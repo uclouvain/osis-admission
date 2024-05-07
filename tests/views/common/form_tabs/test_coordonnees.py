@@ -208,7 +208,7 @@ class CoordonneesFormTestCase(TestCase):
             },
         )
         self.assertEqual(
-            form.get_prepare_data,
+            form.address_data_to_save,
             {
                 'city': '',
                 'country': None,
@@ -235,7 +235,7 @@ class CoordonneesFormTestCase(TestCase):
         # Some fields are missing
         form = AdmissionAddressForm(
             data={
-                'country': self.france_country.pk,
+                'country': self.france_country.iso_code,
                 'street': 'Art street',
                 'street_number': '123',
             },
@@ -243,12 +243,12 @@ class CoordonneesFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('city', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('postal_code', []))
-        self.assertEqual(form.get_prepare_data, None)
+        self.assertEqual(form.address_data_to_save, None)
 
         # All required fields are filled
         form = AdmissionAddressForm(
             data={
-                'country': self.france_country.pk,
+                'country': self.france_country.iso_code,
                 'street': 'ART STREET',
                 'street_number': '123',
                 'city': 'PARIS',
@@ -273,7 +273,7 @@ class CoordonneesFormTestCase(TestCase):
             },
         )
         self.assertEqual(
-            form.get_prepare_data,
+            form.address_data_to_save,
             {
                 'country': self.france_country,
                 'city': 'Paris',
@@ -288,7 +288,7 @@ class CoordonneesFormTestCase(TestCase):
         # Some fields are missing
         form = AdmissionAddressForm(
             data={
-                'country': self.belgium_country.pk,
+                'country': self.belgium_country.iso_code,
                 'street': 'Art street',
                 'street_number': '123',
             },
@@ -296,12 +296,12 @@ class CoordonneesFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('be_city', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('be_postal_code', []))
-        self.assertEqual(form.get_prepare_data, None)
+        self.assertEqual(form.address_data_to_save, None)
 
         # All required fields are filled
         form = AdmissionAddressForm(
             data={
-                'country': self.belgium_country.pk,
+                'country': self.belgium_country.iso_code,
                 'street': 'ART STREET',
                 'street_number': '123',
                 'city': 'PARIS',
@@ -326,7 +326,7 @@ class CoordonneesFormTestCase(TestCase):
             },
         )
         self.assertEqual(
-            form.get_prepare_data,
+            form.address_data_to_save,
             {
                 'country': self.belgium_country,
                 'city': 'Louvain-la-Neuve',
@@ -360,7 +360,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
+        self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.iso_code)
         self.assertIsInstance(response.context['main_form'], AdmissionCoordonneesForm)
         self.assertIsInstance(response.context['residential'], AdmissionAddressForm)
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
@@ -380,7 +380,7 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'phone_mobile': '+3223742211',
                 'private_email': 'john.doe@example.com',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -413,7 +413,7 @@ class CoordonneesFormTestCase(TestCase):
             self.general_url,
             {
                 'phone_mobile': '+3223742211',
-                'residential-country': self.belgium_country.pk,
+                'residential-country': self.belgium_country.iso_code,
                 'residential-be_postal_code': '1348',
                 'residential-be_city': 'Louvain-la-Neuve',
                 'residential-street': 'Art street',
@@ -440,7 +440,7 @@ class CoordonneesFormTestCase(TestCase):
             self.general_url,
             {
                 'phone_mobile': '+3223742211',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -473,12 +473,12 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'show_contact': True,
                 'phone_mobile': '+3223742211',
-                'contact-country': self.belgium_country.pk,
+                'contact-country': self.belgium_country.iso_code,
                 'contact-be_postal_code': '1348',
                 'contact-be_city': 'Louvain-la-Neuve',
                 'contact-street': 'Art street',
                 'contact-street_number': '1',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -505,12 +505,12 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'show_contact': True,
                 'phone_mobile': '+3223742211',
-                'contact-country': self.france_country.pk,
+                'contact-country': self.france_country.iso_code,
                 'contact-postal_code': '92000',
                 'contact-city': 'Paris',
                 'contact-street': 'Peace street',
                 'contact-street_number': '10',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -537,7 +537,7 @@ class CoordonneesFormTestCase(TestCase):
             self.general_url,
             data={
                 'phone_mobile': '+3223742211',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -589,7 +589,7 @@ class CoordonneesFormTestCase(TestCase):
             url,
             data={
                 'phone_mobile': '+3223742211',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -611,7 +611,7 @@ class CoordonneesFormTestCase(TestCase):
             url,
             data={
                 'phone_mobile': '+3223742211',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -647,13 +647,13 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'phone_mobile': '+3223742211',
                 'show_contact': True,
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
                 'residential-street_number': '10',
                 'residential-postal_box': 'PB2',
-                'contact-country': self.belgium_country.pk,
+                'contact-country': self.belgium_country.iso_code,
                 'contact-be_postal_code': '1000',
                 'contact-be_city': 'Bruxelles',
                 'contact-street': 'Main street',
@@ -709,7 +709,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.get(self.continuing_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
+        self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.iso_code)
         self.assertIsInstance(response.context['main_form'], AdmissionCoordonneesForm)
         self.assertIsInstance(response.context['residential'], AdmissionAddressForm)
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
@@ -723,7 +723,7 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'phone_mobile': '+3223742211',
                 'private_email': 'john.doe@example.com',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',
@@ -765,7 +765,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.get(self.doctorate_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
+        self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.iso_code)
         self.assertIsInstance(response.context['main_form'], AdmissionCoordonneesForm)
         self.assertIsInstance(response.context['residential'], AdmissionAddressForm)
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
@@ -779,7 +779,7 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'phone_mobile': '+3223742211',
                 'private_email': 'john.doe@example.com',
-                'residential-country': self.france_country.pk,
+                'residential-country': self.france_country.iso_code,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
                 'residential-street': 'Peace street',

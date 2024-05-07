@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 ##############################################################################
 from .completer_curriculum_service import completer_curriculum
 from .completer_questions_specifiques_service import completer_questions_specifiques
+from .completer_questions_specifiques_par_gestionnaire_service import completer_questions_specifiques_par_gestionnaire
 from .initier_proposition_service import initier_proposition
 from .modifier_choix_formation_service import modifier_choix_formation
 from .modifier_choix_formation_service_par_gestionnaire import modifier_choix_formation_par_gestionnaire
