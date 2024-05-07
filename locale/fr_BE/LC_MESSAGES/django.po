@@ -1517,6 +1517,18 @@ msgstr[1] ""
 "Attestations stipulant l'absence de dettes vis-à-vis des établissements "
 "fréquentés durant l'année académique %(academic_year)s : %(names)s."
 
+msgid ""
+"Certification and short programmes (continuing education) do not allow for "
+"obtaining a visa and residence permit in Belgium. More information: <a "
+"target=\"_blank\" href=\"https://uclouvain.be/en/study/iufc\">https://"
+"uclouvain.be/en/study/iufc</a>."
+msgstr ""
+"Les programmes certifiants et courts (formation continue) ne permettent pas "
+"l'obtention d'un visa et d'un titre de séjour en Belgique. Plus "
+"d'informations : <a target=\"_blank\" href=\"https://uclouvain.be/fr/etudier/"
+"iufc/participants-de-nationalite-hue.html\">https://uclouvain.be/fr/etudier/"
+"iufc/participants-de-nationalite-hue.html</a>."
+
 #, python-format
 msgid "Change <em>%(name)s</em> configuration"
 msgstr "Modifier la configuration de <em>%(name)s</em>"
@@ -3644,6 +3656,9 @@ msgstr ""
 "Je vais obtenir mon diplôme d'études secondaires lors de l'année académique "
 "%s"
 
+msgid "I would like the billing address to be"
+msgstr "Je souhaite que l'adresse de facturation soit"
+
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
 msgstr ""
@@ -4736,6 +4751,9 @@ msgstr ""
 msgid "My legal cohabitant"
 msgstr "Mon cohabitant légal"
 
+msgid "My legal domicile provided above"
+msgstr "L'adresse de mon domicile légal fournie précédemment"
+
 msgid "My legal guardian"
 msgstr "Mon tuteur légal"
 
@@ -5370,6 +5388,9 @@ msgstr "Veuillez confirmer le passage à ce nouvel état."
 msgid "Please confirm the change to this new status."
 msgstr "Merci de confirmer le changement vers ce nouveau statut."
 
+msgid "Please enter your work email address"
+msgstr "Veuillez encoder votre adresse e-mail-professionnelle"
+
 msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
@@ -5430,6 +5451,14 @@ msgid ""
 msgstr ""
 "Attention, cette expérience ne faisait pas partie de la demande lors de sa "
 "soumission."
+
+msgid ""
+"Please provide a copy of the residence permit covering the entire course, "
+"including the assessment test (except for online courses)."
+msgstr ""
+"Veuillez fournir une copie du titre de séjour qui couvre la totalité de la "
+"formation, épreuve d’évaluation comprise (sauf pour les formations "
+"organisées en ligne)."
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."
@@ -6915,6 +6944,9 @@ msgstr ""
 msgid "The confirmation paper is not in progress"
 msgstr "L'épreuve de confirmation n'est pas en cours"
 
+msgid "The contact address I provided"
+msgstr "L'adresse de correspondance que j'ai fournie"
+
 msgid "The css class must be a string."
 msgstr "La classe css doit être une chaîne de caractères."
 
@@ -7561,6 +7593,9 @@ msgstr ""
 "sélectionnée et qu'au moins une ligne de titre d'accès soit cochée dans les "
 "vues du parcours."
 
+msgid "To the attention of"
+msgstr "A l'attention de"
+
 msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
@@ -8096,6 +8131,9 @@ msgstr ""
 
 msgid "You are enrolling as"
 msgstr "Vous vous inscrivez à titre"
+
+msgid "You are registering as"
+msgstr "Vous inscrivez-vous à titre"
 
 msgid ""
 "You can add any document you feel is relevant to your application "

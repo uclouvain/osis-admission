@@ -249,4 +249,10 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         historique=_historique,
     ),
+    CompleterQuestionsSpecifiquesParGestionnaireCommand: (
+        lambda msg_bus, cmd: completer_questions_specifiques_par_gestionnaire(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
 }

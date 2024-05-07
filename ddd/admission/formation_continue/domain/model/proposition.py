@@ -200,6 +200,7 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         copie_titre_sejour: List[str],
         documents_additionnels: List[str],
+        auteur: str,
     ):
         self.inscription_a_titre = ChoixInscriptionATitre[inscription_a_titre] if inscription_a_titre else None
         self.nom_siege_social = nom_siege_social or ''
@@ -225,7 +226,7 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.copie_titre_sejour = copie_titre_sejour
         self.documents_additionnels = documents_additionnels
-        self.auteur_derniere_modification = self.matricule_candidat
+        self.auteur_derniere_modification = auteur
 
     def verifier_informations_complementaires(self):
         """Vérification de la validité des informations complémentaires."""

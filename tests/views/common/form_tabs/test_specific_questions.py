@@ -36,11 +36,20 @@ from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationTrainingFactory,
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
@@ -66,7 +75,7 @@ from reference.tests.factories.country import CountryFactory
 
 @freezegun.freeze_time('2022-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class SpecificQuestionsFormViewTestCase(TestCase):
+class GeneralSpecificQuestionsFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create data
@@ -700,3 +709,506 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
 
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('est_bachelier_belge', []))
+
+
+@freezegun.freeze_time('2022-01-01')
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create data
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium', european_union=True)
+        cls.ca_country = CountryFactory(iso_code='CA', european_union=False)
+
+        cls.first_entity = EntityWithVersionFactory()
+
+        cls.training = ContinuingEducationTrainingFactory(
+            management_entity=cls.first_entity,
+            academic_year=cls.academic_years[0],
+        )
+
+        cls.specific_questions = [
+            AdmissionFormItemInstantiationFactory(
+                form_item=TextAdmissionFormItemFactory(),
+                tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+                academic_year=cls.academic_years[1],
+            ),
+            AdmissionFormItemInstantiationFactory(
+                form_item=MessageAdmissionFormItemFactory(),
+                tab=Onglets.CURRICULUM.name,
+                academic_year=cls.academic_years[1],
+            ),
+        ]
+
+        # Create users
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_entity).person.user
+        cls.program_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+
+        cls.file_uuids = {
+            'copie_titre_sejour': uuid.uuid4(),
+            'documents_additionnels': uuid.uuid4(),
+        }
+
+    def setUp(self):
+        # Mock osis document api
+        patcher = mock.patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch(
+            'osis_document.api.utils.get_remote_metadata',
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: value
+
+        # Create data
+        self.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training=self.training,
+            candidate__country_of_citizenship=self.be_country,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            determined_academic_year=self.academic_years[1],
+            registration_as=ChoixInscriptionATitre.PROFESSIONNEL.name,
+            specific_question_answers={
+                str(self.specific_questions[0].form_item.uuid): 'test',
+            },
+            residence_permit=[self.file_uuids['copie_titre_sejour']],
+            additional_documents=[self.file_uuids['documents_additionnels']],
+            head_office_name='UCL',
+            unique_business_number='0123',
+            vat_number='TVA123',
+            professional_email='test@example.be',
+            billing_address_type=ChoixTypeAdresseFacturation.AUTRE.name,
+            billing_address_street='Rue de la faculte',
+            billing_address_street_number='1',
+            billing_address_postal_code='1348',
+            billing_address_city='Louvain-la-Neuve',
+            billing_address_country=self.be_country,
+            billing_address_recipient='recipient@example.be',
+            billing_address_postal_box='BP8',
+        )
+
+        self.url = resolve_url(
+            'admission:continuing-education:update:specific-questions',
+            uuid=self.continuing_admission.uuid,
+        )
+        self.details_url = resolve_url(
+            'admission:continuing-education:specific-questions',
+            uuid=self.continuing_admission.uuid,
+        )
+
+    def test_continuing_specific_questions_access(self):
+        # If the user is not authenticated, he should be redirected to the login page
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, resolve_url('login') + '?next=' + self.url)
+
+        # If the user is authenticated but doesn't have the right role, raise a 403
+        self.client.force_login(CandidateFactory().person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # If the user is authenticated and has the right role, he should be able to access the page
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_login(self.program_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_continuing_specific_questions_form_initialization(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertEqual(form['copie_titre_sejour'].value(), ['foobar'])
+        self.assertEqual(form['inscription_a_titre'].value(), ChoixInscriptionATitre.PROFESSIONNEL.name)
+        self.assertEqual(form['nom_siege_social'].value(), 'UCL')
+        self.assertEqual(form['numero_unique_entreprise'].value(), '0123')
+        self.assertEqual(form['numero_tva_entreprise'].value(), 'TVA123')
+        self.assertEqual(form['adresse_mail_professionnelle'].value(), 'test@example.be')
+        self.assertEqual(form['type_adresse_facturation'].value(), ChoixTypeAdresseFacturation.AUTRE.name)
+        self.assertEqual(form['adresse_facturation_destinataire'].value(), 'recipient@example.be')
+        self.assertEqual(form['documents_additionnels'].value(), ['foobar'])
+        self.assertEqual(
+            form['reponses_questions_specifiques'].value(),
+            {
+                str(self.specific_questions[0].form_item.uuid): 'test',
+            },
+        )
+        self.assertEqual(form['street'].value(), 'Rue de la faculte')
+        self.assertEqual(form['street_number'].value(), '1')
+        self.assertEqual(form['postal_box'].value(), 'BP8')
+        self.assertEqual(form['postal_code'].value(), '1348')
+        self.assertEqual(form['city'].value(), 'Louvain-la-Neuve')
+        self.assertEqual(form['country'].value(), 'BE')
+        self.assertEqual(form['be_postal_code'].value(), '1348')
+        self.assertEqual(form['be_city'].value(), 'Louvain-la-Neuve')
+        self.assertEqual(form.fields['be_city'].widget.choices, [('Louvain-la-Neuve', 'Louvain-la-Neuve')])
+        self.assertEqual(form.display_residence_permit_question, False)
+
+        # With a foreign billing address
+        self.continuing_admission.billing_address_country = self.ca_country
+        self.continuing_admission.save()
+
+        # With a candidate with a not UE+5 nationality
+        self.continuing_admission.candidate.country_of_citizenship = self.ca_country
+        self.continuing_admission.candidate.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertEqual(form['city'].value(), 'Louvain-la-Neuve')
+        self.assertEqual(form['country'].value(), 'CA')
+        self.assertEqual(form['be_postal_code'].value(), None)
+        self.assertEqual(form['be_city'].value(), None)
+        self.assertEqual(form.fields['be_city'].widget.choices, [])
+        self.assertEqual(form.display_residence_permit_question, True)
+
+    def _assert_fields_are_required(self, form, fields):
+        self.assertEqual(len(form.errors), len(fields))
+        for field in fields:
+            self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get(field, []), 'Field {} must be required'.format(field))
+
+    def test_continuing_specific_questions_form_submission_with_invalid_data(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # No data
+        response = self.client.post(self.url, {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertEqual(form.is_valid(), False)
+        self._assert_fields_are_required(form, ['inscription_a_titre'])
+
+        # Missing data for a professional enrolment
+        response = self.client.post(
+            self.url,
+            data={
+                'inscription_a_titre': ChoixInscriptionATitre.PROFESSIONNEL.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertEqual(form.is_valid(), False)
+
+        self._assert_fields_are_required(
+            form,
+            [
+                'nom_siege_social',
+                'numero_unique_entreprise',
+                'numero_tva_entreprise',
+                'adresse_mail_professionnelle',
+                'type_adresse_facturation',
+            ],
+        )
+
+        # Missing data for the custom billing address
+        default_data = {
+            'inscription_a_titre': ChoixInscriptionATitre.PROFESSIONNEL.name,
+            'nom_siege_social': 'UCL',
+            'numero_unique_entreprise': '0123',
+            'numero_tva_entreprise': 'TVA123',
+            'adresse_mail_professionnelle': 'test@example.be',
+            'type_adresse_facturation': ChoixTypeAdresseFacturation.AUTRE.name,
+        }
+
+        # With no data
+        response = self.client.post(
+            self.url,
+            data=default_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertEqual(form.is_valid(), False)
+
+        self._assert_fields_are_required(
+            form,
+            [
+                'street',
+                'street_number',
+                'city',
+                'postal_code',
+                'country',
+            ],
+        )
+
+        # With a local billing address
+        response = self.client.post(
+            self.url,
+            data={
+                **default_data,
+                'country': self.be_country.iso_code,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertEqual(form.is_valid(), False)
+
+        self._assert_fields_are_required(form, ['be_city', 'be_postal_code', 'street_number', 'street'])
+
+        # With a foreign billing address
+        response = self.client.post(
+            self.url,
+            data={
+                **default_data,
+                'country': self.ca_country.iso_code,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertEqual(form.is_valid(), False)
+
+        self._assert_fields_are_required(form, ['city', 'postal_code', 'street_number', 'street'])
+
+    def test_continuing_specific_questions_form_submission_with_valid_data_for_a_private_enrolment(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.post(
+            self.url,
+            data={
+                'copie_titre_sejour_0': [self.file_uuids['copie_titre_sejour']],
+                'inscription_a_titre': ChoixInscriptionATitre.PRIVE.name,
+                'reponses_questions_specifiques_0': 'my answer',
+                'documents_additionnels_0': [self.file_uuids['documents_additionnels']],
+                # Additional data that will be cleaned
+                'nom_siege_social': 'Mons',
+                'numero_unique_entreprise': '321',
+                'numero_tva_entreprise': 'TVA321',
+                'adresse_mail_professionnelle': 'other.email@example.be',
+                'country': self.be_country.iso_code,
+                'street': 'Rue de la paix',
+                'street_number': '2',
+                'postal_box': 'BP7',
+                'be_city': 'Mons',
+                'be_postal_code': '4000',
+                'city': 'Montreal',
+                'postal_code': 'G1R 0B8',
+                'adresse_facturation_destinataire': 'other.recipient@example.be',
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=self.details_url)
+
+        # Check the admission has been saved
+        self.continuing_admission.refresh_from_db()
+
+        self.assertEqual(self.continuing_admission.residence_permit, [])
+        self.assertEqual(self.continuing_admission.additional_documents, [self.file_uuids['documents_additionnels']])
+        self.assertEqual(self.continuing_admission.registration_as, ChoixInscriptionATitre.PRIVE.name)
+        self.assertEqual(self.continuing_admission.head_office_name, '')
+        self.assertEqual(self.continuing_admission.unique_business_number, '')
+        self.assertEqual(self.continuing_admission.vat_number, '')
+        self.assertEqual(self.continuing_admission.professional_email, '')
+        self.assertEqual(self.continuing_admission.billing_address_type, '')
+        self.assertEqual(self.continuing_admission.billing_address_street, '')
+        self.assertEqual(self.continuing_admission.billing_address_street_number, '')
+        self.assertEqual(self.continuing_admission.billing_address_postal_code, '')
+        self.assertEqual(self.continuing_admission.billing_address_city, '')
+        self.assertEqual(self.continuing_admission.billing_address_country, None)
+        self.assertEqual(self.continuing_admission.billing_address_recipient, '')
+        self.assertEqual(self.continuing_admission.billing_address_postal_box, '')
+        self.assertEqual(
+            self.continuing_admission.specific_question_answers,
+            {
+                str(self.specific_questions[0].form_item.uuid): 'my answer',
+            },
+        )
+
+    def test_continuing_specific_questions_form_submission_with_valid_data_for_a_professional_enrolment(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.post(
+            self.url,
+            data={
+                'copie_titre_sejour_0': [self.file_uuids['copie_titre_sejour']],
+                'inscription_a_titre': ChoixInscriptionATitre.PROFESSIONNEL.name,
+                'reponses_questions_specifiques_0': 'my answer',
+                'documents_additionnels_0': [self.file_uuids['documents_additionnels']],
+                'type_adresse_facturation': ChoixTypeAdresseFacturation.CONTACT.name,
+                'nom_siege_social': 'Mons',
+                'numero_unique_entreprise': '321',
+                'numero_tva_entreprise': 'TVA321',
+                'adresse_mail_professionnelle': 'other.email@example.be',
+                # Additional data that will be cleaned
+                'country': self.be_country.iso_code,
+                'street': 'Rue de la paix',
+                'street_number': '2',
+                'postal_box': 'BP7',
+                'be_city': 'Mons',
+                'be_postal_code': '4000',
+                'city': 'Montreal',
+                'postal_code': 'G1R 0B8',
+                'adresse_facturation_destinataire': 'other.recipient@example.be',
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=self.details_url)
+
+        # Check the admission has been saved
+        self.continuing_admission.refresh_from_db()
+
+        self.assertEqual(self.continuing_admission.residence_permit, [])
+        self.assertEqual(self.continuing_admission.additional_documents, [self.file_uuids['documents_additionnels']])
+        self.assertEqual(self.continuing_admission.registration_as, ChoixInscriptionATitre.PROFESSIONNEL.name)
+        self.assertEqual(self.continuing_admission.head_office_name, 'Mons')
+        self.assertEqual(self.continuing_admission.unique_business_number, '321')
+        self.assertEqual(self.continuing_admission.vat_number, 'TVA321')
+        self.assertEqual(self.continuing_admission.professional_email, 'other.email@example.be')
+        self.assertEqual(self.continuing_admission.billing_address_type, ChoixTypeAdresseFacturation.CONTACT.name)
+        self.assertEqual(self.continuing_admission.billing_address_street, '')
+        self.assertEqual(self.continuing_admission.billing_address_street_number, '')
+        self.assertEqual(self.continuing_admission.billing_address_postal_code, '')
+        self.assertEqual(self.continuing_admission.billing_address_city, '')
+        self.assertEqual(self.continuing_admission.billing_address_country, None)
+        self.assertEqual(self.continuing_admission.billing_address_recipient, '')
+        self.assertEqual(self.continuing_admission.billing_address_postal_box, '')
+        self.assertEqual(
+            self.continuing_admission.specific_question_answers,
+            {
+                str(self.specific_questions[0].form_item.uuid): 'my answer',
+            },
+        )
+
+        # With a local custom billing address
+        response = self.client.post(
+            self.url,
+            data={
+                'inscription_a_titre': ChoixInscriptionATitre.PROFESSIONNEL.name,
+                'type_adresse_facturation': ChoixTypeAdresseFacturation.AUTRE.name,
+                'nom_siege_social': 'Mons',
+                'numero_unique_entreprise': '321',
+                'numero_tva_entreprise': 'TVA321',
+                'adresse_mail_professionnelle': 'other.email@example.be',
+                'country': self.be_country.iso_code,
+                'street': 'Rue de la paix',
+                'street_number': '2',
+                'postal_box': 'BP7',
+                'be_city': 'Mons',
+                'be_postal_code': '4000',
+                'adresse_facturation_destinataire': 'other.recipient@example.be',
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=self.details_url)
+
+        # Check the admission has been saved
+        self.continuing_admission.refresh_from_db()
+
+        self.assertEqual(self.continuing_admission.residence_permit, [])
+        self.assertEqual(self.continuing_admission.additional_documents, [])
+        self.assertEqual(self.continuing_admission.registration_as, ChoixInscriptionATitre.PROFESSIONNEL.name)
+        self.assertEqual(self.continuing_admission.head_office_name, 'Mons')
+        self.assertEqual(self.continuing_admission.unique_business_number, '321')
+        self.assertEqual(self.continuing_admission.vat_number, 'TVA321')
+        self.assertEqual(self.continuing_admission.professional_email, 'other.email@example.be')
+        self.assertEqual(self.continuing_admission.billing_address_type, ChoixTypeAdresseFacturation.AUTRE.name)
+        self.assertEqual(self.continuing_admission.billing_address_street, 'Rue de la paix')
+        self.assertEqual(self.continuing_admission.billing_address_street_number, '2')
+        self.assertEqual(self.continuing_admission.billing_address_postal_code, '4000')
+        self.assertEqual(self.continuing_admission.billing_address_city, 'Mons')
+        self.assertEqual(self.continuing_admission.billing_address_country, self.be_country)
+        self.assertEqual(self.continuing_admission.billing_address_recipient, 'other.recipient@example.be')
+        self.assertEqual(self.continuing_admission.billing_address_postal_box, 'BP7')
+        self.assertEqual(
+            self.continuing_admission.specific_question_answers,
+            {
+                str(self.specific_questions[0].form_item.uuid): '',
+            },
+        )
+
+        # With a foreign custom billing address
+        response = self.client.post(
+            self.url,
+            data={
+                'inscription_a_titre': ChoixInscriptionATitre.PROFESSIONNEL.name,
+                'type_adresse_facturation': ChoixTypeAdresseFacturation.AUTRE.name,
+                'nom_siege_social': 'Mons',
+                'numero_unique_entreprise': '321',
+                'numero_tva_entreprise': 'TVA321',
+                'adresse_mail_professionnelle': 'other.email@example.be',
+                'country': self.ca_country.iso_code,
+                'street': 'Rue de la paix',
+                'street_number': '2',
+                'postal_box': 'BP7',
+                'city': 'Montreal',
+                'postal_code': 'H2Y 3B9',
+                'adresse_facturation_destinataire': 'other.recipient@example.be',
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=self.details_url)
+
+        # Check the admission has been saved
+        self.continuing_admission.refresh_from_db()
+
+        self.assertEqual(self.continuing_admission.residence_permit, [])
+        self.assertEqual(self.continuing_admission.additional_documents, [])
+        self.assertEqual(self.continuing_admission.registration_as, ChoixInscriptionATitre.PROFESSIONNEL.name)
+        self.assertEqual(self.continuing_admission.head_office_name, 'Mons')
+        self.assertEqual(self.continuing_admission.unique_business_number, '321')
+        self.assertEqual(self.continuing_admission.vat_number, 'TVA321')
+        self.assertEqual(self.continuing_admission.professional_email, 'other.email@example.be')
+        self.assertEqual(self.continuing_admission.billing_address_type, ChoixTypeAdresseFacturation.AUTRE.name)
+        self.assertEqual(self.continuing_admission.billing_address_street, 'Rue de la paix')
+        self.assertEqual(self.continuing_admission.billing_address_street_number, '2')
+        self.assertEqual(self.continuing_admission.billing_address_postal_code, 'H2Y 3B9')
+        self.assertEqual(self.continuing_admission.billing_address_city, 'Montreal')
+        self.assertEqual(self.continuing_admission.billing_address_country, self.ca_country)
+        self.assertEqual(self.continuing_admission.billing_address_recipient, 'other.recipient@example.be')
+        self.assertEqual(self.continuing_admission.billing_address_postal_box, 'BP7')
+        self.assertEqual(
+            self.continuing_admission.specific_question_answers,
+            {
+                str(self.specific_questions[0].form_item.uuid): '',
+            },
+        )
+
+    def test_continuing_specific_questions_form_submission_with_valid_data_for_a_not_hue5_candidate(self):
+        self.client.force_login(self.sic_manager_user)
+
+        self.continuing_admission.candidate.country_of_citizenship = self.ca_country
+        self.continuing_admission.candidate.save()
+
+        response = self.client.post(
+            self.url,
+            data={
+                'copie_titre_sejour_0': [self.file_uuids['copie_titre_sejour']],
+                'inscription_a_titre': ChoixInscriptionATitre.PRIVE.name,
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=self.details_url)
+
+        # Check the admission has been saved
+        self.continuing_admission.refresh_from_db()
+
+        self.assertEqual(self.continuing_admission.residence_permit, [self.file_uuids['copie_titre_sejour']])
+        self.assertEqual(self.continuing_admission.registration_as, ChoixInscriptionATitre.PRIVE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.sic_manager_user.person)

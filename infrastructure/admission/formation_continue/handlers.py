@@ -226,4 +226,10 @@ COMMAND_HANDLERS = {
         cmd,
         lister_demandes_service=ListerDemandesService(),
     ),
+    CompleterQuestionsSpecifiquesParGestionnaireCommand: (
+        lambda msg_bus, cmd: completer_questions_specifiques_par_gestionnaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
 }
