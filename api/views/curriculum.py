@@ -187,7 +187,9 @@ class CurriculumView(SubmitPropositionMixin, BaseCurriculumView):
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
-        message_bus_instance.invoke(self.complete_command_class(**serializer.data))
+        message_bus_instance.invoke(
+            self.complete_command_class(**serializer.data, auteur_modification=request.user.person.global_id)
+        )
         self.get_permission_object().update_detailed_status(request.user.person)
         data = {**serializer.data, 'errors': self.get_permission_object().detailed_status}
         self.add_access_conditions_url(data)

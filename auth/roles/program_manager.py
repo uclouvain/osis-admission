@@ -84,8 +84,10 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.change_admission_coordinates': is_part_of_education_group & continuing.in_manager_status,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
+            'admission.change_admission_secondary_studies': is_part_of_education_group & continuing.in_manager_status,
             'admission.view_admission_languages': is_part_of_education_group,
             'admission.view_admission_curriculum': is_part_of_education_group,
+            'admission.change_admission_curriculum': is_part_of_education_group & continuing.in_manager_status,
             # Project
             'admission.view_admission_project': is_part_of_education_group,
             'admission.view_admission_cotutelle': is_part_of_education_group,

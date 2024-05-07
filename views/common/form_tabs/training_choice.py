@@ -34,7 +34,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationGeneraleParGestionnaireCommand,
 )
 from admission.forms.admission.training_choice import GeneralTrainingChoiceForm, ContinuingTrainingChoiceForm
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 

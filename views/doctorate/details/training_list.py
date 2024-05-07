@@ -32,7 +32,8 @@ from admission.ddd.parcours_doctoral.formation.commands import AccepterActivites
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import StatutActivite
 from admission.forms.doctorate.training.activity import get_category_labels
 from admission.forms.doctorate.training.processus import BatchActivityForm
-from admission.templatetags.admission import CONTEXT_DOCTORATE, can_read_tab
+from admission.templatetags.admission import can_read_tab
+from admission.constants import CONTEXT_DOCTORATE
 
 __all__ = [
     "ComplementaryTrainingView",

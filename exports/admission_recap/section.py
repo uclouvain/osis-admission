@@ -183,10 +183,7 @@ def get_secondary_studies_context(
 ) -> dict:
     secondary_studies_context = {'specific_questions': specific_questions}
     if resume_proposition.etudes_secondaires.diplome_etranger:
-        secondary_studies_context['need_translations'] = (
-            resume_proposition.etudes_secondaires.diplome_etranger.regime_linguistique
-            not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-        )
+        secondary_studies_context['need_translations'] = resume_proposition.etudes_secondaires.a_besoin_traductions
         secondary_studies_context['ue_or_assimilated'] = (
             resume_proposition.etudes_secondaires.diplome_etranger.pays_membre_ue
             or est_formation_medecine_ou_dentisterie(resume_proposition.proposition.formation.code_domaine)

@@ -28,6 +28,7 @@ from typing import Optional
 
 import attr
 
+from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.dtos.campus import CampusDTO
 from osis_common.ddd import interface
 
@@ -54,6 +55,10 @@ class FormationDTO(interface.DTO):
     @property
     def nom_complet(self):
         return f'{self.sigle} - {self.intitule or self.intitule_fr}'
+
+    @property
+    def est_formation_medecine_ou_dentisterie(self) -> bool:
+        return est_formation_medecine_ou_dentisterie(self.code_domaine)
 
 
 @attr.dataclass(frozen=True, slots=True)

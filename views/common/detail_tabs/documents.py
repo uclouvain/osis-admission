@@ -57,7 +57,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
     ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
 )
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,

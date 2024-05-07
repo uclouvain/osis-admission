@@ -42,7 +42,7 @@ from osis_role.errors import predicate_failed_msg
 @predicate(bind=True)
 @predicate_failed_msg(message=_("This action is limited to a specific admission context."))
 def is_continuing(self, user: User, obj: ContinuingEducationAdmission):
-    from admission.templatetags.admission import CONTEXT_CONTINUING
+    from admission.constants import CONTEXT_CONTINUING
 
     return obj.admission_context == CONTEXT_CONTINUING
 
