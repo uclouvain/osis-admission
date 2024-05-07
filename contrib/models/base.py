@@ -68,6 +68,7 @@ from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person import Person
+from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
 from osis_document.contrib import FileField
@@ -134,9 +135,10 @@ class BaseAdmissionQuerySet(models.QuerySet):
 
     def annotate_with_student_registration_id(self):
         return self.annotate(
-            student_registration_id=ArrayAgg(
-                'candidate__student__registration_id',
-                filter=Q(candidate__student__isnull=False),
+            student_registration_id=models.Subquery(
+                Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
+                    'registration_id'
+                )[:1]
             ),
         )
 

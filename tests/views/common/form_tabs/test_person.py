@@ -50,7 +50,7 @@ from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory
+from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
@@ -102,6 +102,11 @@ class PersonFormTestCase(TestCase):
             candidate__language=settings.LANGUAGE_CODE_EN,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
+
+        cls.general_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.general_admission.training.education_group,
+        ).person.user
+
         cls.general_url = resolve_url('admission:general-education:update:person', uuid=cls.general_admission.uuid)
 
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
@@ -111,8 +116,13 @@ class PersonFormTestCase(TestCase):
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
 
+        cls.continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.continuing_admission.training.education_group,
+        ).person.user
+
         cls.continuing_url = resolve_url(
-            'admission:continuing-education:update:person', uuid=cls.continuing_admission.uuid
+            'admission:continuing-education:update:person',
+            uuid=cls.continuing_admission.uuid,
         )
 
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
@@ -578,10 +588,23 @@ class PersonFormTestCase(TestCase):
     def test_general_person_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        # No residential address
         response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
+
+    def test_general_person_form_on_get_program_manager(self):
+        self.client.force_login(user=self.general_program_manager_user)
+
+        response = self.client.get(self.general_url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_general_person_form_on_post_program_manager_is_forbidden(self):
+        self.client.force_login(user=self.general_program_manager_user)
+
+        response = self.client.post(self.general_url, self.form_data)
+
+        self.assertEqual(response.status_code, 403)
 
     def test_general_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -760,10 +783,23 @@ class PersonFormTestCase(TestCase):
     def test_continuing_person_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        # No residential address
         response = self.client.get(self.continuing_url)
 
         self.assertEqual(response.status_code, 200)
+
+    def test_continuing_person_form_on_get_program_manager(self):
+        self.client.force_login(user=self.continuing_program_manager_user)
+
+        response = self.client.get(self.continuing_url)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_continuing_person_form_on_post_program_manager_is_allowed(self):
+        self.client.force_login(user=self.continuing_program_manager_user)
+
+        response = self.client.post(self.continuing_url, self.form_data)
+
+        self.assertEqual(response.status_code, 302)
 
     def test_continuing_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -800,10 +836,11 @@ class PersonFormTestCase(TestCase):
         response = self.client.post(self.continuing_url, self.form_data)
 
         self.assertRedirects(
-            response, reverse('admission:continuing-education:person', args=[self.continuing_admission.uuid])
+            response,
+            reverse('admission:continuing-education:person', args=[self.continuing_admission.uuid]),
         )
 
-        candidate = Person.objects.get(pk=self.doctorate_admission.candidate.pk)
+        candidate = Person.objects.get(pk=self.continuing_admission.candidate.pk)
         self.assertEqual(candidate.first_name, self.form_data['first_name'])
         self.assertEqual(candidate.last_name, self.form_data['last_name'])
 

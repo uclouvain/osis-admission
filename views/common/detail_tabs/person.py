@@ -41,6 +41,6 @@ class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
         context['contact_language'] = get_languages().get(self.admission.candidate.language)
         if self.is_doctorate and 'dossier' in context:
             context['profil_candidat'] = context['dossier'].profil_soumis_candidat
-        elif self.is_general:
+        elif self.is_general or self.is_continuing:
             context['profil_candidat'] = context['admission'].profil_soumis_candidat
         return context
