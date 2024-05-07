@@ -26,6 +26,7 @@
 from typing import List
 from uuid import UUID
 
+from django.urls import reverse
 from django.utils.functional import cached_property
 
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
@@ -88,7 +89,11 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         return est_formation_medecine_ou_dentisterie(self.proposition.formation.code_domaine)
 
     def get_success_url(self):
-        return self.next_url or self.request.get_full_path()
+        return (
+            self.next_url or self.request.get_full_path()
+            if self.is_general
+            else reverse(f'admission:{self.current_context}:education', kwargs=self.kwargs)
+        )
 
     def update_current_admission_on_form_valid(self, form, admission):
         admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}

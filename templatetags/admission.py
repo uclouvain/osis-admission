@@ -385,6 +385,10 @@ TAB_TREES = {
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
+        Tab('experience', _('Previous experience'), 'list-alt'): [
+            Tab('education', _('Secondary studies')),
+            Tab('curriculum', _('Curriculum')),
+        ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
             Tab('comments', pgettext('tab', 'Comments'), 'comments')
         ],
