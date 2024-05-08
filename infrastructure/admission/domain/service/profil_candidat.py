@@ -48,7 +48,7 @@ from django.db.models import (
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
-from admission.contrib.models import EPCInjection
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
@@ -87,6 +87,7 @@ from osis_profile.models import (
     EducationalExperience,
 )
 from osis_profile.models.education import LanguageKnowledge
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
 
 
 # TODO: a mettre dans infra/shared_kernel/profil
@@ -282,11 +283,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             if high_school_diploma_alternative
             else None,
             identifiant_externe=potential_diploma.external_id if potential_diploma else None,
-            injectee=(
-                EPCInjection.objects.filter(admission__candidate_id=candidate.id).exists()
-                if valuated_secondary_studies
-                else False
-            )
+            injectee=candidate.secondaire_injecte_par_admission or candidate.secondaire_injecte_par_cv
         )
 
     @classmethod
@@ -306,11 +303,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 autre_activite=experience.activity,
                 uuid=experience.uuid,
                 valorisee_par_admissions=getattr(experience, 'valuated_from_admissions', None),
-                injectee=(
-                    EPCInjection.objects.filter(
-                        admission__uuid__in=getattr(experience, 'valuated_from_admissions', [])
-                    ).exists()
-                ),
+                injectee=experience.injecte_par_admission or experience.injecte_par_cv,
                 identifiant_externe=experience.external_id,
             )
             for experience in experiences_non_academiques
@@ -377,7 +370,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                         str(uuid_proposition)
                     )
                 )
-
+        educational_experience_years = educational_experience_years.annotate(
+            injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(
+                    admission__uuid=OuterRef('educational_experience__valuated_from_admission__uuid')
+                )
+            ),
+            injecte_par_cv=Exists(
+                CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('educational_experience__uuid'))
+            )
+        )
         educational_experience_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
         for experience_year in educational_experience_years:
             experience_year_dto = cls._get_academic_experience_year_dto(experience_year)
@@ -460,11 +462,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     systeme_evaluation=experience_year.educational_experience.evaluation_type,
                     type_enseignement=experience_year.educational_experience.study_system,
                     valorisee_par_admissions=getattr(experience_year, 'valuated_from_admissions', None),
-                    injectee=(
-                        EPCInjection.objects.filter(
-                            admission__uuid__in=getattr(experience_year, 'valuated_from_admissions', [])
-                        ).exists()
-                    ),
+                    injectee=experience_year.injecte_par_admission or experience_year.injecte_par_cv,
                     identifiant_externe=experience_year.educational_experience.external_id,
                     **institute,
                     **linguistic_regime,
@@ -538,8 +536,17 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             'belgianhighschooldiploma__institute',
             'foreignhighschooldiploma__country',
             'foreignhighschooldiploma__linguistic_regime',
+        ).annotate(
+            secondaire_injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(admission__candidate_id=OuterRef('pk'))
+            ),
+            secondaire_injecte_par_cv=Exists(
+                CurriculumEPCInjection.objects.filter(
+                    type_experience=ExperienceType.HIGH_SCHOOL.name,
+                    person_id=OuterRef('pk'),
+                )
+            )
         ).get(global_id=matricule)
-
         return cls._get_secondary_studies_dto(
             candidate,
             cls.has_default_language(),
@@ -558,6 +565,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
         non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
             person__global_id=matricule,
+        ).annotate(
+            injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+            ),
+            injecte_par_cv=Exists(
+                CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))
+            )
         )
 
         non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
@@ -704,8 +718,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ProfessionalExperience.objects.filter(person__global_id=matricule)
             .annotate(
                 nombre_mois=(ExtractYear('end_date') - ExtractYear('start_date')) * 12
-                + (ExtractMonth('end_date') - ExtractMonth('start_date'))
-                + 1  # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
+                            + (ExtractMonth('end_date') - ExtractMonth('start_date'))
+                            + 1
+                # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
             )
             .aggregate(total=models.Sum('nombre_mois'))
         ).get('total')
@@ -728,7 +743,15 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             Person.objects.prefetch_related(
                 Prefetch(
                     'professionalexperience_set',
-                    queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date'),
+                    queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date').annotate(
+                        injecte_par_admission=Exists(
+                            AdmissionEPCInjection.objects.filter(
+                                admission__uuid=OuterRef('valuated_from_admission__uuid'))
+                        ),
+                        injecte_par_cv=Exists(
+                            CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))
+                        )
+                    ),
                 ),
                 Prefetch(
                     'personaddress_set',
@@ -751,6 +774,15 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 secondary_studies_are_valuated=ExpressionWrapper(
                     Q(baseadmission__isnull=False),
                     output_field=BooleanField(),
+                ),
+                secondaire_injecte_par_admission=Exists(
+                    AdmissionEPCInjection.objects.filter(admission__candidate_id=OuterRef('pk'))
+                ),
+                secondaire_injecte_par_cv=Exists(
+                    CurriculumEPCInjection.objects.filter(
+                        type_experience=ExperienceType.HIGH_SCHOOL.name,
+                        person_id=OuterRef('pk'),
+                    )
                 ),
                 belgian_highschool_diploma_institute_address=Concat(
                     F(f'{be_institute_address}__street'),
