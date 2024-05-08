@@ -1119,6 +1119,10 @@ def digit_ticket_status_msg(digit_ticket):
         'digit_ticket': digit_ticket
     }
 
+@register.filter
+def to_niss_format(s):
+    return f"{s[:2]}.{s[2:4]}.{s[4:6]}-{s[6:9]}.{s[9:]}"
+
 
 @register.filter
 def map_fields_items(digit_fields):
@@ -1127,13 +1131,12 @@ def map_fields_items(digit_fields):
         "first_name": "firstName",
         "middle_name": "",
         "last_name": "lastName",
-        "email": "",
+        "national_number": "nationalRegister",
         "gender": "gender",
         "birth_date": "birthDate",
         "civil_state": "",
         "birth_place": "placeOfBirth",
         "country_of_citizenship__name": "nationality",
-        "national_number": "nationalRegister",
         "id_card_number": "",
         "passport_number": "",
         "id_card_expiry_date": "",

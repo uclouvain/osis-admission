@@ -309,6 +309,12 @@ fieldset.custom-fieldset > legend {
     background-color: #28a745 !important;
 }
 
+.panel-default-badge-primary{
+    color: #fff !important;
+    background-color: #337ab7 !important;
+}
+
+
 .merge-panel-container {
   display: flex;
   flex-direction: row;
@@ -471,4 +477,12 @@ a.no-link {
 
 .fit-content {
   width: fit-content;
+}
+
+.fusion-data{
+  pointer-events: none;
+}
+
+.fusion-data #id_identification_type{
+  pointer-events: all !important;
 }

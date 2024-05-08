@@ -64,15 +64,24 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
         from infrastructure.messages_bus import message_bus_instance
         return message_bus_instance.invoke(
             RechercherParcoursAnterieurQuery(
-                global_id=self.request.GET.get('matricule'),
+                global_id=self._format_matricule(self.request.GET.get('matricule')),
                 uuid_proposition=self.kwargs['admission_uuid'],
             )
         )
 
+    def _format_matricule(self, matricule):
+        prefix_fgs = (8 - len(matricule)) * '0'
+        user_fgs = ''.join([prefix_fgs, matricule])
+        return user_fgs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['professional_experience'] = self.provided_experience.experiences_non_academiques
-        context['educational_experience'] = self.provided_experience.experiences_academiques
+        context['professional_experience'] = sorted(
+            self.provided_experience.experiences_non_academiques, key=lambda exp: (exp.date_debut, exp.date_fin), reverse=True
+        )
+        context['educational_experience'] = sorted(
+            self.provided_experience.experiences_academiques, key=lambda exp: exp.titre_formate, reverse=True
+        )
         context['provided_high_school_graduation_year'] = self.provided_experience.annee_diplome_etudes_secondaires
         if self.known_experience:
             context['professional_experience'] = self._merge_professional_experiences()
@@ -82,15 +91,17 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
         return context
 
     def _merge_professional_experiences(self):
-        return sorted(
+        a = sorted(
             self.provided_experience.experiences_non_academiques + self.known_experience.experiences_non_academiques,
-            key=lambda exp: exp.date_fin, reverse=True
+            key=lambda exp: (exp.date_debut, exp.date_fin), reverse=True
         )
+        print([a.dates_formatees for a in a])
+        return a
 
     def _merge_academic_experiences(self):
         return sorted(
             self.provided_experience.experiences_academiques + self.known_experience.experiences_academiques,
-            key=lambda exp: exp.annees[-1], reverse=True
+            key=lambda exp: exp.titre_formate, reverse=True
         )
 
     def _get_mergeable_experiences_uuids(self):

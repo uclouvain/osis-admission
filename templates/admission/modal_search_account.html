@@ -34,8 +34,8 @@
                 <select id="match" class="form-control" name="match">
                     {% for match in matches %}
                       <option value="{{ forloop.counter0 }}">
-                        <div>{{ match.person.lastName }}, {{ match.person.firstName }} - {{ match.person.gender }}</div>
-                        <div>- {{ match.person.birthDate }} - {{ match.person.nationalRegister }}</div>
+                        {{ match.person.lastName }}, {{ match.person.firstName }} - {{ match.person.gender }}
+                        - {{ match.person.birthDate }} - {{ match.person.nationalRegister|to_niss_format }}
                       </option>
                     {% endfor %}
                 </select>
@@ -114,11 +114,12 @@
             $('#selectedMatricule').val(selectedMatriculeVal);
             document.dispatchEvent(new CustomEvent("selectMergePerson"));
         }).one('select2:open', (e) => {
-            $(".match-select .select2-results").prepend(
-                $('<li style="padding: 6px; list-style: none;"><table style="width: 100%"><thead><tr><th style="width: 25%">Nom, Prénom</th><th style="width: 25%">Genre</th><th style="width: 25%">Date de naissance<th style="width: 25%">NISS</tr></thead></table></li>')
+            $(".match-select .select2-results:not(:has(li#header))").prepend(
+                $('<li id="header" style="padding: 6px; list-style: none;"><table style="width: 100%"><thead><tr><th style="width: 25%">Nom, Prénom</th><th style="width: 25%">Genre</th><th style="width: 25%">Date de naissance<th style="width: 25%">NISS</tr></thead></table></li>')
             )
         });
 
+        $('.digit-data #national_number').mask('00.00.00-000.00');
         $('.fusion-data #national_number').mask('00.00.00-000.00');
 
     });
