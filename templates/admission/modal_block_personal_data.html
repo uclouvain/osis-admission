@@ -82,7 +82,7 @@
                     </button>
                 </div>
                 <div class="panel-title form-group">
-                        <div class="bold-text text-nowrap">{% trans 'Available information' %}</div>
+                        <div class="bold-text text-nowrap">{% trans 'Available information (Digit)' %}</div>
                         {% for match in matches %}
                           <div id="match-{{ forloop.counter0 }}" class="match-name" data-matricule="{{ match.person.matricule }}" {% if not forloop.first %} style="display: none;" {% endif %}">
                             {{ match.person.lastName }}, {{ match.person.firstName }} - <span class="badge panel-default-badge-success" data-toggle="tooltip" title="Similarity rate">{{ match.similarityRate }}</span>
@@ -116,3 +116,29 @@
 
     </div>
 </div>
+
+
+<script>
+
+    showDiffWarning(0);
+    document.addEventListener("selectMergePerson", () => showDiffWarning());
+
+    function showDiffWarning(matchId){
+
+        const selectedMatchId = (matchId == null) ? $('#match').select2('data')[0].id : matchId;
+
+        document.querySelectorAll('.original-data .form-control[id]').forEach((el) => {
+           const candidateValue = el.value;
+           const digitValue = document.querySelector(`.digit-${selectedMatchId}-data #${el.id}.form-control`).value;
+
+           el.parentElement.classList.toggle("has-warning", candidateValue !== digitValue);
+           el.parentElement.querySelector('i')?.remove();
+
+           if(candidateValue !== digitValue){
+               el.parentElement.querySelector('label').insertAdjacentHTML(
+                   "beforeend", "<i class='fas fa-warning text-warning' data-toggle='tooltip' title='Data differs from digit'></i>"
+               )
+           }
+        });
+    }
+</script>

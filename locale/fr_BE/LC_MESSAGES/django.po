@@ -1010,8 +1010,8 @@ msgstr "Autoriser"
 msgid "Authors"
 msgstr "Auteurs et autrices"
 
-msgid "Available information"
-msgstr "Informations disponibles"
+msgid "Available information (Digit)"
+msgstr "Information connue (Digit)"
 
 msgid "Awaiting approval"
 msgstr "En révision"
