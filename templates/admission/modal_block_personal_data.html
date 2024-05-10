@@ -99,7 +99,7 @@
         <div class="panel-body digit-data">
         {% for match in matches %}
             <span class="match-data-panel digit-{{ forloop.counter0 }}-data" {% if not forloop.first %} style="display: none;" {% endif %}>
-            {% for label, value in match.person|map_fields_items %}
+            {% for label, value in match|map_fields_items %}
                 <div class="flex-merge-input">
                     <div class="merge-btn-container">
                         <button data-merge-source="digit-{{ forloop.parentloop.counter0 }}" data-merge-label="{{ label }}" class="btn btn-xs btn-default btn-merge">

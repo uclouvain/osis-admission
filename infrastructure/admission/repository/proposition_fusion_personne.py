@@ -39,6 +39,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
     def initialiser(
             cls,
             global_id: str,
+            selected_global_id: str,
             nom: str,
             prenom: str,
             autres_prenoms: str,
@@ -81,7 +82,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             defaults={
                 "proposal_merge_person_id": merge_person.id,
                 "status": PersonMergeStatus.MERGED.name,
-                "selected_global_id": "test",
+                "selected_global_id": selected_global_id,
                 "professional_curex_to_merge": professional_curex_ids,
                 "educational_curex_to_merge": educational_curex_ids,
             }

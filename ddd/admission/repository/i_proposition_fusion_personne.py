@@ -36,6 +36,7 @@ class IPropositionPersonneFusionRepository:
     def initialiser(
             cls,
             global_id: str,
+            selected_global_id: str,
             nom: str,
             prenom: str,
             autres_prenoms: str,

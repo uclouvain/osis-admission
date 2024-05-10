@@ -1132,8 +1132,10 @@ def map_fields_items(digit_fields):
         "middle_name": "",
         "last_name": "lastName",
         "national_number": "nationalRegister",
+        "last_registration_id": "",
         "gender": "gender",
         "birth_date": "birthDate",
+        "email": "",
         "civil_state": "",
         "birth_place": "placeOfBirth",
         "country_of_citizenship__name": "nationality",
@@ -1145,10 +1147,15 @@ def map_fields_items(digit_fields):
 
     mapped_fields = {}
     for admission_field, digit_field in mapping.items():
-        mapped_fields[admission_field] = digit_fields.get(digit_field)
+        mapped_fields[admission_field] = digit_fields.get('person').get(digit_field)
 
     mapped_fields['birth_date'] = datetime.datetime.strptime(mapped_fields['birth_date'], "%Y-%m-%d")
     mapped_fields['gender'] = "H" if mapped_fields['gender'] == "M" else "F"
+
+    noma = next(
+        (account['sourceId'] for account in digit_fields.get('applicationAccounts') if account['source'] == "ETU"), None
+    )
+    mapped_fields['last_registration_id'] = noma
 
     if mapped_fields['country_of_citizenship__name']:
         mapped_fields['country_of_citizenship__name'] = Country.objects.get(
@@ -1485,3 +1492,9 @@ def access_conditions_url(proposition: PropositionDTO):
         training_acronym=training['training__acronym'],
         partial_training_acronym=training['training__partial_acronym'],
     )
+
+@register.filter
+def format_matricule(matricule):
+    prefix_fgs = (8 - len(matricule)) * '0'
+    user_fgs = ''.join([prefix_fgs, matricule])
+    return user_fgs

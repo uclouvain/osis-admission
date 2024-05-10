@@ -36,6 +36,7 @@ from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
     RechercherParcoursAnterieurQuery
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
+from admission.templatetags.admission import format_matricule
 from base.models.person import Person
 from base.views.common import display_success_messages
 from osis_common.utils.htmx import HtmxMixin
@@ -58,8 +59,8 @@ class SearchAccountView(HtmxMixin, FormView):
     @property
     def candidate(self):
         return Person.objects.values(
-            'first_name', 'middle_name', 'last_name', 'national_number', 'gender', 'birth_date', 'civil_state',
-            'birth_place', 'country_of_citizenship__name', 'id_card_number',
+            'first_name', 'middle_name', 'last_name', 'national_number', 'last_registration_id', 'gender', 'birth_date',
+            'email', 'civil_state', 'birth_place', 'country_of_citizenship__name', 'id_card_number',
             'passport_number', 'id_card_expiry_date', 'passport_expiry_date', 'global_id'
         ).get(baseadmissions__uuid=self.kwargs['uuid'])
 
@@ -77,6 +78,7 @@ class SearchAccountView(HtmxMixin, FormView):
         message_bus_instance.invoke(
             InitialiserPropositionFusionPersonneCommand(
                 original_global_id=self.candidate['global_id'],
+                selected_global_id=format_matricule(self.request.POST.get('global_id')),
                 nom=form.cleaned_data['last_name'],
                 prenom=form.cleaned_data['first_name'],
                 autres_prenoms=form.cleaned_data['middle_name'],

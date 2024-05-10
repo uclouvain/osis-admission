@@ -42,6 +42,25 @@ class PersonMergeProposalForm(AdmissionPersonForm):
         self.fields['country_of_citizenship'].required = True
         self.fields['identification_type'].required = True
         self.fields['identification_type'].label = _("Select which identification applies:")
+        self.fields['last_registration_id'].label = _("Last registration id")
+        self.fields['email'].label = _("Private email")
+
+    def clean(self):
+        data = super().clean()
+
+        if data['identification_type'] == IdentificationType.PASSPORT_NUMBER.name:
+            self.fields['passport_number'].required = True
+            self.fields['passport_expiry_date'].required = True
+            self.fields['id_card_number'].required = False
+            self.fields['id_card_expiry_date'].required = False
+
+        if data['identification_type'] == IdentificationType.ID_CARD_NUMBER.name:
+            self.fields['id_card_number'].required = True
+            self.fields['id_card_expiry_date'].required = True
+            self.fields['passport_number'].required = False
+            self.fields['passport_expiry_date'].required = False
+
+        return data
 
     class Meta:
         model = Person
@@ -50,8 +69,10 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'middle_name',
             'last_name',
             'national_number',
+            'last_registration_id',
             'gender',
             'birth_date',
+            'email',
             'civil_state',
             'birth_place',
             'country_of_citizenship',
@@ -73,7 +94,6 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'has_national_number',
             'unknown_birth_date',
             'already_registered',
-            'last_registration_id',
         ]
         force_translations = [
             _('Civil state'),

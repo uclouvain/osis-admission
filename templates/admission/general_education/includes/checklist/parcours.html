@@ -42,7 +42,7 @@
   {# Vue complète #}
   {% concat prefix '-parcours-complete' as complete_parcours_id %}
   <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ complete_parcours_id }}">
-    {% include 'osis_profile/parcours_externe_complet.html' with show_titre_acces=True show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=complete_parcours_id %}
+    {% include 'osis_profile/parcours_externe_complet.html' with show_titre_acces=True curex_a_fusionner=curex_a_fusionner show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=complete_parcours_id %}
   </div>
 
   {# Vue formations académiques #}
@@ -57,7 +57,9 @@
           <th>{% trans "Years" %}</th>
           <th>{# Diplomant #}</th>
           <th>{% trans "Experiences" %}</th>
-          <th>{% trans "Access title" %}</th>
+          {% if show_titre_acces %}
+            <th>{% trans "Access title" %}</th>$
+          {% endif %}
           <th>{% trans "Registered credits" %}</th>
           <th>{% trans "Credits earned" %}</th>
           <th>{% trans "Reduction" %}</th>
@@ -69,11 +71,11 @@
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=formations_prefix_id %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions curex_a_fusionner=curex_a_fusionner action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=formations_prefix_id %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
-                <td colspan="{% if show_actions %}10{% else %}9{% endif %}"></td>
+                <td colspan="{% if show_actions or curex_a_fusionner %}10{% else %}9{% endif %}"></td>
               </tr>
               {% endifchanged %}
             {% endfor %}
@@ -107,7 +109,7 @@
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=financabilite_prefix_id %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions show_titre_acces=show_titre_acces curex_a_fusionner=curex_a_fusionner action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=financabilite_prefix_id %}
             {% endfor %}
           {% endfor %}
         {% endwith %}

@@ -145,6 +145,7 @@ class RechercherCompteExistantQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     original_global_id: str
+    selected_global_id: str
     nom: str
     prenom: str
     autres_prenoms: str

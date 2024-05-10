@@ -34,6 +34,7 @@ def initialiser_proposition_fusion_personne(
 ) -> PropositionFusionPersonneIdentity:
     return proposition_fusion_personne_repository.initialiser(
         global_id=cmd.original_global_id,
+        selected_global_id=cmd.selected_global_id,
         nom=cmd.nom,
         prenom=cmd.prenom,
         autres_prenoms=cmd.autres_prenoms,

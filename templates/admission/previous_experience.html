@@ -31,11 +31,12 @@
         <tr>
             <th style="width: 5%;"></th>
             <th style="width: 15%;">Années</th>
-            <th style="width: 15%;">Type</th>
-            <th style="width: 15%;">Secteur</th>
+            <th style="width: 10%;">Type</th>
+            <th style="width: 10%;">Secteur</th>
             <th style="width: 15%;">Activité</th>
             <th style="width: 15%;">Fonction</th>
             <th style="width: 20%;">Lieu</th>
+            <th style="width: 10%;">Source</th>
         </tr>
     </thead>
     <tbody>
@@ -44,7 +45,7 @@
             <td>
                 <input type="checkbox" name="professional" value="{{ experience.uuid }}" checked
                 {% if not experience.uuid in mergeable_experiences_uuids %}
-                       disabled title="{% trans 'Will be automatically retrieved from known person' %}"
+                       disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
                 {% endif %}/>
             </td>
             <td>{{ experience.date_debut|date:"Y" }} - {{ experience.date_fin|date:"Y" }}</td>
@@ -53,6 +54,13 @@
             <td>{{ experience.activité|default_if_none_or_empty:'Non spécifié' }}</td>
             <td>{{ experience.fonction|default_if_none_or_empty:'Non spécifié' }}</td>
             <td>{{ experience.employeur|default_if_none_or_empty:'Non spécifié' }}</td>
+            <td>
+                {% if experience.uuid in mergeable_experiences_uuids %}
+                    <div class="badge badge-warning">Connue UCL</div>
+                {% else %}
+                    <div class="badge badge-info">Candidat</div>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -64,8 +72,9 @@
         <tr>
             <th style="width: 5%;"></th>
             <th style="width: 15%;">Années</th>
-            <th style="width: 40%;">Formation</th>
-            <th style="width: 40%;">Lieu</th>
+            <th style="width: 35%;">Formation</th>
+            <th style="width: 35%;">Lieu</th>
+            <th style="width: 10%;">Source</th>
         </tr>
     </thead>
     <tbody>
@@ -74,12 +83,19 @@
             <td>
                 <input type="checkbox" name="educational" value="{{ experience.uuid }}" checked
                 {% if not experience.uuid in mergeable_experiences_uuids %}
-                       disabled title="{% trans 'Will be automatically retrieved from known person' %}"
+                       disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
                 {% endif %}/>
             </td>
             <td>{{ experience.annees|display_academic_years_range }}</td>
             <td>{{ experience.nom_formation|default_if_none_or_empty:'Non spécifié' }}</td>
             <td>{{ experience.nom_institut|default_if_none_or_empty:'Non spécifié' }}</td>
+            <td>
+                {% if experience.uuid in mergeable_experiences_uuids %}
+                    <div class="badge badge-warning">Connue UCL</div>
+                {% else %}
+                    <div class="badge badge-info">Candidat</div>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>

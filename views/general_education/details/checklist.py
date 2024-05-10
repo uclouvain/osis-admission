@@ -1499,8 +1499,16 @@ class ChecklistView(
             }
 
             # Experiences
+            if self.proposition_fusion:
+                merge_curex = (
+                    self.proposition_fusion.educational_curex_uuids + self.proposition_fusion.professional_curex_uuids
+                )
+                self._merge_with_known_curriculum(merge_curex, command_result.resume)
+                context['curex_a_fusionner'] = merge_curex
+
             experiences = self._get_experiences(command_result.resume)
             experiences_by_uuid = self._get_experiences_by_uuid(command_result.resume)
+
             context['experiences'] = experiences
             context['experiences_by_uuid'] = experiences_by_uuid
 
@@ -1725,6 +1733,21 @@ class ChecklistView(
 
         return context
 
+    def _merge_with_known_curriculum(self, curex_a_fusionner, resume):
+        if curex_a_fusionner:
+            curex_existant = message_bus_instance.invoke(
+                RechercherParcoursAnterieurQuery(
+                    global_id=self.proposition_fusion.matricule,
+                    uuid_proposition=self.admission_uuid,
+                )
+            )
+            for experience_non_academique in curex_existant.experiences_non_academiques:
+                if str(experience_non_academique.uuid) in curex_a_fusionner:
+                    resume.curriculum.experiences_non_academiques.append(experience_non_academique)
+            for experience_academique in curex_existant.experiences_academiques:
+                if str(experience_academique.uuid) in curex_a_fusionner:
+                    resume.curriculum.experiences_academiques.append(experience_academique)
+
     def _get_experiences(self, resume: ResumePropositionDTO):
         return groupe_curriculum_par_annee_decroissante(
             experiences_academiques=resume.curriculum.experiences_academiques,
@@ -1746,30 +1769,6 @@ class ChecklistView(
         for experience_non_academique in resume.curriculum.experiences_non_academiques:
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
-
-        if self.proposition_fusion:
-            curex_a_fusionner = (self.proposition_fusion.educational_curex_uuids +
-                                 self.proposition_fusion.professional_curex_uuids)
-            if curex_a_fusionner:
-                curex_existant = message_bus_instance.invoke(
-                    RechercherParcoursAnterieurQuery(
-                        global_id=self.proposition_fusion.matricule,
-                        uuid_proposition=self.admission_uuid,
-                    )
-                )
-                experiences = {
-                    annee: [exp for exp in exp_list if str(exp.uuid) in curex_a_fusionner]
-                    for annee, exp_list in experiences.items()
-                }
-                if curex_existant:
-                    # add existing curex by years
-                    for exp in (curex_existant.experiences_academiques + curex_existant.experiences_non_academiques):
-                        years_range = [anExp.annee for anExp in exp.annees] \
-                            if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
-                        for annee in years_range:
-                            experiences.setdefault(annee, []).append(exp)
-                    experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
-
         return experiences
 
 class ApplicationFeesView(

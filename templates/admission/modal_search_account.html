@@ -31,15 +31,17 @@
         <div class="modal-header">
             <h4 class="modal-title" id="">{% trans "Merge with existing entry" %}</h4>
             <div class="panel-title form-group">
-                <select id="match" class="form-control" name="match">
-                    {% for match in matches %}
-                      <option value="{{ forloop.counter0 }}">
-                        {{ match.person.lastName }}, {{ match.person.firstName }} - {{ match.person.gender }}
-                        - {{ match.person.birthDate }} - {{ match.person.nationalRegister|to_niss_format }}
-                      </option>
-                    {% endfor %}
-                </select>
-                <input id="selectedMatricule" type="hidden" value="{{ matches.0.person.matricule }}"/>
+                <form id="matricule-form">
+                    <select id="match" class="form-control" name="match">
+                        {% for match in matches %}
+                          <option value="{{ forloop.counter0 }}">
+                            {{ match.person.lastName }}, {{ match.person.firstName }} - {{ match.person.gender }}
+                            - {{ match.person.birthDate }} - {{ match.person.nationalRegister|to_niss_format }}
+                          </option>
+                        {% endfor %}
+                    </select>
+                    <input id="selectedMatricule" name="global_id" type="hidden" value="{{ matches.0.person.matricule }}"/>
+                </form>
             </div>
         </div>
         <div class="modal-body">
@@ -78,7 +80,7 @@
                 hx-post="{{ request.get_full_path }}"
                 hx-target="#form-ajax-modal"
                 hx-trigger="click"
-                hx-include="#proposal-form, #curex-form"
+                hx-include="#matricule-form, #proposal-form, #curex-form"
                 hx-indicator="#htmx-overlay"
                 hx-swap="innerHTML"
             >

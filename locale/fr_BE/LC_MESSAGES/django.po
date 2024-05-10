@@ -5873,6 +5873,9 @@ msgstr "Crédits inscrits"
 msgid "Registration Id"
 msgstr "Noma"
 
+msgid "Last registration id"
+msgstr "Dernier NOMA connu"
+
 msgid "Registration as"
 msgstr "Inscription à titre"
 
@@ -8443,3 +8446,6 @@ msgstr "{items} types sur {total}"
 
 msgid "Select which identification applies:"
 msgstr "Choisissez le moyen d'identification retenu:"
+
+msgid "Will be automatically retrieved from candidate"
+msgstr "Sera automatiquement récupéré du parcours fourni par le candidat"

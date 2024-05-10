@@ -26,6 +26,7 @@
 
 from django.views.generic import TemplateView
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.templatetags.admission import format_matricule
 from base.models.person import Person
 from osis_common.utils.htmx import HtmxMixin
 
@@ -64,15 +65,10 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
         from infrastructure.messages_bus import message_bus_instance
         return message_bus_instance.invoke(
             RechercherParcoursAnterieurQuery(
-                global_id=self._format_matricule(self.request.GET.get('matricule')),
+                global_id=format_matricule(self.request.GET.get('matricule')),
                 uuid_proposition=self.kwargs['admission_uuid'],
             )
         )
-
-    def _format_matricule(self, matricule):
-        prefix_fgs = (8 - len(matricule)) * '0'
-        user_fgs = ''.join([prefix_fgs, matricule])
-        return user_fgs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -91,12 +87,10 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
         return context
 
     def _merge_professional_experiences(self):
-        a = sorted(
+        return sorted(
             self.provided_experience.experiences_non_academiques + self.known_experience.experiences_non_academiques,
             key=lambda exp: (exp.date_debut, exp.date_fin), reverse=True
         )
-        print([a.dates_formatees for a in a])
-        return a
 
     def _merge_academic_experiences(self):
         return sorted(
@@ -107,5 +101,5 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
     def _get_mergeable_experiences_uuids(self):
         return [
             exp.uuid for exp in
-            (self.provided_experience.experiences_non_academiques + self.provided_experience.experiences_academiques)
+            (self.known_experience.experiences_non_academiques + self.known_experience.experiences_academiques)
         ]

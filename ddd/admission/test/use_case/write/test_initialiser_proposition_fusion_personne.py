@@ -45,6 +45,7 @@ class TestInitialiserPropositionFusionPersonne(SimpleTestCase):
         # Arrange
         cmd = InitialiserPropositionFusionPersonneCommand(
             original_global_id="1",
+            selected_global_id="test",
             nom='John Doe',
             prenom='Jane Doe',
             autres_prenoms='Bob Smith',
