@@ -48,7 +48,7 @@ from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.fields import RadioBooleanField
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.utils.mark_safe_lazy import mark_safe_lazy
-from education_group.templatetags.academic_year_display import get_academic_year
+from education_group.templatetags.academic_year_display import display_as_academic_year
 from reference.services.iban_validator import (
     IBANValidatorService,
     IBANValidatorException,
@@ -422,7 +422,7 @@ class AccountingForm(forms.Form):
                 ' %(academic_year)s: %(names)s.',
                 len(names),
             ) % {
-                'academic_year': get_academic_year(academic_year),
+                'academic_year': display_as_academic_year(academic_year),
                 'names': ', '.join(names),
             }
 
