@@ -663,6 +663,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             },
         )
         patcher.start()
@@ -689,6 +690,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             token: {
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             }
             for token in tokens
         }

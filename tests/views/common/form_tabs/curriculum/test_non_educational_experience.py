@@ -62,7 +62,7 @@ from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
 from reference.tests.factories.country import CountryFactory
 
 
-#TODO: Remove duplicate tests with osis_profile
+# TODO: Remove duplicate tests with osis_profile
 @freezegun.freeze_time('2023-01-01')
 class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
@@ -111,7 +111,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -602,7 +602,7 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         # Mock osis document api
         self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
         self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
-        self.get_several_remote_metadata_patched.return_value = {'foobar': {'name': 'certificate.pdf'}}
+        self.get_several_remote_metadata_patched.return_value = {'foobar': {'name': 'certificate.pdf', 'size': 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
         self.get_remote_tokens_patcher = mock.patch('osis_document.api.utils.get_remote_tokens')

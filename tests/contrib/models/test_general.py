@@ -80,7 +80,7 @@ class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
 
         patcher = patch(
             "osis_document.api.utils.get_remote_metadata",
-            return_value={"name": "myfile", "mimetype": "application/pdf"},
+            return_value={"name": "myfile", "mimetype": "application/pdf", "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)

@@ -78,6 +78,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
             token: {
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             }
             for token in tokens
         }
