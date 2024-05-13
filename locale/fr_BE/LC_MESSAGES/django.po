@@ -4547,6 +4547,10 @@ msgstr "Affiliations"
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
 
+msgctxt "admission"
+msgid "Merge"
+msgstr "Fusionner"
+
 msgid "Merge all non-empty data from digit match to merge form"
 msgstr "Fusionner toutes les données valides provenant de la correspondance"
 

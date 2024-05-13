@@ -84,7 +84,12 @@
                 <div class="panel-title form-group">
                         <div class="bold-text text-nowrap">{% trans 'Available information (Digit)' %}</div>
                         {% for match in matches %}
-                          <div id="match-{{ forloop.counter0 }}" class="match-name" data-matricule="{{ match.person.matricule }}" {% if not forloop.first %} style="display: none;" {% endif %}">
+                          <div id="match-{{ forloop.counter0 }}" class="match-name" data-matricule="{{ match.person.matricule|format_matricule }}"
+                                  {% if merge_person and merge_person.selected_global_id != match.person.matricule|format_matricule %}
+                                    style="display: none;"
+                                  {% elif not merge_person and not forloop.first %}
+                                    style="display: none;"
+                                  {% endif %}">
                             {{ match.person.lastName }}, {{ match.person.firstName }} -
                             {% for account in match.applicationAccounts %}
                             {% if account.source == "ETU" %}
@@ -98,7 +103,12 @@
 
         <div class="panel-body digit-data">
         {% for match in matches %}
-            <span class="match-data-panel digit-{{ forloop.counter0 }}-data" {% if not forloop.first %} style="display: none;" {% endif %}>
+            <span class="match-data-panel digit-{{ forloop.counter0 }}-data"
+              {% if merge_person and merge_person.selected_global_id != match.person.matricule|format_matricule %}
+                style="display: none;"
+              {% elif not merge_person and not forloop.first %}
+                style="display: none;"
+              {% endif %}">
             {% for label, value in match|map_fields_items %}
                 <div class="flex-merge-input">
                     <div class="merge-btn-container">

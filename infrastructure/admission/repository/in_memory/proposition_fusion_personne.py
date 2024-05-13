@@ -38,6 +38,8 @@ class PropositionPersonneFusionInMemoryRepository(IPropositionPersonneFusionRepo
     @classmethod
     def initialiser(
             cls,
+            existing_merge_person_id: Optional[str],
+            status: str,
             global_id: str,
             selected_global_id: str,
             nom: str,
@@ -54,6 +56,7 @@ class PropositionPersonneFusionInMemoryRepository(IPropositionPersonneFusionRepo
             numero_passeport: str,
             dernier_noma_connu: str,
             expiration_carte_id: str,
+            expiration_passeport: str,
             educational_curex_ids: List[str],
             professional_curex_ids: List[str],
     ) -> PropositionFusionPersonneIdentity:  # noqa

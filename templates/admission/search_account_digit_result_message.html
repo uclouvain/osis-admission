@@ -38,6 +38,16 @@
         </form>
         <strong>Correspondance trouvée</strong> Veuillez vérifier s'il y a lieu de fusionner les informations
     </div>
+{% elif result_code == 'PENDING' %}
+    <div class="alert alert-info">
+        <form id="search-existing-account-form" method="POST" action="{% url 'admission:services:digit:search-account' uuid=uuid %}">
+            {% csrf_token %}
+            <button id="search-existing-account-btn" type="submit" class="btn btn-xs btn-info pull-right">
+                {% trans "Modifier" %}
+            </button>
+        </form>
+        <strong>Proposition de fusion enregistrée</strong> Vous pouvez poursuivre la fusion
+    </div>
 {% elif result_code == 'REFUSED' %}
     <div class="alert alert-danger">
         <form id="undo-merge-proposal" method="POST" action="{% url 'admission:services:digit:undo-merge' uuid=uuid %}">

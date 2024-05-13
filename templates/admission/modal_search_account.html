@@ -34,13 +34,17 @@
                 <form id="matricule-form">
                     <select id="match" class="form-control" name="match">
                         {% for match in matches %}
-                          <option value="{{ forloop.counter0 }}">
+                          <option value="{{ forloop.counter0 }}" {% if merge_person.selected_global_id == match.person.matricule|format_matricule %} selected {% endif %}>
                             {{ match.person.lastName }}, {{ match.person.firstName }} - {{ match.person.gender }}
                             - {{ match.person.birthDate }} - {{ match.person.nationalRegister|to_niss_format }}
                           </option>
                         {% endfor %}
                     </select>
-                    <input id="selectedMatricule" name="global_id" type="hidden" value="{{ matches.0.person.matricule }}"/>
+                    {% if merge_person %}
+                        <input id="selectedMatricule" name="global_id" type="hidden" value="{{ merge_person.selected_global_id }}"/>
+                    {% else %}
+                        <input id="selectedMatricule" name="global_id" type="hidden" value="{{ matches.0.person.matricule|format_matricule }}"/>
+                    {% endif %}
                 </form>
             </div>
         </div>
@@ -65,8 +69,21 @@
         </div>
 
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+                <i class="fas fa-xmark" style="margin-right: 3px;"></i>
                 {% trans "Cancel" %}
+            </button>
+            <button type="button" class="btn btn-secondary"
+                hx-post="{{ request.get_full_path }}"
+                hx-target="#form-ajax-modal"
+                hx-trigger="click"
+                hx-include="#matricule-form, #proposal-form, #curex-form"
+                hx-vals='{"action": "SAVE"}'
+                hx-indicator="#htmx-overlay"
+                hx-swap="innerHTML"
+            >
+                <i class="fas fa-save" style="margin-right: 3px;"></i>
+                {% trans "Save fusion proposal" %}
             </button>
             <button type="button" class="btn btn-danger"
                 hx-post="{% url 'admission:services:digit:discard-merge' uuid=uuid %}"
@@ -74,6 +91,7 @@
                 hx-include="#proposal-form"
                 hx-indicator="#htmx-overlay"
             >
+                 <i class="fas fa-ban" style="margin-right: 3px;"></i>
                 {% trans "Discard fusion" %}
             </button>
             <button type="button" class="btn btn-primary"
@@ -81,10 +99,12 @@
                 hx-target="#form-ajax-modal"
                 hx-trigger="click"
                 hx-include="#matricule-form, #proposal-form, #curex-form"
+                hx-vals='{"action": "MERGE"}'
                 hx-indicator="#htmx-overlay"
                 hx-swap="innerHTML"
             >
-                {% trans "Save fusion proposal" %}
+                <i class="fas fa-merge" style="margin-right: 3px;"></i>
+                {% trans "Merge" context "admission" %}
             </button>
         </div>
 

@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import datetime
+
 from django.forms import HiddenInput
 from django.utils.translation import gettext as _
 
@@ -40,27 +42,61 @@ class PersonMergeProposalForm(AdmissionPersonForm):
         # some adjustments to initial form
         self.fields['middle_name'].help_text = None
         self.fields['country_of_citizenship'].required = True
-        self.fields['identification_type'].required = True
-        self.fields['identification_type'].label = _("Select which identification applies:")
         self.fields['last_registration_id'].label = _("Last registration id")
         self.fields['email'].label = _("Private email")
 
     def clean(self):
+        last_registration_id = self.data.get('last_registration_id')
+
         data = super().clean()
+        data['last_registration_id'] = last_registration_id
+
+        id_type = self.data.get('identification_type')
+
+        if not id_type and (self.data['passport_number'] or self.data['passport_expiry_date']):
+            data['identification_type'] = IdentificationType.PASSPORT_NUMBER.name
+            data['passport_number'] = self.data['passport_number']
+            data['passport_expiry_date'] = self.data['passport_expiry_date']
+
+        if not id_type and (self.data['national_number'] or self.data['id_card_number'] or self.data['id_card_expiry_date']):
+            data['identification_type'] = IdentificationType.ID_CARD_NUMBER.name
+            data['national_number'] = self.data['national_number']
+            data['id_card_number'] = self.data['id_card_number']
+            data['id_card_expiry_date'] = self.data['id_card_expiry_date']
 
         if data['identification_type'] == IdentificationType.PASSPORT_NUMBER.name:
-            self.fields['passport_number'].required = True
-            self.fields['passport_expiry_date'].required = True
-            self.fields['id_card_number'].required = False
-            self.fields['id_card_expiry_date'].required = False
+            self.errors.pop('id_card_number', None)
+            self.errors.pop('id_card_expiry_date', None)
 
         if data['identification_type'] == IdentificationType.ID_CARD_NUMBER.name:
-            self.fields['id_card_number'].required = True
-            self.fields['id_card_expiry_date'].required = True
-            self.fields['passport_number'].required = False
-            self.fields['passport_expiry_date'].required = False
+            self.errors.pop('passport_number', None)
+            self.errors.pop('passport_expiry_date', None)
+
+        if data['identification_type'] == IdentificationType.ID_CARD_NUMBER.name and not all(
+                [data['national_number'], data['id_card_number'], data['id_card_expiry_date']]
+        ):
+            for field in ['national_number', 'id_card_number', 'id_card_expiry_date']:
+                if not data[field]:
+                    self.add_error(field, "This field is required.")
+
+        if data['identification_type'] == IdentificationType.PASSPORT_NUMBER.name and not all(
+                [data['passport_number'], data['passport_expiry_date']]
+        ):
+            for field in ['passport_number', 'passport_expiry_date']:
+                if not data[field]:
+                    self.add_error(field, "This field is required.")
+
+        if self.data['passport_expiry_date']:
+            data['passport_expiry_date'] = self._to_YYYYMMDD(self.data['passport_expiry_date'])
+
+        if self.data['id_card_expiry_date']:
+            data['id_card_expiry_date'] = self._to_YYYYMMDD(self.data['id_card_expiry_date'])
 
         return data
+
+    def _to_YYYYMMDD(self, date_str):
+        return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d") if date_str else None
+
 
     class Meta:
         model = Person
@@ -80,7 +116,6 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'passport_number',
             'id_card_expiry_date',
             'passport_expiry_date',
-            'identification_type',
         ]
         exclude = [
             'birth_country',
@@ -94,6 +129,7 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'has_national_number',
             'unknown_birth_date',
             'already_registered',
+            'identification_type',
         ]
         force_translations = [
             _('Civil state'),

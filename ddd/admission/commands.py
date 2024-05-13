@@ -144,6 +144,8 @@ class RechercherCompteExistantQuery(interface.QueryRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
+    existing_merge_person_id: Optional[str]
+    status: str
     original_global_id: str
     selected_global_id: str
     nom: str
@@ -160,6 +162,7 @@ class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     numero_passeport: str
     dernier_noma_connu: str
     expiration_carte_id: str
+    expiration_passeport: str
     educational_curex_uuids: List[str]
     professional_curex_uuids: List[str]
     annee_diplome_etudes_secondaires: int

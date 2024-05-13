@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from abc import ABCMeta
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
@@ -35,6 +35,8 @@ class IPropositionPersonneFusionRepository:
     @classmethod
     def initialiser(
             cls,
+            existing_merge_person_id: Optional[str],
+            status: str,
             global_id: str,
             selected_global_id: str,
             nom: str,
@@ -51,6 +53,7 @@ class IPropositionPersonneFusionRepository:
             numero_passeport: str,
             dernier_noma_connu: str,
             expiration_carte_id: str,
+            expiration_passeport: str,
             educational_curex_ids: List[str],
             professional_curex_ids: List[str],
     ) -> PropositionFusionPersonneIdentity:  # noqa

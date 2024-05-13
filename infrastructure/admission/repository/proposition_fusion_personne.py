@@ -38,6 +38,8 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
     @classmethod
     def initialiser(
             cls,
+            existing_merge_person_id: Optional[str],
+            status: str,
             global_id: str,
             selected_global_id: str,
             nom: str,
@@ -54,34 +56,39 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             numero_passeport: str,
             dernier_noma_connu: str,
             expiration_carte_id: str,
+            expiration_passeport: str,
             educational_curex_ids: List[str],
             professional_curex_ids: List[str],
     ) -> PropositionFusionPersonneIdentity:  # noqa
 
         country_of_citizenship = Country.objects.get(name=nationalite)
 
-        merge_person = Person.objects.create(
-            last_name=nom,
-            first_name=prenom,
-            middle_name=autres_prenoms,
-            birth_date=date_naissance,
-            birth_place=lieu_naissance,
-            email=email,
-            gender=genre,
-            civil_state=etat_civil,
-            country_of_citizenship=country_of_citizenship,
-            national_number=numero_national,
-            id_card_number=numero_carte_id,
-            passport_number=numero_passeport,
-            last_registration_id=dernier_noma_connu,
-            id_card_expiry_date=expiration_carte_id,
+        merge_person, created = Person.objects.update_or_create(
+            id=existing_merge_person_id,
+            defaults={
+                'last_name': nom,
+                'first_name': prenom,
+                'middle_name': autres_prenoms,
+                'birth_date': date_naissance,
+                'birth_place': lieu_naissance,
+                'email': email,
+                'gender': genre,
+                'civil_state': etat_civil,
+                'country_of_citizenship': country_of_citizenship,
+                'national_number': numero_national,
+                'id_card_number': numero_carte_id,
+                'passport_number': numero_passeport,
+                'last_registration_id': dernier_noma_connu,
+                'id_card_expiry_date': expiration_carte_id,
+                'passport_expiry_date': expiration_passeport,
+            }
         )
 
         person_merge_proposal, created = PersonMergeProposal.objects.update_or_create(
             original_person__global_id=global_id,
             defaults={
                 "proposal_merge_person_id": merge_person.id,
-                "status": PersonMergeStatus.MERGED.name,
+                "status": PersonMergeStatus.MERGED.name if status == "MERGE" else PersonMergeStatus.PENDING.name,
                 "selected_global_id": selected_global_id,
                 "professional_curex_to_merge": professional_curex_ids,
                 "educational_curex_to_merge": educational_curex_ids,

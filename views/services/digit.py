@@ -47,6 +47,7 @@ from admission.ddd.admission.commands import RechercherCompteExistantQuery, Defa
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreationStatus
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.views.common import display_error_messages, display_success_messages
 
 from django.utils.translation import gettext_lazy as _
@@ -93,19 +94,23 @@ class SearchDigitAccountView(FormView):
     def post(self, request, *args, **kwargs):
 
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
+        person_merge_proposal = self._get_person_merge_proposal(candidate)
 
         if self._is_valid_for_search(request, candidate):
             return redirect(to=self.request.META.get('HTTP_REFERER'))
 
-        matches = search_digit_account(
-            global_id=candidate.global_id,
-            last_name=candidate.last_name,
-            first_name=candidate.first_name,
-            other_first_name=candidate.middle_name,
-            birth_date=str(candidate.birth_date),
-            sex=candidate.sex,
-            niss=candidate.national_number,
-        )
+        if person_merge_proposal.status == PersonMergeStatus.PENDING.name:
+            matches = person_merge_proposal.similarity_result
+        else:
+            matches = search_digit_account(
+                global_id=candidate.global_id,
+                last_name=candidate.last_name,
+                first_name=candidate.first_name,
+                other_first_name=candidate.middle_name,
+                birth_date=str(candidate.birth_date),
+                sex=candidate.sex,
+                niss=candidate.national_number,
+            )
 
         request.session['search_context'] = {'matches': matches}
         return redirect(reverse('admission:services:search-account-modal', kwargs={'uuid': kwargs['uuid']}))
@@ -124,6 +129,12 @@ class SearchDigitAccountView(FormView):
             ) + ", ".join(missing_fields))
 
         return has_missing_fields
+
+    def _get_person_merge_proposal(self, candidate):
+        try:
+            return PersonMergeProposal.objects.get(original_person__global_id=candidate.global_id)
+        except PersonMergeProposal.DoesNotExist:
+            return None
 
 
 def search_digit_account(

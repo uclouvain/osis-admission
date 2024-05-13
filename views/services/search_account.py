@@ -23,7 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import datetime
 
+from django.forms import model_to_dict
 from django.http import HttpResponse
 from django.urls import reverse
 from django.views.generic import FormView
@@ -38,6 +40,7 @@ from admission.ddd.admission.commands import InitialiserPropositionFusionPersonn
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
 from admission.templatetags.admission import format_matricule
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.views.common import display_success_messages
 from osis_common.utils.htmx import HtmxMixin
 
@@ -64,35 +67,63 @@ class SearchAccountView(HtmxMixin, FormView):
             'passport_number', 'id_card_expiry_date', 'passport_expiry_date', 'global_id'
         ).get(baseadmissions__uuid=self.kwargs['uuid'])
 
+    @property
+    def proposal_merge(self):
+        try:
+            return PersonMergeProposal.objects.get(original_person__global_id=self.candidate['global_id'])
+        except PersonMergeProposal.DoesNotExist:
+            return None
+
+    @property
+    def merge_person(self):
+        return self.proposal_merge.proposal_merge_person if self.proposal_merge else None
+
+    def get_initial(self):
+        return model_to_dict(self.merge_person) if self.proposal_merge.status == PersonMergeStatus.PENDING.name else {}
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['uuid'] = self.kwargs['uuid']
         context['candidate'] = self.candidate
+        context['merge_person'] = self.proposal_merge
         search_context = self.request.session.get('search_context', {})
         context.update(**search_context)
         return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        is_required = request.POST.get('action') == 'MERGE'
+
+        if not is_required:
+            form.is_valid()
+            return self.form_valid(form)
+        else:
+            return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         from infrastructure.messages_bus import message_bus_instance
         display_success_messages(self.request, messages_to_display="La proposition de fusion a été créée avec succès")
         message_bus_instance.invoke(
             InitialiserPropositionFusionPersonneCommand(
+                existing_merge_person_id=self.merge_person.id,
+                status=self.request.POST.get('action'),
                 original_global_id=self.candidate['global_id'],
                 selected_global_id=format_matricule(self.request.POST.get('global_id')),
-                nom=form.cleaned_data['last_name'],
-                prenom=form.cleaned_data['first_name'],
-                autres_prenoms=form.cleaned_data['middle_name'],
-                date_naissance=form.cleaned_data['birth_date'],
-                lieu_naissance=form.cleaned_data['birth_place'],
-                email=form.cleaned_data['email'],
-                genre=form.cleaned_data['gender'],
-                nationalite=form.cleaned_data['country_of_citizenship'],
-                etat_civil=form.cleaned_data['civil_state'],
-                numero_national=form.cleaned_data['national_number'],
-                numero_carte_id=form.cleaned_data['id_card_number'],
-                numero_passeport=form.cleaned_data['passport_number'],
-                dernier_noma_connu=form.cleaned_data['last_registration_id'],
-                expiration_carte_id=form.cleaned_data['id_card_expiry_date'],
+                nom=form.cleaned_data.get('last_name', ''),
+                prenom=form.cleaned_data.get('first_name', ''),
+                autres_prenoms=form.cleaned_data.get('middle_name', ''),
+                date_naissance=form.cleaned_data.get('birth_date'),
+                lieu_naissance=form.cleaned_data.get('birth_place', ''),
+                email=form.cleaned_data.get('email', ''),
+                genre=form.cleaned_data.get('gender', ''),
+                nationalite=form.cleaned_data.get('country_of_citizenship', ''),
+                etat_civil=form.cleaned_data.get('civil_state', ''),
+                numero_national=form.cleaned_data.get('national_number', ''),
+                numero_carte_id=form.cleaned_data.get('id_card_number', ''),
+                numero_passeport=form.cleaned_data.get('passport_number', ''),
+                dernier_noma_connu=form.cleaned_data.get('last_registration_id', ''),
+                expiration_carte_id=form._to_YYYYMMDD(self.request.POST.get('id_card_expiry_date')),
+                expiration_passeport=form._to_YYYYMMDD(self.request.POST.get('passport_expiry_date')),
                 educational_curex_uuids=self.get_educational_curex_form_values(),
                 professional_curex_uuids=self.get_professional_curex_form_values(),
                 annee_diplome_etudes_secondaires=self.get_high_school_graduation_year(),

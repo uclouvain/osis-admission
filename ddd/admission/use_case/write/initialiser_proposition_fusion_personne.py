@@ -33,6 +33,8 @@ def initialiser_proposition_fusion_personne(
         proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
 ) -> PropositionFusionPersonneIdentity:
     return proposition_fusion_personne_repository.initialiser(
+        existing_merge_person_id=cmd.existing_merge_person_id,
+        status=cmd.status,
         global_id=cmd.original_global_id,
         selected_global_id=cmd.selected_global_id,
         nom=cmd.nom,
@@ -49,6 +51,7 @@ def initialiser_proposition_fusion_personne(
         numero_passeport=cmd.numero_passeport,
         dernier_noma_connu=cmd.dernier_noma_connu,
         expiration_carte_id=cmd.expiration_carte_id,
+        expiration_passeport=cmd.expiration_passeport,
         educational_curex_ids=cmd.educational_curex_uuids,
         professional_curex_ids=cmd.professional_curex_uuids,
     )
