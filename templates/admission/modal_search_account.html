@@ -134,6 +134,8 @@
             $(`.digit-${selectedMatchId}-data`).show();
             const selectedMatriculeVal = $(`#match-${selectedMatchId}`).data('matricule');
             $('#selectedMatricule').val(selectedMatriculeVal);
+            const selectedNoma = $(`#match-${selectedMatchId} #noma-badge`).data('noma');
+            $('#proposal-form #id_last_registration_id').val(selectedNoma);
             document.dispatchEvent(new CustomEvent("selectMergePerson"));
         }).one('select2:open', (e) => {
             $(".match-select .select2-results:not(:has(li#header))").prepend(
@@ -144,7 +146,10 @@
         $('.digit-data #national_number').mask('00.00.00-000.00');
         $('.fusion-data #national_number').mask('00.00.00-000.00');
 
+        $('#match').trigger('change');
+
     });
+
 
     // merge input from data source to fusion form using btn-merge
     document.querySelectorAll('.btn-merge').forEach((el) => {

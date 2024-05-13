@@ -93,7 +93,7 @@
                             {{ match.person.lastName }}, {{ match.person.firstName }} -
                             {% for account in match.applicationAccounts %}
                             {% if account.source == "ETU" %}
-                                <span class="badge panel-default-badge-primary">NOMA: {{ account.sourceId }}</span>
+                                <span id="noma-badge" data-noma="{{ account.sourceId }}" class="badge panel-default-badge-primary">NOMA: {{ account.sourceId }}</span>
                             {% endif %}
                             {% endfor %}
                           </div>

@@ -61,7 +61,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             professional_curex_ids: List[str],
     ) -> PropositionFusionPersonneIdentity:  # noqa
 
-        country_of_citizenship = Country.objects.get(name=nationalite)
+        country_of_citizenship = get_object_or_none(Country, name=nationalite)
 
         merge_person, created = Person.objects.update_or_create(
             id=existing_merge_person_id,
@@ -102,6 +102,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
         person_merge_proposal = get_object_or_none(
             PersonMergeProposal, original_person__global_id=global_id
         )
+        country = person_merge_proposal.proposal_merge_person.country_of_citizenship
         return PropositionFusionPersonneDTO(
             status=person_merge_proposal.status,
             matricule=person_merge_proposal.selected_global_id,
@@ -115,7 +116,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             birth_place=person_merge_proposal.proposal_merge_person.birth_place,
             birth_country=person_merge_proposal.proposal_merge_person.birth_country,
             civil_state=person_merge_proposal.proposal_merge_person.civil_state,
-            country_of_citizenship=person_merge_proposal.proposal_merge_person.country_of_citizenship.name,
+            country_of_citizenship=country.name if country else None,
             national_number=person_merge_proposal.proposal_merge_person.national_number,
             id_card_number=person_merge_proposal.proposal_merge_person.id_card_number,
             passport_number=person_merge_proposal.proposal_merge_person.passport_number,

@@ -1132,7 +1132,6 @@ def map_fields_items(digit_fields):
         "middle_name": "",
         "last_name": "lastName",
         "national_number": "nationalRegister",
-        "last_registration_id": "",
         "gender": "gender",
         "birth_date": "birthDate",
         "email": "",
@@ -1151,11 +1150,6 @@ def map_fields_items(digit_fields):
 
     mapped_fields['birth_date'] = datetime.datetime.strptime(mapped_fields['birth_date'], "%Y-%m-%d")
     mapped_fields['gender'] = "H" if mapped_fields['gender'] == "M" else "F"
-
-    noma = next(
-        (account['sourceId'] for account in digit_fields.get('applicationAccounts') if account['source'] == "ETU"), None
-    )
-    mapped_fields['last_registration_id'] = noma
 
     if mapped_fields['country_of_citizenship__name']:
         mapped_fields['country_of_citizenship__name'] = Country.objects.get(
