@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ from admission.api.views.person import (
     GeneralPersonView,
     ContinuingPersonView,
 )
+from admission.api.views.continuing_education import RetrieveContinuingEducationSpecificInformationView
 from admission.api.views.project import *
 from admission.api.views.pool_questions import PoolQuestionsView
 from admission.api.views.submission import *

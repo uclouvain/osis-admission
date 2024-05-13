@@ -261,6 +261,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
                 ChoixMoyensDecouverteFormation.FACEBOOK.name,
                 ChoixMoyensDecouverteFormation.LINKEDIN.name,
             ],
+            'marque_d_interet': True,
         }
 
         cls.url = resolve_url('admission_api_v1:continuing_training_choice')
@@ -287,6 +288,14 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
                 ChoixMoyensDecouverteFormation.LINKEDIN.name,
             ],
         )
+        self.assertEqual(admission.interested_mark, True)
+
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=admission.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été initiée.')
 
     def test_training_choice_initialization_using_api_candidate_with_wrong_training(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -465,6 +474,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
                 ChoixMoyensDecouverteFormation.FACEBOOK.name,
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
             ],
+            'marque_d_interet': True,
         }
 
         AdmissionFormItemInstantiationFactory(
@@ -537,6 +547,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
             ],
         )
+        self.assertEqual(admission.interested_mark, True)
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)

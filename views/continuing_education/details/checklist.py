@@ -46,7 +46,6 @@ from admission.forms.admission.checklist import (
     CommentForm,
 )
 from admission.forms.admission.continuing_education.checklist import StudentReportForm
-from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from osis_role.templatetags.osis_role import has_perm
@@ -202,5 +201,6 @@ class FicheEtudiantFormView(CheckListDefaultContextMixin, AdmissionFormMixin, Ht
         return kwargs
 
     def form_valid(self, form):
+        form.instance.last_update_author = self.request.user.person
         form.save()
         return super().form_valid(form)

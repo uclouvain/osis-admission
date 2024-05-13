@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,11 +29,28 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
 from admission.contrib.models import ContinuingEducationAdmission
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE,
+)
 from osis_role.errors import predicate_failed_msg
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("This action is limited to a specific admission context."))
+def is_continuing(self, user: User, obj: ContinuingEducationAdmission):
+    from admission.templatetags.admission import CONTEXT_CONTINUING
+
+    return obj.get_admission_context() == CONTEXT_CONTINUING
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_('The proposition must be in draft form to realize this action.'))
 def in_progress(self, user: User, obj: ContinuingEducationAdmission):
     return obj.status == ChoixStatutPropositionContinue.EN_BROUILLON.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
+def is_submitted(self, user: User, obj: ContinuingEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE

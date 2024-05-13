@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-03-22 18:08+0100\n"
-"PO-Revision-Date: 2023-12-08 17:10+0100\n"
+"PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_BE\n"
@@ -233,6 +233,9 @@ msgstr ""
 "m'engage à transmettre %(to_service)s toutes les modifications de données "
 "reprises dans mon dossier</li></ul>"
 
+msgid "A cancel mail has already been sent to the candidate."
+msgstr "Un courrier d'annulation a été envoyé au candidat."
+
 msgid ""
 "A candidate is considered as VIP if he/she is in double degree or if he/she "
 "benefits from an international scholarship or if he/she is Erasmus Mundus."
@@ -243,8 +246,14 @@ msgstr ""
 msgid "A card"
 msgstr "Carte A"
 
+msgid "A close mail has already been sent to the candidate."
+msgstr "Un courrier de clotûre a déjà été envoyé au candidat."
+
 msgid "A comment is required."
 msgstr "Un commentaire est requis."
+
+msgid "A deny mail has already been sent to the candidate."
+msgstr "Un courrier de refus a été envoyé au candidat."
 
 msgid "A justification is needed when creating a pre-admission."
 msgstr "Une justification est requise pour une pré-admission."
@@ -385,6 +394,9 @@ msgstr "Accepter les activités sélectionnées"
 
 msgid "Accept selected courses"
 msgstr "Accepter les cours sélectionnées"
+
+msgid "Acceptation condition"
+msgstr "Condition d'acceptation"
 
 msgctxt "publication-status"
 msgid "Accepted"
@@ -628,6 +640,10 @@ msgstr ""
 msgid "All"
 msgstr "Tous"
 
+msgctxt "feminine"
+msgid "All"
+msgstr "Toutes"
+
 msgctxt "filters"
 msgid "All"
 msgstr "Tous"
@@ -650,6 +666,9 @@ msgstr "Montant"
 
 msgid "Amount (without EUR/)"
 msgstr "Montant (sans EUR/€)"
+
+msgid "An approval mail has already been sent to the candidate."
+msgstr "Un courrier d'accord a été envoyé au candidat."
 
 msgid "An approval mail has been sent to the candidate."
 msgstr "Un courrier d'autorisation a été envoyé au candidat."
@@ -677,6 +696,9 @@ msgstr "Un membre externe doit avoir un email."
 
 msgid "An external member must have an institute."
 msgstr "Un membre externe doit avoir une institution."
+
+msgid "An holding mail has already been sent to the candidate."
+msgstr "Un courrier  de mise en attente a déjà été envoyé au candidat."
 
 msgid ""
 "An integer greater than zero indicating the position of the item in relation "
@@ -736,6 +758,9 @@ msgstr "Personne de contact pour la composition du programme annuel :"
 msgid "Another admission has been submitted."
 msgstr "Une autre admission a déjà été soumise."
 
+msgid "Application"
+msgstr "Demande"
+
 msgid "Application accepted"
 msgstr "Inscription autorisée"
 
@@ -786,11 +811,17 @@ msgstr "Approbation par pdf"
 msgid "Approval"
 msgstr "Accord"
 
+msgid "Approval by faculty condition:"
+msgstr "Condition d'acceptation par la faculté :"
+
 msgid "Approval certificate from SIC"
 msgstr "Certificat d'approbation SIC"
 
 msgid "Approval certificate of faculty"
 msgstr "Attestation d'accord facultaire"
+
+msgid "Approval condition by faculty"
+msgstr "Condition d'acceptation par la faculté"
 
 msgid "Approval for another training"
 msgstr "Accord pour une autre formation "
@@ -840,6 +871,9 @@ msgstr ""
 "Êtes-vous actuellement inscrit∙e en première année de bachelier dans une "
 "haute école ou une université de la Communauté française de Belgique ?"
 
+msgid "Are you sure you want to change the status?"
+msgstr "Êtes-vous sûr·e de vouloir changer d'état ?"
+
 #, python-format
 msgctxt "admission"
 msgid "Are you sure you want to delete \"%(object)s\"?"
@@ -855,6 +889,10 @@ msgid ""
 "Are you sure you want to duplicate this experience (%(experience_name)s)?"
 msgstr ""
 "Êtes-vous sûr de vouloir dupliquer cette expérience (%(experience_name)s) ?"
+
+msgid ""
+"Are you sure you want to go back to the \"Application confirmed\" status?"
+msgstr "Êtes-vous sûr·e de vouloir repasser à l'état \"Demande confirmée\" ?"
 
 #, python-format
 msgid "Are you sure you want to refuse \"%(object)s\"?"
@@ -1340,14 +1378,26 @@ msgstr "Peut voir les informations relatives aux études secondaires"
 msgid "Cancel"
 msgstr "Annuler"
 
+msgid "Cancel reason"
+msgstr "Motif d'annulation"
+
+msgid "Cancel reason:"
+msgstr "Motifs d'annulation :"
+
 msgid "Cancel the application fee request"
 msgstr "Annuler la demande des frais de dossier"
 
 msgid "Cancel the request"
 msgstr "Annuler la réclamation"
 
+msgid "Canceled"
+msgstr "Annulée"
+
 msgid "Cancelled application"
 msgstr "Demande annulée"
+
+msgid "Cancelled application by a manager"
+msgstr "Demande annulée par un gestionnaire"
 
 msgid "Candidate"
 msgstr "Candidat"
@@ -1551,6 +1601,10 @@ msgstr "FRC - Fonds de recherche clinique"
 msgid "Close"
 msgstr "Fermer"
 
+msgctxt "Admission"
+msgid "Close"
+msgstr "Clôturer"
+
 msgctxt "modal"
 msgid "Close"
 msgstr "Fermer"
@@ -1572,6 +1626,9 @@ msgstr "Commentaire sur l'authentification"
 
 msgid "Comment for PhD Committee manager"
 msgstr "Commentaire du gestionnaire CDD"
+
+msgid "Comment from IUFC to the faculty"
+msgstr "Commentaire de l'IUFC pour la Faculté"
 
 msgid "Comment to the candidate:"
 msgstr "Commentaire à destination du candidat :"
@@ -1640,6 +1697,9 @@ msgstr "Complétée pour Fac"
 msgid "Completed for SIC"
 msgstr "Complétée pour SIC"
 
+msgid "Condition for approval"
+msgstr "Condition d'acceptation"
+
 msgid "Configuration"
 msgstr "Configuration"
 
@@ -1650,6 +1710,10 @@ msgctxt "admission"
 msgid "Configure"
 msgstr "Configurer"
 
+msgid "Confirm"
+msgstr "Confirmer"
+
+msgctxt "admission"
 msgid "Confirm"
 msgstr "Confirmer"
 
@@ -1733,6 +1797,10 @@ msgstr "Formation continue"
 
 msgid "Continuing education admission"
 msgstr "Admission en formation continue"
+
+msgctxt "ways_hear_about_training"
+msgid "Continuing education website"
+msgstr "Par le site de la formation continue"
 
 msgid "Continuing enrolment applications"
 msgstr "Demandes d'inscription en formation continue"
@@ -2246,9 +2314,15 @@ msgstr "Supprimer ?"
 msgid "Deletion of an experience"
 msgstr "Suppression d'une expérience"
 
+msgid "Denied"
+msgstr "Refusée"
+
 msgctxt "admission decision"
 msgid "Denied"
 msgstr "Rejetée"
+
+msgid "Deny reason"
+msgstr "Motif de refus"
 
 msgid "Description"
 msgstr "Description"
@@ -2534,6 +2608,9 @@ msgstr "EN"
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
 
+msgid "EPC status"
+msgstr "Statut EPC"
+
 msgid "EU,NEU"
 msgstr "UE,HUE"
 
@@ -2563,6 +2640,13 @@ msgstr "Date de prise d'effet"
 msgctxt "admission"
 msgid "Email"
 msgstr "Email"
+
+msgctxt "ways_hear_about_training"
+msgid "Email"
+msgstr "Emailing"
+
+msgid "Email address"
+msgstr "Courriel"
 
 msgid "Email content"
 msgstr "Contenu du mail"
@@ -2608,8 +2692,39 @@ msgstr ""
 "E-mail envoyé au candidat pour l'informer que la vérification de "
 "l'authentification de son parcours est en cours."
 
+msgid ""
+"Email sent to the candidate when IUFC or the faculty cancel the application."
+msgstr "E-mail envoyé au candidat lorsque l'IUFC clotûre une proposition."
+
+msgid ""
+"Email sent to the candidate when IUFC or the faculty deny the application."
+msgstr "E-mail envoyé au candidat lorsque l'IUFC refuse une proposition."
+
+msgid ""
+"Email sent to the candidate when IUFC or the faculty put the application on "
+"hold."
+msgstr ""
+"E-mail envoyé au candidat lorsque l'IUFC met une proposition en attente."
+
+msgid "Email sent to the candidate when IUFC validate the application."
+msgstr "E-mail envoyé au candidat lorsque l'IUFC valide une proposition."
+
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
+
+msgid ""
+"Email sent to the candidate when the faculty approve the application with "
+"conditions."
+msgstr ""
+"E-mail envoyé au candidat lorsque la faculté approuve une proposition avec "
+"conditions."
+
+msgid ""
+"Email sent to the candidate when the faculty approve the application without "
+"condition."
+msgstr ""
+"E-mail envoyé au candidat lorsque la faculté approuve une proposition sans "
+"conditions."
 
 msgid ""
 "Email sent to the checkers to inform them to check the background "
@@ -2618,12 +2733,18 @@ msgstr ""
 "E-Mail envoyé aux vérificateurs pour les informer de la nécessité de "
 "vérifier l'authentification du parcours du candidat"
 
+msgid "Email sent to the faculty when IUFC needs more information."
+msgstr "E-mail envoyé à la Faculté lorsque l'IUFC demande plus d'information."
+
 msgid ""
 "Email sent to the faculty when the SIC submits the application during the "
 "faculty decision process."
 msgstr ""
 "E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
 "de décision facultaire."
+
+msgid "Emails of the training managers"
+msgstr "Emails des gestionnaires de la formation"
 
 msgid "Emergency contact (telephone number)"
 msgstr "Contact en cas d'urgence (numéro de téléphone)"
@@ -2843,8 +2964,21 @@ msgstr "Equivalence de grade académique FWB"
 msgid "FWB equivalent course"
 msgstr "Formation FWB équivalente"
 
+msgid "Fac approval"
+msgstr "Accord fac"
+
+msgctxt "ways_hear_about_training"
+msgid "Facebook"
+msgstr "Sur Facebook"
+
+msgid "Faculty"
+msgstr "Faculté"
+
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
+
+msgid "Faculty comment for IUFC"
+msgstr "Commentaire de la Faculté pour l'IUFC"
 
 msgid "Faculty comment for the SIC"
 msgstr "Commentaire de la Faculté pour le SIC"
@@ -3051,6 +3185,10 @@ msgstr "La formation n'est pas disponible pour cette année."
 msgid "Former UCLouvain student"
 msgstr "Ancien·ne étudiant·e UCLouvain"
 
+msgctxt "ways_hear_about_training"
+msgid "Former students"
+msgstr "Par des anciens étudiants"
+
 msgid "Fraudster"
 msgstr "Fraudeur"
 
@@ -3098,6 +3236,10 @@ msgstr "Valeur en français"
 
 msgid "French values"
 msgstr "Valeurs en français"
+
+msgctxt "ways_hear_about_training"
+msgid "Friends"
+msgstr "Par des amis"
 
 msgid "From"
 msgstr "De"
@@ -3248,6 +3390,9 @@ msgctxt "tab"
 msgid "History"
 msgstr "Historique"
 
+msgid "Holding reason"
+msgstr "Raison de mise en attente"
+
 msgid "Home"
 msgstr "Accueil"
 
@@ -3269,7 +3414,7 @@ msgstr "Composition de ménage, ou copie de votre acte de naissance"
 msgid "How did the candidate find out about this course?"
 msgstr "Comment le candidat a connu l'existence de cette formation ?"
 
-msgid "How did you find out about this course?"
+msgid "How did you hear about this course?"
 msgstr "Comment avez-vous connu l'existence de cette formation ?"
 
 msgid "I am a long-term resident in the European Union outside Belgium"
@@ -3362,6 +3507,9 @@ msgstr ""
 "constitutifs du dossier au poste diplomatique sélectionné (exemples : "
 "diplômes, relevés de notes, autorisation d’inscription, …) afin de s’assurer "
 "de l’authenticité des documents transmis par mes soins."
+
+msgid "I am interested in this course even if it is closed"
+msgstr "Je marque mon intérêt pour cette formation même si celle-ci est fermée"
 
 #, python-format
 msgid ""
@@ -3531,6 +3679,9 @@ msgstr "Invité"
 msgid "IN_PROGRESS"
 msgstr "En cours"
 
+msgid "IUFC comment for the Faculty"
+msgstr "Commentaire de l'IUFC pour la Faculté"
+
 msgid "Identification"
 msgstr "Identification"
 
@@ -3692,6 +3843,10 @@ msgstr "En ordre de paiement"
 msgid "In person"
 msgstr "En présentiel"
 
+msgctxt "ways_hear_about_training"
+msgid "In the press"
+msgstr "Dans la presse"
+
 msgid "Include"
 msgstr "Inclure"
 
@@ -3829,6 +3984,9 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
+msgid "It is not possible to go from the \"validated\" status to this status."
+msgstr "Il n'est pas possible de passer du statut \"validé\" à ce statut."
+
 msgid "JURY_APPROUVE_ADRE"
 msgstr "JURY_APPROUVE_ADRE"
 
@@ -3884,6 +4042,12 @@ msgstr "Langue"
 msgid "Language regime"
 msgstr "Régime linguistique"
 
+msgid "Last email sent by"
+msgstr "Dernière email envoyé par"
+
+msgid "Last email sent the"
+msgstr "Dernière email envoyé le"
+
 msgid "Last hour views:"
 msgstr "Vues de la dernière heure :"
 
@@ -3895,6 +4059,9 @@ msgstr "Dernière modification"
 
 msgid "Last modification (author)"
 msgstr "Dernière modif. (auteur)"
+
+msgid "Last name"
+msgstr "Nom"
 
 msgid "Last name / First name / Email"
 msgstr "Nom / Prénom / E-mail"
@@ -3974,6 +4141,12 @@ msgstr "Lien vers le groupe de supervision de l'admission (front-office)"
 msgid "Link to the admissions (front-office)"
 msgstr "Lien vers la liste des admissions (front-office)"
 
+msgid "Link to the application in the back-office"
+msgstr "Lien vers l'admission (back-office)"
+
+msgid "Link to the application on the portal"
+msgstr "Lien vers l'admission (portail)"
+
 msgid "Link to the complementary training panel (front-office)"
 msgstr "Lien vers la page liée à la formation complémentaire (front-office)"
 
@@ -3989,6 +4162,10 @@ msgid ""
 msgstr ""
 "Lien vers la page de décision facultaire dans la checklist de l'admission "
 "(back-office)"
+
+msgctxt "ways_hear_about_training"
+msgid "Linkedin"
+msgstr "Sur LinkedIn"
 
 msgid "List"
 msgstr "Liste"
@@ -4064,6 +4241,10 @@ msgstr "MEMBRE"
 
 msgid "MIME file types"
 msgstr "Types de fichier MIME"
+
+msgctxt "ways_hear_about_training"
+msgid "MOOCs"
+msgstr "Par les Moocs"
 
 msgid "Madam"
 msgstr "Madame"
@@ -4353,6 +4534,9 @@ msgstr ""
 "Les champs requis dans l'onglet 'Informations complémentaires > Visa' sont "
 "manquants."
 
+msgid "Mandatory fields are missing in the 'Course choice' tab."
+msgstr "Les champs requis dans l'onglet 'Choix de formation' sont manquants."
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
 
@@ -4441,6 +4625,9 @@ msgstr "Corps du message"
 
 msgid "Message for the candidate"
 msgstr "Message pour le candidat"
+
+msgid "Message for the faculty"
+msgstr "Message pour la Faculté"
 
 msgid "Message object"
 msgstr "Sujet du message"
@@ -4564,6 +4751,9 @@ msgstr "Sans objet"
 msgid "NO"
 msgstr "Non"
 
+msgid "NOMA"
+msgstr "NOMA"
+
 msgid "NON_CONCERNE"
 msgstr "Non concerné(e)"
 
@@ -4600,6 +4790,9 @@ msgstr "Nom de la personne de contact pour la composition du programme annuel"
 msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
+msgid "Name of the manager sending the email"
+msgstr "Nom du gestionnaire qui envois l'email"
+
 msgid "Name of the working list"
 msgstr "Nom de la liste de travail"
 
@@ -4635,9 +4828,6 @@ msgstr "Aucune étude en français"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
-
-msgid "No continuing enrolment"
-msgstr "Aucune inscription en formation continue n'a été trouvée"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
@@ -4802,6 +4992,18 @@ msgstr "Grade obtenu"
 msgid "Ok"
 msgstr "Ok"
 
+msgid "On hold"
+msgstr "Mise en attente"
+
+msgid "On hold other reason"
+msgstr "Autre motif de mise en attente"
+
+msgid "On hold reason"
+msgstr "Motif de mise en attente"
+
+msgid "On hold reason:"
+msgstr "Motif de mise en attente :"
+
 msgid ""
 "On the basis of the information you have provided, you will need to apply "
 "for a student visa if your application to attend our university is accepted "
@@ -4816,9 +5018,6 @@ msgstr ""
 "informations relatives à la demande <a href=\"https://uclouvain.be/fr/"
 "etudier/inscriptions/bienvenue-aux-etudiants-internationaux-et-aux-"
 "etudiantes-internationales.html\" target=\"_blank\"> visa</a>."
-
-msgid "On the press"
-msgstr "Dans la presse"
 
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
@@ -4856,6 +5055,11 @@ msgstr "Historique des paiements en ligne"
 msgid "Only one admission"
 msgstr "Une seule admission"
 
+msgid ""
+"Only the \"to be processed\" status is available from the \"closed\" status."
+msgstr ""
+"Seul l'état \"À traiter\" est accessible à partir de l'état \"clôturée\"."
+
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
 
@@ -4881,6 +5085,10 @@ msgid "Other"
 msgstr "Autre"
 
 msgctxt "admission gender"
+msgid "Other"
+msgstr "Autre"
+
+msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr "Autre"
 
@@ -4914,6 +5122,9 @@ msgstr "Autres documents relatifs à la cotutelle"
 msgid "Other given names"
 msgstr "Autres prénoms"
 
+msgid "Other holding reason"
+msgstr "Autre motif de mise en attente"
+
 msgid "Other institute"
 msgstr "Autre institution"
 
@@ -4929,6 +5140,9 @@ msgstr "Autres membres du comité d’accompagnement"
 msgctxt "admission"
 msgid "Other reasons"
 msgstr "Autres motifs"
+
+msgid "Other refusal reason"
+msgstr "Autre motif de refus"
 
 msgid "Other refusal reasons"
 msgstr "Autres motifs de refus facultaire"
@@ -5004,6 +5218,9 @@ msgstr "Page"
 
 msgid "Page size"
 msgstr "Taille de la page"
+
+msgid "Paid"
+msgstr "Payé"
 
 msgid "Parcours"
 msgstr "Parcours"
@@ -5082,6 +5299,10 @@ msgstr "Données personnelles"
 msgctxt "admission"
 msgid "Personal email"
 msgstr "E-mail privé"
+
+msgctxt "ways_hear_about_training"
+msgid "Personalised mail"
+msgstr "Par courrier personnalisé"
 
 msgid "Personalized"
 msgstr "Personnalisée"
@@ -5346,6 +5567,9 @@ msgstr "Privé"
 msgid "Processing by Fac"
 msgstr "Traitement en Fac"
 
+msgid "Produce xls"
+msgstr "Produire un fichier xls"
+
 msgid "Professional"
 msgstr "Professionnel"
 
@@ -5569,6 +5793,9 @@ msgstr "Boutons radios"
 msgid "Rank in diploma"
 msgstr "Rang dans le diplôme"
 
+msgid "Reason for cancellation"
+msgstr "Motif d'annulation"
+
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
 
@@ -5577,6 +5804,12 @@ msgstr "Motif de refus"
 
 msgid "Reasons"
 msgstr "Motifs"
+
+msgid "Reasons for not accepting"
+msgstr "Motif de refus"
+
+msgid "Reasons for putting on hold"
+msgstr "Motif de mise en attente"
 
 msgid "Rebilling or third-party payer"
 msgstr "Refacturation ou tiers-payant"
@@ -5639,6 +5872,9 @@ msgstr "Référence DIAL.Pr"
 msgid "Reference of the admission"
 msgstr "Référence de la proposition"
 
+msgid "Reference of the application"
+msgstr "Référence de la demande"
+
 msgid "Reference:"
 msgstr "Référence :"
 
@@ -5665,6 +5901,12 @@ msgstr "Catégories des motifs de refus"
 
 msgid "Refusal reason category"
 msgstr "Catégorie d'un motif de refus"
+
+msgid "Refusal reason other"
+msgstr "Autre motif de refus"
+
+msgid "Refusal reason:"
+msgstr "Motifs de refus :"
 
 msgid "Refusal reasons"
 msgstr "Motifs de refus"
@@ -5695,6 +5937,9 @@ msgstr "Attestation d’immatriculation"
 
 msgid "Registration fees"
 msgstr "Droits d'inscription"
+
+msgid "Registration required"
+msgstr "Inscription au rôle requise"
 
 msgid "Related experience"
 msgstr "Expérience associée"
@@ -6102,6 +6347,9 @@ msgstr "Envoyer un e-mail"
 msgid "Send a mail to the candidate"
 msgstr "Envoyer un e-mail au candidat"
 
+msgid "Send a mail to the faculty"
+msgstr "Envoyer un e-mail à la Faculté"
+
 msgid "Send an information email"
 msgstr "Envoyer un e-mail d'information"
 
@@ -6303,6 +6551,9 @@ msgstr "État d’avancement de la formation doctorale"
 
 msgid "Status:"
 msgstr "État :"
+
+msgid "Statut"
+msgstr "Statut"
 
 msgid "Street"
 msgstr "Rue"
@@ -6565,12 +6816,31 @@ msgstr "L'acronyme de la bourse d'études"
 msgid "The activity title"
 msgstr "Le titre de l'activité"
 
+msgid "The application can only be validated if it was previously approved."
+msgstr ""
+"La demande ne peut être validée que si elle a préalablement été acceptée."
+
+msgid "The application has been validated."
+msgstr "La demande a été validée."
+
+msgid "The application is in IUFC"
+msgstr "La demande est actuellement en IUFC"
+
+msgid "The application is in faculty"
+msgstr "La demande est actuellement en faculté"
+
 msgid ""
 "The authorization can not be done while there is one or more documents to be "
 "requested immediately."
 msgstr ""
 "L’autorisation ne peut avoir lieu tant qu’un ou plusieurs documents sont à "
 "réclamer immédiatement."
+
+#, python-format
+msgid ""
+"The cancel mail has been sent to the candidate the %(date)s by %(sender)s."
+msgstr ""
+"Le mail d'annulation a été envoyé au candidat le %(date)s par %(sender)s."
 
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
@@ -6586,6 +6856,14 @@ msgstr "Le candidat doit se présenter en SIC"
 
 msgid "The certificate of achievement is being generated."
 msgstr "L'attestation de réussite est en cours de génération."
+
+msgid ""
+"The closing of the application has important consequences (canceling the "
+"requested documents, status reset, etc). Do you confirm the closing?"
+msgstr ""
+"La clôture du dossier a des conséquences importantes (annulation des "
+"documents demandés, réinitialisation des états, etc). Confirmez-vous la "
+"clôture ?"
 
 #, python-format
 msgid ""
@@ -6667,6 +6945,11 @@ msgstr ""
 "dispositions sur la page web de votre Commission Doctorale de Domaine (CDD) "
 "pour plus d’informations."
 
+#, python-format
+msgid ""
+"The deny mail has been sent to the candidate the %(date)s by %(sender)s."
+msgstr "Le mail de refus a été envoyé au candidat le %(date)s par %(sender)s."
+
 msgctxt "female gender"
 msgid "The doctoral student"
 msgstr "La doctorante"
@@ -6728,6 +7011,14 @@ msgstr "Les expériences qui ont été valorisées via cette admission."
 
 msgid "The export has failed"
 msgstr "L'export a échoué"
+
+#, python-format
+msgid ""
+"The fac approval mail has been sent to the candidate the %(date)s by "
+"%(sender)s."
+msgstr ""
+"Le mail de la décision fac a été envoyé au candidat le %(date)s par "
+"%(sender)s."
 
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
@@ -6828,6 +7119,13 @@ msgstr ""
 msgid "The official enrolment authorisation signed by you."
 msgstr "La présente autorisation signée pour accord dans le cadre ci-dessous."
 
+#, python-format
+msgid ""
+"The on hold mail has been sent to the candidate the %(date)s by %(sender)s."
+msgstr ""
+"Le mail de mise en attente a été envoyé au candidat le %(date)s par "
+"%(sender)s."
+
 msgid "The opinion about the extension request is not completed."
 msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
 
@@ -6858,6 +7156,9 @@ msgid ""
 "The professional experiences that have been valuated from this admission."
 msgstr ""
 "Les expériences professionnelles qui ont été valorisées via cette admission."
+
+msgid "The programme is already full"
+msgstr "Le programme est d'ores et déjà complet"
 
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée"
@@ -6959,6 +7260,13 @@ msgstr ""
 "01/02/%(end_year)s. Dès réception de ce document signé par vos soins, les "
 "modalités de payement vous seront communiquées."
 
+#, python-format
+msgid ""
+"The validation mail has been sent to the candidate the %(date)s by "
+"%(sender)s."
+msgstr ""
+"Le mail de validation a été envoyé au candidat le %(date)s par %(sender)s."
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
@@ -7020,8 +7328,14 @@ msgstr "Données relatives à la thèse"
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
 
+msgid "This action is limited to a specific admission context."
+msgstr "Cette action est limitée à un contexte d'admission particulier."
+
 msgid "This action will cancel the document request."
 msgstr "Cette action va annuler la réclamation des documents en cours."
+
+msgid "This action will change the status to \"Application confirmed\"."
+msgstr "Cette action fera passer l'état à \"Demande confirmée\"."
 
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
@@ -7355,6 +7669,10 @@ msgstr ""
 "de bachelier et toute obtention d'un grade académique avec la mention "
 "éventuelle."
 
+msgctxt "ways_hear_about_training"
+msgid "UCLouvain website"
+msgstr "Par le site web de l'UCLouvain"
+
 msgid "UE"
 msgstr "UE"
 
@@ -7447,6 +7765,9 @@ msgstr "VIP"
 msgid "VIP candidate"
 msgstr "Candidat VIP"
 
+msgid "Validate"
+msgstr "Valider"
+
 msgid "Validate selected courses"
 msgstr "Valider les cours sélectionnées"
 
@@ -7457,41 +7778,15 @@ msgctxt "assimilation-checklist"
 msgid "Validated"
 msgstr "Validée"
 
+msgctxt "decision-checklist"
+msgid "Validated"
+msgstr "Validée"
+
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
 
 msgid "Values"
 msgstr "Valeurs"
-
-msgid "Via Facebook"
-msgstr "Sur Facebook"
-
-msgid "Via LinkedIn"
-msgstr "Sur LinkedIn"
-
-msgid "Via MOOCs"
-msgstr "Par les Moocs"
-
-msgid "Via a personalized letter"
-msgstr "Par courrier personnalisé"
-
-msgid "Via an emailing"
-msgstr "Par un emailing"
-
-msgid "Via former students"
-msgstr "Par des anciens étudiants"
-
-msgid "Via friends"
-msgstr "Par des amis"
-
-msgid "Via the website of UCLouvain"
-msgstr "Par le site web de l'UCLouvain"
-
-msgid "Via the website of the continuing education"
-msgstr "Par le site de la formation continue"
-
-msgid "Via word of mouth"
-msgstr "Par le bouche à oreille"
 
 msgid "Viewed at"
 msgstr "Vue le"
@@ -7523,6 +7818,9 @@ msgstr "Contrat de travail"
 msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
+
+msgid "Waiting for development"
+msgstr "En attente de développement"
 
 msgid "Waiting for signature"
 msgstr "En attente de signature"
@@ -7594,8 +7892,18 @@ msgstr "Vue complète"
 msgid "With academic year"
 msgstr "Avec une année académique"
 
+msgid "With condition"
+msgstr "Sous condition"
+
+msgid "Without condition"
+msgstr "Sans condition"
+
 msgid "Without free documents"
 msgstr "Sans les documents libres"
+
+msgctxt "ways_hear_about_training"
+msgid "Word of mouth"
+msgstr "Par le bouche à oreille"
 
 msgid "Work contract"
 msgstr "Type de contrat de travail"
@@ -7796,10 +8104,50 @@ msgstr ""
 "Vous avez la possibilité d'ajouter tout document que vous jugez pertinent "
 "pour votre dossier (justificatifs, preuve de niveau de langue, ...)."
 
+msgid ""
+"You can not cancel this application, it is in the \"Validated\" state. "
+"Please contact Noemie Pecher."
+msgstr ""
+"Vous ne pouvez pas annuler cette demande, elle est en statut \"Validé\". "
+"Veuillez contacter Noémie Pécher."
+
+msgid ""
+"You can not transition to the \"Approved\" status from the \"Validated\" or "
+"\"Closed\" status."
+msgstr ""
+"Vous ne pouvez pas passer de l'état \"Autorisée\" à partir de l'état "
+"\"Validée\" ou \"Clôturée\"."
+
+msgid ""
+"You can not transition to the \"Canceled\" status from the \"Closed\" status."
+msgstr ""
+"Vous ne pouvez pas passer à l'état \"Annulée\" à partir de l'état "
+"\"Clôturée\"."
+
+msgid ""
+"You can not transition to the \"Denied\" status from the \"Validated\" or "
+"\"Closed\" status."
+msgstr ""
+"Vous ne pouvez pas passer à l'état \"Refusée\" à partir de l'état "
+"\"Validée\" ou \"Clôturée\"."
+
+msgid ""
+"You can not transition to the \"Hold on\" status from the \"Closed\" status."
+msgstr ""
+"Vous ne pouvez pas passer à l'état \"Mise en attente\" à partir de l'état "
+"\"Clôturée\"."
+
 msgid "You can only select courses that are managed by the program manager."
 msgstr ""
 "Vous ne pouvez sélectionner que les formations gérées par le·la même "
 "responsable de programme."
+
+msgid ""
+"You can only transition to the \"Validated\" status from the \"Approved\" "
+"status."
+msgstr ""
+"Vous ne pouvez passer à l'état \"Validée\" qu'à partir de l'état "
+"\"Approuvée\"."
 
 #, python-format
 msgid ""
@@ -7869,6 +8217,9 @@ msgstr[0] ""
 msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
 "vous en avez déjà envoyé %(maximum_number)s pour l'année %(annee_cible)s."
+
+msgid "You do not meet the admission requirements"
+msgstr "Vous ne remplissez pas les conditions d'admission"
 
 msgid ""
 "You do not specify if you are applying as resident or non-resident (as "
@@ -8006,6 +8357,20 @@ msgstr ""
 msgid "Your Belgian student status"
 msgstr "Situation d’assimilation qui vous correspond"
 
+#, python-format
+msgid ""
+"Your application cannot be submitted because the %(acronym)s course is "
+"closed."
+msgstr ""
+"Il n'est pas possible de soumettre votre dossier d'admission car la "
+"formation %(acronym)s est fermée."
+
+msgid "Your application is currently being reviewed by the course exam board"
+msgstr "Votre dossier est en cours de vérification par le jury de la formation"
+
+msgid "Your background is not suited to this course"
+msgstr "Votre parcours n'est pas adapté au programme de cette formation"
+
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."
 
@@ -8016,10 +8381,16 @@ msgid "Your dossier reference:"
 msgstr "Votre numéro de dossier :"
 
 msgid ""
+"Your experience and reasons for undertaking this programme are insufficient"
+msgstr ""
+"Vous ne disposez pas de l'expérience et/ou des motivations nécessaires pour "
+"suivre ce programme"
+
+msgid ""
 "Your export request has been planned, you will receive a notification as "
 "soon as it is available."
 msgstr ""
-"Votre demande d’export a été planifié, vous recevrez une notification dès "
+"Votre demande d’export a été planifiée, vous recevrez une notification dès "
 "qu’il sera disponible."
 
 msgid "Your note has been added."
@@ -8153,6 +8524,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes,no,"
+msgstr "oui,non,"
 
 msgid "your father"
 msgstr "votre père"

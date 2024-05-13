@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -63,7 +63,10 @@ from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
 )
@@ -413,7 +416,7 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
 
         # Checklist is available for submitted admissions only
         if Tab('checklist') in valid_sub_tabs:
-            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE:
+            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE | STATUTS_PROPOSITION_CONTINUE_SOUMISE:
                 valid_sub_tabs.remove(Tab('checklist'))
 
         # Add dynamic badge for comments
@@ -791,12 +794,6 @@ def default_if_none_or_empty(value, arg):
     return value if value not in EMPTY_VALUES else arg
 
 
-@register.simple_tag
-def concat(*args):
-    """Concatenate a list of strings."""
-    return ''.join(args)
-
-
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
 def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects'), **kwargs):
     """Display the answers of the specific questions based on a list of configurations."""
@@ -874,11 +871,12 @@ def interpolate(string, **kwargs):
 
 
 @register.simple_tag
-def admission_url(admission_uuid: str, osis_education_type: str):
+def admission_url(admission_uuid: str, osis_education_type: str = '', admission_context: str = ''):
     """Get the base URL of a specific admission"""
-    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
-    if admission_context is None:
-        return None
+    if not admission_context:
+        admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+        if admission_context is None:
+            return None
     return reverse(f'admission:{admission_context}', kwargs={'uuid': admission_uuid})
 
 

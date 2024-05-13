@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -31,7 +31,7 @@ from uuid import UUID
 from django.contrib import messages
 from django.db.models import ProtectedError, QuerySet
 from django.forms import forms
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, resolve_url
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
@@ -47,27 +47,12 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
-from base.models.academic_year import AcademicYear
-from base.models.enums.community import CommunityEnum
-from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.forms import (
-    FORM_SET_PREFIX,
-    FOLLOWING_FORM_SET_PREFIX,
-    OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
-    OSIS_DOCUMENT_UPLOADER_CLASS,
-)
-from osis_profile.forms.experience_academique import (
-    MINIMUM_CREDIT_NUMBER,
-)
-from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
+from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
 from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
 from osis_profile.views.edit_experience_non_academique import EditExperienceNonAcademiqueView
 from osis_profile.views.parcours_externe_mixins import DeleteEducationalExperienceMixin
-from reference.models.enums.cycle import Cycle
 
 __all__ = [
     'CurriculumEducationalExperienceFormView',
@@ -150,6 +135,13 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             },
         )
 
+    def delete_url(self):
+        return resolve_url(
+            f'{self.base_namespace}:update:curriculum:educational_delete',
+            uuid=self.proposition.uuid,
+            experience_uuid=self.experience_id,
+        )
+
     def get_context_data(self, **kwargs):
         return {
             **super().get_context_data(**kwargs),
@@ -201,6 +193,13 @@ class CurriculumNonEducationalExperienceFormView(
                 'uuid': self.admission_uuid,
                 'experience_uuid': self.experience_id,
             },
+        )
+
+    def delete_url(self):
+        return resolve_url(
+            f'{self.base_namespace}:update:curriculum:non_educational_delete',
+            uuid=self.proposition.uuid,
+            experience_uuid=self.experience_id,
         )
 
     def get_context_data(self, **kwargs):
@@ -262,10 +261,11 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
     def get_success_url(self):
         return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
 
+
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}
 
-    def traitement_specifique(self, experiences_supprimees: List[UUID]):
+    def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass
 
     def get_failure_url(self):
@@ -281,7 +281,7 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, Delete
 class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceNonAcademiqueView):
     urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
 
-    def traitement_specifique(self, experiences_supprimees: List[UUID]):
+    def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass
 
     def get_failure_url(self):

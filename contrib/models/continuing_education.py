@@ -40,6 +40,8 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixTypeAdresseFacturation,
     ChoixMoyensDecouverteFormation,
     ChoixEdition,
+    ChoixMotifAttente,
+    ChoixMotifRefus,
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -250,6 +252,57 @@ class ContinuingEducationAdmission(BaseAdmission):
         blank=True,
     )
 
+    last_email_sent_at = models.DateTimeField(
+        verbose_name=_("Last email sent the"),
+        null=True,
+        blank=True,
+    )
+
+    last_email_sent_by = models.ForeignKey(
+        to="base.Person",
+        verbose_name=_("Last email sent by"),
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+
+    on_hold_reason = models.TextField(
+        verbose_name=_("On hold reason"),
+        choices=ChoixMotifAttente.choices(),
+        blank=True,
+    )
+
+    on_hold_reason_other = models.TextField(
+        verbose_name=_("On hold other reason"),
+        default='',
+        blank=True,
+    )
+
+    approval_condition_by_faculty = models.TextField(
+        verbose_name=_("Approval condition by faculty"),
+        default='',
+        blank=True,
+    )
+
+    refusal_reason = models.TextField(
+        verbose_name=_("Refusal reason"),
+        choices=ChoixMotifRefus.choices(),
+        blank=True,
+    )
+
+    refusal_reason_other = models.TextField(
+        verbose_name=_("Refusal reason other"),
+        default='',
+        blank=True,
+    )
+
+    cancel_reason = models.TextField(
+        verbose_name=_("Cancel reason"),
+        default='',
+        blank=True,
+    )
+
     class Meta:
         verbose_name = _("Continuing education admission")
         ordering = ('-created_at',)
@@ -296,6 +349,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
                 "candidate__country_of_citizenship",
                 "training__academic_year",
                 "training__education_group_type",
+                "training__specificiufcinformations",
                 "determined_academic_year",
             )
             .annotate_pool_end_date()
@@ -313,6 +367,9 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
             .annotate_with_reference()
+            .annotate_with_student_registration_id()
+            .annotate_with_status_update_date()
+            .annotate_several_admissions_in_progress()
         )
 
 
