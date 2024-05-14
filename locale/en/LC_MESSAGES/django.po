@@ -738,6 +738,9 @@ msgstr ""
 msgid "Approval condition by faculty"
 msgstr ""
 
+msgid "Approval for a late enrolment"
+msgstr ""
+
 msgid "Approval for another training"
 msgstr ""
 
@@ -6528,6 +6531,10 @@ msgstr ""
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr ""
 
+msgid ""
+"The proposition must be a late enrollment with a defined access condition."
+msgstr ""
+
 msgid "The proposition must be concerned by the payment."
 msgstr ""
 
@@ -6916,6 +6923,9 @@ msgid "Transcript translation"
 msgstr ""
 
 msgid "Transcript type"
+msgstr ""
+
+msgid "Transfer to SIC"
 msgstr ""
 
 msgid "Trigger the payment hook"

@@ -84,6 +84,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 from osis_profile.models import (
@@ -2132,6 +2133,217 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(conditions[1].name_fr, 'Ma première condition')
         self.assertEqual(conditions[1].name_en, 'My first condition')
         self.assertIsNone(conditions[1].related_experience)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+
+        self.assertEqual(len(history_entries), 1)
+        history_entry = history_entries[0]
+
+        self.assertEqual(
+            history_entry.author,
+            f'{self.fac_manager_user.person.first_name} {self.fac_manager_user.person.last_name}',
+        )
+
+        self.assertEqual(
+            history_entry.message_fr,
+            'La faculté a informé le SIC de son acceptation.',
+        )
+
+        self.assertEqual(
+            history_entry.message_en,
+            'The faculty informed the SIC of its approval.',
+        )
+
+        self.assertCountEqual(
+            history_entry.tags,
+            ['proposition', 'fac-decision', 'approval-send-to-sic', 'status-changed'],
+        )
+
+
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
+class LateFacultyApprovalDecisionViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        EntityVersionFactory(entity=cls.first_doctoral_commission)
+
+        cls.training = GeneralEducationTrainingFactory(
+            management_entity=cls.first_doctoral_commission,
+            academic_year=cls.academic_years[0],
+        )
+
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.fac_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.training.education_group,
+            person__language=settings.LANGUAGE_CODE_FR,
+        ).person.user
+
+        cls.default_headers = {'HTTP_HX-Request': 'true'}
+
+    def assertDjangoMessage(self, response, message):
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(message, messages)
+
+    def setUp(self) -> None:
+        self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            status=ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
+            determined_academic_year=self.academic_years[0],
+            late_enrollment=True,
+            admission_requirement=ConditionAcces.BAC.name,
+        )
+
+        self.experience = self.general_admission.candidate.educationalexperience_set.first()
+
+        self.experience.obtained_diploma = True
+        self.experience.save(update_fields=['obtained_diploma'])
+
+        self.valuated_experience = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.general_admission,
+            educationalexperience=self.experience,
+            is_access_title=True,
+        )
+
+        self.experience_uuid = str(self.experience.uuid)
+        self.default_checklist = copy.deepcopy(self.general_admission.checklist)
+        self.url = resolve_url(
+            'admission:general-education:late-fac-decision-approval',
+            uuid=self.general_admission.uuid,
+        )
+        self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
+
+        self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patched = self.confirm_remote_upload_patcher.start()
+        patched.return_value = str(self.file_uuid)
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
+
+        self.confirm_remote_upload_patcher = mock.patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+        )
+        patched = self.confirm_remote_upload_patcher.start()
+        patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
+
+        self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
+        patched = self.get_remote_metadata_patcher.start()
+        patched.return_value = {"name": "test.pdf", "size": 1}
+        self.addCleanup(self.get_remote_metadata_patcher.stop)
+
+        self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
+        patched = self.get_remote_token_patcher.start()
+        patched.return_value = 'foobar'
+        self.addCleanup(self.get_remote_token_patcher.stop)
+
+        self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        patched = self.save_raw_content_remotely_patcher.start()
+        patched.return_value = 'a-token'
+        self.addCleanup(self.save_raw_content_remotely_patcher.stop)
+
+        patcher = mock.patch('admission.exports.utils.change_remote_metadata')
+        self.change_remote_metadata_patcher = patcher.start()
+        self.change_remote_metadata_patcher.return_value = 'a-token'
+        self.addCleanup(patcher.stop)
+
+    def test_submit_late_approval_decision_is_forbidden_with_sic_user(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_submit_late_approval_decision_is_forbidden_with_fac_user_if_the_admission_is_not_in_specific_statuses(
+        self,
+    ):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+        self.general_admission.save()
+
+        response = self.client.post(self.url, data={'save_transfer': '1'}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save()
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_approval_decision_form_initialization(self):
+        self.client.force_login(user=self.fac_manager_user)
+        response = self.client.get(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_approval_decision_form_submitting_with_invalid_context(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        # No admission requirement
+        self.general_admission.admission_requirement = ''
+        self.general_admission.save()
+
+        response = self.client.post(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertDjangoMessage(
+            response=response,
+            message=gettext('The proposition must be a late enrollment with a defined access condition.'),
+        )
+
+        # No late enrollment
+        self.general_admission.late_enrollment = False
+        self.general_admission.admission_requirement = ConditionAcces.BAC.name
+        self.general_admission.save()
+
+        response = self.client.post(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertDjangoMessage(
+            response=response,
+            message=gettext('The proposition must be a late enrollment with a defined access condition.'),
+        )
+
+        # No selected access title
+        self.general_admission.late_enrollment = True
+        self.general_admission.save()
+
+        self.valuated_experience.is_access_title = False
+        self.valuated_experience.save()
+
+        response = self.client.post(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertDjangoMessage(
+            response=response,
+            message=gettext(
+                'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving '
+                'access to the chosen program.',
+            ),
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_approval_decision_form_submitting_with_valid_context(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+        self.assertEqual(
+            self.general_admission.checklist['current']['decision_facultaire']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)

@@ -241,3 +241,11 @@ class DocumentAReclamerImmediatException(BusinessException):
             "The authorization can not be done while there is one or more documents to be requested immediately."
         )
         super().__init__(message, **kwargs)
+
+
+class InscriptionTardiveAvecConditionAccesException(BusinessException):
+    status_code = "FORMATION-GENERALE-27"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be a late enrollment with a defined access condition.")
+        super().__init__(message, **kwargs)

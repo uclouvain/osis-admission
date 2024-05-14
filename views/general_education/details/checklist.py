@@ -110,6 +110,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverInscriptionParSicCommand,
     RecupererTitresAccesSelectionnablesPropositionQuery,
     RecupererResumePropositionQuery,
+    ApprouverInscriptionTardiveParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -201,6 +202,7 @@ __all__ = [
     'FacultyRefusalDecisionView',
     'FacultyApprovalDecisionView',
     'FacultyDecisionSendToSicView',
+    'LateFacultyApprovalDecisionView',
     'PastExperiencesStatusView',
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
@@ -713,6 +715,35 @@ class FacultyApprovalDecisionView(
                     )
                 )
                 self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class LateFacultyApprovalDecisionView(
+    FacultyDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'late-fac-decision-approval'
+    urlpatterns = {'late-fac-decision-approval': 'fac-decision/late-fac-decision-approval'}
+    template_name = 'admission/general_education/includes/checklist/late_fac_decision_approval_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/late_fac_decision_approval_form.html'
+    permission_required = 'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ApprouverInscriptionTardiveParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)

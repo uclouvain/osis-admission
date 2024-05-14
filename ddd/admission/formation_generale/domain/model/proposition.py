@@ -90,10 +90,10 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     ApprouverParSicAValiderValidatorList,
     RefuserParSicAValiderValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
+    ApprouverInscriptionTardiveParFacValidatorList,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.education_group_types import TrainingType
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -417,6 +417,22 @@ class Proposition(interface.RootEntity):
             avec_complements_formation=self.avec_complements_formation,
             complements_formation=self.complements_formation,
             nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            titres_selectionnes=titres_selectionnes,
+        ).validate()
+
+        self.specifier_acceptation_par_fac()
+        self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
+        self.auteur_derniere_modification = auteur_modification
+
+    def approuver_inscription_tardive_par_fac(
+        self,
+        auteur_modification: str,
+        titres_selectionnes: List[TitreAccesSelectionnable],
+    ):
+        ApprouverInscriptionTardiveParFacValidatorList(
+            statut=self.statut,
+            condition_acces=self.condition_acces,
+            est_inscription_tardive=self.est_inscription_tardive,
             titres_selectionnes=titres_selectionnes,
         ).validate()
 
