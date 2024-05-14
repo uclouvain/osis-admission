@@ -136,11 +136,12 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         )
 
     def delete_url(self):
-        return resolve_url(
-            f'{self.base_namespace}:update:curriculum:educational_delete',
-            uuid=self.proposition.uuid,
-            experience_uuid=self.experience_id,
-        )
+        if self.experience_id:
+            return resolve_url(
+                f'{self.base_namespace}:update:curriculum:educational_delete',
+                uuid=self.proposition.uuid,
+                experience_uuid=self.experience_id,
+            )
 
     def get_context_data(self, **kwargs):
         return {
