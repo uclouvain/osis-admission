@@ -52,6 +52,7 @@ from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
     EtudesSecondairesDTOFactory,
+    AnneeExperienceAcademiqueDTOFactory,
 )
 from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
 from admission.templatetags.admission import (
@@ -87,6 +88,7 @@ from admission.templatetags.admission import (
     label_with_user_icon,
     candidate_language,
     experience_valuation_url,
+    checklist_experience_action_links_context,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -539,12 +541,15 @@ class DisplayTagTestCase(TestCase):
             pays=BE_ISO_CODE,
             regime_linguistique=FR_ISO_CODE,
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            annees=[AnneeExperienceAcademiqueDTOFactory(uuid=uuid.uuid4())],
         )
-        template_params = experience_details_template(
-            context={
+
+        kwargs = {
+            'context': {
                 'request': Mock(path='mypath'),
+                'admission': MagicMock(noma_candidat='0123456'),
             },
-            resume_proposition=MagicMock(
+            'resume_proposition': MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
                 est_proposition_doctorale=False,
@@ -553,8 +558,12 @@ class DisplayTagTestCase(TestCase):
                     formation=MagicMock(),
                 ),
             ),
-            experience=experience,
-        )
+            'experience': experience,
+            'can_update_curriculum': True,
+        }
+
+        template_params = experience_details_template(**kwargs)
+
         self.assertEqual(
             template_params['custom_base_template'],
             'admission/exports/recap/includes/curriculum_educational_experience.html',
@@ -562,28 +571,26 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['title'], _('Academic experience'))
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/curriculum/educational/{}?next=mypath&next_hash_url='
-            'parcours_anterieur__{}'.format(
-                proposition_uuid,
-                experience.uuid,
-                experience.uuid,
+            '/admissions/general-education/{proposition_uuid}/update/curriculum/educational/{experience_uuid}'
+            '?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+                proposition_uuid=proposition_uuid,
+                experience_uuid=experience.uuid,
             ),
         )
         self.assertEqual(
             template_params['duplicate_link_button'],
-            '/admissions/general-education/{}/update/curriculum/educational/{}/duplicate?next=mypath&next_hash_url='
-            'parcours_anterieur__{}'.format(
-                proposition_uuid,
-                experience.uuid,
-                experience.uuid,
+            '/admissions/general-education/{proposition_uuid}/update/curriculum/educational/{experience_uuid}'
+            '/duplicate?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+                proposition_uuid=proposition_uuid,
+                experience_uuid=experience.uuid,
             ),
         )
         self.assertEqual(
             template_params['delete_link_button'],
-            '/admissions/general-education/{}/update/curriculum/educational/{}/delete?next=mypath&next_hash_url='
-            'parcours_anterieur'.format(
-                proposition_uuid,
-                experience.uuid,
+            '/admissions/general-education/{proposition_uuid}/update/curriculum/educational/{experience_uuid}'
+            '/delete?next=mypath&next_hash_url=parcours_anterieur'.format(
+                proposition_uuid=proposition_uuid,
+                experience_uuid=experience.uuid,
             ),
         )
         self.assertEqual(template_params['experience'], experience)
@@ -593,14 +600,45 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['translation_required'], False)
         self.assertEqual(template_params['evaluation_system_with_credits'], True)
 
+        # With a valuated experience
+        kwargs['experience'] = ExperienceAcademiqueDTOFactory(
+            pays=BE_ISO_CODE,
+            regime_linguistique=FR_ISO_CODE,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            annees=[AnneeExperienceAcademiqueDTOFactory(uuid=uuid.uuid4())],
+            identifiant_externe='EPC-1',
+        )
+
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(
+            template_params['edit_link_button'],
+            '/osis_profile/{noma}/parcours_externe/edit/experience_academique/{annee_experience_uuid}'.format(
+                noma='0123456',
+                annee_experience_uuid=kwargs['experience'].annees[0].uuid,
+            ),
+        )
+        self.assertEqual(template_params['delete_link_button'], '')
+
+        # Without the right to update education
+        kwargs['can_update_curriculum'] = False
+
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(template_params['edit_link_button'], '')
+        self.assertEqual(template_params['duplicate_link_button'], '')
+        self.assertEqual(template_params['delete_link_button'], '')
+
     def test_experience_details_with_a_non_educational_experience(self):
         proposition_uuid = uuid.uuid4()
         experience = ExperienceNonAcademiqueDTOFactory()
-        template_params = experience_details_template(
-            context={
+
+        kwargs = {
+            'context': {
                 'request': Mock(path='mypath'),
+                'admission': MagicMock(noma_candidat='0123456'),
             },
-            resume_proposition=MagicMock(
+            'resume_proposition': MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
                 est_proposition_doctorale=False,
@@ -609,8 +647,12 @@ class DisplayTagTestCase(TestCase):
                     formation=MagicMock(),
                 ),
             ),
-            experience=experience,
-        )
+            'experience': experience,
+            'can_update_curriculum': True,
+        }
+
+        template_params = experience_details_template(**kwargs)
+
         self.assertEqual(
             template_params['custom_base_template'],
             'admission/exports/recap/includes/curriculum_professional_experience.html',
@@ -618,43 +660,65 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['title'], _('Non-academic experience'))
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/curriculum/non_educational/{}?next=mypath&next_hash_url='
-            'parcours_anterieur__{}'.format(
-                proposition_uuid,
-                experience.uuid,
-                experience.uuid,
+            '/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience_uuid}'
+            '?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+                proposition_uuid=proposition_uuid,
+                experience_uuid=experience.uuid,
             ),
         )
         self.assertEqual(
             template_params['duplicate_link_button'],
-            '/admissions/general-education/{}/update/curriculum/non_educational/{}/duplicate?next=mypath&next_hash_url='
-            'parcours_anterieur__{}'.format(
-                proposition_uuid,
-                experience.uuid,
-                experience.uuid,
+            '/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience_uuid}'
+            '/duplicate?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+                proposition_uuid=proposition_uuid,
+                experience_uuid=experience.uuid,
             ),
         )
         self.assertEqual(
             template_params['delete_link_button'],
-            '/admissions/general-education/{}/update/curriculum/non_educational/{}/delete?next=mypath&next_hash_url='
-            'parcours_anterieur'.format(
-                proposition_uuid,
-                experience.uuid,
+            '/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience_uuid}'
+            '/delete?next=mypath&next_hash_url=parcours_anterieur'.format(
+                proposition_uuid=proposition_uuid,
+                experience_uuid=experience.uuid,
             ),
         )
         self.assertEqual(template_params['experience'], experience)
         self.assertEqual(template_params['with_single_header_buttons'], True)
         self.assertEqual(template_params['CURRICULUM_ACTIVITY_LABEL'], CURRICULUM_ACTIVITY_LABEL)
 
+        # With a valuated experience
+        kwargs['experience'] = ExperienceNonAcademiqueDTOFactory(identifiant_externe='EPC-1')
+
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(
+            template_params['edit_link_button'],
+            '/osis_profile/{noma}/parcours_externe/edit/experience_non_academique/{experience_uuid}'.format(
+                noma='0123456',
+                experience_uuid=kwargs['experience'].uuid,
+            ),
+        )
+        self.assertEqual(template_params['delete_link_button'], '')
+
+        # Without the right to update education
+        kwargs['can_update_curriculum'] = False
+
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(template_params['edit_link_button'], '')
+        self.assertEqual(template_params['duplicate_link_button'], '')
+        self.assertEqual(template_params['delete_link_button'], '')
+
     def test_experience_details_with_secondary_studies(self):
         proposition_uuid = uuid.uuid4()
         experience = EtudesSecondairesDTOFactory()
         specific_questions = {Onglets.ETUDES_SECONDAIRES.name: [QuestionSpecifiqueDTOFactory()]}
-        template_params = experience_details_template(
-            context={
+        kwargs = {
+            'context': {
                 'request': Mock(path='mypath'),
+                'admission': MagicMock(noma_candidat='0123456'),
             },
-            resume_proposition=MagicMock(
+            'resume_proposition': MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
                 est_proposition_doctorale=False,
@@ -663,18 +727,193 @@ class DisplayTagTestCase(TestCase):
                     formation=MagicMock(),
                 ),
             ),
-            experience=experience,
-            specific_questions=specific_questions,
-        )
+            'experience': experience,
+            'specific_questions': specific_questions,
+            'can_update_education': True,
+        }
+        template_params = experience_details_template(**kwargs)
         self.assertEqual(template_params['custom_base_template'], 'admission/exports/recap/includes/education.html')
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/education?next=mypath&next_hash_url=parcours_anterieur__{}'.format(
-                proposition_uuid,
-                experience.uuid,
+            '/admissions/general-education/{proposition_uuid}/update/education'
+            '?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+                proposition_uuid=proposition_uuid,
+                experience_uuid=experience.uuid,
             ),
         )
         self.assertEqual(template_params['specific_questions'], specific_questions[Onglets.ETUDES_SECONDAIRES.name])
+
+        # With a valuated experience
+        kwargs['experience'] = EtudesSecondairesDTOFactory(identifiant_externe='EPC-1')
+
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(
+            template_params['edit_link_button'],
+            '/osis_profile/{noma}/parcours_externe/edit/etudes_secondaires'.format(noma='0123456'),
+        )
+
+        # Without the right to update education
+        kwargs['can_update_education'] = False
+
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(template_params['edit_link_button'], '')
+
+    def test_checklist_experience_action_links_context_with_an_educational_experience(self):
+        proposition_uuid = uuid.uuid4()
+
+        experience = ExperienceAcademiqueDTOFactory(
+            annees=[AnneeExperienceAcademiqueDTOFactory(uuid=uuid.uuid4(), annee=2020)],
+            valorisee_par_admissions=[proposition_uuid],
+        )
+
+        kwargs = {
+            'context': {
+                'request': MagicMock(path='mypath'),
+                'admission': MagicMock(noma_candidat='0123456'),
+                'view': MagicMock(base_namespace='admission:general-education', kwargs={'uuid': proposition_uuid}),
+            },
+            'prefix': 'prefix',
+            'experience': experience,
+            'current_year': 2020,
+            'parcours_tab_id': 'tabID',
+        }
+
+        next_url_suffix = f'?next=mypath&next_hash_url=tabID'
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['prefix'], 'prefix')
+        self.assertEqual(
+            context['update_url'],
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/educational/{experience.uuid}{next_url_suffix}',
+        )
+        self.assertEqual(
+            context['delete_url'],
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/educational/{experience.uuid}/delete{next_url_suffix}',
+        )
+        self.assertEqual(
+            context['duplicate_url'],
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/educational/{experience.uuid}/duplicate',
+        )
+        self.assertEqual(context['experience_uuid'], str(experience.uuid))
+        self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
+        # With a valuated experience
+        experience = ExperienceAcademiqueDTOFactory(
+            annees=[AnneeExperienceAcademiqueDTOFactory(uuid=uuid.uuid4(), annee=2020)],
+            valorisee_par_admissions=[proposition_uuid],
+            identifiant_externe='EPC-1',
+        )
+        kwargs['experience'] = experience
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['edit_link_button_in_new_tab'], True)
+        self.assertEqual(
+            context['update_url'],
+            f'/osis_profile/0123456/parcours_externe/edit/experience_academique/{experience.annees[0].uuid}',
+        )
+        self.assertEqual(context['delete_url'], '')
+
+    def test_checklist_experience_action_links_context_with_a_non_educational_experience(self):
+        proposition_uuid = uuid.uuid4()
+
+        experience = ExperienceNonAcademiqueDTOFactory(
+            valorisee_par_admissions=[proposition_uuid],
+            date_fin=datetime.date(2020, 12, 31),
+        )
+
+        kwargs = {
+            'context': {
+                'request': MagicMock(path='mypath'),
+                'admission': MagicMock(noma_candidat='0123456'),
+                'view': MagicMock(base_namespace='admission:general-education', kwargs={'uuid': proposition_uuid}),
+            },
+            'prefix': 'prefix',
+            'experience': experience,
+            'current_year': 2020,
+            'parcours_tab_id': 'tabID',
+        }
+
+        next_url_suffix = f'?next=mypath&next_hash_url=tabID'
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['prefix'], 'prefix')
+        self.assertEqual(
+            context['update_url'],
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience.uuid}{next_url_suffix}',
+        )
+        self.assertEqual(
+            context['delete_url'],
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience.uuid}/delete{next_url_suffix}',
+        )
+        self.assertEqual(
+            context['duplicate_url'],
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience.uuid}/duplicate',
+        )
+        self.assertEqual(context['experience_uuid'], str(experience.uuid))
+        self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
+        # With a valuated experience
+        experience = ExperienceNonAcademiqueDTOFactory(
+            valorisee_par_admissions=[proposition_uuid],
+            date_fin=datetime.date(2020, 12, 31),
+            identifiant_externe='EPC-1',
+        )
+        kwargs['experience'] = experience
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['edit_link_button_in_new_tab'], True)
+        self.assertEqual(
+            context['update_url'],
+            f'/osis_profile/0123456/parcours_externe/edit/experience_non_academique/{experience.uuid}',
+        )
+        self.assertEqual(context['delete_url'], '')
+
+    def test_checklist_experience_action_links_context_with_secondary_studies(self):
+        proposition_uuid = uuid.uuid4()
+
+        experience = EtudesSecondairesDTOFactory()
+
+        kwargs = {
+            'context': {
+                'request': MagicMock(path='mypath'),
+                'admission': MagicMock(noma_candidat='0123456'),
+                'view': MagicMock(base_namespace='admission:general-education', kwargs={'uuid': proposition_uuid}),
+            },
+            'prefix': 'prefix',
+            'experience': experience,
+            'current_year': 2020,
+            'parcours_tab_id': 'tabID',
+        }
+
+        next_url_suffix = f'?next=mypath&next_hash_url=tabID'
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['prefix'], 'prefix')
+        self.assertEqual(
+            context['update_url'],
+            f'/admissions/general-education/{proposition_uuid}/update/education{next_url_suffix}',
+        )
+        self.assertEqual(context['experience_uuid'], str(experience.uuid))
+        self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
+        # With a valuated experience
+        experience = EtudesSecondairesDTOFactory(identifiant_externe='EPC-1')
+        kwargs['experience'] = experience
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['edit_link_button_in_new_tab'], True)
+        self.assertEqual(
+            context['update_url'],
+            f'/osis_profile/0123456/parcours_externe/edit/etudes_secondaires',
+        )
 
     def test_experience_valuation_url_with_an_educational_experience(self):
         proposition_uuid = uuid.uuid4()
