@@ -427,7 +427,7 @@ onglet_decision_sic = ConfigurationOngletChecklist(
         ),
         ConfigurationStatutChecklist(
             identifiant='A_COMPLETER',
-            libelle=_('To be completed'),
+            libelle=_('Manager follow-up'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'blocage': 'to_be_completed'},
         ),

@@ -4088,6 +4088,9 @@ msgstr ""
 msgid "Management of the enrolment applications"
 msgstr ""
 
+msgid "Manager follow-up"
+msgstr ""
+
 msgid ""
 "Mandatory fields are missing in the 'Additional information > Specific "
 "questions' tab."
