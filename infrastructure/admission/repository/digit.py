@@ -30,6 +30,7 @@ from typing import Optional, List
 
 import requests
 from django.conf import settings
+from django.db.models import QuerySet
 
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
@@ -54,7 +55,8 @@ class DigitRepository(IDigitRepository):
             merge_person = proposition.get().proposal_merge_person
 
         person = merge_person if merge_person else candidate
-        ticket_response = _request_person_ticket_creation(person, noma)
+        addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
+        ticket_response = _request_person_ticket_creation(person, noma, addresses)
 
         logger.info(f"DIGIT Response: {ticket_response}")
 
@@ -76,7 +78,8 @@ class DigitRepository(IDigitRepository):
         if proposition.exists():
             person = proposition.get().proposal_merge_person
 
-        ticket_response = _request_person_ticket_validation(person)
+        addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
+        ticket_response = _request_person_ticket_validation(person, addresses)
 
         PersonMergeProposal.objects.update_or_create(
             original_person=candidate,
@@ -169,39 +172,39 @@ def _retrieve_person_ticket_status(request_id: int):
     ).json()
 
 
-def _request_person_ticket_creation(person: Person, noma: str):
+def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"requestId": "1", "status": "CREATED"}
     else:
-        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, noma))}")
+        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, noma, addresses))}")
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, noma)),
+            data=json.dumps(_get_ticket_data(person, noma, addresses)),
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
         )
         return response.json()
 
 
-def _request_person_ticket_validation(person: Person):
+def _request_person_ticket_validation(person: Person, addresses: QuerySet):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"errors": [], "valid": True}
     else:
-        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0'))}")
+        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses))}")
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, '0')),
+            data=json.dumps(_get_ticket_data(person, '0', addresses)),
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
         )
         return response.json()
 
 
-def _get_ticket_data(person: Person, noma: str):
+def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
     noma = person.last_registration_id if person.last_registration_id else noma
     return {
         "provider": {
@@ -228,7 +231,7 @@ def _get_ticket_data(person: Person, noma: str):
                 "number": address.street_number,
                 "box": address.postal_box,
             }
-            for address in person.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
+            for address in addresses
         ],
         "physicalPerson": True,
     }
