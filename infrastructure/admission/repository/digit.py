@@ -106,7 +106,7 @@ class DigitRepository(IDigitRepository):
                 nom=ticket.person.last_name,
                 prenom=ticket.person.first_name,
                 statut=ticket.status,
-                errors=[error['msg'] for error in ticket.errors],
+                errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket.errors],
             )
         except PersonTicketCreation.DoesNotExist:
             return None
@@ -141,7 +141,7 @@ class DigitRepository(IDigitRepository):
                 nom=ticket['person__last_name'],
                 prenom=ticket['person__first_name'],
                 statut=ticket['status'],
-                errors=[error['msg'] for error in ticket['errors']],
+                errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket['errors']],
             ) for ticket in tickets
         ]
 

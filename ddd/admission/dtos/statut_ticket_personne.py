@@ -37,7 +37,7 @@ class StatutTicketPersonneDTO(interface.DTO):
     nom: str
     prenom: str
     statut: str
-    errors: List[str]
+    errors: List[dict]
 
     def __str__(self):
         return f"{self.request_id} - {self.nom.upper()}, {self.prenom} - {self.statut}"

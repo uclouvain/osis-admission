@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -40,8 +40,10 @@
     <div class="alert alert-danger">
         <strong>Erreurs à la création du compte</strong> Il existe des erreurs qui empêchent la création du compte
         <ul>
-            {% for error_msg in digit_ticket.errors %}
-                <li>{{ error_msg }}</li>
+            {% for error in digit_ticket.errors %}
+                <li><span style="text-decoration: underline;">{{ error.code|digit_error_description }}</span>:
+                    {{ error.msg }}
+                </li>
             {% endfor %}
         </ul>
     </div>
