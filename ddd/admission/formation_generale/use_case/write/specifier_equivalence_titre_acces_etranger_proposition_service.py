@@ -42,6 +42,7 @@ def specifier_equivalence_titre_acces_etranger_proposition(
         auteur_modification=cmd.gestionnaire,
         type_equivalence_titre_acces=cmd.type_equivalence_titre_acces,
         statut_equivalence_titre_acces=cmd.statut_equivalence_titre_acces,
+        information_a_propos_de_la_restriction=cmd.information_a_propos_de_la_restriction,
         etat_equivalence_titre_acces=cmd.etat_equivalence_titre_acces,
         date_prise_effet_equivalence_titre_acces=cmd.date_prise_effet_equivalence_titre_acces,
     )
