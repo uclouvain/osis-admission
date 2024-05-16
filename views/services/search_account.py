@@ -129,7 +129,8 @@ class SearchAccountView(HtmxMixin, FormView):
                 annee_diplome_etudes_secondaires=self.get_high_school_graduation_year(),
             )
         )
-        message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=self.candidate['global_id']))
+        if self.request.POST.get('action') == 'MERGE':
+            message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=self.candidate['global_id']))
         return HttpResponse(status=200, headers={'HX-Refresh': 'true'})
 
     def form_invalid(self, form):
