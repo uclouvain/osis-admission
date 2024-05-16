@@ -1978,6 +1978,9 @@ class PastExperiencesAccessTitleEquivalencyView(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     type_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_type'],
+                    information_a_propos_de_la_restriction=form.cleaned_data[
+                        'foreign_access_title_equivalency_restriction_about'
+                    ],
                     statut_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_status'],
                     etat_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_state'],
                     date_prise_effet_equivalence_titre_acces=form.cleaned_data[
