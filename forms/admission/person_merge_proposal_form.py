@@ -77,9 +77,15 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             if data['identification_type'] == IdentificationType.ID_CARD_NUMBER.name and not all(
                     [data['national_number'], data['id_card_number'], data['id_card_expiry_date']]
             ):
-                for field in ['national_number', 'id_card_number', 'id_card_expiry_date']:
-                    if not data[field]:
-                        self.add_error(field, "This field is required.")
+                if not data['national_number'] and data['id_card_number'] and not data['id_card_expiry_date']:
+                    self.add_error('id_card_expiry_date', "This field is required.")
+
+                if not data['id_card_number'] and data['national_number'] and not data['id_card_expiry_date']:
+                    self.add_error('id_card_expiry_date', "This field is required.")
+
+                if not data['national_number'] and not data['id_card_number']:
+                    self.add_error('national_number', "This field is required.")
+                    self.add_error('id_card_number', "This field is required.")
 
             if data['identification_type'] == IdentificationType.PASSPORT_NUMBER.name and not all(
                     [data['passport_number'], data['passport_expiry_date']]
