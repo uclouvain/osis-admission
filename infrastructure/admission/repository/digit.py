@@ -25,6 +25,7 @@
 # ##############################################################################
 import json
 import logging
+from datetime import datetime
 from typing import Optional, List
 
 import requests
@@ -32,6 +33,7 @@ from django.conf import settings
 
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
+from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
@@ -39,26 +41,57 @@ from base.models.person_merge_proposal import PersonMergeProposal
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
+
 class DigitRepository(IDigitRepository):
     @classmethod
     def submit_person_ticket(cls, global_id: str, noma: str):
-        person = Person.objects.get(global_id=global_id)
+        candidate = Person.objects.get(global_id=global_id)
 
         # get proposal merge person if any is linked
-        proposition = PersonMergeProposal.objects.filter(original_person=person, proposal_merge_person__isnull=False)
+        merge_person = None
+        proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
         if proposition.exists():
-            person = proposition.get().proposal_merge_person
+            merge_person = proposition.get().proposal_merge_person
 
+        person = merge_person if merge_person else candidate
         ticket_response = _request_person_ticket_creation(person, noma)
 
         logger.info(f"DIGIT Response: {ticket_response}")
 
         if ticket_response:
             PersonTicketCreation.objects.get_or_create(
-                request_id=ticket_response['requestId'], status=ticket_response['status']
+                request_id=ticket_response['requestId'],
+                status=ticket_response['status'],
+                person=candidate,
             )
 
         return ticket_response
+
+    @classmethod
+    def validate_person_ticket(cls, global_id: str):
+        candidate = Person.objects.get(global_id=global_id)
+
+        # get proposal merge person if any is linked
+        proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
+        if proposition.exists():
+            person = proposition.get().proposal_merge_person
+
+        ticket_response = _request_person_ticket_validation(person)
+
+        PersonMergeProposal.objects.update_or_create(
+            original_person=candidate,
+            defaults={
+                "validation": ticket_response,
+                "last_similarity_result_update": datetime.now()
+            }
+        )
+
+        logger.info(f"DIGIT Response: {ticket_response}")
+
+        return ValidationTicketResponseDTO(
+            valid=ticket_response['valid'],
+            errors=ticket_response['errors'],
+        )
 
     @classmethod
     def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
@@ -152,7 +185,24 @@ def _request_person_ticket_creation(person: Person, noma: str):
         return response.json()
 
 
+def _request_person_ticket_validation(person: Person):
+    if settings.MOCK_DIGIT_SERVICE_CALL:
+        return {"errors": [], "valid": True}
+    else:
+        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0'))}")
+        response = requests.post(
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': settings.ESB_AUTHORIZATION,
+            },
+            data=json.dumps(_get_ticket_data(person, '0')),
+            url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
+        )
+        return response.json()
+
+
 def _get_ticket_data(person: Person, noma: str):
+    noma = person.last_registration_id if person.last_registration_id else noma
     return {
         "provider": {
             "source": "ETU",
@@ -164,7 +214,7 @@ def _get_ticket_data(person: Person, noma: str):
             "lastName": person.last_name,
             "firstName": person.first_name,
             "birthDate": person.birth_date.strftime('%Y-%m-%d'),
-            "gender": person.sex,
+            "gender": "M" if person.gender == "H" else person.gender,
             "nationalRegister": "".join(filter(str.isdigit, person.national_number)),
             "nationality": person.country_of_citizenship.iso_code,
         },

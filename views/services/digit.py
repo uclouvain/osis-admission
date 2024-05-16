@@ -59,11 +59,20 @@ class RequestDigitAccountCreationView(ProcessFormView):
 
     def post(self, request, *args, **kwargs):
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
+
+        try:
+            merge_proposal = PersonMergeProposal.objects.get(original_person=candidate)
+        except PersonMergeProposal.DoesNotExist:
+            merge_proposal = None
+
+        noma = merge_proposal.proposal_merge_person.last_registration_id if merge_proposal else None
+
         response = self.create_digit_person(
             global_id=candidate.global_id,
-            year=self.base_admission.determined_academic_year.year
+            year=self.base_admission.determined_academic_year.year,
+            noma=noma,
         )
-        if response['status'] == PersonTicketCreationStatus.CREATED:
+        if response['status'] == PersonTicketCreationStatus.CREATED.name:
             display_success_messages(request, "Ticket de création de compte envoyé avec succès dans DigIT")
         else:
             display_error_messages(request, "Une erreur est survenue lors de l'envoi dans DigIT")
@@ -74,12 +83,13 @@ class RequestDigitAccountCreationView(ProcessFormView):
         return BaseAdmission.objects.get(uuid=self.kwargs['uuid'])
 
     @staticmethod
-    def create_digit_person(global_id: str, year: int):
+    def create_digit_person(global_id: str, year: int, noma: str = None):
         from infrastructure.messages_bus import message_bus_instance
         return message_bus_instance.invoke(
             SoumettreTicketPersonneCommand(
                 global_id=global_id,
-                annee=year
+                annee=year,
+                noma=noma,
             )
         )
 

@@ -123,6 +123,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             id_card_expiry_date=person_merge_proposal.proposal_merge_person.id_card_expiry_date,
             professional_curex_uuids=person_merge_proposal.professional_curex_to_merge,
             educational_curex_uuids=person_merge_proposal.educational_curex_to_merge,
+            validation=person_merge_proposal.validation,
         ) if person_merge_proposal and person_merge_proposal.proposal_merge_person else None
 
     @classmethod

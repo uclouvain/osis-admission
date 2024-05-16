@@ -305,6 +305,8 @@ class AdmissionFormMixin(AdmissionViewMixin):
         if self.update_requested_documents and hasattr(self.admission, 'update_requested_documents'):
             self.admission.update_requested_documents()
 
+
+
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)
             response = self.render_to_response(self.get_context_data(form=form))

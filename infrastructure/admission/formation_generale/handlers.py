@@ -27,7 +27,7 @@ from admission.ddd.admission.commands import \
     (RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand,
      DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand,
      RefuserPropositionFusionCommand, GetStatutTicketPersonneQuery, RetrieveListeTicketsEnAttenteQuery,
-     RetrieveAndStoreStatutTicketPersonneFromDigitCommand)
+     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, ValiderTicketPersonneCommand)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
@@ -88,6 +88,7 @@ from admission.ddd.admission.use_case.write.recuperer_statut_ticket_personne_de_
 from admission.ddd.admission.use_case.write.refuser_proposition_fusion_personne import \
     refuser_proposition_fusion_personne
 from admission.ddd.admission.use_case.write.soumettre_ticket_creation_personne import soumettre_ticket_creation_personne
+from admission.ddd.admission.use_case.write.valider_ticket_creation_personne import valider_ticket_creation_personne
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -678,4 +679,10 @@ COMMAND_HANDLERS = {
             digit_repository=DigitRepository(),
         )
     ),
+    ValiderTicketPersonneCommand: (
+        lambda msg_bus, cmd: valider_ticket_creation_personne(
+            cmd,
+            digit_repository=DigitRepository(),
+        )
+    )
 }

@@ -192,7 +192,14 @@ class RechercherParcoursAnterieurQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SoumettreTicketPersonneCommand(interface.CommandRequest):
     global_id: str
+    noma: str
     annee: int
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ValiderTicketPersonneCommand(interface.CommandRequest):
+    global_id: str
+
 
 @attr.dataclass(frozen=True, slots=True)
 class GetStatutTicketPersonneQuery(interface.QueryRequest):

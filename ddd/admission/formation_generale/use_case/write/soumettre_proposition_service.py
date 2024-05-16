@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.commands import RechercherCompteExistantQuery
+from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -172,6 +172,8 @@ def soumettre_proposition(
             niss=identification.numero_registre_national_belge,
         )
     )
+
+    message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=proposition.matricule_candidat))
 
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)

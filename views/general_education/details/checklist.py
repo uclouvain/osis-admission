@@ -1723,9 +1723,8 @@ class ChecklistView(
             )
             context['can_choose_access_title'] = can_change_access_title
 
-            matr = self.proposition_fusion.matricule if self.proposition_fusion else self.proposition.matricule_candidat
             context['digit_ticket'] = message_bus_instance.invoke(
-                GetStatutTicketPersonneQuery(global_id=matr)
+                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
             )
 
             if self.proposition_fusion:

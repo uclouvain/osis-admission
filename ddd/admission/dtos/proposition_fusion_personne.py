@@ -49,3 +49,4 @@ class PropositionFusionPersonneDTO(interface.DTO):
     id_card_expiry_date: str
     professional_curex_uuids: str
     educational_curex_uuids: str
+    validation: dict

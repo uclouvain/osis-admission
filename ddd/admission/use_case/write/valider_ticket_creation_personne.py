@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,19 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
+from admission.ddd.admission.commands import ValiderTicketPersonneCommand
 from admission.ddd.admission.repository.i_digit import IDigitRepository
-from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
-from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
 
-def soumettre_ticket_creation_personne(
-    cmd: 'SoumettreTicketPersonneCommand',
+def valider_ticket_creation_personne(
+    cmd: 'ValiderTicketPersonneCommand',
     digit_repository: 'IDigitRepository',
-    compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> any:
-    noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=cmd.annee).compteur,
-        annee=cmd.annee
-    ) if not cmd.noma else cmd.noma
-    return digit_repository.submit_person_ticket(global_id=cmd.global_id, noma=noma)
+    return digit_repository.validate_person_ticket(global_id=cmd.global_id)

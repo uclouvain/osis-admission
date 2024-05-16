@@ -36,7 +36,7 @@ __all__ = [
 
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
-    RechercherParcoursAnterieurQuery
+    RechercherParcoursAnterieurQuery, ValiderTicketPersonneCommand
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
 from admission.templatetags.admission import format_matricule
 from base.models.person import Person
@@ -129,6 +129,7 @@ class SearchAccountView(HtmxMixin, FormView):
                 annee_diplome_etudes_secondaires=self.get_high_school_graduation_year(),
             )
         )
+        message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=self.candidate['global_id']))
         return HttpResponse(status=200, headers={'HX-Refresh': 'true'})
 
     def form_invalid(self, form):
