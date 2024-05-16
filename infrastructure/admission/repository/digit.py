@@ -222,10 +222,10 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
             "matricule": person.global_id,
             "lastName": person.last_name,
             "firstName": person.first_name,
-            "birthDate": person.birth_date.strftime('%Y-%m-%d'),
+            "birthDate": person.birth_date.strftime('%Y-%m-%d') if person.birth_date else None,
             "gender": "M" if person.gender == "H" else person.gender,
             "nationalRegister": "".join(filter(str.isdigit, person.national_number)),
-            "nationality": person.country_of_citizenship.iso_code,
+            "nationality": person.country_of_citizenship.iso_code if person.country_of_citizenship else None,
         },
         "addresses": [
             {
