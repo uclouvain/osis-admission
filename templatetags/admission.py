@@ -1113,11 +1113,10 @@ def search_account_digit_result_msg(admission):
     }
 
 
-@register.inclusion_tag('admission/digit_ticket_status_message.html')
-def digit_ticket_status_msg(digit_ticket):
-    return {
-        'digit_ticket': digit_ticket
-    }
+@register.inclusion_tag('admission/digit_ticket_status_message.html', takes_context=True)
+def digit_ticket_status_msg(context, digit_ticket):
+    context['digit_ticket'] = digit_ticket
+    return context
 
 @register.filter
 def to_niss_format(s):

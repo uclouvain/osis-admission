@@ -65,7 +65,12 @@ class RequestDigitAccountCreationView(ProcessFormView):
         except PersonMergeProposal.DoesNotExist:
             merge_proposal = None
 
-        noma = merge_proposal.proposal_merge_person.last_registration_id if merge_proposal else None
+        if merge_proposal.proposal_merge_person.last_registration_id:
+            noma = merge_proposal.proposal_merge_person.last_registration_id
+        elif candidate.last_registration_id:
+            noma = candidate.last_registration_id
+        else:
+            noma = None
 
         response = self.create_digit_person(
             global_id=candidate.global_id,

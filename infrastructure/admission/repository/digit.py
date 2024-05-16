@@ -48,6 +48,10 @@ class DigitRepository(IDigitRepository):
     def submit_person_ticket(cls, global_id: str, noma: str):
         candidate = Person.objects.get(global_id=global_id)
 
+        if noma:
+            candidate.last_registration_id = noma
+            candidate.save()
+
         # get proposal merge person if any is linked
         merge_person = None
         proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
@@ -61,10 +65,12 @@ class DigitRepository(IDigitRepository):
         logger.info(f"DIGIT Response: {ticket_response}")
 
         if ticket_response:
-            PersonTicketCreation.objects.get_or_create(
-                request_id=ticket_response['requestId'],
-                status=ticket_response['status'],
+            PersonTicketCreation.objects.update_or_create(
                 person=candidate,
+                defaults={
+                    'request_id': ticket_response['requestId'],
+                    'status': ticket_response['status'],
+                }
             )
 
         return ticket_response
