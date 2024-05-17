@@ -23,13 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from email.message import EmailMessage
 from typing import List, Dict, Optional
 
 from django.conf import settings
-from django.utils import translation
+from django.utils import translation, formats
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
+
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
@@ -80,6 +83,7 @@ from base.models.person import Person
 from base.utils.utils import format_academic_year
 
 ONE_YEAR_SECONDS = 366 * 24 * 60 * 60
+MOIS_DEBUT_TRAITEMENT_INSCRIPTION = 7
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
 
@@ -162,6 +166,25 @@ class Notification(INotification):
                     )
                 )
                 if proposition.est_inscription_tardive
+                else ''
+            )
+            common_tokens['enrolment_sentence'] = (
+                (
+                    "<p>{}</p>".format(
+                        _(
+                            'For your information, applications for the %(academic_year)s academic year will be '
+                            'processed from %(start_date)s.'
+                        )
+                    )
+                )
+                % {
+                    'academic_year': format_academic_year(proposition.annee_calculee),
+                    'start_date': formats.date_format(
+                        datetime.date(proposition.annee_calculee, MOIS_DEBUT_TRAITEMENT_INSCRIPTION, 1),
+                        'F Y',
+                    ),
+                }
+                if proposition.type_demande == TypeDemande.INSCRIPTION
                 else ''
             )
             common_tokens['training_acronym'] = proposition.formation_id.sigle
