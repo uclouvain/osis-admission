@@ -360,6 +360,12 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         current_admission.refresh_from_db()
         self.assertEqual(current_admission.type_demande, TypeDemande.INSCRIPTION.name)
 
+        notifications = EmailNotification.objects.filter(person=current_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        self.assertIn('juillet 1980', notifications[0].payload)
+
+        notifications[0].delete()
+
         current_admission.candidate.country_of_citizenship.european_union = False
         current_admission.candidate.country_of_citizenship.save(update_fields=['european_union'])
 
@@ -378,6 +384,10 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
         current_admission.refresh_from_db()
         self.assertEqual(current_admission.type_demande, TypeDemande.ADMISSION.name)
+
+        notifications = EmailNotification.objects.filter(person=current_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        self.assertNotIn('juillet 1980', notifications[0].payload)
 
     @freezegun.freeze_time("1980-10-22")
     def test_general_proposition_submission_with_late_enrollment(self):
