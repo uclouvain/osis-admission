@@ -755,6 +755,13 @@ msgstr "Annexe au certificat d'approbation SIC"
 msgid "Annual programme contact person:"
 msgstr "Personne de contact pour la composition du programme annuel :"
 
+msgid ""
+"Another admission has been authorized for this candidate for this academic "
+"year."
+msgstr ""
+"Une autre demande a été autorisée pour le·la candidat·e pour cette année "
+"académique."
+
 msgid "Another admission has been submitted."
 msgstr "Une autre admission a déjà été soumise."
 

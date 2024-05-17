@@ -43,6 +43,7 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
 
+from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
@@ -76,6 +77,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
+    STATUTS_TOUTE_PROPOSITION_AUTORISEE,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
@@ -246,6 +248,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         checklist_additional_icons = {}
+        checklist_additional_icons_title = {}
 
         # A SIC user has an additional icon for the decision of the faculty if a fac manager wrote a comment
         if self.is_sic:
@@ -260,7 +263,40 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             if has_comment:
                 checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
 
+        candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
+            ListerToutesDemandesQuery(
+                matricule_candidat=self.admission.candidate.global_id,
+                etats=STATUTS_TOUTE_PROPOSITION_SOUMISE,
+                champ_tri='date_confirmation',
+                tri_inverse=True,
+            )
+        )
+
+        submitted_for_the_current_year_admissions: List[DemandeRechercheDTO] = []
+
+        for admission in candidate_admissions:
+            if (
+                admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+                and admission.annee_demande == self.admission.determined_academic_year.year
+                and admission.uuid != self.admission_uuid
+            ):
+                submitted_for_the_current_year_admissions.append(admission)
+
+        context['toutes_les_demandes'] = candidate_admissions
+        context['autres_demandes'] = submitted_for_the_current_year_admissions
+
+        if any(
+            admission
+            for admission in submitted_for_the_current_year_admissions
+            if admission.etat_demande in STATUTS_TOUTE_PROPOSITION_AUTORISEE
+        ):
+            checklist_additional_icons['choix_formation'] = 'fa-solid fa-square-2'
+            checklist_additional_icons_title['choix_formation'] = _(
+                'Another admission has been authorized for this candidate for this academic year.'
+            )
+
         context['checklist_additional_icons'] = checklist_additional_icons
+        context['checklist_additional_icons_title'] = checklist_additional_icons_title
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
         context['can_change_faculty_decision'] = self.request.user.has_perm(
@@ -1419,29 +1455,6 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
-                ListerToutesDemandesQuery(
-                    matricule_candidat=self.admission.candidate.global_id,
-                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE,
-                    champ_tri='date_confirmation',
-                    tri_inverse=True,
-                )
-            )
-
-            submitted_for_the_current_year_admissions: List[DemandeRechercheDTO] = []
-            submitted_candidate_admissions_by_uuid: Dict[str, DemandeRechercheDTO] = {}
-
-            for admission in candidate_admissions:
-                if (
-                    admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
-                    and admission.annee_demande == self.admission.determined_academic_year.year
-                    and admission.uuid != self.admission_uuid
-                ):
-                    submitted_for_the_current_year_admissions.append(admission)
-                submitted_candidate_admissions_by_uuid[admission.uuid] = admission
-
-            context['autres_demandes'] = submitted_for_the_current_year_admissions
-
             # Initialize forms
             tab_names = list(self.extra_context['checklist_tabs'].keys())
 
@@ -1602,7 +1615,11 @@ class ChecklistView(
                 if valuated_admissions and self.admission_uuid not in valuated_admissions:
                     not_valuated_by_current_admission_experiences_uuids.add(experience_uuid)
                     last_valuated_admission_by_experience_uuid[experience_uuid] = next(
-                        (admission for admission in candidate_admissions if admission.uuid in valuated_admissions),
+                        (
+                            admission
+                            for admission in context['toutes_les_demandes']
+                            if admission.uuid in valuated_admissions
+                        ),
                         None,
                     )
 
