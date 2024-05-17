@@ -82,6 +82,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             'mimetype': PDF_MIME_TYPE,
             'explicit_name': 'Mon nom de fichier',
             'upload_uuid': uuid.uuid4(),
+            'size': 1,
         }
         cls.image_metadata = {
             **cls.pdf_file_metadata,
@@ -140,7 +141,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
         patcher = patch(
             "osis_document.api.utils.get_remote_metadata",
-            return_value={"name": "myfile.myext", "mimetype": "application/pdf"},
+            return_value={"name": "myfile.myext", "mimetype": "application/pdf", "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -159,7 +160,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         patcher = patch(
             "osis_document.api.utils.get_several_remote_metadata",
             side_effect=lambda tokens: {
-                token: {"name": "myfile.myext", "mimetype": "application/pdf"} for token in tokens
+                token: {"name": "myfile.myext", "mimetype": "application/pdf", "size": 1} for token in tokens
             },
         )
         patcher.start()

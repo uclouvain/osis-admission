@@ -78,9 +78,13 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
+from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
+from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time("1980-02-25")
@@ -127,6 +131,9 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             training=cls.admission_ok.training,
         )
         cls.candidate_ok = cls.admission_ok.candidate
+        cls.candidate_ok_residential_address = PersonAddress.objects.filter(
+            person=cls.candidate_ok, label=PersonAddressType.RESIDENTIAL.name
+        ).first()
         cls.second_candidate_ok = cls.second_admission_ok.candidate
         cls.ok_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=cls.admission_ok.uuid)
         cls.second_ok_url = resolve_url(
@@ -294,6 +301,26 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
         self.assertEqual(self.admission_ok.late_enrollment, False)
+        self.assertEqual(
+            self.admission_ok.submitted_profile,
+            {
+                'identification': {
+                    'first_name': self.admission_ok.candidate.first_name,
+                    'last_name': self.admission_ok.candidate.last_name,
+                    'gender': self.admission_ok.candidate.gender,
+                    'country_of_citizenship': self.admission_ok.candidate.country_of_citizenship.iso_code,
+                    'date_of_birth': self.admission_ok.candidate.birth_date.isoformat(),
+                },
+                'coordinates': {
+                    'country': self.candidate_ok_residential_address.country.iso_code,
+                    'postal_code': self.candidate_ok_residential_address.postal_code,
+                    'city': self.candidate_ok_residential_address.city,
+                    'street': self.candidate_ok_residential_address.street,
+                    'street_number': self.candidate_ok_residential_address.street_number,
+                    'postal_box': self.candidate_ok_residential_address.postal_box,
+                },
+            },
+        )
 
         history_entry: HistoryEntry = HistoryEntry.objects.filter(
             object_uuid=self.admission_ok.uuid,
@@ -559,6 +586,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
     def setUpTestData(cls, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         AdmissionAcademicCalendarFactory.produce_all_required()
+        cls.belgium_country = CountryFactory(iso_code=BE_ISO_CODE)
 
         # Validation errors
         cls.candidate_errors = IncompletePersonForIUFCFactory()
@@ -573,6 +601,9 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         cls.admission_ok = ContinuingEducationAdmissionFactory(with_access_conditions_met=True)
         training = cls.admission_ok.training
         cls.candidate_ok = cls.admission_ok.candidate
+        cls.candidate_ok_residential_address = PersonAddress.objects.filter(
+            person=cls.candidate_ok, label=PersonAddressType.RESIDENTIAL.name
+        ).first()
         cls.ok_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=cls.admission_ok.uuid)
 
         cls.second_admission_ok = ContinuingEducationAdmissionFactory(
@@ -632,6 +663,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             },
         )
         patcher.start()
@@ -658,6 +690,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             token: {
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             }
             for token in tokens
         }
@@ -766,6 +799,26 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
+        self.assertEqual(
+            self.admission_ok.submitted_profile,
+            {
+                'identification': {
+                    'first_name': self.admission_ok.candidate.first_name,
+                    'last_name': self.admission_ok.candidate.last_name,
+                    'gender': self.admission_ok.candidate.gender,
+                    'country_of_citizenship': self.admission_ok.candidate.country_of_citizenship.iso_code,
+                    'date_of_birth': self.admission_ok.candidate.birth_date.isoformat(),
+                },
+                'coordinates': {
+                    'country': self.candidate_ok_residential_address.country.iso_code,
+                    'postal_code': self.candidate_ok_residential_address.postal_code,
+                    'city': self.candidate_ok_residential_address.city,
+                    'street': self.candidate_ok_residential_address.street,
+                    'street_number': self.candidate_ok_residential_address.street_number,
+                    'postal_box': self.candidate_ok_residential_address.postal_box,
+                },
+            },
+        )
 
         # Check tasks
         admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok)

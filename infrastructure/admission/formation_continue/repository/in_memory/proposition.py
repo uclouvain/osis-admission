@@ -249,4 +249,5 @@ class PropositionInMemoryRepository(
             motif_de_refus=proposition.motif_de_refus,
             motif_de_refus_autre=proposition.motif_de_refus_autre,
             motif_d_annulation=proposition.motif_d_annulation,
+            profil_soumis_candidat=proposition.profil_soumis_candidat,
         )

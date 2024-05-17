@@ -1010,7 +1010,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
+        patched.return_value = {"name": "test.pdf", "size": 1}
 
         self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()
@@ -1196,7 +1196,7 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
+        patched.return_value = {"name": "test.pdf", "size": 1}
 
         self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()

@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -71,7 +71,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 
 
-#TODO: Remove duplicate tests with osis_profile
+# TODO: Remove duplicate tests with osis_profile
 class CurriculumEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -152,7 +152,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -1580,7 +1580,8 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(years[0].acquired_credit_number, 10)
         self.assertEqual(years[0].registered_credit_number, 10)
 
-    def test_post_form_with_created_experience(self):
+    @mock.patch('admission.views.common.form_tabs.curriculum.CurriculumEducationalExperienceFormView.delete_url')
+    def test_post_form_with_created_experience(self, mock_delete_url):
         self.client.force_login(self.sic_manager_user)
 
         self.assertFalse(
@@ -1668,7 +1669,8 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             },
         )
 
-    def test_post_form_with_created_experience_with_blank_years(self):
+    @mock.patch('admission.views.common.form_tabs.curriculum.CurriculumEducationalExperienceFormView.delete_url')
+    def test_post_form_with_created_experience_with_blank_years(self, mock_delete_url):
         self.client.force_login(self.sic_manager_user)
 
         self.assertFalse(
@@ -1854,7 +1856,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -2050,7 +2052,7 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -2277,6 +2279,7 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.get_several_remote_metadata_patched.return_value = {
             f'token{index}': {
                 'name': f'the_file_{index}.pdf',
+                'size': 1,
             }
             for index in range(len(self.files_uuids))
         }

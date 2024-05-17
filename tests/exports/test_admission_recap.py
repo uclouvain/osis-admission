@@ -320,6 +320,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             },
         )
         patcher.start()
@@ -345,6 +346,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             token: {
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             }
             for token in tokens
         }
@@ -908,7 +910,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         cls.get_remote_token_patcher.start()
 
         cls.get_remote_metadata_patcher = mock.patch(
-            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"}
+            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile", "size": 1}
         )
         cls.get_remote_metadata_patcher.start()
 
@@ -1238,6 +1240,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
         continuing_proposition_dto = _PropositionFormationContinueDTO(
             uuid='uuid-proposition',
+            profil_soumis_candidat=None,
             formation=_FormationDTO(
                 sigle='FC1',
                 annee=2023,

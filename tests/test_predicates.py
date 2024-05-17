@@ -35,6 +35,7 @@ from admission.auth.predicates import common, doctorate, general, not_in_general
 from admission.auth.predicates.general import is_invited_to_pay_after_request
 from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
@@ -498,3 +499,13 @@ class PredicatesTestCase(TestCase):
         self.assertFalse(continuing.is_continuing(user, general_admission))
         self.assertTrue(continuing.is_continuing(user, continuing_admission))
         self.assertFalse(continuing.is_continuing(user, doctorate_admission))
+
+    def test_in_manager_status(self):
+        user = UserFactory()
+        general_admission = GeneralEducationAdmissionFactory(status=ChoixStatutPropositionGenerale.CONFIRMEE.name)
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+
+        self.assertFalse(continuing.in_manager_status(user, general_admission))
+        self.assertFalse(continuing.in_manager_status(user, doctorate_admission))
+        self.assertTrue(continuing.in_manager_status(user, continuing_admission))

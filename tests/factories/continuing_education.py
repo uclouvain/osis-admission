@@ -92,10 +92,6 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     ]
     interested_mark = False
 
-    @factory.post_generation
-    def create_candidate_role(self, create, extracted, **kwargs):
-        CandidateFactory(person=self.candidate)
-
     class Params:
         with_access_conditions_met = factory.Trait(
             training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,

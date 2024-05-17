@@ -520,9 +520,13 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
         )
 
     def for_manager_dto(self):
-        return self.for_dto().annotate_campus(
-            training_field='other_training_accepted_by_fac',
-            annotation_name='other_training_accepted_by_fac_teaching_campus',
+        return (
+            self.for_dto()
+            .annotate_campus(
+                training_field='other_training_accepted_by_fac',
+                annotation_name='other_training_accepted_by_fac_teaching_campus',
+            )
+            .annotate_with_student_registration_id()
         )
 
 
