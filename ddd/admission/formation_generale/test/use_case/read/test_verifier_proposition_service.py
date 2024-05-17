@@ -87,12 +87,14 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
+    ValorisationEtudesSecondairesDTO,
 )
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from osis_profile import BE_ISO_CODE
@@ -1067,6 +1069,26 @@ class TestVerifierPropositionService(TestCase):
         id_proposition = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.master_proposition.entity_id)
 
+    def test_should_etre_pas_verifier_si_deja_valorise_par_admission_pour_master(self):
+        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            valorisation=ValorisationEtudesSecondairesDTO(
+                types_formations_admissions_valorisees=[TrainingType.MASTER_M1.name],
+            ),
+        )
+        id_proposition = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertEqual(id_proposition, self.master_proposition.entity_id)
+
+    def test_should_etre_pas_verifier_si_deja_valorise_par_epc_pour_master(self):
+        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            valorisation=ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=True,
+            ),
+        )
+        id_proposition = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertEqual(id_proposition, self.master_proposition.entity_id)
+
     def test_should_retourner_erreur_si_indication_a_diplome_etudes_secondaires_non_specifiee_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             annee_diplome_etudes_secondaires=2020,
@@ -1094,15 +1116,62 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
-    def test_should_etre_ok_si_etudes_secondaires_et_diplome_non_specifie_pour_bachelier_avec_valorisation(self):
+    def test_should_verifier_secondaires_pour_bachelier_avec_valorisation_master(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
-            annee_diplome_etudes_secondaires=2020,
-            valorisees=True,
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(),
+            valorisation=ValorisationEtudesSecondairesDTO(
+                types_formations_admissions_valorisees=[TrainingType.MASTER_M1.name],
+            ),
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
+
+    def test_should_pas_verifier_secondaires_pour_bachelier_avec_valorisation_bachelier_et_diplome(self):
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(),
+            valorisation=ValorisationEtudesSecondairesDTO(
+                types_formations_admissions_valorisees=[TrainingType.BACHELOR.name],
+            ),
         )
 
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
+
+    def test_should_verifier_secondaires_pour_bachelier_avec_valorisation_bachelier_sans_diplome(self):
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            valorisation=ValorisationEtudesSecondairesDTO(
+                types_formations_admissions_valorisees=[TrainingType.BACHELOR.name],
+            ),
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
+
+    def test_should_pas_verifier_secondaires_pour_bachelier_avec_valorisation_epc_et_diplome(self):
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(),
+            valorisation=ValorisationEtudesSecondairesDTO(est_valorise_par_epc=True),
+        )
+
+        id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
+        self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
+
+    def test_should_verifier_secondaires_pour_bachelier_avec_valorisation_epc_sans_diplome(self):
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            valorisation=ValorisationEtudesSecondairesDTO(est_valorise_par_epc=True),
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_etudes_secondaires_en_cours_et_diplome_non_specifie_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(

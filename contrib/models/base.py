@@ -413,7 +413,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         verbose_name=_('Curriculum'),
         max_files=1,
     )
-    valuated_secondary_studies_person = models.OneToOneField(
+    valuated_secondary_studies_person = models.ForeignKey(
         to='base.Person',
         blank=True,
         null=True,

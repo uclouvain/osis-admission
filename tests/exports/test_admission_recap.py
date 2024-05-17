@@ -163,6 +163,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
+    ValorisationEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
@@ -197,6 +198,11 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 @attr.dataclass
 class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
+    pass
+
+
+@attr.dataclass
+class _ValorisationEtudesSecondairesDTO(UnfrozenDTO, ValorisationEtudesSecondairesDTO):
     pass
 
 
@@ -1147,7 +1153,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             alternative_secondaires=None,
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2015,
-            valorisees=False,
+            valorisation=_ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=False,
+                types_formations_admissions_valorisees=[],
+            ),
         )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
@@ -1179,7 +1188,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2015,
-            valorisees=False,
+            valorisation=_ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=False,
+                types_formations_admissions_valorisees=[],
+            ),
         )
 
         accounting_dto = _ComptabiliteDTO(
