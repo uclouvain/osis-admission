@@ -2922,6 +2922,12 @@ msgid ""
 "%(date)s."
 msgstr ""
 
+#, python-format
+msgid ""
+"For your information, applications for the %(academic_year)s academic year "
+"will be processed from %(start_date)s."
+msgstr ""
+
 msgid "Foreign access title equivalence effective date"
 msgstr ""
 
@@ -5840,6 +5846,11 @@ msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr ""
 
 msgid "Sentence indicating the payment of the application fee (if applicable)."
+msgstr ""
+
+msgid ""
+"Sentence indicating the start date of the enrollment processing (if "
+"applicable)."
 msgstr ""
 
 msgid "Services"

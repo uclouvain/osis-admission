@@ -3156,6 +3156,14 @@ msgstr ""
 "Pour le président du jury, %(manager_first_name)s %(manager_last_name)s Le "
 "%(date)s."
 
+#, python-format
+msgid ""
+"For your information, applications for the %(academic_year)s academic year "
+"will be processed from %(start_date)s."
+msgstr ""
+"Pour votre bonne information, les dossiers d’inscription pour l’année "
+"académique %(academic_year)s seront traités à partir de %(start_date)s."
+
 msgid "Foreign access title equivalence effective date"
 msgstr "Date de prise d'effet de l'équivalence du titre d'accès étranger"
 
@@ -6373,6 +6381,13 @@ msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
 
 msgid "Sentence indicating the payment of the application fee (if applicable)."
 msgstr "Phrase indiquant le payement des frais de dossier (si applicable)."
+
+msgid ""
+"Sentence indicating the start date of the enrollment processing (if "
+"applicable)."
+msgstr ""
+"Phrase indiquant la date de début du traitement des inscriptions (si "
+"applicable)."
 
 msgid "Services"
 msgstr "Services"
