@@ -390,7 +390,10 @@ class Notification(INotification):
         proposition: Proposition,
         objet_message: str,
         corps_message: str,
-    ) -> EmailMessage:
+    ) -> Optional[EmailMessage]:
+        if not objet_message or not corps_message:
+            return None
+
         candidate = Person.objects.get(global_id=proposition.matricule_candidat)
 
         document_uuid = (

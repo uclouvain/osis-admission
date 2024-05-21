@@ -1085,14 +1085,18 @@ class SicDecisionFinalRefusalForm(forms.Form):
         widget=forms.Textarea(),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, with_email, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['body'].widget.attrs['data-config'] = json.dumps(
-            {
-                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
-                'language': get_language(),
-            }
-        )
+        if with_email:
+            self.fields['body'].widget.attrs['data-config'] = json.dumps(
+                {
+                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                    'language': get_language(),
+                }
+            )
+        else:
+            del self.fields['body']
+            del self.fields['subject']
 
 
 class SicDecisionFinalApprovalForm(forms.Form):
