@@ -203,6 +203,7 @@ class Proposition(interface.RootEntity):
 
     type_equivalence_titre_acces: Optional[TypeEquivalenceTitreAcces] = None
     statut_equivalence_titre_acces: Optional[StatutEquivalenceTitreAcces] = None
+    information_a_propos_de_la_restriction: str = ''
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
@@ -697,12 +698,14 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         type_equivalence_titre_acces: str,
         statut_equivalence_titre_acces: str,
+        information_a_propos_de_la_restriction: str,
         etat_equivalence_titre_acces: str,
         date_prise_effet_equivalence_titre_acces: Optional[datetime.date],
     ):
         self.auteur_derniere_modification = auteur_modification
         self.type_equivalence_titre_acces = getattr(TypeEquivalenceTitreAcces, type_equivalence_titre_acces, None)
         self.statut_equivalence_titre_acces = getattr(StatutEquivalenceTitreAcces, statut_equivalence_titre_acces, None)
+        self.information_a_propos_de_la_restriction = information_a_propos_de_la_restriction
         self.etat_equivalence_titre_acces = getattr(EtatEquivalenceTitreAcces, etat_equivalence_titre_acces, None)
         self.date_prise_effet_equivalence_titre_acces = date_prise_effet_equivalence_titre_acces
 

@@ -3514,6 +3514,9 @@ msgid ""
 "project\" part."
 msgstr ""
 
+msgid "Information about the restriction"
+msgstr ""
+
 msgid "Information provided to the candidate."
 msgstr ""
 
