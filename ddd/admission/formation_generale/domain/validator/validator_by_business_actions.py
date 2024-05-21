@@ -46,6 +46,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldAssimilationEtreCompletee,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -76,6 +77,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldConditionAccesEtreSelectionne,
     ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
+    ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
@@ -353,6 +355,33 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
                 avec_complements_formation=self.avec_complements_formation,
                 complements_formation=self.complements_formation,
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+            ShouldSelectionnerTitreAccesPourEnvoyerASIC(
+                titres_selectionnes=self.titres_selectionnes,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverInscriptionTardiveParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    est_inscription_tardive: bool
+    condition_acces: Optional[ConditionAcces]
+
+    titres_selectionnes: List[TitreAccesSelectionnable]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldFacPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldPropositionEtreInscriptionTardiveAvecConditionAcces(
+                est_inscription_tardive=self.est_inscription_tardive,
+                condition_acces=self.condition_acces,
             ),
             ShouldSelectionnerTitreAccesPourEnvoyerASIC(
                 titres_selectionnes=self.titres_selectionnes,

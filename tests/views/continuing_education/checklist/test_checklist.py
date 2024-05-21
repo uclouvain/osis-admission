@@ -71,6 +71,7 @@ class ChecklistViewTestCase(TestCase):
             'mimetype': PDF_MIME_TYPE,
             'explicit_name': 'My file name',
             'author': cls.sic_manager_user.person.global_id,
+            'size': 1,
         }
 
     def setUp(self) -> None:

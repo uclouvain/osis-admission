@@ -125,7 +125,7 @@ def in_fac_status_extended(self, user: User, obj: GeneralEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC))
 def in_sic_status(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
+    return isinstance(obj, GeneralEducationAdmission) and obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
 
 
 @predicate(bind=True)

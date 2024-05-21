@@ -685,7 +685,7 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
 
         cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = cls.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
+        patched.return_value = {"name": "test.pdf", "size": 1}
 
         cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = cls.get_remote_token_patcher.start()

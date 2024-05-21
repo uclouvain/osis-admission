@@ -738,6 +738,9 @@ msgstr ""
 msgid "Approval condition by faculty"
 msgstr ""
 
+msgid "Approval for a late enrolment"
+msgstr ""
+
 msgid "Approval for another training"
 msgstr ""
 
@@ -804,6 +807,12 @@ msgstr ""
 
 msgid ""
 "Are you sure you want to go back to the \"Application confirmed\" status?"
+msgstr ""
+
+msgid "Are you sure you want to realize this deletion?"
+msgstr ""
+
+msgid "Are you sure you want to realize this duplication?"
 msgstr ""
 
 #, python-format
@@ -6539,6 +6548,10 @@ msgstr ""
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr ""
 
+msgid ""
+"The proposition must be a late enrollment with a defined access condition."
+msgstr ""
+
 msgid "The proposition must be concerned by the payment."
 msgstr ""
 
@@ -6927,6 +6940,9 @@ msgid "Transcript translation"
 msgstr ""
 
 msgid "Transcript type"
+msgstr ""
+
+msgid "Transfer to SIC"
 msgstr ""
 
 msgid "Trigger the payment hook"

@@ -28,10 +28,12 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
+from admission.auth.predicates import not_in_continuing_statuses_predicate_message
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE,
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE,
 )
 from osis_role.errors import predicate_failed_msg
 
@@ -54,3 +56,14 @@ def in_progress(self, user: User, obj: ContinuingEducationAdmission):
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: ContinuingEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_continuing_statuses_predicate_message(STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE),
+)
+def in_manager_status(self, user: User, obj: ContinuingEducationAdmission):
+    return (
+        isinstance(obj, ContinuingEducationAdmission)
+        and obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE
+    )

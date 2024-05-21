@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from typing import List
 
 from django import forms
@@ -43,11 +44,11 @@ from admission.ddd.admission.enums import (
     ChoixTypeCompteBancaire,
     ChoixAffiliationSport,
 )
-from admission.templatetags.admission import get_academic_year
 from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.fields import RadioBooleanField
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.utils.mark_safe_lazy import mark_safe_lazy
+from education_group.templatetags.academic_year_display import get_academic_year
 from reference.services.iban_validator import (
     IBANValidatorService,
     IBANValidatorException,

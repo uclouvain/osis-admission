@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List, Optional
 
-from django.db.models import QuerySet, Max, Q
+from django.db.models import QuerySet, Max, Q, F
 
 from admission.contrib.models.base import (
     BaseAdmission,
@@ -85,11 +85,18 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 baseadmission=admission,
                 **additional_filters,
             )
+            .annotate(last_year=Max('educationalexperience__educationalexperienceyear__academic_year__year'))
             .filter(
                 Q(educationalexperience__obtained_diploma=True)
-                | Q(educationalexperience__educationalexperienceyear__result=Result.WAITING_RESULT.name)
+                | Q(
+                    educationalexperience__educationalexperienceyear__result__in=[
+                        Result.WAITING_RESULT.name,
+                        Result.SUCCESS_WITH_RESIDUAL_CREDITS.name,
+                    ],
+                    educationalexperience__educationalexperienceyear__academic_year__year=F('last_year'),
+                )
             )
-            .annotate(last_year=Max('educationalexperience__educationalexperienceyear__academic_year__year'))
+            .distinct()
             .select_related('educationalexperience__country')
         )
 
