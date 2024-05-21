@@ -314,7 +314,15 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
         self.general_admission.save()
 
-        response = self.client.post(self.url, data={}, **self.default_headers)
+        # Choose an existing reason
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-approval-final-subject': 'subject',
+                'sic-decision-approval-final-body': 'body',
+            },
+            **self.default_headers,
+        )
 
         # Check the response
         self.assertEqual(response.status_code, 200)
