@@ -897,6 +897,12 @@ msgid ""
 "Are you sure you want to go back to the \"Application confirmed\" status?"
 msgstr "Êtes-vous sûr·e de vouloir repasser à l'état \"Demande confirmée\" ?"
 
+msgid "Are you sure you want to realize this deletion?"
+msgstr "Êtes-vous sûr·e de vouloir réaliser cette suppression ?"
+
+msgid "Are you sure you want to realize this duplication?"
+msgstr "Êtes-vous sûr·e de vouloir réaliser cette duplication ?"
+
 #, python-format
 msgid "Are you sure you want to refuse \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir refuser \"%(object)s\" ?"

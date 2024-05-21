@@ -1,0 +1,64 @@
+{% load i18n strings %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain
+  (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if edit_link_button %}
+  <div class="btn-group btn-group-sm" role="group">
+    <a
+        class="btn btn-default"
+        href="{{ edit_link_button }}"
+    >
+      <i class="fas fa-edit"></i>
+    </a>
+
+    {% if duplicate_link_button %}
+      {% concat 'duplicate-experience-modal-single-' experience.uuid.hex as duplicate_modal_id %}
+      <button
+          class="btn btn-default"
+          data-toggle="modal"
+          data-target="#{{ duplicate_modal_id }}"
+      >
+        <i class="fas fa-copy"></i>
+      </button>
+      {% translate 'Duplication of an experience' as confirm_title %}
+      {% translate 'Are you sure you want to realize this duplication?' as confirm_message %}
+      {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=duplicate_link_button confirm_message=confirm_message confirm_id=duplicate_modal_id confirm_button_class="btn-primary" %}
+    {% endif %}
+    {% if delete_link_button %}
+      {% concat 'delete-experience-modal-single-' experience.uuid.hex as delete_modal_id %}
+      <button
+          class="btn btn-default"
+          data-toggle="modal"
+          data-target="#{{ delete_modal_id }}"
+      >
+        <i class="fas fa-xmark"></i>
+      </button>
+      {% translate 'Deletion of an experience' as confirm_title %}
+      {% translate 'Are you sure you want to realize this deletion?' as confirm_message %}
+      {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=delete_link_button confirm_message=confirm_message confirm_id=delete_modal_id %}
+    {% endif %}
+  </div>
+{% endif %}
