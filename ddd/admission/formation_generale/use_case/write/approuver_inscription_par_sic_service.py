@@ -45,6 +45,7 @@ def approuver_inscription_par_sic(
     cmd: ApprouverInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    notification: 'INotification',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
@@ -102,8 +103,14 @@ def approuver_inscription_par_sic(
         noma=noma
     )
 
+    message = notification.accepter_proposition_par_sic(
+        proposition=proposition,
+        objet_message=cmd.objet_message,
+        corps_message=cmd.corps_message,
+    )
     historique.historiser_acceptation_sic(
         proposition=proposition,
+        message=message,
         gestionnaire=cmd.auteur,
     )
 
