@@ -173,14 +173,23 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
                 models = cls._find_models_with_fk_to_person()
                 for model, field_name in models:
                     if model == BaseAdmission:
-                        updated_count = model.objects.filter(
+                        admissions = model.objects.filter(
                             **{field_name: person_merge_proposal.original_person}
-                        ).update(
-                            valuated_secondary_studies_person=known_person,
-                            candidate_id=known_person.id
                         )
-                        logger.info(
-                            f'Updated {updated_count} instances of {model.__name__} for fields valuated_secondary_studies_person and candidate_id.')
+                        for admission in admissions:
+                            if admission.valuated_secondary_studies_person:
+                                admission.valuated_secondary_studies_person = known_person
+                                admission.candidate_id = known_person.id
+                                admission.save()
+                                logger.info(
+                                    f'Updated {admission} instances of {model.__name__} '
+                                    f'for fields valuated_secondary_studies_person and candidate_id.'
+                                )
+                            else:
+                                admission.candidate_id = known_person.id
+                                admission.save()
+                                logger.info(
+                                f'Updated {admission} instances of {model.__name__} for candidate_id.')
                     else:
                         updated_count = model.objects.filter(
                             **{field_name: person_merge_proposal.original_person}
@@ -211,7 +220,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
     @classmethod
     def _find_models_with_fk_to_person(cls):
         models_with_fk = []
-        for model in apps.get_models():
+        for model in [model for model in apps.get_models() if model != PersonMergeProposal]:
             for field in model._meta.get_fields():
                 if isinstance(field, ForeignKey) and field.related_model == Person:
                     models_with_fk.append((model, field.name))
