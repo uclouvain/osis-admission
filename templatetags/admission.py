@@ -1137,6 +1137,33 @@ def bg_class_by_checklist_experience(experience):
     }.get(experience.__class__, '')
 
 
+@register.simple_tag(takes_context=True)
+def experience_valuation_url(context, experience):
+    base_namespace = context['view'].base_namespace
+    admission_uuid = context['view'].kwargs.get('uuid', '')
+    next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
+
+    if isinstance(experience, ExperienceAcademiqueDTO):
+        return (
+            resolve_url(
+                f'{base_namespace}:update:curriculum:educational_valuate',
+                uuid=admission_uuid,
+                experience_uuid=experience.uuid,
+            )
+            + next_url_suffix
+        )
+    if isinstance(experience, ExperienceNonAcademiqueDTO):
+        return (
+            resolve_url(
+                f'{base_namespace}:update:curriculum:non_educational_valuate',
+                uuid=admission_uuid,
+                experience_uuid=experience.uuid,
+            )
+            + next_url_suffix
+        )
+    return ''
+
+
 @register.inclusion_tag('admission/includes/custom_base_template.html', takes_context=True)
 def experience_details_template(
     context,

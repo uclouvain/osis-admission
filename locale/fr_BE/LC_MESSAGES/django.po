@@ -2434,6 +2434,9 @@ msgstr ""
 "Confirmez-vous l'envoi de ce mail à l'adresse <a href=\"mailto:"
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> ?"
 
+msgid "Do you confirm the valuation of this experience?"
+msgstr "Confirmez-vous la valorisation de cette expérience ?"
+
 msgid "Do you have a Belgian National Register Number (NISS)?"
 msgstr "Avez-vous un numéro de registre national belge (NISS) ?"
 
@@ -7030,6 +7033,9 @@ msgstr ""
 msgid "The element has not been found."
 msgstr "L'élément n'a pas été trouvé"
 
+msgid "The experience has been valuated."
+msgstr "L'expérience a été valorisée."
+
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées via cette admission."
 
@@ -7814,6 +7820,9 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
+
+msgid "Valuate"
+msgstr "Valoriser"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"

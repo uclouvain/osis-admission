@@ -2256,6 +2256,9 @@ msgid ""
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
 msgstr ""
 
+msgid "Do you confirm the valuation of this experience?"
+msgstr ""
+
 msgid "Do you have a Belgian National Register Number (NISS)?"
 msgstr ""
 
@@ -6413,6 +6416,9 @@ msgstr ""
 msgid "The element has not been found."
 msgstr ""
 
+msgid "The experience has been valuated."
+msgstr ""
+
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
@@ -7107,6 +7113,9 @@ msgstr ""
 
 msgctxt "decision-checklist"
 msgid "Validated"
+msgstr ""
+
+msgid "Valuate"
 msgstr ""
 
 msgid "Valuated diplomas or experiences:"
