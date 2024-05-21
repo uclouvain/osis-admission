@@ -38,6 +38,7 @@ from admission.ddd.admission.repository.i_proposition_fusion_personne import IPr
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from osis_common.utils.models import get_object_or_none
+from osis_profile.models import ProfessionalExperience, EducationalExperience
 from reference.models.country import Country
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -190,6 +191,18 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
                                 admission.save()
                                 logger.info(
                                 f'Updated {admission} instances of {model.__name__} for candidate_id.')
+                    elif model == ProfessionalExperience or model == EducationalExperience:
+                        experiences = model.objects.filter(
+                            **{field_name: person_merge_proposal.original_person}
+                        )
+                        curex_to_merge = (person_merge_proposal.professional_curex_to_merge +
+                                          person_merge_proposal.educational_curex_to_merge)
+                        for experience in experiences:
+                            if experience.uuid in curex_to_merge:
+                                experience.person_id = known_person.id
+                                experience.save()
+                            else:
+                                experience.delete()
                     else:
                         updated_count = model.objects.filter(
                             **{field_name: person_merge_proposal.original_person}
