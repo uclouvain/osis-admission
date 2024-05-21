@@ -39,7 +39,6 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -102,6 +101,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -1155,6 +1155,7 @@ def experience_details_template(
     :return: The rendered template
     """
     next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
+    delete_next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur'
     res_context = {
         'is_general': resume_proposition.est_proposition_generale,
         'is_continuing': resume_proposition.est_proposition_continue,
@@ -1166,29 +1167,75 @@ def experience_details_template(
     if experience.__class__ == ExperienceAcademiqueDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
         res_context['title'] = _('Academic experience')
-        res_context['edit_link_button'] = (
-            reverse(
-                'admission:general-education:update:curriculum:educational',
-                args=[resume_proposition.proposition.uuid, experience.uuid],
+        res_context['with_single_header_buttons'] = True
+
+        if with_edit_link_button:
+            res_context['edit_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:educational',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
             )
-            + next_url_suffix
-            if with_edit_link_button
-            else None
-        )
+
+            res_context['duplicate_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:educational_duplicate',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
+            )
+
+            res_context['delete_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:educational_delete',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + delete_next_url_suffix
+            )
+
+        else:
+            res_context['edit_link_button'] = None
+            res_context['duplicate_link_button'] = None
+            res_context['delete_link_button'] = None
+
         res_context.update(get_educational_experience_context(resume_proposition, experience))
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
         res_context['title'] = _('Non-academic experience')
-        res_context['edit_link_button'] = (
-            reverse(
-                'admission:general-education:update:curriculum:non_educational',
-                args=[resume_proposition.proposition.uuid, experience.uuid],
+        res_context['with_single_header_buttons'] = True
+
+        if with_edit_link_button:
+            res_context['edit_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:non_educational',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
             )
-            + next_url_suffix
-            if with_edit_link_button
-            else None
-        )
+
+            res_context['duplicate_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:non_educational_duplicate',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
+            )
+
+            res_context['delete_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:non_educational_delete',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + delete_next_url_suffix
+            )
+
+        else:
+            res_context['edit_link_button'] = None
+            res_context['duplicate_link_button'] = None
+            res_context['delete_link_button'] = None
+
         res_context.update(get_non_educational_experience_context(experience))
 
     elif experience.__class__ == EtudesSecondairesAdmissionDTO:

@@ -22,7 +22,16 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% panel title=title edit_link_button=edit_link_button %}
+<div class="panel panel-default">
+{% if title %}
+  <div class="panel-heading flex-content">
+    <h4 class="panel-title">{{ title }}</h4>
+    {% if with_single_header_buttons %}
+      {% include 'admission/general_education/includes/checklist/previous_experience_single_header_buttons.html' %}
+    {% endif %}
+  </div>
+{% endif %}
+<div class="panel-body">
   <div class="row">
     <div class="col-md-6">
       {% field_data _('Start date') experience.date_debut|date:"YEAR_MONTH_FORMAT"|capfirst %}
@@ -59,4 +68,5 @@
   {% if not is_continuing %}
     {% field_data CURRICULUM_ACTIVITY_LABEL|get_item:experience.type experience.certificat %}
   {% endif %}
-{% endpanel %}
+  </div>
+</div>

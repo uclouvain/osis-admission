@@ -211,7 +211,7 @@ class PDFGeneration(IPDFGeneration):
 
                 context['access_titles_names'].append(
                     next(
-                        experience.titre_formate
+                        experience.titre_pdf_decision_fac
                         for experience in {
                             TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE: cv_dto.experiences_non_academiques,
                             TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE: cv_dto.experiences_academiques,

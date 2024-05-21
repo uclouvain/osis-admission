@@ -75,6 +75,12 @@ templates.register(
             "des impératifs pédagogiques.",
         ),
         Token(
+            name='enrolment_sentence',
+            description=_('Sentence indicating the start date of the enrollment processing (if applicable).'),
+            example="Pour votre bonne information, les dossiers d’inscription pour l’année académique 2024-2025 seront "
+            "traités à partir de juillet 2024.",
+        ),
+        Token(
             name='recap_link',
             description=_("Link to download a copy of the file related to the admission (frontoffice)."),
             example="https://dev.studies.uclouvain.be/somewhere",
