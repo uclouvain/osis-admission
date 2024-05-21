@@ -262,6 +262,9 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             if has_comment:
                 checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
 
+        if self.proposition.type == TypeDemande.INSCRIPTION.name and self.proposition.est_inscription_tardive:
+            checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
+
         context['checklist_additional_icons'] = checklist_additional_icons
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
