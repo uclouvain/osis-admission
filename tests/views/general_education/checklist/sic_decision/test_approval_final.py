@@ -314,7 +314,10 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         # Choose an existing reason
         response = self.client.post(
             self.url,
-            data={},
+            data={
+                'sic-decision-approval-final-subject': 'subject',
+                'sic-decision-approval-final-body': 'body',
+            },
             **self.default_headers,
         )
 

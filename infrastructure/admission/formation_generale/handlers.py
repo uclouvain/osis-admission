@@ -595,6 +595,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
+            notification=Notification(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),

@@ -1119,18 +1119,13 @@ class SicDecisionFinalApprovalForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        is_inscription = kwargs.pop('is_inscription')
         super().__init__(*args, **kwargs)
-        if is_inscription:
-            del self.fields['subject']
-            del self.fields['body']
-        else:
-            self.fields['body'].widget.attrs['data-config'] = json.dumps(
-                {
-                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
-                    'language': get_language(),
-                }
-            )
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                'language': get_language(),
+            }
+        )
 
 
 class FinancabiliteApprovalForm(forms.ModelForm):
