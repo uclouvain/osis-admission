@@ -49,6 +49,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldTitreAccesEtreSelectionne,
     ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
+    ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
 )
 from ._should_informations_complementaires_etre_completes import (
     ShouldVisaEtreComplete,

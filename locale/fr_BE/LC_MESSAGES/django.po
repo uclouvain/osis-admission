@@ -823,6 +823,9 @@ msgstr "Attestation d'accord facultaire"
 msgid "Approval condition by faculty"
 msgstr "Condition d'acceptation par la faculté"
 
+msgid "Approval for a late enrolment"
+msgstr "Accord pour une inscription tardive"
+
 msgid "Approval for another training"
 msgstr "Accord pour une autre formation "
 
@@ -7178,6 +7181,12 @@ msgstr "Le programme est d'ores et déjà complet"
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée"
 
+msgid ""
+"The proposition must be a late enrollment with a defined access condition."
+msgstr ""
+"La proposition doit être une inscription tardive avec une condition d'accès "
+"définie."
+
 msgid "The proposition must be concerned by the payment."
 msgstr "La proposition doit être concernée par le paiement."
 
@@ -7626,6 +7635,9 @@ msgstr "Traduction du relevé de notes"
 
 msgid "Transcript type"
 msgstr "Type de relevé de notes"
+
+msgid "Transfer to SIC"
+msgstr "Transmettre en SIC"
 
 msgid "Trigger the payment hook"
 msgstr "Déclencher le webhook de paiement"

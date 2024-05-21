@@ -70,3 +70,4 @@ from .modifier_authentification_experience_parcours_anterieur_service import (
     modifier_authentification_experience_parcours_anterieur,
 )
 from .annuler_reclamation_documents_au_candidat_service import annuler_reclamation_documents_au_candidat
+from .approuver_inscription_tardive_par_faculte_service import approuver_inscription_tardive_par_faculte
