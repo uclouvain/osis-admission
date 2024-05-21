@@ -40,7 +40,7 @@
   <div style="display:flex; flex-direction: row;">
     <div class="original-person-data" style="flex: 1;">
 
-    {% if proposition_fusion.status == "MERGED" %}
+    {% if proposition_fusion.status == "IN_PROGRESS" %}
       <div class="alert alert-warning">
         Données originales fournies par le candidat
       </div>
@@ -72,7 +72,7 @@
       {% field_data _("Contact language") identification.nom_langue_contact %}
     </div>
 
-{% if proposition_fusion.status == "MERGED" %}
+{% if proposition_fusion.status == "IN_PROGRESS" %}
 
     <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
 
@@ -145,7 +145,7 @@
 
         </div>
 
-    {% if proposition_fusion.status == "MERGED" %}
+    {% if proposition_fusion.status == "IN_PROGRESS" %}
 
         <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
 
@@ -185,7 +185,7 @@
       {% endif %}
     </div>
 
-    {% if proposition_fusion.status == "MERGED" %}
+    {% if proposition_fusion.status == "IN_PROGRESS" %}
 
         <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
 

@@ -23,8 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import logging
 from typing import Optional, List
 
+from django.conf import settings
+from django.db.models import Model, ForeignKey
+
+from django.apps import apps
+
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
@@ -32,6 +39,8 @@ from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from osis_common.utils.models import get_object_or_none
 from reference.models.country import Country
+
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
 class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
@@ -88,7 +97,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             original_person__global_id=global_id,
             defaults={
                 "proposal_merge_person_id": merge_person.id,
-                "status": PersonMergeStatus.MERGED.name if status == "MERGE" else PersonMergeStatus.PENDING.name,
+                "status": PersonMergeStatus.IN_PROGRESS.name if status == "MERGE" else PersonMergeStatus.PENDING.name,
                 "selected_global_id": selected_global_id,
                 "professional_curex_to_merge": professional_curex_ids,
                 "educational_curex_to_merge": educational_curex_ids,
@@ -102,7 +111,8 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
         person_merge_proposal = get_object_or_none(
             PersonMergeProposal, original_person__global_id=global_id
         )
-        country = person_merge_proposal.proposal_merge_person.country_of_citizenship
+        country = person_merge_proposal.proposal_merge_person.country_of_citizenship \
+            if person_merge_proposal and person_merge_proposal.proposal_merge_person else None
         return PropositionFusionPersonneDTO(
             status=person_merge_proposal.status,
             matricule=person_merge_proposal.selected_global_id,
@@ -145,3 +155,64 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             }
         )
         return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)
+
+    @classmethod
+    def fusionner(cls, candidate_global_id: str):
+        person_merge_proposal = get_object_or_none(
+            PersonMergeProposal, original_person__global_id=candidate_global_id
+        )
+        if person_merge_proposal and person_merge_proposal.status == PersonMergeStatus.IN_PROGRESS.name:
+            known_person_global_id = person_merge_proposal.selected_global_id
+            known_person = get_object_or_none(Person, global_id=known_person_global_id)
+
+            if known_person:
+                person_to_merge = person_merge_proposal.proposal_merge_person
+                cls._update_non_empty_fields(person_to_merge, known_person)
+                known_person.save()
+
+                models = cls._find_models_with_fk_to_person()
+                for model, field_name in models:
+                    if model == BaseAdmission:
+                        updated_count = model.objects.filter(
+                            **{field_name: person_merge_proposal.original_person}
+                        ).update(
+                            valuated_secondary_studies_person=known_person,
+                            candidate_id=known_person.id
+                        )
+                        logger.info(
+                            f'Updated {updated_count} instances of {model.__name__} for fields valuated_secondary_studies_person and candidate_id.')
+                    else:
+                        updated_count = model.objects.filter(
+                            **{field_name: person_merge_proposal.original_person}
+                        ).update(**{field_name: known_person})
+                        logger.info(f'Updated {updated_count} instances of {model.__name__}.')
+
+                person_merge_proposal.status = PersonMergeStatus.MERGED.name
+                person_merge_proposal.save()
+
+                person_to_merge.delete()
+
+    @classmethod
+    def _update_non_empty_fields(cls, source_obj: Model, target_obj: Model):
+        """
+        Update non-empty fields from source_obj to target_obj.
+        """
+        for field in source_obj._meta.fields:
+            field_name = field.name
+            source_value = getattr(source_obj, field_name)
+
+            # Skip if the field is empty or uuid or it's the primary key
+            if field.primary_key or field.name == 'uuid' or not source_value:
+                continue
+
+            setattr(target_obj, field_name, source_value)
+
+
+    @classmethod
+    def _find_models_with_fk_to_person(cls):
+        models_with_fk = []
+        for model in apps.get_models():
+            for field in model._meta.get_fields():
+                if isinstance(field, ForeignKey) and field.related_model == Person:
+                    models_with_fk.append((model, field.name))
+        return models_with_fk

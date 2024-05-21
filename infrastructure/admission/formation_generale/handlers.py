@@ -27,7 +27,8 @@ from admission.ddd.admission.commands import \
     (RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand,
      DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand,
      RefuserPropositionFusionCommand, GetStatutTicketPersonneQuery, RetrieveListeTicketsEnAttenteQuery,
-     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, ValiderTicketPersonneCommand)
+     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, ValiderTicketPersonneCommand,
+     FusionnerCandidatAvecPersonneExistanteCommand)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
@@ -81,6 +82,8 @@ from admission.ddd.admission.use_case.write import (
 )
 from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import \
     defaire_proposition_fusion_personne
+from admission.ddd.admission.use_case.write.fusionner_candidat_avec_personne_existante import \
+    fusionner_candidat_avec_personne_existante
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import \
     initialiser_proposition_fusion_personne
 from admission.ddd.admission.use_case.write.recuperer_statut_ticket_personne_de_digit import \
@@ -684,5 +687,11 @@ COMMAND_HANDLERS = {
             cmd,
             digit_repository=DigitRepository(),
         )
-    )
+    ),
+    FusionnerCandidatAvecPersonneExistanteCommand: (
+        lambda msg_bus, cmd: fusionner_candidat_avec_personne_existante(
+            cmd,
+            proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
+        )
+    ),
 }

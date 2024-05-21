@@ -214,3 +214,8 @@ class RetrieveAndStoreStatutTicketPersonneFromDigitCommand(interface.CommandRequ
 @attr.dataclass(frozen=True, slots=True)
 class RetrieveListeTicketsEnAttenteQuery(interface.QueryRequest):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FusionnerCandidatAvecPersonneExistanteCommand(interface.QueryRequest):
+    candidate_global_id: str

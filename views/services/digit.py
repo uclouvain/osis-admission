@@ -114,7 +114,7 @@ class SearchDigitAccountView(FormView):
         if self._is_valid_for_search(request, candidate):
             return redirect(to=self.request.META.get('HTTP_REFERER'))
 
-        if person_merge_proposal.status == PersonMergeStatus.PENDING.name:
+        if person_merge_proposal and person_merge_proposal.status == PersonMergeStatus.PENDING.name:
             matches = person_merge_proposal.similarity_result
         else:
             matches = search_digit_account(

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,33 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.shortcuts import redirect
-
-from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand
-from backoffice.celery import app
+from admission.ddd.admission.commands import FusionnerCandidatAvecPersonneExistanteCommand
+from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 
 
-@app.task
-def run(request=None):
-    from infrastructure.messages_bus import message_bus_instance
-
-    # Retrieve list of tickets
-    tickets_pending = message_bus_instance.invoke(command=RetrieveListeTicketsEnAttenteQuery())
-
-    for ticket in tickets_pending:
-        status = message_bus_instance.invoke(
-            command=RetrieveAndStoreStatutTicketPersonneFromDigitCommand(global_id=ticket.matricule)
-        )
-
-        if status in ["DONE", "DONE_WITH_WARNINGS"]:
-            message_bus_instance.invoke(
-                command=FusionnerCandidatAvecPersonneExistanteCommand(
-                    candidate_global_id=ticket.matricule,
-                )
-            )
-
-
-    # Handle response when task is ran as a cmd from admin panel
-    if request:
-        return redirect(request.META.get('HTTP_REFERER'))
+def fusionner_candidat_avec_personne_existante(
+        cmd: 'FusionnerCandidatAvecPersonneExistanteCommand',
+        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
+):
+    return proposition_fusion_personne_repository.fusionner(
+        candidate_global_id=cmd.candidate_global_id,
+    )

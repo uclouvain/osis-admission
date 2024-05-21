@@ -80,10 +80,12 @@ class DigitRepository(IDigitRepository):
         candidate = Person.objects.get(global_id=global_id)
 
         # get proposal merge person if any is linked
+        merge_person = None
         proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
         if proposition.exists():
-            person = proposition.get().proposal_merge_person
+            merge_person = proposition.get().proposal_merge_person
 
+        person = merge_person if merge_person else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ticket_response = _request_person_ticket_validation(person, addresses)
 

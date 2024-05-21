@@ -105,7 +105,7 @@ class SearchAccountView(HtmxMixin, FormView):
         display_success_messages(self.request, messages_to_display="La proposition de fusion a été créée avec succès")
         message_bus_instance.invoke(
             InitialiserPropositionFusionPersonneCommand(
-                existing_merge_person_id=self.merge_person.id,
+                existing_merge_person_id=self.merge_person.id if self.merge_person else None,
                 status=self.request.POST.get('action'),
                 original_global_id=self.candidate['global_id'],
                 selected_global_id=format_matricule(self.request.POST.get('global_id')),
