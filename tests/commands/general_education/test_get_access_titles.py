@@ -103,12 +103,14 @@ class GetAccessTitlesViewTestCase(TestCase):
 
         educational_experience_uuid = educational_experience.uuid
 
-        for year in self.academic_years:
+        educational_experience_years = [
             EducationalExperienceYearFactory(
                 educational_experience=educational_experience,
                 result=Result.SUCCESS.name,
                 academic_year=year,
             )
+            for year in self.academic_years
+        ]
 
         # The experience has not been valuated so we don't retrieve the experience
         access_titles = message_bus_instance.invoke(
@@ -164,10 +166,9 @@ class GetAccessTitlesViewTestCase(TestCase):
 
         self.assertEqual(len(access_titles), 0)
 
-        # The diploma has not been obtained but the results of one year are in progress
-        educational_experience.educationalexperienceyear_set.filter(academic_year=self.academic_years[-1]).update(
-            result=Result.WAITING_RESULT.name,
-        )
+        # The diploma has not been obtained but the results of the last year is in progress
+        educational_experience_years[1].result = Result.WAITING_RESULT.name
+        educational_experience_years[1].save()
 
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
@@ -177,6 +178,32 @@ class GetAccessTitlesViewTestCase(TestCase):
 
         self.assertEqual(len(access_titles), 1)
         self.assertIn(educational_experience_uuid, access_titles)
+
+        educational_experience_years[1].result = Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
+        educational_experience_years[1].save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+        self.assertIn(educational_experience_uuid, access_titles)
+
+        # The diploma has not been obtained but the results of the first year is in progress
+        educational_experience_years[1].result = Result.SUCCESS.name
+        educational_experience_years[1].save()
+        educational_experience_years[0].result = Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
+        educational_experience_years[0].save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 0)
 
     def test_get_access_title_with_cv_non_academic_experience(self):
         access_titles: List[TitreAccesSelectionnableDTO]
