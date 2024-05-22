@@ -309,6 +309,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -324,6 +325,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -339,6 +341,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -354,6 +357,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -369,6 +373,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -521,6 +526,62 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.admission_requirement, ConditionAcces.BAC.name)
         self.assertEqual(self.general_admission.admission_requirement_year, self.academic_years[0])
+
+    def test_post_form_with_admission_requirement_and_with_prerequisite_courses(self):
+        master_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=GeneralEducationTrainingFactory(
+                management_entity=self.general_admission.training.management_entity,
+                academic_year=self.general_admission.training.academic_year,
+                education_group_type__name=TrainingType.MASTER_M1.name,
+            ),
+            candidate=self.candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        master_url = resolve_url(self.url_name, uuid=master_general_admission.uuid)
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        # With explicit prerequisite courses
+        response = self.client.post(
+            master_url,
+            **self.default_headers,
+            data={
+                'admission_requirement': ConditionAcces.BAC.name,
+                'admission_requirement_year': self.academic_years[0].pk,
+                'with_prerequisite_courses': False,
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the admission
+        master_general_admission.refresh_from_db()
+
+        self.assertEqual(master_general_admission.admission_requirement, ConditionAcces.BAC.name)
+        self.assertEqual(master_general_admission.admission_requirement_year, self.academic_years[0])
+        self.assertEqual(master_general_admission.with_prerequisite_courses, False)
+
+        # With implicit prerequisite courses
+        response = self.client.post(
+            master_url,
+            **self.default_headers,
+            data={
+                'admission_requirement': ConditionAcces.SNU_TYPE_COURT.name,
+                'admission_requirement_year': self.academic_years[0].pk,
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the admission
+        master_general_admission.refresh_from_db()
+
+        self.assertEqual(master_general_admission.admission_requirement, ConditionAcces.SNU_TYPE_COURT.name)
+        self.assertEqual(master_general_admission.admission_requirement_year, self.academic_years[0])
+        self.assertEqual(master_general_admission.with_prerequisite_courses, True)
 
     def test_post_form_with_admission_requirement_with_access_titles(self):
         self.client.force_login(user=self.sic_manager_user)

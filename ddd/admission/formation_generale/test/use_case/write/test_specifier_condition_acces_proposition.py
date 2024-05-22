@@ -164,6 +164,47 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         self.assertEqual(proposition.condition_acces, ConditionAcces.BAC)
         self.assertEqual(proposition.millesime_condition_acces, 2021)
 
+    def test_should_remplir_automatiquement_question_complements_formation_si_snu_court_comme_condition_acces(self):
+        proposition_id = self.message_bus.invoke(
+            SpecifierConditionAccesPropositionCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                condition_acces=ConditionAcces.BAC.name,
+                millesime_condition_acces=2021,
+                gestionnaire='0123456789',
+            )
+        )
+
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(proposition.condition_acces, ConditionAcces.BAC)
+        self.assertEqual(proposition.avec_complements_formation, None)
+
+        proposition_id = self.message_bus.invoke(
+            SpecifierConditionAccesPropositionCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                condition_acces=ConditionAcces.SNU_TYPE_COURT.name,
+                millesime_condition_acces=2021,
+                gestionnaire='0123456789',
+            )
+        )
+
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(proposition.condition_acces, ConditionAcces.SNU_TYPE_COURT)
+        self.assertEqual(proposition.avec_complements_formation, True)
+
+        proposition_id = self.message_bus.invoke(
+            SpecifierConditionAccesPropositionCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                condition_acces=ConditionAcces.SNU_TYPE_COURT.name,
+                millesime_condition_acces=2021,
+                gestionnaire='0123456789',
+                avec_complements_formation=False,
+            )
+        )
+
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(proposition.condition_acces, ConditionAcces.SNU_TYPE_COURT)
+        self.assertEqual(proposition.avec_complements_formation, False)
+
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(
