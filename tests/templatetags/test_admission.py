@@ -615,7 +615,7 @@ class DisplayTagTestCase(TestCase):
             template_params['custom_base_template'],
             'admission/exports/recap/includes/curriculum_professional_experience.html',
         )
-        self.assertEqual(template_params['title'], _('Non-academic experience'))
+        self.assertEqual(template_params['title'], _('Non-academic activity'))
         self.assertEqual(
             template_params['edit_link_button'],
             '/admissions/general-education/{}/update/curriculum/non_educational/{}?next=mypath&next_hash_url='

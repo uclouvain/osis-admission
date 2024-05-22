@@ -4492,7 +4492,7 @@ msgstr ""
 msgid "Non doctor reason"
 msgstr ""
 
-msgid "Non-academic experience"
+msgid "Non-academic activity"
 msgstr ""
 
 msgid "Non-resident (as defined by government decree)"

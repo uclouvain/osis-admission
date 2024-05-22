@@ -1239,7 +1239,7 @@ def experience_details_template(
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
-        res_context['title'] = _('Non-academic experience')
+        res_context['title'] = _('Non-academic activity')
         res_context['with_single_header_buttons'] = True
 
         if with_edit_link_button:

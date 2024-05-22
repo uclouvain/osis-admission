@@ -4968,8 +4968,8 @@ msgstr "Noma"
 msgid "Non doctor reason"
 msgstr "Justification"
 
-msgid "Non-academic experience"
-msgstr "Expérience non-académique"
+msgid "Non-academic activity"
+msgstr "Activité non-académique"
 
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
