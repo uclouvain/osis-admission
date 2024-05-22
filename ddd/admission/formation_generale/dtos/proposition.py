@@ -185,6 +185,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     millesime_condition_acces: Optional[int]
     type_equivalence_titre_acces: str
     statut_equivalence_titre_acces: str
+    information_a_propos_de_la_restriction: str
     etat_equivalence_titre_acces: str
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date]
 

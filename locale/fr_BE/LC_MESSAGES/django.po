@@ -3883,6 +3883,9 @@ msgstr ""
 "Les informations concernant une éventuelle cotutelle sont à indiquer dans la "
 "partie « Projet doctoral »."
 
+msgid "Information about the restriction"
+msgstr "Information à propos de la restriction"
+
 msgid "Information provided to the candidate."
 msgstr "Information communiquée au candidat."
 

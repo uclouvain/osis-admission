@@ -686,11 +686,13 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
         fields = [
             'foreign_access_title_equivalency_type',
             'foreign_access_title_equivalency_status',
+            'foreign_access_title_equivalency_restriction_about',
             'foreign_access_title_equivalency_state',
             'foreign_access_title_equivalency_effective_date',
         ]
         widgets = {
             'foreign_access_title_equivalency_effective_date': CustomDateInput,
+            'foreign_access_title_equivalency_restriction_about': forms.TextInput,
         }
 
     class Media:
@@ -707,6 +709,9 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
 
         displayed_fields = {
             'foreign_access_title_equivalency_type',
+        }
+        optional_fields = {
+            'foreign_access_title_equivalency_restriction_about',
         }
 
         if equivalency_type in {
@@ -729,6 +734,8 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
                     displayed_fields.add('foreign_access_title_equivalency_effective_date')
 
         for field in self.fields:
+            if field in optional_fields:
+                continue
             if field in displayed_fields:
                 if not cleaned_data.get(field):
                     self.add_error(field, FIELD_REQUIRED_MESSAGE)
