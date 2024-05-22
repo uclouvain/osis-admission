@@ -121,6 +121,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     OngletsChecklist,
+    TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -941,39 +942,46 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def sic_decision_refusal_final_form(self):
-        tokens = {
-            "admission_reference": self.proposition.reference,
-            "candidate": (
-                f"{self.proposition.profil_soumis_candidat.prenom} " f"{self.proposition.profil_soumis_candidat.nom}"
-            )
-            if self.proposition.profil_soumis_candidat
-            else "",
-            "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
-            "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
-            "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
-        }
+        with_email = self.proposition.type_de_refus != TypeDeRefus.REFUS_LIBRE.name
+        subject = ''
+        body = ''
 
-        try:
-            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
-                ADMISSION_EMAIL_SIC_REFUSAL,
-                settings.LANGUAGE_CODE_FR,
-            )
+        if with_email:
+            tokens = {
+                "admission_reference": self.proposition.reference,
+                "candidate": (
+                    f"{self.proposition.profil_soumis_candidat.prenom} "
+                    f"{self.proposition.profil_soumis_candidat.nom}"
+                )
+                if self.proposition.profil_soumis_candidat
+                else "",
+                "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
+                "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+                "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
+            }
 
-            subject = mail_template.render_subject(tokens=tokens)
-            body = mail_template.body_as_html(tokens=tokens)
-        except EmptyMailTemplateContent:
-            subject = ''
-            body = ''
+            try:
+                mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
+                    ADMISSION_EMAIL_SIC_REFUSAL,
+                    settings.LANGUAGE_CODE_FR,
+                )
+
+                subject = mail_template.render_subject(tokens=tokens)
+                body = mail_template.body_as_html(tokens=tokens)
+            except EmptyMailTemplateContent:
+                subject = ''
+                body = ''
 
         return SicDecisionFinalRefusalForm(
             data=self.request.POST
-            if self.request.method == 'POST' and 'sic-decision-refusal-final-subject' in self.request.POST
+            if self.request.method == 'POST' and 'sic-decision-refusal-final-submitted' in self.request.POST
             else None,
             prefix='sic-decision-refusal-final',
             initial={
                 'subject': subject,
                 'body': body,
             },
+            with_email=with_email,
         )
 
     @cached_property
@@ -1179,8 +1187,8 @@ class SicRefusalFinalDecisionView(
                 message_bus_instance.invoke(
                     RefuserAdmissionParSicCommand(
                         uuid_proposition=self.admission_uuid,
-                        objet_message=form.cleaned_data['subject'],
-                        corps_message=form.cleaned_data['body'],
+                        objet_message=form.cleaned_data.get('subject', ''),
+                        corps_message=form.cleaned_data.get('body', ''),
                         auteur=self.request.user.person.global_id,
                     )
                 )
@@ -1188,8 +1196,8 @@ class SicRefusalFinalDecisionView(
                 message_bus_instance.invoke(
                     RefuserInscriptionParSicCommand(
                         uuid_proposition=self.admission_uuid,
-                        objet_message=form.cleaned_data['subject'],
-                        corps_message=form.cleaned_data['body'],
+                        objet_message=form.cleaned_data.get('subject', ''),
+                        corps_message=form.cleaned_data.get('body', ''),
                         auteur=self.request.user.person.global_id,
                     )
                 )

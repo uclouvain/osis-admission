@@ -34,36 +34,47 @@
   <div class="modal-body" style="overflow:auto;">
 
     {% bootstrap_form_errors sic_decision_refusal_final_form %}
+  
+    <input type="hidden" name="sic-decision-refusal-final-submitted">
 
-{#    <a href="#" id="sic-refusal-final-reset-subject" class="btn btn-sm btn-primary reset-button"><i#}
-{#        class="fa fa-rotate-right"></i> {% trans "Reset" %}</a>#}
-    {% bootstrap_field sic_decision_refusal_final_form.subject %}
+    {% if original_admission.refusal_type != 'REFUS_LIBRE' %}
+      {% bootstrap_field sic_decision_refusal_final_form.subject %}
 
-{#    <a href="#" id="sic-refusal-final-reset-body" class="btn btn-sm btn-primary reset-button"><i#}
-{#        class="fa fa-rotate-right"></i> {% trans "Reset" %}</a>#}
-    {% bootstrap_field sic_decision_refusal_final_form.body %}
+      {% bootstrap_field sic_decision_refusal_final_form.body %}
 
-    <p>{% trans "Do you want to send the refusal to the candidate now?" %}</p>
-
+      <p>{% trans "Do you want to send the refusal to the candidate now?" %}</p>
+    {% else %}
+      <p>{% trans "Do you want to refuse the application now?" %}</p>
+    {% endif %}
   </div>
 
   <div class="modal-footer">
-    <a
-        class="btn btn-default"
-        href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="refus" %}"
-        target="_blank"
-    >
-      <i class="fa fa-magnifying-glass"></i>
-      {% translate 'Visualize refusal' %}
-    </a>
-    <button
-        class="btn btn-danger"
-        name="save"
-        {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
-    >
-      <i class="fa fa-envelope"></i>
-      {% translate 'Send' context 'admission' %}
-    </button>
+    {% if original_admission.refusal_type == 'REFUS_LIBRE' %}
+      <button
+          class="btn btn-danger"
+          name="save"
+          {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
+      >
+        {% translate 'Refuse' context 'admission' %}
+      </button>
+    {% else %}
+      <a
+          class="btn btn-default"
+          href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="refus" %}"
+          target="_blank"
+      >
+        <i class="fa fa-magnifying-glass"></i>
+        {% translate 'Visualize refusal' %}
+      </a>
+      <button
+          class="btn btn-danger"
+          name="save"
+          {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
+      >
+        <i class="fa fa-envelope"></i>
+        {% translate 'Send' context 'admission' %}
+      </button>
+    {% endif %}
     <button
         class="btn btn-default"
         data-dismiss="modal"
@@ -75,24 +86,13 @@
   {{ sic_decision_refusal_final_form.initial.subject|json_script:"sic_decision_refusal_final_form_subject" }}
   {{ sic_decision_refusal_final_form.initial.body|json_script:"sic_decision_refusal_final_form_body" }}
 
+  {% if original_admission.refusal_type != 'REFUS_LIBRE' %}
   <script>
-      $('#sic-refusal-final-reset-subject').click((event) => {
-          event.preventDefault();
-          const value = JSON.parse(document.getElementById('sic_decision_refusal_final_form_subject').textContent);
-          $('#id_sic-decision-refusal-final-subject').val(value);
-      });
-
-      $('#sic-refusal-final-reset-body').click((event) => {
-          event.preventDefault();
-          const value = JSON.parse(document.getElementById('sic_decision_refusal_final_form_body').textContent);
-          $('#id_sic-decision-refusal-final-body').val(value);
-          CKEDITOR.instances['id_sic-decision-refusal-final-body'].setData(value);
-      });
-
       $(document).ready(() => {
           initializeCKEditor('id_sic-decision-refusal-final-body');
       });
   </script>
+  {% endif %}
 
   {% if request.htmx %}
     {% if sic_decision_refusal_final_form.is_valid %}

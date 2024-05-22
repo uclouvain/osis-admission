@@ -2452,6 +2452,9 @@ msgstr "Voulez-vous autoriser cette demande de type inscription maintenant ?"
 msgid "Do you want to continue?"
 msgstr "Souhaitez-vous continuer ?"
 
+msgid "Do you want to refuse the application now?"
+msgstr "Voulez-vous refuser la demande maintenant ?"
+
 msgid "Do you want to request the application fee now?"
 msgstr "Voulez-vous réclamer les frais de dossier maintenant ?"
 
@@ -5802,6 +5805,9 @@ msgstr "Refus dossier tardif"
 msgid "REFUS_EQUIVALENCE"
 msgstr "Refus équivalence"
 
+msgid "REFUS_LIBRE"
+msgstr "Refus libre"
+
 msgid "REJECTED"
 msgstr "Rejeté"
 
@@ -5945,6 +5951,10 @@ msgstr "Refus à valider"
 
 msgid "Refusal type"
 msgstr "Type de refus"
+
+msgctxt "admission"
+msgid "Refuse"
+msgstr "Refuser"
 
 msgid "Refuse activity"
 msgstr "Refuser l'activité"

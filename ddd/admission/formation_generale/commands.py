@@ -584,17 +584,17 @@ class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RefuserAdmissionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
-    objet_message: str
-    corps_message: str
     auteur: str
+    objet_message: str = ''
+    corps_message: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)
 class RefuserInscriptionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
-    objet_message: str
-    corps_message: str
     auteur: str
+    objet_message: str = ''
+    corps_message: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

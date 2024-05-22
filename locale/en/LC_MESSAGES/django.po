@@ -1293,9 +1293,6 @@ msgstr ""
 msgid "Cancel the request"
 msgstr ""
 
-#, fuzzy
-#| msgctxt "payment"
-#| msgid "canceled"
 msgid "Canceled"
 msgstr "Canceled"
 
@@ -2144,15 +2141,12 @@ msgstr ""
 msgid "Deletion of an experience"
 msgstr ""
 
-#, fuzzy
-#| msgctxt "admission decision"
-#| msgid "Denied"
 msgid "Denied"
-msgstr "Rejetée"
+msgstr ""
 
 msgctxt "admission decision"
 msgid "Denied"
-msgstr "Rejetée"
+msgstr ""
 
 msgid "Deny reason"
 msgstr ""
@@ -2272,6 +2266,9 @@ msgid "Do you want to authorize this inscription type admission now?"
 msgstr ""
 
 msgid "Do you want to continue?"
+msgstr ""
+
+msgid "Do you want to refuse the application now?"
 msgstr ""
 
 msgid "Do you want to request the application fee now?"
@@ -5278,6 +5275,9 @@ msgstr ""
 msgid "REFUS_EQUIVALENCE"
 msgstr ""
 
+msgid "REFUS_LIBRE"
+msgstr ""
+
 msgid "REJECTED"
 msgstr "Rejected"
 
@@ -5418,6 +5418,10 @@ msgstr ""
 msgid "Refusal type"
 msgstr ""
 
+msgctxt "admission"
+msgid "Refuse"
+msgstr ""
+
 msgid "Refuse activity"
 msgstr ""
 
@@ -5538,10 +5542,8 @@ msgstr ""
 msgid "Resident (as defined by government decree)"
 msgstr ""
 
-#, fuzzy
-#| msgid "Experience not found."
 msgid "Ressource not found."
-msgstr "Expérience non trouvée."
+msgstr ""
 
 msgid "Restore activity to submitted"
 msgstr ""
