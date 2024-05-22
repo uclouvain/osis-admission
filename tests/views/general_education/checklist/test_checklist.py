@@ -232,6 +232,9 @@ class ChecklistViewTestCase(TestCase):
                 documents[non_educational_experience_child_identifier],
             )
         }
+        secondary_studies_documents_identifiers = set(
+            doc.identifiant for doc in documents[secondary_studies_child_identifier]
+        )
         self.assertCountEqual(response.context['read_only_documents'], cv_experiences_documents_identifiers)
 
         past_experiences_documents = set(doc.identifiant for doc in documents[OngletsChecklist.parcours_anterieur.name])
@@ -239,6 +242,7 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertTrue(cv_experiences_documents_identifiers <= past_experiences_documents)
         self.assertTrue(cv_experiences_documents_identifiers <= financeability_documents)
+        self.assertTrue(secondary_studies_documents_identifiers <= past_experiences_documents)
 
         # Two valuated experiences by the current admission -> we retrieve the experiences and their documents
         educational_valuation.baseadmission = self.general_admission
@@ -277,6 +281,10 @@ class ChecklistViewTestCase(TestCase):
                 documents[non_educational_experience_child_identifier],
             )
         }
+        secondary_studies_documents_identifiers = set(
+            doc.identifiant for doc in documents[secondary_studies_child_identifier]
+        )
+
         self.assertEqual(response.context['read_only_documents'], [])
 
         past_experiences_documents = set(doc.identifiant for doc in documents[OngletsChecklist.parcours_anterieur.name])
@@ -284,6 +292,7 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertTrue(cv_experiences_documents_identifiers <= past_experiences_documents)
         self.assertTrue(cv_experiences_documents_identifiers <= financeability_documents)
+        self.assertTrue(secondary_studies_documents_identifiers <= past_experiences_documents)
 
     def test_poursuite_de_cycle_no(self):
         self.training.education_group_type = EducationGroupTypeFactory(name=TrainingType.BACHELOR.name)
