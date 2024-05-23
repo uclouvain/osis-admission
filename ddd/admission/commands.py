@@ -217,5 +217,16 @@ class RetrieveListeTicketsEnAttenteQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class FusionnerCandidatAvecPersonneExistanteCommand(interface.QueryRequest):
+class FusionnerCandidatAvecPersonneExistanteCommand(interface.CommandRequest):
+    candidate_global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererMatriculeDigitQuery(interface.QueryRequest):
+    noma: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierMatriculeCandidatCommand(interface.QueryRequest):
+    digit_global_id: str
     candidate_global_id: str

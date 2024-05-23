@@ -34,6 +34,7 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
     statut_ticket = StatutTicketPersonneDTO(
         request_id=1,
         matricule='123456789',
+        noma='0000000',
         nom='lastname',
         prenom='firstname',
         statut='CREATED',

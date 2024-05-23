@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,23 +22,16 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from typing import List
-
-import attr
-
-from osis_common.ddd import interface
+# ##############################################################################
+from admission.ddd.admission.commands import ModifierMatriculeCandidatCommand
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class StatutTicketPersonneDTO(interface.DTO):
-    request_id: int
-    matricule: str
-    noma: str
-    nom: str
-    prenom: str
-    statut: str
-    errors: List[dict]
-
-    def __str__(self):
-        return f"{self.request_id} - {self.nom.upper()}, {self.prenom} - {self.statut}"
+def modifier_matricule_candidat(
+        cmd: 'ModifierMatriculeCandidatCommand',
+        digit_repository: 'IDigitRepository',
+):
+    return digit_repository.modifier_matricule_candidat(
+        candidate_global_id=cmd.candidate_global_id,
+        digit_global_id=cmd.digit_global_id,
+    )

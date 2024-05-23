@@ -26,7 +26,8 @@
 from django.shortcuts import redirect
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand, \
+    RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand
 from backoffice.celery import app
 
 
@@ -43,11 +44,24 @@ def run(request=None):
         )
 
         if status in ["DONE", "DONE_WITH_WARNINGS"]:
-            message_bus_instance.invoke(
-                command=FusionnerCandidatAvecPersonneExistanteCommand(
-                    candidate_global_id=ticket.matricule,
+            digit_matricule = message_bus_instance.invoke(
+                command=RecupererMatriculeDigitQuery(
+                    noma=ticket.noma,
                 )
             )
+            if digit_matricule == ticket.matricule:
+                message_bus_instance.invoke(
+                    command=FusionnerCandidatAvecPersonneExistanteCommand(
+                        candidate_global_id=digit_matricule,
+                    )
+                )
+            else:
+                message_bus_instance.invoke(
+                    command=ModifierMatriculeCandidatCommand(
+                        candidate_global_id=ticket.matricule,
+                        digit_global_id=digit_matricule
+                    )
+                )
 
 
     # Handle response when task is ran as a cmd from admin panel

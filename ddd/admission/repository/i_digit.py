@@ -52,3 +52,11 @@ class IDigitRepository:
     @classmethod
     def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
         raise NotImplementedError
+
+    @classmethod
+    def get_global_id(cls, noma: str) -> str:
+        raise NotImplementedError
+
+    @classmethod
+    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
+        raise NotImplementedError

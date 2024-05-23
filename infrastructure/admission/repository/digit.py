@@ -35,6 +35,7 @@ from django.db.models import QuerySet
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
+from admission.templatetags.admission import format_matricule
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
@@ -146,12 +147,38 @@ class DigitRepository(IDigitRepository):
             StatutTicketPersonneDTO(
                 request_id=ticket['request_id'],
                 matricule=ticket['person__global_id'],
+                noma=ticket['person__last_registration_id'],
                 nom=ticket['person__last_name'],
                 prenom=ticket['person__first_name'],
                 statut=ticket['status'],
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket['errors']],
             ) for ticket in tickets
         ]
+
+    @classmethod
+    def get_global_id(cls, noma: str) -> str:
+        if settings.MOCK_DIGIT_SERVICE_CALL:
+            return "00000000"
+        else:
+            logger.info(f"DIGIT sent data: NOMA - {noma}")
+            response = requests.post(
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': settings.ESB_AUTHORIZATION,
+                },
+                data=json.dumps({"noma": noma}),
+                url=f"{settings.ESB_API_URL}/{settings.DIGIT_REQUEST_MATRICULE_URL}"
+            )
+            matricule = response.json()['person']['matricule']
+            return response.json()['person']['matricule']
+
+    @classmethod
+    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
+        candidate = Person.objects.get(global_id=candidate_global_id)
+        digit_global_id = format_matricule(digit_global_id)
+        candidate.global_id = digit_global_id
+        candidate.external_id = f"osis.person_{digit_global_id}"
+        candidate.save()
 
 
 def _retrieve_person_ticket_status(request_id: int):
