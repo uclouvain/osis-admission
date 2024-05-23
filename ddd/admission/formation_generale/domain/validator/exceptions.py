@@ -249,3 +249,30 @@ class InscriptionTardiveAvecConditionAccesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The proposition must be a late enrollment with a defined access condition.")
         super().__init__(message, **kwargs)
+
+
+class DemandeDoitEtreAdmissionException(BusinessException):
+    status_code = "FORMATION-GENERALE-28"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be an admission.")
+        super().__init__(message, **kwargs)
+
+
+class DemandeDoitEtreInscriptionException(BusinessException):
+    status_code = "FORMATION-GENERALE-29"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be an enrollment.")
+        super().__init__(message, **kwargs)
+
+
+class EtatChecklistDecisionSicNonValidePourApprouverUneInscription(BusinessException):
+    status_code = "FORMATION-GENERALE-30"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'To approve an enrollment, the status of the checklist for the sic decision must be '
+            '"To be processed" or "Dispensation needed" (with management approval of the dispensation).'
+        )
+        super().__init__(message, **kwargs)

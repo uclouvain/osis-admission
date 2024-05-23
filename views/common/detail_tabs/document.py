@@ -287,6 +287,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     }
     permission_required = 'admission.change_documents_management'
     name = 'document-action'
+    close_modal_on_htmx_request = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

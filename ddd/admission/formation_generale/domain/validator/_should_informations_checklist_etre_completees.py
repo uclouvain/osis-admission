@@ -41,6 +41,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
@@ -49,6 +50,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
+    BesoinDeDerogation,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -65,6 +67,9 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     ParcoursAnterieurNonSuffisantException,
     DocumentAReclamerImmediatException,
     InscriptionTardiveAvecConditionAccesException,
+    DemandeDoitEtreAdmissionException,
+    DemandeDoitEtreInscriptionException,
+    EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -97,6 +102,24 @@ class ShouldSpecifierInformationsAcceptationFacultaire(BusinessValidator):
             or self.avec_conditions_complementaires
             and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
             or not self.nombre_annees_prevoir_programme
+        ):
+            raise InformationsAcceptationFacultaireNonSpecifieesException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldSpecifierInformationsAcceptationFacultaireInscription(BusinessValidator):
+    avec_conditions_complementaires: Optional[bool]
+    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
+
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+
+    def validate(self, *args, **kwargs):
+        if (
+            self.avec_conditions_complementaires is None
+            or self.avec_conditions_complementaires
+            and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
         ):
             raise InformationsAcceptationFacultaireNonSpecifieesException
 
@@ -174,6 +197,38 @@ class ShouldSicPeutDonnerDecision(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC:
             raise SituationPropositionNonSICException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldChecklistEtreDansEtatCorrectPourApprouverInscription(BusinessValidator):
+    checklist_actuelle: StatutsChecklistGenerale
+    besoin_de_derogation: BesoinDeDerogation
+
+    def validate(self, *args, **kwargs):
+        if not (
+            self.checklist_actuelle.decision_sic.statut == ChoixStatutChecklist.INITIAL_CANDIDAT
+            or self.checklist_actuelle.decision_sic.statut == ChoixStatutChecklist.GEST_EN_COURS
+            and self.besoin_de_derogation == BesoinDeDerogation.ACCORD_DIRECTION
+        ):
+            raise EtatChecklistDecisionSicNonValidePourApprouverUneInscription
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDemandeEtreTypeAdmission(BusinessValidator):
+    type_demande: TypeDemande
+
+    def validate(self, *args, **kwargs):
+        if self.type_demande != TypeDemande.ADMISSION:
+            raise DemandeDoitEtreAdmissionException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDemandeEtreTypeInscription(BusinessValidator):
+    type_demande: TypeDemande
+
+    def validate(self, *args, **kwargs):
+        if self.type_demande != TypeDemande.INSCRIPTION:
+            raise DemandeDoitEtreInscriptionException
 
 
 @attr.dataclass(frozen=True, slots=True)

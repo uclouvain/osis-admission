@@ -3892,6 +3892,9 @@ msgstr "Information à propos de la restriction"
 msgid "Information provided to the candidate."
 msgstr "Information communiquée au candidat."
 
+msgid "Information related to an approval"
+msgstr "Informations relatives à une autorisation"
+
 msgid "Initialization of the predefined specific questions"
 msgstr "Initialisation des questions spécifiques prédéfinies"
 
@@ -4869,6 +4872,9 @@ msgstr "Doctorat non trouvé."
 
 msgid "No document"
 msgstr "Pas de document"
+
+msgid "No document is defined as requestable."
+msgstr "Aucun document n'est spécifié comme réclamable."
 
 msgid "No document is defined as requestable. At least one is required."
 msgstr ""
@@ -7215,6 +7221,12 @@ msgstr ""
 "La proposition doit être une inscription tardive avec une condition d'accès "
 "définie."
 
+msgid "The proposition must be an admission."
+msgstr "La proposition doit être une admission."
+
+msgid "The proposition must be an enrollment."
+msgstr "La proposition doit être une inscription."
+
 msgid "The proposition must be concerned by the payment."
 msgstr "La proposition doit être concernée par le paiement."
 
@@ -7538,6 +7550,9 @@ msgstr ""
 "Ce changement d'état va clore la transaction dans l'application de paiement. "
 "Il restera à informer le/la candidat·e."
 
+msgid "This status is not available for the inscription type admissions."
+msgstr "Cet état n’est pas accessible pour les demandes de type Inscription."
+
 msgid "Tick boxes"
 msgstr "Cases à cocher"
 
@@ -7560,6 +7575,15 @@ msgstr "Intitulé de la formation"
 
 msgid "To"
 msgstr "À"
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Dispensation needed\" (with management "
+"approval of the dispensation)."
+msgstr ""
+"Pour approuver une inscription, le statut de la checklist pour la décision "
+"sic doit être \"A traiter\" ou \"Besoin dérogation\" (avec l'accord de la "
+"dérogation par la direction)."
 
 msgid "To be completed"
 msgstr "À compléter"

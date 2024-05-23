@@ -48,6 +48,8 @@
       {% if open_modal %}
       data-toggle="modal"
       data-target="{{ open_modal }}"
+      data-backdrop="static"
+      data-keyboard="false"
       {% elif htmx_post %}
         hx-post="{{ htmx_post }}"
       {% else %}

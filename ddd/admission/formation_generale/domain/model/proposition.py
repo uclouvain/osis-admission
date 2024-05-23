@@ -86,11 +86,13 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     ModifierStatutChecklistParcoursAnterieurValidatorList,
     RefuserParSicValidatorList,
-    ApprouverParSicValidatorList,
+    ApprouverAdmissionParSicValidatorList,
     ApprouverParSicAValiderValidatorList,
     RefuserParSicAValiderValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     ApprouverInscriptionTardiveParFacValidatorList,
+    ApprouverInscriptionParSicValidatorList,
+    SpecifierInformationsApprobationInscriptionValidatorList,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -796,10 +798,9 @@ class Proposition(interface.RootEntity):
         self.besoin_de_derogation = besoin_de_derogation
         self.auteur_derniere_modification = auteur_modification
 
-    def specifier_informations_acceptation_par_sic(
+    def _specifier_informations_de_base_acceptation_par_sic(
         self,
         auteur_modification: str,
-        documents_dto: List[EmplacementDocumentDTO],
         avec_conditions_complementaires: Optional[bool],
         uuids_conditions_complementaires_existantes: Optional[List[str]],
         conditions_complementaires_libres: Optional[List[Dict]],
@@ -809,29 +810,8 @@ class Proposition(interface.RootEntity):
         nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
-        droits_inscription_montant: str,
-        droits_inscription_montant_autre: Optional[float],
-        dispense_ou_droits_majores: str,
-        tarif_particulier: str,
-        refacturation_ou_tiers_payant: str,
-        annee_de_premiere_inscription_et_statut: str,
-        est_mobilite: Optional[bool],
-        nombre_de_mois_de_mobilite: str,
-        doit_se_presenter_en_sic: Optional[bool],
-        communication_au_candidat: str,
-        doit_fournir_visa_etudes: Optional[bool],
     ):
-        ApprouverParSicAValiderValidatorList(
-            statut=self.statut,
-            statut_checklist_parcours_anterieur=self.checklist_actuelle.parcours_anterieur,
-            documents_dto=documents_dto,
-        ).validate()
-        self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
-        self.checklist_actuelle.decision_sic = StatutChecklist(
-            statut=ChoixStatutChecklist.GEST_EN_COURS,
-            libelle=__('Approval'),
-            extra={'en_cours': "approval"},
-        )
+        """Spécifier les informations d'acceptation par SIC communes entre les admissions et les inscriptions."""
         self.auteur_derniere_modification = auteur_modification
 
         self.avec_conditions_complementaires = avec_conditions_complementaires
@@ -865,6 +845,57 @@ class Proposition(interface.RootEntity):
         self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
         self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
 
+    def specifier_informations_acceptation_par_sic(
+        self,
+        auteur_modification: str,
+        documents_dto: List[EmplacementDocumentDTO],
+        avec_conditions_complementaires: Optional[bool],
+        uuids_conditions_complementaires_existantes: Optional[List[str]],
+        conditions_complementaires_libres: Optional[List[Dict]],
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+        droits_inscription_montant: str,
+        droits_inscription_montant_autre: Optional[float],
+        dispense_ou_droits_majores: str,
+        tarif_particulier: str,
+        refacturation_ou_tiers_payant: str,
+        annee_de_premiere_inscription_et_statut: str,
+        est_mobilite: Optional[bool],
+        nombre_de_mois_de_mobilite: str,
+        doit_se_presenter_en_sic: Optional[bool],
+        communication_au_candidat: str,
+        doit_fournir_visa_etudes: Optional[bool],
+    ):
+        ApprouverParSicAValiderValidatorList(
+            statut=self.statut,
+            statut_checklist_parcours_anterieur=self.checklist_actuelle.parcours_anterieur,
+            documents_dto=documents_dto,
+            type_demande=self.type_demande,
+        ).validate()
+        self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Approval'),
+            extra={'en_cours': "approval"},
+        )
+
+        self._specifier_informations_de_base_acceptation_par_sic(
+            auteur_modification=auteur_modification,
+            avec_conditions_complementaires=avec_conditions_complementaires,
+            uuids_conditions_complementaires_existantes=uuids_conditions_complementaires_existantes,
+            conditions_complementaires_libres=conditions_complementaires_libres,
+            avec_complements_formation=avec_complements_formation,
+            uuids_complements_formation=uuids_complements_formation,
+            commentaire_complements_formation=commentaire_complements_formation,
+            nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
+            nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
+            email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+        )
+
         self.droits_inscription_montant = droits_inscription_montant
         self.droits_inscription_montant_autre = droits_inscription_montant_autre
         self.dispense_ou_droits_majores = dispense_ou_droits_majores
@@ -876,6 +907,36 @@ class Proposition(interface.RootEntity):
         self.doit_se_presenter_en_sic = doit_se_presenter_en_sic
         self.communication_au_candidat = communication_au_candidat
         self.doit_fournir_visa_etudes = doit_fournir_visa_etudes
+
+    def specifier_informations_acceptation_inscription_par_sic(
+        self,
+        auteur_modification: str,
+        avec_conditions_complementaires: Optional[bool],
+        uuids_conditions_complementaires_existantes: Optional[List[str]],
+        conditions_complementaires_libres: Optional[List[Dict]],
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+    ):
+        SpecifierInformationsApprobationInscriptionValidatorList(
+            statut=self.statut,
+        ).validate()
+
+        self._specifier_informations_de_base_acceptation_par_sic(
+            auteur_modification=auteur_modification,
+            avec_conditions_complementaires=avec_conditions_complementaires,
+            uuids_conditions_complementaires_existantes=uuids_conditions_complementaires_existantes,
+            conditions_complementaires_libres=conditions_complementaires_libres,
+            avec_complements_formation=avec_complements_formation,
+            uuids_complements_formation=uuids_complements_formation,
+            commentaire_complements_formation=commentaire_complements_formation,
+            nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
+            nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
+            email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+        )
 
     def specifier_motifs_refus_par_sic(
         self,
@@ -912,17 +973,31 @@ class Proposition(interface.RootEntity):
         self.auteur_derniere_modification = auteur_modification
 
     def approuver_par_sic(self, auteur_modification: str, documents_dto: List[EmplacementDocumentDTO]):
-        ApprouverParSicValidatorList(
-            statut=self.statut,
-            avec_conditions_complementaires=self.avec_conditions_complementaires,
-            conditions_complementaires_existantes=self.conditions_complementaires_existantes,
-            conditions_complementaires_libres=self.conditions_complementaires_libres,
-            avec_complements_formation=self.avec_complements_formation,
-            complements_formation=self.complements_formation,
-            nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
-            checklist=self.checklist_actuelle,
-            documents_dto=documents_dto,
-        ).validate()
+        if self.type_demande == TypeDemande.INSCRIPTION:
+            ApprouverInscriptionParSicValidatorList(
+                statut=self.statut,
+                checklist=self.checklist_actuelle,
+                besoin_de_derogation=self.besoin_de_derogation,
+                avec_conditions_complementaires=self.avec_conditions_complementaires,
+                conditions_complementaires_existantes=self.conditions_complementaires_existantes,
+                conditions_complementaires_libres=self.conditions_complementaires_libres,
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
+                documents_dto=documents_dto,
+            ).validate()
+
+        else:
+            ApprouverAdmissionParSicValidatorList(
+                statut=self.statut,
+                avec_conditions_complementaires=self.avec_conditions_complementaires,
+                conditions_complementaires_existantes=self.conditions_complementaires_existantes,
+                conditions_complementaires_libres=self.conditions_complementaires_libres,
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
+                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+                checklist=self.checklist_actuelle,
+                documents_dto=documents_dto,
+            ).validate()
 
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_REUSSITE,

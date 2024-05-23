@@ -3535,6 +3535,9 @@ msgstr ""
 msgid "Information provided to the candidate."
 msgstr ""
 
+msgid "Information related to an approval"
+msgstr ""
+
 msgid "Initialization of the predefined specific questions"
 msgstr ""
 
@@ -4405,6 +4408,9 @@ msgid "No doctorate found."
 msgstr ""
 
 msgid "No document"
+msgstr ""
+
+msgid "No document is defined as requestable."
 msgstr ""
 
 msgid "No document is defined as requestable. At least one is required."
@@ -6566,6 +6572,12 @@ msgid ""
 "The proposition must be a late enrollment with a defined access condition."
 msgstr ""
 
+msgid "The proposition must be an admission."
+msgstr ""
+
+msgid "The proposition must be an enrollment."
+msgstr ""
+
 msgid "The proposition must be concerned by the payment."
 msgstr ""
 
@@ -6842,6 +6854,9 @@ msgid ""
 "The applicant will still need to be informed."
 msgstr ""
 
+msgid "This status is not available for the inscription type admissions."
+msgstr ""
+
 msgid "Tick boxes"
 msgstr ""
 
@@ -6863,6 +6878,12 @@ msgid "Title of the training"
 msgstr ""
 
 msgid "To"
+msgstr ""
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Dispensation needed\" (with management "
+"approval of the dispensation)."
 msgstr ""
 
 msgid "To be completed"

@@ -51,6 +51,7 @@ from admission.ddd.admission.formation_generale.domain.model._comptabilite impor
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    BesoinDeDerogation,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -78,11 +79,14 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
+    ShouldDemandeEtreTypeAdmission,
+    ShouldSpecifierInformationsAcceptationFacultaireInscription,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldNePasAvoirDeDocumentReclameImmediat,
+    ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -390,7 +394,7 @@ class ApprouverInscriptionTardiveParFacValidatorList(TwoStepsMultipleBusinessExc
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
 
     avec_conditions_complementaires: Optional[bool]
@@ -420,6 +424,50 @@ class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidato
                 avec_complements_formation=self.avec_complements_formation,
                 complements_formation=self.complements_formation,
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+            ShouldParcoursAnterieurEtreSuffisant(
+                statut=self.checklist.parcours_anterieur,
+            ),
+            ShouldNePasAvoirDeDocumentReclameImmediat(
+                documents_dto=self.documents_dto,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    checklist: StatutsChecklistGenerale
+    besoin_de_derogation: BesoinDeDerogation
+
+    avec_conditions_complementaires: Optional[bool]
+    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
+
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+
+    documents_dto: List[EmplacementDocumentDTO]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldChecklistEtreDansEtatCorrectPourApprouverInscription(
+                checklist_actuelle=self.checklist,
+                besoin_de_derogation=self.besoin_de_derogation,
+            ),
+            ShouldSpecifierInformationsAcceptationFacultaireInscription(
+                avec_conditions_complementaires=self.avec_conditions_complementaires,
+                conditions_complementaires_existantes=self.conditions_complementaires_existantes,
+                conditions_complementaires_libres=self.conditions_complementaires_libres,
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
             ),
             ShouldParcoursAnterieurEtreSuffisant(
                 statut=self.checklist.parcours_anterieur,
@@ -498,6 +546,7 @@ class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionList
     statut: ChoixStatutPropositionGenerale
     statut_checklist_parcours_anterieur: StatutChecklist
     documents_dto: List[EmplacementDocumentDTO]
+    type_demande: TypeDemande
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -513,6 +562,22 @@ class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionList
             ShouldNePasAvoirDeDocumentReclameImmediat(
                 documents_dto=self.documents_dto,
             ),
+            ShouldDemandeEtreTypeAdmission(
+                type_demande=self.type_demande,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsApprobationInscriptionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(statut=self.statut),
         ]
 
 
