@@ -113,6 +113,7 @@ class DigitRepository(IDigitRepository):
                 request_id=ticket.request_id,
                 matricule=ticket.person.global_id,
                 nom=ticket.person.last_name,
+                noma=ticket.person.last_registration_id,
                 prenom=ticket.person.first_name,
                 statut=ticket.status,
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket.errors],
@@ -160,22 +161,20 @@ class DigitRepository(IDigitRepository):
         if settings.MOCK_DIGIT_SERVICE_CALL:
             return "00000000"
         else:
-            logger.info(f"DIGIT sent data: NOMA - {noma}")
-            response = requests.post(
+            logger.info(f"DIGIT retrive matricule from NOMA - {noma}")
+            response = requests.get(
                 headers={
                     'Content-Type': 'application/json',
                     'Authorization': settings.ESB_AUTHORIZATION,
                 },
-                data=json.dumps({"noma": noma}),
-                url=f"{settings.ESB_API_URL}/{settings.DIGIT_REQUEST_MATRICULE_URL}"
+                url=f"{settings.ESB_API_URL}/{settings.DIGIT_REQUEST_MATRICULE_URL}/{noma}"
             )
             matricule = response.json()['person']['matricule']
-            return response.json()['person']['matricule']
+            return format_matricule(matricule)
 
     @classmethod
     def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
         candidate = Person.objects.get(global_id=candidate_global_id)
-        digit_global_id = format_matricule(digit_global_id)
         candidate.global_id = digit_global_id
         candidate.external_id = f"osis.person_{digit_global_id}"
         candidate.save()
