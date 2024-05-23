@@ -701,7 +701,7 @@ class Proposition(interface.RootEntity):
                 nouveau_millesime_condition_acces = titres_selectionnes[0].annee
 
             # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
-            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT and avec_complements_formation is None:
+            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
                 avec_complements_formation = True
 
         self.auteur_derniere_modification = auteur_modification
