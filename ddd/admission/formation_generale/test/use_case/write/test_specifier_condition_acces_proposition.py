@@ -194,6 +194,20 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(
             SpecifierConditionAccesPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                condition_acces=ConditionAcces.BAC.name,
+                millesime_condition_acces=2021,
+                gestionnaire='0123456789',
+                avec_complements_formation=False,
+            )
+        )
+
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(proposition.condition_acces, ConditionAcces.BAC)
+        self.assertEqual(proposition.avec_complements_formation, False)
+
+        proposition_id = self.message_bus.invoke(
+            SpecifierConditionAccesPropositionCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.SNU_TYPE_COURT.name,
                 millesime_condition_acces=2021,
                 gestionnaire='0123456789',
@@ -203,7 +217,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
 
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition.condition_acces, ConditionAcces.SNU_TYPE_COURT)
-        self.assertEqual(proposition.avec_complements_formation, False)
+        self.assertEqual(proposition.avec_complements_formation, True)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
