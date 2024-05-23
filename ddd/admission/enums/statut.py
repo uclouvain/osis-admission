@@ -98,7 +98,7 @@ STATUTS_TOUTE_PROPOSITION_SOUMISE = list(
 )
 
 STATUTS_TOUTE_PROPOSITION_AUTORISEE = {
-    ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE,
-    ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE,
-    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE,
+    ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+    ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name,
+    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
 }
