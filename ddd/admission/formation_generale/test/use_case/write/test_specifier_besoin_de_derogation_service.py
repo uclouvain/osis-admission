@@ -78,4 +78,4 @@ class TestSpecifierBesoinDeDerogation(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.besoin_de_derogation, BesoinDeDerogation.AVIS_DIRECTION_DEMANDE.name)
+        self.assertEqual(proposition.besoin_de_derogation, BesoinDeDerogation.AVIS_DIRECTION_DEMANDE)

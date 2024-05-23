@@ -159,7 +159,7 @@
                   {{ ''|tab_edit_button:'#choix_formation'|safe }}
                 {% endif %}
               </dt>
-              <dd>
+              <dd class="mb-15">
                 {% with formation=admission.formation %}
                   {% if admission|est_premiere_annee %}
                     {{ formation.sigle }}-1 - {{ formation.intitule|intitule_premiere_annee }} ({{ formation.campus }})
@@ -170,10 +170,10 @@
               </dd>
 
               <dt>{% trans "Number of previous registration" context 'admission' %}</dt>
-              <dd>{% trans "Unavailable" %}</dd>
+              <dd class="mb-15">{% trans "Unavailable" %}</dd>
 
               <dt>{% trans "Number of additional years the candidate can have" context 'admission' %}</dt>
-              <dd>{% trans "Unavailable" %}</dd>
+              <dd class="mb-15">{% trans "Unavailable" %}</dd>
             </dl>
 
             {% panel _("Parcours") %}
@@ -419,18 +419,10 @@
         {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
 
         <div class="info-part">
+          {% include 'admission/general_education/includes/checklist/sic_decision_sic_fraud_status.html' %}
           <dl>
-            <dt>{% trans "Fraudster status from SIC" %}</dt>
-            <dd>
-              {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
-                <span class="bg-danger">{% trans "Fraudster" %}</span>
-              {% else %}
-                {% trans "No fraud identified" %}
-              {% endif %}
-            </dd>
-
             <dt>{% trans "Fraudster status from ARES" %}</dt>
-            <dd>
+            <dd class="mb-15">
               Not implemented yet.
             </dd>
 
@@ -1054,9 +1046,13 @@
     }
 
     #checklist-menu li.active {
-      cursor: pointer;
+      pointer-events: none;
       background: inherit;
       color: inherit;
+    }
+
+    #checklist-menu li.active ul {
+      pointer-events: initial;
     }
 
     #checklist-menu li.active > div > a, #checklist-menu li.active > a {
@@ -1309,7 +1305,7 @@
     }
 
 
-    #requested-documents-selects tbody tr.tab-name {
+    tbody tr.tab-name {
       background-color: #f5f5f5;
     }
 

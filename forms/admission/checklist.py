@@ -765,14 +765,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
 
         for document in documents:
             if document.est_a_reclamer:
-                if document.document_uuids:
-                    label = '<span class="fa-solid fa-paperclip"></span> '
-                else:
-                    label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
-                    label += '<span class="fa-solid fa-building-columns"></span> '
-                label += document.libelle
-
+                label = document.libelle_avec_icone
                 document_field = ChangeRequestDocumentForm.create_change_request_document_field(
                     label=label,
                     document_identifier=document.identifiant,
@@ -927,9 +920,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
 
         # Initialize additional approval conditions field
-        self.fields['with_additional_approval_conditions'].required = True
-
-        self.fields['with_prerequisite_courses'].required = True
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields
@@ -951,8 +941,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         )
 
         self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
-
-        self.fields['program_planned_years_number'].required = True
 
         self.fields['tuition_fees_amount'].required = True
         self.fields['tuition_fees_amount'].choices = [(None, '-')] + self.fields['tuition_fees_amount'].choices
@@ -976,18 +964,30 @@ class SicDecisionApprovalForm(forms.ModelForm):
             self.fields['is_mobility'].required = False
             self.fields['mobility_months_amount'].required = False
 
-        if not self.is_admission:
-            del self.fields['must_report_to_sic']
-        else:
-            self.fields['must_report_to_sic'].required = True
-            self.initial['must_report_to_sic'] = False
-
         if self.is_admission and candidate_nationality_is_no_ue_5:
             self.initial['must_provide_student_visa_d'] = True
         else:
             del self.fields['must_provide_student_visa_d']
 
-        self.fields['communication_to_the_candidate'].required = False
+        if not self.is_admission:
+            self.fields.pop('tuition_fees_amount', None)
+            self.fields.pop('tuition_fees_amount_other', None)
+            self.fields.pop('tuition_fees_dispensation', None)
+            self.fields.pop('particular_cost', None)
+            self.fields.pop('rebilling_or_third_party_payer', None)
+            self.fields.pop('first_year_inscription_and_status', None)
+            self.fields.pop('is_mobility', None)
+            self.fields.pop('mobility_months_amount', None)
+            self.fields.pop('must_report_to_sic', None)
+            self.fields.pop('communication_to_the_candidate', None)
+            self.fields.pop('must_provide_student_visa_d', None)
+        else:
+            self.initial['must_report_to_sic'] = False
+            self.fields['must_report_to_sic'].required = True
+            self.fields['program_planned_years_number'].required = True
+            self.fields['communication_to_the_candidate'].required = False
+            self.fields['with_additional_approval_conditions'].required = True
+            self.fields['with_prerequisite_courses'].required = True
 
     def clean_all_additional_approval_conditions(self):
         # This field can contain uuids of existing conditions or free conditions as strings

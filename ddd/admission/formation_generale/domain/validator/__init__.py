@@ -41,6 +41,8 @@ from ._should_etudes_secondaires_etre_completees import (
 from ._should_informations_checklist_etre_completees import (
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
+    ShouldDemandeEtreTypeAdmission,
+    ShouldDemandeEtreTypeInscription,
     ShouldFacPeutDonnerDecision,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire,
@@ -51,6 +53,8 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
+    ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
+    ShouldSpecifierInformationsAcceptationFacultaireInscription,
 )
 from ._should_informations_complementaires_etre_completes import (
     ShouldVisaEtreComplete,
