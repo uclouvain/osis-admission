@@ -65,7 +65,7 @@ class DigitService(IDigitService):
             niss = re.sub(r'\D', '', niss)
 
         data = {
-            "lastname": nom, "firstname": prenom, "birthDate": date_naissance,
+            "lastname": nom, "firstname": prenom, "birthdate": date_naissance,
             "sex": genre, "nationalRegister": niss, "otherFirstName": autres_prenoms,
         }
         logger.info(
