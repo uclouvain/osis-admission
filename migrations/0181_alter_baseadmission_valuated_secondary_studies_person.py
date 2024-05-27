@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ('base', '0683_personmergeproposal_validation'),
-        ('admission', '0179_alter_email_confirm_enrolment_submission'),
+        ('admission', '0180_merge_20240522_1800'),
     ]
 
     operations = [
