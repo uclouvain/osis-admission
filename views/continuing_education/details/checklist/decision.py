@@ -341,7 +341,7 @@ class SendToFacFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPe
 
         for manager in recipients_managers:
             email_notification = EmailNotification(
-                recipient=manager.person.private_email,
+                recipient=manager.person.email,
                 subject=subject,
                 html_content=body,
                 plain_text_content=transform_html_to_text(body),

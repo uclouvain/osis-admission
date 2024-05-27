@@ -23,10 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email import message_from_string
+
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from osis_notification.models import EmailNotification
 
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
@@ -40,7 +43,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.forms.admission.continuing_education.checklist import (
-    StudentReportForm,
     DecisionFacApprovalForm,
     DecisionFacApprovalChoices,
     DecisionHoldForm,
@@ -504,6 +506,8 @@ class ChecklistViewTestCase(TestCase):
     def test_post_send_to_fac_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
+        self.assertFalse(EmailNotification.objects.filter(person=self.fac_manager_user.person).exists())
+
         url = resolve_url(
             'admission:continuing-education:decision-send-to-fac',
             uuid=self.continuing_admission.uuid,
@@ -520,6 +524,11 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['decision_send_to_fac_form'].is_valid())
+
+        notifications = EmailNotification.objects.filter(person=self.fac_manager_user.person)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.fac_manager_user.person.email)
 
     #### FAC MANAGER
 
