@@ -438,6 +438,12 @@ class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ApprouverInscriptionTardiveParFaculteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str

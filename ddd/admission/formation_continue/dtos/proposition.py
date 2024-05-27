@@ -31,6 +31,7 @@ import attr
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
 )
@@ -50,6 +51,7 @@ class PropositionDTO(interface.DTO):
     soumise_le: Optional[datetime.datetime]
     erreurs: List[Dict[str, str]]
     statut: str
+    profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
     matricule_candidat: str
     prenom_candidat: str

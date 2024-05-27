@@ -567,7 +567,25 @@ class DisplayTagTestCase(TestCase):
                 experience.uuid,
             ),
         )
+        self.assertEqual(
+            template_params['duplicate_link_button'],
+            '/admissions/general-education/{}/update/curriculum/educational/{}/duplicate?next=mypath&next_hash_url='
+            'parcours_anterieur__{}'.format(
+                proposition_uuid,
+                experience.uuid,
+                experience.uuid,
+            ),
+        )
+        self.assertEqual(
+            template_params['delete_link_button'],
+            '/admissions/general-education/{}/update/curriculum/educational/{}/delete?next=mypath&next_hash_url='
+            'parcours_anterieur'.format(
+                proposition_uuid,
+                experience.uuid,
+            ),
+        )
         self.assertEqual(template_params['experience'], experience)
+        self.assertEqual(template_params['with_single_header_buttons'], True)
         self.assertEqual(template_params['is_foreign_experience'], False)
         self.assertEqual(template_params['is_belgian_experience'], True)
         self.assertEqual(template_params['translation_required'], False)
@@ -605,7 +623,25 @@ class DisplayTagTestCase(TestCase):
                 experience.uuid,
             ),
         )
+        self.assertEqual(
+            template_params['duplicate_link_button'],
+            '/admissions/general-education/{}/update/curriculum/non_educational/{}/duplicate?next=mypath&next_hash_url='
+            'parcours_anterieur__{}'.format(
+                proposition_uuid,
+                experience.uuid,
+                experience.uuid,
+            ),
+        )
+        self.assertEqual(
+            template_params['delete_link_button'],
+            '/admissions/general-education/{}/update/curriculum/non_educational/{}/delete?next=mypath&next_hash_url='
+            'parcours_anterieur'.format(
+                proposition_uuid,
+                experience.uuid,
+            ),
+        )
         self.assertEqual(template_params['experience'], experience)
+        self.assertEqual(template_params['with_single_header_buttons'], True)
         self.assertEqual(template_params['CURRICULUM_ACTIVITY_LABEL'], CURRICULUM_ACTIVITY_LABEL)
 
     def test_experience_details_with_secondary_studies(self):

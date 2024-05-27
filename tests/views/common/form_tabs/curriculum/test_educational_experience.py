@@ -71,7 +71,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 
 
-#TODO: Remove duplicate tests with osis_profile
+# TODO: Remove duplicate tests with osis_profile
 class CurriculumEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -152,7 +152,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -1856,7 +1856,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -2052,7 +2052,7 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -2279,6 +2279,7 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.get_several_remote_metadata_patched.return_value = {
             f'token{index}': {
                 'name': f'the_file_{index}.pdf',
+                'size': 1,
             }
             for index in range(len(self.files_uuids))
         }

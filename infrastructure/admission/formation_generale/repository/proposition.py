@@ -791,11 +791,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                             tags__contains=['proposition', 'status-changed'],
                         ).values('created')[:1]
                     ),
-                    student_registration_id=Subquery(
-                        Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
-                            'registration_id'
-                        )[:1],
-                    ),
                 )
                 .select_related(
                     'accounting',

@@ -50,12 +50,12 @@ class SicPatchMixin(TestCase):
 
         self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
+        patched.return_value = {"name": "test.pdf", "size": 1}
         self.addCleanup(self.get_remote_metadata_patcher.stop)
 
         self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
         patched = self.get_several_remote_metadata_patcher.start()
-        patched.return_value = {"foo": {"name": "test.pdf"}}
+        patched.return_value = {"foo": {"name": "test.pdf", "size": 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
         self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
