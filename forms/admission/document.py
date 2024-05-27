@@ -112,8 +112,7 @@ def get_request_status_choices(only_limited_request_choices):
 
 class FreeDocumentHelperFormMixin(forms.Form):
     checklist_tab = forms.ChoiceField(
-        label=pgettext_lazy('admission', 'Checklist'),
-        choices=OTHER_EMPTY_CHOICE,
+        label=_('Document category'),
         required=False,
     )
 
