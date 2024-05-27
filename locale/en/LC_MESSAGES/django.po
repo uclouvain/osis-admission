@@ -671,6 +671,11 @@ msgstr ""
 msgid "Annual programme contact person:"
 msgstr ""
 
+msgid ""
+"Another admission has been authorized for this candidate for this academic "
+"year."
+msgstr ""
+
 msgid "Another admission has been submitted."
 msgstr ""
 
