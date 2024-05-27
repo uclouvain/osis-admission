@@ -689,9 +689,9 @@ class Proposition(interface.RootEntity):
         nouveau_millesime_condition_acces = millesime_condition_acces
         nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
 
-        # Si la condition d'accès a changé, et qu'un seul titre d'accès a été sélectionné,
-        # le millésime correspond à l'année de ce titre
+        # Si la condition d'accès a changé
         if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
+            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
             titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
                 proposition_identity=self.entity_id,
                 seulement_selectionnes=True,
@@ -699,6 +699,10 @@ class Proposition(interface.RootEntity):
 
             if len(titres_selectionnes) == 1:
                 nouveau_millesime_condition_acces = titres_selectionnes[0].annee
+
+            # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
+            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
+                avec_complements_formation = True
 
         self.auteur_derniere_modification = auteur_modification
         self.condition_acces = nouvelle_condition_acces
