@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 # ##############################################################################
 from functools import partial
 
+from django.utils.functional import cached_property
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
@@ -105,17 +106,19 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
     specific_question_answers = AnswerToSpecificQuestionField(write_only=True)
     is_vae_potential = serializers.SerializerMethodField(read_only=True)
     is_valuated = serializers.SerializerMethodField(read_only=True)
+    can_update_diploma = serializers.SerializerMethodField(read_only=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['is_vae_potential'].field_schema = {'type': 'boolean'}
         self.fields['is_valuated'].field_schema = {'type': 'boolean'}
+        self.fields['can_update_diploma'].field_schema = {'type': 'boolean'}
 
     def get_is_vae_potential(self, person):
         return ProfilCandidatTranslator.est_potentiel_vae(person.global_id)
 
     def get_is_valuated(self, person):
-        return ProfilCandidatTranslator.etudes_secondaires_valorisees(person.global_id)
+        return self.valuation.est_valorise
 
     @staticmethod
     def load_diploma(instance):
@@ -163,15 +166,32 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
         if instance.high_school_diploma_alternative:
             instance.high_school_diploma_alternative.delete()
 
-    def update(self, instance, validated_data):
-        if self.get_is_valuated(instance):
-            return instance
+    def get_can_update_diploma(self, person):
+        return self.valuation.diplome_est_modifiable(
+            diplome=(
+                self.instance.belgian_diploma
+                or self.instance.foreign_diploma
+                or self.instance.high_school_diploma_alternative
+            ),
+            formation=self.context.get('training_type'),
+        )
 
+    @cached_property
+    def valuation(self):
+        return ProfilCandidatTranslator.valorisation_etudes_secondaires(matricule=self.instance.global_id)
+
+    def update(self, instance, validated_data):
         self.load_diploma(instance)
 
-        instance.graduated_from_high_school = validated_data.get('graduated_from_high_school')
-        instance.graduated_from_high_school_year = validated_data.get('graduated_from_high_school_year')
-        instance.save()
+        if not self.get_is_valuated(instance):
+            # The base data can only be updated if the secondary studies are not valuated
+            instance.graduated_from_high_school = validated_data.get('graduated_from_high_school')
+            instance.graduated_from_high_school_year = validated_data.get('graduated_from_high_school_year')
+            instance.save()
+
+        # The diploma data can only be updated in a specific case for the admissions for a bachelor
+        if not self.get_can_update_diploma(instance):
+            return instance
 
         belgian_diploma_data = validated_data.get("belgian_diploma")
         foreign_diploma_data = validated_data.get("foreign_diploma")

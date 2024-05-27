@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,8 +40,10 @@ from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationEtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO, CurriculumAExperiencesDTO,
+    ExperienceAcademiqueDTO,
+    CurriculumAExperiencesDTO,
 )
 from osis_common.ddd import interface
 
@@ -125,8 +127,8 @@ class IProfilCandidatTranslator(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
-        """Spécifie si les études secondaires ont été valorisées."""
+    def valorisation_etudes_secondaires(cls, matricule: str) -> ValorisationEtudesSecondairesDTO:
+        """Retourne les données de valorisation des études secondaires."""
         raise NotImplementedError
 
     @classmethod
