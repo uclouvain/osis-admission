@@ -39,6 +39,12 @@ class RechercherFormationContinueQuery(interface.QueryRequest):
     campus: Optional[str] = ''
 
 
+@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
+class RecupererFormationContinueQuery(interface.QueryRequest):
+    sigle: str
+    annee: int
+
+
 @attr.dataclass(frozen=True, slots=True)
 class InitierPropositionCommand(interface.CommandRequest):
     sigle_formation: str
@@ -245,3 +251,41 @@ class ListerDemandesQuery(SortedQueryRequest):
     inscription_requise: Optional[bool] = None
     paye: Optional[bool] = None
     demandeur: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChoixFormationParGestionnaireCommand:
+    uuid_proposition: str
+    gestionnaire: str
+    sigle_formation: str
+    annee_formation: int
+    reponses_questions_specifiques: Dict
+    motivations: str
+    moyens_decouverte_formation: List[str]
+    marque_d_interet: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+    inscription_a_titre: Optional[str] = ''
+    nom_siege_social: Optional[str] = ''
+    numero_unique_entreprise: Optional[str] = ''
+    numero_tva_entreprise: Optional[str] = ''
+    adresse_mail_professionnelle: Optional[str] = ''
+
+    # Adresse facturation
+    type_adresse_facturation: Optional[str] = ''
+    adresse_facturation_rue: Optional[str] = ''
+    adresse_facturation_numero_rue: Optional[str] = ''
+    adresse_facturation_code_postal: Optional[str] = ''
+    adresse_facturation_ville: Optional[str] = ''
+    adresse_facturation_pays: Optional[str] = ''
+    adresse_facturation_destinataire: Optional[str] = ''
+    adresse_facturation_boite_postale: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    copie_titre_sejour: List[str] = attr.Factory(list)
+    documents_additionnels: List[str] = attr.Factory(list)

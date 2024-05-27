@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,15 +55,22 @@ class PersonsAutocompleteTestCase(TestCase):
             password='top_secret',
         )
         # Create candidates
-        cls.first_candidate = CandidateFactory(person=PersonFactory(
-            first_name='John',
-            last_name='Doe',
-        )).person
-        StudentFactory(person=cls.first_candidate, registration_id='0001',)
-        cls.second_candidate = CandidateFactory(person=PersonFactory(
-            first_name='Jane',
-            last_name='Poe',
-        )).person
+        cls.first_candidate = CandidateFactory(
+            person=PersonFactory(
+                first_name='John',
+                last_name='Poe',
+            )
+        ).person
+        StudentFactory(
+            person=cls.first_candidate,
+            registration_id='0001',
+        )
+        cls.second_candidate = CandidateFactory(
+            person=PersonFactory(
+                first_name='Jane',
+                last_name='Poe',
+            )
+        ).person
         StudentFactory(person=cls.second_candidate, registration_id='0002')
 
         # Create promoters
@@ -91,9 +98,7 @@ class PersonsAutocompleteTestCase(TestCase):
         )
 
     def test_candidates_with_name(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'), data={
-            'q': 'oe'
-        })
+        request = self.factory.get(reverse('admission:autocomplete:candidates'), data={'q': 'Poe'})
         request.user = self.user
 
         response = CandidatesAutocomplete.as_view()(request)
@@ -103,16 +108,19 @@ class PersonsAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    self._formatted_person_result(self.first_candidate),
                     self._formatted_person_result(self.second_candidate),
+                    self._formatted_person_result(self.first_candidate),
                 ],
             },
         )
 
     def test_candidates_with_registration_id(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'), data={
-            'q': '0001',
-        })
+        request = self.factory.get(
+            reverse('admission:autocomplete:candidates'),
+            data={
+                'q': '0001',
+            },
+        )
         request.user = self.user
 
         response = CandidatesAutocomplete.as_view()(request)
@@ -149,9 +157,12 @@ class PersonsAutocompleteTestCase(TestCase):
         )
 
     def test_promoters_with_name(self):
-        request = self.factory.get(reverse('admission:autocomplete:promoters'), data={
-            'q': self.first_promoter.first_name,
-        })
+        request = self.factory.get(
+            reverse('admission:autocomplete:promoters'),
+            data={
+                'q': self.first_promoter.first_name,
+            },
+        )
         request.user = self.user
 
         response = PromotersAutocomplete.as_view()(request)

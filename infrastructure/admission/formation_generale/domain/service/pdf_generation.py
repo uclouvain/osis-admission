@@ -44,6 +44,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import TypeDeRefus
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PdfSicInconnu
@@ -437,6 +438,9 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:
+        if proposition.type_de_refus == TypeDeRefus.REFUS_LIBRE.name:
+            return None
+
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
@@ -473,6 +477,9 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:
+        if proposition.type_de_refus == TypeDeRefus.REFUS_LIBRE.name:
+            return None
+
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator

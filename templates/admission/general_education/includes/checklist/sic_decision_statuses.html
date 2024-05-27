@@ -32,14 +32,14 @@
 >
   {% if not proposition|sic_can_edit %}
     {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=True %}
-    {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
   {% elif current|sic_in_final_statut %}
     {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' open_modal='#sic-decision-confirm-modal-INITIAL_CANDIDAT' %}
-    {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
@@ -48,7 +48,7 @@
     {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
     {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' htmx_post=change_status_url %}
     {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-to_be_completed' as change_status_url %}
-    {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' htmx_post=change_status_url %}
+    {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' htmx_post=change_status_url %}
     {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-derogation' as change_status_url %}
     {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' htmx_post=change_status_url %}
     {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" open_modal='#sic-decision-refusal-modal' class='warning' %}

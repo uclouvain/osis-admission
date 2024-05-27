@@ -671,6 +671,11 @@ msgstr ""
 msgid "Annual programme contact person:"
 msgstr ""
 
+msgid ""
+"Another admission has been authorized for this candidate for this academic "
+"year."
+msgstr ""
+
 msgid "Another admission has been submitted."
 msgstr ""
 
@@ -1293,9 +1298,6 @@ msgstr ""
 msgid "Cancel the request"
 msgstr ""
 
-#, fuzzy
-#| msgctxt "payment"
-#| msgid "canceled"
 msgid "Canceled"
 msgstr "Canceled"
 
@@ -1410,6 +1412,13 @@ msgid_plural ""
 "academic year %(academic_year)s: %(names)s."
 msgstr[0] ""
 msgstr[1] ""
+
+msgid ""
+"Certification and short programmes (continuing education) do not allow for "
+"obtaining a visa and residence permit in Belgium. More information: <a "
+"target=\"_blank\" href=\"https://uclouvain.be/en/study/iufc\">https://"
+"uclouvain.be/en/study/iufc</a>."
+msgstr ""
 
 #, python-format
 msgid "Change <em>%(name)s</em> configuration"
@@ -2144,15 +2153,12 @@ msgstr ""
 msgid "Deletion of an experience"
 msgstr ""
 
-#, fuzzy
-#| msgctxt "admission decision"
-#| msgid "Denied"
 msgid "Denied"
-msgstr "Rejetée"
+msgstr ""
 
 msgctxt "admission decision"
 msgid "Denied"
-msgstr "Rejetée"
+msgstr ""
 
 msgid "Deny reason"
 msgstr ""
@@ -2256,6 +2262,9 @@ msgid ""
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
 msgstr ""
 
+msgid "Do you confirm the valuation of this experience?"
+msgstr ""
+
 msgid "Do you have a Belgian National Register Number (NISS)?"
 msgstr ""
 
@@ -2269,6 +2278,9 @@ msgid "Do you want to authorize this inscription type admission now?"
 msgstr ""
 
 msgid "Do you want to continue?"
+msgstr ""
+
+msgid "Do you want to refuse the application now?"
 msgstr ""
 
 msgid "Do you want to request the application fee now?"
@@ -3348,6 +3360,9 @@ msgstr ""
 msgid "I will be graduating from secondary school during the %s academic year"
 msgstr ""
 
+msgid "I would like the billing address to be"
+msgstr ""
+
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
 msgstr ""
@@ -3527,6 +3542,9 @@ msgstr ""
 msgid ""
 "Information about a potential cotutelle are to be inputted in the \"Doctoral "
 "project\" part."
+msgstr ""
+
+msgid "Information about the restriction"
 msgstr ""
 
 msgid "Information provided to the candidate."
@@ -4103,6 +4121,9 @@ msgstr ""
 msgid "Management of the enrolment applications"
 msgstr ""
 
+msgid "Manager follow-up"
+msgstr ""
+
 msgid ""
 "Mandatory fields are missing in the 'Additional information > Specific "
 "questions' tab."
@@ -4296,6 +4317,9 @@ msgid ""
 msgstr ""
 
 msgid "My legal cohabitant"
+msgstr ""
+
+msgid "My legal domicile provided above"
 msgstr ""
 
 msgid "My legal guardian"
@@ -4906,6 +4930,9 @@ msgstr ""
 msgid "Please confirm the change to this new status."
 msgstr ""
 
+msgid "Please enter your work email address"
+msgstr ""
+
 msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
@@ -4949,6 +4976,11 @@ msgstr ""
 msgid ""
 "Please note that this experience was not part of the application when it was "
 "submitted."
+msgstr ""
+
+msgid ""
+"Please provide a copy of the residence permit covering the entire course, "
+"including the assessment test (except for online courses)."
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
@@ -5269,6 +5301,9 @@ msgstr ""
 msgid "REFUS_EQUIVALENCE"
 msgstr ""
 
+msgid "REFUS_LIBRE"
+msgstr ""
+
 msgid "REJECTED"
 msgstr "Rejected"
 
@@ -5409,6 +5444,10 @@ msgstr ""
 msgid "Refusal type"
 msgstr ""
 
+msgctxt "admission"
+msgid "Refuse"
+msgstr ""
+
 msgid "Refuse activity"
 msgstr ""
 
@@ -5529,10 +5568,8 @@ msgstr ""
 msgid "Resident (as defined by government decree)"
 msgstr ""
 
-#, fuzzy
-#| msgid "Experience not found."
 msgid "Ressource not found."
-msgstr "Expérience non trouvée."
+msgstr ""
 
 msgid "Restore activity to submitted"
 msgstr ""
@@ -6332,6 +6369,9 @@ msgstr ""
 msgid "The confirmation paper is not in progress"
 msgstr ""
 
+msgid "The contact address I provided"
+msgstr ""
+
 msgid "The css class must be a string."
 msgstr ""
 
@@ -6411,6 +6451,9 @@ msgid ""
 msgstr ""
 
 msgid "The element has not been found."
+msgstr ""
+
+msgid "The experience has been valuated."
 msgstr ""
 
 msgid "The experiences that have been valuated from this admission."
@@ -6591,6 +6634,9 @@ msgstr ""
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr ""
 
+msgid "The selected training has not been found for this year."
+msgstr ""
+
 #, python-format
 msgid "The selection type must be one of the following values: %(values)s."
 msgstr ""
@@ -6767,6 +6813,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"This course is closed. The candidate can express its interest by ticking the "
+"box below or by contacting a course administrator."
+msgstr ""
+
+msgid ""
 "This document does not represent a commitment of financial support from "
 "UCLouvain."
 msgstr ""
@@ -6891,6 +6942,9 @@ msgstr ""
 msgid ""
 "To move to this state, an admission requirement must have been selected and "
 "at least one access title line must be selected in the past experience views."
+msgstr ""
+
+msgid "To the attention of"
 msgstr ""
 
 msgid ""
@@ -7109,6 +7163,9 @@ msgctxt "decision-checklist"
 msgid "Validated"
 msgstr ""
 
+msgid "Valuate"
+msgstr ""
+
 msgid "Valuated diplomas or experiences:"
 msgstr ""
 
@@ -7321,6 +7378,9 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
+msgid "Yes, I am interested in this course"
+msgstr ""
+
 msgid "Yes, an account number in IBAN format"
 msgstr ""
 
@@ -7388,6 +7448,9 @@ msgid ""
 msgstr ""
 
 msgid "You are enrolling as"
+msgstr ""
+
+msgid "You are registering as"
 msgstr ""
 
 msgid ""

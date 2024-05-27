@@ -50,7 +50,8 @@ from admission.ddd.admission.formation_continue.domain.model.enums import ChoixS
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
-    ExperienceNonAcademiqueDTOFactory, EtudesSecondairesDTOFactory,
+    ExperienceNonAcademiqueDTOFactory,
+    EtudesSecondairesDTOFactory,
 )
 from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
 from admission.templatetags.admission import (
@@ -85,6 +86,7 @@ from admission.templatetags.admission import (
     is_list,
     label_with_user_icon,
     candidate_language,
+    experience_valuation_url,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -673,6 +675,59 @@ class DisplayTagTestCase(TestCase):
             ),
         )
         self.assertEqual(template_params['specific_questions'], specific_questions[Onglets.ETUDES_SECONDAIRES.name])
+
+    def test_experience_valuation_url_with_an_educational_experience(self):
+        proposition_uuid = uuid.uuid4()
+        experience = ExperienceAcademiqueDTOFactory()
+        self.assertEqual(
+            experience_valuation_url(
+                context={
+                    'view': Mock(
+                        kwargs={'uuid': proposition_uuid},
+                        base_namespace='admission:general-education',
+                    ),
+                    'request': Mock(path='mypath'),
+                },
+                experience=experience,
+            ),
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/educational/'
+            f'{experience.uuid}/valuate?next=mypath&next_hash_url=parcours_anterieur__{experience.uuid}',
+        )
+
+    def test_experience_valuation_url_with_a_non_educational_experience(self):
+        proposition_uuid = uuid.uuid4()
+        experience = ExperienceNonAcademiqueDTOFactory()
+        self.assertEqual(
+            experience_valuation_url(
+                context={
+                    'view': Mock(
+                        kwargs={'uuid': proposition_uuid},
+                        base_namespace='admission:general-education',
+                    ),
+                    'request': Mock(path='mypath'),
+                },
+                experience=experience,
+            ),
+            f'/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/'
+            f'{experience.uuid}/valuate?next=mypath&next_hash_url=parcours_anterieur__{experience.uuid}',
+        )
+
+    def test_experience_valuation_url_with_secondary_studies(self):
+        proposition_uuid = uuid.uuid4()
+        experience = EtudesSecondairesDTOFactory()
+        self.assertEqual(
+            experience_valuation_url(
+                context={
+                    'view': Mock(
+                        kwargs={'uuid': proposition_uuid},
+                        base_namespace='admission:general-education',
+                    ),
+                    'request': Mock(path='mypath'),
+                },
+                experience=experience,
+            ),
+            '',
+        )
 
 
 class SimpleAdmissionTemplateTagsTestCase(TestCase):

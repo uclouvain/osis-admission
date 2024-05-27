@@ -76,7 +76,8 @@ class CentralManager(EntityRoleModel):
             'admission.change_admission_coordinates': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.is_doctorate),
             'admission.view_admission_training_choice': is_entity_manager,
-            'admission.change_admission_training_choice': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_training_choice': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.is_doctorate),
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & general.in_sic_status,
             'admission.view_admission_secondary_studies': is_entity_manager,
@@ -92,7 +93,8 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_accounting': is_entity_manager,
             'admission.change_admission_accounting': is_entity_manager & general.in_sic_status,
             'admission.view_admission_specific_questions': is_entity_manager,
-            'admission.change_admission_specific_questions': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_specific_questions': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status),
             'admission.view_admission_jury': is_entity_manager,
             'admission.change_admission_jury': is_entity_manager,
             'admission.add_supervision_member': is_entity_manager,

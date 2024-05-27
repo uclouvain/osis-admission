@@ -28,8 +28,8 @@ from typing import List, Dict
 from dal_select2.views import Select2ListView, Select2QuerySetView
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, F, Value, Case, When
-from django.db.models.functions import Coalesce, Concat
+from django.db.models import Q, F, Value, Case, When, Exists, OuterRef
+from django.db.models.functions import Concat
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
 
@@ -97,14 +97,23 @@ class ContinuingManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select
     model_field_name = 'formatted_title'
 
     @classmethod
-    def get_base_queryset(cls, user, acronyms=None):
+    def get_base_queryset(cls, user, acronyms=None, academic_year=None, campus=None, **kwargs):
         # Filter on the type of training (continuing education)
         qs = EducationGroupYear.objects.filter(
             education_group_type__name__in=AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES,
         )
 
+        # Filter on the acronym
         if acronyms:
             qs = qs.filter(acronym__in=acronyms)
+
+        # Filter on the academic year
+        if academic_year:
+            qs = qs.filter(academic_year__year=int(academic_year))
+
+        # Filter on the teaching campus
+        if campus:
+            qs = qs.filter(educationgroupversion__root_group__main_teaching_campus__uuid=campus)
 
         # Filter on the permissions of the user
         relevant_roles = _get_relevant_roles(user, 'admission.view_continuing_enrolment_applications')
@@ -129,7 +138,10 @@ class ContinuingManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select
                     if get_language() == settings.LANGUAGE_CODE_FR
                     else Case(When(title_english='', then=F('title')), default=F('title_english')),
                 ),
+                state=F('specificiufcinformations__state'),
+                registration_required=F('specificiufcinformations__registration_required'),
             )
+            .select_related('specificiufcinformations')
             .only('acronym')
             .order_by('acronym')
         )
@@ -137,10 +149,17 @@ class ContinuingManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select
 
     @cached_property
     def queryset(self):
-        return self.get_base_queryset(user=self.request.user)
+        return self.get_base_queryset(user=self.request.user, **self.forwarded)
 
-    def get_result_label(self, result):
-        return result.formatted_title
-
-    def get_result_value(self, result):
-        return result.acronym
+    def get_results(self, context):
+        """Return data for the 'results' key of the response."""
+        return [
+            {
+                'id': result.acronym,
+                'text': result.formatted_title,
+                'selected_text': result.formatted_title,
+                'state': result.state,
+                'registration_required': result.registration_required,
+            }
+            for result in context['object_list']
+        ]

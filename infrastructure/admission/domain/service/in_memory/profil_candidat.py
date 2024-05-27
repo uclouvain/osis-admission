@@ -49,10 +49,13 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.teaching_type import TeachingTypeEnum
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
+    ValorisationEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO, CurriculumAExperiencesDTO,
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+    CurriculumAExperiencesDTO,
 )
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
@@ -77,6 +80,11 @@ class UnfrozenDTO:
 
 @attr.dataclass
 class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
+    pass
+
+
+@attr.dataclass
+class _ValorisationEtudesSecondairesDTO(UnfrozenDTO, ValorisationEtudesSecondairesDTO):
     pass
 
 
@@ -818,6 +826,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
                 annee_diplome_etudes_secondaires=2022,
+                valorisation=_ValorisationEtudesSecondairesDTO(
+                    est_valorise_par_epc=False,
+                    types_formations_admissions_valorisees=[],
+                ),
             ),
             "0123456789": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
@@ -825,6 +837,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
                 annee_diplome_etudes_secondaires=2022,
+                valorisation=_ValorisationEtudesSecondairesDTO(
+                    est_valorise_par_epc=False,
+                    types_formations_admissions_valorisees=[],
+                ),
             ),
             "0000000001": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
@@ -833,6 +849,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
                 annee_diplome_etudes_secondaires=2022,
+                valorisation=_ValorisationEtudesSecondairesDTO(
+                    est_valorise_par_epc=False,
+                    types_formations_admissions_valorisees=[],
+                ),
             ),
             "0000000002": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
@@ -840,6 +860,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
                 annee_diplome_etudes_secondaires=2022,
+                valorisation=_ValorisationEtudesSecondairesDTO(
+                    est_valorise_par_epc=False,
+                    types_formations_admissions_valorisees=[],
+                ),
             ),
         }
 
@@ -946,7 +970,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
-        return cls.etudes_secondaires.get(matricule) or EtudesSecondairesAdmissionDTO()
+        return cls.etudes_secondaires.get(matricule) or EtudesSecondairesAdmissionDTO(
+            valorisation=_ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=False,
+                types_formations_admissions_valorisees=[],
+            ),
+        )
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
@@ -1082,11 +1111,17 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return curriculum.candidat_est_potentiel_vae
 
     @classmethod
-    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
+    def valorisation_etudes_secondaires(cls, matricule: str) -> ValorisationEtudesSecondairesDTO:
         etudes_secondaires = cls.etudes_secondaires.get(matricule)
         if etudes_secondaires:
-            return etudes_secondaires.valorisees is True
-        return False
+            return ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=etudes_secondaires.valorisees is True,
+                types_formations_admissions_valorisees=[],
+            )
+        return ValorisationEtudesSecondairesDTO(
+            est_valorise_par_epc=False,
+            types_formations_admissions_valorisees=[],
+        )
 
     @classmethod
     def get_connaissances_langues(cls, matricule: str) -> List[ConnaissanceLangueDTO]:

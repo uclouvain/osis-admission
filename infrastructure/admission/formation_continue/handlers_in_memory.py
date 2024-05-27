@@ -109,6 +109,10 @@ COMMAND_HANDLERS = {
         formation_continue_translator=_formation_continue_translator,
         annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
+    RecupererFormationContinueQuery: lambda msg_bus, cmd: recuperer_formation(
+        cmd,
+        formation_continue_translator=_formation_continue_translator,
+    ),
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
         cmd,
         proposition_repository=_proposition_repository,
@@ -248,5 +252,16 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
+    ),
+    ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
+    ),
+    CompleterQuestionsSpecifiquesParGestionnaireCommand: (
+        lambda msg_bus, cmd: completer_questions_specifiques_par_gestionnaire(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
     ),
 }

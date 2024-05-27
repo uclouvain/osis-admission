@@ -39,7 +39,7 @@
             {% include 'admission/general_education/checklist_menu_item_status.html' with statut=statut item_name=checklist_item_name %}
             {{ checklist_tabs|get_item:checklist_item_name }}
             {% if checklist_additional_icons and checklist_additional_icons|get_item_or_none:checklist_item_name %}
-              {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name additional_icon=checklist_additional_icons|get_item:checklist_item_name %}
+              {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name additional_icon=checklist_additional_icons|get_item:checklist_item_name title=checklist_additional_icons_title|get_item:checklist_item_name %}
             {% endif %}
           </a>
         </div>
@@ -55,7 +55,7 @@
                 <a class="sub-item-link">
                   {% include 'admission/general_education/checklist_menu_item_status.html' with statut=child.statut item_name=child_identifier %}
                   {{ checklist_tabs|get_item:child_identifier }}
-                  {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=child_identifier additional_icon=checklist_additional_icons|get_item:child_identifier %}
+                  {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=child_identifier additional_icon=checklist_additional_icons|get_item:child_identifier title=checklist_additional_icons_title|get_item:child_identifier %}
                 </a>
               </li>
             {% endfor %}

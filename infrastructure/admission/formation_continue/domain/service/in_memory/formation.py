@@ -230,7 +230,10 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             ),
             None,
         )
-        return cls._build_dto(entity=training)
+        if training:
+            return cls._build_dto(entity=training)
+
+        raise FormationNonTrouveeException
 
     @classmethod
     def get(cls, entity_id: FormationIdentity) -> 'Formation':
