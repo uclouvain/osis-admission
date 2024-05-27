@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from django import template
+from django.template.defaultfilters import unordered_list
 from django.utils.translation import gettext_lazy as _
 
 from base.models.utils.utils import ChoiceEnum, ChoiceEnumWithAcronym
@@ -59,6 +60,15 @@ def multiple_enum_display(values, enum_name):
             if enum.__name__ == enum_name:
                 return ", ".join([str(enum.get_value(value)) for value in values])
     return ', '.join(values)
+
+
+@register.filter
+def multiple_enum_display_as_list(values, enum_name):
+    if values:
+        for enum in ChoiceEnum.__subclasses__():
+            if enum.__name__ == enum_name:
+                return unordered_list([str(enum.get_value(value)) for value in values])
+    return unordered_list(values)
 
 
 @register.filter

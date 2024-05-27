@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,16 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_demandes_service import lister_demandes
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .rechercher_formations_service import rechercher_formations
-from .recuperer_documents_proposition_service import recuperer_documents_proposition
-from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
-from .recuperer_formation_service import recuperer_formation
-from .recuperer_proposition_service import recuperer_proposition
-from .recuperer_resume_proposition_service import recuperer_resume_proposition
-from .recuperer_resume_et_emplacements_document_non_libres_proposition_service import (
-    recuperer_resume_et_emplacements_documents_non_libres_proposition,
-)
-from .verifier_proposition_service import verifier_proposition
+from django.test import SimpleTestCase
+
+from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.formation_continue.commands import RecupererFormationContinueQuery
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+
+
+class TestRecupererFormationService(SimpleTestCase):
+    def setUp(self) -> None:
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_should_recuperer_formation_selon_sigle_et_annee(self):
+        result: FormationDTO = self.message_bus.invoke(RecupererFormationContinueQuery(sigle='USCC1', annee=2020))
+        self.assertEqual(result.sigle, 'USCC1')
+        self.assertEqual(result.annee, 2020)
+
+    def test_should_lever_exception_si_formation_non_trouvee(self):
+        with self.assertRaises(FormationNonTrouveeException):
+            self.message_bus.invoke(RecupererFormationContinueQuery(sigle='INCONNUE', annee=2020))

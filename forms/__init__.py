@@ -38,6 +38,8 @@ from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.academic_year import AcademicYear
+from base.models.campus import Campus
+from education_group.forms.fields import MainCampusChoiceField
 from education_group.templatetags.education_group_extra import format_to_academic_year
 from reference.models.country import Country
 
@@ -328,3 +330,8 @@ class NullBooleanSelectField(forms.NullBooleanField):
                 ('false', _('No')),
             )
         )
+
+
+class AdmissionMainCampusChoiceField(MainCampusChoiceField):
+    def label_from_instance(self, obj: Campus) -> str:
+        return obj.name

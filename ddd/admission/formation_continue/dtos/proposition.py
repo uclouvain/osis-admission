@@ -117,3 +117,7 @@ class PropositionDTO(interface.DTO):
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+
+    @property
+    def annee_demande(self):
+        return self.annee_calculee or self.formation.annee
