@@ -38,6 +38,8 @@ from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.academic_year import AcademicYear
+from base.models.campus import Campus
+from education_group.forms.fields import MainCampusChoiceField
 from education_group.templatetags.education_group_extra import format_to_academic_year
 from reference.models.country import Country
 
@@ -51,6 +53,8 @@ EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
 DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
 }
+
+CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT = 'span(*)[*]{*};ul(*)[*]{*}'
 
 
 class SelectOrOtherWidget(forms.MultiWidget):
@@ -313,3 +317,21 @@ def disable_unavailable_forms(forms_by_access: Dict[forms.Form, bool]):
         if not is_available:
             for field in form.fields:
                 form.fields[field].disabled = True
+
+
+class NullBooleanSelectField(forms.NullBooleanField):
+    def __init__(self, empty_label='', *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.widget = forms.Select(
+            choices=(
+                ('', empty_label),
+                ('true', _('Yes')),
+                ('false', _('No')),
+            )
+        )
+
+
+class AdmissionMainCampusChoiceField(MainCampusChoiceField):
+    def label_from_instance(self, obj: Campus) -> str:
+        return obj.name

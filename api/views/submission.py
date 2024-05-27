@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -57,7 +57,6 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.utils import (
     gather_business_exceptions,
     get_cached_admission_perm_obj,
@@ -80,11 +79,11 @@ __all__ = [
 
 
 def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission]):
-    # Valuate the secondary studies of the candidate if no admission already valuated them
+    # Valuate the secondary studies of the candidate
     if isinstance(
         instance,
         (GeneralEducationAdmission, ContinuingEducationAdmission),
-    ) and not ProfilCandidatTranslator.etudes_secondaires_valorisees(instance.candidate.global_id):
+    ):
         instance.valuated_secondary_studies_person_id = instance.candidate_id
         instance.save(update_fields=['valuated_secondary_studies_person_id'])
 

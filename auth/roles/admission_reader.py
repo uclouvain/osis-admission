@@ -28,8 +28,9 @@ from rules import RuleSet
 
 from admission.auth.predicates.common import has_education_group_of_types, is_part_of_education_group
 from admission.auth.predicates.general import is_submitted
-from base.models.enums.education_group_types import TrainingType
-from continuing_education.models.continuing_education_training import CONTINUING_EDUCATION_TRAINING_TYPES
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from parcours_interne.auth.roles.parcours_viewer import ParcoursViewer
 
 
@@ -43,9 +44,11 @@ class AdmissionReader(ParcoursViewer):
         ruleset = {
             # Listings
             'admission.view_enrolment_applications': rules.always_allow,
-            'admission.view_doctorate_enrolment_applications': has_education_group_of_types(TrainingType.PHD.name),
+            'admission.view_doctorate_enrolment_applications': has_education_group_of_types(
+                *AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES,
+            ),
             'admission.view_continuing_enrolment_applications': has_education_group_of_types(
-                *CONTINUING_EDUCATION_TRAINING_TYPES
+                *AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES,
             ),
             # Access a single application
             'admission.view_enrolment_application': is_part_of_education_group,

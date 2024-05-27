@@ -201,5 +201,6 @@ class FicheEtudiantFormView(CheckListDefaultContextMixin, AdmissionFormMixin, Ht
         return kwargs
 
     def form_valid(self, form):
+        form.instance.last_update_author = self.request.user.person
         form.save()
         return super().form_valid(form)

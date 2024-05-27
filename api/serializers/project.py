@@ -74,6 +74,7 @@ __all__ = [
     "GeneralEducationPropositionIdentityWithStatusSerializer",
 ]
 
+
 PROPOSITION_ERROR_SCHEMA = {
     "type": "array",
     "items": {
@@ -617,6 +618,10 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'documents_additionnels',
             'motivations',
             'moyens_decouverte_formation',
+            'aide_a_la_formation',
+            'inscription_au_role_obligatoire',
+            'etat_formation',
+            'marque_d_interet',
         ]
         extra_kwargs = {
             'nom_siege_social': {'max_length': 255},

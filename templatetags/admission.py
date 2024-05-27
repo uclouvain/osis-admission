@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -39,7 +39,6 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -64,7 +63,10 @@ from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
 )
@@ -99,9 +101,9 @@ from admission.utils import get_access_conditions_url
 from base.models.enums.civil_state import CivilState
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
-from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -385,11 +387,15 @@ TAB_TREES = {
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
-        Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('debug', _('Debug'), 'bug'),
+        Tab('continuing-education', _('Course choice'), 'person-chalkboard'): [
+            Tab('training-choice', _('Course choice')),
         ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
             Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
         ],
     },
 }
@@ -415,7 +421,7 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
 
         # Checklist is available for submitted admissions only
         if Tab('checklist') in valid_sub_tabs:
-            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE:
+            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE | STATUTS_PROPOSITION_CONTINUE_SOUMISE:
                 valid_sub_tabs.remove(Tab('checklist'))
 
         # Add dynamic badge for comments
@@ -770,18 +776,6 @@ def formatted_language(language: str):
 
 
 @register.filter
-def get_academic_year(year: Union[int, str, float]):
-    """Return the academic year related to a specific year."""
-    return format_academic_year(year)
-
-
-@register.filter
-def get_short_academic_year(year: Union[int, str, float]):
-    """Return the academic year related to a specific year with only two digits for the end year."""
-    return format_academic_year(year, short=True)
-
-
-@register.filter
 def get_last_inscription_date(year: Union[int, str, float]):
     """Return the academic year related to a specific year."""
     return datetime.date(year, 9, 30)
@@ -791,12 +785,6 @@ def get_last_inscription_date(year: Union[int, str, float]):
 def default_if_none_or_empty(value, arg):
     """If value is None or empty, use given default."""
     return value if value not in EMPTY_VALUES else arg
-
-
-@register.simple_tag
-def concat(*args):
-    """Concatenate a list of strings."""
-    return ''.join(args)
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
@@ -877,11 +865,12 @@ def interpolate(string, **kwargs):
 
 
 @register.simple_tag
-def admission_url(admission_uuid: str, osis_education_type: str):
+def admission_url(admission_uuid: str, osis_education_type: str = '', admission_context: str = ''):
     """Get the base URL of a specific admission"""
-    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
-    if admission_context is None:
-        return None
+    if not admission_context:
+        admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+        if admission_context is None:
+            return None
     return reverse(f'admission:{admission_context}', kwargs={'uuid': admission_uuid})
 
 
@@ -1238,6 +1227,33 @@ def bg_class_by_checklist_experience(experience):
     }.get(experience.__class__, '')
 
 
+@register.simple_tag(takes_context=True)
+def experience_valuation_url(context, experience):
+    base_namespace = context['view'].base_namespace
+    admission_uuid = context['view'].kwargs.get('uuid', '')
+    next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
+
+    if isinstance(experience, ExperienceAcademiqueDTO):
+        return (
+            resolve_url(
+                f'{base_namespace}:update:curriculum:educational_valuate',
+                uuid=admission_uuid,
+                experience_uuid=experience.uuid,
+            )
+            + next_url_suffix
+        )
+    if isinstance(experience, ExperienceNonAcademiqueDTO):
+        return (
+            resolve_url(
+                f'{base_namespace}:update:curriculum:non_educational_valuate',
+                uuid=admission_uuid,
+                experience_uuid=experience.uuid,
+            )
+            + next_url_suffix
+        )
+    return ''
+
+
 @register.inclusion_tag('admission/includes/custom_base_template.html', takes_context=True)
 def experience_details_template(
     context,
@@ -1256,6 +1272,7 @@ def experience_details_template(
     :return: The rendered template
     """
     next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
+    delete_next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur'
     res_context = {
         'is_general': resume_proposition.est_proposition_generale,
         'is_continuing': resume_proposition.est_proposition_continue,
@@ -1267,29 +1284,75 @@ def experience_details_template(
     if experience.__class__ == ExperienceAcademiqueDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
         res_context['title'] = _('Academic experience')
-        res_context['edit_link_button'] = (
-            reverse(
-                'admission:general-education:update:curriculum:educational',
-                args=[resume_proposition.proposition.uuid, experience.uuid],
+        res_context['with_single_header_buttons'] = True
+
+        if with_edit_link_button:
+            res_context['edit_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:educational',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
             )
-            + next_url_suffix
-            if with_edit_link_button
-            else None
-        )
+
+            res_context['duplicate_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:educational_duplicate',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
+            )
+
+            res_context['delete_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:educational_delete',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + delete_next_url_suffix
+            )
+
+        else:
+            res_context['edit_link_button'] = None
+            res_context['duplicate_link_button'] = None
+            res_context['delete_link_button'] = None
+
         res_context.update(get_educational_experience_context(resume_proposition, experience))
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
         res_context['title'] = _('Non-academic experience')
-        res_context['edit_link_button'] = (
-            reverse(
-                'admission:general-education:update:curriculum:non_educational',
-                args=[resume_proposition.proposition.uuid, experience.uuid],
+        res_context['with_single_header_buttons'] = True
+
+        if with_edit_link_button:
+            res_context['edit_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:non_educational',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
             )
-            + next_url_suffix
-            if with_edit_link_button
-            else None
-        )
+
+            res_context['duplicate_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:non_educational_duplicate',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + next_url_suffix
+            )
+
+            res_context['delete_link_button'] = (
+                reverse(
+                    'admission:general-education:update:curriculum:non_educational_delete',
+                    args=[resume_proposition.proposition.uuid, experience.uuid],
+                )
+                + delete_next_url_suffix
+            )
+
+        else:
+            res_context['edit_link_button'] = None
+            res_context['duplicate_link_button'] = None
+            res_context['delete_link_button'] = None
+
         res_context.update(get_non_educational_experience_context(experience))
 
     elif experience.__class__ == EtudesSecondairesAdmissionDTO:

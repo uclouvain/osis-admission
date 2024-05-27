@@ -29,7 +29,9 @@ from typing import Optional, Dict, List
 
 import attr
 from django.utils.timezone import now
+from django.utils.translation import gettext_noop as __
 
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -38,12 +40,28 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixTypeAdresseFacturation,
     ChoixMoyensDecouverteFormation,
     ChoixEdition,
+    ChoixMotifAttente,
+    ChoixMotifRefus,
+    ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_continue.domain.model.statut_checklist import StatutsChecklistContinue
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    StatutsChecklistContinue,
+    StatutChecklist,
+)
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_action import (
     InformationsComplementairesValidatorList,
+    ChoixFormationValidatorList,
+)
+from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
+    MettreEnAttenteValidatorList,
+    ApprouverParFacValidatorList,
+    RefuserPropositionValidatorList,
+    AnnulerPropositionValidatorList,
+    ApprouverPropositionValidatorList,
+    CloturerPropositionValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 from osis_common.ddd import interface
 
 
@@ -61,6 +79,7 @@ class Proposition(interface.RootEntity):
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
     statut: ChoixStatutPropositionContinue = ChoixStatutPropositionContinue.EN_BROUILLON
+    auteur_derniere_modification: str = ''
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
@@ -89,6 +108,8 @@ class Proposition(interface.RootEntity):
     checklist_initiale: Optional[StatutsChecklistContinue] = None
     checklist_actuelle: Optional[StatutsChecklistContinue] = None
 
+    profil_soumis_candidat: Optional[ProfilCandidat] = None
+
     marque_d_interet: Optional[bool] = None
     edition: Optional[ChoixEdition] = None
     en_ordre_de_paiement: Optional[bool] = None
@@ -103,12 +124,24 @@ class Proposition(interface.RootEntity):
     diplome_produit: Optional[bool] = None
     intitule_du_tff: Optional[str] = ''
 
-    def modifier_choix_formation(
+    # Decision
+    decision_dernier_mail_envoye_le: Optional[datetime.datetime] = None
+    decision_dernier_mail_envoye_par: Optional[str] = ''
+    motif_de_mise_en_attente: Optional[ChoixMotifAttente] = None
+    motif_de_mise_en_attente_autre: Optional[str] = ''
+    condition_d_approbation_par_la_faculte: Optional[str] = ''
+    motif_de_refus: Optional[ChoixMotifRefus] = None
+    motif_de_refus_autre: Optional[str] = ''
+    motif_d_annulation: Optional[str] = ''
+
+    def _modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
         reponses_questions_specifiques: Dict,
         motivations: str,
         moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
+        auteur: str,
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -116,15 +149,55 @@ class Proposition(interface.RootEntity):
         self.moyens_decouverte_formation = [
             ChoixMoyensDecouverteFormation[moyen] for moyen in moyens_decouverte_formation
         ]
+        self.marque_d_interet = marque_d_interet
+        self.auteur_derniere_modification = auteur
+
+    def modifier_choix_formation_par_candidat(
+        self,
+        formation_id: FormationIdentity,
+        reponses_questions_specifiques: Dict,
+        motivations: str,
+        moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
+    ):
+        self._modifier_choix_formation(
+            formation_id=formation_id,
+            reponses_questions_specifiques=reponses_questions_specifiques,
+            motivations=motivations,
+            moyens_decouverte_formation=moyens_decouverte_formation,
+            marque_d_interet=marque_d_interet,
+            auteur=self.matricule_candidat,
+        )
+
+    def modifier_choix_formation_par_gestionnaire(
+        self,
+        formation_id: FormationIdentity,
+        reponses_questions_specifiques: Dict,
+        motivations: str,
+        moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
+        gestionnaire: str,
+    ):
+        self._modifier_choix_formation(
+            formation_id=formation_id,
+            reponses_questions_specifiques=reponses_questions_specifiques,
+            motivations=motivations,
+            moyens_decouverte_formation=moyens_decouverte_formation,
+            marque_d_interet=marque_d_interet,
+            auteur=gestionnaire,
+        )
+        self.annee_calculee = formation_id.annee
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionContinue.ANNULEE
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def soumettre(
         self,
         formation_id: FormationIdentity,
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
+        profil_candidat_soumis: ProfilCandidat,
     ):
         self.statut = ChoixStatutPropositionContinue.CONFIRMEE
         self.annee_calculee = formation_id.annee
@@ -132,6 +205,8 @@ class Proposition(interface.RootEntity):
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
         self.soumise_le = now()
+        self.auteur_derniere_modification = self.matricule_candidat
+        self.profil_soumis_candidat = profil_candidat_soumis
 
     def completer_curriculum(
         self,
@@ -142,6 +217,7 @@ class Proposition(interface.RootEntity):
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def completer_informations_complementaires(
         self,
@@ -186,7 +262,133 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.copie_titre_sejour = copie_titre_sejour
         self.documents_additionnels = documents_additionnels
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def verifier_informations_complementaires(self):
         """Vérification de la validité des informations complémentaires."""
         InformationsComplementairesValidatorList(self.inscription_a_titre).validate()
+
+    def verifier_choix_de_formation(self, informations_specifiques_formation: Optional[InformationsSpecifiquesDTO]):
+        """Vérification de la validité des informations saisies dans l'onglet du choix de formation."""
+        ChoixFormationValidatorList(
+            motivations=self.motivations,
+            moyens_decouverte_formation=self.moyens_decouverte_formation,
+            informations_specifiques_formation=informations_specifiques_formation,
+        ).validate()
+
+    def mettre_en_attente(
+        self,
+        gestionnaire: str,
+        motif: str,
+        autre_motif: Optional[str] = '',
+    ):
+        MettreEnAttenteValidatorList(
+            checklist_statut=self.checklist_actuelle.decision,
+        ).validate()
+
+        self.statut = ChoixStatutPropositionContinue.EN_ATTENTE
+        self.checklist_actuelle.decision = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('On hold'),
+            extra={'en_cours': "on_hold"},
+        )
+        self.decision_dernier_mail_envoye_le = now()
+        self.decision_dernier_mail_envoye_par = gestionnaire
+        self.motif_de_mise_en_attente = ChoixMotifAttente[motif]
+        self.motif_de_mise_en_attente_autre = autre_motif
+        self.auteur_derniere_modification = gestionnaire
+
+    def approuver_par_fac(
+        self,
+        gestionnaire: str,
+        condition: str,
+    ):
+        ApprouverParFacValidatorList(
+            checklist_statut=self.checklist_actuelle.decision,
+        ).validate()
+
+        self.checklist_actuelle.decision = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Fac approval'),
+            extra={'en_cours': "fac_approval"},
+        )
+        self.decision_dernier_mail_envoye_le = now()
+        self.decision_dernier_mail_envoye_par = gestionnaire
+        self.condition_d_approbation_par_la_faculte = condition
+        self.statut = ChoixStatutPropositionContinue.CONFIRMEE
+        self.auteur_derniere_modification = gestionnaire
+
+    def refuser_proposition(
+        self,
+        gestionnaire: str,
+        motif: str,
+        autre_motif: Optional[str] = '',
+    ):
+        RefuserPropositionValidatorList(
+            checklist_statut=self.checklist_actuelle.decision,
+        ).validate()
+
+        self.statut = ChoixStatutPropositionContinue.INSCRIPTION_REFUSEE
+        self.checklist_actuelle.decision = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Denied'),
+            extra={'blocage': "denied"},
+        )
+        self.decision_dernier_mail_envoye_le = now()
+        self.decision_dernier_mail_envoye_par = gestionnaire
+        self.motif_de_refus = ChoixMotifRefus[motif]
+        self.motif_de_refus_autre = autre_motif
+        self.auteur_derniere_modification = gestionnaire
+
+    def annuler_proposition(
+        self,
+        gestionnaire: str,
+        motif: str,
+    ):
+        AnnulerPropositionValidatorList(
+            checklist_statut=self.checklist_actuelle.decision,
+        ).validate()
+
+        self.statut = ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE
+        self.checklist_actuelle.decision = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Canceled'),
+            extra={'blocage': "canceled"},
+        )
+        self.decision_dernier_mail_envoye_le = now()
+        self.decision_dernier_mail_envoye_par = gestionnaire
+        self.motif_d_annulation = motif
+        self.auteur_derniere_modification = gestionnaire
+
+    def approuver_proposition(
+        self,
+        gestionnaire: str,
+    ):
+        ApprouverPropositionValidatorList(
+            checklist_statut=self.checklist_actuelle.decision,
+        ).validate()
+
+        self.statut = ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE
+        self.checklist_actuelle.decision = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            libelle=__('Validated'),
+        )
+        self.decision_dernier_mail_envoye_le = now()
+        self.decision_dernier_mail_envoye_par = gestionnaire
+        self.auteur_derniere_modification = gestionnaire
+
+    def cloturer_proposition(
+        self,
+        gestionnaire: str,
+    ):
+        CloturerPropositionValidatorList(
+            checklist_statut=self.checklist_actuelle.decision,
+        ).validate()
+
+        self.statut = ChoixStatutPropositionContinue.CLOTUREE
+        self.checklist_actuelle.decision = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Validated'),
+            extra={'blocage': "closed"},
+        )
+        self.auteur_derniere_modification = gestionnaire

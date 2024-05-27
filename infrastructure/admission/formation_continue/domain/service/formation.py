@@ -25,7 +25,7 @@
 ##############################################################################
 import unicodedata
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from django.conf import settings
 from django.utils.translation import get_language
@@ -40,34 +40,97 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.campus import Campus as CampusDBModel
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
+from ddd.logic.formation_catalogue.commands import SearchFormationsCommand, RecupererFormationQuery
+from ddd.logic.formation_catalogue.domain.validators.exceptions import TrainingNotFoundException
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
+from ddd.logic.formation_catalogue.formation_continue.commands import RecupererInformationsSpecifiquesQuery
+from ddd.logic.formation_catalogue.formation_continue.domain.validator.exceptions import (
+    InformationsSpecifiquesNonTrouveesException,
+)
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 from ddd.logic.shared_kernel.academic_year.commands import SearchAcademicYearCommand
-from ddd.logic.shared_kernel.campus.commands import GetCampusQuery
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
+from ddd.logic.shared_kernel.campus.commands import GetCampusQuery, SearchUclouvainCampusesQuery
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 
 
 class FormationContinueTranslator(IFormationContinueTranslator):
     @classmethod
-    def _build_dto(cls, dto: 'TrainingDto') -> 'FormationDTO':
+    def _get_campuses_by_uuid(cls, campuses_uuids: List[str]) -> Dict[str, UclouvainCampusDTO]:
+        """
+        Get a dictionary associating the uuid of the campus and its information.
+        :param campuses_uuids: a list of the uuids of the campuses
+        :return: a dictionary associating the uuid of the campus and its dto
+        """
         from infrastructure.messages_bus import message_bus_instance
 
-        academic_year = message_bus_instance.invoke(SearchAcademicYearCommand(year=dto.year, to_year=dto.year))[0]
+        campuses: List[UclouvainCampusDTO] = (
+            message_bus_instance.invoke(SearchUclouvainCampusesQuery(uuids=campuses_uuids)) if campuses_uuids else {}
+        )
 
-        try:
-            campus: 'UclouvainCampusDTO' = message_bus_instance.invoke(
-                GetCampusQuery(uuid=dto.main_teaching_campus_uuid)
-            )
-        except Exception:
-            campus = None
-        try:
-            campus_inscription: 'UclouvainCampusDTO' = message_bus_instance.invoke(
-                GetCampusQuery(uuid=dto.enrollment_campus_uuid)
-            )
-        except Exception:
-            campus_inscription = None
+        return {campus.uuid: campus for campus in campuses}
+
+    @classmethod
+    def _get_academic_years_by_year(cls, years: List[int]) -> Dict[int, AcademicYear]:
+        """
+        Get a dictionary associating the year of the academic year and its information.
+        :param years: a list of the years
+        :return: a dictionary associating the year of the academic year and its dto
+        """
+        from infrastructure.messages_bus import message_bus_instance
+
+        academic_years: List[AcademicYear] = (
+            message_bus_instance.invoke(SearchAcademicYearCommand(year=min(years), to_year=max(years))) if years else []
+        )
+
+        return {academic_year.year: academic_year for academic_year in academic_years}
+
+    @classmethod
+    def _build_dto(
+        cls,
+        dto: 'TrainingDto',
+        campuses_by_uuid: Dict[str, UclouvainCampusDTO] = None,
+        academic_years_by_year: Dict[int, AcademicYear] = None,
+    ) -> 'FormationDTO':
+        """
+        Build a FormationDTO from a TrainingDto
+        :param dto: the input dto
+        :param campuses_by_uuid: dictionary associating the uuid of the campus and its dto. If not specified, the
+        search will be done in this method.
+        :param academic_years_by_year: dictionary associating the year of the academic year and its dto. If not
+        specified, the search will be done in this method.
+        :return: the output dto
+        """
+        # Load the academic year if not already loaded
+        if not academic_years_by_year:
+            academic_years_by_year = cls._get_academic_years_by_year(years=[dto.year])
+
+        academic_year = academic_years_by_year[dto.year]
+
+        # Load the campuses if not already loaded
+        if not campuses_by_uuid:
+            campuses_uuids = []
+
+            if dto.main_teaching_campus_uuid:
+                campuses_uuids.append(dto.main_teaching_campus_uuid)
+
+            if dto.enrollment_campus_uuid:
+                campuses_uuids.append(dto.enrollment_campus_uuid)
+
+            campuses_by_uuid = cls._get_campuses_by_uuid(campuses_uuids)
+
+        campus = (
+            campuses_by_uuid[dto.main_teaching_campus_uuid]
+            if dto.main_teaching_campus_uuid in campuses_by_uuid
+            else None
+        )
+
+        campus_inscription = (
+            campuses_by_uuid[dto.enrollment_campus_uuid] if dto.enrollment_campus_uuid in campuses_by_uuid else None
+        )
 
         return FormationDTO(
             sigle=dto.acronym,
@@ -117,34 +180,30 @@ class FormationContinueTranslator(IFormationContinueTranslator):
     def get_dto(cls, sigle: str, annee: int) -> 'FormationDTO':  # pragma: no cover
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(SearchFormationsCommand(sigles_annees=[(sigle, annee)]))
-
-        if dtos:
-            return cls._build_dto(dtos[0])
-
-        raise FormationNonTrouveeException
+        try:
+            training_dto: TrainingDto = message_bus_instance.invoke(
+                RecupererFormationQuery(sigle_formation=sigle, annee_formation=annee)
+            )
+            return cls._build_dto(training_dto)
+        except TrainingNotFoundException:
+            raise FormationNonTrouveeException
 
     @classmethod
     def get(cls, entity_id: FormationIdentity) -> 'Formation':
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(
-                sigles_annees=[(entity_id.sigle, entity_id.annee)],
-                types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
-                    TypeFormation.FORMATION_CONTINUE.name
-                ),
+        try:
+            dto: TrainingDto = message_bus_instance.invoke(
+                RecupererFormationQuery(
+                    sigle_formation=entity_id.sigle,
+                    annee_formation=entity_id.annee,
+                )
             )
-        )
-
-        if dtos:
-            dto: TrainingDto = dtos[0]
-
             try:
-                campus: 'UclouvainCampusDTO' = message_bus_instance.invoke(
+                campus: Optional['UclouvainCampusDTO'] = message_bus_instance.invoke(
                     GetCampusQuery(uuid=dto.main_teaching_campus_uuid)
                 )
-            except Exception:
+            except CampusDBModel.DoesNotExist:
                 campus = None
 
             return Formation(
@@ -166,7 +225,8 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 else None,
             )
 
-        raise FormationNonTrouveeException
+        except TrainingNotFoundException:
+            raise FormationNonTrouveeException
 
     @classmethod
     def search(
@@ -180,7 +240,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
         if not annee:
             return []
 
-        dtos = message_bus_instance.invoke(
+        dtos: List[TrainingDto] = message_bus_instance.invoke(
             SearchFormationsCommand(
                 annee=annee,
                 campus=campus,
@@ -195,7 +255,29 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             )
         )
 
-        results = [cls._build_dto(dto) for dto in dtos]
+        academic_years = set()
+        campuses_uuids = set()
+
+        for dto in dtos:
+            academic_years.add(dto.year)
+
+            if dto.enrollment_campus_uuid:
+                campuses_uuids.add(dto.enrollment_campus_uuid)
+            if dto.main_teaching_campus_uuid:
+                campuses_uuids.add(dto.main_teaching_campus_uuid)
+
+        academic_years_by_year = cls._get_academic_years_by_year(list(academic_years))
+        campuses_by_uuid = cls._get_campuses_by_uuid(list(campuses_uuids))
+
+        results = [
+            cls._build_dto(
+                dto,
+                campuses_by_uuid=campuses_by_uuid,
+                academic_years_by_year=academic_years_by_year,
+            )
+            for dto in dtos
+        ]
+
         return list(
             sorted(
                 results,
@@ -221,3 +303,17 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             )
         )
         return bool(dtos)
+
+    @classmethod
+    def get_informations_specifiques_dto(cls, entity_id: FormationIdentity) -> Optional[InformationsSpecifiquesDTO]:
+        from infrastructure.messages_bus import message_bus_instance
+
+        try:
+            return message_bus_instance.invoke(
+                RecupererInformationsSpecifiquesQuery(
+                    sigle_formation=entity_id.sigle,
+                    annee=entity_id.annee,
+                )
+            )
+        except InformationsSpecifiquesNonTrouveesException:
+            pass

@@ -268,6 +268,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'foreign_access_title_equivalency_type': entity.type_equivalence_titre_acces.name
                 if entity.type_equivalence_titre_acces
                 else '',
+                'foreign_access_title_equivalency_restriction_about': entity.information_a_propos_de_la_restriction,
                 'foreign_access_title_equivalency_status': entity.statut_equivalence_titre_acces.name
                 if entity.statut_equivalence_titre_acces
                 else '',
@@ -499,6 +500,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None,
             millesime_condition_acces=admission.admission_requirement_year
             and admission.admission_requirement_year.year,
+            information_a_propos_de_la_restriction=admission.foreign_access_title_equivalency_restriction_about,
             type_equivalence_titre_acces=TypeEquivalenceTitreAcces[admission.foreign_access_title_equivalency_type]
             if admission.foreign_access_title_equivalency_type
             else None,
@@ -756,6 +758,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.admission_requirement_year
             else None,
             type_equivalence_titre_acces=admission.foreign_access_title_equivalency_type,
+            information_a_propos_de_la_restriction=admission.foreign_access_title_equivalency_restriction_about,
             statut_equivalence_titre_acces=admission.foreign_access_title_equivalency_status,
             etat_equivalence_titre_acces=admission.foreign_access_title_equivalency_state,
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
@@ -790,11 +793,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                             object_uuid=OuterRef('uuid'),
                             tags__contains=['proposition', 'status-changed'],
                         ).values('created')[:1]
-                    ),
-                    student_registration_id=Subquery(
-                        Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
-                            'registration_id'
-                        )[:1],
                     ),
                 )
                 .select_related(

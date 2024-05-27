@@ -25,13 +25,19 @@
 # ##############################################################################
 import json
 
-from django.test import TestCase
+from django.conf import settings
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import translation
 
+from admission.tests.factories.continuing_education import ContinuingEducationTrainingFactory
 from admission.tests.factories.general_education import GeneralEducationTrainingFactory
-from admission.tests.factories.roles import ProgramManagerRoleFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, CentralManagerRoleFactory
+from base.models.enums.state_iufc import StateIUFC
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
+from base.tests.factories.user import UserFactory
+from education_group.auth.scope import Scope
 from program_management.models.education_group_version import EducationGroupVersion
 
 
@@ -146,4 +152,168 @@ class ManagedGeneralEducationTrainingsAutocompleteTestCase(TestCase):
         self.assertEqual(
             results[0]['id'],
             str(self.first_year_biology_training.uuid),
+        )
+
+
+class ContinuingManagedEducationTrainingsAutocompleteTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        entity = EntityWithVersionFactory()
+        other_entity = EntityWithVersionFactory()
+
+        cls.first_year_computer_training = ContinuingEducationTrainingFactory(
+            management_entity=entity,
+            academic_year=academic_years[0],
+            title='Informatique',
+            title_english='Computer Science',
+            acronym='CS1',
+        )
+
+        cls.first_year_biology_training = ContinuingEducationTrainingFactory(
+            management_entity=entity,
+            academic_year=academic_years[0],
+            title='Biologie',
+            title_english='Biology',
+            acronym='BIO1',
+        )
+
+        cls.first_year_economics_training = ContinuingEducationTrainingFactory(
+            academic_year=academic_years[0],
+            title='Economie',
+            title_english='',
+            acronym='ECO1',
+            management_entity=other_entity,
+        )
+
+        cls.second_year_computer_training = ContinuingEducationTrainingFactory(
+            management_entity=entity,
+            academic_year=academic_years[1],
+            title='Informatique',
+            title_english='Computer Science',
+            acronym='CS1',
+        )
+
+        cls.cdd_manager = ProgramManagerRoleFactory(
+            education_group=cls.first_year_computer_training.education_group
+        ).person
+
+        for training in [cls.first_year_economics_training, cls.second_year_computer_training]:
+            ProgramManagerRoleFactory(education_group=training.education_group, person=cls.cdd_manager)
+
+        cls.central_manager = CentralManagerRoleFactory(scopes=[Scope.IUFC.name], entity=entity).person
+
+        cls.url = reverse('admission:autocomplete:continuing-managed-education-trainings')
+
+    def test_filter_by_program_manager_role(self):
+        self.client.force_login(self.cdd_manager.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        self.assertCountEqual(
+            [result['id'] for result in results],
+            [self.first_year_computer_training.acronym, self.first_year_economics_training.acronym],
+        )
+
+    def test_filter_by_central_manager_role(self):
+        self.client.force_login(self.central_manager.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        self.assertCountEqual(
+            [result['id'] for result in results],
+            [self.first_year_computer_training.acronym, self.first_year_biology_training.acronym],
+        )
+
+    def test_filter_by_fr_title(self):
+        self.client.force_login(self.central_manager.user)
+
+        response = self.client.get(self.url, data={'q': 'Biologie'})
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        training = self.first_year_biology_training
+        self.assertEqual(
+            results,
+            [
+                {
+                    'id': training.acronym,
+                    'selected_text': f'{training.acronym} - {training.title}',
+                    'text': f'{training.acronym} - {training.title}',
+                    'state': StateIUFC.OPEN.name,
+                    'registration_required': True,
+                }
+            ],
+        )
+
+    def test_filter_by_acronym(self):
+        self.client.force_login(self.central_manager.user)
+
+        response = self.client.get(self.url, data={'q': 'BIO1'})
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.first_year_biology_training.acronym)
+
+    @override_settings(LANGUAGE_CODE=settings.LANGUAGE_CODE_EN)
+    def test_filter_by_en_title(self):
+        self.client.force_login(UserFactory())
+
+        response = self.client.get(self.url, data={'q': 'Biology'})
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        training = self.first_year_biology_training
+        self.assertEqual(
+            results,
+            [
+                {
+                    'id': training.acronym,
+                    'selected_text': f'{training.acronym} - {training.title_english}',
+                    'text': f'{training.acronym} - {training.title_english}',
+                    'state': StateIUFC.OPEN.name,
+                    'registration_required': True,
+                }
+            ],
+        )
+
+    @override_settings(LANGUAGE_CODE=settings.LANGUAGE_CODE_EN)
+    def test_display_french_title_is_the_english_title_is_empty(self):
+        self.client.force_login(UserFactory())
+
+        response = self.client.get(self.url, data={'q': 'Econom'})
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        training = self.first_year_economics_training
+
+        self.assertEqual(
+            results,
+            [
+                {
+                    'id': training.acronym,
+                    'selected_text': f'{training.acronym} - {training.title}',
+                    'text': f'{training.acronym} - {training.title}',
+                    'state': StateIUFC.OPEN.name,
+                    'registration_required': True,
+                }
+            ],
         )

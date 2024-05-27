@@ -39,14 +39,40 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
 )
 
-CHOIX_STATUT_TOUTE_PROPOSITION = [(status.name, status.value) for status in ChoixStatutPropositionGenerale]
-CHOIX_STATUT_TOUTE_PROPOSITION.insert(
-    1,
-    (
-        ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
-        ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.value,
-    ),
-)
+
+def choix_statuts_toute_proposition_ordonnes():
+    """
+    Correspond aux statuts de la proposition générale avec les statuts spécifiques de proposition continue
+    et de proposition doctorale intercalés à l'endroit souhaité.
+    :return: une liste de tuples (nom, valeur) des statuts ordonnés.
+    """
+    choix = [(statut.name, statut.value) for statut in ChoixStatutPropositionGenerale]
+
+    # Association entre les statuts déjà présents de formation générale et les statuts spécifiques à placer juste après
+    choix_specifiques = {
+        ChoixStatutPropositionGenerale.EN_BROUILLON.name: ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
+        ChoixStatutPropositionGenerale.ANNULEE.name: ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE,
+        ChoixStatutPropositionGenerale.CONFIRMEE.name: ChoixStatutPropositionContinue.EN_ATTENTE,
+    }
+
+    nb_choix = len(choix) + len(choix_specifiques)
+    index = 0
+
+    while index < nb_choix:
+        choix_courant = choix[index]
+
+        if choix_courant[0] in choix_specifiques:
+            statut_specifique = choix_specifiques[choix_courant[0]]
+            index += 1
+            choix.insert(index, (statut_specifique.name, statut_specifique.value))
+
+        index += 1
+
+    return choix
+
+
+CHOIX_STATUT_TOUTE_PROPOSITION = choix_statuts_toute_proposition_ordonnes()
+
 CHOIX_STATUT_TOUTE_PROPOSITION_DICT = {statut[0]: statut[1] for statut in CHOIX_STATUT_TOUTE_PROPOSITION}
 
 STATUTS_TOUTE_PROPOSITION = set(
@@ -70,3 +96,9 @@ STATUTS_TOUTE_PROPOSITION_SOUMISE = list(
     - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
     - STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 )
+
+STATUTS_TOUTE_PROPOSITION_AUTORISEE = {
+    ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+    ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name,
+    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+}

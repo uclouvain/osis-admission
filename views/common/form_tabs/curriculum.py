@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -31,8 +31,9 @@ from uuid import UUID
 from django.contrib import messages
 from django.db.models import ProtectedError, QuerySet
 from django.forms import forms
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, resolve_url
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
@@ -58,10 +59,12 @@ __all__ = [
     'CurriculumEducationalExperienceFormView',
     'CurriculumEducationalExperienceDeleteView',
     'CurriculumEducationalExperienceDuplicateView',
+    'CurriculumEducationalExperienceValuateView',
     'CurriculumGlobalFormView',
     'CurriculumNonEducationalExperienceFormView',
     'CurriculumNonEducationalExperienceDeleteView',
     'CurriculumNonEducationalExperienceDuplicateView',
+    'CurriculumNonEducationalExperienceValuateView',
 ]
 
 
@@ -135,6 +138,14 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             },
         )
 
+    def delete_url(self):
+        if self.experience_id:
+            return resolve_url(
+                f'{self.base_namespace}:update:curriculum:educational_delete',
+                uuid=self.proposition.uuid,
+                experience_uuid=self.experience_id,
+            )
+
     def get_context_data(self, **kwargs):
         return {
             **super().get_context_data(**kwargs),
@@ -145,7 +156,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
 class CurriculumNonEducationalExperienceFormView(
     AdmissionFormMixin,
     LoadDossierViewMixin,
-    EditExperienceNonAcademiqueView
+    EditExperienceNonAcademiqueView,
 ):
     urlpatterns = {
         'non_educational': 'non_educational/<uuid:experience_uuid>',
@@ -187,6 +198,14 @@ class CurriculumNonEducationalExperienceFormView(
                 'experience_uuid': self.experience_id,
             },
         )
+
+    def delete_url(self):
+        if self.experience_id:
+            return resolve_url(
+                f'{self.base_namespace}:update:curriculum:non_educational_delete',
+                uuid=self.proposition.uuid,
+                experience_uuid=self.experience_id,
+            )
 
     def get_context_data(self, **kwargs):
         return {
@@ -251,7 +270,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}
 
-    def traitement_specifique(self, experiences_supprimees: List[UUID]):
+    def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass
 
     def get_failure_url(self):
@@ -267,7 +286,7 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, Delete
 class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceNonAcademiqueView):
     urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
 
-    def traitement_specifique(self, experiences_supprimees: List[UUID]):
+    def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass
 
     def get_failure_url(self):
@@ -432,3 +451,56 @@ class CurriculumEducationalExperienceDuplicateView(CurriculumBaseExperienceDupli
 
     def additional_duplications_save(self, duplicated_objects):
         EducationalExperienceYear.objects.bulk_create(duplicated_objects)
+
+
+class CurriculumBaseExperienceValuateView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+    permission_required = 'admission.change_admission_curriculum'
+    form_class = forms.Form
+    experience_model = None
+    valuated_experience_model = None
+    valuated_experience_field_id_name = None
+    update_requested_documents = True
+    update_admission_author = True
+    message_on_success = _('The experience has been valuated.')
+
+    @cached_property
+    def experience(self) -> Union[EducationalExperience, ProfessionalExperience]:
+        return get_object_or_404(self.experience_model, uuid=self.experience_id)
+
+    @property
+    def experience_id(self):
+        return str(self.kwargs.get('experience_uuid', None))
+
+    def get_success_url(self):
+        return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
+
+    def form_valid(self, form):
+        self.valuated_experience_model.objects.create(
+            baseadmission=self.admission,
+            **{self.valuated_experience_field_id_name: self.experience.uuid},
+        )
+        return super().form_valid(form)
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        # Add the experience to the checklist if it's not already there
+        if 'current' in admission.checklist and not any(
+            experience
+            for experience in admission.checklist['current']['parcours_anterieur']['enfants']
+            if experience.get('extra', {}).get('identifiant') == self.experience_id
+        ):
+            experience_checklist = Checklist.initialiser_checklist_experience(self.experience_id).to_dict()
+            admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
+
+
+class CurriculumNonEducationalExperienceValuateView(CurriculumBaseExperienceValuateView):
+    urlpatterns = {'non_educational_valuate': 'non_educational/<uuid:experience_uuid>/valuate'}
+    experience_model = ProfessionalExperience
+    valuated_experience_model = AdmissionProfessionalValuatedExperiences
+    valuated_experience_field_id_name = 'professionalexperience_id'
+
+
+class CurriculumEducationalExperienceValuateView(CurriculumBaseExperienceValuateView):
+    urlpatterns = {'educational_valuate': 'educational/<uuid:experience_uuid>/valuate'}
+    experience_model = EducationalExperience
+    valuated_experience_model = AdmissionEducationalValuatedExperiences
+    valuated_experience_field_id_name = 'educationalexperience_id'

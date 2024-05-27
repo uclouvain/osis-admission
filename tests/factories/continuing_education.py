@@ -30,6 +30,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixStatutChecklist,
     ChoixStatutPropositionContinue,
+    ChoixMoyensDecouverteFormation,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -42,6 +43,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
+from base.tests.factories.specific_iufc_informations import SpecificIUFCInformationsFactory
 from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
@@ -62,6 +64,12 @@ class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
             root_group__academic_year__year=self.academic_year.year,
         )
 
+    @factory.post_generation
+    def create_iufc_specific_information(self, create, extracted, **kwargs):
+        SpecificIUFCInformationsFactory(
+            training=self,
+        )
+
 
 class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -75,7 +83,14 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     )
     reference = factory.LazyAttribute(generate_proposition_reference)
     registration_as = ChoixInscriptionATitre.PRIVE.name
+    determined_academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
+    motivations = 'My motivations'
+    ways_to_find_out_about_the_course = [
+        ChoixMoyensDecouverteFormation.AMIS.name,
+        ChoixMoyensDecouverteFormation.LINKEDIN.name,
+    ]
+    interested_mark = False
 
     class Params:
         with_access_conditions_met = factory.Trait(

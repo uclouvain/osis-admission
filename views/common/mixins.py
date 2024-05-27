@@ -243,6 +243,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         elif self.is_general:
             context['admission'] = self.proposition
             context['access_title_country'] = access_title_country(self.selectable_access_titles.values())
+        elif self.is_continuing:
+            context['admission'] = self.proposition
         else:
             context['admission'] = self.admission
 

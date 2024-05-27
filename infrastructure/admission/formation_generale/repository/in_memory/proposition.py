@@ -380,6 +380,7 @@ class PropositionInMemoryRepository(
             type_equivalence_titre_acces=proposition.type_equivalence_titre_acces
             if proposition.type_equivalence_titre_acces
             else '',
+            information_a_propos_de_la_restriction=proposition.information_a_propos_de_la_restriction,
             statut_equivalence_titre_acces=proposition.statut_equivalence_titre_acces
             if proposition.statut_equivalence_titre_acces
             else '',

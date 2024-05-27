@@ -64,6 +64,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionnePourEnvoyerASICException,
     ParcoursAnterieurNonSuffisantException,
     DocumentAReclamerImmediatException,
+    InscriptionTardiveAvecConditionAccesException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -148,6 +149,16 @@ class ShouldFacPeutDonnerDecision(BusinessValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ShouldPropositionEtreInscriptionTardiveAvecConditionAcces(BusinessValidator):
+    condition_acces: Optional[ConditionAcces]
+    est_inscription_tardive: bool
+
+    def validate(self, *args, **kwargs):
+        if not self.est_inscription_tardive or not self.condition_acces:
+            raise InscriptionTardiveAvecConditionAccesException
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ShouldSelectionnerTitreAccesPourEnvoyerASIC(BusinessValidator):
     titres_selectionnes: List[TitreAccesSelectionnable]
 
@@ -180,10 +191,7 @@ class ShouldTitreAccesEtreSelectionne(BusinessValidator):
     titres_acces_selectionnes: List[TitreAccesSelectionnable]
 
     def validate(self, *args, **kwargs):
-        if (
-            self.statut == ChoixStatutChecklist.GEST_REUSSITE
-            and not self.titres_acces_selectionnes
-        ):
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not self.titres_acces_selectionnes:
             raise TitreAccesEtreSelectionneException
 
 
@@ -194,9 +202,8 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
     millesime_condition_acces: Optional[int]
 
     def validate(self, *args, **kwargs):
-        if (
-            self.statut == ChoixStatutChecklist.GEST_REUSSITE
-            and not (self.condition_acces and self.millesime_condition_acces)
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not (
+            self.condition_acces and self.millesime_condition_acces
         ):
             raise ConditionAccesEtreSelectionneException
 

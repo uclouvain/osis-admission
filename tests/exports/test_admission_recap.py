@@ -153,6 +153,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.state_iufc import StateIUFC
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
 from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
@@ -162,9 +163,11 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
+    ValorisationEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
@@ -195,6 +198,11 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 @attr.dataclass
 class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
+    pass
+
+
+@attr.dataclass
+class _ValorisationEtudesSecondairesDTO(UnfrozenDTO, ValorisationEtudesSecondairesDTO):
     pass
 
 
@@ -318,6 +326,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             },
         )
         patcher.start()
@@ -343,6 +352,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             token: {
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             }
             for token in tokens
         }
@@ -906,7 +916,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         cls.get_remote_token_patcher.start()
 
         cls.get_remote_metadata_patcher = mock.patch(
-            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"}
+            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile", "size": 1}
         )
         cls.get_remote_metadata_patcher.start()
 
@@ -1143,7 +1153,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             alternative_secondaires=None,
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2015,
-            valorisees=False,
+            valorisation=_ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=False,
+                types_formations_admissions_valorisees=[],
+            ),
         )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
@@ -1175,7 +1188,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2015,
-            valorisees=False,
+            valorisation=_ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=False,
+                types_formations_admissions_valorisees=[],
+            ),
         )
 
         accounting_dto = _ComptabiliteDTO(
@@ -1236,6 +1252,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
         continuing_proposition_dto = _PropositionFormationContinueDTO(
             uuid='uuid-proposition',
+            profil_soumis_candidat=None,
             formation=_FormationDTO(
                 sigle='FC1',
                 annee=2023,
@@ -1289,6 +1306,12 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_candidat='Doe',
             pays_nationalite_candidat='BE',
             pays_nationalite_ue_candidat=True,
+            nom_pays_nationalite_candidat='Belgique',
+            noma_candidat='548267',
+            langue_contact_candidat='FR',
+            adresse_email_candidat='john.doe@example.be',
+            date_changement_statut=datetime.datetime(2023, 1, 1),
+            candidat_a_plusieurs_demandes=False,
             reponses_questions_specifiques=cls.admission.specific_question_answers,
             curriculum=['uuid-curriculum'],
             equivalence_diplome=['uuid-equivalence-diplome'],
@@ -1307,6 +1330,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             moyens_decouverte_formation=[],
             documents_demandes={},
             marque_d_interet=False,
+            aide_a_la_formation=False,
+            inscription_au_role_obligatoire=True,
+            etat_formation=StateIUFC.OPEN.name,
             edition=ChoixEdition.UN.name,
             en_ordre_de_paiement=False,
             droits_reduits=False,
@@ -1319,6 +1345,14 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             a_reussi_l_epreuve_d_evaluation=False,
             diplome_produit=False,
             intitule_du_tff="",
+            decision_dernier_mail_envoye_le=None,
+            decision_dernier_mail_envoye_par="",
+            motif_de_mise_en_attente="",
+            motif_de_mise_en_attente_autre="",
+            condition_d_approbation_par_la_faculte="",
+            motif_de_refus="",
+            motif_de_refus_autre="",
+            motif_d_annulation="",
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
@@ -2319,6 +2353,31 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[1].required)
+
+    def test_curriculum_attachments_for_continuing_proposition_with_short_training(self):
+        with mock.patch.multiple(
+            self.continuing_context.proposition,
+            inscription_au_role_obligatoire=False,
+        ):
+            section = get_curriculum_section(self.continuing_context, self.empty_questions, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 0)
+
+    def test_curriculum_attachments_for_continuing_proposition_with_long_training(self):
+        with mock.patch.multiple(
+            self.continuing_context.proposition,
+            inscription_au_role_obligatoire=True,
+        ):
+            section = get_curriculum_section(self.continuing_context, self.empty_questions, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'CURRICULUM')
+            self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
+            self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.curriculum)
+            self.assertFalse(attachments[0].required)
 
     # Curriculum attachments
     def test_curriculum_attachments_for_continuing_proposition_without_equivalence(self):

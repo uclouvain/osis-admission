@@ -463,6 +463,13 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
     ),
+    ApprouverInscriptionTardiveParFaculteCommand: lambda msg_bus, cmd: approuver_inscription_tardive_par_faculte(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=HistoriqueFormationGenerale(),
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=PropositionRepository(),

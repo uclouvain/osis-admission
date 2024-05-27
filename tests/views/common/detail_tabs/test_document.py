@@ -123,6 +123,7 @@ class DocumentViewTestCase(TestCase):
             'mimetype': PDF_MIME_TYPE,
             'explicit_name': 'My file name',
             'author': self.sic_manager_user.person.global_id,
+            'size': 1,
         }
 
         patcher = patch('admission.templatetags.admission.get_remote_metadata', return_value=self.file_metadata)
@@ -523,6 +524,8 @@ class DocumentViewTestCase(TestCase):
         categorized_document = CategorizedFreeDocumentFactory(
             checklist_tab=OngletsChecklist.parcours_anterieur.name,
             with_academic_year=True,
+            long_label_fr='Mon document libre {annee_academique}',
+            long_label_en='My free document {annee_academique}',
         )
         response = self.client.post(
             url,
@@ -575,8 +578,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(
             form_item_instantiation.form_item.title,
             {
-                'en': categorized_document.long_label_en,
-                'fr-be': categorized_document.long_label_fr,
+                'en': 'My free document 2019-2020',
+                'fr-be': 'Mon document libre 2019-2020',
             },
         )
 

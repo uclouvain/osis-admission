@@ -395,6 +395,11 @@ class GeneralEducationAdmission(BaseAdmission):
         max_length=30,
         verbose_name=_('Foreign access title equivalence status'),
     )
+    foreign_access_title_equivalency_restriction_about = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_('Information about the restriction'),
+    )
     foreign_access_title_equivalency_state = models.CharField(
         choices=EtatEquivalenceTitreAcces.choices(),
         blank=True,
@@ -520,9 +525,13 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
         )
 
     def for_manager_dto(self):
-        return self.for_dto().annotate_campus(
-            training_field='other_training_accepted_by_fac',
-            annotation_name='other_training_accepted_by_fac_teaching_campus',
+        return (
+            self.for_dto()
+            .annotate_campus(
+                training_field='other_training_accepted_by_fac',
+                annotation_name='other_training_accepted_by_fac_teaching_campus',
+            )
+            .annotate_with_student_registration_id()
         )
 
 

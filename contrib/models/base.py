@@ -27,12 +27,12 @@ import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.aggregates import StringAgg
+from django.contrib.postgres.aggregates import StringAgg, ArrayAgg
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, IntegrityError
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count, IntegerField
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
@@ -40,7 +40,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
+from osis_history.models import HistoryEntry
 
 from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -68,8 +68,10 @@ from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person import Person
+from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
+from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -131,6 +133,15 @@ class BaseAdmissionQuerySet(models.QuerySet):
             )
         )
 
+    def annotate_with_student_registration_id(self):
+        return self.annotate(
+            student_registration_id=models.Subquery(
+                Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
+                    'registration_id'
+                )[:1]
+            ),
+        )
+
     def annotate_training_management_faculty(self):
         today = timezone.now().today()
         cte = EntityVersion.objects.with_children(entity_id=OuterRef("training__management_entity_id"))
@@ -187,6 +198,23 @@ class BaseAdmissionQuerySet(models.QuerySet):
             | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
         )
 
+    def annotate_ordered_enum(self, field_name, ordering_field_name, enum_class):
+        """
+        Annotate the queryset with an equivalent numeric version of an enum field.
+        :param field_name: The name of the enum field
+        :param ordering_field_name: The name of the output field
+        :param enum_class: The enum class
+        :return: The annotated queryset
+        """
+        return self.annotate(
+            **{
+                ordering_field_name: Case(
+                    *(When(**{field_name: member.name}, then=i) for i, member in enumerate(enum_class)),
+                    output_field=IntegerField(),
+                )
+            },
+        )
+
     def annotate_several_admissions_in_progress(self):
         return self.alias(
             admissions_in_progress_nb=Subquery(
@@ -218,9 +246,20 @@ class BaseAdmissionQuerySet(models.QuerySet):
             ),
         )
 
-    def filter_according_to_roles(self, demandeur_uuid):
+    def annotate_with_status_update_date(self):
+        return self.annotate(
+            status_updated_at=Subquery(
+                HistoryEntry.objects.filter(
+                    object_uuid=OuterRef('uuid'),
+                    tags__contains=['proposition', 'status-changed'],
+                ).values('created')[:1]
+            )
+        )
+
+    def filter_according_to_roles(self, demandeur_uuid, permission='admission.view_enrolment_application'):
         demandeur_user = User.objects.filter(person__uuid=demandeur_uuid).first()
-        roles = _get_relevant_roles(demandeur_user, 'admission.view_enrolment_application')
+
+        roles = _get_relevant_roles(demandeur_user, permission)
 
         # Filter managed entities
         entities_conditions = Q()
@@ -374,7 +413,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         verbose_name=_('Curriculum'),
         max_files=1,
     )
-    valuated_secondary_studies_person = models.OneToOneField(
+    valuated_secondary_studies_person = models.ForeignKey(
         to='base.Person',
         blank=True,
         null=True,
@@ -469,9 +508,13 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
-    def __str__(self):
+    @property
+    def reference_str(self):
         reference = '{:08}'.format(self.reference)
         return f'{reference[:4]}.{reference[4:]}'
+
+    def __str__(self):
+        return self.reference_str
 
     def get_admission_context(self):
         from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING

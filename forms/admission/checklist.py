@@ -116,8 +116,8 @@ class CommentForm(forms.Form):
 
         super().__init__(*args, **kwargs)
 
-        form_for_sic = f'__{COMMENT_TAG_SIC}' in self.prefix
-        form_for_fac = f'__{COMMENT_TAG_FAC}' in self.prefix
+        form_for_sic = self.prefix.endswith(f'__{COMMENT_TAG_SIC}')
+        form_for_fac = self.prefix.endswith(f'__{COMMENT_TAG_FAC}')
 
         self.fields['comment'].widget.attrs['hx-post'] = form_url
 
@@ -686,11 +686,13 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
         fields = [
             'foreign_access_title_equivalency_type',
             'foreign_access_title_equivalency_status',
+            'foreign_access_title_equivalency_restriction_about',
             'foreign_access_title_equivalency_state',
             'foreign_access_title_equivalency_effective_date',
         ]
         widgets = {
             'foreign_access_title_equivalency_effective_date': CustomDateInput,
+            'foreign_access_title_equivalency_restriction_about': forms.TextInput,
         }
 
     class Media:
@@ -707,6 +709,9 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
 
         displayed_fields = {
             'foreign_access_title_equivalency_type',
+        }
+        optional_fields = {
+            'foreign_access_title_equivalency_restriction_about',
         }
 
         if equivalency_type in {
@@ -729,6 +734,8 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
                     displayed_fields.add('foreign_access_title_equivalency_effective_date')
 
         for field in self.fields:
+            if field in optional_fields:
+                continue
             if field in displayed_fields:
                 if not cleaned_data.get(field):
                     self.add_error(field, FIELD_REQUIRED_MESSAGE)
@@ -1066,6 +1073,7 @@ class SicDecisionRefusalForm(FacDecisionRefusalForm):
 
 class SicDecisionDerogationForm(forms.Form):
     dispensation_needed = forms.ChoiceField(
+        label=_('Dispensation needed'),
         choices=BesoinDeDerogation.choices(),
         widget=forms.RadioSelect(
             attrs={
@@ -1084,14 +1092,18 @@ class SicDecisionFinalRefusalForm(forms.Form):
         widget=forms.Textarea(),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, with_email, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['body'].widget.attrs['data-config'] = json.dumps(
-            {
-                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
-                'language': get_language(),
-            }
-        )
+        if with_email:
+            self.fields['body'].widget.attrs['data-config'] = json.dumps(
+                {
+                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                    'language': get_language(),
+                }
+            )
+        else:
+            del self.fields['body']
+            del self.fields['subject']
 
 
 class SicDecisionFinalApprovalForm(forms.Form):

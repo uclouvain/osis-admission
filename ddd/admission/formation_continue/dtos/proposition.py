@@ -31,6 +31,7 @@ import attr
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
 )
@@ -50,12 +51,19 @@ class PropositionDTO(interface.DTO):
     soumise_le: Optional[datetime.datetime]
     erreurs: List[Dict[str, str]]
     statut: str
+    profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
     matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
     pays_nationalite_candidat: str
     pays_nationalite_ue_candidat: Optional[bool]
+    nom_pays_nationalite_candidat: str
+    noma_candidat: str
+    adresse_email_candidat: str
+    date_changement_statut: Optional[datetime.datetime]
+    candidat_a_plusieurs_demandes: bool
+    langue_contact_candidat: str
 
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
 
@@ -80,6 +88,9 @@ class PropositionDTO(interface.DTO):
     documents_demandes: Dict
 
     marque_d_interet: Optional[bool]
+    aide_a_la_formation: Optional[bool]
+    inscription_au_role_obligatoire: Optional[bool]
+    etat_formation: str
     edition: Optional[str]
     en_ordre_de_paiement: Optional[bool]
     droits_reduits: Optional[bool]
@@ -93,6 +104,20 @@ class PropositionDTO(interface.DTO):
     diplome_produit: Optional[bool]
     intitule_du_tff: Optional[str]
 
+    # Decision
+    decision_dernier_mail_envoye_le: Optional[datetime.datetime]
+    decision_dernier_mail_envoye_par: Optional[str]
+    motif_de_mise_en_attente: Optional[str]
+    motif_de_mise_en_attente_autre: Optional[str]
+    condition_d_approbation_par_la_faculte: Optional[str]
+    motif_de_refus: Optional[str]
+    motif_de_refus_autre: Optional[str]
+    motif_d_annulation: Optional[str]
+
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+
+    @property
+    def annee_demande(self):
+        return self.annee_calculee or self.formation.annee
