@@ -78,8 +78,13 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.person_address_type import PersonAddressType
+from base.models.enums.state_iufc import StateIUFC
+from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
+from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time("1980-02-25")
@@ -126,6 +131,9 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             training=cls.admission_ok.training,
         )
         cls.candidate_ok = cls.admission_ok.candidate
+        cls.candidate_ok_residential_address = PersonAddress.objects.filter(
+            person=cls.candidate_ok, label=PersonAddressType.RESIDENTIAL.name
+        ).first()
         cls.second_candidate_ok = cls.second_admission_ok.candidate
         cls.ok_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=cls.admission_ok.uuid)
         cls.second_ok_url = resolve_url(
@@ -222,7 +230,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.third_admission_ok.refresh_from_db()
 
         # Valuation of the secondary studies
-        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, None)
+        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, self.third_admission_ok.candidate)
 
         # Valuation of the curriculum experiences
         self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)
@@ -296,6 +304,26 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
         self.assertEqual(self.admission_ok.late_enrollment, False)
+        self.assertEqual(
+            self.admission_ok.submitted_profile,
+            {
+                'identification': {
+                    'first_name': self.admission_ok.candidate.first_name,
+                    'last_name': self.admission_ok.candidate.last_name,
+                    'gender': self.admission_ok.candidate.gender,
+                    'country_of_citizenship': self.admission_ok.candidate.country_of_citizenship.iso_code,
+                    'date_of_birth': self.admission_ok.candidate.birth_date.isoformat(),
+                },
+                'coordinates': {
+                    'country': self.candidate_ok_residential_address.country.iso_code,
+                    'postal_code': self.candidate_ok_residential_address.postal_code,
+                    'city': self.candidate_ok_residential_address.city,
+                    'street': self.candidate_ok_residential_address.street,
+                    'street_number': self.candidate_ok_residential_address.street_number,
+                    'postal_box': self.candidate_ok_residential_address.postal_box,
+                },
+            },
+        )
 
         history_entry: HistoryEntry = HistoryEntry.objects.filter(
             object_uuid=self.admission_ok.uuid,
@@ -335,6 +363,12 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         current_admission.refresh_from_db()
         self.assertEqual(current_admission.type_demande, TypeDemande.INSCRIPTION.name)
 
+        notifications = EmailNotification.objects.filter(person=current_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        self.assertIn('juillet 1980', notifications[0].payload)
+
+        notifications[0].delete()
+
         current_admission.candidate.country_of_citizenship.european_union = False
         current_admission.candidate.country_of_citizenship.save(update_fields=['european_union'])
 
@@ -353,6 +387,10 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
         current_admission.refresh_from_db()
         self.assertEqual(current_admission.type_demande, TypeDemande.ADMISSION.name)
+
+        notifications = EmailNotification.objects.filter(person=current_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        self.assertNotIn('juillet 1980', notifications[0].payload)
 
     @freezegun.freeze_time("1980-10-22")
     @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
@@ -563,6 +601,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
     def setUpTestData(cls, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         AdmissionAcademicCalendarFactory.produce_all_required()
+        cls.belgium_country = CountryFactory(iso_code=BE_ISO_CODE)
 
         # Validation errors
         cls.candidate_errors = IncompletePersonForIUFCFactory()
@@ -577,6 +616,9 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         cls.admission_ok = ContinuingEducationAdmissionFactory(with_access_conditions_met=True)
         training = cls.admission_ok.training
         cls.candidate_ok = cls.admission_ok.candidate
+        cls.candidate_ok_residential_address = PersonAddress.objects.filter(
+            person=cls.candidate_ok, label=PersonAddressType.RESIDENTIAL.name
+        ).first()
         cls.ok_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=cls.admission_ok.uuid)
 
         cls.second_admission_ok = ContinuingEducationAdmissionFactory(
@@ -636,6 +678,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             },
         )
         patcher.start()
@@ -662,6 +705,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             token: {
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             }
             for token in tokens
         }
@@ -706,10 +750,6 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             json_content['errors'],
             [
                 {
-                    "status_code": "ADMISSION-2",
-                    "detail": _("Admission conditions not met."),
-                },
-                {
                     "status_code": "FORMATION-CONTINUE-3",
                     "detail": _(
                         "Please specify the details of your most recent academic training and your most recent "
@@ -730,6 +770,36 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['errors'], [])
 
+    def test_continuing_proposition_with_closed_training(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        admission = ContinuingEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            with_access_conditions_met=True,
+        )
+        admission.training.specificiufcinformations.state = StateIUFC.CLOSED.name
+        admission.training.specificiufcinformations.save()
+
+        admission_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
+
+        expected_error = {
+            "status_code": "FORMATION-CONTINUE-6",
+            "detail": _("Your application cannot be submitted because the %(acronym)s course is closed.")
+            % {"acronym": admission.training.acronym},
+        }
+
+        # Verification
+        response = self.client.get(admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_content = response.json()
+        self.assertEqual(json_content.get('errors', []), [expected_error])
+
+        # Submission
+        response = self.client.post(admission_url, self.submitted_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_content = response.json()
+        self.assertEqual(json_content.get('non_field_errors', []), [expected_error])
+
     def test_continuing_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
@@ -744,6 +814,26 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
+        self.assertEqual(
+            self.admission_ok.submitted_profile,
+            {
+                'identification': {
+                    'first_name': self.admission_ok.candidate.first_name,
+                    'last_name': self.admission_ok.candidate.last_name,
+                    'gender': self.admission_ok.candidate.gender,
+                    'country_of_citizenship': self.admission_ok.candidate.country_of_citizenship.iso_code,
+                    'date_of_birth': self.admission_ok.candidate.birth_date.isoformat(),
+                },
+                'coordinates': {
+                    'country': self.candidate_ok_residential_address.country.iso_code,
+                    'postal_code': self.candidate_ok_residential_address.postal_code,
+                    'city': self.candidate_ok_residential_address.city,
+                    'street': self.candidate_ok_residential_address.street,
+                    'street_number': self.candidate_ok_residential_address.street_number,
+                    'postal_box': self.candidate_ok_residential_address.postal_box,
+                },
+            },
+        )
 
         # Check tasks
         admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok)
@@ -765,6 +855,14 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         content = email_object.as_string()
         self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)
         self.assertIn('http://dummyurl/file/foobar', content)
+
+        # Check the history entries
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=self.admission_ok.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été soumise.')
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
@@ -800,7 +898,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.third_admission_ok.refresh_from_db()
 
         # Valuation of the secondary studies
-        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, None)
+        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, self.third_admission_ok.candidate)
 
         # Valuation of the curriculum experiences
         self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)

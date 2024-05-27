@@ -44,6 +44,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import TypeDeRefus
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PdfSicInconnu
@@ -211,7 +212,7 @@ class PDFGeneration(IPDFGeneration):
 
                 context['access_titles_names'].append(
                     next(
-                        experience.titre_formate
+                        experience.titre_pdf_decision_fac
                         for experience in {
                             TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE: cv_dto.experiences_non_academiques,
                             TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE: cv_dto.experiences_academiques,
@@ -346,14 +347,20 @@ class PDFGeneration(IPDFGeneration):
                 ):
                     # For the curriculum experiences, we would like to get the name of the experience
                     documents_names.append(
-                        '{document_label} : {cv_xp_label}'.format(
+                        '{document_label} : {cv_xp_label}. {document_communication}'.format(
                             document_label=document.libelle_langue_candidat,
                             cv_xp_label=experiences_curriculum_par_uuid[document_identifier[1]].titre_pdf_decision_sic,
+                            document_communication=document.justification_gestionnaire,
                         )
                     )
 
                 else:
-                    documents_names.append(document.libelle_langue_candidat)
+                    documents_names.append(
+                        '{document_label}. {document_communication}'.format(
+                            document_label=document.libelle_langue_candidat,
+                            document_communication=document.justification_gestionnaire,
+                        )
+                    )
 
         token = admission_generate_pdf(
             admission=None,
@@ -431,6 +438,9 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:
+        if proposition.type_de_refus == TypeDeRefus.REFUS_LIBRE.name:
+            return None
+
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
@@ -467,6 +477,9 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:
+        if proposition.type_de_refus == TypeDeRefus.REFUS_LIBRE.name:
+            return None
+
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator

@@ -34,9 +34,11 @@ from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -46,6 +48,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
     ChoixMoyensDecouverteFormation,
+    ChoixEdition,
+    ChoixMotifAttente,
+    ChoixMotifRefus,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
@@ -95,9 +100,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
             return cls._load(
-                ContinuingEducationAdmissionProxy.objects.select_related('billing_address_country').get(
-                    uuid=entity_id.uuid
-                )
+                ContinuingEducationAdmissionProxy.objects.select_related(
+                    'billing_address_country',
+                    'last_update_author',
+                ).get(uuid=entity_id.uuid)
             )
         except ContinuingEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
@@ -118,7 +124,33 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             acronym=entity.formation_id.sigle,
             academic_year__year=entity.formation_id.annee,
         )
-        candidate = Person.objects.get(global_id=entity.matricule_candidat)
+
+        persons = {
+            person.global_id: person
+            for person in Person.objects.filter(
+                global_id__in=[
+                    matricule
+                    for matricule in [
+                        entity.matricule_candidat,
+                        entity.auteur_derniere_modification,
+                        entity.decision_dernier_mail_envoye_par,
+                    ]
+                    if matricule
+                ]
+            )
+        }
+
+        candidate = persons[entity.matricule_candidat]
+
+        last_email_sent_by = (
+            persons[entity.decision_dernier_mail_envoye_par]
+            if entity.decision_dernier_mail_envoye_par in persons
+            else None
+        )
+
+        last_update_author = (
+            persons[entity.auteur_derniere_modification] if entity.auteur_derniere_modification in persons else None
+        )
 
         adresse_facturation = (
             {
@@ -180,6 +212,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     and attrs.asdict(entity.checklist_actuelle, value_serializer=cls._serialize)
                     or {},
                 },
+                'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
                 'interested_mark': entity.marque_d_interet,
                 'edition': entity.edition.name if entity.edition else '',
                 'in_payement_order': entity.en_ordre_de_paiement,
@@ -193,6 +226,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'assessment_test_succeeded': entity.a_reussi_l_epreuve_d_evaluation,
                 'certificate_provided': entity.diplome_produit,
                 'tff_label': entity.intitule_du_tff,
+                'last_email_sent_at': entity.decision_dernier_mail_envoye_le,
+                'last_email_sent_by': last_email_sent_by,
+                'on_hold_reason': entity.motif_de_mise_en_attente.name if entity.motif_de_mise_en_attente else '',
+                'on_hold_reason_other': entity.motif_de_mise_en_attente_autre,
+                'approval_condition_by_faculty': entity.condition_d_approbation_par_la_faculte,
+                'refusal_reason': entity.motif_de_refus.name if entity.motif_de_refus else '',
+                'refusal_reason_other': entity.motif_de_refus_autre,
+                'cancel_reason': entity.motif_d_annulation,
+                'last_update_author': last_update_author,
                 **adresse_facturation,
             },
         )
@@ -201,7 +243,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
-        return cls._load_dto(ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
+        try:
+            return cls._load_dto(ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
+        except ContinuingEducationAdmissionProxy.DoesNotExist:
+            raise PropositionNonTrouveeException
 
     @classmethod
     def _load(cls, admission: 'ContinuingEducationAdmission') -> 'Proposition':
@@ -220,6 +265,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
+            profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile),
+            auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
             reponses_questions_specifiques=admission.specific_question_answers,
@@ -254,7 +301,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ChoixMoyensDecouverteFormation[way] for way in admission.ways_to_find_out_about_the_course
             ],
             marque_d_interet=admission.interested_mark,
-            edition=admission.edition,
+            edition=ChoixEdition[admission.edition] if admission.edition else None,
             checklist_initiale=checklist_initiale and StatutsChecklistContinue.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistContinue.from_dict(checklist_actuelle),
             en_ordre_de_paiement=admission.in_payement_order,
@@ -268,6 +315,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
             diplome_produit=admission.certificate_provided,
             intitule_du_tff=admission.tff_label,
+            decision_dernier_mail_envoye_le=admission.last_email_sent_at,
+            decision_dernier_mail_envoye_par=admission.last_email_sent_by.global_id
+            if admission.last_email_sent_by
+            else '',
+            motif_de_mise_en_attente=ChoixMotifAttente[admission.on_hold_reason] if admission.on_hold_reason else '',
+            motif_de_mise_en_attente_autre=admission.on_hold_reason_other,
+            condition_d_approbation_par_la_faculte=admission.approval_condition_by_faculty,
+            motif_de_refus=ChoixMotifRefus[admission.refusal_reason] if admission.refusal_reason else '',
+            motif_de_refus_autre=admission.refusal_reason_other,
+            motif_d_annulation=admission.cancel_reason,
         )
 
     @classmethod
@@ -283,20 +340,35 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             .first()
         )
 
+        if language_is_french:
+            training_title_field = 'title'
+            country_name_field = 'name'
+        else:
+            training_title_field = 'title_english'
+            country_name_field = 'name_en'
+
         return PropositionDTO(
             uuid=admission.uuid,
             statut=admission.status,
+            date_changement_statut=admission.status_updated_at,  # from annotation
+            langue_contact_candidat=admission.candidate.language,
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
             soumise_le=admission.submitted_at,
             erreurs=admission.detailed_status or [],
             date_fin_pot=admission.pool_end_date,  # from annotation
+            candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
+            profil_soumis_candidat=ProfilCandidatDTO.from_dict(
+                dict_profile=admission.submitted_profile,
+                nom_pays_nationalite=admission.submitted_profile_country_of_citizenship_name,  # from annotation
+                nom_pays_adresse=admission.submitted_profile_country_name,  # from annotation
+            ),
             formation=FormationDTO(
                 sigle=admission.training.acronym,
                 code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
                 date_debut=admission.training.academic_year.start_date,
-                intitule=admission.training.title if language_is_french else admission.training.title_english,
+                intitule=getattr(admission.training, training_title_field),
                 intitule_fr=admission.training.title,
                 intitule_en=admission.training.title_english,
                 campus=CampusDTO(
@@ -305,7 +377,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     code_postal=campus.postal_code,
                     ville=campus.city,
                     pays_iso_code=campus.country.iso_code if campus.country else '',
-                    nom_pays=campus.country.name if campus.country else '',
+                    nom_pays=getattr(campus.country, country_name_field) if campus.country else '',
                     rue=campus.street,
                     numero_rue=campus.street_number,
                     boite_postale=campus.postal_box,
@@ -324,7 +396,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     pays_iso_code=admission.training.enrollment_campus.country.iso_code
                     if admission.training.enrollment_campus.country
                     else '',
-                    nom_pays=admission.training.enrollment_campus.country.name
+                    nom_pays=getattr(admission.training.enrollment_campus.country, country_name_field)
                     if admission.training.enrollment_campus.country
                     else '',
                     rue=admission.training.enrollment_campus.street,
@@ -348,8 +420,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             pays_nationalite_candidat=admission.candidate.country_of_citizenship.iso_code
             if admission.candidate.country_of_citizenship
             else '',
+            nom_pays_nationalite_candidat=getattr(admission.candidate.country_of_citizenship, country_name_field)
+            if admission.candidate.country_of_citizenship
+            else '',
             pays_nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
+            noma_candidat=admission.student_registration_id or '',  # from annotation
+            adresse_email_candidat=admission.candidate.private_email,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
@@ -366,7 +443,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 code_postal=admission.billing_address_postal_code,
                 ville=admission.billing_address_city,
                 pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
-                nom_pays=getattr(admission.billing_address_country, 'name' if language_is_french else 'name_en')
+                nom_pays=getattr(admission.billing_address_country, country_name_field)
                 if admission.billing_address_country
                 else '',
                 destinataire=admission.billing_address_recipient,
@@ -379,6 +456,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
+            aide_a_la_formation=admission.training.specificiufcinformations.training_assistance
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else None,
+            inscription_au_role_obligatoire=admission.training.specificiufcinformations.registration_required
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else None,
+            etat_formation=admission.training.specificiufcinformations.state
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else '',
             documents_demandes=admission.requested_documents,
             marque_d_interet=admission.interested_mark,
             edition=admission.edition,
@@ -393,4 +479,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
             diplome_produit=admission.certificate_provided,
             intitule_du_tff=admission.tff_label,
+            decision_dernier_mail_envoye_le=admission.last_email_sent_at,
+            decision_dernier_mail_envoye_par=admission.last_email_sent_by.global_id
+            if admission.last_email_sent_by
+            else '',
+            motif_de_mise_en_attente=admission.on_hold_reason,
+            motif_de_mise_en_attente_autre=admission.on_hold_reason_other,
+            condition_d_approbation_par_la_faculte=admission.approval_condition_by_faculty,
+            motif_de_refus=admission.refusal_reason,
+            motif_de_refus_autre=admission.refusal_reason_other,
+            motif_d_annulation=admission.cancel_reason,
         )

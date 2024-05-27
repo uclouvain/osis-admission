@@ -40,6 +40,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person_address import PersonAddressFactory
+from base.tests.factories.program_manager import ProgramManagerFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -63,6 +64,15 @@ class CoordonneesDetailViewTestCase(TestCase):
             candidate__phone_mobile='0123456789',
         )
 
+        cls.continuing_url = resolve_url(
+            'admission:continuing-education:coordonnees',
+            uuid=cls.continuing_admission.uuid,
+        )
+
+        cls.continuing_manager_user = ProgramManagerFactory(
+            education_group=cls.continuing_admission.training.education_group,
+        ).person.user
+
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
@@ -71,6 +81,10 @@ class CoordonneesDetailViewTestCase(TestCase):
         )
 
         cls.general_url = resolve_url('admission:general-education:coordonnees', uuid=cls.general_admission.uuid)
+
+        cls.general_manager_user = ProgramManagerFactory(
+            education_group=cls.general_admission.training.education_group,
+        ).person.user
 
         cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=cls.general_admission.training,
@@ -103,6 +117,11 @@ class CoordonneesDetailViewTestCase(TestCase):
             uuid=cls.confirmed_doctorate_admission.uuid,
         )
 
+    def test_continuing_coordonnes_detail_program_manager(self):
+        self.client.force_login(user=self.continuing_manager_user)
+        response = self.client.get(self.continuing_url)
+        self.assertEqual(response.status_code, 200)
+
     def test_continuing_coordonnees_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
         residential_address = PersonAddressFactory(
@@ -114,14 +133,18 @@ class CoordonneesDetailViewTestCase(TestCase):
             label=PersonAddressType.CONTACT.name,
         )
 
-        url = resolve_url('admission:continuing-education:coordonnees', uuid=self.continuing_admission.uuid)
-        response = self.client.get(url)
+        response = self.client.get(self.continuing_url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['coordonnees']['contact'], contact_address)
         self.assertEqual(response.context['coordonnees']['residential'], residential_address)
         self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
         self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
+
+    def test_general_coordonnees_detail_program_manager(self):
+        self.client.force_login(user=self.general_manager_user)
+        response = self.client.get(self.general_url)
+        self.assertEqual(response.status_code, 200)
 
     def test_general_coordonnees_detail_sic_manager_without_address(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -1,4 +1,4 @@
-{% load admission %}
+{% load admission strings %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -39,7 +39,7 @@
             {% include 'admission/general_education/checklist_menu_item_status.html' with statut=statut item_name=checklist_item_name %}
             {{ checklist_tabs|get_item:checklist_item_name }}
             {% if checklist_additional_icons and checklist_additional_icons|get_item_or_none:checklist_item_name %}
-              {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name additional_icon=checklist_additional_icons|get_item:checklist_item_name %}
+              {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name additional_icon=checklist_additional_icons|get_item:checklist_item_name title=checklist_additional_icons_title|get_item:checklist_item_name %}
             {% endif %}
             {% with original_admission.candidate.personmergeproposal.status as merge_status %}
                 {% if checklist_item_name == 'donnees_personnelles' %}
@@ -65,7 +65,7 @@
                     {% if child.extra.identifiant in curex_a_fusionner %}
                         <div class="pull-right badge small badge-warning">Fusion</div>
                     {% endif %}
-                  {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=child_identifier additional_icon=checklist_additional_icons|get_item:child_identifier %}
+                  {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=child_identifier additional_icon=checklist_additional_icons|get_item:child_identifier title=checklist_additional_icons_title|get_item:child_identifier %}
                 </a>
               </li>
             {% endfor %}

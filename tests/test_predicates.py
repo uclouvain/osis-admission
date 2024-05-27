@@ -31,10 +31,11 @@ from django.test import TestCase
 from django.utils import translation
 from osis_signature.enums import SignatureState
 
-from admission.auth.predicates import common, doctorate, general, not_in_general_statuses_predicate_message
+from admission.auth.predicates import common, doctorate, general, not_in_general_statuses_predicate_message, continuing
 from admission.auth.predicates.general import is_invited_to_pay_after_request
 from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
@@ -42,10 +43,13 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddConfiguratorFactory, PromoterRoleFactory
 from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory
 from base.tests.factories.entity import EntityFactory
+from base.tests.factories.person import PersonFactory
+from base.tests.factories.user import UserFactory
 
 
 class PredicatesTestCase(TestCase):
@@ -475,3 +479,33 @@ class PredicatesTestCase(TestCase):
                 'Le statut global de la demande doit être l\'un des suivants pour pouvoir réaliser cette action : '
                 'Demande confirmée (par étudiant), A compléter (par étudiant) pour SIC.',
             )
+
+    def test_is_general(self):
+        user = UserFactory()
+        general_admission = GeneralEducationAdmissionFactory()
+        continuing_admission = ContinuingEducationAdmissionFactory()
+        doctorate_admission = DoctorateAdmissionFactory()
+
+        self.assertTrue(general.is_general(user, general_admission))
+        self.assertFalse(general.is_general(user, continuing_admission))
+        self.assertFalse(general.is_general(user, doctorate_admission))
+
+    def test_is_continuing(self):
+        user = UserFactory()
+        general_admission = GeneralEducationAdmissionFactory()
+        continuing_admission = ContinuingEducationAdmissionFactory()
+        doctorate_admission = DoctorateAdmissionFactory()
+
+        self.assertFalse(continuing.is_continuing(user, general_admission))
+        self.assertTrue(continuing.is_continuing(user, continuing_admission))
+        self.assertFalse(continuing.is_continuing(user, doctorate_admission))
+
+    def test_in_manager_status(self):
+        user = UserFactory()
+        general_admission = GeneralEducationAdmissionFactory(status=ChoixStatutPropositionGenerale.CONFIRMEE.name)
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+
+        self.assertFalse(continuing.in_manager_status(user, general_admission))
+        self.assertFalse(continuing.in_manager_status(user, doctorate_admission))
+        self.assertTrue(continuing.in_manager_status(user, continuing_admission))

@@ -53,7 +53,7 @@ class ExportPdfTestCase(TestCase):
     @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
     @patch('osis_document.api.utils.confirm_remote_upload')
     def test_pdf_archive(self, confirm, confirm_multiple_upload, save, get_metadata, post_processing):
-        get_metadata.return_value = {"name": "test.pdf"}
+        get_metadata.return_value = {"name": "test.pdf", "size": 1}
         save.return_value = 'a-token'
         confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         post_processing.return_value = {

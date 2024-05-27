@@ -263,7 +263,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         get_remote_metadata,
         get_remote_token,
     ):
-        get_remote_metadata.return_value = {"name": "test.pdf"}
+        get_remote_metadata.return_value = {"name": "test.pdf", "size": 1}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         file_confirm_upload.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
@@ -396,7 +396,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         get_remote_metadata,
         get_remote_token,
     ):
-        get_remote_metadata.return_value = {"name": "test.pdf"}
+        get_remote_metadata.return_value = {"name": "test.pdf", "size": 1}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         file_confirm_upload.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
@@ -419,7 +419,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         get_remote_metadata,
         get_remote_token,
     ):
-        get_remote_metadata.return_value = {"name": "test.pdf"}
+        get_remote_metadata.return_value = {"name": "test.pdf", "size": 1}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         file_confirm_upload.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []

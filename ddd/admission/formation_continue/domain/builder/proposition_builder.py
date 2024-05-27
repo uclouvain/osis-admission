@@ -60,4 +60,5 @@ class PropositionBuilder(interface.RootEntityBuilder):
             moyens_decouverte_formation=[
                 ChoixMoyensDecouverteFormation[moyen] for moyen in cmd.moyens_decouverte_formation
             ],
+            marque_d_interet=cmd.marque_d_interet,
         )

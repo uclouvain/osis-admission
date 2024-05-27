@@ -23,25 +23,35 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from dal import autocomplete
+from contextlib import suppress
+from typing import Optional
+
+from dal import autocomplete, forward
 from django import forms
+from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import TypeBourse
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMoyensDecouverteFormation
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.forms import get_scholarship_choices, format_training
+from admission.forms import get_scholarship_choices, format_training, AdmissionMainCampusChoiceField
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.fields import RadioBooleanField
+from base.models.education_group_year import EducationGroupYear
+from base.models.enums.state_iufc import StateIUFC
 
 
-class TrainingChoiceForm(ConfigurableFormMixin):
+class BaseTrainingChoiceForm(ConfigurableFormMixin):
     training_type = forms.ChoiceField(
         choices=TypeFormation.choices(),
         label=_('Course type'),
@@ -49,12 +59,15 @@ class TrainingChoiceForm(ConfigurableFormMixin):
         required=False,
     )
 
-    campus = forms.ChoiceField(
+    campus = AdmissionMainCampusChoiceField(
         label=_('Campus (optional)'),
-        disabled=True,
         required=False,
+        queryset=None,
+        to_field_name='uuid',
     )
 
+
+class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
     general_education_training = forms.ChoiceField(
         label=pgettext_lazy('admission', 'Course'),
         disabled=True,
@@ -103,13 +116,13 @@ class TrainingChoiceForm(ConfigurableFormMixin):
         widget=autocomplete.ListSelect2,
     )
 
-    def __init__(self, proposition: PropositionGestionnaireDTO, *args, **kwargs):
+    def __init__(self, proposition: PropositionGestionnaireDTO, user: User, *args, **kwargs):
         self.training_type = AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[
             proposition.formation.type
         ]
 
         kwargs['initial'] = {
-            'campus': proposition.formation.campus.nom if proposition.formation.campus else '',
+            'campus': proposition.formation.campus.uuid if proposition.formation.campus else '',
             'training_type': self.training_type,
             'double_degree_scholarship': proposition.bourse_double_diplome and proposition.bourse_double_diplome.uuid,
             'international_scholarship': proposition.bourse_internationale and proposition.bourse_internationale.uuid,
@@ -120,8 +133,7 @@ class TrainingChoiceForm(ConfigurableFormMixin):
 
         super().__init__(*args, **kwargs)
 
-        # Initialize fields choices
-        self.fields['campus'].choices = [[self.initial['campus'], self.initial['campus']]]
+        self.fields['campus'].disabled = True
 
         self.fields['general_education_training'].choices = [
             [self.initial['general_education_training'], mark_safe(format_training(proposition.formation))]
@@ -171,3 +183,130 @@ class TrainingChoiceForm(ConfigurableFormMixin):
 
     class Media:
         js = ('js/dependsOn.min.js',)
+
+
+class ContinuingTrainingChoiceForm(BaseTrainingChoiceForm):
+    continuing_education_training = forms.ChoiceField(
+        label=pgettext_lazy('admission', 'Course'),
+        required=False,
+        widget=autocomplete.ListSelect2(
+            url="admission:autocomplete:continuing-managed-education-trainings",
+            attrs={
+                'data-placeholder': _('Acronym / Title'),
+                'data-html': 'true',
+            },
+            forward=['academic_year', 'campus', forward.Const('uuid', 'id_field')],
+        ),
+    )
+
+    academic_year = AcademicYearModelChoiceField(
+        label=_('Academic year'),
+        required=False,
+        to_field_name='year',
+    )
+
+    motivations = forms.CharField(
+        label=_('Motivations'),
+        widget=forms.Textarea(
+            attrs={
+                'rows': 6,
+            }
+        ),
+        max_length=1000,
+        required=False,
+    )
+
+    ways_to_find_out_about_the_course = forms.MultipleChoiceField(
+        label=_('How did you hear about this course?'),
+        required=False,
+        choices=ChoixMoyensDecouverteFormation.choices(),
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    interested_mark = forms.NullBooleanField(
+        label=_('Yes, I am interested in this course'),
+        required=False,
+        widget=forms.CheckboxInput,
+    )
+
+    def __init__(self, proposition: PropositionContinueDTO, user: User, *args, **kwargs):
+        self.training_type = AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[
+            proposition.formation.type
+        ]
+
+        kwargs['initial'] = {
+            'campus': proposition.formation.campus.uuid if proposition.formation.campus else '',
+            'training_type': self.training_type,
+            'continuing_education_training': proposition.formation.sigle,
+            'academic_year': proposition.annee_demande,
+            'interested_mark': proposition.marque_d_interet,
+            'ways_to_find_out_about_the_course': proposition.moyens_decouverte_formation,
+            'motivations': proposition.motivations,
+            'specific_question_answers': proposition.reponses_questions_specifiques,
+        }
+
+        super().__init__(*args, **kwargs)
+
+        if self.is_bound:
+            selected_training = self.data.get(self.add_prefix('continuing_education_training'))
+            selected_year = self.data.get(self.add_prefix('academic_year'))
+        else:
+            selected_training = self.initial.get('continuing_education_training')
+            selected_year = self.initial.get('academic_year')
+
+        self.continuing_training: Optional[EducationGroupYear] = None
+        self.display_long_continuing_fields = False
+        self.display_closed_continuing_fields = False
+
+        if selected_training and selected_year:
+            with suppress(EducationGroupYear.DoesNotExist):
+                self.continuing_training = ContinuingManagedEducationTrainingsAutocomplete.get_base_queryset(
+                    user=user,
+                    acronyms=[selected_training],
+                    academic_year=selected_year,
+                ).get()
+
+                self.display_long_continuing_fields = self.continuing_training.registration_required
+                self.display_closed_continuing_fields = self.continuing_training.state == StateIUFC.CLOSED.name
+
+        self.fields['continuing_education_training'].choices = [
+            (
+                selected_training,
+                self.continuing_training.formatted_title  # type: ignore
+                if self.continuing_training
+                else selected_training,
+            )
+        ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        self.clean_continuing_education(cleaned_data)
+        return cleaned_data
+
+    def clean_continuing_education(self, cleaned_data):
+        for required_field in [
+            'continuing_education_training',
+            'motivations',
+            'academic_year',
+        ]:
+            if not cleaned_data.get(required_field):
+                self.add_error(required_field, FIELD_REQUIRED_MESSAGE)
+
+        if (
+            self.cleaned_data.get('academic_year')
+            and self.cleaned_data.get('continuing_education_training')
+            and not self.continuing_training
+        ):
+            self.add_error(
+                'continuing_education_training',
+                _('The selected training has not been found for this year.'),
+            )
+
+        if self.display_long_continuing_fields:
+            if not cleaned_data.get('ways_to_find_out_about_the_course'):
+                self.add_error('ways_to_find_out_about_the_course', FIELD_REQUIRED_MESSAGE)
+        else:
+            cleaned_data['ways_to_find_out_about_the_course'] = []
+
+        if not self.display_closed_continuing_fields:
+            cleaned_data['interested_mark'] = None

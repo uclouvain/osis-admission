@@ -40,14 +40,17 @@ from django.views import View
 
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
-from admission.forms.admission.filter import AllAdmissionsFilterForm
+from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
@@ -62,6 +65,7 @@ from osis_export.models.enums.types import ExportTypes
 
 __all__ = [
     'AdmissionListExcelExportView',
+    'ContinuingAdmissionListExcelExportView',
 ]
 
 
@@ -155,7 +159,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     export_description = gettext_lazy('Excel export of admission applications')
     permission_required = 'admission.view_enrolment_applications'
     redirect_url_name = 'admission:all-list'
-    urlpatterns = 'admission-list-excel-export'
+    urlpatterns = 'all-admissions-list'
 
     def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
         formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
@@ -263,7 +267,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Confirmation date'),
         ]
 
-    def get_row_data(self, row: DemandeRechercheDTO):
+    def get_row_data(self, row: TouteDemandeRechercheDTO):
         return [
             row.numero_demande,
             row.nom_candidat,
@@ -287,6 +291,119 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters.pop('taille_page', None)
             filters.pop('page', None)
             filters.pop('liste_travail', None)
+
+            ordering_field = self.request.GET.get('o')
+            if ordering_field:
+                filters['tri_inverse'] = ordering_field[0] == '-'
+                filters['champ_tri'] = ordering_field.lstrip('-')
+
+            filters['demandeur'] = str(self.request.user.person.uuid)
+            return form.cleaned_data
+        return {}
+
+
+class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
+    command = ListerDemandesQuery
+    export_name = gettext_lazy('Admission applications export')
+    export_description = gettext_lazy('Excel export of admission applications')
+    permission_required = 'admission.view_continuing_enrolment_applications'
+    redirect_url_name = 'admission:continuing-education:list'
+    urlpatterns = 'continuing-admissions-list'
+
+    def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
+        formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
+
+        # Remove the filters not used in the excel export
+        formatted_filters.pop('demandeur', None)
+        formatted_filters.pop('tri_inverse', None)
+        formatted_filters.pop('champ_tri', None)
+
+        # Formatting of the names of the filters
+        base_fields = ContinuingAdmissionsFilterForm.base_fields
+        mapping_filter_key_name = {
+            key: str(base_fields[key].label) if key in base_fields else key for key in formatted_filters
+        }
+
+        mapping_filter_key_name['etats'] = _('Status')
+        mapping_filter_key_name['facultes'] = _('Faculty')
+        mapping_filter_key_name['matricule_candidat'] = _('Last name / First name / Email / NOMA')
+
+        # Formatting of the values of the filters
+        mapping_filter_key_value = {}
+
+        # Retrieve candidate name
+        candidate_global_id = formatted_filters.get('matricule_candidat')
+        if candidate_global_id:
+            person = Person.objects.filter(global_id=candidate_global_id).first()
+            if person:
+                mapping_filter_key_value['matricule_candidat'] = person.full_name
+
+        # Format enums
+        statuses = formatted_filters.get('etats')
+        if statuses:
+            mapping_filter_key_value['etats'] = [
+                ChoixStatutPropositionContinue.get_value(status_key) for status_key in statuses
+            ]
+
+        edition = formatted_filters.get('edition')
+        if edition:
+            mapping_filter_key_value['edition'] = [ChoixEdition.get_value(status_key) for status_key in edition]
+
+        # Format boolean values
+        for filter_name in ['inscription_requise', 'paye']:
+            formatted_filters[filter_name] = yesno(formatted_filters[filter_name], _('yes,no,'))
+
+        trainings_types = formatted_filters.get('types_formation')
+        if trainings_types:
+            mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
+
+        return {
+            mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])
+            for key, value in formatted_filters.items()
+        }
+
+    def get_header(self):
+        return [
+            _('Application no.'),
+            _('Last name'),
+            _('First name'),
+            _('NOMA'),
+            _('Email address'),
+            pgettext('admission', 'Course'),
+            _('Edition'),
+            _('Faculty'),
+            _('Paid'),
+            _('Status'),
+            _('EPC status'),
+            _('Confirmation date'),
+            _('Last modif.'),
+            _('Modification author'),
+        ]
+
+    def get_row_data(self, row: DemandeContinueRechercheDTO):
+        return [
+            row.numero_demande,
+            row.nom_candidat,
+            row.prenom_candidat,
+            row.noma_candidat,
+            row.courriel_candidat,
+            row.formation,
+            str(ChoixEdition.get_value(row.edition)) if row.edition else '',
+            row.sigle_faculte,
+            yesno(row.paye),
+            str(ChoixStatutPropositionContinue.get_value(row.etat_demande)),
+            '',  # TODO Add EPC status
+            row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',
+            row.derniere_modification_le.strftime(FULL_DATE_FORMAT),
+            row.derniere_modification_par,
+        ]
+
+    def get_filters(self):
+        form = ContinuingAdmissionsFilterForm(user=self.request.user, data=self.request.GET)
+        if form.is_valid():
+            filters = form.cleaned_data
+            filters.pop('taille_page', None)
+            filters.pop('page', None)
 
             ordering_field = self.request.GET.get('o')
             if ordering_field:

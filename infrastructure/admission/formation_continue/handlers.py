@@ -30,6 +30,24 @@ from admission.ddd.admission.formation_continue.use_case.read.recuperer_resume_e
     recuperer_resume_et_emplacements_documents_non_libres_proposition,
 )
 from admission.ddd.admission.formation_continue.use_case.write import *
+from admission.ddd.admission.formation_continue.use_case.write.annuler_proposition_service import (
+    annuler_proposition,
+)
+from admission.ddd.admission.formation_continue.use_case.write.approuver_par_fac_service import (
+    approuver_par_fac,
+)
+from admission.ddd.admission.formation_continue.use_case.write.cloturer_proposition_service import (
+    cloturer_proposition,
+)
+from admission.ddd.admission.formation_continue.use_case.write.mettre_en_attente_service import (
+    mettre_en_attente,
+)
+from admission.ddd.admission.formation_continue.use_case.write.refuser_proposition_service import (
+    refuser_proposition,
+)
+from admission.ddd.admission.formation_continue.use_case.write.valider_proposition_service import (
+    valider_proposition,
+)
 from admission.ddd.admission.formation_continue.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -40,10 +58,13 @@ from admission.infrastructure.admission.domain.service.elements_confirmation imp
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
+from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
+from admission.infrastructure.admission.formation_continue.domain.service.historique import Historique
+from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import ListerDemandesService
 from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
@@ -61,11 +82,16 @@ COMMAND_HANDLERS = {
         formation_continue_translator=FormationContinueTranslator(),
         annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
+    RecupererFormationContinueQuery: lambda msg_bus, cmd: recuperer_formation(
+        cmd,
+        formation_continue_translator=FormationContinueTranslator(),
+    ),
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        historique=HistoriqueGlobal(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -83,6 +109,7 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
+        historique=HistoriqueGlobal(),
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -105,6 +132,7 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        historique=HistoriqueGlobal(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -162,5 +190,49 @@ COMMAND_HANDLERS = {
             cmd,
             emplacement_document_repository=EmplacementDocumentRepository(),
         )
+    ),
+    MettreEnAttenteCommand: lambda msg_bus, cmd: mettre_en_attente(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        notification=Notification(),
+    ),
+    ApprouverParFacCommand: lambda msg_bus, cmd: approuver_par_fac(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        notification=Notification(),
+    ),
+    RefuserPropositionCommand: lambda msg_bus, cmd: refuser_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        notification=Notification(),
+    ),
+    AnnulerPropositionCommand: lambda msg_bus, cmd: annuler_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        notification=Notification(),
+    ),
+    ValiderPropositionCommand: lambda msg_bus, cmd: valider_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        notification=Notification(),
+    ),
+    CloturerPropositionCommand: lambda msg_bus, cmd: cloturer_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+    ),
+    ListerDemandesQuery: lambda msg_bus, cmd: lister_demandes(
+        cmd,
+        lister_demandes_service=ListerDemandesService(),
+    ),
+    ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationContinueTranslator(),
     ),
 }

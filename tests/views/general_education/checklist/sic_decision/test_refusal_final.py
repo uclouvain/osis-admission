@@ -31,6 +31,7 @@ from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from osis_history.models import HistoryEntry
+from osis_notification.models import EmailNotification
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import GeneralEducationAdmission
@@ -192,6 +193,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 'sic-decision-refusal-final-subject': 'subject',
                 'sic-decision-refusal-final-body': 'body',
+                'sic-decision-refusal-final-submitted': '',
             },
             **self.default_headers,
         )
@@ -217,6 +219,13 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check the mail is sent
+        self.assertTrue(
+            EmailNotification.objects.filter(
+                person=self.general_admission.candidate, payload__contains='subject'
+            ).exists()
+        )
 
         # Check that history entries are created
         entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
@@ -267,6 +276,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 'sic-decision-refusal-final-subject': 'subject',
                 'sic-decision-refusal-final-body': 'body',
+                'sic-decision-refusal-final-submitted': '',
             },
             **self.default_headers,
         )
@@ -300,6 +310,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 'sic-decision-refusal-final-subject': 'subject',
                 'sic-decision-refusal-final-body': 'body',
+                'sic-decision-refusal-final-submitted': '',
             },
             **self.default_headers,
         )
@@ -332,6 +343,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 'sic-decision-refusal-final-subject': 'subject',
                 'sic-decision-refusal-final-body': 'body',
+                'sic-decision-refusal-final-submitted': '',
             },
             **self.default_headers,
         )
@@ -384,6 +396,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 'sic-decision-refusal-final-subject': 'subject',
                 'sic-decision-refusal-final-body': 'body',
+                'sic-decision-refusal-final-submitted': '',
             },
             **self.default_headers,
         )
@@ -417,6 +430,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 'sic-decision-refusal-final-subject': 'subject',
                 'sic-decision-refusal-final-body': 'body',
+                'sic-decision-refusal-final-submitted': '',
             },
             **self.default_headers,
         )
@@ -437,3 +451,75 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         training_campus: Campus = self.louvain_training.enrollment_campus
 
         self.assertEqual(footer_campus.uuid, training_campus.uuid)
+
+    def test_refusal_final_decision_form_submitting_without_email(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        self.general_admission.refusal_type = TypeDeRefus.REFUS_LIBRE.name
+        self.general_admission.save(update_fields=['refusal_type'])
+
+        # Choose an existing reason
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-refusal-final-subject': '',
+                'sic-decision-refusal-final-body': '',
+                'sic-decision-refusal-final-submitted': '',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get('HX-Refresh'))
+
+        form = response.context['sic_decision_refusal_final_form']
+        self.assertTrue(form.is_valid())
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name)
+        self.assertEqual(
+            self.general_admission.checklist['current']['decision_sic']['statut'],
+            ChoixStatutChecklist.GEST_BLOCAGE.name,
+        )
+        self.assertEqual(
+            self.general_admission.checklist['current']['decision_sic']['extra'],
+            {'blocage': 'refusal'},
+        )
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check the mail is not sent
+        self.assertFalse(
+            EmailNotification.objects.filter(
+                person=self.general_admission.candidate, payload__contains='subject'
+            ).exists()
+        )
+
+        # Check that history entries are created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+
+        status_change_entry = next((entry for entry in entries if 'status-changed' in entry.tags), None)
+        message_entry = next((entry for entry in entries if 'message' in entry.tags), None)
+
+        self.assertIsNotNone(status_change_entry)
+        self.assertIsNone(message_entry)
+
+        self.assertCountEqual(
+            ['proposition', 'sic-decision', 'refusal', 'status-changed'],
+            status_change_entry.tags,
+        )
+
+        self.assertEqual(
+            status_change_entry.author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        # Check that the pdf is not generated
+        self.get_pdf_from_template_patcher.assert_not_called()

@@ -30,7 +30,7 @@
     <a
         class="scroll-to-top"
         href="#"
-        hx-get="{% url 'admission:admission-list-excel-export' %}?{{ view.query_params.urlencode }}"
+        hx-get="{% url 'admission:excel-exports:all-admissions-list' %}?{{ view.query_params.urlencode }}"
         hx-indicator="#htmx-overlay"
         hx-swap="none"
     >

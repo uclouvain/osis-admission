@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -37,84 +37,42 @@
 {% endblock %}
 
 
-{% block style %}
 
-  {{ block.super }}
-
-  <link rel="stylesheet" href="{% static 'admission/admission.css' %}" type='text/css'>
-  <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker3.min.css' %}" type='text/css'>
-  <style>
-    .mt-1 {
-      margin-top: 1em;
-    }
-
-    /* Customize the form inputs */
-    #search_form fieldset {
-      padding-bottom: 1em;
-    }
-
-    #search_form fieldset > legend {
-      font-size: 1em;
-      padding: 0 5px;
-      width: inherit;
-      border: none;
-      font-weight: bold;
-      margin-bottom: 0.5em;
-    }
-
-    #search_form .select2-container {
-      min-width: unset;
-    }
-
-    #search_form .select2-selection__rendered {
-      white-space: break-spaces;
-    }
-
-    /* Customize input and buttons above the list */
-    .list-actions {
-      display: flex;
-      justify-content: right;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .list-actions > * {
-      width: fit-content;
-    }
-
-  </style>
+{% block form_fields %}
+  <div class="row">
+    {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.edition form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.numero form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.matricule_candidat form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.etats form_group_class="form-group col-md-3" %}
+  </div>
+  <div class="row">
+    {% bootstrap_field filter_form.entites form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.types_formation form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-4" %}
+    {% bootstrap_field filter_form.inscription_requise form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.paye form_group_class="form-group col-md-2" %}
+  </div>
 {% endblock %}
 
 {% block script %}
-
   {{ block.super }}
-
-  {{ filter_form.media }}
+  <script src="{% static 'js/clipboard.js' %}"></script>
 
   <script>
-    // Prevent to save the DOM in cache when using htmx requests
-    htmx.config.refreshOnHistoryMiss = true;
-    htmx.config.historyCacheSize = 0;
+      $(document).ready(function () {
+          initializePopover({ trigger: 'hover' })
+          initializeLazyPopover()
 
-    $(document).ready(function () {
-
-      // Clear inputs when the form is reset
-      $('#search_form').on('reset', function (evt) {
-        $('#search_form :input:not([type=hidden])').val(null).trigger('change');
-        evt.preventDefault();
-        $('#search_form button[type=submit]').click();
-        return false;
+          const $reference = $('#id_numero');
+          $reference.mask(getReferenceMask($reference.val()), {
+              translation: {
+                  'S': { pattern: /[a-zA-Z]/, optional: true },
+              },
+              onKeyPress: function (cep, e, field, options) {
+                  $reference.mask(getReferenceMask(cep), options);
+              },
+          });
       });
-
-      // Display / hide the form errors
-      $('#admission-search').on('htmx:beforeSend', function (evt) {
-        $('#form_errors').html('');
-      });
-
-      $(document).on('change', '#id_taille_page', function (evt) {
-        $('#search_form button[type=submit]').click();
-      });
-    });
   </script>
-
 {% endblock %}

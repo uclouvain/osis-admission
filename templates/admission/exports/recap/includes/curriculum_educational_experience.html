@@ -1,4 +1,4 @@
-{% load i18n admission enums %}
+{% load i18n admission enums academic_year_display %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,7 +25,16 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% panel title=title edit_link_button=edit_link_button %}
+<div class="panel panel-default">
+{% if title %}
+  <div class="panel-heading flex-content">
+    <h4 class="panel-title">{{ title }}</h4>
+    {% if with_single_header_buttons %}
+      {% include 'admission/general_education/includes/checklist/previous_experience_single_header_buttons.html' %}
+    {% endif %}
+  </div>
+{% endif %}
+<div class="panel-body">
   <div class="row">
     <div class="col-md-6">
       {% with experience.annees|last as first_year %}
@@ -258,4 +267,5 @@
         </div>
       {% endif %}
   {% endif %}
-{% endpanel %}
+  </div>
+</div>

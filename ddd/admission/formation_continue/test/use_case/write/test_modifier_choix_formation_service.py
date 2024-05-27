@@ -56,6 +56,7 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
                 ChoixMoyensDecouverteFormation.AUTRE.name,
             ],
+            marque_d_interet=True,
         )
 
     def test_should_modifier_choix_formation(self):
@@ -73,6 +74,7 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
                 ChoixMoyensDecouverteFormation.AUTRE,
             ],
         )
+        self.assertEqual(proposition.marque_d_interet, True)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')

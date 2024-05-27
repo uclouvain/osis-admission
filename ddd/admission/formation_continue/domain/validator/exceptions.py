@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,4 +61,62 @@ class InformationsComplementairesNonRenseigneesException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("Mandatory fields are missing in the 'Additional information > Specific questions' tab.")
+        super().__init__(message, **kwargs)
+
+
+class ChoixDeFormationNonRenseigneException(BusinessException):
+    status_code = "FORMATION-CONTINUE-5"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the 'Course choice' tab.")
+        super().__init__(message, **kwargs)
+
+
+class FormationEstFermeeException(BusinessException):
+    status_code = "FORMATION-CONTINUE-6"
+
+    def __init__(self, sigle_formation: str, **kwargs):
+        message = _('Your application cannot be submitted because the %(acronym)s course is closed.') % {
+            "acronym": sigle_formation,
+        }
+        super().__init__(message, **kwargs)
+
+
+class MettreEnAttenteTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-7"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Hold on" status from the "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class ApprouverParFacTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-8"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Approved" status from the "Validated" or "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class RefuserPropositionTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-9"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Denied" status from the "Validated" or "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class AnnulerPropositionTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-10"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Canceled" status from the "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class ApprouverPropositionTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-11"
+
+    def __init__(self, **kwargs):
+        message = _('You can only transition to the "Validated" status from the "Approved" status.')
         super().__init__(message, **kwargs)

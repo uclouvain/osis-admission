@@ -35,7 +35,11 @@ from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
+from admission.tests.factories.roles import (
+    CentralManagerRoleFactory,
+    SicManagementRoleFactory,
+    ProgramManagerRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -62,11 +66,29 @@ class PersonDetailViewTestCase(TestCase):
             candidate__language=settings.LANGUAGE_CODE_FR,
         )
 
+        cls.continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.continuing_admission.training.education_group,
+        ).person.user
+
+        cls.continuing_url = resolve_url(
+            'admission:continuing-education:person',
+            uuid=cls.continuing_admission.uuid,
+        )
+
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
         )
+
+        cls.general_url = resolve_url(
+            'admission:general-education:person',
+            uuid=cls.general_admission.uuid,
+        )
+
+        cls.general_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.general_admission.training.education_group,
+        ).person.user
 
         cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=cls.general_admission.training,
@@ -99,21 +121,34 @@ class PersonDetailViewTestCase(TestCase):
             uuid=cls.confirmed_doctorate_admission.uuid,
         )
 
+    def test_continuing_person_detail_program_manager(self):
+        self.client.force_login(user=self.continuing_program_manager_user)
+
+        response = self.client.get(self.continuing_url)
+
+        self.assertEqual(response.status_code, 200)
+
     def test_continuing_person_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        url = resolve_url('admission:continuing-education:person', uuid=self.continuing_admission.uuid)
-        response = self.client.get(url)
+        response = self.client.get(self.continuing_url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['admission'].uuid, self.continuing_admission.uuid)
         self.assertEqual(response.context['person'], self.continuing_admission.candidate)
         self.assertEqual(response.context['contact_language'], _('French'))
 
+    def test_general_person_detail_program_manager(self):
+        self.client.force_login(user=self.general_program_manager_user)
+
+        response = self.client.get(self.general_url)
+
+        self.assertEqual(response.status_code, 200)
+
     def test_general_person_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        url = resolve_url('admission:general-education:person', uuid=self.general_admission.uuid)
+        url = resolve_url(self.general_url)
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)

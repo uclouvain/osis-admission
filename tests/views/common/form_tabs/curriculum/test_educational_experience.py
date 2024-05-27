@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -71,7 +71,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 
 
-#TODO: Remove duplicate tests with osis_profile
+# TODO: Remove duplicate tests with osis_profile
 class CurriculumEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -152,7 +152,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -1580,7 +1580,8 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(years[0].acquired_credit_number, 10)
         self.assertEqual(years[0].registered_credit_number, 10)
 
-    def test_post_form_with_created_experience(self):
+    @mock.patch('admission.views.common.form_tabs.curriculum.CurriculumEducationalExperienceFormView.delete_url')
+    def test_post_form_with_created_experience(self, mock_delete_url):
         self.client.force_login(self.sic_manager_user)
 
         self.assertFalse(
@@ -1668,7 +1669,8 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             },
         )
 
-    def test_post_form_with_created_experience_with_blank_years(self):
+    @mock.patch('admission.views.common.form_tabs.curriculum.CurriculumEducationalExperienceFormView.delete_url')
+    def test_post_form_with_created_experience_with_blank_years(self, mock_delete_url):
         self.client.force_login(self.sic_manager_user)
 
         self.assertFalse(
@@ -1854,7 +1856,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -1883,193 +1885,6 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         response = self.client.delete(f'{self.delete_url}?next={admission_url}&next_hash_url=custom_hash')
         self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
-
-    def test_delete_unknown_experience_returns_404(self):
-        self.client.force_login(self.sic_manager_user)
-
-        response = self.client.delete(
-            resolve_url(
-                'admission:general-education:update:curriculum:educational_delete',
-                uuid=self.general_admission.uuid,
-                experience_uuid=uuid.uuid4(),
-            ),
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_delete_experience_used_as_approval_condition_is_not_allowed(self):
-        self.client.force_login(self.sic_manager_user)
-
-        approval_condition = FreeAdditionalApprovalConditionFactory(
-            admission=self.general_admission,
-            related_experience=self.experience,
-            name_fr='Condition de test',
-            name_en='Test condition',
-        )
-
-        response = self.client.delete(self.delete_url, follow=True)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        messages = [m.message for m in response.context['messages']]
-        self.assertIn(
-            gettext(
-                'Cannot delete the experience because it is used as additional condition for the '
-                'proposition {admission}.'.format(admission=approval_condition.admission)
-            ),
-            messages,
-        )
-
-    def test_delete_known_experience(self):
-        self.client.force_login(self.sic_manager_user)
-
-        # Simulate a valuated experience
-        AdmissionEducationalValuatedExperiences.objects.create(
-            baseadmission_id=self.general_admission.uuid,
-            educationalexperience_id=self.experience.uuid,
-        )
-
-        self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
-            Checklist.initialiser_checklist_experience(experience_uuid=self.experience.uuid).to_dict()
-        ]
-
-        self.general_admission.save()
-
-        response = self.client.delete(self.delete_url)
-
-        self.assertFalse(EducationalExperience.objects.filter(uuid=self.experience.uuid).exists())
-
-        self.assertFalse(
-            EducationalExperienceYear.objects.filter(
-                educational_experience__uuid=self.experience.uuid,
-            ).exists()
-        )
-
-        self.assertFalse(
-            AdmissionEducationalValuatedExperiences.objects.filter(
-                educationalexperience_id=self.experience.uuid
-            ).exists()
-        )
-
-        self.general_admission.refresh_from_db()
-
-        self.assertEqual(
-            self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
-            [],
-        )
-
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
-            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
-            self.general_admission.requested_documents,
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-
-
-@freezegun.freeze_time('2022-01-01')
-class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Create data
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
-        cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
-        first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        EntityVersionFactory(entity=first_doctoral_commission)
-        cls.french = LanguageFactory(code='FR')
-
-        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=cls.academic_years[0],
-            candidate__language=settings.LANGUAGE_CODE_EN,
-            candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
-            candidate__last_registration_year=None,
-            candidate__id_photo=[],
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-        )
-
-        # Create users
-        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
-        cls.program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.general_admission.training.education_group,
-        ).person.user
-        cls.first_cycle_diploma = DiplomaTitleFactory(
-            cycle=Cycle.FIRST_CYCLE.name,
-        )
-        cls.second_cycle_diploma = DiplomaTitleFactory(
-            cycle=Cycle.SECOND_CYCLE.name,
-        )
-        cls.first_institute = OrganizationFactory(
-            community=CommunityEnum.FRENCH_SPEAKING.name,
-            establishment_type=EstablishmentTypeEnum.UNIVERSITY.name,
-        )
-        cls.second_institute = OrganizationFactory(
-            community=CommunityEnum.FRENCH_SPEAKING.name,
-            establishment_type=EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
-        )
-
-    def setUp(self):
-        # Create data
-        self.experience: EducationalExperience = EducationalExperienceFactory(
-            person=self.general_admission.candidate,
-            country=self.be_country,
-            program=self.first_cycle_diploma,
-            fwb_equivalent_program=self.first_cycle_diploma,
-            institute=self.first_institute,
-            linguistic_regime=self.french,
-            education_name='Computer science',
-            institute_name='University of Louvain',
-            institute_address='Rue de Louvain, 1000 Bruxelles',
-            expected_graduation_date=datetime.date(2024, 1, 1),
-        )
-        self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
-            educational_experience=self.experience,
-            academic_year=self.academic_years[0],
-            with_block_1=True,
-            reduction='',
-            is_102_change_of_course=True,
-        )
-        self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
-            educational_experience=self.experience,
-            academic_year=self.academic_years[2],
-            with_complement=True,
-            reduction=Reduction.A150.name,
-        )
-        # Targeted url
-        self.delete_url = resolve_url(
-            'admission:general-education:update:curriculum:educational_delete',
-            uuid=self.general_admission.uuid,
-            experience_uuid=self.experience.uuid,
-        )
-
-        # Mock osis document api
-        patcher = mock.patch("osis_document.api.utils.get_remote_token", side_effect=lambda value, **kwargs: value)
-        patcher.start()
-        self.addCleanup(patcher.stop)
-        patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
-        patched = patcher.start()
-        patched.side_effect = lambda _, value, __: value
-        self.addCleanup(patcher.stop)
-
-    def test_delete_experience_from_curriculum_is_not_allowed_for_fac_users(self):
-        self.client.force_login(self.program_manager_user)
-        response = self.client.delete(self.delete_url)
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_delete_experience_from_curriculum_is_allowed_for_sic_users(self):
-        self.client.force_login(self.sic_manager_user)
-        response = self.client.delete(self.delete_url)
-
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
     def test_delete_unknown_experience_returns_404(self):
         self.client.force_login(self.sic_manager_user)
@@ -2277,6 +2092,7 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.get_several_remote_metadata_patched.return_value = {
             f'token{index}': {
                 'name': f'the_file_{index}.pdf',
+                'size': 1,
             }
             for index in range(len(self.files_uuids))
         }
@@ -2583,3 +2399,134 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             .get('parcours_anterieur', {})
             .get('enfants', []),
         )
+
+
+@freezegun.freeze_time('2022-01-01')
+class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create data
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
+        entity = EntityWithVersionFactory()
+
+        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training__management_entity=entity,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        # Create users
+        cls.sic_manager_user = SicManagementRoleFactory(entity=entity).person.user
+        cls.program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.general_admission.training.education_group,
+        ).person.user
+
+    def setUp(self):
+        # Create data
+        self.experience: EducationalExperience = EducationalExperienceFactory(
+            person=self.general_admission.candidate,
+        )
+
+        # Targeted url
+        self.valuate_url = resolve_url(
+            'admission:general-education:update:curriculum:educational_valuate',
+            uuid=self.general_admission.uuid,
+            experience_uuid=self.experience.uuid,
+        )
+
+    def test_valuate_experience_from_curriculum_is_not_allowed_for_fac_users(self):
+        self.client.force_login(self.program_manager_user)
+        response = self.client.post(self.valuate_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_valuate_experience_from_curriculum_is_allowed_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+
+        expected_url = resolve_url('admission:general-education:checklist', uuid=self.general_admission.uuid)
+
+        response = self.client.post(self.valuate_url)
+
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+    def test_valuate_experience_from_curriculum_and_redirect(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.post(f'{self.valuate_url}?next={admission_url}&next_hash_url=custom_hash')
+
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+    def test_valuate_unknown_experience_returns_404(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.post(
+            resolve_url(
+                'admission:general-education:update:curriculum:educational_valuate',
+                uuid=self.general_admission.uuid,
+                experience_uuid=uuid.uuid4(),
+            ),
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_valuate_known_experience(self):
+        self.client.force_login(self.sic_manager_user)
+
+        default_experience_checklist = Checklist.initialiser_checklist_experience(str(self.experience.uuid)).to_dict()
+
+        response = self.client.post(self.valuate_url)
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        # Check that the experience has been valuated
+        valuation = AdmissionEducationalValuatedExperiences.objects.filter(
+            educationalexperience_id=self.experience.uuid,
+            baseadmission=self.general_admission,
+        ).first()
+        self.assertIsNotNone(valuation)
+
+        # Check that the experience has been added to the checklist
+        self.general_admission.refresh_from_db()
+
+        saved_experience_checklist = [
+            experience_checklist
+            for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+            if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
+        ]
+
+        self.assertEqual(len(saved_experience_checklist), 1)
+        self.assertEqual(saved_experience_checklist[0], default_experience_checklist)
+
+        # Check that the modified informations have been updated
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        # Keep the experience checklist if one is already there
+        saved_experience_checklist[0]['extra']['custom'] = 'custom value'
+        self.general_admission.save(update_fields=['checklist'])
+
+        valuation.delete()
+
+        response = self.client.post(self.valuate_url)
+
+        # Check that the experience has been valuated
+        valuation = AdmissionEducationalValuatedExperiences.objects.filter(
+            educationalexperience_id=self.experience.uuid,
+            baseadmission=self.general_admission,
+        ).first()
+        self.assertIsNotNone(valuation)
+
+        # Check that the experience checklist has been kept
+        self.general_admission.refresh_from_db()
+
+        new_saved_experience_checklist = [
+            experience_checklist
+            for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+            if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
+        ]
+
+        self.assertEqual(len(new_saved_experience_checklist), 1)
+        self.assertNotEqual(new_saved_experience_checklist[0], default_experience_checklist)
+        self.assertEqual(new_saved_experience_checklist[0], saved_experience_checklist[0])

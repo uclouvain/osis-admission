@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -48,7 +48,7 @@ from django.db.models import (
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
@@ -76,10 +76,13 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
+    ValorisationEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO, CurriculumAExperiencesDTO,
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+    CurriculumAExperiencesDTO,
 )
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
@@ -88,8 +91,10 @@ from osis_profile.models import (
     EducationalExperience,
 )
 from osis_profile.models.education import LanguageKnowledge
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
 
 
+# TODO: a mettre dans infra/shared_kernel/profil
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def has_default_language(cls) -> bool:
@@ -221,15 +226,18 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         cls,
         candidate: Person,
         has_default_language: bool,
-        valuated_secondary_studies: Optional[bool],
     ):
         belgian_high_school_diploma = getattr(candidate, 'belgianhighschooldiploma', None)
         foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
         high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
 
+        potential_diploma = belgian_high_school_diploma or foreign_high_school_diploma
         return EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=candidate.graduated_from_high_school,
-            valorisees=valuated_secondary_studies,
+            valorisation=ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=candidate.is_valuated_by_epc,  # From annotation
+                types_formations_admissions_valorisees=candidate.valuated_training_types,  # From annotation
+            ),
             annee_diplome_etudes_secondaires=candidate.graduated_from_high_school_year.year
             if candidate.graduated_from_high_school_year
             else None,
@@ -280,6 +288,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             )
             if high_school_diploma_alternative
             else None,
+            identifiant_externe=potential_diploma.external_id if potential_diploma else None,
+            injectee=candidate.secondaire_injecte_par_admission or candidate.secondaire_injecte_par_cv,
         )
 
     @classmethod
@@ -299,6 +309,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 autre_activite=experience.activity,
                 uuid=experience.uuid,
                 valorisee_par_admissions=getattr(experience, 'valuated_from_admissions', None),
+                injectee=experience.injecte_par_admission or experience.injecte_par_cv,
                 identifiant_externe=experience.external_id,
             )
             for experience in experiences_non_academiques
@@ -365,7 +376,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                         str(uuid_proposition)
                     )
                 )
-
+        educational_experience_years = educational_experience_years.annotate(
+            injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(
+                    admission__uuid=OuterRef('educational_experience__valuated_from_admission__uuid')
+                )
+            ),
+            injecte_par_cv=Exists(
+                CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('educational_experience__uuid'))
+            ),
+        )
         educational_experience_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
         for experience_year in educational_experience_years:
             experience_year_dto = cls._get_academic_experience_year_dto(experience_year)
@@ -448,6 +468,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     systeme_evaluation=experience_year.educational_experience.evaluation_type,
                     type_enseignement=experience_year.educational_experience.study_system,
                     valorisee_par_admissions=getattr(experience_year, 'valuated_from_admissions', None),
+                    injectee=experience_year.injecte_par_admission or experience_year.injecte_par_cv,
                     identifiant_externe=experience_year.educational_experience.external_id,
                     **institute,
                     **linguistic_regime,
@@ -513,21 +534,47 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
-        valuated_secondary_studies = cls.etudes_secondaires_valorisees(matricule)
+    def get_secondary_studies_valuation_annotations(cls):
+        return dict(
+            is_valuated_by_epc=ExpressionWrapper(
+                Q(belgianhighschooldiploma__external_id__isnull=False)
+                | Q(foreignhighschooldiploma__external_id__isnull=False),
+                output_field=BooleanField(),
+            ),
+            valuated_training_types=ArrayAgg(
+                'baseadmissions__training__education_group_type__name',
+                filter=Q(baseadmissions__valuated_secondary_studies_person_id=F('pk')),
+            ),
+        )
 
-        candidate: Person = Person.objects.select_related(
-            'graduated_from_high_school_year',
-            'highschooldiplomaalternative',
-            'belgianhighschooldiploma__institute',
-            'foreignhighschooldiploma__country',
-            'foreignhighschooldiploma__linguistic_regime',
-        ).get(global_id=matricule)
+    @classmethod
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
+        candidate: Person = (
+            Person.objects.select_related(
+                'graduated_from_high_school_year',
+                'highschooldiplomaalternative',
+                'belgianhighschooldiploma__institute',
+                'foreignhighschooldiploma__country',
+                'foreignhighschooldiploma__linguistic_regime',
+            )
+            .annotate(
+                secondaire_injecte_par_admission=Exists(
+                    AdmissionEPCInjection.objects.filter(admission__candidate_id=OuterRef('pk'))
+                ),
+                secondaire_injecte_par_cv=Exists(
+                    CurriculumEPCInjection.objects.filter(
+                        type_experience=ExperienceType.HIGH_SCHOOL.name,
+                        person_id=OuterRef('pk'),
+                    )
+                ),
+                **cls.get_secondary_studies_valuation_annotations(),
+            )
+            .get(global_id=matricule)
+        )
 
         return cls._get_secondary_studies_dto(
             candidate,
             cls.has_default_language(),
-            valuated_secondary_studies,
         )
 
     @classmethod
@@ -544,7 +591,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
             non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
                 person__global_id=matricule,
-            )
+            ).annotate(
+            injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+            ),
+            injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+        )
 
             non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
 
@@ -672,8 +724,22 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         return {annee: qs.get(annee - 1) for annee in annees}
 
     @classmethod
-    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
-        return BaseAdmission.objects.filter(valuated_secondary_studies_person__global_id=matricule).exists()
+    def valorisation_etudes_secondaires(cls, matricule: str) -> ValorisationEtudesSecondairesDTO:
+        valuation = (
+            Person.objects.filter(global_id=matricule)
+            .annotate(**cls.get_secondary_studies_valuation_annotations())
+            .values('is_valuated_by_epc', 'valuated_training_types')
+            .first()
+        )
+
+        return (
+            ValorisationEtudesSecondairesDTO(
+                est_valorise_par_epc=valuation['is_valuated_by_epc'],
+                types_formations_admissions_valorisees=valuation['valuated_training_types'],
+            )
+            if valuation
+            else ValorisationEtudesSecondairesDTO()
+        )
 
     @classmethod
     def est_potentiel_vae(cls, matricule: str) -> bool:
@@ -682,7 +748,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .annotate(
                 nombre_mois=(ExtractYear('end_date') - ExtractYear('start_date')) * 12
                 + (ExtractMonth('end_date') - ExtractMonth('start_date'))
-                + 1  # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
+                + 1
+                # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
             )
             .aggregate(total=models.Sum('nombre_mois'))
         ).get('total')
@@ -705,7 +772,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             Person.objects.prefetch_related(
                 Prefetch(
                     'professionalexperience_set',
-                    queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date'),
+                    queryset=ProfessionalExperience.objects.all()
+                    .order_by('-start_date', '-end_date')
+                    .annotate(
+                        injecte_par_admission=Exists(
+                            AdmissionEPCInjection.objects.filter(
+                                admission__uuid=OuterRef('valuated_from_admission__uuid')
+                            )
+                        ),
+                        injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+                    ),
                 ),
                 Prefetch(
                     'personaddress_set',
@@ -725,9 +801,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 'foreignhighschooldiploma__linguistic_regime',
             )
             .annotate(
-                secondary_studies_are_valuated=ExpressionWrapper(
-                    Q(baseadmission__isnull=False),
-                    output_field=BooleanField(),
+                secondaire_injecte_par_admission=Exists(
+                    AdmissionEPCInjection.objects.filter(admission__candidate_id=OuterRef('pk'))
+                ),
+                secondaire_injecte_par_cv=Exists(
+                    CurriculumEPCInjection.objects.filter(
+                        type_experience=ExperienceType.HIGH_SCHOOL.name,
+                        person_id=OuterRef('pk'),
+                    )
                 ),
                 belgian_highschool_diploma_institute_address=Concat(
                     F(f'{be_institute_address}__street'),
@@ -738,6 +819,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     Value(' '),
                     F(f'{be_institute_address}__city'),
                 ),
+                **cls.get_secondary_studies_valuation_annotations(),
             )
         )
 
@@ -815,7 +897,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             etudes_secondaires=cls._get_secondary_studies_dto(
                 candidate=candidate,
                 has_default_language=has_default_language,
-                valuated_secondary_studies=candidate.secondary_studies_are_valuated,  # From annotation
             ),
             connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
         )

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,11 +27,17 @@ from typing import List, Optional
 
 import attr
 
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixInscriptionATitre
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixInscriptionATitre,
+    ChoixMoyensDecouverteFormation,
+)
 from admission.ddd.admission.formation_continue.domain.validator import (
     ShouldRenseignerInformationsAdditionnelles,
+    ShouldRenseignerChoixDeFormation,
+    ShouldFormationEtreOuverte,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -45,5 +51,27 @@ class InformationsComplementairesValidatorList(TwoStepsMultipleBusinessException
         return [
             ShouldRenseignerInformationsAdditionnelles(
                 inscription_a_titre=self.inscription_a_titre,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    motivations: str
+    moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation]
+    informations_specifiques_formation: Optional[InformationsSpecifiquesDTO]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldRenseignerChoixDeFormation(
+                motivations=self.motivations,
+                moyens_decouverte_formation=self.moyens_decouverte_formation,
+                informations_specifiques_formation=self.informations_specifiques_formation,
+            ),
+            ShouldFormationEtreOuverte(
+                informations_specifiques_formation=self.informations_specifiques_formation,
             ),
         ]

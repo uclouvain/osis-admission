@@ -24,10 +24,15 @@
 #
 # ##############################################################################
 from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
+from .lister_demandes_service import lister_demandes
 from .lister_propositions_candidat_service import lister_propositions_candidat
 from .rechercher_formations_service import rechercher_formations
 from .recuperer_documents_proposition_service import recuperer_documents_proposition
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
+from .recuperer_formation_service import recuperer_formation
 from .recuperer_proposition_service import recuperer_proposition
 from .recuperer_resume_proposition_service import recuperer_resume_proposition
+from .recuperer_resume_et_emplacements_document_non_libres_proposition_service import (
+    recuperer_resume_et_emplacements_documents_non_libres_proposition,
+)
 from .verifier_proposition_service import verifier_proposition

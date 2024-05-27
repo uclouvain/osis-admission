@@ -76,6 +76,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
                 "explicit_name": "My file",
                 "author": "0123456",
                 "mimetype": JPEG_MIME_TYPE,
+                "size": 1,
             },
         )
         patcher.start()

@@ -62,7 +62,7 @@ from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
 from reference.tests.factories.country import CountryFactory
 
 
-#TODO: Remove duplicate tests with osis_profile
+# TODO: Remove duplicate tests with osis_profile
 @freezegun.freeze_time('2023-01-01')
 class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
@@ -111,7 +111,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -602,7 +602,7 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         # Mock osis document api
         self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
         self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
-        self.get_several_remote_metadata_patched.return_value = {'foobar': {'name': 'certificate.pdf'}}
+        self.get_several_remote_metadata_patched.return_value = {'foobar': {'name': 'certificate.pdf', 'size': 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
         self.get_remote_tokens_patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
@@ -818,3 +818,135 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
             .get('parcours_anterieur', {})
             .get('enfants', []),
         )
+
+    @freezegun.freeze_time('2022-01-01')
+    class CurriculumNonEducationalExperienceValuateViewTestCase(TestCase):
+        @classmethod
+        def setUpTestData(cls):
+            # Create data
+            cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
+            entity = EntityWithVersionFactory()
+
+            cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+                training__management_entity=entity,
+                status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            )
+
+            # Create users
+            cls.sic_manager_user = SicManagementRoleFactory(entity=entity).person.user
+            cls.program_manager_user = ProgramManagerRoleFactory(
+                education_group=cls.general_admission.training.education_group,
+            ).person.user
+
+        def setUp(self):
+            # Create data
+            self.experience: ProfessionalExperience = ProfessionalExperienceFactory(
+                person=self.general_admission.candidate,
+            )
+
+            # Targeted url
+            self.valuate_url = resolve_url(
+                'admission:general-education:update:curriculum:non_educational_valuate',
+                uuid=self.general_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            )
+
+        def test_valuate_experience_from_curriculum_is_not_allowed_for_fac_users(self):
+            self.client.force_login(self.program_manager_user)
+            response = self.client.post(self.valuate_url)
+
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        def test_valuate_experience_from_curriculum_is_allowed_for_sic_users(self):
+            self.client.force_login(self.sic_manager_user)
+
+            expected_url = resolve_url('admission:general-education:checklist', uuid=self.general_admission.uuid)
+
+            response = self.client.post(self.valuate_url)
+
+            self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+        def test_valuate_experience_from_curriculum_and_redirect(self):
+            self.client.force_login(self.sic_manager_user)
+
+            admission_url = resolve_url('admission')
+            expected_url = f'{admission_url}#custom_hash'
+
+            response = self.client.post(f'{self.valuate_url}?next={admission_url}&next_hash_url=custom_hash')
+
+            self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+        def test_valuate_unknown_experience_returns_404(self):
+            self.client.force_login(self.sic_manager_user)
+
+            response = self.client.post(
+                resolve_url(
+                    'admission:general-education:update:curriculum:non_educational_valuate',
+                    uuid=self.general_admission.uuid,
+                    experience_uuid=uuid.uuid4(),
+                ),
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        def test_valuate_known_experience(self):
+            self.client.force_login(self.sic_manager_user)
+
+            default_experience_checklist = Checklist.initialiser_checklist_experience(
+                str(self.experience.uuid)
+            ).to_dict()
+
+            response = self.client.post(self.valuate_url)
+
+            self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+            # Check that the experience has been valuated
+            valuation = AdmissionProfessionalValuatedExperiences.objects.filter(
+                professionalexperience_id=self.experience.uuid,
+                baseadmission=self.general_admission,
+            ).first()
+            self.assertIsNotNone(valuation)
+
+            # Check that the experience has been added to the checklist
+            self.general_admission.refresh_from_db()
+
+            saved_experience_checklist = [
+                experience_checklist
+                for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
+            ]
+
+            self.assertEqual(len(saved_experience_checklist), 1)
+            self.assertEqual(saved_experience_checklist[0], default_experience_checklist)
+
+            # Check that the modified informations have been updated
+            self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+            self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+            # Keep the experience checklist if one is already there
+            saved_experience_checklist[0]['extra']['custom'] = 'custom value'
+            self.general_admission.save(update_fields=['checklist'])
+
+            valuation.delete()
+
+            response = self.client.post(self.valuate_url)
+
+            # Check that the experience has been valuated
+            valuation = AdmissionProfessionalValuatedExperiences.objects.filter(
+                professionalexperience_id=self.experience.uuid,
+                baseadmission=self.general_admission,
+            ).first()
+            self.assertIsNotNone(valuation)
+
+            # Check that the experience checklist has been kept
+            self.general_admission.refresh_from_db()
+
+            new_saved_experience_checklist = [
+                experience_checklist
+                for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
+            ]
+
+            self.assertEqual(len(new_saved_experience_checklist), 1)
+            self.assertNotEqual(new_saved_experience_checklist[0], default_experience_checklist)
+            self.assertEqual(new_saved_experience_checklist[0], saved_experience_checklist[0])

@@ -47,6 +47,7 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
@@ -69,6 +70,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
+        cls.previous_academic_year = AcademicYearFactory(year=cls.academic_year.year - 1)
         AdmissionAcademicCalendarFactory.produce_all_required(cls.academic_year.year)
         cls.high_school = HighSchoolFactory()
 
@@ -77,20 +79,26 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         cls.agnostic_url = resolve_url("secondary-studies")
         cls.diploma_data = {
             "graduated_from_high_school": GotDiploma.YES.name,
+            "graduated_from_high_school_year": cls.academic_year.year,
             "belgian_diploma": {
                 "institute": cls.high_school.uuid,
                 "academic_graduation_year": cls.academic_year.year,
-                "educational_type": "TEACHING_OF_GENERAL_EDUCATION",
+                "educational_type": EducationalType.TEACHING_OF_GENERAL_EDUCATION.name,
             },
             "specific_question_answers": {
                 "fe254203-17c7-47d6-95e4-3c5c532da551": "My answer !",
             },
         }
         cls.diploma_updated_data = {
-            "graduated_from_high_school": GotDiploma.YES.name,
+            "graduated_from_high_school": GotDiploma.THIS_YEAR.name,
+            "graduated_from_high_school_year": cls.previous_academic_year.year,
             "belgian_diploma": {
                 "institute": cls.high_school.uuid,
-                "academic_graduation_year": cls.academic_year.year,
+                "academic_graduation_year": cls.previous_academic_year.year,
+                "educational_type": EducationalType.TRANSITION_METHOD.name,
+            },
+            "specific_question_answers": {
+                "fe254203-17c7-47d6-95e4-3c5c532da551": "My answer 2 !",
             },
         }
         doctoral_commission = EntityFactory()
@@ -101,14 +109,24 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             supervision_group=promoter.process,
             training__management_entity=doctoral_commission,
         )
-        general_admission = GeneralEducationAdmissionFactory(
+
+        cls.general_bachelor_admission = GeneralEducationAdmissionFactory(
             candidate=doctorate_admission.candidate,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+        )
+        cls.general_master_admission = GeneralEducationAdmissionFactory(
+            candidate=doctorate_admission.candidate,
+            training__education_group_type__name=TrainingType.MASTER_M1.name,
         )
         continuing_admission = ContinuingEducationAdmissionFactory(
             candidate=doctorate_admission.candidate,
         )
         cls.doctorate_admission_url = resolve_url("secondary-studies", uuid=doctorate_admission.uuid)
-        cls.general_admission_url = resolve_url("general_secondary_studies", uuid=general_admission.uuid)
+        cls.general_admission_url = resolve_url("general_secondary_studies", uuid=cls.general_master_admission.uuid)
+        cls.general_bachelor_admission_url = resolve_url(
+            "general_secondary_studies",
+            uuid=cls.general_bachelor_admission.uuid,
+        )
         cls.continuing_admission_url = resolve_url("continuing_secondary_studies", uuid=continuing_admission.uuid)
         cls.candidate_user = doctorate_admission.candidate.user
         cls.candidate_user_without_admission = CandidateFactory().person.user
@@ -116,7 +134,8 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         cls.promoter_user = promoter.person.user
         cls.committee_member_user = CaMemberFactory(process=promoter.process).person.user
         cls.doctorate_admission_uuid = doctorate_admission.uuid
-        cls.general_admission_uuid = general_admission.uuid
+        cls.general_master_admission_uuid = cls.general_master_admission.uuid
+        cls.general_bachelor_admission_uuid = cls.general_bachelor_admission.uuid
         cls.continuing_admission_uuid = continuing_admission.uuid
 
     def create_belgian_diploma_with_doctorate_admission(self, data):
@@ -126,6 +145,10 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     def create_belgian_diploma_with_general_admission(self, data):
         self.client.force_authenticate(self.candidate_user)
         return self.client.put(self.general_admission_url, data)
+
+    def create_belgian_diploma_with_general_bachelor_admission(self, data):
+        self.client.force_authenticate(self.candidate_user)
+        return self.client.put(self.general_bachelor_admission_url, data)
 
     def create_belgian_diploma_with_continuing_admission(self, data):
         self.client.force_authenticate(self.candidate_user)
@@ -189,7 +212,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk)
         self.assertEqual(foreign_diploma.count(), 0)
 
-        updated_admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
+        updated_admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
         self.assertEqual(
             updated_admission.specific_question_answers,
             {
@@ -284,35 +307,112 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     def test_diploma_update_is_partially_working_if_already_valuated_by_admission(self):
         self.create_belgian_diploma_with_general_admission(self.diploma_data)
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+
         self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
-        admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
-        self.assertEqual(admission.specific_question_answers, self.diploma_data['specific_question_answers'])
-        self.assertEqual(admission.modified_at, datetime.datetime.now())
-        self.assertEqual(admission.last_update_author, self.candidate_user.person)
-        # Valuate the secondary studies
+
+        self.general_master_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_master_admission.specific_question_answers,
+            self.diploma_data['specific_question_answers'],
+        )
+        self.assertEqual(self.general_master_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_master_admission.last_update_author, self.candidate_user.person)
+
+        # Valuate the secondary studies by a continuing education admission
         ContinuingEducationAdmissionFactory(
             candidate=self.candidate_user.person,
             valuated_secondary_studies_person=self.candidate_user.person,
         )
 
         # Want to update the diploma and the specific question answers -> only update the specific question answers
-        updated_data = {
-            "graduated_from_high_school": GotDiploma.THIS_YEAR.name,
-            "belgian_diploma": {
-                "institute": self.high_school.uuid,
-                "academic_graduation_year": self.academic_year.year,
-                "educational_type": EducationalType.TRANSITION_METHOD.name,
-            },
-            "specific_question_answers": {
-                "fe254203-17c7-47d6-95e4-3c5c532da551": "My answer 2 !",
-            },
-        }
-        self.create_belgian_diploma_with_general_admission(updated_data)
+        self.create_belgian_diploma_with_general_admission(self.diploma_updated_data)
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+
         self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
         self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
-        admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
-        self.assertEqual(admission.specific_question_answers, updated_data['specific_question_answers'])
+
+        admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
+        self.assertEqual(admission.specific_question_answers, self.diploma_updated_data['specific_question_answers'])
+
+        # Valuate the secondary studies by a general bachelor education admission
+        valuated_bachelor_education_admission = GeneralEducationAdmissionFactory(
+            candidate=self.general_bachelor_admission.candidate,
+            valuated_secondary_studies_person=self.general_bachelor_admission.candidate,
+            training=self.general_bachelor_admission.training,
+        )
+
+        # Want to update the diploma and the specific question answers for a bachelor
+
+        # -> only update the specific question answers because of the bachelor education valuation
+        self.create_belgian_diploma_with_general_bachelor_admission(self.diploma_updated_data)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+
+        self.general_bachelor_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_bachelor_admission.specific_question_answers,
+            self.diploma_updated_data['specific_question_answers'],
+        )
+
+        # -> partially update the diploma and the specific question answers if no bachelor education valuation
+        valuated_bachelor_education_admission.delete()
+
+        self.create_belgian_diploma_with_general_bachelor_admission(self.diploma_updated_data)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+
+        # The base data cannot be updated
+        self.assertEqual(
+            diploma.person.graduated_from_high_school,
+            self.diploma_data['graduated_from_high_school'],
+        )
+        self.assertEqual(
+            diploma.person.graduated_from_high_school_year.year,
+            self.diploma_data['graduated_from_high_school_year'],
+        )
+
+        # The additional data can be updated
+        self.assertEqual(diploma.educational_type, self.diploma_updated_data['belgian_diploma']['educational_type'])
+
+    def test_diploma_update_is_partially_working_if_already_valuated_by_epc(self):
+        self.create_belgian_diploma_with_general_admission(self.diploma_data)
+
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+
+        admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
+
+        self.assertEqual(admission.specific_question_answers, self.diploma_data['specific_question_answers'])
+        self.assertEqual(admission.modified_at, datetime.datetime.now())
+        self.assertEqual(admission.last_update_author, self.candidate_user.person)
+
+        # Valuate the secondary studies
+        diploma.external_id = 'EPC-1'
+        diploma.save(update_fields=['external_id'])
+
+        # Want to update the diploma and the specific question answers -> only update the specific question answers
+        self.create_belgian_diploma_with_general_admission(self.diploma_updated_data)
+
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+
+        admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
+        self.assertEqual(admission.specific_question_answers, self.diploma_updated_data['specific_question_answers'])
+
+        # Even for a bachelor education admission
+        self.create_belgian_diploma_with_general_bachelor_admission(self.diploma_updated_data)
+
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+
+        admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
+        self.assertEqual(admission.specific_question_answers, self.diploma_updated_data['specific_question_answers'])
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -432,7 +532,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
+        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile", "size": 1})
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch(
