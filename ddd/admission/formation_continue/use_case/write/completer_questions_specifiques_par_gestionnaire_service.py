@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand
+from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesParGestionnaireCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -31,8 +31,8 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 
 
-def completer_questions_specifiques(
-    cmd: 'CompleterQuestionsSpecifiquesCommand',
+def completer_questions_specifiques_par_gestionnaire(
+    cmd: 'CompleterQuestionsSpecifiquesParGestionnaireCommand',
     proposition_repository: 'IPropositionRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
@@ -57,7 +57,7 @@ def completer_questions_specifiques(
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         copie_titre_sejour=cmd.copie_titre_sejour,
         documents_additionnels=cmd.documents_additionnels,
-        auteur=proposition_candidat.matricule_candidat,
+        auteur=cmd.gestionnaire,
     )
 
     # THEN

@@ -238,6 +238,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             context['access_title_country'] = access_title_country(self.selectable_access_titles.values())
         elif self.is_continuing:
             context['admission'] = self.proposition
+            context['is_continuing'] = True
         else:
             context['admission'] = self.admission
 

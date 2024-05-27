@@ -388,6 +388,9 @@ TAB_TREES = {
         Tab('continuing-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
         ],
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('specific-questions', _('Specific aspects')),
+        ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
             Tab('comments', pgettext('tab', 'Comments'), 'comments')
         ],

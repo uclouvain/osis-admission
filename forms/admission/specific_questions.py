@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,9 +28,14 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import DiplomaticPost
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
+)
 from admission.forms import (
     get_diplomatic_post_initial_choices,
 )
+from admission.forms.admission.coordonnees import BaseAdmissionAddressForm
 from admission.forms.specific_question import ConfigurableFormMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.fields import RadioBooleanField
@@ -202,3 +207,116 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
                 data['attestation_inscription_reguliere'] = []
 
         return data
+
+
+class ContinuingSpecificQuestionsForm(ConfigurableFormMixin, BaseAdmissionAddressForm):
+    configurable_form_field_name = 'reponses_questions_specifiques'
+
+    copie_titre_sejour = MaxOneFileUploadField(
+        label=_(
+            'Please provide a copy of the residence permit covering the entire course, including the assessment test '
+            '(except for online courses).'
+        ),
+        max_files=1,
+        required=False,
+    )
+    inscription_a_titre = forms.ChoiceField(
+        choices=ChoixInscriptionATitre.choices(),
+        label=_('You are registering as'),
+        widget=forms.RadioSelect,
+    )
+    nom_siege_social = forms.CharField(
+        label=_('Head office name'),
+        required=False,
+        max_length=255,
+    )
+    numero_unique_entreprise = forms.CharField(
+        label=_('Unique business number'),
+        required=False,
+        max_length=255,
+    )
+    numero_tva_entreprise = forms.CharField(
+        label=_('VAT number'),
+        required=False,
+        max_length=255,
+    )
+    adresse_mail_professionnelle = forms.EmailField(
+        label=_('Please enter your work email address'),
+        required=False,
+    )
+
+    # Adresse facturation
+    type_adresse_facturation = forms.ChoiceField(
+        choices=ChoixTypeAdresseFacturation.verbose_choices(),
+        label=_('I would like the billing address to be'),
+        required=False,
+        widget=forms.RadioSelect,
+    )
+    adresse_facturation_destinataire = forms.CharField(
+        label=_('To the attention of'),
+        required=False,
+        max_length=255,
+    )
+    documents_additionnels = MaxOneFileUploadField(
+        label=_(
+            'You can add any document you feel is relevant to your application '
+            '(supporting documents, proof of language level, etc.).'
+        ),
+        required=False,
+        max_files=10,
+    )
+
+    class Media:
+        js = (
+            'js/dependsOn.min.js',
+            'js/jquery.mask.min.js',
+            'admission/formatter.js',
+        )
+
+    def __init__(self, display_residence_permit_question, **kwargs):
+        super().__init__(**kwargs)
+        self.display_residence_permit_question = display_residence_permit_question
+        self.check_coordinates_fields = (
+            self.data.get(self.add_prefix('inscription_a_titre')) == ChoixInscriptionATitre.PROFESSIONNEL.name
+            and self.data.get(self.add_prefix('type_adresse_facturation')) == ChoixTypeAdresseFacturation.AUTRE.name
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        enrollment_as = cleaned_data.get('inscription_a_titre')
+        billing_address_type = cleaned_data.get('type_adresse_facturation')
+
+        professional_fields = [
+            'nom_siege_social',
+            'numero_unique_entreprise',
+            'numero_tva_entreprise',
+            'adresse_mail_professionnelle',
+            'type_adresse_facturation',
+        ]
+
+        if enrollment_as == ChoixInscriptionATitre.PROFESSIONNEL.name:
+            for field in professional_fields:
+                if not cleaned_data.get(field):
+                    self.add_error(field, FIELD_REQUIRED_MESSAGE)
+        else:
+            for field in professional_fields:
+                cleaned_data[field] = ''
+
+        if not (
+            enrollment_as == ChoixInscriptionATitre.PROFESSIONNEL.name
+            and billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
+        ):
+            cleaned_data['street'] = ''
+            cleaned_data['street_number'] = ''
+            cleaned_data['postal_box'] = ''
+            cleaned_data['postal_code'] = ''
+            cleaned_data['city'] = ''
+            cleaned_data['country'] = None
+            cleaned_data['be_postal_code'] = ''
+            cleaned_data['be_city'] = ''
+
+        if not self.display_residence_permit_question:
+            cleaned_data['copie_titre_sejour'] = []
+
+        return cleaned_data

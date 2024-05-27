@@ -263,3 +263,29 @@ class ModifierChoixFormationParGestionnaireCommand:
     motivations: str
     moyens_decouverte_formation: List[str]
     marque_d_interet: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+    inscription_a_titre: Optional[str] = ''
+    nom_siege_social: Optional[str] = ''
+    numero_unique_entreprise: Optional[str] = ''
+    numero_tva_entreprise: Optional[str] = ''
+    adresse_mail_professionnelle: Optional[str] = ''
+
+    # Adresse facturation
+    type_adresse_facturation: Optional[str] = ''
+    adresse_facturation_rue: Optional[str] = ''
+    adresse_facturation_numero_rue: Optional[str] = ''
+    adresse_facturation_code_postal: Optional[str] = ''
+    adresse_facturation_ville: Optional[str] = ''
+    adresse_facturation_pays: Optional[str] = ''
+    adresse_facturation_destinataire: Optional[str] = ''
+    adresse_facturation_boite_postale: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    copie_titre_sejour: List[str] = attr.Factory(list)
+    documents_additionnels: List[str] = attr.Factory(list)

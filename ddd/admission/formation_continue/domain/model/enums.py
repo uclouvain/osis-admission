@@ -50,6 +50,14 @@ class ChoixTypeAdresseFacturation(ChoiceEnum):
     CONTACT = pgettext_lazy("admission", "Postal address")
     AUTRE = _("Other address")
 
+    @classmethod
+    def verbose_choices(cls):
+        return (
+            (cls.RESIDENTIEL.name, _("My legal domicile provided above")),
+            (cls.CONTACT.name, _("The contact address I provided")),
+            (cls.AUTRE.name, cls.AUTRE.value),
+        )
+
 
 class ChoixMoyensDecouverteFormation(ChoiceEnum):
     SITE_WEB_UCLOUVAIN = pgettext_lazy("ways_hear_about_training", "UCLouvain website")
