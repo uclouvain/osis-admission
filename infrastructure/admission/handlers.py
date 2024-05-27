@@ -30,7 +30,10 @@ from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read.recu
     import recuperer_informations_destinataire
 from admission.ddd.admission.use_case.read import *
 from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
+from admission.ddd.admission.use_case.read.recuperer_matricule_digit import recuperer_matricule_digit
+from admission.ddd.admission.use_case.write.modifier_matricule_candidat import modifier_matricule_candidat
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
+from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import \
     PropositionPersonneFusionRepository
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import \
@@ -45,8 +48,16 @@ COMMAND_HANDLERS = {
         query,
         email_destinataire_repository=EmailDestinataireRepository()
     ),
-    GetPropositionFusionQuery: lambda msg_bus, cmd: get_proposition_fusion_personne(
-        cmd,
+    GetPropositionFusionQuery: lambda msg_bus, query: get_proposition_fusion_personne(
+        query,
         proposition_fusion_repository=PropositionPersonneFusionRepository()
+    ),
+    RecupererMatriculeDigitQuery: lambda msg_bus, query: recuperer_matricule_digit(
+        query,
+        digit_repository=DigitRepository()
+    ),
+    ModifierMatriculeCandidatCommand: lambda msg_bus, query: modifier_matricule_candidat(
+        query,
+        digit_repository=DigitRepository()
     ),
 }

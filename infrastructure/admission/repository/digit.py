@@ -142,7 +142,8 @@ class DigitRepository(IDigitRepository):
                 PersonTicketCreationStatus.IN_PROGRESS.value,
             ]
         ).select_related('person').values(
-            'request_id', 'person__last_name', 'person__first_name', 'person__global_id', 'status', 'errors'
+            'request_id', 'person__last_registration_id', 'person__last_name', 'person__first_name',
+            'person__global_id', 'status', 'errors'
         )
         return [
             StatutTicketPersonneDTO(
@@ -174,6 +175,8 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
+        print(candidate_global_id)
+        print(digit_global_id)
         candidate = Person.objects.get(global_id=candidate_global_id)
         candidate.global_id = digit_global_id
         candidate.external_id = f"osis.person_{digit_global_id}"
