@@ -876,6 +876,10 @@
 
               if (elt.classList.contains('checklist-state-button')) {
                   {# Click on checklist state button #}
+                  if(!event.originalEvent.detail.successful){
+                    location.reload();
+                  }
+
                   const buttonToSelect = event.originalEvent.detail.successful ? elt : previousSelectedButton;
                   buttonToSelect.disabled = true;
                   buttonToSelect.classList.remove('btn-default');
