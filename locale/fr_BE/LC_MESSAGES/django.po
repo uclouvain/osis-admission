@@ -6945,6 +6945,12 @@ msgstr ""
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
 
+msgid ""
+"The candidate has already applied for this course for this academic year."
+msgstr ""
+"Le ou la candidat·e a déjà postulé pour cette formation cette année "
+"académique."
+
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"
 
