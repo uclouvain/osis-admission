@@ -37,17 +37,48 @@
 {% endwith %}
 
 {% panel _("Legal domicile") %}
-    <div class="row">
-        <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>
-        {% trans "Number" context "address" as address_number_label %}
-        <div class="col-md-4">{% field_data address_number_label coordonnees.domicile_legal.numero_rue %}</div>
-        <div class="col-md-4">{% field_data _("Box") coordonnees.domicile_legal.boite_postale hide_empty=True %} </div>
-      </div>
-      <div class="row">
-        <div class="col-md-4">{% field_data _("Country") coordonnees.domicile_legal.nom_pays %}</div>
-        <div class="col-md-4">{% field_data _("Postcode") coordonnees.domicile_legal.code_postal %}</div>
-        <div class="col-md-4">{% field_data _("City") coordonnees.domicile_legal.ville %}</div>
-      </div>
+
+    <div style="display:flex; flex-direction: row;">
+        <div class="original-person-data" style="flex: 1;">
+
+            <div class="row">
+                <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>
+                {% trans "Number" context "address" as address_number_label %}
+                <div class="col-md-4">{% field_data address_number_label coordonnees.domicile_legal.numero_rue %}</div>
+                <div class="col-md-4">{% field_data _("Box") coordonnees.domicile_legal.boite_postale hide_empty=True %} </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">{% field_data _("Country") coordonnees.domicile_legal.nom_pays %}</div>
+                <div class="col-md-4">{% field_data _("Postcode") coordonnees.domicile_legal.code_postal %}</div>
+                <div class="col-md-4">{% field_data _("City") coordonnees.domicile_legal.ville %}</div>
+              </div>
+
+        </div>
+
+    {% if proposition_fusion.status == "IN_PROGRESS" %}
+
+        <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+        <div class="proposition-fusion-data" style="flex:1;">
+
+            <div class="row">
+                <div class="col-md-4">{% field_data _("Street") coordonnees_fusion.domicile_legal.rue %}</div>
+                {% trans "Number" context "address" as address_number_label %}
+                <div class="col-md-4">{% field_data address_number_label coordonnees_fusion.domicile_legal.numero_rue %}</div>
+                <div class="col-md-4">{% field_data _("Box") coordonnees_fusion.domicile_legal.boite_postale hide_empty=True %} </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">{% field_data _("Country") coordonnees_fusion.domicile_legal.nom_pays %}</div>
+                <div class="col-md-4">{% field_data _("Postcode") coordonnees_fusion.domicile_legal.code_postal %}</div>
+                <div class="col-md-4">{% field_data _("City") coordonnees_fusion.domicile_legal.ville %}</div>
+              </div>
+
+        </div>
+
+    {% endif %}
+
+    </div>
+
 {% endpanel %}
 
 {% if coordonnees.adresse_correspondance %}
@@ -68,12 +99,38 @@
 {% endif %}
 
 {% panel _("Contact") %}
-  <div class="row">
-    {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}
-    {% field_data mobile_phone_label coordonnees.numero_mobile "col-md-4" %}
-    {% trans "Personal email" context "admission" as email_label %}
-    {% field_data email_label coordonnees.adresse_email_privee "col-md-4" %}
-    {% trans "Emergency contact (telephone number)" context "admission" as emergency_contact_label %}
-    {% field_data emergency_contact_label coordonnees.numero_contact_urgence "col-md-4" %}
-  </div>
+    <div style="display:flex; flex-direction: row;">
+        <div class="original-person-data" style="flex: 1;">
+
+          <div class="row">
+            {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}
+            {% field_data mobile_phone_label coordonnees.numero_mobile "col-md-6" %}
+            {% trans "Personal email" context "admission" as email_label %}
+            {% field_data email_label coordonnees.adresse_email_privee "col-md-6" %}
+            {% trans "Emergency contact (telephone number)" context "admission" as emergency_contact_label %}
+            {% field_data emergency_contact_label coordonnees.numero_contact_urgence "col-md-6" %}
+          </div>
+
+        </div>
+
+        {% if proposition_fusion.status == "IN_PROGRESS" %}
+
+        <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+        <div class="proposition-fusion-data" style="flex:1;">
+
+            <div class="row">
+            {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}
+            {% field_data mobile_phone_label coordonnees_fusion.numero_mobile "col-md-6" %}
+            {% trans "Personal email" context "admission" as email_label %}
+            {% field_data email_label coordonnees_fusion.adresse_email_privee "col-md-6" %}
+            {% trans "Emergency contact (telephone number)" context "admission" as emergency_contact_label %}
+            {% field_data emergency_contact_label coordonnees_fusion.numero_contact_urgence "col-md-6" %}
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
 {% endpanel %}

@@ -38,7 +38,8 @@ from rest_framework.views import APIView
 
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.commands import ValiderTicketPersonneCommand, RechercherCompteExistantQuery
+from admission.ddd.admission.commands import ValiderTicketPersonneCommand, RechercherCompteExistantQuery, \
+    GetPropositionFusionQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
@@ -75,21 +76,10 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
 
     from infrastructure.messages_bus import message_bus_instance
     validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
-    similarity_data = message_bus_instance.invoke(
-        RechercherCompteExistantQuery(
-            matricule=admission.candidate.global_id,
-            nom=admission.candidate.last_name,
-            prenom=admission.candidate.first_name,
-            autres_prenoms=admission.candidate.middle_name,
-            date_naissance=str(admission.candidate.birth_date),
-            genre=admission.candidate.sex,
-            niss=admission.candidate.national_number,
-        )
-    )
+    proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
 
-    if similarity_data:
-        person_merge_proposal = PersonMergeProposal.objects.get(original_person=admission.candidate)
-        if person_merge_proposal.status == PersonMergeStatus.MATCH_FOUND.name:
+    if proposition_fusion:
+        if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
             raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
 
     if validation.valid is False:
