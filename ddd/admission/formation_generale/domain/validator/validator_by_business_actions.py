@@ -78,6 +78,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
+    ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
@@ -452,6 +453,26 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 statut=self.statut,
                 condition_acces=self.condition_acces,
                 millesime_condition_acces=self.millesime_condition_acces,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierConditionAccesParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    avec_complements_formation: Optional[bool]
+
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+    commentaire_complements_formation: str
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation(
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
+                commentaire_complements_formation=self.commentaire_complements_formation,
             ),
         ]
 

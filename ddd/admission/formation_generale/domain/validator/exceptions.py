@@ -249,3 +249,14 @@ class InscriptionTardiveAvecConditionAccesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The proposition must be a late enrollment with a defined access condition.")
         super().__init__(message, **kwargs)
+
+
+class ComplementsFormationEtreVidesSiPasDeComplementsFormationException(BusinessException):
+    status_code = "FORMATION-GENERALE-28"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'If the answer to the additional courses question is no, there must be no additional LU and the '
+            'communication relating to the additional courses must be completely empty.'
+        )
+        super().__init__(message, **kwargs)

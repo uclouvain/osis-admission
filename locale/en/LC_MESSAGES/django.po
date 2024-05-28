@@ -3441,6 +3441,12 @@ msgid "If other, specify"
 msgstr ""
 
 msgid ""
+"If the answer to the additional courses question is no, there must be no "
+"additional LU and the communication relating to the additional courses must "
+"be completely empty."
+msgstr ""
+
+msgid ""
 "If you submit the activity, you will no longer be able to modify the seminar "
 "or the various activities within it."
 msgstr ""
