@@ -162,7 +162,7 @@ class DigitRepository(IDigitRepository):
         if settings.MOCK_DIGIT_SERVICE_CALL:
             return "00000000"
         else:
-            logger.info(f"DIGIT retrive matricule from NOMA - {noma}")
+            logger.info(f"DIGIT retrieve matricule from NOMA - {noma}")
             response = requests.get(
                 headers={
                     'Content-Type': 'application/json',

@@ -114,28 +114,30 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
         )
         country = person_merge_proposal.proposal_merge_person.country_of_citizenship \
             if person_merge_proposal and person_merge_proposal.proposal_merge_person else None
+        person = person_merge_proposal.proposal_merge_person \
+            if person_merge_proposal.proposal_merge_person else person_merge_proposal.original_person
         return PropositionFusionPersonneDTO(
             status=person_merge_proposal.status,
             matricule=person_merge_proposal.selected_global_id,
             original_person_uuid=person_merge_proposal.original_person.uuid,
-            first_name=person_merge_proposal.proposal_merge_person.first_name,
-            last_name=person_merge_proposal.proposal_merge_person.last_name,
-            other_name=person_merge_proposal.proposal_merge_person.middle_name,
-            birth_date=person_merge_proposal.proposal_merge_person.birth_date,
-            sex=person_merge_proposal.proposal_merge_person.sex,
-            gender=person_merge_proposal.proposal_merge_person.gender,
-            birth_place=person_merge_proposal.proposal_merge_person.birth_place,
-            birth_country=person_merge_proposal.proposal_merge_person.birth_country,
-            civil_state=person_merge_proposal.proposal_merge_person.civil_state,
+            first_name=person.first_name,
+            last_name=person.last_name,
+            other_name=person.middle_name,
+            birth_date=person.birth_date,
+            sex=person.sex,
+            gender=person.gender,
+            birth_place=person.birth_place,
+            birth_country=person.birth_country,
+            civil_state=person.civil_state,
             country_of_citizenship=country.name if country else None,
-            national_number=person_merge_proposal.proposal_merge_person.national_number,
-            id_card_number=person_merge_proposal.proposal_merge_person.id_card_number,
-            passport_number=person_merge_proposal.proposal_merge_person.passport_number,
-            id_card_expiry_date=person_merge_proposal.proposal_merge_person.id_card_expiry_date,
+            national_number=person.national_number,
+            id_card_number=person.id_card_number,
+            passport_number=person.passport_number,
+            id_card_expiry_date=person.id_card_expiry_date,
             professional_curex_uuids=person_merge_proposal.professional_curex_to_merge,
             educational_curex_uuids=person_merge_proposal.educational_curex_to_merge,
             validation=person_merge_proposal.validation,
-        ) if person_merge_proposal and person_merge_proposal.proposal_merge_person else None
+        ) if person_merge_proposal else None
 
     @classmethod
     def defaire(cls, global_id: str) -> PropositionFusionPersonneIdentity:
