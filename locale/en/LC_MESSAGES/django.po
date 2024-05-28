@@ -2407,9 +2407,6 @@ msgstr ""
 msgid "Duplication of an experience"
 msgstr ""
 
-msgid "Dynamic questions about \"Specific aspects\" sub-tab"
-msgstr ""
-
 msgid "ECONOMY"
 msgstr ""
 
@@ -6017,6 +6014,9 @@ msgid "Specific profile"
 msgstr ""
 
 msgid "Specific question"
+msgstr ""
+
+msgid "Specific questions"
 msgstr ""
 
 msgid "Specified"
