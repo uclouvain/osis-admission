@@ -46,6 +46,7 @@ from admission.forms import (
     OTHER_EMPTY_CHOICE,
     autocomplete,
     get_year_choices,
+    AdmissionHTMLCharField,
 )
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
 from admission.views.autocomplete.categorized_free_documents import CategorizedFreeDocumentsAutocomplete
@@ -355,7 +356,7 @@ class RequestAllDocumentsForm(forms.Form):
         label=_('Message object'),
     )
 
-    message_content = forms.CharField(
+    message_content = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )

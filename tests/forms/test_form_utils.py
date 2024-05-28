@@ -24,9 +24,10 @@
 #
 # ##############################################################################
 import freezegun
+from django import forms
 from django.test import SimpleTestCase
 
-from admission.forms import get_year_choices
+from admission.forms import get_year_choices, AdmissionHTMLCharField
 
 
 @freezegun.freeze_time('2020-01-01')
@@ -83,3 +84,40 @@ class GetYearChoicesTestCase(SimpleTestCase):
                 ('2020-2021', '2020-2021'),
             ],
         )
+
+
+class AdmissionHTMLCharFieldTestCase(SimpleTestCase):
+    class CustomForm(forms.Form):
+        html_field = AdmissionHTMLCharField(required=False)
+        char_field = forms.CharField(required=False)
+
+    def test_html_char_field_with_accent(self):
+        form = self.CustomForm(
+            data={
+                'html_field': '<p>test with accent &egrave;</p>',
+                'char_field': '<p>test with accent &egrave;</p>',
+            },
+        )
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['html_field'], '<p>test with accent è</p>')
+        self.assertEqual(form.cleaned_data['char_field'], '<p>test with accent &egrave;</p>')
+
+    def test_html_char_field_without_accent(self):
+        form = self.CustomForm(
+            data={
+                'html_field': '<p>test without accent e</p>',
+                'char_field': '<p>test without accent e</p>',
+            },
+        )
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['html_field'], '<p>test without accent e</p>')
+        self.assertEqual(form.cleaned_data['char_field'], '<p>test without accent e</p>')
+
+    def test_html_char_field_without_value(self):
+        form = self.CustomForm(data={})
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['html_field'], '')
+        self.assertEqual(form.cleaned_data['char_field'], '')
