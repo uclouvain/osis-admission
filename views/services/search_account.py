@@ -41,17 +41,19 @@ from admission.forms.admission.person_merge_proposal_form import PersonMergeProp
 from admission.templatetags.admission import format_matricule
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.views.common import display_success_messages
 from osis_common.utils.htmx import HtmxMixin
 
 
-class SearchAccountView(HtmxMixin, FormView):
+class SearchAccountView(HtmxMixin, FormView, HtmxPermissionRequiredMixin):
 
     name = "search_account"
 
     template_name = "admission/modal_search_account.html"
     htmx_template_name = "admission/modal_search_account.html"
     urlpatterns = {'search-account-modal': 'search-account-modal/<uuid:uuid>'}
+    permission_required = "admission.merge_candidate_with_known_person"
 
     form_class = PersonMergeProposalForm
 

@@ -52,10 +52,13 @@ from base.views.common import display_error_messages, display_success_messages
 
 from django.utils.translation import gettext_lazy as _
 
+from osis_role.contrib.views import PermissionRequiredMixin
 
-class RequestDigitAccountCreationView(ProcessFormView):
+
+class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
 
     urlpatterns = {'request-digit-person-creation': 'request-digit-person-creation/<uuid:uuid>'}
+    permission_required = "admission.merge_candidate_with_known_person"
 
     def post(self, request, *args, **kwargs):
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
@@ -100,11 +103,12 @@ class RequestDigitAccountCreationView(ProcessFormView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class SearchDigitAccountView(FormView):
+class SearchDigitAccountView(FormView, PermissionRequiredMixin):
 
     name = "search-account"
 
     urlpatterns = {'search-account': 'search-account/<uuid:uuid>'}
+    permission_required = "admission.merge_candidate_with_known_person"
 
     def post(self, request, *args, **kwargs):
 
@@ -176,10 +180,11 @@ def search_digit_account(
     )
 
 
-class UndoMergeAccountView(FormView):
+class UndoMergeAccountView(FormView, PermissionRequiredMixin):
 
     name = 'undo-merge'
     urlpatterns = {'undo-merge': 'undo-merge/<uuid:uuid>'}
+    permission_required = "admission.merge_candidate_with_known_person"
 
     def post(self, request, *args, **kwargs):
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
@@ -195,10 +200,11 @@ class UndoMergeAccountView(FormView):
         return redirect(request.META['HTTP_REFERER'])
 
 
-class DiscardMergeAccountView(FormView):
+class DiscardMergeAccountView(FormView, PermissionRequiredMixin):
 
     name = 'discard-merge'
     urlpatterns = {'discard-merge': 'discard-merge/<uuid:uuid>'}
+    permission_required = "admission.merge_candidate_with_known_person"
 
     def post(self, request, *args, **kwargs):
 

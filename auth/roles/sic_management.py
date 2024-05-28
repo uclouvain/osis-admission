@@ -56,5 +56,7 @@ class SicManagement(EntityRoleModel):
             'admission.view_doctorate_enrolment_applications': rules.always_allow,
             'admission.view_continuing_enrolment_applications': rules.always_allow,
             'admission.validate_registration': is_entity_manager,
+            # Fusion
+            'admission.merge_candidate_with_known_person': is_entity_manager,
         }
         return RuleSet(ruleset)

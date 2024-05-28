@@ -127,5 +127,7 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_change_sic_decision': is_entity_manager & general.in_sic_status,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
+            # Fusion
+            'admission.merge_candidate_with_known_person': is_entity_manager,
         }
         return RuleSet(ruleset)

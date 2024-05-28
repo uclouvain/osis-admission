@@ -28,6 +28,7 @@ from django.views.generic import TemplateView
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.templatetags.admission import format_matricule
 from base.models.person import Person
+from base.utils.htmx import HtmxPermissionRequiredMixin
 from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
@@ -35,12 +36,13 @@ __all__ = [
 ]
 
 
-class SearchPreviousExperienceView(HtmxMixin, TemplateView):
+class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, TemplateView):
     name = "search_previous_experience"
 
     template_name = "admission/previous_experience.html"
     htmx_template_name = "admission/previous_experience.html"
     urlpatterns = {'previous-experience': 'previous-experience/<uuid:admission_uuid>'}
+    permission_required = "admission.merge_candidate_with_known_person"
 
     @property
     def candidate(self):
