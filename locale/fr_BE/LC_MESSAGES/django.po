@@ -6487,9 +6487,6 @@ msgstr "Secrétaire"
 msgid "Sector"
 msgstr "Secteur"
 
-msgid "Select a document"
-msgstr "Sélectionner un document"
-
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
@@ -8806,6 +8803,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes,no"
+msgstr "oui,non"
 
 msgid "yes,no,"
 msgstr "oui,non,"

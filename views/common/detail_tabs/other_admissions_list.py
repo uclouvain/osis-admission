@@ -26,7 +26,7 @@
 from django.views.generic import TemplateView
 
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
 from admission.views.common.mixins import AdmissionViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
@@ -48,7 +48,7 @@ class OtherAdmissionsListView(AdmissionViewMixin, TemplateView):
                     if self.admission.determined_academic_year
                     else self.admission.training.academic_year.year,
                     matricule_candidat=self.admission.candidate.global_id,
-                    etats=list(STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER),
+                    etats=list(STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE),
                 )
             )
             if demande.uuid != self.admission_uuid

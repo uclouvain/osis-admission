@@ -5925,9 +5925,6 @@ msgstr ""
 msgid "Sector"
 msgstr ""
 
-msgid "Select a document"
-msgstr ""
-
 msgid "Select a mail template"
 msgstr ""
 
@@ -7954,6 +7951,9 @@ msgid "ucl"
 msgstr "UCLouvain"
 
 msgid "use"
+msgstr ""
+
+msgid "yes,no"
 msgstr ""
 
 msgid "yes,no,"

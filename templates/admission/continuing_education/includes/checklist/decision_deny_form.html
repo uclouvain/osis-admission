@@ -46,7 +46,7 @@
       </div>
       {% endif %}
 
-      <div class="form-group"><strong>{% trans "Contact language" %}</strong> <span class="label label-admission-primary">{{ admission.candidate.language|formatted_language }}</span></div>
+      <div class="form-group"><strong>{% trans "Contact language" %}</strong> <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span></div>
 
       {% bootstrap_form_errors decision_deny_form %}
 
