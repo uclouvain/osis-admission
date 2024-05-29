@@ -112,8 +112,10 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
         person_merge_proposal = get_object_or_none(
             PersonMergeProposal, original_person__global_id=global_id
         )
+        if not person_merge_proposal:
+            return None
         country = person_merge_proposal.proposal_merge_person.country_of_citizenship \
-            if person_merge_proposal and person_merge_proposal.proposal_merge_person else None
+            if person_merge_proposal.proposal_merge_person else None
         person = person_merge_proposal.proposal_merge_person \
             if person_merge_proposal.proposal_merge_person else person_merge_proposal.original_person
         return PropositionFusionPersonneDTO(
@@ -137,7 +139,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             professional_curex_uuids=person_merge_proposal.professional_curex_to_merge,
             educational_curex_uuids=person_merge_proposal.educational_curex_to_merge,
             validation=person_merge_proposal.validation,
-        ) if person_merge_proposal else None
+        )
 
     @classmethod
     def defaire(cls, global_id: str) -> PropositionFusionPersonneIdentity:
