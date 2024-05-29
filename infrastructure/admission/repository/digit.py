@@ -243,6 +243,12 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet):
 
 def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
     noma = person.last_registration_id if person.last_registration_id else noma
+    if person.birth_date:
+        birth_date = person.birth_date.strftime('%Y-%m-%d')
+    elif person.birth_year:
+        birth_date = f"{person.birth_year}-00-00"
+    else:
+        birth_date = None
     return {
         "provider": {
             "source": "ETU",
@@ -253,10 +259,12 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
             "matricule": person.global_id,
             "lastName": person.last_name,
             "firstName": person.first_name,
-            "birthDate": person.birth_date.strftime('%Y-%m-%d') if person.birth_date else None,
+            "birthDate": birth_date,
             "gender": "M" if person.gender == "H" else person.gender,
             "nationalRegister": "".join(filter(str.isdigit, person.national_number)),
             "nationality": person.country_of_citizenship.iso_code if person.country_of_citizenship else None,
+            "otherFirstName": person.middle_name,
+            "placeOfBirth": person.birth_place,
         },
         "addresses": [
             {
