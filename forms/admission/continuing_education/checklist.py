@@ -35,7 +35,7 @@ from django.utils.translation import (
 
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMotifRefus, ChoixMotifAttente
-from admission.forms import CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT
+from admission.forms import CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT, AdmissionHTMLCharField
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -201,7 +201,7 @@ class DecisionHoldForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(
             attrs={
@@ -250,7 +250,7 @@ class DecisionCancelForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(
             attrs={
@@ -275,7 +275,7 @@ class DecisionValidationForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(
             attrs={
@@ -305,7 +305,7 @@ class SendToFacForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the faculty'),
         widget=forms.Textarea(
             attrs={
