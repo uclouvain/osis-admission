@@ -651,6 +651,12 @@ msgstr ""
 msgid "Analysis folder"
 msgstr ""
 
+msgid "Analysis folder for a continuing education admission"
+msgstr ""
+
+msgid "Analysis folder for a doctorate education admission"
+msgstr ""
+
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
@@ -1299,7 +1305,7 @@ msgid "Cancel the request"
 msgstr ""
 
 msgid "Canceled"
-msgstr "Canceled"
+msgstr ""
 
 msgid "Cancelled application"
 msgstr ""
@@ -4011,11 +4017,21 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 
@@ -4026,17 +4042,17 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
-"or invalid in his application for continuing education"
-msgstr ""
-
-msgid ""
-"Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for continuing education"
 msgstr ""
 
 msgid ""

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -211,6 +211,16 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             configuration={},
             onglet=Onglets.INFORMATIONS_ADDITIONNELLES,
             formation=FormationIdentity(sigle='USCC1', annee=2020),
+        ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='26de0c3d-3c06-4c93-8eb4-c8648f04f146'),
+            type=TypeItemFormulaire.DOCUMENT,
+            requis=False,
+            configuration={
+                CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name: ['application/pdf'],
+            },
+            onglet=Onglets.DOCUMENTS,
+            proposition=PropositionIdentity(uuid='uuid-USCC4'),
         ),
     ]
 

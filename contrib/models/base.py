@@ -38,6 +38,7 @@ from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
 from osis_history.models import HistoryEntry
@@ -525,6 +526,10 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
             return CONTEXT_DOCTORATE
         if hasattr(self, 'continuingeducationadmission'):
             return CONTEXT_CONTINUING
+
+    @cached_property
+    def admission_context(self):
+        return self.get_admission_context()
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):

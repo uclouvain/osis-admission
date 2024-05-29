@@ -26,7 +26,7 @@
 
 import uuid
 from email.message import EmailMessage
-from typing import Optional, List
+from typing import Optional, List, Dict
 from uuid import UUID
 
 import attr
@@ -41,6 +41,8 @@ from admission.contrib.models import (
     AdmissionFormItem,
 )
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import CleConfigurationItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -89,6 +91,55 @@ def get_message_to_historize(message: EmailMessage) -> dict:
         settings.LANGUAGE_CODE_FR: message_fr,
         settings.LANGUAGE_CODE_EN: message_en,
     }
+
+
+def get_requested_documents_html_lists(
+    requested_documents: List[EmplacementDocument],
+    requested_documents_dtos: List[EmplacementDocumentDTO],
+):
+    """
+    Create an html list with the requested and submitted documents and an html list with the requested and not
+    submitted documents.
+    :param requested_documents: List of requested documents with the updated status
+    :param requested_documents_dtos: List of requested documents dtos
+    :return: a dict whose the keys are the documents statuses and the values, the html lists of documents grouped
+    by tab.
+    """
+    updated_documents_by_identifier: Dict[str, EmplacementDocument] = {
+        document.entity_id.identifiant: document for document in requested_documents
+    }
+
+    current_tab_by_status = {
+        StatutEmplacementDocument.A_RECLAMER: None,
+        StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION: None,
+    }
+    html_list_by_status = {
+        StatutEmplacementDocument.A_RECLAMER: '',
+        StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION: '',
+    }
+
+    for document_dto in requested_documents_dtos:
+        updated_document = updated_documents_by_identifier.get(document_dto.identifiant)
+
+        if updated_document and updated_document.statut in html_list_by_status:
+            # Group the documents by tab
+            if current_tab_by_status[updated_document.statut] != document_dto.onglet:
+                if current_tab_by_status[updated_document.statut] is not None:
+                    html_list_by_status[updated_document.statut] += '</ul></li>'
+
+                # Add the tab name
+                html_list_by_status[updated_document.statut] += f'<li>{document_dto.nom_onglet_langue_candidat}<ul>'
+
+            # Add the document name
+            html_list_by_status[updated_document.statut] += f'<li>{document_dto.libelle_langue_candidat}</li>'
+
+            current_tab_by_status[updated_document.statut] = document_dto.onglet
+
+    for status in html_list_by_status:
+        if html_list_by_status[status]:
+            html_list_by_status[status] = f'<ul>{html_list_by_status[status]}</ul></li></ul>'
+
+    return html_list_by_status
 
 
 def dto_to_dict(dto):

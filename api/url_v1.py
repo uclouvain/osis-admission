@@ -175,6 +175,7 @@ urlpatterns = [
     _path('propositions/continuing-education/<uuid:uuid>/', include(continuing_education_view_set_router.urls)),
     path('propositions/continuing-education/<uuid:uuid>/submit', views.SubmitContinuingEducationPropositionView),
     path('continuing-education/<str:sigle>/<int:annee>', views.RetrieveContinuingEducationSpecificInformationView),
+    path('propositions/continuing-education/<uuid:uuid>/documents', views.ContinuingRequestedDocumentListView),
     # Autocompletes
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),

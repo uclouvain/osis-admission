@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from django.test import TestCase
 
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.infrastructure.admission.formation_generale.domain.service.notification import Notification
+from admission.infrastructure.utils import get_requested_documents_html_lists
 
 
 class GeneralNotificationTestCase(TestCase):
@@ -70,7 +71,7 @@ class GeneralNotificationTestCase(TestCase):
         ]
 
     def test_get_requested_documents_html_lists_with_no_requested_documents(self):
-        lists = Notification._get_requested_documents_html_lists(
+        lists = get_requested_documents_html_lists(
             requested_documents=[],
             requested_documents_dtos=[],
         )
@@ -78,7 +79,7 @@ class GeneralNotificationTestCase(TestCase):
         self.assertEqual(lists[StatutEmplacementDocument.A_RECLAMER], '')
 
     def test_documents_with_only_submitted_documents(self):
-        lists = Notification._get_requested_documents_html_lists(
+        lists = get_requested_documents_html_lists(
             requested_documents=[
                 MagicMock(
                     statut=StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION,
@@ -123,7 +124,7 @@ class GeneralNotificationTestCase(TestCase):
         )
 
     def test_with_submitted_and_not_submitted_documents(self):
-        lists = Notification._get_requested_documents_html_lists(
+        lists = get_requested_documents_html_lists(
             requested_documents=[
                 MagicMock(
                     statut=StatutEmplacementDocument.A_RECLAMER,

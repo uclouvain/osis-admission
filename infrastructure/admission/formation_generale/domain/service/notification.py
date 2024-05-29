@@ -33,6 +33,7 @@ from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
 
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.infrastructure.utils import get_requested_documents_html_lists
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
@@ -300,56 +301,6 @@ class Notification(INotification):
             return email_message
 
     @classmethod
-    def _get_requested_documents_html_lists(
-        cls,
-        requested_documents: List[EmplacementDocument],
-        requested_documents_dtos: List[EmplacementDocumentDTO],
-    ):
-        """
-        Create an html list with the requested and submitted documents and an html list with the requested and not
-        submitted documents.
-        :param requested_documents: List of requested documents with the updated status
-        :param requested_documents_dtos: List of requested documents dtos
-        :return: a dict whose the keys are the documents statuses and the values, the html lists of documents grouped
-        by tab.
-        """
-        updated_documents_by_identifier: Dict[str, EmplacementDocument] = {
-            document.entity_id.identifiant: document for document in requested_documents
-        }
-
-        current_tab_by_status = {
-            StatutEmplacementDocument.A_RECLAMER: None,
-            StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION: None,
-        }
-        html_list_by_status = {
-            StatutEmplacementDocument.A_RECLAMER: '',
-            StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION: '',
-        }
-
-        for document_dto in requested_documents_dtos:
-            updated_document = updated_documents_by_identifier.get(document_dto.identifiant)
-
-            if updated_document and updated_document.statut in html_list_by_status:
-                # Group the documents by tab
-                if current_tab_by_status[updated_document.statut] != document_dto.onglet:
-                    if current_tab_by_status[updated_document.statut] is not None:
-                        html_list_by_status[updated_document.statut] += '</ul></li>'
-
-                    # Add the tab name
-                    html_list_by_status[updated_document.statut] += f'<li>{document_dto.nom_onglet_langue_candidat}<ul>'
-
-                # Add the document name
-                html_list_by_status[updated_document.statut] += f'<li>{document_dto.libelle_langue_candidat}</li>'
-
-                current_tab_by_status[updated_document.statut] = document_dto.onglet
-
-        for status in html_list_by_status:
-            if html_list_by_status[status]:
-                html_list_by_status[status] = f'<ul>{html_list_by_status[status]}</ul></li></ul>'
-
-        return html_list_by_status
-
-    @classmethod
     def confirmer_reception_documents_envoyes_par_candidat(
         cls,
         proposition: PropositionDTO,
@@ -361,7 +312,7 @@ class Notification(INotification):
             'training__enrollment_campus',
         ).get(uuid=proposition.uuid)
 
-        html_list_by_status = cls._get_requested_documents_html_lists(liste_documents_reclames, liste_documents_dto)
+        html_list_by_status = get_requested_documents_html_lists(liste_documents_reclames, liste_documents_dto)
 
         tokens = {
             'admission_reference': proposition.reference,

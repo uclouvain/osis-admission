@@ -36,7 +36,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
 from osis_common.ddd import interface
 from osis_common.ddd.interface import CommandRequest
 
@@ -79,7 +80,13 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
             justification_gestionnaire=raison,
             derniere_action_le=heure_initialisation,
             statut_reclamation=StatutReclamationEmplacementDocument[statut_reclamation] if statut_reclamation else None,
-            onglet_checklist_associe=OngletsChecklist[onglet_checklist_associe] if onglet_checklist_associe else None,
+            onglet_checklist_associe=getattr(
+                OngletsChecklistGenerale,
+                onglet_checklist_associe,
+                getattr(OngletsChecklistContinue, onglet_checklist_associe, None),
+            )
+            if onglet_checklist_associe
+            else None,
         )
 
     @classmethod

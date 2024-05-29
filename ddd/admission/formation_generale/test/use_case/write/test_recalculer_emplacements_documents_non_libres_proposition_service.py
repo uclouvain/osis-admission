@@ -75,14 +75,14 @@ class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(SimpleTestCase
         self.addCleanup(self.emplacement_document_repository.reset)
 
     def test_recalculer_emplacements_documents_non_libres_proposition(self):
-        self.assertEqual(len(self.emplacement_document_repository.entities), 6)
+        nb_entites = len(self.emplacement_document_repository.entities)
 
         proposition = self.proposition_repository.get(PropositionIdentity('uuid-MASTER-SCI'))
         proposition.curriculum = []
         proposition_id = self.message_bus.invoke(self.cmd)
 
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertTrue(len(self.emplacement_document_repository.entities) > 6)
+        self.assertTrue(len(self.emplacement_document_repository.entities) > nb_entites)
 
         try:
             emplacement_entity_id = EmplacementDocumentIdentity(

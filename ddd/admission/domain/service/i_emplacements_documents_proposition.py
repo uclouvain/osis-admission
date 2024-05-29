@@ -37,7 +37,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     DocumentsSysteme,
 )
-from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
 from admission.exports.admission_recap.attachments import Attachment
 from admission.exports.admission_recap.section import get_sections, Section
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
