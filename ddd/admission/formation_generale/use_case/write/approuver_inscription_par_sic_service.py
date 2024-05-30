@@ -96,6 +96,7 @@ def approuver_inscription_par_sic(
         annee=proposition.formation_id.annee
     )
 
+    # use event publication to trigger submit ticket in digit
     digit.submit_person_ticket(
         global_id=proposition.matricule_candidat,
         noma=noma

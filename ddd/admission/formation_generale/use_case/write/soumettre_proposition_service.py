@@ -51,6 +51,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import VerifierProposition
+from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
@@ -159,10 +160,10 @@ def soumettre_proposition(
     )
     proposition_repository.save(proposition)
 
-    # use event to trigger duplicate person search in DIGIT
     from infrastructure.messages_bus import message_bus_instance
-    message_bus_instance.invoke(
-        RechercherCompteExistantQuery(
+    message_bus_instance.publish(
+        PropositionSoumiseEvent(
+            entity_id=proposition.entity_id,
             matricule=proposition.matricule_candidat,
             nom=identification.nom,
             prenom=identification.prenom,
@@ -172,8 +173,6 @@ def soumettre_proposition(
             niss=identification.numero_registre_national_belge,
         )
     )
-
-    message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=proposition.matricule_candidat))
 
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)

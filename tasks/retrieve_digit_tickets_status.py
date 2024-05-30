@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import waffle
 from django.shortcuts import redirect
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
@@ -33,6 +34,9 @@ from backoffice.celery import app
 
 @app.task
 def run(request=None):
+    if not waffle.switch_is_active('fusion-digit'):
+        return
+
     from infrastructure.messages_bus import message_bus_instance
 
     # Retrieve list of tickets
@@ -62,7 +66,6 @@ def run(request=None):
                         digit_global_id=digit_matricule
                     )
                 )
-
 
     # Handle response when task is ran as a cmd from admin panel
     if request:

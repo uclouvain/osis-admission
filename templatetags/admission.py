@@ -1091,15 +1091,14 @@ def render_display_field_name(field_name: str, context: str = None) -> str:
     return pgettext(context, msg) if context else _(msg)
 
 
-@register.inclusion_tag('admission/search_account_digit_result_message.html')
-def search_account_digit_result_msg(admission):
+@register.inclusion_tag('admission/search_account_digit_result_message.html', takes_context=True)
+def search_account_digit_result_msg(context, admission):
     status = None
     if hasattr(admission.candidate, 'personmergeproposal'):
         status = admission.candidate.personmergeproposal.status
-    return {
-        'uuid': admission.uuid,
-        'result_code': status
-    }
+    context['uuid'] = admission.uuid
+    context['result_code'] = status
+    return context
 
 
 @register.inclusion_tag('admission/digit_ticket_status_message.html', takes_context=True)

@@ -29,6 +29,7 @@ from datetime import datetime
 from typing import Optional, List
 
 import requests
+import waffle
 from django.conf import settings
 from django.db.models import QuerySet
 
@@ -47,6 +48,9 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 class DigitRepository(IDigitRepository):
     @classmethod
     def submit_person_ticket(cls, global_id: str, noma: str):
+        if not waffle.switch_is_active('fusion-digit'):
+            return
+
         candidate = Person.objects.get(global_id=global_id)
 
         if noma:
@@ -78,6 +82,9 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def validate_person_ticket(cls, global_id: str):
+        if not waffle.switch_is_active('fusion-digit'):
+            return ValidationTicketResponseDTO(valid=True, errors=[])
+
         candidate = Person.objects.get(global_id=global_id)
 
         # get proposal merge person if any is linked
@@ -107,6 +114,9 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
+        if not waffle.switch_is_active('fusion-digit'):
+            return None
+
         try:
             ticket = PersonTicketCreation.objects.select_related('person').get(person__global_id=global_id)
             return StatutTicketPersonneDTO(
@@ -123,6 +133,9 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
+        if not waffle.switch_is_active('fusion-digit'):
+            return None
+
         if PersonTicketCreation.objects.filter(person__global_id=global_id).exists():
             stored_ticket = PersonTicketCreation.objects.get(person__global_id=global_id)
             remote_ticket = _retrieve_person_ticket_status(stored_ticket.request_id)
@@ -136,6 +149,9 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
+        if not waffle.switch_is_active('fusion-digit'):
+            return []
+
         tickets = PersonTicketCreation.objects.filter(
             status__in=[
                 PersonTicketCreationStatus.CREATED.value,
@@ -159,6 +175,9 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def get_global_id(cls, noma: str) -> str:
+        if not waffle.switch_is_active('fusion-digit'):
+            return ""
+
         if settings.MOCK_DIGIT_SERVICE_CALL:
             return "00000000"
         else:
@@ -175,8 +194,6 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
-        print(candidate_global_id)
-        print(digit_global_id)
         candidate = Person.objects.get(global_id=candidate_global_id)
         candidate.global_id = digit_global_id
         candidate.external_id = f"osis.person_{digit_global_id}"

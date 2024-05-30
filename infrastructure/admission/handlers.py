@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from django.conf import settings
 
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
@@ -33,6 +34,7 @@ from admission.ddd.admission.use_case.read.get_proposition_fusion_service import
 from admission.ddd.admission.use_case.read.recuperer_matricule_digit import recuperer_matricule_digit
 from admission.ddd.admission.use_case.write.modifier_matricule_candidat import modifier_matricule_candidat
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
+from admission.infrastructure.admission.event_handler.reagir_a_proposition_soumise import recherche_et_validation_digit
 from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import \
     PropositionPersonneFusionRepository
@@ -61,3 +63,13 @@ COMMAND_HANDLERS = {
         digit_repository=DigitRepository()
     ),
 }
+
+EVENT_HANDLERS = {}
+
+if 'admission' in settings.INSTALLED_APPS:
+    from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent
+
+    EVENT_HANDLERS = {
+        **EVENT_HANDLERS,
+        PropositionSoumiseEvent: [recherche_et_validation_digit],
+    }

@@ -29,6 +29,7 @@ import logging
 import re
 
 import requests
+import waffle
 from django.conf import settings
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
@@ -51,6 +52,9 @@ class DigitService(IDigitService):
             date_naissance: str,
             niss: str
     ) -> str:
+        if not waffle.switch_is_active('fusion-digit'):
+            return "[]"
+
         original_person = Person.objects.get(global_id=matricule)
 
         person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
