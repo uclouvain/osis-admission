@@ -39,6 +39,7 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.contrib.models.base import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetPropositionCommand,
     GetCotutelleCommand,
@@ -50,6 +51,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, Co
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
+from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
@@ -149,6 +151,11 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         }[self.current_context]
         return message_bus_instance.invoke(cmd)
 
+
+    @cached_property
+    def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
+        return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))
+
     @cached_property
     def dossier(self) -> 'DemandeDTO':
         return message_bus_instance.invoke(RecupererDemandeQuery(uuid=self.admission_uuid))
@@ -238,6 +245,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             context['access_title_country'] = access_title_country(self.selectable_access_titles.values())
         elif self.is_continuing:
             context['admission'] = self.proposition
+            context['is_continuing'] = True
         else:
             context['admission'] = self.admission
 
@@ -299,6 +307,8 @@ class AdmissionFormMixin(AdmissionViewMixin):
         # Update the requested documents
         if self.update_requested_documents and hasattr(self.admission, 'update_requested_documents'):
             self.admission.update_requested_documents()
+
+
 
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)

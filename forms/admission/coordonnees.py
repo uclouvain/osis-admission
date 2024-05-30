@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ class AdmissionCoordonneesForm(forms.ModelForm):
         self.fields['show_contact'].initial = show_contact
 
 
-class AdmissionAddressForm(forms.ModelForm):
+class BaseAdmissionAddressForm(forms.Form):
     street = forms.CharField(
         required=False,
         label=_('Street'),
@@ -132,6 +132,7 @@ class AdmissionAddressForm(forms.ModelForm):
     country = AdmissionModelCountryChoiceField(
         required=False,
         label=_('Country'),
+        to_field_name='iso_code',
     )
 
     # Enable autocompletion only for Belgium postal codes
@@ -150,24 +151,13 @@ class AdmissionAddressForm(forms.ModelForm):
         ),
     )
 
-    class Meta:
-        model = ZipCode
-        fields = [
-            'street',
-            'street_number',
-            'postal_box',
-            'postal_code',
-            'city',
-            'country',
-        ]
-
     def __init__(self, check_coordinates_fields=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.check_coordinates_fields = check_coordinates_fields
 
         country = self.data.get(self.add_prefix('country'), self.initial.get('country'))
         if country:
-            country_qs = Country.objects.filter(pk=country)
+            country_qs = Country.objects.filter(iso_code=country)
             self.fields['country'].queryset = country_qs
 
             if country_qs and country_qs[0].iso_code == BE_ISO_CODE:
@@ -207,7 +197,7 @@ class AdmissionAddressForm(forms.ModelForm):
         return cleaned_data
 
     @cached_property
-    def get_prepare_data(self):
+    def address_data_to_save(self):
         if not self.is_valid():
             return
 
@@ -221,3 +211,25 @@ class AdmissionAddressForm(forms.ModelForm):
         prepare_data.pop('be_city')
 
         return prepare_data
+
+
+class AdmissionAddressForm(BaseAdmissionAddressForm, forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        # We use the iso code of the country instead of the id
+        instance = kwargs.get('instance')
+        if instance and instance.country:
+            kwargs.setdefault('initial', {})
+            kwargs['initial']['country'] = instance.country.iso_code
+
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = ZipCode
+        fields = [
+            'street',
+            'street_number',
+            'postal_box',
+            'postal_code',
+            'city',
+            'country',
+        ]

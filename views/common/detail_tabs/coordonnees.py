@@ -27,6 +27,7 @@ from django.views.generic import TemplateView
 
 from admission.views.common.mixins import LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.person import Person
 from base.models.person_address import PersonAddress
 
 __all__ = ['AdmissionCoordonneesDetailView']
@@ -55,9 +56,29 @@ class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
             'emergency_contact_phone': self.admission.candidate.emergency_contact_phone,
         }
 
+        if self.proposition_fusion:
+            known_person = Person.objects.get(global_id=self.proposition_fusion.matricule)
+            addresses = {
+                address.label: address
+                for address in PersonAddress.objects.filter(
+                    person=known_person,
+                    label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
+                ).select_related('country')
+            }
+            context['coordonnees_fusion'] = {
+                'contact': addresses.get(PersonAddressType.CONTACT.name),
+                'residential': addresses.get(PersonAddressType.RESIDENTIAL.name),
+                'private_email': known_person.private_email,
+                'phone_mobile': known_person.phone_mobile,
+                'emergency_contact_phone': known_person.emergency_contact_phone,
+            }
+
         if self.is_doctorate and 'dossier' in context:
             context['profil_candidat'] = context['dossier'].profil_soumis_candidat
         elif self.is_general or self.is_continuing:
             context['profil_candidat'] = context['admission'].profil_soumis_candidat
 
         return context
+
+    def get_digit_data(self):
+        return {'available': False, 'email': None}

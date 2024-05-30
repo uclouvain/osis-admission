@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,10 +33,15 @@ from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationTrainingFactory,
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, MessageAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -55,7 +60,7 @@ from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time('2022-01-01')
-class SpecificQuestionsDetailViewTestCase(TestCase):
+class GeneralSpecificQuestionsDetailViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create data
@@ -232,3 +237,99 @@ class SpecificQuestionsDetailViewTestCase(TestCase):
 
         self.assertEqual(response.context.get('enrolled_for_contingent_training'), False)
         self.assertNotContains(response, gettext('Enrolment in limited enrolment bachelor\'s course'))
+
+
+@freezegun.freeze_time('2022-01-01')
+class ContinuingSpecificQuestionsDetailViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create data
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
+        cls.ca_country = CountryFactory(iso_code='CA', european_union=False)
+
+        cls.first_entity = EntityWithVersionFactory()
+
+        cls.training = ContinuingEducationTrainingFactory(
+            management_entity=cls.first_entity,
+            academic_year=cls.academic_years[0],
+        )
+
+        cls.specific_questions = [
+            AdmissionFormItemInstantiationFactory(
+                form_item=MessageAdmissionFormItemFactory(),
+                tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+                academic_year=cls.academic_years[1],
+            ),
+            AdmissionFormItemInstantiationFactory(
+                form_item=MessageAdmissionFormItemFactory(),
+                tab=Onglets.CURRICULUM.name,
+                academic_year=cls.academic_years[1],
+            ),
+        ]
+
+        # Create users
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_entity).person.user
+        cls.program_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+
+    def setUp(self):
+        self.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training=self.training,
+            candidate__language=settings.LANGUAGE_CODE_EN,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            determined_academic_year=self.academic_years[1],
+        )
+
+        self.url = resolve_url('admission:continuing-education:specific-questions', uuid=self.continuing_admission.uuid)
+
+    def test_continuing_specific_questions_access(self):
+        # If the user is not authenticated, he should be redirected to the login page
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, resolve_url('login') + '?next=' + self.url)
+
+        # If the user is authenticated but doesn't have the right role, raise a 403
+        self.client.force_login(CandidateFactory().person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # If the user is authenticated and has the right role, he should be able to access the page
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_login(self.program_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_continuing_specific_questions(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check context data
+        self.assertEqual(response.context['proposition'].uuid, self.continuing_admission.uuid)
+
+        specific_questions: List[QuestionSpecifiqueDTO] = response.context.get('specific_questions', [])
+        self.assertEqual(len(specific_questions), 1)
+        self.assertEqual(specific_questions[0].uuid, str(self.specific_questions[0].form_item.uuid))
+        self.assertContains(response, gettext('You are enrolling as'))
+
+        # Display visa question: not ue+5 nationality
+        self.continuing_admission.candidate.country_of_citizenship = self.ca_country
+        self.continuing_admission.candidate.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check context data
+        self.assertContains(
+            response,
+            gettext(
+                'Copy of residence permit covering entire course, including assessment test (except for online courses).'
+            ),
+        )

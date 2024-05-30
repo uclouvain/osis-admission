@@ -36,8 +36,10 @@ from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, 
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from base.models.enums.civil_state import CivilState
 from base.tests.factories.person import generate_global_id
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationEtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
 
@@ -104,7 +106,20 @@ class CoordonneesDTOFactory(factory.Factory):
         abstract = False
 
 
+class ValorisationEtudesSecondairesDTOFactory(factory.Factory):
+    est_valorise_par_epc = False
+    types_formations_admissions_valorisees = []
+
+    class Meta:
+        model = ValorisationEtudesSecondairesDTO
+        abstract = False
+
+
 class EtudesSecondairesDTOFactory(factory.Factory):
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    valorisation = factory.SubFactory(ValorisationEtudesSecondairesDTOFactory)
+
     class Meta:
         model = EtudesSecondairesAdmissionDTO
         abstract = False

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.97
+  version: 1.0.100
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4411,6 +4411,72 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - continuing-education
+  /propositions/continuing-education/{uuid}/documents:
+    get:
+      operationId: list_continuing_documents
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSpecificQuestionsList'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: create_continuing_documents
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterEmplacementsDocumentsParCandidatCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -6198,6 +6264,7 @@ components:
                 format: date-time
               statut:
                 type: string
+                readOnly: true
               links:
                 type: object
                 properties:
@@ -6229,6 +6296,10 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_documents:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_documents:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
               pdf_recapitulatif:
@@ -6243,7 +6314,6 @@ components:
             - prenom_candidat
             - nom_candidat
             - creee_le
-            - statut
             - pdf_recapitulatif
       required:
       - doctorate_propositions
@@ -6703,6 +6773,9 @@ components:
           type: boolean
           readOnly: true
         is_valuated:
+          type: boolean
+          readOnly: true
+        can_update_diploma:
           type: boolean
           readOnly: true
     GotDiploma:
@@ -9553,6 +9626,7 @@ components:
           format: date-time
         statut:
           type: string
+          readOnly: true
         links:
           type: object
           properties:
@@ -9703,7 +9777,6 @@ components:
       - prenom_candidat
       - nom_candidat
       - creee_le
-      - statut
       - erreurs
       - curriculum
       - equivalence_diplome
@@ -10274,6 +10347,7 @@ components:
           format: date-time
         statut:
           type: string
+          readOnly: true
         links:
           type: object
           properties:
@@ -10304,6 +10378,10 @@ components:
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -10412,7 +10490,6 @@ components:
       - prenom_candidat
       - nom_candidat
       - creee_le
-      - statut
       - erreurs
       - curriculum
       - equivalence_diplome

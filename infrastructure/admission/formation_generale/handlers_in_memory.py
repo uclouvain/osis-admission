@@ -133,6 +133,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.repository.in_memory.digit import DigitInMemoryRepository
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -147,6 +148,8 @@ from infrastructure.shared_kernel.campus.repository.in_memory.campus import Uclo
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import \
+    CompteurAnnuelPourNomaInMemoryRepository
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -173,6 +176,8 @@ _reference_translator = ReferenceInMemoryTranslator()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _campus_repository = UclouvainCampusInMemoryRepository()
 _taches_techniques = TachesTechniquesInMemory()
+_digit_repository = DigitInMemoryRepository()
+_compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -648,6 +653,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -661,6 +668,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (

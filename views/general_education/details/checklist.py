@@ -43,6 +43,7 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
 
+from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
@@ -53,7 +54,8 @@ from osis_mail_template.models import MailTemplate
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.commands import ListerToutesDemandesQuery, GetStatutTicketPersonneQuery, \
+    RechercherParcoursAnterieurQuery
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -76,6 +78,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
+    STATUTS_TOUTE_PROPOSITION_AUTORISEE,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
@@ -121,6 +124,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     OngletsChecklist,
+    TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -184,6 +188,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -248,6 +253,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         checklist_additional_icons = {}
+        checklist_additional_icons_title = {}
 
         # A SIC user has an additional icon for the decision of the faculty if a fac manager wrote a comment
         if self.is_sic:
@@ -265,7 +271,40 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         if self.proposition.type == TypeDemande.INSCRIPTION.name and self.proposition.est_inscription_tardive:
             checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
 
+        candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
+            ListerToutesDemandesQuery(
+                matricule_candidat=self.admission.candidate.global_id,
+                etats=STATUTS_TOUTE_PROPOSITION_SOUMISE,
+                champ_tri='date_confirmation',
+                tri_inverse=True,
+            )
+        )
+
+        submitted_for_the_current_year_admissions: List[DemandeRechercheDTO] = []
+
+        for admission in candidate_admissions:
+            if (
+                admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+                and admission.annee_demande == self.admission.determined_academic_year.year
+                and admission.uuid != self.admission_uuid
+            ):
+                submitted_for_the_current_year_admissions.append(admission)
+
+        context['toutes_les_demandes'] = candidate_admissions
+        context['autres_demandes'] = submitted_for_the_current_year_admissions
+
+        if any(
+            admission
+            for admission in submitted_for_the_current_year_admissions
+            if admission.etat_demande in STATUTS_TOUTE_PROPOSITION_AUTORISEE
+        ):
+            checklist_additional_icons['choix_formation'] = 'fa-solid fa-square-2'
+            checklist_additional_icons_title['choix_formation'] = _(
+                'Another admission has been authorized for this candidate for this academic year.'
+            )
+
         context['checklist_additional_icons'] = checklist_additional_icons
+        context['checklist_additional_icons_title'] = checklist_additional_icons_title
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
         context['can_change_faculty_decision'] = self.request.user.has_perm(
@@ -941,39 +980,46 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def sic_decision_refusal_final_form(self):
-        tokens = {
-            "admission_reference": self.proposition.reference,
-            "candidate": (
-                f"{self.proposition.profil_soumis_candidat.prenom} " f"{self.proposition.profil_soumis_candidat.nom}"
-            )
-            if self.proposition.profil_soumis_candidat
-            else "",
-            "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
-            "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
-            "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
-        }
+        with_email = self.proposition.type_de_refus != TypeDeRefus.REFUS_LIBRE.name
+        subject = ''
+        body = ''
 
-        try:
-            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
-                ADMISSION_EMAIL_SIC_REFUSAL,
-                settings.LANGUAGE_CODE_FR,
-            )
+        if with_email:
+            tokens = {
+                "admission_reference": self.proposition.reference,
+                "candidate": (
+                    f"{self.proposition.profil_soumis_candidat.prenom} "
+                    f"{self.proposition.profil_soumis_candidat.nom}"
+                )
+                if self.proposition.profil_soumis_candidat
+                else "",
+                "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
+                "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+                "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
+            }
 
-            subject = mail_template.render_subject(tokens=tokens)
-            body = mail_template.body_as_html(tokens=tokens)
-        except EmptyMailTemplateContent:
-            subject = ''
-            body = ''
+            try:
+                mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
+                    ADMISSION_EMAIL_SIC_REFUSAL,
+                    settings.LANGUAGE_CODE_FR,
+                )
+
+                subject = mail_template.render_subject(tokens=tokens)
+                body = mail_template.body_as_html(tokens=tokens)
+            except EmptyMailTemplateContent:
+                subject = ''
+                body = ''
 
         return SicDecisionFinalRefusalForm(
             data=self.request.POST
-            if self.request.method == 'POST' and 'sic-decision-refusal-final-subject' in self.request.POST
+            if self.request.method == 'POST' and 'sic-decision-refusal-final-submitted' in self.request.POST
             else None,
             prefix='sic-decision-refusal-final',
             initial={
                 'subject': subject,
                 'body': body,
             },
+            with_email=with_email,
         )
 
     @cached_property
@@ -1179,8 +1225,8 @@ class SicRefusalFinalDecisionView(
                 message_bus_instance.invoke(
                     RefuserAdmissionParSicCommand(
                         uuid_proposition=self.admission_uuid,
-                        objet_message=form.cleaned_data['subject'],
-                        corps_message=form.cleaned_data['body'],
+                        objet_message=form.cleaned_data.get('subject', ''),
+                        corps_message=form.cleaned_data.get('body', ''),
                         auteur=self.request.user.person.global_id,
                     )
                 )
@@ -1188,8 +1234,8 @@ class SicRefusalFinalDecisionView(
                 message_bus_instance.invoke(
                     RefuserInscriptionParSicCommand(
                         uuid_proposition=self.admission_uuid,
-                        objet_message=form.cleaned_data['subject'],
-                        corps_message=form.cleaned_data['body'],
+                        objet_message=form.cleaned_data.get('subject', ''),
+                        corps_message=form.cleaned_data.get('body', ''),
                         auteur=self.request.user.person.global_id,
                     )
                 )
@@ -1453,29 +1499,6 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
-                ListerToutesDemandesQuery(
-                    matricule_candidat=self.admission.candidate.global_id,
-                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE,
-                    champ_tri='date_confirmation',
-                    tri_inverse=True,
-                )
-            )
-
-            submitted_for_the_current_year_admissions: List[DemandeRechercheDTO] = []
-            submitted_candidate_admissions_by_uuid: Dict[str, DemandeRechercheDTO] = {}
-
-            for admission in candidate_admissions:
-                if (
-                    admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
-                    and admission.annee_demande == self.admission.determined_academic_year.year
-                    and admission.uuid != self.admission_uuid
-                ):
-                    submitted_for_the_current_year_admissions.append(admission)
-                submitted_candidate_admissions_by_uuid[admission.uuid] = admission
-
-            context['autres_demandes'] = submitted_for_the_current_year_admissions
-
             # Initialize forms
             tab_names = list(self.extra_context['checklist_tabs'].keys())
 
@@ -1531,8 +1554,16 @@ class ChecklistView(
             }
 
             # Experiences
+            if self.proposition_fusion:
+                merge_curex = (
+                    self.proposition_fusion.educational_curex_uuids + self.proposition_fusion.professional_curex_uuids
+                )
+                self._merge_with_known_curriculum(merge_curex, command_result.resume)
+                context['curex_a_fusionner'] = merge_curex
+
             experiences = self._get_experiences(command_result.resume)
             experiences_by_uuid = self._get_experiences_by_uuid(command_result.resume)
+
             context['experiences'] = experiences
             context['experiences_by_uuid'] = experiences_by_uuid
 
@@ -1636,7 +1667,11 @@ class ChecklistView(
                 if valuated_admissions and self.admission_uuid not in valuated_admissions:
                     not_valuated_by_current_admission_experiences_uuids.add(experience_uuid)
                     last_valuated_admission_by_experience_uuid[experience_uuid] = next(
-                        (admission for admission in candidate_admissions if admission.uuid in valuated_admissions),
+                        (
+                            admission
+                            for admission in context['toutes_les_demandes']
+                            if admission.uuid in valuated_admissions
+                        ),
                         None,
                     )
 
@@ -1747,7 +1782,29 @@ class ChecklistView(
             )
             context['can_choose_access_title'] = can_change_access_title
 
+            context['digit_ticket'] = message_bus_instance.invoke(
+                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
+            )
+
+            if self.proposition_fusion:
+                context['proposition_fusion'] = self.proposition_fusion
+
         return context
+
+    def _merge_with_known_curriculum(self, curex_a_fusionner, resume):
+        if curex_a_fusionner:
+            curex_existant = message_bus_instance.invoke(
+                RechercherParcoursAnterieurQuery(
+                    global_id=self.proposition_fusion.matricule,
+                    uuid_proposition=self.admission_uuid,
+                )
+            )
+            for experience_non_academique in curex_existant.experiences_non_academiques:
+                if str(experience_non_academique.uuid) in curex_a_fusionner:
+                    resume.curriculum.experiences_non_academiques.append(experience_non_academique)
+            for experience_academique in curex_existant.experiences_academiques:
+                if str(experience_academique.uuid) in curex_a_fusionner:
+                    resume.curriculum.experiences_academiques.append(experience_academique)
 
     def _get_experiences(self, resume: ResumePropositionDTO):
         return groupe_curriculum_par_annee_decroissante(
@@ -1771,7 +1828,6 @@ class ChecklistView(
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
         return experiences
-
 
 class ApplicationFeesView(
     AdmissionFormMixin,
@@ -2012,6 +2068,9 @@ class PastExperiencesAccessTitleEquivalencyView(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     type_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_type'],
+                    information_a_propos_de_la_restriction=form.cleaned_data[
+                        'foreign_access_title_equivalency_restriction_about'
+                    ],
                     statut_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_status'],
                     etat_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_state'],
                     date_prise_effet_equivalence_titre_acces=form.cleaned_data[

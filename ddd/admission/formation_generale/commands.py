@@ -488,6 +488,7 @@ class SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(interface.Command
     type_equivalence_titre_acces: str = ''
     statut_equivalence_titre_acces: str = ''
     etat_equivalence_titre_acces: str = ''
+    information_a_propos_de_la_restriction: str = ''
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
 
@@ -583,17 +584,17 @@ class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RefuserAdmissionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
-    objet_message: str
-    corps_message: str
     auteur: str
+    objet_message: str = ''
+    corps_message: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)
 class RefuserInscriptionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
-    objet_message: str
-    corps_message: str
     auteur: str
+    objet_message: str = ''
+    corps_message: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

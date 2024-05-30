@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 from typing import Dict, List, Optional
 
 import attr
@@ -37,6 +37,12 @@ from osis_common.ddd import interface
 class RechercherFormationContinueQuery(interface.QueryRequest):
     terme_de_recherche: str
     campus: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
+class RecupererFormationContinueQuery(interface.QueryRequest):
+    sigle: str
+    annee: int
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -168,8 +174,82 @@ class RecupererDocumentsPropositionQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsReclamesPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecalculerEmplacementsDocumentsNonLibresPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterEmplacementsDocumentsParCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    reponses_documents_a_completer: Dict[str, List[str]]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerReclamationDocumentsAuCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreNonReclamableCommand(
+    commands.InitialiserEmplacementDocumentLibreNonReclamableCommand
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreAReclamerCommand(commands.InitialiserEmplacementDocumentLibreAReclamerCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentAReclamerCommand(commands.InitialiserEmplacementDocumentAReclamerCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierReclamationEmplacementDocumentCommand(commands.ModifierReclamationEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerReclamationEmplacementDocumentCommand(commands.AnnulerReclamationEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerEmplacementDocumentCommand(commands.SupprimerEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplacerEmplacementDocumentCommand(commands.RemplacerEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplirEmplacementDocumentParGestionnaireCommand(commands.RemplirEmplacementDocumentParGestionnaireCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentsAuCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiants_emplacements: List[str]
+    a_echeance_le: datetime.date
+    objet_message: str
+    corps_message: str
+    auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -245,3 +325,41 @@ class ListerDemandesQuery(SortedQueryRequest):
     inscription_requise: Optional[bool] = None
     paye: Optional[bool] = None
     demandeur: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChoixFormationParGestionnaireCommand:
+    uuid_proposition: str
+    gestionnaire: str
+    sigle_formation: str
+    annee_formation: int
+    reponses_questions_specifiques: Dict
+    motivations: str
+    moyens_decouverte_formation: List[str]
+    marque_d_interet: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+    inscription_a_titre: Optional[str] = ''
+    nom_siege_social: Optional[str] = ''
+    numero_unique_entreprise: Optional[str] = ''
+    numero_tva_entreprise: Optional[str] = ''
+    adresse_mail_professionnelle: Optional[str] = ''
+
+    # Adresse facturation
+    type_adresse_facturation: Optional[str] = ''
+    adresse_facturation_rue: Optional[str] = ''
+    adresse_facturation_numero_rue: Optional[str] = ''
+    adresse_facturation_code_postal: Optional[str] = ''
+    adresse_facturation_ville: Optional[str] = ''
+    adresse_facturation_pays: Optional[str] = ''
+    adresse_facturation_destinataire: Optional[str] = ''
+    adresse_facturation_boite_postale: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    copie_titre_sejour: List[str] = attr.Factory(list)
+    documents_additionnels: List[str] = attr.Factory(list)

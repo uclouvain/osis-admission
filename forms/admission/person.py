@@ -369,7 +369,8 @@ class AdmissionPersonForm(AdmissionModelForm):
             data['id_card_expiry_date'] = None
             data['passport_expiry_date'] = None
 
-            self.add_error('identification_type', FIELD_REQUIRED_MESSAGE)
+            if 'identification_type' in self.fields:
+                self.add_error('identification_type', FIELD_REQUIRED_MESSAGE)
 
         # Lowercase the specified names
         for field in ['first_name', 'last_name', 'middle_name', 'birth_place']:

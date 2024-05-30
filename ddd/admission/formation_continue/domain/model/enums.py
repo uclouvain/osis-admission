@@ -35,6 +35,8 @@ class ChoixStatutPropositionContinue(ChoiceEnum):
     EN_ATTENTE = _('On hold')
     INSCRIPTION_REFUSEE = _('Application denied')
     ANNULEE = _('Cancelled application')
+    A_COMPLETER_POUR_FAC = _('To be completed for Fac')
+    COMPLETEE_POUR_FAC = _('Completed for Fac')
     INSCRIPTION_AUTORISEE = _('Application accepted')
     CLOTUREE = _('Closed')
     ANNULEE_PAR_GESTIONNAIRE = _('Cancelled application by a manager')
@@ -49,6 +51,14 @@ class ChoixTypeAdresseFacturation(ChoiceEnum):
     RESIDENTIEL = _("Legal domicile")
     CONTACT = pgettext_lazy("admission", "Postal address")
     AUTRE = _("Other address")
+
+    @classmethod
+    def verbose_choices(cls):
+        return (
+            (cls.RESIDENTIEL.name, _("My legal domicile provided above")),
+            (cls.CONTACT.name, _("The contact address I provided")),
+            (cls.AUTRE.name, cls.AUTRE.value),
+        )
 
 
 class ChoixMoyensDecouverteFormation(ChoiceEnum):
@@ -76,7 +86,7 @@ STATUTS_PROPOSITION_CONTINUE_SOUMISE = (
 )
 
 STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT = {
-    'A_COMPLETER_POUR_FAC',
+    ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
 }
 
 STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE = (

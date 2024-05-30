@@ -183,15 +183,17 @@ class Historique(IHistorique):
     @classmethod
     def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
-        message_a_historiser = get_message_to_historize(message)
 
-        add_history_entry(
-            proposition.entity_id.uuid,
-            message_a_historiser[settings.LANGUAGE_CODE_FR],
-            message_a_historiser[settings.LANGUAGE_CODE_EN],
-            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "sic-decision", "refusal", "message"],
-        )
+        if message is not None:
+            message_a_historiser = get_message_to_historize(message)
+
+            add_history_entry(
+                proposition.entity_id.uuid,
+                message_a_historiser[settings.LANGUAGE_CODE_FR],
+                message_a_historiser[settings.LANGUAGE_CODE_EN],
+                "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+                tags=["proposition", "sic-decision", "refusal", "message"],
+            )
 
         add_history_entry(
             proposition.entity_id.uuid,
