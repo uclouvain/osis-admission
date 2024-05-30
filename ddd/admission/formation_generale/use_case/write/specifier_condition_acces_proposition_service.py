@@ -31,12 +31,14 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def specifier_condition_acces_proposition(
     cmd: 'SpecifierConditionAccesPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
@@ -47,6 +49,7 @@ def specifier_condition_acces_proposition(
         millesime_condition_acces=cmd.millesime_condition_acces,
         titre_acces_selectionnable_repository=titre_acces_selectionnable_repository,
         avec_complements_formation=cmd.avec_complements_formation,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
     )
 
     proposition_repository.save(proposition)

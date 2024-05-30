@@ -3745,6 +3745,12 @@ msgstr ""
 msgid "Internal comment:"
 msgstr ""
 
+msgid "Internal experience"
+msgstr ""
+
+msgid "Internal experiences to choose as access titles"
+msgstr ""
+
 msgid "Internal label"
 msgstr ""
 
@@ -6760,6 +6766,9 @@ msgstr ""
 #, python-format
 msgid ""
 "The inscription type admission was authorised the %(date)s by %(author)s."
+msgstr ""
+
+msgid "The internal experiences chosen as access titles of this admission."
 msgstr ""
 
 msgid "The jury is not in progress"

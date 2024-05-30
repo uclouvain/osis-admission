@@ -23,12 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import itertools
-
-import attr
 import datetime
+import itertools
 from typing import Dict, Set, Optional, List, Union
 
+import attr
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
@@ -44,14 +43,6 @@ from django.utils.translation import gettext_lazy as _, ngettext, pgettext, over
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
-
-from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
-)
-from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -65,6 +56,8 @@ from admission.ddd.admission.commands import (
     GetStatutTicketPersonneQuery,
     RechercherParcoursAnterieurQuery,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -77,9 +70,7 @@ from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSe
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
-    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     StatutReclamationEmplacementDocument,
-    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -136,10 +127,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    OngletsChecklist,
     TypeDeRefus,
     OngletsChecklist,
     DerogationFinancement,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
@@ -215,10 +208,13 @@ from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.models.student import Student
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -1652,6 +1648,10 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
         return super().get(request, *args, **kwargs)
 
 
+def get_internal_experiences(noma: str) -> List[ExperienceParcoursInterneDTO]:
+    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(noma=noma))
+
+
 class ApplicationFeesView(
     AdmissionFormMixin,
     RequestApplicationFeesContextDataMixin,
@@ -1839,10 +1839,21 @@ class PastExperiencesAccessTitleView(
                 RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
             )
 
+            internal_experiences = []
+
+            if any(
+                title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name
+                for title in access_titles.values()
+            ):
+                student = Student.objects.filter(person=self.admission.candidate).only('registration_id').first()
+                if student:
+                    internal_experiences = get_internal_experiences(noma=student.registration_id)
+
             context['selected_access_titles_names'] = get_access_titles_names(
                 access_titles=access_titles,
                 curriculum_dto=command_result.curriculum,
                 etudes_secondaires_dto=command_result.etudes_secondaires,
+                internal_experiences=internal_experiences,
             )
 
         return context
@@ -2516,6 +2527,10 @@ class ChecklistView(
     template_name = "admission/general_education/checklist.html"
     permission_required = 'admission.view_checklist'
 
+    @cached_property
+    def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
+        return get_internal_experiences(noma=self.proposition.noma_candidat)
+
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
         assimilation_documents = {
@@ -2690,6 +2705,7 @@ class ChecklistView(
                 access_titles=self.selectable_access_titles,
                 curriculum_dto=command_result.resume.curriculum,
                 etudes_secondaires_dto=command_result.resume.etudes_secondaires,
+                internal_experiences=self.internal_experiences,
             )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
@@ -2927,6 +2943,7 @@ class ChecklistView(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
+            experiences_parcours_interne=self.internal_experiences,
         )
 
     def _get_financabilite(self):

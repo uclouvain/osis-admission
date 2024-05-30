@@ -32,6 +32,7 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnableIdentity,
 )
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from osis_common.ddd import interface
 from osis_common.ddd.interface import EntityIdentity, RootEntity
 
@@ -53,11 +54,16 @@ class ITitreAccesSelectionnableRepository(interface.AbstractRepository):
     def search_dto_by_proposition(
         cls,
         proposition_identity: PropositionIdentity,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         seulement_selectionnes: Optional[bool] = None,
     ) -> Dict[str, TitreAccesSelectionnableDTO]:
         return {
             entity.entity_id.uuid_experience: cls.entity_to_dto(entity)
-            for entity in cls.search_by_proposition(proposition_identity, seulement_selectionnes)
+            for entity in cls.search_by_proposition(
+                proposition_identity,
+                experience_parcours_interne_translator,
+                seulement_selectionnes,
+            )
         }
 
     @classmethod
@@ -65,6 +71,7 @@ class ITitreAccesSelectionnableRepository(interface.AbstractRepository):
     def search_by_proposition(
         cls,
         proposition_identity: PropositionIdentity,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         seulement_selectionnes: Optional[bool] = None,
     ) -> List[TitreAccesSelectionnable]:
         raise NotImplementedError
