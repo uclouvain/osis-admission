@@ -150,7 +150,7 @@
         {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
         {% field_data _('Contact person for the design of the annual program') contact_person %}
 
-        {% if admission.type_demande == 'ADMISSION' %}
+        {% if admission.type == 'ADMISSION' %}
           {% field_data _('Tuition fees amount') admission.droits_inscription_montant|enum_display:'DroitsInscriptionMontant' %}
           {% if admission.droits_inscription_montant == 'AUTRE' %}
             {% field_data _('Amount (without EUR/)') admission.droits_inscription_montant_autre %}

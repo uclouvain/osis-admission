@@ -916,9 +916,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
 
         # Initialize additional approval conditions field
-        self.fields['with_additional_approval_conditions'].required = True
-
-        self.fields['with_prerequisite_courses'].required = True
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields
@@ -985,6 +982,8 @@ class SicDecisionApprovalForm(forms.ModelForm):
             self.fields['must_report_to_sic'].required = True
             self.fields['program_planned_years_number'].required = True
             self.fields['communication_to_the_candidate'].required = False
+            self.fields['with_additional_approval_conditions'].required = True
+            self.fields['with_prerequisite_courses'].required = True
 
     def clean_all_additional_approval_conditions(self):
         # This field can contain uuids of existing conditions or free conditions as strings

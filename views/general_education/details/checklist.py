@@ -1403,7 +1403,7 @@ class SicDecisionApprovalPanelView(HtmxPermissionRequiredMixin, SicDecisionMixin
     urlpatterns = {'sic-decision-approval-panel': 'sic-decision-approval-panel'}
     template_name = 'admission/general_education/includes/checklist/sic_decision_approval_panel.html'
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_panel.html'
-    permission_required = 'admission.checklist_change_sic_decision'
+    permission_required = 'admission.view_checklist'
 
 
 class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):

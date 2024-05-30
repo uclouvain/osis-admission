@@ -117,9 +117,10 @@ class ShouldSpecifierInformationsAcceptationFacultaireInscription(BusinessValida
 
     def validate(self, *args, **kwargs):
         if (
-            self.avec_conditions_complementaires is None
-            or self.avec_conditions_complementaires
+            self.avec_conditions_complementaires
             and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
+            or self.avec_complements_formation
+            and not self.complements_formation
         ):
             raise InformationsAcceptationFacultaireNonSpecifieesException
 
@@ -208,6 +209,7 @@ class ShouldChecklistEtreDansEtatCorrectPourApprouverInscription(BusinessValidat
         if not (
             self.checklist_actuelle.decision_sic.statut == ChoixStatutChecklist.INITIAL_CANDIDAT
             or self.checklist_actuelle.decision_sic.statut == ChoixStatutChecklist.GEST_EN_COURS
+            and self.checklist_actuelle.decision_sic.extra.get('en_cours') == 'derogation'
             and self.besoin_de_derogation == BesoinDeDerogation.ACCORD_DIRECTION
         ):
             raise EtatChecklistDecisionSicNonValidePourApprouverUneInscription

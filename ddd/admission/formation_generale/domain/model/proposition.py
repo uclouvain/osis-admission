@@ -794,8 +794,8 @@ class Proposition(interface.RootEntity):
             extra={},
         )
 
-    def specifier_besoin_de_derogation(self, besoin_de_derogation: BesoinDeDerogation, auteur_modification: str):
-        self.besoin_de_derogation = besoin_de_derogation
+    def specifier_besoin_de_derogation(self, besoin_de_derogation: str, auteur_modification: str):
+        self.besoin_de_derogation = BesoinDeDerogation[besoin_de_derogation] if besoin_de_derogation else ''
         self.auteur_derniere_modification = auteur_modification
 
     def _specifier_informations_de_base_acceptation_par_sic(
