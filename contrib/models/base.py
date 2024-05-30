@@ -376,6 +376,12 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         verbose_name=_('The educational experiences that have been valuated from this admission.'),
         through='AdmissionEducationalValuatedExperiences',
     )
+    internal_access_titles = models.ManyToManyField(
+        'epc.InscriptionProgrammeCycle',
+        blank=True,
+        related_name='+',
+        verbose_name=_('The internal experiences chosen as access titles of this admission.'),
+    )
     detailed_status = models.JSONField(
         default=dict,
         encoder=DjangoJSONEncoder,

@@ -98,6 +98,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -695,6 +696,7 @@ class Proposition(interface.RootEntity):
         millesime_condition_acces: Optional[int],
         avec_complements_formation: Optional[bool],
         titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
         nouveau_millesime_condition_acces = millesime_condition_acces
         nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
@@ -704,6 +706,7 @@ class Proposition(interface.RootEntity):
             # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
             titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
                 proposition_identity=self.entity_id,
+                experience_parcours_interne_translator=experience_parcours_interne_translator,
                 seulement_selectionnes=True,
             )
 

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from typing import List, Optional
 
 from django.db.models import QuerySet, Max, Q, F
@@ -44,6 +45,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE, BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result
 
@@ -53,17 +55,20 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
     def search_by_proposition(
         cls,
         proposition_identity: PropositionIdentity,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         seulement_selectionnes: Optional[bool] = None,
     ) -> List[TitreAccesSelectionnable]:
         # Retrieve the secondary studies
         admission: BaseAdmission = (
-            BaseAdmission.objects.select_related(
+            BaseAdmission.objects.annotate_with_student_registration_id()
+            .select_related(
                 'candidate__belgianhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__country',
                 'candidate__highschooldiplomaalternative',
                 'candidate__graduated_from_high_school_year',
             )
+            .prefetch_related('internal_access_titles')
             .only(
                 'are_secondary_studies_access_title',
                 'candidate__belgianhighschooldiploma__uuid',
@@ -108,6 +113,22 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             )
             .select_related('professionalexperience')
             .only('professionalexperience__end_date')
+        )
+
+        # Retrieve the internal experiences
+        internal_access_titles_uuids = set(
+            [
+                str(uuid.UUID(int=internal_access_title_id))
+                for internal_access_title_id in admission.internal_access_titles.all().values_list('pk', flat=True)
+            ]
+        )
+
+        internal_experiences = (
+            experience_parcours_interne_translator.recuperer(
+                noma=admission.student_registration_id,
+            )
+            if not seulement_selectionnes or seulement_selectionnes and internal_access_titles_uuids
+            else []
         )
 
         access_titles = []
@@ -193,6 +214,25 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 )
             )
 
+        for experience in internal_experiences:
+            is_selected = experience.uuid in internal_access_titles_uuids
+
+            if not experience.est_diplome_ou_diplomable or seulement_selectionnes and not is_selected:
+                continue
+
+            access_titles.append(
+                TitreAccesSelectionnable(
+                    entity_id=TitreAccesSelectionnableIdentity(
+                        uuid_experience=experience.uuid,
+                        uuid_proposition=admission.uuid,
+                        type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE,
+                    ),
+                    selectionne=is_selected,
+                    annee=experience.derniere_annee.annee,
+                    pays_iso_code=BE_ISO_CODE,
+                )
+            )
+
         return access_titles
 
     @classmethod
@@ -216,3 +256,12 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 professionalexperience_id=entity.entity_id.uuid_experience,
             ).update(is_access_title=entity.selectionne):
                 raise ExperienceNonTrouveeException
+
+        elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE:
+            experience_pk = uuid.UUID(entity.entity_id.uuid_experience).int
+            current_admission = BaseAdmission.objects.get(uuid=entity.entity_id.uuid_proposition)
+
+            if entity.selectionne:
+                current_admission.internal_access_titles.add(experience_pk)
+            else:
+                current_admission.internal_access_titles.remove(experience_pk)

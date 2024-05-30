@@ -33,6 +33,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_inscription_tardive_par_faculte(
@@ -41,6 +42,7 @@ def approuver_inscription_tardive_par_faculte(
     historique: 'IHistorique',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -49,6 +51,7 @@ def approuver_inscription_tardive_par_faculte(
 
     titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
         proposition_identity=proposition.entity_id,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=True,
     )
 

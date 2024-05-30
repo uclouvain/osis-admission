@@ -154,8 +154,13 @@ from infrastructure.shared_kernel.campus.repository.in_memory.campus import Uclo
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
-from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import \
-    CompteurAnnuelPourNomaInMemoryRepository
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
+    CompteurAnnuelPourNomaInMemoryRepository,
+)
+from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
+    ExperienceParcoursInterneInMemoryTranslator,
+)
+
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -184,6 +189,7 @@ _campus_repository = UclouvainCampusInMemoryRepository()
 _taches_techniques = TachesTechniquesInMemory()
 _digit_repository = DigitInMemoryRepository()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
+_experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -506,6 +512,7 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     ApprouverInscriptionTardiveParFaculteCommand: lambda msg_bus, cmd: approuver_inscription_tardive_par_faculte(
         cmd,
@@ -513,6 +520,7 @@ COMMAND_HANDLERS = {
         historique=_historique_formation_generale,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
@@ -553,11 +561,13 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
         lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
@@ -579,6 +589,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(
             cmd,
             titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
         )
     ),
     SpecifierFinancabiliteResultatCalculCommand: lambda msg_bus, cmd: specifier_financabilite_resultat_calcul(

@@ -41,13 +41,13 @@
 <div id="{{ prefix }}-parcours" class="tab-content parcours">
   {# Vue complète #}
   {% concat prefix '-parcours-complete' as complete_parcours_id %}
-  <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ complete_parcours_id }}">
+  <div role="tabpanel" class="parcours table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ complete_parcours_id }}">
     {% include 'osis_profile/parcours_externe_complet.html' with show_titre_acces=True curex_a_fusionner=curex_a_fusionner show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=complete_parcours_id %}
   </div>
 
   {# Vue formations académiques #}
   {% concat prefix '-parcours-formations' as formations_prefix_id %}
-  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ formations_prefix_id }}">
+  <div role="tabpanel" class="parcours table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ formations_prefix_id }}">
     <table class="table">
       <thead>
         <tr>
@@ -85,7 +85,7 @@
 
   {# Vue finançabilité #}
   {% concat prefix '-parcours-financabilite' as financabilite_prefix_id %}
-  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ financabilite_prefix_id }}">
+  <div role="tabpanel" class="parcours table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ financabilite_prefix_id }}">
     <table class="table">
       <thead>
         <tr>

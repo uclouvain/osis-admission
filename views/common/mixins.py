@@ -215,6 +215,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             )
         )
 
+    @cached_property
+    def selected_access_titles(self):
+        return message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
@@ -241,7 +250,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 raise Http404(e.message)
         elif self.is_general:
             context['admission'] = self.proposition
-            context['access_title_country'] = access_title_country(self.selectable_access_titles.values())
+            context['access_title_country'] = access_title_country(self.selected_access_titles.values())
         elif self.is_continuing:
             context['admission'] = self.proposition
             context['is_continuing'] = True
@@ -307,8 +316,6 @@ class AdmissionFormMixin(AdmissionViewMixin):
         # Update the requested documents
         if self.update_requested_documents and hasattr(self.admission, 'update_requested_documents'):
             self.admission.update_requested_documents()
-
-
 
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)
