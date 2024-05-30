@@ -25,11 +25,18 @@
 # ##############################################################################
 from django.utils.translation import gettext as _
 
-from admission.contrib.models import AdmissionTask, GeneralEducationAdmission
+from admission.contrib.models import AdmissionTask, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument
-from admission.ddd.admission.formation_generale.commands import InitialiserEmplacementDocumentLibreNonReclamableCommand
+from admission.ddd.admission.formation_continue import commands as continuing_commands
+from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+
+
+__all__ = [
+    'continuing_education_admission_analysis_folder_from_task',
+    'general_education_admission_analysis_folder_from_task',
+]
 
 
 def general_education_admission_analysis_folder_from_task(task_uuid: str):
@@ -45,7 +52,7 @@ def general_education_admission_analysis_folder_from_task(task_uuid: str):
     from infrastructure.messages_bus import message_bus_instance
 
     message_bus_instance.invoke(
-        InitialiserEmplacementDocumentLibreNonReclamableCommand(
+        general_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand(
             uuid_proposition=task.admission.uuid,
             auteur=task.admission.candidate.global_id,
             uuid_document=token,
@@ -53,6 +60,27 @@ def general_education_admission_analysis_folder_from_task(task_uuid: str):
                 ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name: TypeEmplacementDocument.LIBRE_INTERNE_FAC.name,
                 ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name: TypeEmplacementDocument.LIBRE_INTERNE_SIC.name,
             }.get(task.admission.generaleducationadmission.status, TypeEmplacementDocument.LIBRE_INTERNE_SIC.name),
+            libelle=_('Analysis file generated when the documents requested from the candidate are received'),
+        )
+    )
+
+
+def continuing_education_admission_analysis_folder_from_task(task_uuid: str):
+    """Generates the analysis folder for a continuing education admission and save it."""
+    task = AdmissionTask.objects.select_related('admission__candidate').get(task__uuid=task_uuid)
+
+    # Generate the analysis folder
+    token = admission_pdf_recap(task.admission, task.admission.candidate.language, ContinuingEducationAdmission)
+
+    # Save the analysis folder in the admission
+    from infrastructure.messages_bus import message_bus_instance
+
+    message_bus_instance.invoke(
+        continuing_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand(
+            uuid_proposition=task.admission.uuid,
+            auteur=task.admission.candidate.global_id,
+            uuid_document=token,
+            type_emplacement=TypeEmplacementDocument.LIBRE_INTERNE_FAC.name,
             libelle=_('Analysis file generated when the documents requested from the candidate are received'),
         )
     )

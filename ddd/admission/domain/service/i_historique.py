@@ -59,6 +59,10 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    def historiser_demande_complements(cls, proposition: PropositionAdmission, acteur: str, message: EmailMessage):
+        raise NotImplementedError
+
+    @classmethod
     def historiser_completion_documents_par_candidat(cls, proposition: PropositionAdmission):
         raise NotImplementedError
 

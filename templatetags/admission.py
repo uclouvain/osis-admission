@@ -383,12 +383,18 @@ TAB_TREES = {
         Tab('checklist', _('Checklist'), 'list-check'): [
             Tab('checklist', _('Checklist'), 'list-check'),
         ],
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
+        ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
         Tab('continuing-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
+        ],
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('specific-questions', _('Specific aspects')),
         ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
             Tab('comments', pgettext('tab', 'Comments'), 'comments')

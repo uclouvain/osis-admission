@@ -63,13 +63,6 @@ def admission_pdf_recap(
         DoctorateAdmission: doctorate_education_commands,
     }[admission_class or type(admission)]
 
-    # Get admission with proper annotation if needed
-    if not hasattr(admission, 'formatted_reference'):
-        if admission_class:
-            admission = admission_class.objects.with_training_management_and_reference().get(pk=admission.pk)
-        else:
-            admission = BaseAdmission.objects.with_training_management_and_reference().get(pk=admission.pk)
-
     with override(language=language):
         context: ResumePropositionDTO = message_bus_instance.invoke(
             commands.RecupererResumePropositionQuery(uuid_proposition=admission.uuid),
@@ -164,7 +157,7 @@ def admission_pdf_recap(
 
         first_name = format_value_for_filename(admission.candidate.first_name)
         last_name = format_value_for_filename(admission.candidate.last_name)
-        reference = admission.formatted_reference
+        reference = context.proposition.reference
         filename = f'{last_name} - {first_name} - {reference}.pdf'
 
         # Save the pdf

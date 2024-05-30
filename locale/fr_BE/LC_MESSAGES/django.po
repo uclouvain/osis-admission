@@ -740,6 +740,12 @@ msgstr ""
 msgid "Analysis folder"
 msgstr "Dossier d'analyse"
 
+msgid "Analysis folder for a continuing education admission"
+msgstr "Dossier d'analyse pour une demande en formation continue"
+
+msgid "Analysis folder for a doctorate education admission"
+msgstr "Dossier d'analyse pour une demande en formation doctorale"
+
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
@@ -1545,6 +1551,18 @@ msgstr[0] ""
 msgstr[1] ""
 "Attestations stipulant l'absence de dettes vis-à-vis des établissements "
 "fréquentés durant l'année académique %(academic_year)s : %(names)s."
+
+msgid ""
+"Certification and short programmes (continuing education) do not allow for "
+"obtaining a visa and residence permit in Belgium. More information: <a "
+"target=\"_blank\" href=\"https://uclouvain.be/en/study/iufc\">https://"
+"uclouvain.be/en/study/iufc</a>."
+msgstr ""
+"Les programmes certifiants et courts (formation continue) ne permettent pas "
+"l'obtention d'un visa et d'un titre de séjour en Belgique. Plus "
+"d'informations : <a target=\"_blank\" href=\"https://uclouvain.be/fr/etudier/"
+"iufc/participants-de-nationalite-hue.html\">https://uclouvain.be/fr/etudier/"
+"iufc/participants-de-nationalite-hue.html</a>."
 
 #, python-format
 msgid "Change <em>%(name)s</em> configuration"
@@ -3708,6 +3726,9 @@ msgstr ""
 "Je vais obtenir mon diplôme d'études secondaires lors de l'année académique "
 "%s"
 
+msgid "I would like the billing address to be"
+msgstr "Je souhaite que l'adresse de facturation soit"
+
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
 msgstr ""
@@ -4449,6 +4470,13 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for continuing education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que tous les documents réclamés "
+"ont été reçus pour sa demande en formation continue"
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que tous les documents réclamés "
@@ -4456,6 +4484,13 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for continuing education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que des documents FAC sont "
+"manquants ou invalides dans sa demande en formation continue"
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que des documents FAC sont "
@@ -4470,13 +4505,6 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
-"or invalid in his application for continuing education"
-msgstr ""
-"E-mail envoyé au candidat pour l'informer que des documents SIC sont "
-"manquants ou invalides dans sa demande en formation continue"
-
-msgid ""
-"Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que des documents SIC sont "
@@ -4488,6 +4516,14 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que des documents SIC sont "
 "manquants ou invalides dans sa demande en formation générale"
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for continuing education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que certains documents réclamés "
+"ont été reçus et que d'autres sont encore manquants pour sa demande en "
+"formation continue"
 
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
@@ -4830,6 +4866,9 @@ msgstr ""
 
 msgid "My legal cohabitant"
 msgstr "Mon cohabitant légal"
+
+msgid "My legal domicile provided above"
+msgstr "L'adresse de mon domicile légal fournie précédemment"
 
 msgid "My legal guardian"
 msgstr "Mon tuteur légal"
@@ -5471,6 +5510,9 @@ msgstr "Veuillez confirmer le passage à ce nouvel état."
 msgid "Please confirm the change to this new status."
 msgstr "Merci de confirmer le changement vers ce nouveau statut."
 
+msgid "Please enter your work email address"
+msgstr "Veuillez encoder votre adresse e-mail-professionnelle"
+
 msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
@@ -5531,6 +5573,14 @@ msgid ""
 msgstr ""
 "Attention, cette expérience ne faisait pas partie de la demande lors de sa "
 "soumission."
+
+msgid ""
+"Please provide a copy of the residence permit covering the entire course, "
+"including the assessment test (except for online courses)."
+msgstr ""
+"Veuillez fournir une copie du titre de séjour qui couvre la totalité de la "
+"formation, épreuve d’évaluation comprise (sauf pour les formations "
+"organisées en ligne)."
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."
@@ -7045,6 +7095,9 @@ msgstr ""
 msgid "The confirmation paper is not in progress"
 msgstr "L'épreuve de confirmation n'est pas en cours"
 
+msgid "The contact address I provided"
+msgstr "L'adresse de correspondance que j'ai fournie"
+
 msgid "The css class must be a string."
 msgstr "La classe css doit être une chaîne de caractères."
 
@@ -7711,6 +7764,9 @@ msgstr ""
 "sélectionnée et qu'au moins une ligne de titre d'accès soit cochée dans les "
 "vues du parcours."
 
+msgid "To the attention of"
+msgstr "A l'attention de"
+
 msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
@@ -8276,6 +8332,9 @@ msgstr ""
 
 msgid "You are enrolling as"
 msgstr "Vous vous inscrivez à titre"
+
+msgid "You are registering as"
+msgstr "Vous inscrivez-vous à titre"
 
 msgid ""
 "You can add any document you feel is relevant to your application "

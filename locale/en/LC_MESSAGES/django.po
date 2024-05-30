@@ -656,6 +656,12 @@ msgstr ""
 msgid "Analysis folder"
 msgstr ""
 
+msgid "Analysis folder for a continuing education admission"
+msgstr ""
+
+msgid "Analysis folder for a doctorate education admission"
+msgstr ""
+
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
@@ -1307,7 +1313,7 @@ msgid "Cancel the request"
 msgstr ""
 
 msgid "Canceled"
-msgstr "Canceled"
+msgstr ""
 
 msgid "Cancelled application"
 msgstr ""
@@ -1423,6 +1429,13 @@ msgid_plural ""
 "academic year %(academic_year)s: %(names)s."
 msgstr[0] ""
 msgstr[1] ""
+
+msgid ""
+"Certification and short programmes (continuing education) do not allow for "
+"obtaining a visa and residence permit in Belgium. More information: <a "
+"target=\"_blank\" href=\"https://uclouvain.be/en/study/iufc\">https://"
+"uclouvain.be/en/study/iufc</a>."
+msgstr ""
 
 #, python-format
 msgid "Change <em>%(name)s</em> configuration"
@@ -3385,6 +3398,9 @@ msgstr ""
 msgid "I will be graduating from secondary school during the %s academic year"
 msgstr ""
 
+msgid "I would like the billing address to be"
+msgstr ""
+
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
 msgstr ""
@@ -4042,11 +4058,21 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 
@@ -4057,17 +4083,17 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
-"or invalid in his application for continuing education"
-msgstr ""
-
-msgid ""
-"Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for continuing education"
 msgstr ""
 
 msgid ""
@@ -4364,6 +4390,9 @@ msgid ""
 msgstr ""
 
 msgid "My legal cohabitant"
+msgstr ""
+
+msgid "My legal domicile provided above"
 msgstr ""
 
 msgid "My legal guardian"
@@ -4980,6 +5009,9 @@ msgstr ""
 msgid "Please confirm the change to this new status."
 msgstr ""
 
+msgid "Please enter your work email address"
+msgstr ""
+
 msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
@@ -5023,6 +5055,11 @@ msgstr ""
 msgid ""
 "Please note that this experience was not part of the application when it was "
 "submitted."
+msgstr ""
+
+msgid ""
+"Please provide a copy of the residence permit covering the entire course, "
+"including the assessment test (except for online courses)."
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
@@ -6426,6 +6463,9 @@ msgstr ""
 msgid "The confirmation paper is not in progress"
 msgstr ""
 
+msgid "The contact address I provided"
+msgstr ""
+
 msgid "The css class must be a string."
 msgstr ""
 
@@ -6998,6 +7038,9 @@ msgid ""
 "at least one access title line must be selected in the past experience views."
 msgstr ""
 
+msgid "To the attention of"
+msgstr ""
+
 msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
@@ -7516,6 +7559,9 @@ msgid ""
 msgstr ""
 
 msgid "You are enrolling as"
+msgstr ""
+
+msgid "You are registering as"
 msgstr ""
 
 msgid ""

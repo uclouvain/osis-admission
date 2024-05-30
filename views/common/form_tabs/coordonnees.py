@@ -31,7 +31,6 @@ from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMix
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from osis_profile import BE_ISO_CODE
-from reference.models.country import Country
 
 __all__ = ['AdmissionCoordonneesFormView']
 
@@ -51,7 +50,7 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
         kwargs['form'] = True
         context_data = super().get_context_data(**kwargs)
         context_data.update(self.get_forms())
-        context_data['BE_ISO_CODE'] = Country.objects.get(iso_code=BE_ISO_CODE).pk
+        context_data['BE_ISO_CODE'] = BE_ISO_CODE
         return context_data
 
     def post(self, request, *args, **kwargs):
@@ -67,13 +66,13 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
         PersonAddress.objects.update_or_create(
             person=self.admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
-            defaults=forms['residential'].get_prepare_data,
+            defaults=forms['residential'].address_data_to_save,
         )
         if forms['main_form'].cleaned_data['show_contact']:
             PersonAddress.objects.update_or_create(
                 person=self.admission.candidate,
                 label=PersonAddressType.CONTACT.name,
-                defaults=forms['contact'].get_prepare_data,
+                defaults=forms['contact'].address_data_to_save,
             )
         else:
             PersonAddress.objects.filter(
@@ -87,9 +86,9 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
         # Update submitted profile with newer data
         if admission.submitted_profile:
             address = (
-                form['contact'].get_prepare_data
+                form['contact'].address_data_to_save
                 if form['main_form'].cleaned_data['show_contact']
-                else form['residential'].get_prepare_data
+                else form['residential'].address_data_to_save
             )
             admission.submitted_profile['coordinates'] = {
                 'country': address.get('country').iso_code,

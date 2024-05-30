@@ -25,8 +25,12 @@
 # ##############################################################################
 from abc import abstractmethod
 from email.message import EmailMessage
+from typing import List
 
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from osis_common.ddd import interface
 
 
@@ -86,4 +90,24 @@ class INotification(interface.DomainService):
         objet_message: str,
         corps_message: str,
     ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def envoyer_message_libre_au_candidat(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def confirmer_reception_documents_envoyes_par_candidat(
+        cls,
+        proposition: PropositionDTO,
+        liste_documents_reclames: List[EmplacementDocument],
+        liste_documents_dto: List[EmplacementDocumentDTO],
+    ):
         raise NotImplementedError

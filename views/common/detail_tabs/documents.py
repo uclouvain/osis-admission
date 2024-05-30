@@ -41,8 +41,11 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_SIC,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
+    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.document import (
     RequestAllDocumentsForm,
@@ -53,7 +56,6 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL,
     ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
     ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
-    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
 )
 from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.utils import (
@@ -98,11 +100,17 @@ class CancelDocumentRequestView(
 
     def form_valid(self, form):
         message_bus_instance.invoke(
-            general_education_commands.AnnulerReclamationDocumentsAuCandidatCommand(
-                uuid_proposition=self.admission_uuid,
-                auteur=self.request.user.person.global_id,
-                par_fac=self.is_fac,
-            )
+            {
+                CONTEXT_GENERAL: general_education_commands.AnnulerReclamationDocumentsAuCandidatCommand(
+                    uuid_proposition=self.admission_uuid,
+                    auteur=self.request.user.person.global_id,
+                    par_fac=self.is_fac,
+                ),
+                CONTEXT_CONTINUING: continuing_education_commands.AnnulerReclamationDocumentsAuCandidatCommand(
+                    uuid_proposition=self.admission_uuid,
+                    auteur=self.request.user.person.global_id,
+                ),
+            }[self.current_context]
         )
         return super().form_valid(form)
 
@@ -118,19 +126,20 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
 
     retrieve_documents_command = {
         CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
+        CONTEXT_CONTINUING: continuing_education_commands.RecupererDocumentsPropositionQuery,
     }
     fac_documents_request_command = {
         CONTEXT_GENERAL: general_education_commands.ReclamerDocumentsAuCandidatParFACCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.ReclamerDocumentsAuCandidatCommand,
     }
     sic_documents_request_command = {
         CONTEXT_GENERAL: general_education_commands.ReclamerDocumentsAuCandidatParSICCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.ReclamerDocumentsAuCandidatCommand,
     }
 
     def get_permission_required(self):
         self.permission_required = (
-            'admission.change_documents_management'
-            if self.request.method == 'POST'
-            else 'admission.view_documents_management'
+            'admission.request_documents' if self.request.method == 'POST' else 'admission.view_documents_management'
         )
         return super().get_permission_required()
 
@@ -140,7 +149,10 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             if self.request.method == 'POST'
             else 'admission/document/base_htmx.html'
         )
-        if self.admission.status == ChoixStatutPropositionGenerale.EN_BROUILLON.name:
+        if self.admission.status in {
+            ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            ChoixStatutPropositionContinue.EN_BROUILLON.name,
+        }:
             self.template_name = 'admission/document/base_in_progress.html'
         else:
             self.template_name = 'admission/document/base.html'
@@ -171,7 +183,13 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
 
     @cached_property
     def requestable_documents(self):
-        requestable_types = EMPLACEMENTS_FAC if self.is_fac else EMPLACEMENTS_SIC
+        requestable_types = (
+            EMPLACEMENTS_DOCUMENTS_RECLAMABLES
+            if self.is_continuing
+            else EMPLACEMENTS_FAC
+            if self.is_fac
+            else EMPLACEMENTS_SIC
+        )
         return [
             document
             for document in self.documents
@@ -191,7 +209,8 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         kwargs = super().get_form_kwargs()
         kwargs['documents'] = self.requestable_documents
         kwargs['proposition_uuid'] = self.admission_uuid
-        kwargs['only_limited_request_choices'] = self.is_fac
+        kwargs['only_limited_request_choices'] = self.is_general and self.is_fac
+        kwargs['context'] = self.current_context
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -232,7 +251,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             else {
                 CONTEXT_GENERAL: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL,
                 CONTEXT_DOCTORATE: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
-                CONTEXT_CONTINUING: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
+                CONTEXT_CONTINUING: ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
             }
         )[self.current_context]
 

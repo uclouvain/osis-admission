@@ -38,7 +38,10 @@ from admission.exports.admission_recap.admission_async_recap import (
     continuing_education_admission_pdf_recap_from_task,
     doctorate_education_admission_pdf_recap_from_task,
 )
-from admission.tasks.generate_admission_folder import general_education_admission_analysis_folder_from_task
+from admission.tasks.generate_admission_folder import (
+    general_education_admission_analysis_folder_from_task,
+    continuing_education_admission_analysis_folder_from_task,
+)
 from admission.tasks.merge_admission_documents import (
     general_education_admission_document_merging_from_task,
     continuing_education_admission_document_merging_from_task,
@@ -62,6 +65,7 @@ class Command(BaseCommand):
         AdmissionTask.TaskType.DOCTORATE_MERGE.name: doctorate_education_admission_document_merging_from_task,
         # Generate the analysis folder of the proposition when the candidate submits additional documents
         AdmissionTask.TaskType.GENERAL_FOLDER.name: general_education_admission_analysis_folder_from_task,
+        AdmissionTask.TaskType.CONTINUING_FOLDER.name: continuing_education_admission_analysis_folder_from_task,
     }
 
     def handle(self, *args, **options):

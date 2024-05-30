@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,8 +40,12 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.exceptions import DocumentPostProcessingException
-from admission.utils import get_cached_general_education_admission_perm_obj
+from admission.utils import (
+    get_cached_general_education_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
+)
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -194,3 +198,18 @@ class GeneralRequestedDocumentListView(RequestedDocumentListView):
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
+
+class ContinuingRequestedDocumentListView(RequestedDocumentListView):
+    name = "continuing_documents"
+    permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_documents',
+        'POST': 'admission.change_continuingeducationadmission_documents',
+    }
+    schema = RequestedDocumentsListSchema(operation_id_base='_continuing_documents')
+
+    get_documents_command = continuing_education_commands.RecupererDocumentsReclamesPropositionQuery
+    complete_documents_commands = continuing_education_commands.CompleterEmplacementsDocumentsParCandidatCommand
+
+    def get_permission_object(self):
+        return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
