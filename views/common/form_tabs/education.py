@@ -28,18 +28,19 @@ from uuid import UUID
 
 from django.utils.functional import cached_property
 
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.views.edit_etudes_secondaires import EditEtudesSecondairesView
 
 __all__ = [
     'AdmissionEducationFormView',
 ]
-
-from osis_profile.views.edit_etudes_secondaires import EditEtudesSecondairesView
 
 
 class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditEtudesSecondairesView):
@@ -53,6 +54,9 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
     update_admission_author = True
     permission_required = 'admission.change_admission_secondary_studies'
     foreign_form_class = AdmissionBachelorEducationForeignDiplomaForm
+
+    def has_permission(self):
+        return super().has_permission() and self.can_be_updated
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
         pass
@@ -73,6 +77,16 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
             'is_vae_potential': ProfilCandidatTranslator.est_potentiel_vae(self.person.global_id),
         }
 
+    @cached_property
+    def diploma(self):
+        return next(
+            (
+                self.high_school_diploma[diploma]
+                for diploma in ['belgian_diploma', 'foreign_diploma', 'high_school_diploma_alternative']
+            ),
+            None,
+        )
+
     def get_template_names(self):
         if self.is_bachelor:
             return ['admission/forms/bachelor_education.html']
@@ -92,6 +106,18 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
 
     def update_current_admission_on_form_valid(self, form, admission):
         admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+
+    @property
+    def can_be_updated(self):
+        admission_injections = AdmissionEPCInjection.objects.filter(admission__candidate_id=self.person.pk)
+        cv_injections = CurriculumEPCInjection.objects.filter(
+            person_id=self.person.pk,
+            type_experience=ExperienceType.HIGH_SCHOOL.name,
+        )
+
+        return not (
+            (self.diploma and self.diploma.external_id) or cv_injections.exists() or admission_injections.exists()
+        )
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
