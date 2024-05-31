@@ -1685,6 +1685,25 @@ class TestVerifierPropositionService(TestCase):
 
                 self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
 
+    def test_should_verification_etre_ok_si_informations_manquantes_pour_annee_dont_resultat_est_en_attente(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            type_releve_notes=TranscriptType.ONE_A_YEAR.name,
+            pays=FR_ISO_CODE,
+            regime_linguistique='SV',
+        ):
+            with mock.patch.multiple(
+                self.experience_academiques_complete.annees[0],
+                resultat=Result.WAITING_RESULT.name,
+                releve_notes=[],
+                traduction_releve_notes=[],
+                credits_inscrits=None,
+                credits_acquis=None,
+            ):
+                self.experiences_academiques.append(self.experience_academiques_complete)
+                resultat = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+                self.assertEqual(resultat, self.master_proposition.entity_id)
+
     def test_should_verification_renvoyer_erreur_si_resultat_annuel_non_renseigne(self):
         with mock.patch.multiple(self.experience_academiques_complete.annees[0], resultat=''):
             self.experiences_academiques.append(self.experience_academiques_complete)
