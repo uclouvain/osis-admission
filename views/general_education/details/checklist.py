@@ -301,6 +301,16 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 'Another admission has been authorized for this candidate for this academic year.'
             )
 
+        if any(
+            admission
+            for admission in submitted_for_the_current_year_admissions
+            if admission.sigle_formation == self.proposition.formation.sigle
+        ):
+            checklist_additional_icons['choix_formation'] = 'fa-solid fa-triangle-exclamation'
+            checklist_additional_icons_title['choix_formation'] = _(
+                'The candidate has already applied for this course for this academic year.'
+            )
+
         context['checklist_additional_icons'] = checklist_additional_icons
         context['checklist_additional_icons_title'] = checklist_additional_icons_title
         context['can_update_checklist_tab'] = self.can_update_checklist_tab

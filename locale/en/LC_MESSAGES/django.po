@@ -6333,6 +6333,10 @@ msgstr ""
 msgid "The candidate has a scholarship"
 msgstr ""
 
+msgid ""
+"The candidate has already applied for this course for this academic year."
+msgstr ""
+
 msgid "The candidate is doing a mobility"
 msgstr ""
 
