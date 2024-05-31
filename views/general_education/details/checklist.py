@@ -1430,6 +1430,7 @@ class ChecklistView(
                 'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE',
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
+                'ADDITIONAL_DOCUMENTS',
             },
             'donnees_personnelles': assimilation_documents,
             'specificites_formation': {
