@@ -655,6 +655,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
+            notification=_notification,
             profil_candidat_translator=_profil_candidat_translator,
             comptabilite_translator=_comptabilite_translator,
             question_specifique_translator=_question_specific_translator,

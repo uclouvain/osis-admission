@@ -94,6 +94,8 @@ class TestApprouverInscriptionParSic(TestCase):
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
             'auteur': '00321234',
+            'objet_message': 'foo',
+            'corps_message': 'bar',
         }
 
     def test_should_etre_ok_si_statut_correct(self):
