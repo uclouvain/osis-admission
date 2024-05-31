@@ -23,7 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import logging
+
 import waffle
+from django.conf import settings
 from django.shortcuts import redirect
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
@@ -31,16 +34,23 @@ from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery,
     RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand
 from backoffice.celery import app
 
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
+
 
 @app.task
 def run(request=None):
     if not waffle.switch_is_active('fusion-digit'):
+        logger.info("fusion-digit switch not active")
         return
 
     from infrastructure.messages_bus import message_bus_instance
 
+    logger.info("Starting retrieve digit tickets status task")
+
     # Retrieve list of tickets
     tickets_pending = message_bus_instance.invoke(command=RetrieveListeTicketsEnAttenteQuery())
+
+    logger.info("[PENDING DIGIT TICKETS] : " + tickets_pending)
 
     for ticket in tickets_pending:
         status = message_bus_instance.invoke(
