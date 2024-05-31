@@ -2613,9 +2613,6 @@ msgstr "Dupliquer l'expérience"
 msgid "Duplication of an experience"
 msgstr "Duplication d'une expérience"
 
-msgid "Dynamic questions about \"Specific aspects\" sub-tab"
-msgstr "Questions dynamiques du sous-onglet \"Spécificités\""
-
 msgid "ECONOMY"
 msgstr "Economie"
 
@@ -6620,6 +6617,9 @@ msgstr "Profil particulier"
 
 msgid "Specific question"
 msgstr "Question spécifique"
+
+msgid "Specific questions"
+msgstr "Questions spécifiques"
 
 msgid "Specified"
 msgstr "Renseigné(e)"
