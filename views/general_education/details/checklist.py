@@ -1911,6 +1911,13 @@ class PastExperiencesAdmissionRequirementView(
     def get_form(self, form_class=None):
         return self.past_experiences_admission_requirement_form
 
+    def reset_form_data(self, form):
+        form.data = {
+            'admission_requirement': self.admission.admission_requirement,
+            'admission_requirement_year': self.admission.admission_requirement_year_id,
+            'with_prerequisite_courses': self.admission.with_prerequisite_courses,
+        }
+
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
@@ -1925,14 +1932,17 @@ class PastExperiencesAdmissionRequirementView(
             )
 
             # The admission requirement year can be updated via the command
-            form.data = {
-                'admission_requirement': self.admission.admission_requirement,
-                'admission_requirement_year': self.admission.admission_requirement_year_id,
-                'with_prerequisite_courses': self.admission.with_prerequisite_courses,
-            }
+            self.reset_form_data(form)
 
-        except BusinessException as exception:
-            self.message_on_failure = exception.message
+        except (BusinessException, MultipleBusinessExceptions) as exception:
+            self.message_on_failure = (
+                exception.exceptions.pop().message
+                if isinstance(exception, MultipleBusinessExceptions)
+                else exception.message
+            )
+
+            self.reset_form_data(form)
+
             return super().form_invalid(form)
 
         return super().form_valid(form)

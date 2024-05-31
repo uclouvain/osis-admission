@@ -65,6 +65,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     ParcoursAnterieurNonSuffisantException,
     DocumentAReclamerImmediatException,
     InscriptionTardiveAvecConditionAccesException,
+    ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -215,6 +216,20 @@ class ShouldParcoursAnterieurEtreSuffisant(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.statut != ChoixStatutChecklist.GEST_REUSSITE:
             raise ParcoursAnterieurNonSuffisantException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation(BusinessValidator):
+    avec_complements_formation: Optional[bool]
+
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+    commentaire_complements_formation: str
+
+    def validate(self, *args, **kwargs):
+        if not self.avec_complements_formation and (
+            self.complements_formation or self.commentaire_complements_formation
+        ):
+            raise ComplementsFormationEtreVidesSiPasDeComplementsFormationException
 
 
 @attr.dataclass(frozen=True, slots=True)

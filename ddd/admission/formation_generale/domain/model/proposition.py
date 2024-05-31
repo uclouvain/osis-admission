@@ -91,6 +91,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     RefuserParSicAValiderValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     ApprouverInscriptionTardiveParFacValidatorList,
+    SpecifierConditionAccesParcoursAnterieurValidatorList,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -703,6 +704,12 @@ class Proposition(interface.RootEntity):
             # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
             if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
                 avec_complements_formation = True
+
+        SpecifierConditionAccesParcoursAnterieurValidatorList(
+            avec_complements_formation=avec_complements_formation,
+            complements_formation=self.complements_formation,
+            commentaire_complements_formation=self.commentaire_complements_formation,
+        ).validate()
 
         self.auteur_derniere_modification = auteur_modification
         self.condition_acces = nouvelle_condition_acces
