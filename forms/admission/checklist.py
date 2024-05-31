@@ -82,6 +82,7 @@ from admission.forms import (
     FilterFieldWidget,
     EMPTY_CHOICE_AS_LIST,
     get_initial_choices_for_additional_approval_conditions,
+    AdmissionHTMLCharField,
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
@@ -1090,7 +1091,7 @@ class SicDecisionFinalRefusalForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )
@@ -1113,7 +1114,7 @@ class SicDecisionFinalApprovalForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )
