@@ -160,6 +160,9 @@ def soumettre_proposition(
     )
     proposition_repository.save(proposition)
 
+    notification.confirmer_soumission(proposition)
+    historique.historiser_soumission(proposition)
+
     from infrastructure.messages_bus import message_bus_instance
     message_bus_instance.publish(
         PropositionSoumiseEvent(
@@ -173,8 +176,5 @@ def soumettre_proposition(
             niss=identification.numero_registre_national_belge,
         )
     )
-
-    notification.confirmer_soumission(proposition)
-    historique.historiser_soumission(proposition)
 
     return proposition_id
