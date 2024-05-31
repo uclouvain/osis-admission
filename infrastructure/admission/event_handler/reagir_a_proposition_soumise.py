@@ -44,4 +44,4 @@ def recherche_et_validation_digit(
         genre=event.genre,
         niss=event.niss,
     ))
-    msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule_candidat))
+    msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
