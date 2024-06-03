@@ -34,6 +34,7 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 from rest_framework import status
 
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
@@ -66,6 +67,7 @@ from osis_profile.models.enums.education import (
     Equivalence,
     HighSchoolDiplomaTypes,
 )
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import LanguageFactory, FrenchLanguageFactory
@@ -129,6 +131,30 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         response = self.client.get(self.form_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_education_is_not_allowed_for_injected_experiences(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # The experience has been injected from the curriculum
+        cv_injection = CurriculumEPCInjection.objects.create(
+            person=self.general_admission.candidate,
+            type_experience=ExperienceType.HIGH_SCHOOL.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        cv_injection.delete()
+
+        # The admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        admission_injection.delete()
 
     def test_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
@@ -688,6 +714,46 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
         response = self.client.get(self.form_url)
 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_education_is_not_allowed_for_injected_experiences(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # The experience has been injected from the curriculum
+        cv_injection = CurriculumEPCInjection.objects.create(
+            person=self.general_admission.candidate,
+            type_experience=ExperienceType.HIGH_SCHOOL.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        cv_injection.delete()
+
+        # The admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        admission_injection.delete()
+
+        # The experience come from EPC
+        belgian_diploma = BelgianHighSchoolDiplomaFactory(
+            person=self.general_admission.candidate,
+            external_id='EP1-1',
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Reset the experience
+        belgian_diploma.external_id = ''
+        belgian_diploma.save(update_fields=['external_id'])
+
+        response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_form_initialization_without_existing_diploma(self):

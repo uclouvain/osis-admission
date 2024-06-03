@@ -107,10 +107,6 @@ class ProgramManager(EducationGroupRoleModel):
             & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.not_cancelled)),
             'admission.edit_documents': is_part_of_education_group
             & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.not_cancelled)),
-            'admission.change_documents_management': is_part_of_education_group
-            & (
-                (general.is_general & general.in_fac_status) | (continuing.is_continuing & continuing.in_manager_status)
-            ),
             'admission.request_documents': is_part_of_education_group
             & (
                 (general.is_general & general.in_fac_status)

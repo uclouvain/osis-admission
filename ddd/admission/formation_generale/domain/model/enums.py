@@ -254,13 +254,13 @@ class TypeDeRefus(ChoiceEnum):
 
 
 class OngletsChecklist(ChoiceEnum):
+    donnees_personnelles = _('Personal data')
     assimilation = _('Belgian student status')
-    financabilite = _('Financeability')
     frais_dossier = _('Application fee')
-    choix_formation = _('Course choice')
     parcours_anterieur = _('Previous experience')
     experiences_parcours_anterieur = _('Previous experiences')
-    donnees_personnelles = _('Personal data')
+    financabilite = _('Financeability')
+    choix_formation = _('Course choice')
     specificites_formation = _('Training specificities')
     decision_facultaire = _('Decision of the faculty')
     decision_sic = _('Decision of SIC')

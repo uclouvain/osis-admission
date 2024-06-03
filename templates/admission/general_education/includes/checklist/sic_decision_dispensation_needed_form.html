@@ -1,4 +1,4 @@
-{% load admission %}
+{% load bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -24,35 +24,16 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div class="panel panel-default {{ additional_class }}" {% for name, value in attributes.items %} {{ name }}="{{ value|stringformat:'s' }}"{% endfor %}>
-  {% if title %}
-  <div class="panel-heading">
-    {% if edit_link_button %}
-      <a
-          class="btn btn-default pull-right btn-sm"
-          {% if edit_link_button == 'JS_BUTTON' %}
-          tabindex="0"
-          {% else %}
-          href="{{ edit_link_button }}"
-          {% if edit_link_button_in_new_tab %}
-          target="_blank"
-          {% endif %}
-          {% endif %}
-      >
-        <i class="fas fa-{% if edit_link_button == 'JS_BUTTON' or 'update' in edit_link_button or 'edit' in edit_link_button %}edit{% else %}eye{% endif %}"></i>
-      </a>
-    {% endif %}
-    <h{{ title_level }} class="panel-title">
-        {{ title }}
-    </h{{ title_level }}>
-  </div>
+<form
+    hx-post="{% url view.base_namespace|add:':sic-decision-dispensation' uuid=view.kwargs.uuid %}"
+    hx-trigger="change"
+    hx-target="this"
+    hx-swap="outerHTML"
+>
+  {% bootstrap_form sic_decision_dispensation_form %}
+
+  {% if request.htmx and reload_sic_statuses %}
+    {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
   {% endif %}
-  <div class="panel-body">
-      {{ panel_body }}
-  </div>
-  {% if panel_footer|strip %}
-  <div class="panel-footer clearfix">
-    {{ panel_footer }}
-  </div>
-  {% endif %}
-</div>
+
+</form>

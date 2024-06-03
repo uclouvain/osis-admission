@@ -665,6 +665,12 @@ COMMAND_HANDLERS = {
             emplacement_document_repository=EmplacementDocumentRepository(),
         )
     ),
+    SpecifierInformationsAcceptationInscriptionParSicCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_inscription_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
     RechercherParcoursAnterieurQuery: lambda msg_bus, cmd: rechercher_parcours_anterieur(
         cmd,
         profil_candidat_translator=ProfilCandidatTranslator(),

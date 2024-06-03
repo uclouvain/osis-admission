@@ -2681,6 +2681,51 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
             self.assertTrue(attachments[3].required)
 
+    def test_curriculum_acad_experience_attachments_with_general_proposition_and_pending_result(self):
+        experience = self.general_bachelor_context.curriculum.experiences_academiques[0]
+        experience_year = experience.annees[0]
+        with mock.patch.multiple(
+            experience,
+            type_releve_notes=TranscriptType.ONE_A_YEAR.name,
+            regime_linguistique='BR',
+        ):
+            with mock.patch.multiple(experience.annees[0], resultat=Result.WAITING_RESULT.name):
+                section = get_educational_experience_section(
+                    self.general_bachelor_context,
+                    experience,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 4)
+
+                self.assertEqual(attachments[0].identifier, f'{experience_year.annee}.RELEVE_NOTES_ANNUEL')
+                self.assertEqual(
+                    attachments[0].label,
+                    f'{DocumentsCurriculum["RELEVE_NOTES_ANNUEL"]} {experience_year.annee}-{experience_year.annee + 1}',
+                )
+                self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
+                self.assertFalse(attachments[0].required)
+
+                self.assertEqual(attachments[1].identifier, f'{experience_year.annee}.TRADUCTION_RELEVE_NOTES_ANNUEL')
+                self.assertEqual(
+                    attachments[1].label,
+                    f'{DocumentsCurriculum["TRADUCTION_RELEVE_NOTES_ANNUEL"]} '
+                    f'{experience_year.annee}-{experience_year.annee + 1}',
+                )
+                self.assertEqual(attachments[1].uuids, experience_year.traduction_releve_notes)
+                self.assertFalse(attachments[1].required)
+
+                self.assertEqual(attachments[2].identifier, 'DIPLOME')
+                self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
+                self.assertEqual(attachments[2].uuids, experience.diplome)
+                self.assertTrue(attachments[2].required)
+
+                self.assertEqual(attachments[3].identifier, 'TRADUCTION_DIPLOME')
+                self.assertEqual(attachments[3].label, DocumentsCurriculum['TRADUCTION_DIPLOME'])
+                self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
+                self.assertTrue(attachments[3].required)
+
     def test_curriculum_acad_experience_attachments_with_doctorate_proposition(self):
         experience = self.doctorate_context.curriculum.experiences_academiques[0]
         section = get_educational_experience_section(

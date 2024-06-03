@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import html
 from typing import List, Optional, Dict
 
 import phonenumbers
@@ -335,3 +336,13 @@ class NullBooleanSelectField(forms.NullBooleanField):
 class AdmissionMainCampusChoiceField(MainCampusChoiceField):
     def label_from_instance(self, obj: Campus) -> str:
         return obj.name
+
+
+class AdmissionHTMLCharField(forms.CharField):
+    def clean(self, value):
+        cleaned_value = super().clean(value)
+
+        if cleaned_value:
+            return html.unescape(cleaned_value)
+
+        return cleaned_value
