@@ -130,6 +130,8 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_change_past_experiences': is_entity_manager & general.in_sic_status,
             'admission.checklist_select_access_title': is_entity_manager & general.in_sic_status,
             'admission.checklist_change_sic_comment': is_entity_manager & general.is_submitted,
+            'admission.checklist_financability_dispensation': is_entity_manager,
+            'admission.checklist_financability_dispensation_fac': is_entity_manager,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager,
             'admission.checklist_change_comment': is_entity_manager & general.is_submitted,

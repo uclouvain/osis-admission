@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     RegleDeFinancement,
+    DerogationFinancement,
 )
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
@@ -197,3 +198,141 @@ class FinancabiliteComputeRuleViewTestCase(TestCase):
         self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
 
         self.update_financability_computed_rule_mock.assert_called()
+
+
+class FinancabiliteDerogationViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        EntityVersionFactory(entity=cls.first_doctoral_commission)
+
+        cls.training = GeneralEducationTrainingFactory(
+            management_entity=cls.first_doctoral_commission,
+            academic_year=cls.academic_years[0],
+        )
+
+        cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=cls.training,
+            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+        cls.default_headers = {'HTTP_HX-Request': 'true'}
+
+    def test_non_concerne_post(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:financability-derogation-non-concerne',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.financability_dispensation_status, DerogationFinancement.NON_CONCERNE.name
+        )
+
+    def test_abandon_candidat_post(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:financability-derogation-abandon',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.financability_dispensation_status, DerogationFinancement.ABANDON_DU_CANDIDAT.name
+        )
+
+    def test_refus_post(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:financability-derogation-refus',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={'financability-dispensation-refusal-reasons': ['Autre']},
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.financability_dispensation_status,
+            DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
+        )
+
+    def test_accord_post(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:financability-derogation-accord',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.financability_dispensation_status,
+            DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name,
+        )
+
+    def test_notification_candidat(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:financability-derogation-notification',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={
+                'financability-dispensation-notification-subject': 'foo',
+                'financability-dispensation-notification-body': 'bar',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.financability_dispensation_status, DerogationFinancement.CANDIDAT_NOTIFIE.name
+        )
+        self.assertEqual(
+            self.general_admission.financability_dispensation_first_notification_by, self.sic_manager_user.person
+        )

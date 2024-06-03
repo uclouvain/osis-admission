@@ -73,6 +73,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DecisionFacultaireEnum,
     BesoinDeDerogation,
     TypeDeRefus,
+    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -153,6 +154,12 @@ class Proposition(interface.RootEntity):
     financabilite_regle_calcule_le: Optional[datetime.datetime] = None
     financabilite_regle: RegleDeFinancement = ''
     financabilite_regle_etabli_par: str = ''
+
+    financabilite_derogation_statut: DerogationFinancement = ''
+    financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
+    financabilite_derogation_premiere_notification_par: str = ''
+    financabilite_derogation_derniere_notification_le: Optional[datetime.datetime] = None
+    financabilite_derogation_derniere_notification_par: str = ''
 
     documents_additionnels: List[str] = attr.Factory(list)
 
@@ -801,8 +808,34 @@ class Proposition(interface.RootEntity):
             extra={},
         )
 
-    def specifier_besoin_de_derogation(self, besoin_de_derogation: str, auteur_modification: str):
-        self.besoin_de_derogation = BesoinDeDerogation[besoin_de_derogation] if besoin_de_derogation else ''
+    def specifier_derogation_financabilite(
+        self,
+        statut: DerogationFinancement,
+        refus_uuids_motifs: Optional[List[str]],
+        refus_autres_motifs: Optional[List[str]],
+    ):
+        self.financabilite_derogation_statut = statut
+        if statut == DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE:
+            self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in refus_uuids_motifs]
+            self.autres_motifs_refus = refus_autres_motifs
+        elif statut == DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE:
+            self.checklist_actuelle.financabilite = StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_REUSSITE,
+                libelle=__('Dispensation granted'),
+                extra={'reussite': "derogation"},
+            )
+
+    def notifier_candidat_derogation_financabilite(self, gestionnaire: str):
+        self.financabilite_derogation_statut = DerogationFinancement.CANDIDAT_NOTIFIE
+        if not self.financabilite_derogation_premiere_notification_le:
+            self.financabilite_derogation_premiere_notification_le = now()
+            self.financabilite_derogation_premiere_notification_par = gestionnaire
+        else:
+            self.financabilite_derogation_derniere_notification_le = now()
+            self.financabilite_derogation_derniere_notification_par = gestionnaire
+
+    def specifier_besoin_de_derogation(self, besoin_de_derogation: BesoinDeDerogation, auteur_modification: str):
+        self.besoin_de_derogation = besoin_de_derogation
         self.auteur_derniere_modification = auteur_modification
 
     def _specifier_informations_de_base_acceptation_par_sic(

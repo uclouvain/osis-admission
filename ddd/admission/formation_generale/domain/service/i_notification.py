@@ -32,8 +32,9 @@ from admission.ddd.admission.domain.model.enums.authentification import EtatAuth
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
-    IEmailDestinataireRepository
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 from osis_common.ddd import interface
 
 
@@ -116,4 +117,14 @@ class INotification(interface.DomainService):
     @classmethod
     @abstractmethod
     def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def notifier_candidat_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
         raise NotImplementedError
