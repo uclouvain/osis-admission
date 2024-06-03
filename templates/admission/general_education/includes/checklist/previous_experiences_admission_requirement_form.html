@@ -34,6 +34,7 @@
       hx-swap="outerHTML"
       action="{% url view.base_namespace|add:':past-experiences-admission-requirement' uuid=view.kwargs.uuid %}"
       method="post"
+      autocomplete="off"
   >
     {% bootstrap_form_errors past_experiences_admission_requirement_form %}
     {% csrf_token %}

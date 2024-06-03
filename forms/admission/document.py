@@ -408,14 +408,7 @@ class RequestAllDocumentsForm(forms.Form):
 
         for document in documents:
             if document.est_a_reclamer:
-                if document.document_uuids:
-                    label = '<span class="fa-solid fa-paperclip"></span> '
-                else:
-                    label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
-                    label += '<span class="fa-solid fa-building-columns"></span> '
-                label += document.libelle
-
+                label = document.libelle_avec_icone
                 document_field = ChangeRequestDocumentForm.create_change_request_document_field(
                     label=label,
                     document_identifier=document.identifiant,

@@ -573,6 +573,21 @@ class SpecifierInformationsAcceptationPropositionParSicCommand(interface.Command
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    avec_conditions_complementaires: Optional[bool] = None
+    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
+    conditions_complementaires_libres: List[Dict] = attr.Factory(list)
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
