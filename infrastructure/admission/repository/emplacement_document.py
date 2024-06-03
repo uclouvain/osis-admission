@@ -60,10 +60,11 @@ from admission.ddd.admission.enums.emplacement_document import (
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from base.models.person import Person
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
 
 
 class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
@@ -304,7 +305,11 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             statut_reclamation=StatutReclamationEmplacementDocument[emplacement_document.request_status]
             if emplacement_document.request_status
             else None,
-            onglet_checklist_associe=OngletsChecklist[emplacement_document.related_checklist_tab]
+            onglet_checklist_associe=getattr(
+                OngletsChecklistGenerale,
+                emplacement_document.related_checklist_tab,
+                getattr(OngletsChecklistContinue, emplacement_document.related_checklist_tab, None),
+            )
             if emplacement_document.related_checklist_tab
             else None,
         )

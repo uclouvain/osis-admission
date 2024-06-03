@@ -733,6 +733,12 @@ msgstr ""
 msgid "Analysis folder"
 msgstr "Dossier d'analyse"
 
+msgid "Analysis folder for a continuing education admission"
+msgstr "Dossier d'analyse pour une demande en formation continue"
+
+msgid "Analysis folder for a doctorate education admission"
+msgstr "Dossier d'analyse pour une demande en formation doctorale"
+
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
@@ -1574,10 +1580,6 @@ msgstr "Modifier la communication de ce séminaire"
 msgid "Change the publication for this conference"
 msgstr "Modifier la publication de cette conférence"
 
-msgid "Checklist"
-msgstr "Checklist"
-
-msgctxt "admission"
 msgid "Checklist"
 msgstr "Checklist"
 
@@ -2509,6 +2511,9 @@ msgstr "Demandes d'inscription en doctorat"
 msgid "Document"
 msgstr "Document"
 
+msgid "Document category"
+msgstr "Catégorie de documents"
+
 #, python-format
 msgid "Document merging of the proposition %(reference)s"
 msgstr "Fusion des documents de la proposition %(reference)s"
@@ -2606,9 +2611,6 @@ msgstr "Dupliquer l'expérience"
 
 msgid "Duplication of an experience"
 msgstr "Duplication d'une expérience"
-
-msgid "Dynamic questions about \"Specific aspects\" sub-tab"
-msgstr "Questions dynamiques du sous-onglet \"Spécificités\""
 
 msgid "ECONOMY"
 msgstr "Economie"
@@ -3773,6 +3775,15 @@ msgid "If other, specify"
 msgstr "Si autre, préciser"
 
 msgid ""
+"If the answer to the additional courses question is no, there must be no "
+"additional LU and the communication relating to the additional courses must "
+"be completely empty."
+msgstr ""
+"La réponse non à la question des compléments de formation nécessite qu’il "
+"n’y ait aucune UE de complément et que la communication relative aux "
+"compléments soit totalement vide."
+
+msgid ""
 "If you submit the activity, you will no longer be able to modify the seminar "
 "or the various activities within it."
 msgstr ""
@@ -3913,6 +3924,9 @@ msgstr "Information à propos de la restriction"
 
 msgid "Information provided to the candidate."
 msgstr "Information communiquée au candidat."
+
+msgid "Information related to an approval"
+msgstr "Informations relatives à une autorisation"
 
 msgid "Initialization of the predefined specific questions"
 msgstr "Initialisation des questions spécifiques prédéfinies"
@@ -4421,6 +4435,13 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for continuing education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que tous les documents réclamés "
+"ont été reçus pour sa demande en formation continue"
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que tous les documents réclamés "
@@ -4428,6 +4449,13 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for continuing education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que des documents FAC sont "
+"manquants ou invalides dans sa demande en formation continue"
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que des documents FAC sont "
@@ -4442,13 +4470,6 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
-"or invalid in his application for continuing education"
-msgstr ""
-"E-mail envoyé au candidat pour l'informer que des documents SIC sont "
-"manquants ou invalides dans sa demande en formation continue"
-
-msgid ""
-"Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que des documents SIC sont "
@@ -4460,6 +4481,14 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que des documents SIC sont "
 "manquants ou invalides dans sa demande en formation générale"
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for continuing education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que certains documents réclamés "
+"ont été reçus et que d'autres sont encore manquants pour sa demande en "
+"formation continue"
 
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
@@ -4895,6 +4924,9 @@ msgstr "Doctorat non trouvé."
 msgid "No document"
 msgstr "Pas de document"
 
+msgid "No document is defined as requestable."
+msgstr "Aucun document n'est spécifié comme réclamable."
+
 msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 "Aucun document n'est spécifié comme réclamable. Au-moins un est requis."
@@ -4947,8 +4979,8 @@ msgstr "Noma"
 msgid "Non doctor reason"
 msgstr "Justification"
 
-msgid "Non-academic experience"
-msgstr "Expérience non-académique"
+msgid "Non-academic activity"
+msgstr "Activité non-académique"
 
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
@@ -6591,6 +6623,9 @@ msgstr "Profil particulier"
 msgid "Specific question"
 msgstr "Question spécifique"
 
+msgid "Specific questions"
+msgstr "Questions spécifiques"
+
 msgid "Specified"
 msgstr "Renseigné(e)"
 
@@ -6924,6 +6959,12 @@ msgstr ""
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
 
+msgid ""
+"The candidate has already applied for this course for this academic year."
+msgstr ""
+"Le ou la candidat·e a déjà postulé pour cette formation cette année "
+"académique."
+
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"
 
@@ -7254,6 +7295,12 @@ msgstr ""
 "La proposition doit être une inscription tardive avec une condition d'accès "
 "définie."
 
+msgid "The proposition must be an admission."
+msgstr "La proposition doit être une admission."
+
+msgid "The proposition must be an enrollment."
+msgstr "La proposition doit être une inscription."
+
 msgid "The proposition must be concerned by the payment."
 msgstr "La proposition doit être concernée par le paiement."
 
@@ -7577,6 +7624,9 @@ msgstr ""
 "Ce changement d'état va clore la transaction dans l'application de paiement. "
 "Il restera à informer le/la candidat·e."
 
+msgid "This status is not available for the inscription type admissions."
+msgstr "Cet état n’est pas accessible pour les demandes de type Inscription."
+
 msgid "Tick boxes"
 msgstr "Cases à cocher"
 
@@ -7599,6 +7649,15 @@ msgstr "Intitulé de la formation"
 
 msgid "To"
 msgstr "À"
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Dispensation needed\" (with management "
+"approval of the dispensation)."
+msgstr ""
+"Pour approuver une inscription, le statut de la checklist pour la décision "
+"sic doit être \"A traiter\" ou \"Besoin dérogation\" (avec l'accord de la "
+"dérogation par la direction)."
 
 msgid "To be completed"
 msgstr "À compléter"

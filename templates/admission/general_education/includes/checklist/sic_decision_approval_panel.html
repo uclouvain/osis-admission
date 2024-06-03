@@ -1,0 +1,195 @@
+{% load i18n static enums admission bootstrap3 %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% with current=original_admission.checklist.current.decision_sic %}
+  {% has_perm 'admission.checklist_change_sic_decision' as can_change_sic_decision %}
+  {# Approval panel #}
+  {% if display_sic_decision_approval_info_panel %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        {% if can_change_sic_decision and current.statut != 'GEST_REUSSITE' %}
+          {% translate 'The Previous experience must be in the "Sufficient" status in order to do this action.' as approval_to_validate_tooltip %}
+          <button
+            class="btn btn-default pull-right btn-sm"
+            {% if admission.est_admission and not past_experiences_are_sufficient %}
+              title="{{ approval_to_validate_tooltip|force_escape }}"
+              disabled
+              data-toggle="tooltip"
+              data-placement="bottom"
+              data-container="body"
+            {% else %}
+              data-toggle="modal"
+              data-target="#sic-decision-approval-modal"
+              data-backdrop="static"
+              data-keyboard="false"
+            {% endif %}
+          >
+            <i class="fas fa-edit"></i>
+          </button>
+          {% if admission.est_admission and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' %}
+            <a
+                class="btn btn-default pull-right btn-heading-secondary"
+                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord" %}"
+                target="_blank"
+            >
+              <i class="fa fa-magnifying-glass"></i>
+              {% translate 'Visualize approval' %}
+            </a>
+            {% if admission.candidat_a_nationalite_hors_ue_5 %}
+              <a
+                  class="btn btn-default pull-right btn-heading-secondary"
+                  href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+                  target="_blank"
+              >
+                <i class="fa fa-magnifying-glass"></i>
+                {% translate 'Visualize annexe1' %}
+              </a>
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        <h4 class="panel-title">
+          {% if admission.est_inscription %}
+            {% translate "Information related to an approval" %}
+          {% elif current.statut == 'GEST_REUSSITE' %}
+            {% translate "Authorization" %}
+          {% else %}
+            {% translate "Authorization to validate" %}
+          {% endif %}
+        </h4>
+      </div>
+      <div class="panel-body">
+        <table class="table table-condensed">
+          <thead>
+          <tr>
+            <th>
+              {% translate 'Requested documents list' %}
+            </th>
+            <th class="min-width">
+              {% translate 'Deadline type' %}
+            </th>
+          </tr>
+          </thead>
+          {% for document in requested_documents_dtos %}
+            {% ifchanged document.onglet %}
+              {% if not forloop.first %}</tbody>{% endif %}
+              <tbody>
+              <tr class="tab-name">
+                <td colspan="2">> {{ document.nom_onglet }}</td>
+              </tr>
+            {% endifchanged %}
+          <tr>
+            <td>{{ document.libelle_avec_icone }}</td>
+            <td>{{ document.statut_reclamation|enum_display:'StatutReclamationEmplacementDocument' }}</td>
+          </tr>
+          {% if forloop.last %}</tbody>{% endif %}
+          {% empty %}
+            <tr class="tab-name">
+              <td colspan="2">
+                {% translate 'No document is defined as requestable.' %}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+        {% if sic_decision_approval_form.is_admission %}
+          {% field_data _('The candidate must provide a student visa') admission.doit_fournir_visa_etudes %}
+        {% endif %}
+        {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
+        {% if admission.avec_conditions_complementaires %}
+          {% if admission.conditions_complementaires %}
+            {% get_current_language as LANGUAGE_CODE %}
+            <dl>
+              <dt>{% translate _('Additional conditions') %}</dt>
+              <dd>
+                <ul>
+                  {% for condition in admission.conditions_complementaires %}
+                    <li>{% if LANGUAGE_CODE == 'fr-be' %}{{ condition.nom_fr }}{% else %}{{ condition.nom_en }}{% endif %}</li>
+                  {% endfor %}
+                </ul>
+              </dd>
+            </dl>
+          {% else %}
+            {% field_data _('Additional conditions') '' %}
+          {% endif %}
+        {% endif %}
+
+        {% field_data _('Are there any prerequisite courses?') admission.avec_complements_formation %}
+        {% if admission.avec_complements_formation %}
+          {% if admission.complements_formation %}
+            <dl>
+              <dt>{% translate _('Prerequisite courses') %}</dt>
+              <dd>
+                <ul>
+                  {% for formation in admission.complements_formation %}
+                    <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'en' and formation.full_title_en %}{{ formation.full_title_en }}{% else %}{{ formation.full_title }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
+                  {% endfor %}
+                </ul>
+              </dd>
+            </dl>
+          {% else %}
+            {% field_data _('Prerequisite courses') '' %}
+          {% endif %}
+          {% field_data _('Communication to the candidate about additional trainings') admission.commentaire_complements_formation|safe %}
+        {% endif %}
+
+        {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}
+
+        {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
+        {% field_data _('Contact person for the design of the annual program') contact_person %}
+
+        {% if admission.est_admission %}
+          {% field_data _('Tuition fees amount') admission.droits_inscription_montant|enum_display:'DroitsInscriptionMontant' %}
+          {% if admission.droits_inscription_montant == 'AUTRE' %}
+            {% field_data _('Amount (without EUR/)') admission.droits_inscription_montant_autre %}
+          {% endif %}
+          {% field_data _('Dispensation or increased fees') admission.dispense_ou_droits_majores|enum_display:'DispenseOuDroitsMajores' %}
+
+          {% if sic_decision_approval_form.is_vip %}
+            {% field_data _('Particular cost') admission.tarif_particulier %}
+            {% field_data _('Rebilling or third-party payer') admission.refacturation_ou_tiers_payant %}
+            {% field_data _('First year of inscription + status') admission.annee_de_premiere_inscription_et_statut %}
+          {% endif %}
+
+          {% if sic_decision_approval_form.is_hue %}
+            {% field_data _('The candidate is doing a mobility') admission.est_mobilite %}
+            {% if admission.est_mobilite %}
+              {% field_data _('Mobility months amount') admission.nombre_de_mois_de_mobilite|enum_display:'MobiliteNombreDeMois' %}
+            {% endif %}
+          {% endif %}
+
+          {% if sic_decision_approval_form.is_admission %}
+            {% field_data _('The candidate must report to SIC') admission.doit_se_presenter_en_sic %}
+          {% endif %}
+          {% field_data _('Communication to the candidate') admission.communication_au_candidat|safe %}
+        {% endif %}
+
+      </div>
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% if request.htmx %}
+  {% include 'admission/general_education/includes/checklist/sic_decision_sic_fraud_status.html' %}
+{% endif %}

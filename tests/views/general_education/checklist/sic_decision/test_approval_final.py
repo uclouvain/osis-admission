@@ -308,15 +308,13 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
 
     def test_approval_final_decision_form_submitting_inscription(self):
         self.client.force_login(user=self.sic_manager_user)
+        self.general_admission.checklist['current']['decision_sic'][
+            'statut'
+        ] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
         self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
         self.general_admission.save()
 
-        # Choose an existing reason
-        response = self.client.post(
-            self.url,
-            data={},
-            **self.default_headers,
-        )
+        response = self.client.post(self.url, data={}, **self.default_headers)
 
         # Check the response
         self.assertEqual(response.status_code, 200)

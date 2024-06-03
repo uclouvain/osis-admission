@@ -22,5 +22,9 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url view.base_namespace|add:':sic-decision-approval' uuid=view.kwargs.uuid as url%}
+{% if original_admission.type_demande == 'INSCRIPTION' %}
+  {% url view.base_namespace|add:':sic-decision-enrolment-approval' uuid=view.kwargs.uuid as url %}
+{% else %}
+  {% url view.base_namespace|add:':sic-decision-approval' uuid=view.kwargs.uuid as url %}
+{% endif %}
 {% include "admission/general_education/includes/checklist/modal-htmx-reload.html" with modal_id="sic-decision-approval-modal" modal_classes="admission-modal-lg fac-decision-modal" modal_url=url %}

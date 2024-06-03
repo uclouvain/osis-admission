@@ -40,11 +40,17 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    OngletsChecklist,
+    BesoinDeDerogation,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     InformationsAcceptationFacultaireNonSpecifieesException,
     ParcoursAnterieurNonSuffisantException,
     DocumentAReclamerImmediatException,
+    SituationPropositionNonSICException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -90,6 +96,7 @@ class TestApprouverInscriptionParSic(TestCase):
             statut=ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION,
         )
         self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
+        self.proposition.checklist_actuelle.decision_sic.statut = ChoixStatutChecklist.INITIAL_CANDIDAT
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
@@ -107,13 +114,52 @@ class TestApprouverInscriptionParSic(TestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
         self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
-    def test_should_lever_exception_si_presence_conditions_complementaires_non_specifiee(self):
-        self.proposition.avec_conditions_complementaires = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+    def test_should_lever_exception_si_statut_checklist_incorrect(self):
+        statuts_checklist_decision_sic = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_sic.name]
+
+        for statut in [
+            'A_COMPLETER',
+            'REFUS_A_VALIDER',
+            'AUTORISATION_A_VALIDER',
+            'CLOTURE',
+            'REFUSE',
+            'AUTORISE',
+        ]:
+            statut_courant = statuts_checklist_decision_sic[statut]
+
+            self.proposition.checklist_actuelle.decision_sic.statut = statut_courant.statut
+            self.proposition.checklist_actuelle.decision_sic.extra = statut_courant.extra
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+                self.assertIsInstance(
+                    context.exception.exceptions.pop(),
+                    SituationPropositionNonSICException,
+                )
+
+    def test_should_lever_exception_si_statut_derogation_incorrect(self):
+        statut_derogation = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_sic.name][
+            'BESOIN_DEROGATION'
+        ]
+
+        self.proposition.checklist_actuelle.decision_sic.statut = statut_derogation.statut
+        self.proposition.checklist_actuelle.decision_sic.extra = statut_derogation.extra
+
+        for besoin_de_derogation in BesoinDeDerogation.get_except(BesoinDeDerogation.ACCORD_DIRECTION):
+            self.proposition.besoin_de_derogation = besoin_de_derogation
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+                self.assertIsInstance(
+                    context.exception.exceptions.pop(),
+                    SituationPropositionNonSICException,
+                )
+
+        self.proposition.besoin_de_derogation = BesoinDeDerogation.ACCORD_DIRECTION
+
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        self.assertEqual(resultat, self.proposition.entity_id)
 
     def test_should_lever_exception_si_conditions_complementaires_non_specifiees(self):
         self.proposition.avec_conditions_complementaires = True
@@ -122,10 +168,18 @@ class TestApprouverInscriptionParSic(TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
             self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+                context.exception.exceptions.pop(),
+                InformationsAcceptationFacultaireNonSpecifieesException,
             )
 
-    def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
+    def test_should_etre_ok_si_presence_conditions_complementaires_non_specifiee(self):
+        self.proposition.avec_conditions_complementaires = None
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        proposition = self.proposition_repository.get(resultat)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
+
+    def test_should_etre_ok_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         proposition = self.proposition_repository.get(resultat)
@@ -135,17 +189,12 @@ class TestApprouverInscriptionParSic(TestCase):
     def test_should_lever_exception_si_complements_formation_non_specifiees(self):
         self.proposition.avec_complements_formation = True
         self.proposition.complements_formation = []
-        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-        proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
-        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
-    def test_should_lever_exception_si_nombre_annees_prevoir_programme_non_specifie(self):
-        self.proposition.nombre_annees_prevoir_programme = None
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
             self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+                context.exception.exceptions.pop(),
+                InformationsAcceptationFacultaireNonSpecifieesException,
             )
 
     def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):

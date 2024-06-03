@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,11 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 class EmplacementsDocumentsPropositionInMemoryTranslator(IEmplacementsDocumentsPropositionTranslator):
     metadata = {
         'file1.pdf': {
+            'mimetype': PDF_MIME_TYPE,
+            'author': '',
+            'uploaded_at': '2023-01-01T00:00:00',
+        },
+        'uuid12': {
             'mimetype': PDF_MIME_TYPE,
             'author': '',
             'uploaded_at': '2023-01-01T00:00:00',

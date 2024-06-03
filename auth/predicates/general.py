@@ -171,4 +171,4 @@ def can_send_to_fac_faculty_decision(self, user: User, obj: GeneralEducationAdmi
 def is_general(self, user: User, obj: GeneralEducationAdmission):
     from admission.templatetags.admission import CONTEXT_GENERAL
 
-    return obj.get_admission_context() == CONTEXT_GENERAL
+    return obj.admission_context == CONTEXT_GENERAL

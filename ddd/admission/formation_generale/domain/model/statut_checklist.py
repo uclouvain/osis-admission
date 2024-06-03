@@ -119,8 +119,19 @@ INDEX_ONGLETS_CHECKLIST = {
 class ConfigurationStatutChecklist(interface.ValueObject):
     identifiant: str
     libelle: str
-    statut: Optional[ChoixStatutChecklist] = None
+    statut: ChoixStatutChecklist
     extra: Dict[str, any] = attr.Factory(dict)
+
+    def matches(self, other_configuration_as_dictionary: Dict[str, any]) -> bool:
+        """
+        Check if this configuration matches the other one.
+        :param other_configuration_as_dictionary: A dictionary containing the other configuration.
+        :return: True if this configuration matches the other one, False otherwise.
+        """
+        return (
+            self.statut.name == other_configuration_as_dictionary.get('statut', '')
+            and self.extra.items() <= other_configuration_as_dictionary.get('extra', {}).items()
+        )
 
 
 @attr.dataclass

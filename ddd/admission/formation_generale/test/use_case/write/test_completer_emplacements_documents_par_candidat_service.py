@@ -188,7 +188,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
     @freezegun.freeze_time("2023-01-03", as_kwarg="freeze_time")
     def test_should_completer_emplacements_documents_demandes_immediatement_par_fac(self, freeze_time):
-        # Le gestionne réclame les emplacements de documents
+        # Le gestionnaire réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParFACCommand(
                 uuid_proposition='uuid-MASTER-SCI',
@@ -271,7 +271,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
     @freezegun.freeze_time("2023-01-03")
     def test_should_lever_exception_si_documents_reclames_immediatement_ne_sont_pas_completes(self):
-        # Le gestionne réclame les emplacements de documents
+        # Le gestionnaire réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParFACCommand(
                 uuid_proposition='uuid-MASTER-SCI',
@@ -299,7 +299,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
     @freezegun.freeze_time("2023-01-03")
     def test_should_lever_exception_si_documents_non_reclames_sont_completes(self):
-        # Le gestionne réclame les emplacements de documents
+        # Le gestionnaire réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParFACCommand(
                 uuid_proposition='uuid-MASTER-SCI',
@@ -311,7 +311,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             )
         )
 
-        # Le candidat ne remplit pas tous les emplacements demandés immédiatement
+        # Le candidat remplit un document qui n'est pas demandé
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(
                 CompleterEmplacementsDocumentsParCandidatCommand(
@@ -327,7 +327,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
     @freezegun.freeze_time("2023-01-03", as_kwarg="freeze_time")
     def test_should_completer_emplacements_documents_demandes_par_sic(self, freeze_time):
-        # Le gestionne réclame les emplacements de documents
+        # Le gestionnaire réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParSICCommand(
                 uuid_proposition='uuid-MASTER-SCI',

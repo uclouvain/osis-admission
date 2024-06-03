@@ -113,6 +113,28 @@ class Historique(IHistorique):
         )
 
     @classmethod
+    def historiser_demande_complements(cls, proposition: Proposition, acteur: str, message: EmailMessage):
+        gestionnaire = PersonneConnueUclTranslator().get(acteur)
+
+        message_a_historiser = get_message_to_historize(message)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
+            "{first_name} {last_name}".format(first_name=gestionnaire.prenom, last_name=gestionnaire.nom),
+            tags=["proposition", "message"],
+        )
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "Une demande de compléments a été envoyée.",
+            "A request for additional information has been submitted.",
+            "{first_name} {last_name}".format(first_name=gestionnaire.prenom, last_name=gestionnaire.nom),
+            tags=["proposition", "status-changed"],
+        )
+
+    @classmethod
     def historiser_completion_documents_par_candidat(cls, proposition: PropositionAdmission):
         candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
 

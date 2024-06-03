@@ -104,13 +104,21 @@ class CentralManager(EntityRoleModel):
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
             'admission.view_documents_management': is_entity_manager
-            & ((general.is_general & general.not_cancelled) | (continuing.is_continuing & continuing.is_submitted)),
+            & ((general.is_general & general.not_cancelled) | (continuing.is_continuing & continuing.not_cancelled)),
             'admission.edit_documents': is_entity_manager
-            & ((general.is_general & general.not_cancelled) | (continuing.is_continuing & continuing.is_submitted)),
-            'admission.change_documents_management': is_entity_manager
-            & ((general.is_general & general.in_sic_status) | (continuing.is_continuing & continuing.is_submitted)),
-            'admission.cancel_document_request': is_entity_manager & general.in_sic_document_request_status,
-            'admission.generate_in_progress_analysis_folder': is_entity_manager & general.in_progress,
+            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.is_submitted)),
+            'admission.request_documents': is_entity_manager
+            & (
+                (general.is_general & general.in_sic_status)
+                | (continuing.is_continuing & continuing.can_request_documents)
+            ),
+            'admission.cancel_document_request': is_entity_manager
+            & (
+                (general.is_general & general.in_sic_document_request_status)
+                | (continuing.is_continuing & continuing.in_document_request_status)
+            ),
+            'admission.generate_in_progress_analysis_folder': is_entity_manager
+            & ((general.is_general & general.in_progress) | (continuing.is_continuing & continuing.in_progress)),
             'admission.view_checklist': is_entity_manager & (general.is_submitted | continuing.is_submitted),
             'admission.change_checklist': is_entity_manager & (general.in_sic_status | continuing.is_submitted),
             'admission.change_checklist_iufc': is_entity_manager & continuing.is_submitted,
@@ -121,10 +129,10 @@ class CentralManager(EntityRoleModel):
             & general.in_fac_status,
             'admission.checklist_change_past_experiences': is_entity_manager & general.in_sic_status,
             'admission.checklist_select_access_title': is_entity_manager & general.in_sic_status,
-            'admission.checklist_change_sic_comment': is_entity_manager,
+            'admission.checklist_change_sic_comment': is_entity_manager & general.is_submitted,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager,
-            'admission.checklist_change_comment': is_entity_manager & general.in_sic_status,
+            'admission.checklist_change_comment': is_entity_manager & general.is_submitted,
             'admission.checklist_change_sic_decision': is_entity_manager & general.in_sic_status,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,

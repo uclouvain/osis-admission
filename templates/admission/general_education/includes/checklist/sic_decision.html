@@ -27,7 +27,6 @@
 {% with initial=original_admission.checklist.initial.decision_sic current=original_admission.checklist.current.decision_sic %}
   <div
       id="sic-decision-container"
-      hx-target="this"
       hx-swap-oob="true"
   >
     {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=resume_proposition.proposition current=current  %}
@@ -45,21 +44,13 @@
 
     {% bootstrap_form comment_forms.decision_sic %}
 
+    {# Dispensation part #}
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' %}
-      <form
-          hx-post="{% url view.base_namespace|add:':sic-decision-dispensation' uuid=view.kwargs.uuid %}"
-          hx-trigger="change"
-          hx-swap="none"
-      >
-        {% bootstrap_form sic_decision_dispensation_form %}
-      </form>
-
+      {% include 'admission/general_education/includes/checklist/sic_decision_dispensation_needed_form.html' %}
       {% bootstrap_form comment_forms.decision_sic__derogation %}
     {% elif original_admission.dispensation_need != 'NON_CONCERNE' %}
+      {% field_data _('Dispensation needed') original_admission.get_dispensation_needed_display %}
       <dl>
-        <dt>{% trans 'Dispensation needed' %}</dt>
-        <dd>{{ original_admission.get_dispensation_needed_display }}</dd>
-
         <dt>{% trans 'Comment about dispensation' %}</dt>
         <dd>
           <div class="form-group">
@@ -69,6 +60,7 @@
       </dl>
     {% endif %}
 
+    {# Refusal panel #}
     {% if current.extra.en_cours == 'refusal' or current.extra.blocage == 'refusal' %}
       <div class="panel panel-default">
         <div class="panel-heading">
@@ -118,107 +110,16 @@
       </div>
     {% endif %}
 
-    {% if current.extra.en_cours == 'approval' or current.statut == 'GEST_REUSSITE' %}
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          {% if can_change_sic_decision and current.statut != 'GEST_REUSSITE' %}
-            <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-approval-modal"><i class="fas fa-edit"></i></button>
-            {% if original_admission.type_demande == 'ADMISSION' %}
-              <a
-                  class="btn btn-default pull-right btn-heading-secondary"
-                  href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord" %}"
-                  target="_blank"
-              >
-                <i class="fa fa-magnifying-glass"></i>
-                {% translate 'Visualize approval' %}
-              </a>
-              {% if admission.candidat_a_nationalite_hors_ue_5 %}
-                <a
-                    class="btn btn-default pull-right btn-heading-secondary"
-                    href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
-                    target="_blank"
-                >
-                  <i class="fa fa-magnifying-glass"></i>
-                  {% translate 'Visualize annexe1' %}
-                </a>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-          <h4 class="panel-title">{% if current.statut == 'GEST_REUSSITE' %}{% trans "Authorization" %}{% else %}{% trans "Authorization to validate" %}{% endif %}</h4>
-        </div>
-        <div class="panel-body">
-          {% if sic_decision_approval_form.is_admission %}
-            {% field_data _('The candidate must provide a student visa') admission.doit_fournir_visa_etudes %}
-          {% endif %}
-          {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
-          {% if admission.avec_conditions_complementaires %}
-            {% if admission.conditions_complementaires %}
-              {% get_current_language as LANGUAGE_CODE %}
-              <dl>
-                <dt>{% translate _('Additional conditions') %}</dt>
-                <dd>
-                  <ul>
-                    {% for condition in admission.conditions_complementaires %}
-                      <li>{% if LANGUAGE_CODE == 'fr-be' %}{{ condition.nom_fr }}{% else %}{{ condition.nom_en }}{% endif %}</li>
-                    {% endfor %}
-                  </ul>
-                </dd>
-              </dl>
-            {% else %}
-              {% field_data _('Additional conditions') '' %}
-            {% endif %}
-          {% endif %}
-
-          {% field_data _('Are there any prerequisite courses?') admission.avec_complements_formation %}
-          {% if admission.avec_complements_formation %}
-            {% if admission.complements_formation %}
-              <dl>
-                <dt>{% translate _('Prerequisite courses') %}</dt>
-                <dd>
-                  <ul>
-                    {% for formation in admission.complements_formation %}
-                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'en' and formation.full_title_en %}{{ formation.full_title_en }}{% else %}{{ formation.full_title }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
-                    {% endfor %}
-                  </ul>
-                </dd>
-              </dl>
-            {% else %}
-              {% field_data _('Prerequisite courses') '' %}
-            {% endif %}
-            {% field_data _('Communication to the candidate about additional trainings') admission.commentaire_complements_formation|safe %}
-          {% endif %}
-
-          {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}
-
-          {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
-          {% field_data _('Contact person for the design of the annual program') contact_person %}
-
-          {% field_data _('Tuition fees amount') admission.droits_inscription_montant|enum_display:'DroitsInscriptionMontant' %}
-          {% if admission.droits_inscription_montant == 'AUTRE' %}
-            {% field_data _('Amount (without EUR/)') admission.droits_inscription_montant_autre %}
-          {% endif %}
-          {% field_data _('Dispensation or increased fees') admission.dispense_ou_droits_majores|enum_display:'DispenseOuDroitsMajores' %}
-
-          {% if sic_decision_approval_form.is_vip %}
-            {% field_data _('Particular cost') admission.tarif_particulier %}
-            {% field_data _('Rebilling or third-party payer') admission.refacturation_ou_tiers_payant %}
-            {% field_data _('First year of inscription + status') admission.annee_de_premiere_inscription_et_statut %}
-          {% endif %}
-
-          {% if sic_decision_approval_form.is_hue %}
-            {% field_data _('The candidate is doing a mobility') admission.est_mobilite %}
-            {% if admission.est_mobilite %}
-              {% field_data _('Mobility months amount') admission.nombre_de_mois_de_mobilite|enum_display:'MobiliteNombreDeMois' %}
-            {% endif %}
-          {% endif %}
-
-          {% if sic_decision_approval_form.is_admission %}
-            {% field_data _('The candidate must report to SIC') admission.doit_se_presenter_en_sic %}
-          {% endif %}
-          {% field_data _('Communication to the candidate') admission.communication_au_candidat|safe %}
-        </div>
-      </div>
-    {% endif %}
+    {# Approval panel #}
+    <div
+        id="sic-decision-approval-panel-container"
+        hx-target="this"
+        hx-get="{% url base_namespace|add:':sic-decision-approval-panel' view.kwargs.uuid %}"
+        hx-swap="innerHTML"
+        hx-trigger='click from:li[href="#decision_sic"],documents-list-refresh-event'
+    >
+      {% include 'admission/general_education/includes/checklist/sic_decision_approval_panel.html' %}
+    </div>
   </div>
 
   {% if request.htmx %}

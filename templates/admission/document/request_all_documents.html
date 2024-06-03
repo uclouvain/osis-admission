@@ -104,6 +104,7 @@
           const deadlineInput = $('#id_deadline');
           let instance;
           let changesInRequestedDocuments = false;
+          const inProgressEvents = new Set();
           const selectsContainer = $('#requested-documents-selects');
 
           const requestedDocumentsSelects = $('#requested-documents-selects select');
@@ -152,7 +153,9 @@
                           htmlDocumentsList += `<li>${selectedDocument['candidate_language_tab_label']}<ul>`;
                           previousTab = selectedDocument['tab'];
                       }
-                      htmlDocumentsList += `<li>${selectedDocument['label']}. ${selectedDocument['reason']}</li>`;
+                      let currentDocumentLabel = selectedDocument['label'];
+                      if (!currentDocumentLabel.endsWith('.')) currentDocumentLabel += '.';
+                      htmlDocumentsList += `<li>${currentDocumentLabel} ${selectedDocument['reason']}</li>`;
                   }
               })
 
@@ -242,19 +245,27 @@
               if (value === '' && !elementIsConfirmed) {
                   {# A confirmation is required #}
                   event.preventDefault();
+                  event.stopPropagation();
               } else {
                   changesInRequestedDocuments = true;
               }
           });
 
+          selectsContainer.on('htmx:afterRequest', 'select', function() {
+            inProgressEvents.delete(this.id);
+          });
+
           {# Display a confirmation element it the document is not requested anymore #}
           selectsContainer.on('change', 'select', function(event) {
               if ($(this).val() === '') {
+                  inProgressEvents.delete(this.id);
                   const clonedConfirmElement = confirmElement.clone();
                   clonedConfirmElement.removeClass('hidden');
                   clonedConfirmElement[0].id += '-' + $(this).attr('name');
                   $(this).closest('.form-group').append(clonedConfirmElement);
                   clonedConfirmElement.children('button:first').focus();
+              } else {
+                  inProgressEvents.add(this.id);
               }
           });
 
@@ -263,13 +274,14 @@
               const row = $(this).closest('tr');
               const select = row.find('select');
               confirmEvents.add(select[0].id);
+              inProgressEvents.add(select[0].id);
               select[0].dispatchEvent(new CustomEvent('confirmStatusChange'));
           });
 
           {# Cancel the cancellation of the request of the document #}
           selectsContainer.on('click', '.delete-cancel-button', function(event) {
               const select = $(this).closest('div.form-group').children('select');
-              select[0].value = select.data('previous');
+              select.val(select.data('previous'));
               $(this).closest('div').remove();
           });
 
@@ -294,7 +306,9 @@
 
           {# Reset the document list and the document detail if some updates were made #}
           $('#request-all-form-modal [data-dismiss="modal"]').on('click', function (event) {
-              if (changesInRequestedDocuments) {
+              if(inProgressEvents.size) {
+                event.preventDefault();
+              } else if (changesInRequestedDocuments) {
                   $('#document-container').trigger('formValidation', [
                       {
                           is_valid: true,
