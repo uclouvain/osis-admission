@@ -117,5 +117,5 @@ CHOIX_PAR_FORMATION: Dict[str, List[ConditionAcces]] = {
 
 class TypeTitreAccesSelectionnable(ChoiceEnum):
     EXPERIENCE_ACADEMIQUE = _('Academic experience')
-    EXPERIENCE_NON_ACADEMIQUE = _('Non-academic experience')
+    EXPERIENCE_NON_ACADEMIQUE = _('Non-academic activity')
     ETUDES_SECONDAIRES = _('Secondary studies')
