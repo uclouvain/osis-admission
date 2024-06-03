@@ -1419,6 +1419,8 @@ class ChecklistView(
         for document in DocumentsAssimilation:
             assimilation_documents.add(document)
 
+        secondary_studies_attachments = set(DocumentsEtudesSecondaires.keys())
+
         documents_by_tab = {
             'assimilation': assimilation_documents,
             'financabilite': {
@@ -1435,12 +1437,10 @@ class ChecklistView(
             },
             'parcours_anterieur': {
                 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
-                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE',
-                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE',
-                'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE',
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
                 'ADDITIONAL_DOCUMENTS',
+                *secondary_studies_attachments,
             },
             'donnees_personnelles': assimilation_documents,
             'specificites_formation': {
@@ -1450,7 +1450,7 @@ class ChecklistView(
                 'ATTESTATION_ACCORD_FACULTAIRE',
                 'ATTESTATION_REFUS_FACULTAIRE',
             },
-            f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': set(DocumentsEtudesSecondaires.keys()),
+            f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': secondary_studies_attachments,
             'decision_sic': {
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
