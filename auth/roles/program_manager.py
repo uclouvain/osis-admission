@@ -131,6 +131,7 @@ class ProgramManager(EducationGroupRoleModel):
             & general.in_fac_status,
             'admission.checklist_select_access_title': is_part_of_education_group & general.in_fac_status,
             'admission.checklist_change_fac_comment': is_part_of_education_group,
+            'admission.checklist_financability_dispensation_fac': is_part_of_education_group,
             'admission.continuing_checklist_change_fac_comment': is_part_of_education_group,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
             # Exports

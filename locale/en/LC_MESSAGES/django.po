@@ -254,11 +254,17 @@ msgstr ""
 msgid "A translation of your secondary school diploma by a sworn translator"
 msgstr ""
 
+msgid "ABANDON_DU_CANDIDAT"
+msgstr "Candidate withdrawal"
+
 msgid "ACCEPTED"
 msgstr "Accepted"
 
 msgid "ACCEPTEE"
 msgstr "Accepted"
+
+msgid "ACCORD_DE_DEROGATION_FACULTAIRE"
+msgstr "Faculty dispensation approval"
 
 msgid "ACCORD_DIRECTION"
 msgstr ""
@@ -1057,6 +1063,9 @@ msgstr "Supervisory panel member"
 msgid "CA members"
 msgstr ""
 
+msgid "CANDIDAT_NOTIFIE"
+msgstr "Candidate notified"
+
 msgid "CDD"
 msgstr ""
 
@@ -1329,6 +1338,9 @@ msgstr ""
 msgid "Candidate of the admission"
 msgstr ""
 
+msgid "Candidate withdrawal"
+msgstr ""
+
 msgid "Candidate's country of nationality"
 msgstr ""
 
@@ -1523,6 +1535,9 @@ msgstr ""
 msgid "Comment about dispensation"
 msgstr ""
 
+msgid "Comment about financability dispensation"
+msgstr ""
+
 msgid "Comment about jury"
 msgstr ""
 
@@ -1623,6 +1638,9 @@ msgstr ""
 msgid "Confirm and send the message"
 msgstr ""
 
+msgid "Confirm and send to SIC"
+msgstr ""
+
 msgid "Confirm restoring activity to submitted"
 msgstr ""
 
@@ -1681,6 +1699,9 @@ msgid "Contact details"
 msgstr ""
 
 msgid "Contact language"
+msgstr ""
+
+msgid "Contact link"
 msgstr ""
 
 msgid "Contact person for the design of the annual program"
@@ -2231,6 +2252,12 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
+msgid "Dispensation"
+msgstr ""
+
+msgid "Dispensation granted"
+msgstr ""
+
 msgid "Dispensation needed"
 msgstr ""
 
@@ -2509,6 +2536,11 @@ msgid "Email sent to the EU+5 candidate when SIC approves an admission."
 msgstr ""
 
 msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed."
 msgstr ""
 
 msgid ""
@@ -2805,6 +2837,15 @@ msgstr ""
 msgid "Faculty decision:"
 msgstr ""
 
+msgid "Faculty dispensation approval"
+msgstr ""
+
+msgid "Faculty dispensation notification"
+msgstr ""
+
+msgid "Faculty dispensation refusal"
+msgstr ""
+
 msgid "Faculty process"
 msgstr ""
 
@@ -2844,6 +2885,27 @@ msgstr ""
 msgid "Financability computed rule on"
 msgstr ""
 
+msgid "Financability dispensation"
+msgstr ""
+
+msgid "Financability dispensation first notification by"
+msgstr ""
+
+msgid "Financability dispensation first notification on"
+msgstr ""
+
+msgid "Financability dispensation last notification by"
+msgstr ""
+
+msgid "Financability dispensation last notification on"
+msgstr ""
+
+msgid "Financability dispensation needed"
+msgstr ""
+
+msgid "Financability dispensation status"
+msgstr ""
+
 msgid "Financability rule"
 msgstr ""
 
@@ -2870,6 +2932,10 @@ msgid "Financeable"
 msgstr ""
 
 msgid "Financing rule"
+msgstr ""
+
+#, python-format
+msgid "First mail sent to the candidate on %(date)s by %(sender)s."
 msgstr ""
 
 msgid "First name"
@@ -2937,6 +3003,9 @@ msgid ""
 "the radios buttons allow to select only one value whereas the checkboxes "
 "allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
+msgstr ""
+
+msgid "For the attention of"
 msgstr ""
 
 #, python-format
@@ -3742,6 +3811,10 @@ msgstr ""
 msgid "Last hour views:"
 msgstr ""
 
+#, python-format
+msgid "Last mail sent to the candidate on %(date)s by %(sender)s."
+msgstr ""
+
 msgid "Last modif."
 msgstr ""
 
@@ -3998,6 +4071,10 @@ msgstr ""
 msgid ""
 "Mail sent to the applicant following approval or rejection by a member of "
 "the supervisory group"
+msgstr ""
+
+#, python-format
+msgid "Mail sent to the candidate on %(date)s by %(sender)s."
 msgstr ""
 
 msgid ""
@@ -4948,10 +5025,19 @@ msgstr ""
 msgid "Please complete this field: {}"
 msgstr ""
 
+msgid "Please confirm the change to \"Not concerned\"."
+msgstr ""
+
 msgid "Please confirm the change to this new state."
 msgstr ""
 
 msgid "Please confirm the change to this new status."
+msgstr ""
+
+msgid "Please confirm the faculty dispensation approval."
+msgstr ""
+
+msgid "Please confirm the withdrawal of the candidate."
 msgstr ""
 
 msgid "Please enter your work email address"
@@ -5315,6 +5401,9 @@ msgstr ""
 
 msgid "REFUS_COMPLEMENT_TARDIF"
 msgstr ""
+
+msgid "REFUS_DE_DEROGATION_FACULTAIRE"
+msgstr "Faculty dispensation refusal"
 
 msgid "REFUS_DIRECTION"
 msgstr ""
@@ -5974,6 +6063,9 @@ msgstr ""
 msgid "Sir"
 msgstr ""
 
+msgid "Sir, Madam"
+msgstr ""
+
 msgid "Solidarity student"
 msgstr ""
 
@@ -6249,6 +6341,14 @@ msgstr ""
 msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
 "preparation and the jury proposition."
+msgstr ""
+
+msgid ""
+"The 'Dispensation granted' status is reserved to enrolment application whith "
+"financability dispensation status set to 'Faculty dispensation granted'."
+msgstr ""
+
+msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
@@ -7733,6 +7833,10 @@ msgid "Your note has been added."
 msgstr ""
 
 msgid "Your participation in the event"
+msgstr ""
+
+msgid ""
+"Your past experiences does not ensure the expected garanties for success"
 msgstr ""
 
 msgid "Your previous NOMA (matriculation number)"

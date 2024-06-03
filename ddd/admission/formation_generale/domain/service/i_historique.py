@@ -178,3 +178,13 @@ class IHistorique(interface.DomainService):
         statut_original: ChoixStatutPropositionGenerale,
     ):
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: Optional[EmailMessage],
+    ):
+        raise NotImplementedError
