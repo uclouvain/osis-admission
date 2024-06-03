@@ -1458,10 +1458,6 @@ msgstr ""
 msgid "Checklist"
 msgstr ""
 
-msgctxt "admission"
-msgid "Checklist"
-msgstr ""
-
 msgid "Checklist filters"
 msgstr ""
 
@@ -2322,6 +2318,9 @@ msgid "Doctorate enrolment applications"
 msgstr ""
 
 msgid "Document"
+msgstr ""
+
+msgid "Document category"
 msgstr ""
 
 #, python-format

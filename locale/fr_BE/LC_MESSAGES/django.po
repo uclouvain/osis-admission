@@ -1583,10 +1583,6 @@ msgstr "Modifier la publication de cette conférence"
 msgid "Checklist"
 msgstr "Checklist"
 
-msgctxt "admission"
-msgid "Checklist"
-msgstr "Checklist"
-
 msgid "Checklist filters"
 msgstr "Filtres de la checklist"
 
@@ -2514,6 +2510,9 @@ msgstr "Demandes d'inscription en doctorat"
 
 msgid "Document"
 msgstr "Document"
+
+msgid "Document category"
+msgstr "Catégorie de documents"
 
 #, python-format
 msgid "Document merging of the proposition %(reference)s"
