@@ -151,7 +151,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         }[self.current_context]
         return message_bus_instance.invoke(cmd)
 
-
     @cached_property
     def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
         return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))

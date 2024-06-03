@@ -578,7 +578,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> Optional['CurriculumAdmissionDTO']:
+    def get_curriculum(
+            cls, matricule: str, annee_courante: int, uuid_proposition: str
+    ) -> Optional['CurriculumAdmissionDTO']:
 
         try:
             minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)

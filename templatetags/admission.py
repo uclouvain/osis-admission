@@ -1122,6 +1122,7 @@ def digit_ticket_status_msg(context, digit_ticket):
     context['digit_ticket'] = digit_ticket
     return context
 
+
 @register.filter
 def to_niss_format(s):
     return f"{s[:2]}.{s[2:4]}.{s[4:6]}-{s[6:9]}.{s[9:]}"
@@ -1621,6 +1622,7 @@ def access_conditions_url(proposition: PropositionDTO):
         training_acronym=training['training__acronym'],
         partial_training_acronym=training['training__partial_acronym'],
     )
+
 
 @register.filter
 def format_matricule(matricule):

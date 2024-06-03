@@ -75,7 +75,8 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['professional_experience'] = sorted(
-            self.provided_experience.experiences_non_academiques, key=lambda exp: (exp.date_debut, exp.date_fin), reverse=True
+            self.provided_experience.experiences_non_academiques, key=lambda exp: (exp.date_debut, exp.date_fin),
+            reverse=True
         )
         context['educational_experience'] = sorted(
             self.provided_experience.experiences_academiques, key=lambda exp: exp.titre_formate, reverse=True
