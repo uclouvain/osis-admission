@@ -40,12 +40,13 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, ngettext
+from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
 
 from admission.contrib.models import GeneralEducationAdmission
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
@@ -124,6 +125,8 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererResumePropositionQuery,
     ApprouverInscriptionTardiveParFaculteCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
+    SpecifierDerogationFinancabiliteCommand,
+    NotifierCandidatDerogationFinancabiliteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -135,6 +138,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     OngletsChecklist,
     TypeDeRefus,
+    OngletsChecklist,
+    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
@@ -151,6 +156,9 @@ from admission.forms.admission.checklist import (
     FinancabiliteApprovalForm,
     SicDecisionApprovalDocumentsForm,
     FreeAdditionalApprovalConditionForm,
+    FinancabiliteDispensationForm,
+    FinancabilityDispensationRefusalForm,
+    FinancabiliteNotificationForm,
 )
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -173,7 +181,11 @@ from admission.forms.admission.checklist import (
     SinglePastExperienceAuthenticationForm,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
-from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL, INSCRIPTION_EMAIL_SIC_APPROVAL
+from admission.mail_templates import (
+    ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
+    ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
+    INSCRIPTION_EMAIL_SIC_APPROVAL,
+)
 from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_SIC_REFUSAL,
     ADMISSION_EMAIL_SIC_APPROVAL,
@@ -185,6 +197,7 @@ from admission.mail_templates.checklist import (
 )
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
+    add_close_modal_into_htmx_response,
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
@@ -229,6 +242,11 @@ __all__ = [
     'FinancabiliteChangeStatusView',
     'FinancabiliteApprovalView',
     'FinancabiliteComputeRuleView',
+    'FinancabiliteDerogationNonConcerneView',
+    'FinancabiliteDerogationNotificationView',
+    'FinancabiliteDerogationAbandonCandidatView',
+    'FinancabiliteDerogationRefusView',
+    'FinancabiliteDerogationAccordView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
     'SicApprovalDecisionView',
@@ -1634,447 +1652,6 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
         return super().get(request, *args, **kwargs)
 
 
-class ChecklistView(
-    PastExperiencesMixin,
-    FacultyDecisionMixin,
-    SicDecisionMixin,
-    RequestApplicationFeesContextDataMixin,
-    TemplateView,
-):
-    urlpatterns = 'checklist'
-    template_name = "admission/general_education/checklist.html"
-    permission_required = 'admission.view_checklist'
-
-    @classmethod
-    def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
-        assimilation_documents = {
-            'CARTE_IDENTITE',
-            'PASSEPORT',
-        }
-
-        for document in DocumentsAssimilation:
-            assimilation_documents.add(document)
-
-        secondary_studies_attachments = set(DocumentsEtudesSecondaires.keys())
-
-        documents_by_tab = {
-            'assimilation': assimilation_documents,
-            'financabilite': {
-                'DIPLOME_EQUIVALENCE',
-                'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
-                'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
-                'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
-                'CURRICULUM',
-            },
-            'frais_dossier': assimilation_documents,
-            'choix_formation': {
-                'ATTESTATION_INSCRIPTION_REGULIERE',
-                'FORMULAIRE_MODIFICATION_INSCRIPTION',
-            },
-            'parcours_anterieur': {
-                'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
-                'DIPLOME_EQUIVALENCE',
-                'CURRICULUM',
-                'ADDITIONAL_DOCUMENTS',
-                *secondary_studies_attachments,
-            },
-            'donnees_personnelles': assimilation_documents,
-            'specificites_formation': {
-                'ADDITIONAL_DOCUMENTS',
-            },
-            'decision_facultaire': {
-                'ATTESTATION_ACCORD_FACULTAIRE',
-                'ATTESTATION_REFUS_FACULTAIRE',
-            },
-            f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': secondary_studies_attachments,
-            'decision_sic': {
-                'ATTESTATION_ACCORD_SIC',
-                'ATTESTATION_ACCORD_ANNEXE_SIC',
-                'ATTESTATION_REFUS_SIC',
-                'ATTESTATION_ACCORD_FACULTAIRE',
-                'ATTESTATION_REFUS_FACULTAIRE',
-            },
-        }
-
-        # Add documents from the specific questions
-        checklist_target_tab_by_specific_question_tab = {
-            Onglets.CURRICULUM.name: 'parcours_anterieur',
-            Onglets.ETUDES_SECONDAIRES.name: f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}',
-            Onglets.INFORMATIONS_ADDITIONNELLES.name: 'specificites_formation',
-        }
-
-        for specific_question in specific_questions:
-            if (
-                specific_question.type == TypeItemFormulaire.DOCUMENT.name
-                and specific_question.onglet in checklist_target_tab_by_specific_question_tab
-            ):
-                documents_by_tab[checklist_target_tab_by_specific_question_tab[specific_question.onglet]].add(
-                    specific_question.uuid
-                )
-
-        return documents_by_tab
-
-    def get_template_names(self):
-        if self.request.htmx:
-            return ["admission/general_education/checklist_menu.html"]
-        return ["admission/general_education/checklist.html"]
-
-    def get_context_data(self, **kwargs):
-        from infrastructure.messages_bus import message_bus_instance
-
-        context = super().get_context_data(**kwargs)
-        if not self.request.htmx:
-            # Retrieve data related to the proposition
-            command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
-            )
-
-            context['resume_proposition'] = command_result.resume
-
-            specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
-                RecupererQuestionsSpecifiquesQuery(
-                    uuid_proposition=self.admission_uuid,
-                    onglets=[
-                        Onglets.INFORMATIONS_ADDITIONNELLES.name,
-                        Onglets.ETUDES_SECONDAIRES.name,
-                        Onglets.CURRICULUM.name,
-                    ],
-                )
-            )
-
-            context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
-
-            # Initialize forms
-            tab_names = list(self.extra_context['checklist_tabs'].keys())
-
-            comments = {
-                ('__'.join(c.tags)): c
-                for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__overlap=tab_names)
-            }
-
-            for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
-                tab_names.remove(tab)
-                tab_names += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
-            tab_names.append('decision_sic__derogation')
-
-            comments_labels = {
-                'decision_sic__derogation': _('Comment about dispensation'),
-            }
-
-            context['comment_forms'] = {
-                tab_name: CommentForm(
-                    comment=comments.get(tab_name, None),
-                    form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
-                    prefix=tab_name,
-                    label=comments_labels.get(tab_name, None),
-                )
-                for tab_name in tab_names
-            }
-            context['assimilation_form'] = AssimilationForm(
-                initial=self.admission.checklist.get('current', {}).get('assimilation', {}).get('extra'),
-                form_url=resolve_url(
-                    f'{self.base_namespace}:change-checklist-extra',
-                    uuid=self.admission_uuid,
-                    tab='assimilation',
-                ),
-            )
-
-            context['financabilite_approval_form'] = FinancabiliteApprovalForm(
-                instance=self.admission,
-                prefix='financabilite',
-            )
-
-            # Documents
-            admission_documents = command_result.emplacements_documents
-
-            documents_by_tab = self.checklist_documents_by_tab(specific_questions=specific_questions)
-
-            context['documents'] = {
-                tab_name: [
-                    admission_document
-                    for admission_document in admission_documents
-                    if admission_document.identifiant.split('.')[-1] in tab_documents
-                ]
-                for tab_name, tab_documents in documents_by_tab.items()
-            }
-
-            # Experiences
-            if self.proposition_fusion:
-                merge_curex = (
-                    self.proposition_fusion.educational_curex_uuids + self.proposition_fusion.professional_curex_uuids
-                )
-                self._merge_with_known_curriculum(merge_curex, command_result.resume)
-                context['curex_a_fusionner'] = merge_curex
-
-            experiences = self._get_experiences(command_result.resume)
-            experiences_by_uuid = self._get_experiences_by_uuid(command_result.resume)
-
-            context['experiences'] = experiences
-            context['experiences_by_uuid'] = experiences_by_uuid
-
-            # Access titles
-            context['access_title_url'] = self.access_title_url
-            context['access_titles'] = self.selectable_access_titles
-            context['selected_access_titles_names'] = get_access_titles_names(
-                access_titles=self.selectable_access_titles,
-                curriculum_dto=command_result.resume.curriculum,
-                etudes_secondaires_dto=command_result.resume.etudes_secondaires,
-            )
-
-            context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
-            context[
-                'past_experiences_admission_access_title_equivalency_form'
-            ] = self.past_experiences_admission_access_title_equivalency_form
-
-            # Financabilité
-            context['financabilite'] = self._get_financabilite()
-
-            # Authentication forms (one by experience)
-            context['authentication_forms'] = {}
-
-            children = (
-                context['original_admission']
-                .checklist.get('current', {})
-                .get('parcours_anterieur', {})
-                .get('enfants', [])
-            )
-
-            context['check_authentication_mail_to_checkers'] = get_email(
-                template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
-                language=settings.LANGUAGE_CODE_FR,
-                proposition_dto=self.proposition,
-            )
-            context['check_authentication_mail_to_candidate'] = get_email(
-                template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
-                language=self.proposition.langue_contact_candidat,
-                proposition_dto=self.proposition,
-            )
-
-            all_experience_authentication_history_entries = HistoryEntry.objects.filter(
-                object_uuid=self.admission_uuid,
-                tags__contains=['proposition', 'experience-authentication', 'message'],
-            ).order_by('-created')
-
-            context['all_experience_authentication_history_entries'] = {}
-            for entry in all_experience_authentication_history_entries:
-                experience_id = entry.extra_data.get('experience_id')
-                if experience_id:
-                    context['all_experience_authentication_history_entries'].setdefault(experience_id, entry)
-
-            children_by_identifier = {
-                child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
-            }
-            last_valuated_admission_by_experience_uuid = {}
-            not_valuated_by_current_admission_experiences_uuids = set()
-
-            for experience_uuid, current_experience in experiences_by_uuid.items():
-                tab_identifier = f'parcours_anterieur__{experience_uuid}'
-
-                if experience_uuid in children_by_identifier:
-                    experience_checklist_info = children_by_identifier.get(experience_uuid, {})
-                else:
-                    experience_checklist_info = Checklist.initialiser_checklist_experience(experience_uuid).to_dict()
-                    children.append(experience_checklist_info)
-
-                context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
-                    authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
-                )
-                context['authentication_forms'][experience_uuid] = SinglePastExperienceAuthenticationForm(
-                    experience_checklist_info,
-                )
-                context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
-                context['checklist_tabs'][tab_identifier] = truncatechars(current_experience.titre_formate, 50)
-                context['comment_forms'][tab_identifier] = CommentForm(
-                    comment=comments.get(tab_identifier, None),
-                    form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment',
-                        uuid=self.admission_uuid,
-                        tab=tab_identifier,
-                    ),
-                    prefix=tab_identifier,
-                )
-                authentication_comment_identifier = f'{tab_identifier}__authentication'
-                context['comment_forms'][authentication_comment_identifier] = CommentForm(
-                    comment=comments.get(authentication_comment_identifier, None),
-                    form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment',
-                        uuid=self.admission_uuid,
-                        tab=authentication_comment_identifier,
-                    ),
-                    prefix=authentication_comment_identifier,
-                    disabled=not can_edit_experience_authentication(experience_checklist_info),
-                    label=_('Comment about the authentication'),
-                )
-
-                # Get the last valuated admission for this experience
-                valuated_admissions = getattr(current_experience, 'valorisee_par_admissions', [])
-
-                if valuated_admissions and self.admission_uuid not in valuated_admissions:
-                    not_valuated_by_current_admission_experiences_uuids.add(experience_uuid)
-                    last_valuated_admission_by_experience_uuid[experience_uuid] = next(
-                        (
-                            admission
-                            for admission in context['toutes_les_demandes']
-                            if admission.uuid in valuated_admissions
-                        ),
-                        None,
-                    )
-
-            context['last_valuated_admission_by_experience_uuid'] = last_valuated_admission_by_experience_uuid
-
-            # Remove the experiences that we had in the checklist that have been removed
-            children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
-
-            # Order the experiences in chronological order
-            ordered_experiences = {}
-            if children:
-                order = 0
-
-                for annee, experience_list in experiences.items():
-                    for experience in experience_list:
-                        experience_uuid = str(experience.uuid)
-                        if experience_uuid not in ordered_experiences:
-                            ordered_experiences[experience_uuid] = order
-                            order += 1
-
-                children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
-
-            prefixed_past_experiences_documents = []
-            documents_from_not_valuated_experiences = []
-            context['read_only_documents'] = documents_from_not_valuated_experiences
-
-            # Add the documents related to cv experiences
-            for admission_document in admission_documents:
-                document_tab_identifier = admission_document.onglet.split('.')
-
-                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
-                    tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
-
-                    if document_tab_identifier[1] in not_valuated_by_current_admission_experiences_uuids:
-                        documents_from_not_valuated_experiences.append(admission_document.identifiant)
-
-                    if tab_identifier not in context['documents']:
-                        context['documents'][tab_identifier] = [admission_document]
-                    else:
-                        context['documents'][tab_identifier].append(admission_document)
-
-                    prefixed_past_experiences_documents.append(
-                        attr.evolve(
-                            admission_document,
-                            libelle='{experience_name} > {document_name}'.format(
-                                experience_name=context['checklist_tabs'].get(tab_identifier, ''),  # Experience name
-                                document_name=admission_document.libelle,  # Document name
-                            ),
-                        )
-                    )
-
-            # Sort the documents by label
-            for documents in context['documents'].values():
-                documents.sort(key=lambda doc: doc.libelle)
-
-            # Some tabs also contain the documents of each experience
-            context['documents']['parcours_anterieur'].extend(prefixed_past_experiences_documents)
-            context['documents']['financabilite'].extend(prefixed_past_experiences_documents)
-
-            original_admission = self.admission
-
-            can_change_checklist = self.request.user.has_perm('admission.change_checklist', original_admission)
-            can_change_faculty_decision = self.request.user.has_perm(
-                'admission.checklist_change_faculty_decision',
-                original_admission,
-            )
-            can_change_past_experiences = self.request.user.has_perm(
-                'admission.checklist_change_past_experiences',
-                original_admission,
-            )
-            can_change_access_title = self.request.user.has_perm(
-                'admission.checklist_select_access_title',
-                original_admission,
-            )
-            comment_permissions = {
-                'admission.checklist_change_comment': self.request.user.has_perm(
-                    'admission.checklist_change_comment',
-                    original_admission,
-                ),
-                'admission.checklist_change_fac_comment': self.request.user.has_perm(
-                    'admission.checklist_change_fac_comment',
-                    original_admission,
-                ),
-                'admission.checklist_change_sic_comment': self.request.user.has_perm(
-                    'admission.checklist_change_sic_comment',
-                    original_admission,
-                ),
-            }
-
-            disable_unavailable_forms(
-                {
-                    context['assimilation_form']: can_change_checklist,
-                    context['fac_decision_refusal_form']: can_change_faculty_decision,
-                    context['fac_decision_approval_form']: can_change_faculty_decision,
-                    context['financabilite_approval_form']: can_change_checklist,
-                    context['past_experiences_admission_requirement_form']: can_change_past_experiences,
-                    context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,
-                    context['financabilite_approval_form']: can_change_checklist,
-                    **{
-                        authentication_form: can_change_checklist
-                        for authentication_form in context['authentication_forms'].values()
-                    },
-                    **{
-                        comment_form: comment_permissions[comment_form.permission]
-                        for comment_form in context['comment_forms'].values()
-                    },
-                }
-            )
-            context['can_choose_access_title'] = can_change_access_title
-
-            context['digit_ticket'] = message_bus_instance.invoke(
-                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
-            )
-
-            if self.proposition_fusion:
-                context['proposition_fusion'] = self.proposition_fusion
-
-        return context
-
-    def _merge_with_known_curriculum(self, curex_a_fusionner, resume):
-        if curex_a_fusionner:
-            curex_existant = message_bus_instance.invoke(
-                RechercherParcoursAnterieurQuery(
-                    global_id=self.proposition_fusion.matricule,
-                    uuid_proposition=self.admission_uuid,
-                )
-            )
-            for experience_non_academique in curex_existant.experiences_non_academiques:
-                if str(experience_non_academique.uuid) in curex_a_fusionner:
-                    resume.curriculum.experiences_non_academiques.append(experience_non_academique)
-            for experience_academique in curex_existant.experiences_academiques:
-                if str(experience_academique.uuid) in curex_a_fusionner:
-                    resume.curriculum.experiences_academiques.append(experience_academique)
-
-    def _get_experiences(self, resume: ResumePropositionDTO):
-        return groupe_curriculum_par_annee_decroissante(
-            experiences_academiques=resume.curriculum.experiences_academiques,
-            experiences_professionnelles=resume.curriculum.experiences_non_academiques,
-            etudes_secondaires=resume.etudes_secondaires,
-        )
-
-    def _get_financabilite(self):
-        # TODO
-        return {
-            'inscription_precedentes': 2,
-            'inscription_supplementaire': 1,
-        }
-
-    def _get_experiences_by_uuid(self, resume: ResumeCandidatDTO):
-        experiences = {}
-        for experience_academique in resume.curriculum.experiences_academiques:
-            experiences[str(experience_academique.uuid)] = experience_academique
-        for experience_non_academique in resume.curriculum.experiences_non_academiques:
-            experiences[str(experience_non_academique.uuid)] = experience_non_academique
-        experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
-        return experiences
-
-
 class ApplicationFeesView(
     AdmissionFormMixin,
     RequestApplicationFeesContextDataMixin,
@@ -2439,27 +2016,139 @@ class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
 
 
 class FinancabiliteContextMixin(CheckListDefaultContextMixin):
+    @cached_property
+    def financability_dispensation_refusal_form(self):
+        form_kwargs = {
+            'prefix': 'financability-dispensation-refusal',
+        }
+        if self.request.method == 'POST' and 'financability-dispensation-refusal-reasons' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+        else:
+            form_kwargs['initial'] = {
+                'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
+                + self.admission.other_refusal_reasons,
+            }
+
+        return FinancabilityDispensationRefusalForm(**form_kwargs)
+
+    @cached_property
+    def financability_dispensation_notification_form(self):
+        candidate = self.admission.candidate
+
+        training_title = {
+            settings.LANGUAGE_CODE_FR: self.proposition.formation.intitule_fr,
+            settings.LANGUAGE_CODE_EN: self.proposition.formation.intitule,
+        }[candidate.language]
+
+        with override(language=candidate.language):
+            greetings = {
+                ChoixGenre.H.name: pgettext('male gender', 'Dear'),
+                ChoixGenre.F.name: pgettext('female gender', 'Dear'),
+                ChoixGenre.X.name: _("For the attention of"),
+            }.get(candidate.gender or ChoixGenre.X.name)
+
+            greetings_ends = {
+                ChoixGenre.H.name: _('Sir'),
+                ChoixGenre.F.name: _('Madam'),
+                ChoixGenre.X.name: _("Sir, Madam"),
+            }.get(candidate.gender or ChoixGenre.X.name)
+
+        tokens = {
+            'admission_reference': self.proposition.reference,
+            'candidate_first_name': self.proposition.prenom_candidat,
+            'candidate_last_name': self.proposition.nom_candidat,
+            'academic_year': format_academic_year(self.proposition.formation.annee),
+            'training_title': training_title,
+            'training_acronym': self.proposition.formation.sigle,
+            'training_campus': self.proposition.formation.campus.nom,
+            'greetings': greetings,
+            'greetings_end': greetings_ends,
+            'contact_link': get_training_url(
+                training_type=self.admission.training.education_group_type.name,
+                training_acronym=self.admission.training.acronym,
+                partial_training_acronym=self.admission.training.partial_acronym,
+                suffix='contacts',
+            ),
+        }
+
+        try:
+            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
+                ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
+                self.admission.candidate.language,
+            )
+
+            subject = mail_template.render_subject(tokens=tokens)
+            body = mail_template.body_as_html(tokens=tokens)
+        except EmptyMailTemplateContent:
+            subject = ''
+            body = ''
+
+        form_kwargs = {
+            'prefix': 'financability-dispensation-notification',
+        }
+        if self.request.method == 'POST' and 'financability-dispensation-notification-body' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+        else:
+            form_kwargs['initial'] = {
+                'subject': subject,
+                'body': body,
+            }
+
+        return FinancabiliteNotificationForm(**form_kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__contains=['financabilite']).first()
-
-        context['comment_forms'] = {
-            'financabilite': CommentForm(
-                comment=comment,
-                form_url=resolve_url(
-                    f'{self.base_namespace}:save-comment',
-                    uuid=self.admission_uuid,
-                    tab='financabilite',
-                ),
-                prefix='financabilite',
-            )
-        }
 
         context['financabilite_approval_form'] = FinancabiliteApprovalForm(
             instance=self.admission,
             prefix='financabilite',
         )
+
+        context['financability_dispensation_form'] = FinancabiliteDispensationForm(
+            is_central_manager=self.request.user.has_perm(
+                'admission.checklist_financability_dispensation',
+                self.admission,
+            ),
+            is_program_manager=self.request.user.has_perm(
+                'admission.checklist_financability_dispensation_fac',
+                self.admission,
+            ),
+            initial={
+                'dispensation_status': self.admission.financability_dispensation_status,
+            },
+            prefix='financabilite_derogation',
+        )
+
+        context['financability_dispensation_refusal_form'] = self.financability_dispensation_refusal_form
+        context['financability_dispensation_notification_form'] = self.financability_dispensation_notification_form
+
+        if self.request.htmx:
+            comment = CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid, tags__contains=['financabilite']
+            ).first()
+            comment_derogation = CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid, tags__contains=['financabilite__derogation']
+            ).first()
+
+            context['comment_forms'] = {
+                'financabilite': CommentForm(
+                    comment=comment,
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab='financabilite',
+                    ),
+                    prefix='financabilite',
+                ),
+                'financabilite__derogation': CommentForm(
+                    comment=comment_derogation,
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='financabilite__derogation'
+                    ),
+                    prefix='financabilite__derogation',
+                    label=_('Comment about financability dispensation'),
+                ),
+            }
 
         return context
 
@@ -2477,6 +2166,10 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
             status, extra = self.kwargs['status'].split('-')
             if status == 'GEST_BLOCAGE':
                 extra = {'to_be_completed': extra}
+            elif status == 'GEST_EN_COURS':
+                extra = {'en_cours': extra}
+            elif status == 'GEST_REUSSITE':
+                extra = {'reussite': extra}
         except ValueError:
             status = self.kwargs['status']
             extra = {}
@@ -2537,6 +2230,137 @@ class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteCon
         admission = self.get_permission_object()
         admission.update_financability_computed_rule(author=self.request.user.person)
         return self.render_to_response(self.get_context_data())
+
+
+class FinancabiliteDerogationNonConcerneView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-derogation-non-concerne': 'financability-derogation-non-concerne'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.checklist_financability_dispensation'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierDerogationFinancabiliteCommand(
+                uuid_proposition=self.admission_uuid,
+                statut=DerogationFinancement.NON_CONCERNE.name,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        response = self.render_to_response(self.get_context_data())
+        add_close_modal_into_htmx_response(response=response)
+        return response
+
+
+class FinancabiliteDerogationNotificationView(
+    AdmissionFormMixin,
+    FinancabiliteContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'financability-derogation-notification': 'financability-derogation-notification'}
+    permission_required = 'admission.checklist_financability_dispensation'
+    template_name = (
+        htmx_template_name
+    ) = 'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    )
+
+    def get_form(self, form_class=None):
+        return self.financability_dispensation_notification_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                NotifierCandidatDerogationFinancabiliteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    objet_message=form.cleaned_data['subject'],
+                    corps_message=form.cleaned_data['body'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class FinancabiliteDerogationAbandonCandidatView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-derogation-abandon': 'financability-derogation-abandon'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.checklist_financability_dispensation_fac'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierDerogationFinancabiliteCommand(
+                uuid_proposition=self.admission_uuid,
+                statut=DerogationFinancement.ABANDON_DU_CANDIDAT.name,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        response = self.render_to_response(self.get_context_data())
+        add_close_modal_into_htmx_response(response=response)
+        return response
+
+
+class FinancabiliteDerogationRefusView(
+    AdmissionFormMixin,
+    FinancabiliteContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'financability-derogation-refus': 'financability-derogation-refus'}
+    permission_required = 'admission.checklist_financability_dispensation_fac'
+    template_name = (
+        htmx_template_name
+    ) = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+
+    def get_form(self, form_class=None):
+        return self.financability_dispensation_refusal_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierDerogationFinancabiliteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    statut=DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
+                    gestionnaire=self.request.user.person.global_id,
+                    refus_uuids_motifs=form.cleaned_data['reasons'],
+                    refus_autres_motifs=form.cleaned_data['other_reasons'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class FinancabiliteDerogationAccordView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-derogation-accord': 'financability-derogation-accord'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.checklist_financability_dispensation_fac'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierDerogationFinancabiliteCommand(
+                uuid_proposition=self.admission_uuid,
+                statut=DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        response = self.render_to_response(self.get_context_data())
+        add_close_modal_into_htmx_response(response=response)
+        return response
 
 
 class SinglePastExperienceMixin(
@@ -2662,3 +2486,441 @@ class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
                 etat_authentification=form.cleaned_data['state'],
             )
         )
+
+
+class ChecklistView(
+    PastExperiencesMixin,
+    FacultyDecisionMixin,
+    FinancabiliteContextMixin,
+    SicDecisionMixin,
+    RequestApplicationFeesContextDataMixin,
+    TemplateView,
+):
+    urlpatterns = 'checklist'
+    template_name = "admission/general_education/checklist.html"
+    permission_required = 'admission.view_checklist'
+
+    @classmethod
+    def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
+        assimilation_documents = {
+            'CARTE_IDENTITE',
+            'PASSEPORT',
+        }
+
+        for document in DocumentsAssimilation:
+            assimilation_documents.add(document)
+
+        secondary_studies_attachments = set(DocumentsEtudesSecondaires.keys())
+
+        documents_by_tab = {
+            'assimilation': assimilation_documents,
+            'financabilite': {
+                'DIPLOME_EQUIVALENCE',
+                'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
+                'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
+                'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
+                'CURRICULUM',
+            },
+            'frais_dossier': assimilation_documents,
+            'choix_formation': {
+                'ATTESTATION_INSCRIPTION_REGULIERE',
+                'FORMULAIRE_MODIFICATION_INSCRIPTION',
+            },
+            'parcours_anterieur': {
+                'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
+                'DIPLOME_EQUIVALENCE',
+                'CURRICULUM',
+                'ADDITIONAL_DOCUMENTS',
+                *secondary_studies_attachments,
+            },
+            'donnees_personnelles': assimilation_documents,
+            'specificites_formation': {
+                'ADDITIONAL_DOCUMENTS',
+            },
+            'decision_facultaire': {
+                'ATTESTATION_ACCORD_FACULTAIRE',
+                'ATTESTATION_REFUS_FACULTAIRE',
+            },
+            f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': secondary_studies_attachments,
+            'decision_sic': {
+                'ATTESTATION_ACCORD_SIC',
+                'ATTESTATION_ACCORD_ANNEXE_SIC',
+                'ATTESTATION_REFUS_SIC',
+                'ATTESTATION_ACCORD_FACULTAIRE',
+                'ATTESTATION_REFUS_FACULTAIRE',
+            },
+        }
+
+        # Add documents from the specific questions
+        checklist_target_tab_by_specific_question_tab = {
+            Onglets.CURRICULUM.name: 'parcours_anterieur',
+            Onglets.ETUDES_SECONDAIRES.name: f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}',
+            Onglets.INFORMATIONS_ADDITIONNELLES.name: 'specificites_formation',
+        }
+
+        for specific_question in specific_questions:
+            if (
+                specific_question.type == TypeItemFormulaire.DOCUMENT.name
+                and specific_question.onglet in checklist_target_tab_by_specific_question_tab
+            ):
+                documents_by_tab[checklist_target_tab_by_specific_question_tab[specific_question.onglet]].add(
+                    specific_question.uuid
+                )
+
+        return documents_by_tab
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["admission/general_education/checklist_menu.html"]
+        return ["admission/general_education/checklist.html"]
+
+    def get_context_data(self, **kwargs):
+        from infrastructure.messages_bus import message_bus_instance
+
+        context = super().get_context_data(**kwargs)
+        if not self.request.htmx:
+            # Retrieve data related to the proposition
+            command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
+                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
+            )
+
+            context['resume_proposition'] = command_result.resume
+
+            specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
+                RecupererQuestionsSpecifiquesQuery(
+                    uuid_proposition=self.admission_uuid,
+                    onglets=[
+                        Onglets.INFORMATIONS_ADDITIONNELLES.name,
+                        Onglets.ETUDES_SECONDAIRES.name,
+                        Onglets.CURRICULUM.name,
+                    ],
+                )
+            )
+
+            context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
+
+            # Initialize forms
+            tab_names = list(self.extra_context['checklist_tabs'].keys())
+
+            comments = {
+                ('__'.join(c.tags)): c
+                for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__overlap=tab_names)
+            }
+
+            for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
+                tab_names.remove(tab)
+                tab_names += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
+            tab_names.append('decision_sic__derogation')
+            tab_names.append('financabilite__derogation')
+
+            comments_labels = {
+                'decision_sic__derogation': _('Comment about dispensation'),
+                'financabilite__derogation': _('Comment about financability dispensation'),
+            }
+
+            context['comment_forms'] = {
+                tab_name: CommentForm(
+                    comment=comments.get(tab_name, None),
+                    form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
+                    prefix=tab_name,
+                    label=comments_labels.get(tab_name, None),
+                )
+                for tab_name in tab_names
+            }
+            context['assimilation_form'] = AssimilationForm(
+                initial=self.admission.checklist.get('current', {}).get('assimilation', {}).get('extra'),
+                form_url=resolve_url(
+                    f'{self.base_namespace}:change-checklist-extra',
+                    uuid=self.admission_uuid,
+                    tab='assimilation',
+                ),
+            )
+
+            # Documents
+            admission_documents = command_result.emplacements_documents
+
+            documents_by_tab = self.checklist_documents_by_tab(specific_questions=specific_questions)
+
+            context['documents'] = {
+                tab_name: [
+                    admission_document
+                    for admission_document in admission_documents
+                    if admission_document.identifiant.split('.')[-1] in tab_documents
+                ]
+                for tab_name, tab_documents in documents_by_tab.items()
+            }
+
+            # Experiences
+            if self.proposition_fusion:
+                merge_curex = (
+                    self.proposition_fusion.educational_curex_uuids + self.proposition_fusion.professional_curex_uuids
+                )
+                self._merge_with_known_curriculum(merge_curex, command_result.resume)
+                context['curex_a_fusionner'] = merge_curex
+
+            experiences = self._get_experiences(command_result.resume)
+            experiences_by_uuid = self._get_experiences_by_uuid(command_result.resume)
+            context['experiences'] = experiences
+            context['experiences_by_uuid'] = experiences_by_uuid
+
+            # Access titles
+            context['access_title_url'] = self.access_title_url
+            context['access_titles'] = self.selectable_access_titles
+            context['selected_access_titles_names'] = get_access_titles_names(
+                access_titles=self.selectable_access_titles,
+                curriculum_dto=command_result.resume.curriculum,
+                etudes_secondaires_dto=command_result.resume.etudes_secondaires,
+            )
+
+            context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
+            context[
+                'past_experiences_admission_access_title_equivalency_form'
+            ] = self.past_experiences_admission_access_title_equivalency_form
+
+            # Financabilité
+            context['financabilite'] = self._get_financabilite()
+
+            # Authentication forms (one by experience)
+            context['authentication_forms'] = {}
+
+            children = (
+                context['original_admission']
+                .checklist.get('current', {})
+                .get('parcours_anterieur', {})
+                .get('enfants', [])
+            )
+
+            context['check_authentication_mail_to_checkers'] = get_email(
+                template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+                language=settings.LANGUAGE_CODE_FR,
+                proposition_dto=self.proposition,
+            )
+            context['check_authentication_mail_to_candidate'] = get_email(
+                template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+                language=self.proposition.langue_contact_candidat,
+                proposition_dto=self.proposition,
+            )
+
+            all_experience_authentication_history_entries = HistoryEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags__contains=['proposition', 'experience-authentication', 'message'],
+            ).order_by('-created')
+
+            context['all_experience_authentication_history_entries'] = {}
+            for entry in all_experience_authentication_history_entries:
+                experience_id = entry.extra_data.get('experience_id')
+                if experience_id:
+                    context['all_experience_authentication_history_entries'].setdefault(experience_id, entry)
+
+            children_by_identifier = {
+                child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
+            }
+            last_valuated_admission_by_experience_uuid = {}
+            not_valuated_by_current_admission_experiences_uuids = set()
+
+            for experience_uuid, current_experience in experiences_by_uuid.items():
+                tab_identifier = f'parcours_anterieur__{experience_uuid}'
+
+                if experience_uuid in children_by_identifier:
+                    experience_checklist_info = children_by_identifier.get(experience_uuid, {})
+                else:
+                    experience_checklist_info = Checklist.initialiser_checklist_experience(experience_uuid).to_dict()
+                    children.append(experience_checklist_info)
+
+                context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
+                    authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
+                )
+                context['authentication_forms'][experience_uuid] = SinglePastExperienceAuthenticationForm(
+                    experience_checklist_info,
+                )
+                context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
+                context['checklist_tabs'][tab_identifier] = truncatechars(current_experience.titre_formate, 50)
+                context['comment_forms'][tab_identifier] = CommentForm(
+                    comment=comments.get(tab_identifier, None),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab=tab_identifier,
+                    ),
+                    prefix=tab_identifier,
+                )
+                authentication_comment_identifier = f'{tab_identifier}__authentication'
+                context['comment_forms'][authentication_comment_identifier] = CommentForm(
+                    comment=comments.get(authentication_comment_identifier, None),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab=authentication_comment_identifier,
+                    ),
+                    prefix=authentication_comment_identifier,
+                    disabled=not can_edit_experience_authentication(experience_checklist_info),
+                    label=_('Comment about the authentication'),
+                )
+
+                # Get the last valuated admission for this experience
+                valuated_admissions = getattr(current_experience, 'valorisee_par_admissions', [])
+
+                if valuated_admissions and self.admission_uuid not in valuated_admissions:
+                    not_valuated_by_current_admission_experiences_uuids.add(experience_uuid)
+                    last_valuated_admission_by_experience_uuid[experience_uuid] = next(
+                        (
+                            admission
+                            for admission in context['toutes_les_demandes']
+                            if admission.uuid in valuated_admissions
+                        ),
+                        None,
+                    )
+
+            context['last_valuated_admission_by_experience_uuid'] = last_valuated_admission_by_experience_uuid
+
+            # Remove the experiences that we had in the checklist that have been removed
+            children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
+
+            # Order the experiences in chronological order
+            ordered_experiences = {}
+            if children:
+                order = 0
+
+                for annee, experience_list in experiences.items():
+                    for experience in experience_list:
+                        experience_uuid = str(experience.uuid)
+                        if experience_uuid not in ordered_experiences:
+                            ordered_experiences[experience_uuid] = order
+                            order += 1
+
+                children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
+
+            prefixed_past_experiences_documents = []
+            documents_from_not_valuated_experiences = []
+            context['read_only_documents'] = documents_from_not_valuated_experiences
+
+            # Add the documents related to cv experiences
+            for admission_document in admission_documents:
+                document_tab_identifier = admission_document.onglet.split('.')
+
+                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
+                    tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
+
+                    if document_tab_identifier[1] in not_valuated_by_current_admission_experiences_uuids:
+                        documents_from_not_valuated_experiences.append(admission_document.identifiant)
+
+                    if tab_identifier not in context['documents']:
+                        context['documents'][tab_identifier] = [admission_document]
+                    else:
+                        context['documents'][tab_identifier].append(admission_document)
+
+                    prefixed_past_experiences_documents.append(
+                        attr.evolve(
+                            admission_document,
+                            libelle='{experience_name} > {document_name}'.format(
+                                experience_name=context['checklist_tabs'].get(tab_identifier, ''),  # Experience name
+                                document_name=admission_document.libelle,  # Document name
+                            ),
+                        )
+                    )
+
+            # Sort the documents by label
+            for documents in context['documents'].values():
+                documents.sort(key=lambda doc: doc.libelle)
+
+            # Some tabs also contain the documents of each experience
+            context['documents']['parcours_anterieur'].extend(prefixed_past_experiences_documents)
+            context['documents']['financabilite'].extend(prefixed_past_experiences_documents)
+
+            original_admission = self.admission
+
+            can_change_checklist = self.request.user.has_perm('admission.change_checklist', original_admission)
+            can_change_faculty_decision = self.request.user.has_perm(
+                'admission.checklist_change_faculty_decision',
+                original_admission,
+            )
+            can_change_past_experiences = self.request.user.has_perm(
+                'admission.checklist_change_past_experiences',
+                original_admission,
+            )
+            can_change_access_title = self.request.user.has_perm(
+                'admission.checklist_select_access_title',
+                original_admission,
+            )
+            comment_permissions = {
+                'admission.checklist_change_comment': self.request.user.has_perm(
+                    'admission.checklist_change_comment',
+                    original_admission,
+                ),
+                'admission.checklist_change_fac_comment': self.request.user.has_perm(
+                    'admission.checklist_change_fac_comment',
+                    original_admission,
+                ),
+                'admission.checklist_change_sic_comment': self.request.user.has_perm(
+                    'admission.checklist_change_sic_comment',
+                    original_admission,
+                ),
+            }
+
+            disable_unavailable_forms(
+                {
+                    context['assimilation_form']: can_change_checklist,
+                    context['fac_decision_refusal_form']: can_change_faculty_decision,
+                    context['fac_decision_approval_form']: can_change_faculty_decision,
+                    context['financabilite_approval_form']: can_change_checklist,
+                    context['past_experiences_admission_requirement_form']: can_change_past_experiences,
+                    context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,
+                    context['financabilite_approval_form']: can_change_checklist,
+                    **{
+                        authentication_form: can_change_checklist
+                        for authentication_form in context['authentication_forms'].values()
+                    },
+                    **{
+                        comment_form: comment_permissions[comment_form.permission]
+                        for comment_form in context['comment_forms'].values()
+                    },
+                }
+            )
+            context['can_choose_access_title'] = can_change_access_title
+
+            context['digit_ticket'] = message_bus_instance.invoke(
+                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
+            )
+
+            if self.proposition_fusion:
+                context['proposition_fusion'] = self.proposition_fusion
+
+        return context
+
+    def _merge_with_known_curriculum(self, curex_a_fusionner, resume):
+        if curex_a_fusionner:
+            curex_existant = message_bus_instance.invoke(
+                RechercherParcoursAnterieurQuery(
+                    global_id=self.proposition_fusion.matricule,
+                    uuid_proposition=self.admission_uuid,
+                )
+            )
+            for experience_non_academique in curex_existant.experiences_non_academiques:
+                if str(experience_non_academique.uuid) in curex_a_fusionner:
+                    resume.curriculum.experiences_non_academiques.append(experience_non_academique)
+            for experience_academique in curex_existant.experiences_academiques:
+                if str(experience_academique.uuid) in curex_a_fusionner:
+                    resume.curriculum.experiences_academiques.append(experience_academique)
+
+    def _get_experiences(self, resume: ResumePropositionDTO):
+        return groupe_curriculum_par_annee_decroissante(
+            experiences_academiques=resume.curriculum.experiences_academiques,
+            experiences_professionnelles=resume.curriculum.experiences_non_academiques,
+            etudes_secondaires=resume.etudes_secondaires,
+        )
+
+    def _get_financabilite(self):
+        # TODO
+        return {
+            'inscription_precedentes': 2,
+            'inscription_supplementaire': 1,
+        }
+
+    def _get_experiences_by_uuid(self, resume: ResumeCandidatDTO):
+        experiences = {}
+        for experience_academique in resume.curriculum.experiences_academiques:
+            experiences[str(experience_academique.uuid)] = experience_academique
+        for experience_non_academique in resume.curriculum.experiences_non_academiques:
+            experiences[str(experience_non_academique.uuid)] = experience_non_academique
+        experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
+        return experiences

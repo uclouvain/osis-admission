@@ -30,9 +30,10 @@ import freezegun
 
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierFinancabiliteRegleCommand,
+    SpecifierDerogationFinancabiliteCommand,
+    NotifierCandidatDerogationFinancabiliteCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist, \
-    RegleCalculeResultatAvecFinancable
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist, DerogationFinancement
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -44,7 +45,7 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 
 
 @freezegun.freeze_time('2020-11-01')
-class TestSpecifierFinancabiliteRegle(TestCase):
+class TestNotifierCandidatDerogationFinancabilite(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
@@ -70,15 +71,15 @@ class TestSpecifierFinancabiliteRegle(TestCase):
             ),
         )
 
-        self.command = SpecifierFinancabiliteRegleCommand(
+    def test_should_notifier_candidat_etre_ok(self):
+        command = NotifierCandidatDerogationFinancabiliteCommand(
             uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-            financabilite_regle='SECONDE_INSCRIPTION_MEME_CYCLE',
-            etabli_par='uuid-GESTIONNAIRE',
             gestionnaire='0123456789',
+            objet_message='foo',
+            corps_message='bar',
         )
 
-    def test_should_specifier_regle_etre_ok(self):
-        proposition_id = self.message_bus.invoke(self.command)
+        proposition_id = self.message_bus.invoke(command)
 
         proposition = self.proposition_repository.get(proposition_id)
 
@@ -86,9 +87,4 @@ class TestSpecifierFinancabiliteRegle(TestCase):
         self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
 
         # Proposition mise à jour
-        self.assertEqual(
-            proposition.financabilite_regle,
-            RegleCalculeResultatAvecFinancable.SECONDE_INSCRIPTION_MEME_CYCLE
-        )
-        self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
-        self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(proposition.financabilite_derogation_statut, DerogationFinancement.CANDIDAT_NOTIFIE)

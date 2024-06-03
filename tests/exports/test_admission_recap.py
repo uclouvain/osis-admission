@@ -1441,6 +1441,11 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             visa_etudes_d=['uuid-visa-etudes-d'],
             certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
             type=TypeDemande.ADMISSION.name,
+            financabilite_derogation_statut='',
+            financabilite_derogation_premiere_notification_le=None,
+            financabilite_derogation_premiere_notification_par='',
+            financabilite_derogation_derniere_notification_le=None,
+            financabilite_derogation_derniere_notification_par='',
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
