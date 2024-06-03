@@ -23,7 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import logging
+
 import waffle
+from django.conf import settings
 from django.shortcuts import redirect
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
@@ -31,21 +34,31 @@ from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery,
     RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand
 from backoffice.celery import app
 
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
+
 
 @app.task
 def run(request=None):
     if not waffle.switch_is_active('fusion-digit'):
+        logger.info("fusion-digit switch not active")
         return
 
     from infrastructure.messages_bus import message_bus_instance
 
+    logger.info("Starting retrieve digit tickets status task")
+
     # Retrieve list of tickets
     tickets_pending = message_bus_instance.invoke(command=RetrieveListeTicketsEnAttenteQuery())
+
+    logger.info("[PENDING DIGIT TICKETS] : " + str(tickets_pending))
 
     for ticket in tickets_pending:
         status = message_bus_instance.invoke(
             command=RetrieveAndStoreStatutTicketPersonneFromDigitCommand(global_id=ticket.matricule)
         )
+
+        logger.info(f"[DigIT Ticket] {ticket.nom}, {ticket.prenom}")
+        logger.info(f"[DigIT Ticket status] {status}")
 
         if status in ["DONE", "DONE_WITH_WARNINGS"]:
             digit_matricule = message_bus_instance.invoke(
@@ -53,12 +66,15 @@ def run(request=None):
                     noma=ticket.noma,
                 )
             )
+            logger.info(f"[DigIT Ticket noma - matricule] NOMA: {ticket.noma} - MATR: {digit_matricule}")
+
             if digit_matricule == ticket.matricule:
                 message_bus_instance.invoke(
                     command=FusionnerCandidatAvecPersonneExistanteCommand(
                         candidate_global_id=digit_matricule,
                     )
                 )
+                logger.info(f"[DigIT Ticket merge with existing person]")
             else:
                 message_bus_instance.invoke(
                     command=ModifierMatriculeCandidatCommand(
@@ -66,6 +82,7 @@ def run(request=None):
                         digit_global_id=digit_matricule
                     )
                 )
+                logger.info(f"[DigIT Ticket edit candidate global id]")
 
     # Handle response when task is ran as a cmd from admin panel
     if request:
