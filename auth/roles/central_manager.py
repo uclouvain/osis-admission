@@ -106,11 +106,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_documents_management': is_entity_manager
             & ((general.is_general & general.not_cancelled) | (continuing.is_continuing & continuing.not_cancelled)),
             'admission.edit_documents': is_entity_manager
-            & ((general.is_general & general.not_cancelled) | (continuing.is_continuing & continuing.not_cancelled)),
-            'admission.change_documents_management': is_entity_manager
-            & (
-                (general.is_general & general.in_sic_status) | (continuing.is_continuing & continuing.in_manager_status)
-            ),
+            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.is_submitted)),
             'admission.request_documents': is_entity_manager
             & (
                 (general.is_general & general.in_sic_status)
@@ -133,10 +129,10 @@ class CentralManager(EntityRoleModel):
             & general.in_fac_status,
             'admission.checklist_change_past_experiences': is_entity_manager & general.in_sic_status,
             'admission.checklist_select_access_title': is_entity_manager & general.in_sic_status,
-            'admission.checklist_change_sic_comment': is_entity_manager,
+            'admission.checklist_change_sic_comment': is_entity_manager & general.is_submitted,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager,
-            'admission.checklist_change_comment': is_entity_manager & general.in_sic_status,
+            'admission.checklist_change_comment': is_entity_manager & general.is_submitted,
             'admission.checklist_change_sic_decision': is_entity_manager & general.in_sic_status,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,

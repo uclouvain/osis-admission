@@ -109,14 +109,14 @@
     </table>
   </div>
 
-  {% has_perm 'admission.change_documents_management' as can_change_documents %}
   {% has_perm 'admission.request_documents' as can_request_documents %}
+  {% has_perm 'admission.edit_documents' as can_edit_documents %}
   {% has_perm 'admission.cancel_document_request' as can_cancel_document_request %}
 
   <div class="flex-content mt-1" style="gap: 5px">
     <button
         class="btn btn-primary"
-        {% if can_change_documents %}
+        {% if can_edit_documents %}
         data-toggle="collapse"
         data-target="#upload-candidate-document-form"
         hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-request-with-default-file' uuid=view.kwargs.uuid %}"
