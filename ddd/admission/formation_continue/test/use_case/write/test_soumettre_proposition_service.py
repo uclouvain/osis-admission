@@ -23,9 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
-
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (

@@ -53,6 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
@@ -97,6 +98,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import get_access_conditions_url
+from base.models.enums.civil_state import CivilState
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
@@ -863,7 +865,8 @@ def part_of_dict(member, container):
 
 @register.simple_tag
 def is_current_checklist_status(current, state, extra):
-    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {}))
+    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) \
+        if current and state else False
 
 
 @register.simple_tag
@@ -1096,6 +1099,90 @@ def is_profile_coordinates_different(profil_candidat: ProfilCandidatDTO, coordon
             profil_candidat.pays != adresse.country.iso_code,
         )
     )
+
+
+@register.filter
+def render_display_field_name(field_name: str, context: str = None) -> str:
+    msg = field_name.replace('_', ' ').capitalize()
+    return pgettext(context, msg) if context else _(msg)
+
+
+@register.inclusion_tag('admission/search_account_digit_result_message.html', takes_context=True)
+def search_account_digit_result_msg(context, admission):
+    status = None
+    if hasattr(admission.candidate, 'personmergeproposal'):
+        status = admission.candidate.personmergeproposal.status
+    context['uuid'] = admission.uuid
+    context['result_code'] = status
+    return context
+
+
+@register.inclusion_tag('admission/digit_ticket_status_message.html', takes_context=True)
+def digit_ticket_status_msg(context, digit_ticket):
+    context['digit_ticket'] = digit_ticket
+    return context
+
+
+@register.filter
+def to_niss_format(s):
+    return f"{s[:2]}.{s[2:4]}.{s[4:6]}-{s[6:9]}.{s[9:]}"
+
+
+@register.filter
+def map_fields_items(digit_fields):
+
+    mapping = {
+        "first_name": "firstName",
+        "middle_name": "",
+        "last_name": "lastName",
+        "national_number": "nationalRegister",
+        "gender": "gender",
+        "birth_date": "birthDate",
+        "email": "",
+        "civil_state": "",
+        "birth_place": "placeOfBirth",
+        "country_of_citizenship__name": "nationality",
+        "id_card_number": "",
+        "passport_number": "",
+        "id_card_expiry_date": "",
+        "passport_expiry_date": "",
+    }
+
+    mapped_fields = {}
+    for admission_field, digit_field in mapping.items():
+        mapped_fields[admission_field] = digit_fields.get('person').get(digit_field)
+
+    mapped_fields['birth_date'] = datetime.datetime.strptime(mapped_fields['birth_date'], "%Y-%m-%d")
+    mapped_fields['gender'] = "H" if mapped_fields['gender'] == "M" else "F"
+
+    if mapped_fields['country_of_citizenship__name']:
+        mapped_fields['country_of_citizenship__name'] = Country.objects.get(
+            iso_code=mapped_fields['country_of_citizenship__name']
+        ).name
+
+    return mapped_fields.items()
+
+
+@register.inclusion_tag('admission/includes/input_field_data.html')
+def input_field_data(label, value, editable=True, mask=None, select_key=None):
+    if isinstance(value, datetime.date):
+        value = value.strftime("%d/%m/%Y")
+    if label == 'gender' and value is not None:
+        select_key = value
+        value = ChoixGenre.get_value(select_key)
+    if label == 'civil_state' and value is not None:
+        select_key = value
+        value = CivilState.get_value(select_key)
+    if 'country_of_citizenship' in label and value:
+        select_key = Country.objects.get(name=value).id
+    return {
+        'label': label,
+        'value': str(value) if value else None,
+        'editable': editable,
+        'mask': mask,
+        'context': 'admission' if label == 'email' else None,
+        'select_key': select_key,
+    }
 
 
 @register.inclusion_tag(
@@ -1365,7 +1452,8 @@ def checklist_experience_action_links_context(
                 'edit-etudes-secondaires-view',
                 noma=context['admission'].noma_candidat,
             )
-    elif proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year:
+    elif (experience.valorisee_par_admissions and
+          proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year):
         if experience.__class__ == ExperienceAcademiqueDTO:
             result_context['duplicate_url'] = resolve_url(
                 f'{base_namespace}:update:curriculum:educational_duplicate',
@@ -1443,6 +1531,12 @@ def checklist_experience_action_links(
     parcours_tab_id,
 ):
     return checklist_experience_action_links_context(context, experience, current_year, prefix, parcours_tab_id)
+
+
+@register.filter
+def display_academic_years_range(ac_years):
+    ac_years = sorted(ac_years, key=lambda x: x.annee)
+    return '{} - {}'.format(ac_years[0].annee, ac_years[-1].annee) if ac_years else "-"
 
 
 @register.filter
@@ -1528,3 +1622,101 @@ def access_conditions_url(proposition: PropositionDTO):
         training_acronym=training['training__acronym'],
         partial_training_acronym=training['training__partial_acronym'],
     )
+
+
+@register.filter
+def format_matricule(matricule):
+    prefix_fgs = (8 - len(matricule)) * '0'
+    user_fgs = ''.join([prefix_fgs, matricule])
+    return user_fgs
+
+
+@register.filter
+def digit_error_description(error_code):
+    error_mapping = {
+        "ITYPE0001": "Le type d'identité est différent de celle déjà connue",
+        "INAME0001": "Les champs nom ET prénom sont vides ou null",
+        "ILASTNAME0001": "Le nom de famille est null",
+        "ILASTNAME0002": "Le nom de famille comporte plus de 40 caractères",
+        "ILASTNAME0003": "Le nom de famille comporte des caractères invalides",
+        "IFIRSTNAME0001": "Le prénom comporte plus de 20 caractères",
+        "IFIRSTNAME0002": "Le prénom comporte des caractères invalides",
+        "IGENRE0001": "Le genre est null",
+        "IGENRE0002": "La valeur du genre est incorrecte",
+        "IBIRTHDATE0001": "La date de naissance est null",
+        "IBIRTHDATE0002": "L'âge de la personne n'est pas entre 12 et 99 ans",
+        "IBIRTHDATE0003": "La date de naissance est d'un format incorrect",
+        "INATIONALITY0001": "La nationalité est null",
+        "INATIONALITY0002": "Le code nationalité est invalide",
+        "INISS0001": "Le numéro national ne comporte pas 11 caractères",
+        "INISS0002": "Le numéro national comporte des caractères invalides",
+        "INISS0003": "Le format du numéro national est incorrect",
+        "INISS0004": "Problème de cohérence entre la date de naissance et le numéro national",
+        "INISS0005": "Problème de cohérence entre le genre et le numéro national",
+        "INISS0006": "Impossible de vérifier l'existence de celui-ci sur un autre dossier, service inaccessible.",
+        "INISS0007": "Impossible de vérifier la concordance avec la date de naissance",
+        "INISS0008": "Problème de cohérence entre le genre et le numéro niss temporaire",
+        "INISS0009": "Problème de cohérence entre la date de naissance et le numéro niss temporaire",
+        "IDISPLAYLASTNAME0001": "Le display lastname comporte plus de 50 caractères",
+        "IDISPLAYLASTNAME0002": "Le display lastname comporte des caractères invalides",
+        "IDISPLAYFIRSTNAME0001": "Le display firstname comporte plus de 50 caractères",
+        "IDISPLAYFIRSTNAME0002": "Le display firstname comporte des caractères invalides",
+        "IUID0001": "L'UID est null",
+        "IUID0002": "L'UID comporte plus de 12 caractères",
+        "IEMAIL0001": "L'email est null",
+        "IEMAIL0002": "Le format de l'email est incorrect",
+        "IDECEASED0001": "La valeur du champs 'deceased' est null",
+        "IDEGRADATION0001": "Suspicion de dégradation de signalétique",
+        "IDOUBLON": "Suspicion de doublon",
+        "AADDRESSES0001": "La liste d'adresses est null",
+        "AADDRESSES0002": "La liste d'adresses est vide",
+        "AADDRESSTYPE0001": "Le type d'adresse est null",
+        "AADDRESSTYPE0002": "La valeur du type d'adresse est incorrecte",
+        "ACOUNTRY0001": "Le pays est null",
+        "ACOUNTRY0002": "Le pays n'est pas valide",
+        "APOSTALCODE0001": "Le code postal est null",
+        "APOSTALCODE0002": "Le code postal n'est pas valide pour le pays",
+        "APOSTALCODE0003": "La sémantique de code postal est incorrect",
+        "APOSTALCODE0005": "Le code postal n'a pas de correspondance avec le pays et la localité",
+        "ACITY0001": "La ville est null",
+        "ACITY0002": "La ville est inconnue",
+        "ACITY0003": "La ville est trop longue, elle sera tronquée dans le fgs",
+        "ASTREET0001": "La rue est null",
+        "ASTREET0002": "La rue n'existe pas",
+        "ASTREET0003": "La rue est trop longue, elle sera tronquée dans le fgs",
+        "ANUMBER0001": "Le numéro de maison est trop long (plus de 12 caractères)",
+        "AISOCODE0001": "Le code iso est null",
+        "AISOCODE0002": "Le code iso est inconnu",
+        "PAPPLICATION0001": "L'identifiant du fournisseur est null",
+        "PAPPLICATION0002": "L'identifiant du fournisseur est incorrecte",
+        "PAPPLICATION0003": "Fournisseur avec plusieurs matricules",
+        "PAPPLICATIONFGS": "Fournisseur avec plusieurs matricules FGS",
+        "PAPPLICATION0004": "Fournisseur inactif absent du referentiel",
+        "PAPPLICATION0005": "Le fournisseur est déjà présent sur un signalétique different,false",
+        "PAPPLICATION0006": "Le fournisseur est déjà présent sur un signalétique d'une personne non physique",
+        "PACCOUNT0001": "Le matricule est null",
+        "PACCOUNT0002": "Le matricule comporte plus de 8 caractères",
+        "PIDENTITY0001": "L'identityId du fournisseur est null",
+        "PIDENTITY0002": "L'identityId du fournisseur n'existe pas ou plus",
+        "PACTIVE0001": "La valeur 'active' du fournisseur est null",
+        "LADDRESSES0001": "Le niveau de contrôle est dégradé",
+        "CCOMMTYPE0001": "Le type de communication est null",
+        "CCOMMTYPE0002": "Le type de communication est invalide",
+        "CCOMMGSMVALUE0001": "La longueur du numéro de gsm est supérieure à 20 caractères",
+        "TAPPLICATION0001": "L'identifiant du fournisseur est null",
+        "TAPPLICATION0002": "L'identifiant du fournisseur est incorrecte",
+        "TAPPLICATION0003": "L'identifiant du fournisseur client est null",
+        "TAPPLICATION0004": "L'identifiant du fournisseur client est incorrecte",
+        "TAPPLICATION0005": "Fournisseur avec plusieurs clients",
+        "TAPPLICATION0006": "Fournisseur n'est pas lié à une identité",
+        "TACCOUNT0001": "Le matricule client est null",
+        "TACCOUNT0002": "Le matricule client comporte plus de 8 caractères",
+        "RGRIDNUMBER0001": "Le numéro de grille idm est null",
+        "RGRIDNUMBER0002": "Le numéro de grille idm est incorrecte",
+        "RSTARTDATE0001": "La date de début est null",
+        "RSTARTDATE0002": "La date de début est d'un format incorrect",
+        "RSTOPDATE0001": "La date de début est null",
+        "RSTOPDATE0002": "La date de début est d'un format incorrect"
+    }
+
+    return error_mapping[error_code]

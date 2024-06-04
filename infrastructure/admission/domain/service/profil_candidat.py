@@ -70,6 +70,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -481,6 +482,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
+
         person = (
             Person.objects.select_related(
                 'country_of_citizenship',
@@ -576,33 +578,39 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
-        minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
+    def get_curriculum(
+            cls, matricule: str, annee_courante: int, uuid_proposition: str
+    ) -> Optional['CurriculumAdmissionDTO']:
 
-        academic_experiences_dtos = cls._get_academic_experiences_dtos(
-            matricule,
-            cls.has_default_language(),
-            uuid_proposition,
-        )
+        try:
+            minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
 
-        non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
-            person__global_id=matricule,
-        ).annotate(
+            academic_experiences_dtos = cls._get_academic_experiences_dtos(
+                matricule,
+                cls.has_default_language(),
+                uuid_proposition,
+            )
+
+            non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
+                person__global_id=matricule,
+            ).annotate(
             injecte_par_admission=Exists(
                 AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
             ),
             injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
         )
 
-        non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
+            non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
 
-        return CurriculumAdmissionDTO(
-            experiences_academiques=academic_experiences_dtos,
-            annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
-            annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
-            experiences_non_academiques=non_academic_experiences_dtos,
-            annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
-        )
+            return CurriculumAdmissionDTO(
+                experiences_academiques=academic_experiences_dtos,
+                annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
+                annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
+                experiences_non_academiques=non_academic_experiences_dtos,
+                annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
+            )
+        except Person.DoesNotExist:
+            return None
 
     @classmethod
     def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':

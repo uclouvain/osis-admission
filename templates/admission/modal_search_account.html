@@ -1,0 +1,194 @@
+{% load static i18n bootstrap3 admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<script src="{% static 'js/jquery.mask.min.js' %}"></script>
+
+<div class="modal-dialog modal-xl-responsive" tabindex="-1" role="document">
+    <div id="merge-form-modal-content" class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+            <h4 class="modal-title" id="">{% trans "Merge with existing entry" %}</h4>
+            <div class="panel-title form-group">
+                <form id="matricule-form">
+                    <select id="match" class="form-control" name="match">
+                        {% for match in matches %}
+                          <option value="{{ forloop.counter0 }}" {% if merge_person.selected_global_id == match.person.matricule|format_matricule %} selected {% endif %}>
+                            {{ match.person.lastName }}, {{ match.person.firstName }} - {{ match.person.gender }}
+                            - {{ match.person.birthDate }} - {{ match.person.nationalRegister|to_niss_format }}
+                          </option>
+                        {% endfor %}
+                    </select>
+                    {% if merge_person %}
+                        <input id="selectedMatricule" name="global_id" type="hidden" value="{{ merge_person.selected_global_id }}"/>
+                    {% else %}
+                        <input id="selectedMatricule" name="global_id" type="hidden" value="{{ matches.0.person.matricule|format_matricule }}"/>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        <div class="modal-body">
+
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#personal-data">{% trans 'Personal data' %}</a></li>
+              <li><a data-toggle="tab" href="#previous-experience">{% trans 'Previous experience' %}</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="personal-data" class="tab-pane fade in active">
+                    <h6>Choisir les informations personnelles à conserver pour la fusion</h6>
+                    {% include 'admission/modal_block_personal_data.html' %}
+                </div>
+                <div id="previous-experience" class="tab-pane fade in">
+                    <h6>Choisir les lignes de CV à fusionner dans le CV existant</h6>
+                    {% include 'admission/modal_previous_experience.html' %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+                <i class="fas fa-xmark" style="margin-right: 3px;"></i>
+                {% trans "Cancel" %}
+            </button>
+            <button type="button" class="btn btn-secondary"
+                hx-post="{{ request.get_full_path }}"
+                hx-target="#form-ajax-modal"
+                hx-trigger="click"
+                hx-include="#matricule-form, #proposal-form, #curex-form"
+                hx-vals='{"action": "SAVE"}'
+                hx-indicator="#htmx-overlay"
+                hx-swap="innerHTML"
+            >
+                <i class="fas fa-save" style="margin-right: 3px;"></i>
+                {% trans "Save fusion proposal" %}
+            </button>
+            <button type="button" class="btn btn-danger"
+                hx-post="{% url 'admission:services:digit:discard-merge' uuid=uuid %}"
+                hx-trigger="click"
+                hx-include="#proposal-form"
+                hx-indicator="#htmx-overlay"
+            >
+                 <i class="fas fa-ban" style="margin-right: 3px;"></i>
+                {% trans "Discard fusion" %}
+            </button>
+            <button type="button" class="btn btn-primary"
+                hx-post="{{ request.get_full_path }}"
+                hx-target="#form-ajax-modal"
+                hx-trigger="click"
+                hx-include="#matricule-form, #proposal-form, #curex-form"
+                hx-vals='{"action": "MERGE"}'
+                hx-indicator="#htmx-overlay"
+                hx-swap="innerHTML"
+            >
+                <i class="fas fa-merge" style="margin-right: 3px;"></i>
+                {% trans "Merge" context "admission" %}
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    function formatState (state) {
+        const split = state.text.split(' - ');
+        return $('<table style="width: 100%"><tbody><tr><td style="width: 25%;"> ' + split[0] + '</td><td style="width: 25%;"> ' + split[1] + '<td style="width: 25%;"> ' + split[2] + '</td><td style="width: 25%;"> ' + split[3] + '</td></tr></tbody></table>');
+    }
+
+    $('.modal').on('shown.bs.modal', function() {
+
+        $('#match').select2({
+            minimumResultsForSearch: -1,
+            dropdownCssClass: 'match-select',
+            templateResult: formatState,
+        }).on('change', (e) => {
+            const selectedMatchId = $('#match').select2('data')[0].id;
+            $('.match-data-panel').hide();
+            $('.digit-data-heading .btn-merge-all').attr('data-merge-source', `digit-${selectedMatchId}`)
+            $(`.match-name`).hide();
+            $(`#match-${selectedMatchId}`).show();
+            $(`#match-parcours-${selectedMatchId}`).show();
+            $(`.digit-${selectedMatchId}-data`).show();
+            const selectedMatriculeVal = $(`#match-${selectedMatchId}`).data('matricule');
+            $('#selectedMatricule').val(selectedMatriculeVal);
+            const selectedNoma = $(`#match-${selectedMatchId} #noma-badge`).data('noma');
+            $('#proposal-form #id_last_registration_id').val(selectedNoma);
+            document.dispatchEvent(new CustomEvent("selectMergePerson"));
+        }).one('select2:open', (e) => {
+            $(".match-select .select2-results:not(:has(li#header))").prepend(
+                $('<li id="header" style="padding: 6px; list-style: none;"><table style="width: 100%"><thead><tr><th style="width: 25%">Nom, Prénom</th><th style="width: 25%">Genre</th><th style="width: 25%">Date de naissance<th style="width: 25%">NISS</tr></thead></table></li>')
+            )
+        });
+
+        $('.digit-data #national_number').mask('00.00.00-000.00');
+        $('.fusion-data #national_number').mask('00.00.00-000.00');
+
+        $('#match').trigger('change');
+
+    });
+
+
+    // merge input from data source to fusion form using btn-merge
+    document.querySelectorAll('.btn-merge').forEach((el) => {
+        el.addEventListener('click', (e) => {
+            const source = e.currentTarget.dataset.mergeSource;
+            const label = e.currentTarget.dataset.mergeLabel;
+            const destinationLabel = label === 'country_of_citizenship__name' ? 'country_of_citizenship' : label;
+
+            const valueToCopy = document.querySelector(`.${source}-data #${label}`).value;
+            const destinationInput = document.querySelector(`.fusion-data #id_${destinationLabel}`);
+
+            if(destinationInput && valueToCopy){
+
+                if(label === 'national_number') {
+                    $(destinationInput).val(valueToCopy).mask('00.00.00-000.00');
+                }
+                else if(label === 'gender' || label === 'civil_state'){
+                    const selectKey = document.querySelector(`.${source}-data #${label}`).dataset.selectKey;
+                    $(destinationInput).val(selectKey);
+                }
+                else if(label === 'country_of_citizenship__name'){
+                    const selectKey = document.querySelector(`.${source}-data #${label}`).dataset.selectKey;
+                    $(destinationInput).append(new Option(valueToCopy, selectKey, true, true)).trigger("change");
+                }
+                else $(destinationInput).val(valueToCopy);
+                $(destinationInput).trigger('input');
+            }
+        });
+    });
+
+    //batch merging from data source to fusion form using btn-merge-all
+    document.querySelectorAll('.btn-merge-all').forEach((el) => {
+        el.addEventListener('click', (e) => {
+            const source = e.currentTarget.dataset.mergeSource;
+            document.querySelectorAll(`.${source}-data .btn-merge`).forEach(el => el.click());
+
+            // prevent tooltip on button to remain on click
+            $('[data-toggle="tooltip"]').tooltip("hide");
+        });
+    });
+
+</script>

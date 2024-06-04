@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-22 18:08+0100\n"
+"POT-Creation-Date: 2024-05-28 15:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -533,6 +533,11 @@ msgstr ""
 msgid "Admission form items"
 msgstr ""
 
+msgid ""
+"Admission is not yet valid for searching UCLouvain. The following fields are "
+"required: "
+msgstr ""
+
 #, python-format
 msgid ""
 "Admission request for the academic year %(academic_year)s to the program:"
@@ -957,6 +962,9 @@ msgstr ""
 msgid "Authors"
 msgstr ""
 
+msgid "Available information (Digit)"
+msgstr ""
+
 msgid "Awaiting approval"
 msgstr ""
 
@@ -1320,6 +1328,9 @@ msgctxt "gender"
 msgid "Candidate"
 msgstr ""
 
+msgid "Candidate information"
+msgstr ""
+
 msgid "Candidate nationality"
 msgstr ""
 
@@ -1489,6 +1500,9 @@ msgid "Citizenship"
 msgstr ""
 
 msgid "City"
+msgstr ""
+
+msgid "Civil state"
 msgstr ""
 
 msgid "Civil status"
@@ -1862,6 +1876,9 @@ msgstr ""
 msgid "Country of citizenship"
 msgstr ""
 
+msgid "Country of citizenship name"
+msgstr ""
+
 msgctxt "admission"
 msgid "Course"
 msgstr ""
@@ -2231,6 +2248,9 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
+msgid "Discard fusion"
+msgstr ""
+
 msgid "Dispensation needed"
 msgstr ""
 
@@ -2465,6 +2485,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Education"
+msgstr ""
+
+msgid "Educational experience"
 msgstr ""
 
 msgid "Educational experiences"
@@ -2707,6 +2730,9 @@ msgid "Expected graduation date (signed diploma)"
 msgstr ""
 
 msgid "Experience knowledge valorisation"
+msgstr ""
+
+msgid "Experience merge proposal"
 msgstr ""
 
 msgid "Experience not found."
@@ -3057,6 +3083,9 @@ msgstr ""
 msgid "Funding type"
 msgstr ""
 
+msgid "Fusion proposal"
+msgstr ""
+
 msgid "GEOGRAPHY"
 msgstr "Geography"
 
@@ -3168,6 +3197,9 @@ msgid "Hide the checklist menu"
 msgstr ""
 
 msgid "Hide the states of the checklist"
+msgstr ""
+
+msgid "High school graduation year"
 msgstr ""
 
 msgctxt "tab"
@@ -3400,6 +3432,12 @@ msgid "IN_PROGRESS"
 msgstr "In progress"
 
 msgid "IUFC comment for the Faculty"
+msgstr ""
+
+msgid "Id card expiry date"
+msgstr ""
+
+msgid "Id card number"
 msgstr ""
 
 msgid "Identification"
@@ -3761,6 +3799,9 @@ msgid "Last name / First name / Email / NOMA"
 msgstr ""
 
 msgid "Last name / First name / Global id"
+msgstr ""
+
+msgid "Last registration id"
 msgstr ""
 
 msgid "Last update author"
@@ -4216,6 +4257,19 @@ msgstr ""
 msgid "Membre CA not found."
 msgstr "Supervisory panel member not found."
 
+msgctxt "admission"
+msgid "Merge"
+msgstr ""
+
+msgid "Merge all non-empty data from digit match to merge form"
+msgstr ""
+
+msgid "Merge all non-empty data from original to merge form"
+msgstr ""
+
+msgid "Merge with existing entry"
+msgstr ""
+
 msgid "Merging of each document field of a continuing proposition into one PDF"
 msgstr ""
 
@@ -4260,6 +4314,9 @@ msgstr ""
 msgid ""
 "Method 2 (The private defense and the public defense are organised the same "
 "day, and subjected to an admissibility condition)"
+msgstr ""
+
+msgid "Middle name"
 msgstr ""
 
 msgid "Missing"
@@ -4401,6 +4458,9 @@ msgid "Name of the manager sending the email"
 msgstr ""
 
 msgid "Name of the working list"
+msgstr ""
+
+msgid "National number"
 msgstr ""
 
 msgid "Nationality"
@@ -4548,6 +4608,9 @@ msgid "Not free"
 msgstr ""
 
 msgid "Not fundable"
+msgstr ""
+
+msgid "Not specified"
 msgstr ""
 
 msgctxt "admission-header"
@@ -5126,6 +5189,9 @@ msgstr ""
 msgid "Private"
 msgstr ""
 
+msgid "Private email"
+msgstr ""
+
 msgid "Processing by Fac"
 msgstr ""
 
@@ -5136,6 +5202,9 @@ msgid "Professional"
 msgstr ""
 
 msgid "Professional email"
+msgstr ""
+
+msgid "Professional experience"
 msgstr ""
 
 msgid "Professional experiences"
@@ -5571,6 +5640,9 @@ msgstr ""
 msgid "Research seminar"
 msgstr ""
 
+msgid "Resend"
+msgstr ""
+
 msgid "Reset"
 msgstr ""
 
@@ -5612,6 +5684,9 @@ msgid "Retaking of the confirmation paper"
 msgstr ""
 
 msgid "Retaking of the test"
+msgstr ""
+
+msgid "Retrieve from DigIT"
 msgstr ""
 
 msgid "Retype"
@@ -5786,6 +5861,9 @@ msgid "Save and transfer to SIC"
 msgstr ""
 
 msgid "Save and view result"
+msgstr ""
+
+msgid "Save fusion proposal"
 msgstr ""
 
 msgid "Scholarship"
@@ -7108,10 +7186,21 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
+msgid ""
+"Unable to validate the admission because of a potential person duplicates "
+"exists."
+msgstr ""
+
+msgid "Unable to validate the admission because of an invalid DIGIT ticket."
+msgstr ""
+
 msgid "Unavailable"
 msgstr ""
 
 msgid "Undecided"
+msgstr ""
+
+msgid "Undo"
 msgstr ""
 
 msgid "Unique business number"
@@ -7218,6 +7307,9 @@ msgstr ""
 msgid "Values"
 msgstr ""
 
+msgid "Verify"
+msgstr ""
+
 msgid "Viewed at"
 msgstr ""
 
@@ -7306,6 +7398,9 @@ msgid ""
 msgstr ""
 
 msgid "Whole view"
+msgstr ""
+
+msgid "Will be automatically retrieved from candidate"
 msgstr ""
 
 msgid "With academic year"

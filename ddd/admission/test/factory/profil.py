@@ -116,6 +116,7 @@ class ValorisationEtudesSecondairesDTOFactory(factory.Factory):
 
 
 class EtudesSecondairesDTOFactory(factory.Factory):
+
     valorisation = factory.SubFactory(ValorisationEtudesSecondairesDTOFactory)
 
     class Meta:

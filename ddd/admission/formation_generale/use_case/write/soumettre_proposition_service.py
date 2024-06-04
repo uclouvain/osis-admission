@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 
+from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -50,6 +51,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import VerifierProposition
+from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
@@ -75,6 +77,7 @@ def soumettre_proposition(
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+
     annee_courante = (
         GetCurrentAcademicYear()
         .get_starting_academic_year(
@@ -101,6 +104,8 @@ def soumettre_proposition(
         profil_candidat_translator,
     )
     pool = AcademicCalendarTypes[cmd.pool]
+
+    identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 
     # WHEN
     VerifierProposition.verifier(
@@ -154,7 +159,22 @@ def soumettre_proposition(
         annee_courante=annee_courante,
     )
     proposition_repository.save(proposition)
+
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
+
+    from infrastructure.messages_bus import message_bus_instance
+    message_bus_instance.publish(
+        PropositionSoumiseEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+            nom=identification.nom,
+            prenom=identification.prenom,
+            autres_prenoms=identification.autres_prenoms,
+            date_naissance=str(identification.date_naissance),
+            genre=identification.genre,
+            niss=identification.numero_registre_national_belge,
+        )
+    )
 
     return proposition_id
