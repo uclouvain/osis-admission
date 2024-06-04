@@ -190,6 +190,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.models.student import Student
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
@@ -1068,7 +1069,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     if nom and email:
                         contact += ', '
                     if email:
-                        contact = f'<a href="{email}">{email}</a>'
+                        contact += f'<a href="{email}">{email}</a>'
 
                     contact_person_paragraph = _(
                         "<p>Contact person for setting up your annual programme: {contact}</p>"
@@ -1092,9 +1093,9 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         suffix='contacts',
                     )
                     prerequisite_courses_paragraph = _(
-                        "<p>Depending on your previous experience, your faculty will supplement your annual programme with "
-                        f"additional classes (for more information: <a href=\"{link}\">{link}</a>).</p>"
-                    )
+                        "<p>Depending on your previous experience, your faculty will supplement your annual programme "
+                        "with additional classes (for more information: <a href=\"{link}\">{link}</a>).</p>"
+                    ).format(link=link)
 
                 prerequisite_courses_detail_paragraph = ''
                 if self.proposition.complements_formation:
@@ -1172,9 +1173,14 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         required_documents_paragraph += f'<li>{document_name}</li>'
                     required_documents_paragraph += '</ul>'
 
+                noma = ''
+                student = Student.objects.filter(person=self.admission.candidate).values('registration_id').first()
+                if student is not None:
+                    noma = student['registration_id']
+
             tokens.update(
                 {
-                    'noma': '',
+                    'noma': noma,
                     'contact_person_paragraph': contact_person_paragraph,
                     'planned_years_paragraph': planned_years_paragraph,
                     'prerequisite_courses_paragraph': prerequisite_courses_paragraph,

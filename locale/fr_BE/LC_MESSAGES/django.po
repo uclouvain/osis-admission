@@ -218,22 +218,22 @@ msgstr ""
 "<p>Personne de contact pour la composition du programme annuel : {contact}</"
 "p>"
 
+#, python-brace-format
 msgid "<p>Course duration: 1 year</p>"
 msgid_plural "<p>Course duration: {years} years</p>"
 msgstr[0] "<p>Durée des études : 1 an.</p>"
-msgstr[1] "<p>Durée des études : %(years)s ans.</p>"
+msgstr[1] "<p>Durée des études : {years} ans.</p>"
 
+#, python-brace-format
 msgid ""
 "<p>Depending on your previous experience, your faculty will supplement your "
 "annual programme with additional classes (for more information: <a "
-"href=\"https://uclouvain.be/en-prog-2024-gest2m1-cond_adm\">https://"
-"uclouvain.be/en-prog-2024-gest2m1-cond_adm</a>).</p>"
+"href=\"{link}\">{link}</a>).</p>"
 msgstr ""
 "<p>Au vu de votre parcours antérieur, votre faculté complétera votre "
 "programme annuel par des compléments de formation (enseignements "
-"supplémentaires) (pour plus d’informations : <a href=\"https://uclouvain.be/"
-"prog-2024-gest2m1-cond_adm\">https://uclouvain.be/prog-2024-gest2m1-"
-"cond_adm</a>).</p>"
+"supplémentaires) (pour plus d’informations : <a href=\"{link}\">{link}</a>)."
+"</p>"
 
 #, python-brace-format
 msgid ""
