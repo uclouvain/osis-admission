@@ -63,6 +63,24 @@
             ></div>
           </div>
         </div>
+      {% elif checklist_tag == 'financabilite' %}
+        <div class="comment-thread panel panel-panel panel-info">
+          <div class="panel-heading clearfix">
+            {{ checklist_title }}
+          </div>
+          <div class="panel-body">
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }}"
+                 data-header-title="{% translate 'Global' %}"
+            ></div>
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }},derogation"
+                 data-header-title="{% translate 'Financability dispensation' %}"
+            ></div>
+          </div>
+        </div>
       {% elif checklist_tag == 'parcours_anterieur' %}
         {# Display the global comment and the comments related to each experience (general and authentication comments) #}
         <div class="comment-thread panel panel-panel panel-info">
@@ -87,6 +105,24 @@
                    data-header-title="{{ experience_name }} > {% translate 'Comment about the authentication' %}"
               ></div>
             {% endfor %}
+          </div>
+        </div>
+      {% elif checklist_tag == 'decision_sic' %}
+        <div class="comment-thread panel panel-panel panel-info">
+          <div class="panel-heading clearfix">
+            {{ checklist_title }}
+          </div>
+          <div class="panel-body">
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }}"
+                 data-header-title="{% translate 'Global' %}"
+            ></div>
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }},derogation"
+                 data-header-title="{% translate 'Dispensation' %}"
+            ></div>
           </div>
         </div>
       {% else %}

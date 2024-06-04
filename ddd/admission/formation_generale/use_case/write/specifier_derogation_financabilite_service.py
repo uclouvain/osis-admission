@@ -23,18 +23,19 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import SpecifierBesoinDeDerogationSicCommand
+from admission.ddd.admission.formation_generale.commands import SpecifierDerogationFinancabiliteCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import BesoinDeDerogation
+from admission.ddd.admission.formation_generale.domain.model.enums import DerogationFinancement
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def specifier_besoin_de_derogation(
-    cmd: 'SpecifierBesoinDeDerogationSicCommand',
+def specifier_derogation_financabilite(
+    cmd: 'SpecifierDerogationFinancabiliteCommand',
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -43,7 +44,16 @@ def specifier_besoin_de_derogation(
     # WHEN
 
     # THEN
-    proposition.specifier_besoin_de_derogation(BesoinDeDerogation[cmd.besoin_de_derogation], auteur_modification=cmd.gestionnaire)
+    proposition.specifier_derogation_financabilite(
+        statut=DerogationFinancement[cmd.statut],
+        refus_uuids_motifs=cmd.refus_uuids_motifs,
+        refus_autres_motifs=cmd.refus_autres_motifs,
+    )
     proposition_repository.save(proposition)
+
+    historique.historiser_derogation_financabilite(
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+    )
 
     return proposition_id

@@ -136,3 +136,12 @@ class HistoriqueInMemory(IHistorique):
         uuid_experience: str,
     ):
         pass
+
+    @classmethod
+    def historiser_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: Optional[EmailMessage] = None,
+    ):
+        pass
