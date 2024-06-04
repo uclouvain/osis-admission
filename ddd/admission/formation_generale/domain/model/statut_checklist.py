@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     DecisionFacultaireEnum,
     OngletsChecklist,
+    DerogationFinancement,
 )
 from osis_common.ddd import interface
 
@@ -342,7 +343,28 @@ onglet_financabilite = ConfigurationOngletChecklist(
             identifiant='AVIS_EXPERT',
             libelle=_('Expert opinion'),
             statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'expert'},
         ),
+        ConfigurationStatutChecklist(
+            identifiant='BESOIN_DEROGATION',
+            libelle=_('Dispensation needed'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'derogation'},
+        ),
+    ]
+    + [
+        ConfigurationStatutChecklist(
+            identifiant=f'BESOIN_DEROGATION.{besoin_derogation.name}',
+            libelle=besoin_derogation.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={
+                'etat_besoin_derogation': besoin_derogation.name,
+                'en_cours': 'derogation',
+            },
+        )
+        for besoin_derogation in DerogationFinancement
+    ]
+    + [
         ConfigurationStatutChecklist(
             identifiant='A_COMPLETER',
             libelle=_('To be completed'),
@@ -356,9 +378,16 @@ onglet_financabilite = ConfigurationOngletChecklist(
             extra={'to_be_completed': '0'},
         ),
         ConfigurationStatutChecklist(
+            identifiant='DEROGATION_ACCORDEE',
+            libelle=_('Dispensation granted'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            extra={'reussite': 'derogation'},
+        ),
+        ConfigurationStatutChecklist(
             identifiant='FINANCABLE',
             libelle=_('Financeable'),
             statut=ChoixStatutChecklist.GEST_REUSSITE,
+            extra={'reussite': 'financable'},
         ),
     ],
 )
