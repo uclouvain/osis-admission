@@ -178,11 +178,11 @@ msgid_plural "<p>Course duration: {years} years</p>"
 msgstr[0] ""
 msgstr[1] ""
 
+#, python-brace-format
 msgid ""
 "<p>Depending on your previous experience, your faculty will supplement your "
 "annual programme with additional classes (for more information: <a "
-"href=\"https://uclouvain.be/en-prog-2024-gest2m1-cond_adm\">https://"
-"uclouvain.be/en-prog-2024-gest2m1-cond_adm</a>).</p>"
+"href=\"{link}\">{link}</a>).</p>"
 msgstr ""
 
 #, python-brace-format
