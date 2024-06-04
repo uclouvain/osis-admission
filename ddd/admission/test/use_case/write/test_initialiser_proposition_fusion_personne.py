@@ -63,6 +63,9 @@ class TestInitialiserPropositionFusionPersonne(SimpleTestCase):
             educational_curex_uuids=['uc1', 'uc2'],
             professional_curex_uuids=['pc1', 'pc2'],
             annee_diplome_etudes_secondaires=2020,
+            existing_merge_person_id="2",
+            status="MERGE",
+            expiration_passeport="2030-01-01"
         )
         result = initialiser_proposition_fusion_personne(cmd, self.repository)
         self.assertEqual(result, PropositionFusionPersonneIdentity(

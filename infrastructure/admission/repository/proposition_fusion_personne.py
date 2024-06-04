@@ -194,7 +194,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
                                 admission.candidate_id = known_person.id
                                 admission.save()
                                 logger.info(
-                                f'Updated {admission} instances of {model.__name__} for candidate_id.')
+                                    f'Updated {admission} instances of {model.__name__} for candidate_id.')
                     elif model == ProfessionalExperience or model == EducationalExperience:
                         experiences = model.objects.filter(
                             **{field_name: person_merge_proposal.original_person}
@@ -234,7 +234,6 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
                 continue
 
             setattr(target_obj, field_name, source_value)
-
 
     @classmethod
     def _find_models_with_fk_to_person(cls):

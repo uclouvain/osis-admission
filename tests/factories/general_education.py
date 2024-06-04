@@ -31,6 +31,7 @@ from admission.contrib.models.general_education import AdmissionPrerequisiteCour
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    OngletsChecklist,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -81,15 +82,10 @@ def get_checklist():
         'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
     }
     return {
-        'donnees_personnelles': default_content,
-        'frais_dossier': default_content,
-        'assimilation': default_content,
-        'choix_formation': default_content,
-        'parcours_anterieur': default_content,
-        'financabilite': default_content,
-        'specificites_formation': default_content,
-        'decision_facultaire': default_content,
-        'decision_sic': default_content,
+        onglet.name: default_content.copy()
+        for onglet in OngletsChecklist.get_except(
+            OngletsChecklist.experiences_parcours_anterieur.name,
+        )
     }
 
 

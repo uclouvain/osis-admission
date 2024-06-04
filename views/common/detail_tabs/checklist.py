@@ -74,7 +74,6 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     """Change the status of the admission of a specific tab"""
     update_fields = ['checklist', 'last_update_author', 'modified_at']
 
-
     # use an intermediary status for DIGIT VALIDATION
     from infrastructure.messages_bus import message_bus_instance
     validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))

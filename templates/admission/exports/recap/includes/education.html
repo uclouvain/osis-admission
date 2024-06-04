@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 {% endcomment %}
   {% if formation.type == 'BACHELOR' and etudes_secondaires.diplome_belge %}
 
-    {% panel _('Belgian diploma') edit_link_button=edit_link_button %}
+    {% panel _('Belgian diploma') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
 
       {% field_data _('Secondary school graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
 
@@ -53,7 +53,7 @@
 
   {% elif formation.type == 'BACHELOR' and etudes_secondaires.diplome_etranger %}
 
-    {% panel _('Foreign diploma') edit_link_button=edit_link_button %}
+    {% panel _('Foreign diploma') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
 
       {% field_data _('Secondary school graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
 
@@ -93,7 +93,7 @@
     {% endif %}
 
   {% elif formation.type == 'BACHELOR' and etudes_secondaires.alternative_secondaires %}
-    {% panel _('Secondary studies') edit_link_button=edit_link_button %}
+    {% panel _('Secondary studies') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
       {% field_data _('Do you have a secondary school diploma?') _('No') %}
     {% endpanel %}
     {% if not hide_files %}
@@ -103,7 +103,7 @@
     {% endif %}
 
   {% else %}
-    {% panel _('Secondary studies') edit_link_button=edit_link_button %}
+    {% panel _('Secondary studies') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
       {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' %}
         {% blocktranslate trimmed with year=etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year asvar graduation_text %}
           Yes, in {{ year }}.

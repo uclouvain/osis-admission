@@ -151,7 +151,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         }[self.current_context]
         return message_bus_instance.invoke(cmd)
 
-
     @cached_property
     def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
         return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))
@@ -269,6 +268,7 @@ class AdmissionFormMixin(AdmissionViewMixin):
     update_requested_documents = False
     update_admission_author = False
     default_htmx_trigger_form_extra = {}
+    close_modal_on_htmx_request = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -317,7 +317,8 @@ class AdmissionFormMixin(AdmissionViewMixin):
                 response.headers['HX-Refresh'] = 'true'
             else:
                 add_messages_into_htmx_response(request=self.request, response=response)
-                add_close_modal_into_htmx_response(response=response)
+                if self.close_modal_on_htmx_request:
+                    add_close_modal_into_htmx_response(response=response)
             return response
 
         return super().form_valid(form)

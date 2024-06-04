@@ -83,7 +83,7 @@ __all__ = [
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = UploadManagerDocumentForm
-    permission_required = 'admission.change_documents_management'
+    permission_required = 'admission.edit_documents'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
     default_htmx_trigger_form_extra = {
@@ -172,7 +172,7 @@ def can_retype_document(document: AdmissionDocument, document_identifier: str) -
 
 
 class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    permission_required = 'admission.change_documents_management'
+    permission_required = 'admission.edit_documents'
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
@@ -306,8 +306,9 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
         CONTEXT_GENERAL: None,
         CONTEXT_CONTINUING: None,
     }
-    permission_required = 'admission.change_documents_management'
+    permission_required = 'admission.edit_documents'
     name = 'document-action'
+    close_modal_on_htmx_request = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

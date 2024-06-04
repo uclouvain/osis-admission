@@ -46,6 +46,7 @@ from admission.infrastructure.admission.repository.in_memory.titre_acces_selecti
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from epc.models.enums.condition_acces import ConditionAcces
 
 
@@ -72,7 +73,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         self.assertEqual(proposition.millesime_condition_acces, 2021)
         self.assertEqual(proposition.avec_complements_formation, True)
 
-    def test_should_supprimer_complements_formation_et_commentaire_associe_si_besoin(self):
+    def test_should_complements_formation_et_commentaire_associe_etre_vides_si_reponse_negative_aux_complements(self):
         proposition = PropositionFactory(
             entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI-APPROVED-BY-FAC'),
             matricule_candidat='0000000001',
@@ -85,18 +86,55 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
 
         self.proposition_repository.save(proposition)
 
-        proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
-                uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
-                avec_complements_formation=True,
-                gestionnaire='0123456789',
+        with self.assertRaises(MultipleBusinessExceptions):
+            self.message_bus.invoke(
+                SpecifierConditionAccesPropositionCommand(
+                    uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
+                    avec_complements_formation=False,
+                    gestionnaire='0123456789',
+                )
             )
-        )
 
-        self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.avec_complements_formation, True)
         self.assertNotEqual(proposition.complements_formation, [])
         self.assertNotEqual(proposition.commentaire_complements_formation, '')
+
+        proposition.commentaire_complements_formation = ''
+        self.proposition_repository.save(proposition)
+
+        with self.assertRaises(MultipleBusinessExceptions):
+            self.message_bus.invoke(
+                SpecifierConditionAccesPropositionCommand(
+                    uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
+                    avec_complements_formation=False,
+                    gestionnaire='0123456789',
+                )
+            )
+
+        self.assertEqual(proposition.avec_complements_formation, True)
+        self.assertNotEqual(proposition.complements_formation, [])
+        self.assertEqual(proposition.commentaire_complements_formation, '')
+
+        proposition.complements_formation = []
+        proposition.commentaire_complements_formation = 'Test'
+        self.proposition_repository.save(proposition)
+
+        with self.assertRaises(MultipleBusinessExceptions):
+            self.message_bus.invoke(
+                SpecifierConditionAccesPropositionCommand(
+                    uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
+                    avec_complements_formation=False,
+                    gestionnaire='0123456789',
+                )
+            )
+
+        self.assertEqual(proposition.avec_complements_formation, True)
+        self.assertEqual(proposition.complements_formation, [])
+        self.assertNotEqual(proposition.commentaire_complements_formation, '')
+
+        proposition.complements_formation = []
+        proposition.commentaire_complements_formation = ''
+        self.proposition_repository.save(proposition)
 
         proposition_id = self.message_bus.invoke(
             SpecifierConditionAccesPropositionCommand(

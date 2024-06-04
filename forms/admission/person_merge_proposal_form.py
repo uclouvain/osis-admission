@@ -59,7 +59,9 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             data['passport_number'] = self.data['passport_number']
             data['passport_expiry_date'] = self.data['passport_expiry_date']
 
-        if not id_type and (self.data['national_number'] or self.data['id_card_number'] or self.data['id_card_expiry_date']):
+        if not id_type and (
+                self.data['national_number'] or self.data['id_card_number'] or self.data['id_card_expiry_date']
+        ):
             data['identification_type'] = IdentificationType.ID_CARD_NUMBER.name
             data['national_number'] = self.data['national_number']
             data['id_card_number'] = self.data['id_card_number']
@@ -104,7 +106,6 @@ class PersonMergeProposalForm(AdmissionPersonForm):
 
     def _to_YYYYMMDD(self, date_str):
         return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d") if date_str else None
-
 
     class Meta:
         model = Person

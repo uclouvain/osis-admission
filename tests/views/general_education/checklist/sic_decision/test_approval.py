@@ -97,6 +97,10 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'admission:general-education:sic-decision-approval',
             uuid=cls.general_admission.uuid,
         )
+        cls.enrolment_url = resolve_url(
+            'admission:general-education:sic-decision-enrolment-approval',
+            uuid=cls.general_admission.uuid,
+        )
 
     def test_submit_approval_decision_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -304,6 +308,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
                     approval_conditions[0].uuid,
                     'Free condition',
                 ],
+                'sic-decision-approval-program_planned_years_number': '',
             },
             **self.default_headers,
         )
@@ -500,7 +505,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.save()
         self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=True)
         self.general_admission.candidate.save()
-        response = self.client.get(self.url, **self.default_headers)
+        response = self.client.get(self.enrolment_url, **self.default_headers)
         self.assertEqual(response.status_code, 200)
         form = response.context['sic_decision_approval_form']
 
@@ -537,3 +542,71 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertIn('particular_cost', form.fields)
         self.assertIn('rebilling_or_third_party_payer', form.fields)
         self.assertIn('first_year_inscription_and_status', form.fields)
+
+    def test_approval_decision_form_with_an_enrolment(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            candidate=CompletePersonFactory(
+                language=settings.LANGUAGE_CODE_FR,
+                country_of_citizenship__european_union=True,
+            ),
+            status=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+            determined_academic_year=self.academic_years[0],
+            type_demande=TypeDemande.INSCRIPTION.name,
+        )
+
+        general_admission.checklist['current']['parcours_anterieur']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        general_admission.save()
+
+        url = resolve_url('admission:general-education:sic-decision-enrolment-approval', uuid=general_admission.uuid)
+
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['sic_decision_approval_form']
+
+        # Only a subset of the form fields should be displayed and no one is required
+        enrolment_fields = [
+            'all_additional_approval_conditions',
+            'prerequisite_courses',
+            'prerequisite_courses_fac_comment',
+            'program_planned_years_number',
+            'annual_program_contact_person_name',
+            'annual_program_contact_person_email',
+            'with_additional_approval_conditions',
+            'with_prerequisite_courses',
+        ]
+
+        self.assertCountEqual(enrolment_fields, list(form.fields.keys()))
+
+        for field in enrolment_fields:
+            self.assertFalse(form.fields[field].required)
+
+        response = self.client.post(
+            url,
+            data={'sic-decision-approval-program_planned_years_number': ''},
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        form = response.context['sic_decision_approval_form']
+
+        self.assertTrue(form.is_valid())
+
+        # Check the admission
+        general_admission.refresh_from_db()
+
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(general_admission.with_additional_approval_conditions, None)
+        self.assertEqual(general_admission.with_prerequisite_courses, None)
+        self.assertEqual(general_admission.annual_program_contact_person_email, '')
+        self.assertEqual(general_admission.annual_program_contact_person_name, '')
+        self.assertEqual(general_admission.prerequisite_courses_fac_comment, '')
+        self.assertEqual(general_admission.program_planned_years_number, None)
+        self.assertFalse(general_admission.additional_approval_conditions.exists())
+        self.assertFalse(general_admission.freeadditionalapprovalcondition_set.exists())
+        self.assertFalse(general_admission.prerequisite_courses.exists())

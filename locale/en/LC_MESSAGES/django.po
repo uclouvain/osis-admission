@@ -1469,10 +1469,6 @@ msgstr ""
 msgid "Checklist"
 msgstr ""
 
-msgctxt "admission"
-msgid "Checklist"
-msgstr ""
-
 msgid "Checklist filters"
 msgstr ""
 
@@ -2344,6 +2340,9 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+msgid "Document category"
+msgstr ""
+
 #, python-format
 msgid "Document merging of the proposition %(reference)s"
 msgstr ""
@@ -2431,9 +2430,6 @@ msgid "Duplicate experience"
 msgstr ""
 
 msgid "Duplication of an experience"
-msgstr ""
-
-msgid "Dynamic questions about \"Specific aspects\" sub-tab"
 msgstr ""
 
 msgid "ECONOMY"
@@ -3485,6 +3481,12 @@ msgid "If other, specify"
 msgstr ""
 
 msgid ""
+"If the answer to the additional courses question is no, there must be no "
+"additional LU and the communication relating to the additional courses must "
+"be completely empty."
+msgstr ""
+
+msgid ""
 "If you submit the activity, you will no longer be able to modify the seminar "
 "or the various activities within it."
 msgstr ""
@@ -3592,6 +3594,9 @@ msgid "Information about the restriction"
 msgstr ""
 
 msgid "Information provided to the candidate."
+msgstr ""
+
+msgid "Information related to an approval"
 msgstr ""
 
 msgid "Initialization of the predefined specific questions"
@@ -4501,6 +4506,9 @@ msgstr ""
 msgid "No document"
 msgstr ""
 
+msgid "No document is defined as requestable."
+msgstr ""
+
 msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 
@@ -4552,7 +4560,7 @@ msgstr ""
 msgid "Non doctor reason"
 msgstr ""
 
-msgid "Non-academic experience"
+msgid "Non-academic activity"
 msgstr ""
 
 msgid "Non-resident (as defined by government decree)"
@@ -6113,6 +6121,9 @@ msgstr ""
 msgid "Specific question"
 msgstr ""
 
+msgid "Specific questions"
+msgstr ""
+
 msgid "Specified"
 msgstr ""
 
@@ -6405,6 +6416,10 @@ msgstr ""
 msgid "The candidate has a scholarship"
 msgstr ""
 
+msgid ""
+"The candidate has already applied for this course for this academic year."
+msgstr ""
+
 msgid "The candidate is doing a mobility"
 msgstr ""
 
@@ -6689,6 +6704,12 @@ msgid ""
 "The proposition must be a late enrollment with a defined access condition."
 msgstr ""
 
+msgid "The proposition must be an admission."
+msgstr ""
+
+msgid "The proposition must be an enrollment."
+msgstr ""
+
 msgid "The proposition must be concerned by the payment."
 msgstr ""
 
@@ -6965,6 +6986,9 @@ msgid ""
 "The applicant will still need to be informed."
 msgstr ""
 
+msgid "This status is not available for the inscription type admissions."
+msgstr ""
+
 msgid "Tick boxes"
 msgstr ""
 
@@ -6986,6 +7010,12 @@ msgid "Title of the training"
 msgstr ""
 
 msgid "To"
+msgstr ""
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Dispensation needed\" (with management "
+"approval of the dispensation)."
 msgstr ""
 
 msgid "To be completed"

@@ -25,14 +25,22 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if edit_link_button %}
+{% if edit_link_button or duplicate_link_button or delete_link_button %}
   <div class="btn-group btn-group-sm" role="group">
-    <a
-        class="btn btn-default"
-        href="{{ edit_link_button }}"
-    >
-      <i class="fas fa-edit"></i>
-    </a>
+
+    {% if edit_link_button %}
+      <a
+          class="btn btn-default"
+          href="{{ edit_link_button }}"
+          aria-label="{% translate "Update experience" %}"
+          title="{% translate "Update experience" %}"
+          {% if edit_link_button_in_new_tab %}
+          target="_blank"
+          {% endif %}
+      >
+        <i class="fas fa-edit"></i>
+      </a>
+    {% endif %}
 
     {% if duplicate_link_button %}
       {% concat 'duplicate-experience-modal-single-' experience.uuid.hex as duplicate_modal_id %}
@@ -40,6 +48,8 @@
           class="btn btn-default"
           data-toggle="modal"
           data-target="#{{ duplicate_modal_id }}"
+          aria-label="{% translate "Duplicate experience" %}"
+          title="{% translate "Duplicate experience" %}"
       >
         <i class="fas fa-copy"></i>
       </button>
@@ -47,12 +57,15 @@
       {% translate 'Are you sure you want to realize this duplication?' as confirm_message %}
       {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=duplicate_link_button confirm_message=confirm_message confirm_id=duplicate_modal_id confirm_button_class="btn-primary" %}
     {% endif %}
+
     {% if delete_link_button %}
       {% concat 'delete-experience-modal-single-' experience.uuid.hex as delete_modal_id %}
       <button
           class="btn btn-default"
           data-toggle="modal"
           data-target="#{{ delete_modal_id }}"
+          aria-label="{% translate "Delete experience" %}"
+          title="{% translate "Delete experience" %}"
       >
         <i class="fas fa-xmark"></i>
       </button>
@@ -60,5 +73,6 @@
       {% translate 'Are you sure you want to realize this deletion?' as confirm_message %}
       {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=delete_link_button confirm_message=confirm_message confirm_id=delete_modal_id %}
     {% endif %}
+
   </div>
 {% endif %}

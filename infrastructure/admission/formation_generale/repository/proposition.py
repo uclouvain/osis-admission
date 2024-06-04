@@ -68,6 +68,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
+    BesoinDeDerogation,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -276,7 +277,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if entity.etat_equivalence_titre_acces
                 else '',
                 'foreign_access_title_equivalency_effective_date': entity.date_prise_effet_equivalence_titre_acces,
-                'dispensation_needed': entity.besoin_de_derogation,
+                'dispensation_needed': entity.besoin_de_derogation.name if entity.besoin_de_derogation else '',
                 'tuition_fees_amount': entity.droits_inscription_montant,
                 'tuition_fees_amount_other': entity.droits_inscription_montant_autre,
                 'tuition_fees_dispensation': entity.dispense_ou_droits_majores,
@@ -513,7 +514,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.foreign_access_title_equivalency_state
             else None,
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
-            besoin_de_derogation=admission.dispensation_needed,
+            besoin_de_derogation=BesoinDeDerogation[admission.dispensation_needed]
+            if admission.dispensation_needed
+            else '',
             droits_inscription_montant=admission.tuition_fees_amount,
             droits_inscription_montant_autre=admission.tuition_fees_amount_other,
             dispense_ou_droits_majores=admission.tuition_fees_dispensation,

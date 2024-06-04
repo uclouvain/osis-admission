@@ -29,7 +29,8 @@ from typing import Union, List
 from uuid import UUID
 
 from django.contrib import messages
-from django.db.models import ProtectedError, QuerySet
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import ProtectedError, QuerySet, OuterRef, Exists, Q
 from django.forms import forms
 from django.shortcuts import redirect, get_object_or_404, resolve_url
 from django.urls import reverse
@@ -37,6 +38,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
@@ -49,6 +51,7 @@ from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
 from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
@@ -105,12 +108,34 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     update_requested_documents = True
     update_admission_author = True
 
+    def has_permission(self):
+        return super().has_permission() and (
+            not self.educational_experience
+            or not any(
+                getattr(self.educational_experience, field)
+                for field in ['external_id', 'cv_injection', 'admission_injection']
+            )
+        )
+
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
         pass
 
     @property
     def educational_experience_filter_uuid(self):
         return {'uuid': self.experience_id}
+
+    @property
+    def educational_experience_annotations(self):
+        return {
+            'valuated_from_admissions': ArrayAgg(
+                'valuated_from_admission__uuid',
+                filter=Q(valuated_from_admission__isnull=False),
+            ),
+            'admission_injection': Exists(
+                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+            ),
+            'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+        }
 
     def traitement_specifique_de_creation(self):
         # Consider the experience as valuated
@@ -170,6 +195,28 @@ class CurriculumNonEducationalExperienceFormView(
     update_requested_documents = True
     update_admission_author = True
 
+    @property
+    def non_educational_experience_annotations(self):
+        return {
+            'valuated_from_admissions': ArrayAgg(
+                'valuated_from_admission__uuid',
+                filter=Q(valuated_from_admission__isnull=False),
+            ),
+            'admission_injection': Exists(
+                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+            ),
+            'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+        }
+
+    def has_permission(self):
+        return super().has_permission() and (
+            not self.non_educational_experience
+            or not any(
+                getattr(self.non_educational_experience, field)
+                for field in ['external_id', 'cv_injection', 'admission_injection']
+            )
+        )
+
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
         pass
 
@@ -217,6 +264,32 @@ class CurriculumNonEducationalExperienceFormView(
 class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperienceMixin):
     permission_required = 'admission.change_admission_curriculum'
     template_name = 'admission/empty_template.html'
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                valuated_from_admissions=ArrayAgg(
+                    'valuated_from_admission__uuid',
+                    filter=Q(valuated_from_admission__isnull=False),
+                ),
+                admission_injection=Exists(
+                    AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+                ),
+                cv_injection=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=self.experience_id)),
+            )
+        )
+
+    def get_object(self, queryset=None):
+        # To prevent to search it several times
+        return getattr(self, 'object', None) or super().get_object(queryset=queryset)
+
+    def has_permission(self):
+        self.object = self.get_object()
+        return super().has_permission() and not any(
+            getattr(self.object, field) for field in ['external_id', 'cv_injection', 'admission_injection']
+        )
 
     @property
     def person(self):

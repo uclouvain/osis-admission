@@ -64,7 +64,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from osis_profile.models.enums.curriculum import TranscriptType, CURRICULUM_ACTIVITY_LABEL
+from osis_profile.models.enums.curriculum import TranscriptType, CURRICULUM_ACTIVITY_LABEL, Result
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
@@ -366,7 +366,7 @@ def get_curriculum_academic_experience_attachments(
                         sub_identifier=sub_identifier,
                         sub_identifier_label=sub_identifier_label,
                         uuids=annee.releve_notes,
-                        required=True,
+                        required=annee.resultat != Result.WAITING_RESULT.name,
                         candidate_language=context.identification.langue_contact,
                     )
                 )
@@ -378,7 +378,7 @@ def get_curriculum_academic_experience_attachments(
                             sub_identifier=sub_identifier,
                             sub_identifier_label=sub_identifier_label,
                             uuids=annee.traduction_releve_notes,
-                            required=True,
+                            required=annee.resultat != Result.WAITING_RESULT.name,
                             candidate_language=context.identification.langue_contact,
                         )
                     )

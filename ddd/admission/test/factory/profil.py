@@ -117,7 +117,6 @@ class ValorisationEtudesSecondairesDTOFactory(factory.Factory):
 
 class EtudesSecondairesDTOFactory(factory.Factory):
 
-    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     valorisation = factory.SubFactory(ValorisationEtudesSecondairesDTOFactory)
 
     class Meta:

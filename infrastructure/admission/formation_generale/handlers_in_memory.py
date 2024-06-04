@@ -687,4 +687,10 @@ COMMAND_HANDLERS = {
             emplacement_document_repository=_emplacement_document_repository,
         )
     ),
+    SpecifierInformationsAcceptationInscriptionParSicCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_inscription_par_sic(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
 }

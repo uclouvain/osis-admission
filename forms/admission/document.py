@@ -51,6 +51,7 @@ from admission.forms import (
     OTHER_EMPTY_CHOICE,
     autocomplete,
     get_year_choices,
+    AdmissionHTMLCharField,
 )
 from admission.templatetags.admission import (
     formatted_language,
@@ -111,8 +112,7 @@ def get_request_status_choices(only_limited_request_choices):
 
 class FreeDocumentHelperFormMixin(forms.Form):
     checklist_tab = forms.ChoiceField(
-        label=pgettext_lazy('admission', 'Checklist'),
-        choices=OTHER_EMPTY_CHOICE,
+        label=_('Document category'),
         required=False,
     )
 
@@ -378,7 +378,7 @@ class RequestAllDocumentsForm(forms.Form):
         label=_('Message object'),
     )
 
-    message_content = forms.CharField(
+    message_content = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )
@@ -408,14 +408,7 @@ class RequestAllDocumentsForm(forms.Form):
 
         for document in documents:
             if document.est_a_reclamer:
-                if document.document_uuids:
-                    label = '<span class="fa-solid fa-paperclip"></span> '
-                else:
-                    label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
-                    label += '<span class="fa-solid fa-building-columns"></span> '
-                label += document.libelle
-
+                label = document.libelle_avec_icone
                 document_field = ChangeRequestDocumentForm.create_change_request_document_field(
                     label=label,
                     document_identifier=document.identifiant,

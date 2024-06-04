@@ -27,6 +27,7 @@ import datetime
 from typing import Optional, List, Dict
 
 import attr
+from django.utils.safestring import mark_safe
 
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
@@ -81,3 +82,16 @@ class EmplacementDocumentDTO(interface.Entity):
     @property
     def est_a_reclamer(self):
         return self.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER and bool(self.statut_reclamation)
+
+    @property
+    def libelle_avec_icone(self):
+        if self.document_uuids:
+            label = '<span class="fa-solid fa-paperclip"></span> '
+        else:
+            label = '<span class="fa-solid fa-link-slash"></span> '
+        if self.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
+            label += '<span class="fa-solid fa-building-columns"></span> '
+
+        label += self.libelle
+
+        return mark_safe(label)
