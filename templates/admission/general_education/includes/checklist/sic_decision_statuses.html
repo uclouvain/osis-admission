@@ -72,7 +72,10 @@
   {% else %}
     {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
   {% endif %}
-  {% if admission.est_admission and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' or admission.est_inscription and current.statut == 'INITIAL_CANDIDAT' or admission.est_inscription and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' and admission.besoin_de_derogation == 'ACCORD_DIRECTION' %}
+  {% if original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}
+    {% translate 'The status of the checklist for the financability must be "Not concerned" or "Financable" or "Dispensation granted".' as approval_disabled_tooltip %}
+    {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
+  {% elif admission.est_admission and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' or admission.est_inscription and current.statut == 'INITIAL_CANDIDAT' or admission.est_inscription and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' and admission.besoin_de_derogation == 'ACCORD_DIRECTION' %}
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' open_modal='#sic-decision-approval-final-modal' %}
   {% else %}
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' disabled=True %}

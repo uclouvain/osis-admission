@@ -134,6 +134,8 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.checklist['current']['parcours_anterieur'][
             'statut'
         ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.checklist['current']['financabilite']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.checklist['current']['financabilite']['extra'] = {'reussite': 'financable'}
         self.general_admission.save(update_fields=['checklist'])
         self.general_admission.refusal_reasons.add(RefusalReasonFactory())
         self.url = resolve_url(

@@ -71,7 +71,7 @@ class StatutChecklistFactory(factory.Factory):
 
     libelle = FuzzyText(length=10, chars=string.digits)
     enfants = factory.List([])
-    statut = ChoixStatutChecklist.INITIAL_CANDIDAT.name
+    statut = ChoixStatutChecklist.INITIAL_CANDIDAT
     extra = factory.Dict({})
 
 
@@ -305,4 +305,9 @@ class PropositionFactory(factory.Factory):
             droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE,
             est_mobilite=False,
             doit_se_presenter_en_sic=False,
+            checklist_actuelle=factory.SubFactory(
+                StatutsChecklistGeneraleFactory,
+                financabilite__statut=ChoixStatutChecklist.GEST_REUSSITE,
+                financabilite__extra={'reussite': 'financable'},
+            ),
         )

@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     BesoinDeDerogation,
+    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -88,6 +89,7 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldNePasAvoirDeDocumentReclameImmediat,
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
+    ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -418,6 +420,9 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
             ),
+            ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist,
+            ),
             ShouldSpecifierInformationsAcceptationFacultaire(
                 avec_conditions_complementaires=self.avec_conditions_complementaires,
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
@@ -458,6 +463,9 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
         return [
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
+            ),
+            ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist,
             ),
             ShouldChecklistEtreDansEtatCorrectPourApprouverInscription(
                 checklist_actuelle=self.checklist,

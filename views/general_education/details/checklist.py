@@ -2025,7 +2025,9 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
             admission.financability_rule_established_by = request.user.person
             admission.save(update_fields=['financability_rule_established_by'])
 
-        return self.render_to_response(self.get_context_data())
+        response = self.render_to_response(self.get_context_data())
+        response.headers['HX-Refresh'] = 'true'
+        return response
 
 
 class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
@@ -2051,11 +2053,13 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
             )
         )
 
-        return render(
+        response = render(
             self.request,
             'admission/general_education/includes/checklist/financabilite.html',
             context=self.get_context_data(),
         )
+        response.headers['HX-Refresh'] = 'true'
+        return response
 
 
 class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
@@ -2198,6 +2202,7 @@ class FinancabiliteDerogationAccordView(HtmxPermissionRequiredMixin, Financabili
 
         response = self.render_to_response(self.get_context_data())
         add_close_modal_into_htmx_response(response=response)
+        response.headers['HX-Refresh'] = 'true'
         return response
 
 
