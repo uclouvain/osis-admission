@@ -805,7 +805,7 @@ class Proposition(interface.RootEntity):
         self.checklist_actuelle.financabilite = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_REUSSITE,
             libelle=__('Approval'),
-            extra={},
+            extra={'reussite': 'financable'},
         )
 
     def specifier_derogation_financabilite(

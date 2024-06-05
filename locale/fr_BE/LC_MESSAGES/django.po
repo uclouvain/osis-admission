@@ -7601,6 +7601,13 @@ msgstr "La date de début doit être antérieure ou égale à la date de fin"
 msgid "The status has been changed to %(status)s."
 msgstr "Le statut a bien été modifié pour : %(status)s."
 
+msgid ""
+"The status of the checklist for the financability must be \"Not concerned\" "
+"or \"Financable\" or \"Dispensation granted\"."
+msgstr ""
+"L'élément de la checklist \"finançabilité\" doit être à l'état \"non-"
+"concerné\" ou \"finançable\" ou \"dérogation accordée\""
+
 #, python-brace-format
 msgid ""
 "The status of the request is currently \"{current_status}\". Only the "
