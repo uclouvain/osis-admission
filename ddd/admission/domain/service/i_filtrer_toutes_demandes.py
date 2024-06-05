@@ -49,6 +49,7 @@ class IListerToutesDemandes(interface.DomainService):
         bourse_internationale: Optional[str] = '',
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
+        quarantaine: Optional[bool] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,

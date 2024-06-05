@@ -49,6 +49,7 @@ def lister_demandes(
         bourse_internationale=cmd.bourse_internationale,
         bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
         bourse_double_diplomation=cmd.bourse_double_diplomation,
+        quarantaine=cmd.quarantaine,
         demandeur=cmd.demandeur,
         tri_inverse=cmd.tri_inverse,
         champ_tri=cmd.champ_tri,
