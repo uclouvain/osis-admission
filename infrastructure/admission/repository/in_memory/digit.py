@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import Optional, List
 
+from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
