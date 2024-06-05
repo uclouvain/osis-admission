@@ -9,7 +9,7 @@ from admission.mail_templates import INSCRIPTION_EMAIL_SIC_APPROVAL
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0183_update_continuing_status_and_admission_task_type'),
+        ('admission', '0186_alter_generaleducationadmission_refusal_type'),
     ]
 
     operations = [
