@@ -218,6 +218,12 @@ class RetrieveListeTicketsEnAttenteQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RetrieveListePropositionFusionEnErreurQuery(interface.QueryRequest):
+    pass
+
+
+
+@attr.dataclass(frozen=True, slots=True)
 class FusionnerCandidatAvecPersonneExistanteCommand(interface.CommandRequest):
     candidate_global_id: str
 

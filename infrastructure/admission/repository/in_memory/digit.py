@@ -56,3 +56,7 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
     @classmethod
     def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
         return [cls.statut_ticket]
+
+    @classmethod
+    def retrieve_list_error_merge_proposals(cls) -> List[PropositionFusionPersonneDTO]:
+        raise []
