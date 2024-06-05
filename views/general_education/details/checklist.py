@@ -1139,7 +1139,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         training_type=self.admission.training.education_group_type.name,
                         training_acronym=self.admission.training.acronym,
                         partial_training_acronym=self.admission.training.partial_acronym,
-                        suffix='contacts',
+                        suffix='cond_adm',
                     )
                     prerequisite_courses_paragraph = _(
                         "<p>Depending on your previous experience, your faculty will supplement your annual programme "
