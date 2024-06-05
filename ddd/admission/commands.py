@@ -47,6 +47,7 @@ class ListerToutesDemandesQuery(SortedQueryRequest):
     bourse_internationale: Optional[str] = ''
     bourse_erasmus_mundus: Optional[str] = ''
     bourse_double_diplomation: Optional[str] = ''
+    quarantaine: Optional[bool] = None
     demandeur: Optional[str] = ''
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = ''

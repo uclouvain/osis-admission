@@ -271,6 +271,17 @@ class AllAdmissionsFilterForm(CommonAdmissionFilterForm):
         required=False,
     )
 
+    quarantaine = forms.TypedChoiceField(
+        coerce=lambda x: x == 'True',
+        required=False,
+        choices=(
+            (None, _('All')),
+            (True, _('Yes')),
+            (False, _('No')),
+        ),
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
     liste_travail = WorkingListField(
         label=_('Working list'),
         queryset=WorkingList.objects.all(),
