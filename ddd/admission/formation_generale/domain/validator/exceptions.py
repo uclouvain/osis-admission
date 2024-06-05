@@ -287,3 +287,14 @@ class EtatChecklistDecisionSicNonValidePourApprouverUneInscription(BusinessExcep
             '"To be processed" or "Dispensation needed" (with management approval of the dispensation).'
         )
         super().__init__(message, **kwargs)
+
+
+class EtatChecklistFinancabiliteNonValidePourApprouverDemande(BusinessException):
+    status_code = "FORMATION-GENERALE-32"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'The status of the checklist for the financability must be '
+            '"Not concerned" or "Financable" or "Dispensation granted".'
+        )
+        super().__init__(message, **kwargs)
