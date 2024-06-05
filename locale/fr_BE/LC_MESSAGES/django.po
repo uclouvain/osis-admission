@@ -5914,6 +5914,9 @@ msgstr "Refusée"
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
 
+msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
+msgstr "Refus 95 générique - irrecevabilité"
+
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr "Refus article 95 Jury"
 
