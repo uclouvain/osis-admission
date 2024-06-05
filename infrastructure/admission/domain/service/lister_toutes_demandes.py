@@ -62,6 +62,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
+from base.models.person_merge_proposal import PersonMergeStatus
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Result
@@ -84,6 +85,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         bourse_internationale: Optional[str] = '',
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
+        quarantaine: Optional[bool] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
@@ -201,6 +203,23 @@ class ListerToutesDemandes(IListerToutesDemandes):
             qs = qs.filter(generaleducationadmission__erasmus_mundus_scholarship_id=bourse_erasmus_mundus)
         if bourse_double_diplomation:
             qs = qs.filter(generaleducationadmission__double_degree_scholarship_id=bourse_double_diplomation)
+
+        if quarantaine in [True, False]:
+            if quarantaine:
+                qs = qs.filter(
+                    Q(candidate__personmergeproposal__isnull=False) &
+                    ~Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name) &
+                    ~Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name) &
+                    ~Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
+                )
+            else:
+                qs = qs.filter(
+                    Q(candidate__personmergeproposal__isnull=True) |
+                    Q(candidate__personmergeproposal__status__isnull=True) |
+                    Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name) |
+                    Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name) |
+                    Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
+                )
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
             json_path_to_checks = defaultdict(set)
