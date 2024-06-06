@@ -45,6 +45,7 @@ from django.views.generic.edit import ProcessFormView
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
+from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
@@ -93,13 +94,14 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
     @staticmethod
     def create_digit_person(global_id: str, year: int, noma: str = None):
         from infrastructure.messages_bus import message_bus_instance
-        return message_bus_instance.invoke(
-            SoumettreTicketPersonneCommand(
-                global_id=global_id,
-                annee=year,
-                noma=noma,
+        if global_id[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
+            return message_bus_instance.invoke(
+                SoumettreTicketPersonneCommand(
+                    global_id=global_id,
+                    annee=year,
+                    noma=noma,
+                )
             )
-        )
 
 
 @method_decorator(csrf_exempt, name='dispatch')

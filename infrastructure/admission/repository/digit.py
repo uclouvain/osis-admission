@@ -37,6 +37,7 @@ from admission.ddd.admission.dtos.proposition_fusion_personne import Proposition
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
+from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.templatetags.admission import format_matricule
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -49,7 +50,7 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 class DigitRepository(IDigitRepository):
     @classmethod
     def submit_person_ticket(cls, global_id: str, noma: str):
-        if not waffle.switch_is_active('fusion-digit'):
+        if not waffle.switch_is_active('fusion-digit') or global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
             return
 
         candidate = Person.objects.get(global_id=global_id)
@@ -83,7 +84,7 @@ class DigitRepository(IDigitRepository):
 
     @classmethod
     def validate_person_ticket(cls, global_id: str):
-        if not waffle.switch_is_active('fusion-digit'):
+        if not waffle.switch_is_active('fusion-digit') or global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
             return ValidationTicketResponseDTO(valid=True, errors=[])
 
         candidate = Person.objects.get(global_id=global_id)
