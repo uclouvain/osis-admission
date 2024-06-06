@@ -5364,6 +5364,9 @@ msgstr "Denied"
 msgid "REFUS_AGREGATION"
 msgstr ""
 
+msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
+msgstr ""
+
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr ""
 
