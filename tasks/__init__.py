@@ -43,7 +43,11 @@ tasks = {
     },
     '|Admission| Retrieve digit person tickets status': {
         'task': 'admission.tasks.retrieve_digit_tickets_status.run',
-        'schedule': crontab(minute='0', hour='*'),
+        'schedule': crontab(minute='*/5'),
+    },
+    '|Admission| Retry digit duplicates finding': {
+        'task': 'admission.tasks.retry_digit_duplicates_finding.run',
+        'schedule': crontab(minute='*/5'),
     }
 }
 

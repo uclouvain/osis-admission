@@ -33,6 +33,7 @@ from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand, \
     RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand
 from backoffice.celery import app
+from base.tasks import send_pictures_to_card_app
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
@@ -83,6 +84,8 @@ def run(request=None):
                     )
                 )
                 logger.info(f"[DigIT Ticket edit candidate global id]")
+
+            send_pictures_to_card_app.run.delay(global_id=digit_matricule)
 
     # Handle response when task is ran as a cmd from admin panel
     if request:

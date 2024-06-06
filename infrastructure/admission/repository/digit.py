@@ -33,6 +33,7 @@ import waffle
 from django.conf import settings
 from django.db.models import QuerySet
 
+from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
@@ -40,7 +41,7 @@ from admission.templatetags.admission import format_matricule
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
-from base.models.person_merge_proposal import PersonMergeProposal
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
@@ -171,6 +172,35 @@ class DigitRepository(IDigitRepository):
                 statut=ticket['status'],
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket['errors']],
             ) for ticket in tickets
+        ]
+
+    @classmethod
+    def retrieve_list_error_merge_proposals(cls) -> List[PropositionFusionPersonneDTO]:
+        person_merge_proposals = PersonMergeProposal.objects.filter(status=PersonMergeStatus.ERROR.name)
+        return [
+            PropositionFusionPersonneDTO(
+                status=proposal.status,
+                matricule=proposal.original_person.global_id,
+                original_person_uuid=proposal.original_person.uuid,
+                last_name=proposal.original_person.last_name,
+                first_name=proposal.original_person.first_name,
+                other_name=proposal.original_person.other_name,
+                sex=proposal.original_person.sex,
+                gender=proposal.original_person.gender,
+                birth_date=proposal.original_person.birth_date,
+                birth_country=proposal.original_person.birth_country,
+                birth_place=proposal.original_person.birth_place,
+                civil_state=proposal.original_person.civil_state,
+                country_of_citizenship=proposal.original_person.country_of_citizenship.name
+                if proposal.original_person.country_of_citizenship else None,
+                national_number=proposal.original_person.national_number,
+                id_card_number=proposal.original_person.id_card_number,
+                passport_number=proposal.original_person.passport_number,
+                id_card_expiry_date=proposal.original_person.id_card_expiry_date,
+                professional_curex_uuids=proposal.professional_curex_to_merge,
+                educational_curex_uuids=proposal.educational_curex_to_merge,
+                validation=proposal.validation,
+            ) for proposal in person_merge_proposals
         ]
 
     @classmethod
