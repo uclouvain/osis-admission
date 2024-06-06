@@ -54,6 +54,10 @@ class IDigitRepository:
         raise NotImplementedError
 
     @classmethod
+    def retrieve_list_error_merge_proposals(cls) -> List[PropositionFusionPersonneDTO]:
+        raise NotImplementedError
+
+    @classmethod
     def get_global_id(cls, noma: str) -> str:
         raise NotImplementedError
 

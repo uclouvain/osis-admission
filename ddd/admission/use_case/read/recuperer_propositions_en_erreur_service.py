@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,41 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import List
 
+from admission.ddd.admission.commands import RetrieveListePropositionFusionEnErreurQuery
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
-from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
-class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
-    statut_ticket = StatutTicketPersonneDTO(
-        request_id=1,
-        matricule='123456789',
-        noma='0000000',
-        nom='lastname',
-        prenom='firstname',
-        statut='CREATED',
-        errors=[],
-    )
-
-    @classmethod
-    def submit_person_ticket(cls, global_id: str, noma: str):
-        pass
-
-    @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
-        return cls.statut_ticket
-
-    @classmethod
-    def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
-        return cls.statut_ticket.statut
-
-    @classmethod
-    def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
-        return [cls.statut_ticket]
-
-    @classmethod
-    def retrieve_list_error_merge_proposals(cls) -> List[PropositionFusionPersonneDTO]:
-        raise []
+def recuperer_propositions_en_erreur(
+    cmd: 'RetrieveListePropositionFusionEnErreurQuery',
+    digit_repository: 'IDigitRepository',
+) -> List[PropositionFusionPersonneDTO]:
+    return digit_repository.retrieve_list_error_merge_proposals()
