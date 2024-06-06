@@ -7933,6 +7933,11 @@ msgstr ""
 "Impossible de valider le dossier d'admission car il existe au moins un "
 "doublon potentiel de personne."
 
+msgid ""
+"Unable to validate the admission because an error occured while searching for existing person in DIGIT"
+msgstr ""
+"Impossible de valider le dossier d'admission car une erreur s'est produite lors de la recherche de compte existant dans DIGIT"
+
 msgid "Unable to validate the admission because of an invalid DIGIT ticket."
 msgstr ""
 "Impossible de valider le dossier d'admission car il existe des erreurs "
