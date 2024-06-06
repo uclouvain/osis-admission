@@ -82,6 +82,8 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     if proposition_fusion:
         if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
             raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
+        if proposition_fusion.status == PersonMergeStatus.ERROR.name:
+            raise Exception(_("Unable to validate the admission because an error occured while searching for existing person in DIGIT"))
 
     if validation.valid is False:
         raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))

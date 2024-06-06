@@ -64,46 +64,53 @@ class DigitService(IDigitService):
             },
         )
 
-        if niss:
-            # keep only digits in niss
-            niss = re.sub(r'\D', '', niss)
+        if person_merge_proposal.status not in [
+            PersonMergeStatus.IN_PROGRESS.name,
+            PersonMergeStatus.MERGED.name
+        ]:
+            if niss:
+                # keep only digits in niss
+                niss = re.sub(r'\D', '', niss)
 
-        data = {
-            "lastname": nom, "firstname": prenom, "birthdate": date_naissance,
-            "sex": genre, "nationalRegister": niss, "otherFirstName": autres_prenoms,
-        }
-        logger.info(
-            f"DIGIT search existing person: "
-            f'{json.dumps(data)}'
-        )
-
-        if MOCK_DIGIT_SERVICE_CALL:
-            similarity_data = _mock_search_digit_account_return_response()
-        else:
-            response = requests.post(
-                headers={
-                    'Content-Type': 'application/json',
-                    'Authorization': settings.ESB_AUTHORIZATION,
-                },
-                data=json.dumps(data),
-                url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
-            )
-            similarity_data = response.json()
-
-        logger.info(f"DIGIT Response: {similarity_data}")
-
-        PersonMergeProposal.objects.update_or_create(
-            original_person=original_person,
-            defaults={
-                "status": _get_status_from_digit_response(similarity_data),
-                "similarity_result": similarity_data,
-                "last_similarity_result_update": datetime.datetime.now(),
+            data = {
+                "lastname": nom, "firstname": prenom, "birthdate": date_naissance,
+                "sex": genre, "nationalRegister": niss, "otherFirstName": autres_prenoms,
             }
-        )
+            logger.info(
+                f"DIGIT search existing person: "
+                f'{json.dumps(data)}'
+            )
 
-        similarity_data = person_merge_proposal.similarity_result
+            if MOCK_DIGIT_SERVICE_CALL:
+                similarity_data = _mock_search_digit_account_return_response()
+            else:
+                response = requests.post(
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Authorization': settings.ESB_AUTHORIZATION,
+                    },
+                    data=json.dumps(data),
+                    url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
+                )
+                similarity_data = response.json()
 
-        return similarity_data
+            logger.info(f"DIGIT Response: {similarity_data}")
+
+            PersonMergeProposal.objects.update_or_create(
+                original_person=original_person,
+                defaults={
+                    "status": _get_status_from_digit_response(similarity_data),
+                    "similarity_result": similarity_data,
+                    "last_similarity_result_update": datetime.datetime.now(),
+                }
+            )
+
+            similarity_data = person_merge_proposal.similarity_result
+
+            return similarity_data
+
+        else:
+            return "[]"
 
 
 def _get_status_from_digit_response(similarity_data):
