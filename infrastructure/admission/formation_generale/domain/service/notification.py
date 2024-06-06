@@ -288,6 +288,7 @@ class Notification(INotification):
             common_tokens[
                 'training_enrollment_campus_email'
             ] = admission.training.enrollment_campus.sic_enrollment_email
+            common_tokens['application_type'] = admission.get_type_demande_display().lower()
 
             email_message = generate_email(
                 ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
