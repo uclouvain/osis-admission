@@ -87,7 +87,7 @@ templates.register(
         ),
         Token(
             name='application_type',
-            description=_('Type of the applicaton'),
+            description=_('Type of the application'),
             example='admission',
         ),
     ],

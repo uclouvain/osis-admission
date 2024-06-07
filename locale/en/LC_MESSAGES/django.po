@@ -7147,6 +7147,9 @@ msgstr ""
 msgid "Type of paper"
 msgstr ""
 
+msgid "Type of the application"
+msgstr ""
+
 msgid "Type of training"
 msgstr ""
 
@@ -7187,6 +7190,11 @@ msgid "UE"
 msgstr ""
 
 msgid "UUID"
+msgstr ""
+
+msgid ""
+"Unable to validate the admission because an error occured while searching "
+"for existing person in DIGIT"
 msgstr ""
 
 msgid ""
