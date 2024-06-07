@@ -5914,6 +5914,9 @@ msgstr "Refusée"
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
 
+msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
+msgstr "Refus 95 générique - irrecevabilité"
+
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr "Refus article 95 Jury"
 
@@ -7880,6 +7883,9 @@ msgstr "Type de communication"
 msgid "Type of paper"
 msgstr "Type d'épreuve"
 
+msgid "Type of the application"
+msgstr "Type de l'application"
+
 msgid "Type of training"
 msgstr "Type de formation"
 
@@ -7925,6 +7931,13 @@ msgstr "UE"
 
 msgid "UUID"
 msgstr "UUID"
+
+msgid ""
+"Unable to validate the admission because an error occured while searching "
+"for existing person in DIGIT"
+msgstr ""
+"Impossible de valider le dossier d'admission car une erreur s'est produite "
+"lors de la recherche de compte existant dans DIGIT"
 
 msgid ""
 "Unable to validate the admission because of a potential person duplicates "

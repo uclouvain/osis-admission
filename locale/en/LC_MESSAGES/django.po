@@ -5364,6 +5364,9 @@ msgstr "Denied"
 msgid "REFUS_AGREGATION"
 msgstr ""
 
+msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
+msgstr ""
+
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr ""
 
@@ -7144,6 +7147,9 @@ msgstr ""
 msgid "Type of paper"
 msgstr ""
 
+msgid "Type of the application"
+msgstr ""
+
 msgid "Type of training"
 msgstr ""
 
@@ -7184,6 +7190,11 @@ msgid "UE"
 msgstr ""
 
 msgid "UUID"
+msgstr ""
+
+msgid ""
+"Unable to validate the admission because an error occured while searching "
+"for existing person in DIGIT"
 msgstr ""
 
 msgid ""

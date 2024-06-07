@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
+
 import attr
 
 from osis_common.ddd import interface
@@ -50,3 +52,4 @@ class PropositionFusionPersonneDTO(interface.DTO):
     professional_curex_uuids: str
     educational_curex_uuids: str
     validation: dict
+    last_registration_id: Optional[str]

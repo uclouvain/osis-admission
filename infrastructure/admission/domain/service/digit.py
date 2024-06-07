@@ -40,6 +40,9 @@ MOCK_DIGIT_SERVICE_CALL = settings.MOCK_DIGIT_SERVICE_CALL
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
+TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX = ['8', '9']
+EMPTY_LIST_STR = "[]"
+
 class DigitService(IDigitService):
     @classmethod
     def rechercher_compte_existant(
@@ -52,8 +55,8 @@ class DigitService(IDigitService):
             date_naissance: str,
             niss: str
     ) -> str:
-        if not waffle.switch_is_active('fusion-digit'):
-            return "[]"
+        if not waffle.switch_is_active('fusion-digit') or matricule[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
+            return EMPTY_LIST_STR
 
         original_person = Person.objects.get(global_id=matricule)
 
@@ -63,6 +66,9 @@ class DigitService(IDigitService):
                 "last_similarity_result_update": datetime.datetime.now()
             },
         )
+
+        if person_merge_proposal.status in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.MERGED.name]:
+            return EMPTY_LIST_STR
 
         if niss:
             # keep only digits in niss

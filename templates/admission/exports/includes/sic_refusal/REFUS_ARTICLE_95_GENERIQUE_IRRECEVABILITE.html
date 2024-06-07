@@ -1,4 +1,4 @@
-{% load admission i18n static academic_year_display %}
+{% load admission academic_year_display %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -34,38 +34,28 @@
   l’objet d’une réponse favorable.
 </p>
 
-<p>
-  En effet, après analyse de votre curriculum académique et, conformément à l'article 5 du décret du 11 avril
-  2014 adaptant le financement des établissements d'enseignement supérieur à la nouvelle organisation des études,
-  nous constatons que vous n'êtes pas finançable pour des raisons académiques.
-</p>
-
 {% if proposition.motifs_refus %}
-  <p>
-    Aucune dérogation ne peut vous être accordée:
-  </p>
-
-  <ul>
-    {% for motif in proposition.motifs_refus %}
-      <li>{{ motif.motif }}</li>
-    {% endfor %}
-  </ul>
+  {% if proposition.motifs_refus|length == 1 %}
+    <p>{{ proposition.motifs_refus.0.motif }}</p>
+  {% else %}
+    <ul>
+      {% for motif in proposition.motifs_refus %}
+        <li>{{ motif.motif }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 {% endif %}
 
 <p>
-  Par conséquent, et en application de l'article 96, § 1er du décret du 7 novembre 2013 définissant le paysage de
-  l'enseignement supérieur et l'organisation académique des études, votre demande d'admission est refusée.
+  Toutefois, si vous estimez que les motifs de cette décision d'irrecevabilité ne sont pas fondés et que vous disposez
+  d’arguments à faire valoir, un recours peut être exercé auprès de la Déléguée du Gouvernement de la Communauté
+  française de Belgique conformément à l’article 95, § 1er du décret précité. Ce recours doit être introduit par
+  courrier électronique ou par courrier recommandé avec accusé de réception ou remis en mains propres contre
+  accusé de réception.
 </p>
 
 <p>
-  Si vous estimez que des circonstances exceptionnelles le justifient, il vous est loisible d’introduire un recours
-  conformément à l’article 96, § 2 du décret précité et à l’article 23 du Règlement Général des Études et des Examens
-  de l’UCLouvain. Ce recours doit être adressé au vice-recteur aux affaires étudiantes dans les cinq jours qui suivent
-  la notification de la présente décision. Ce recours doit être envoyé par lettre recommandée ou déposé au
-  secrétariat du vice-recteur aux affaires étudiantes contre accusé de réception.
-</p>
-
-<p>
-  Je vous invite à consulter la page suivante afin de prendre connaissance des détails de cette procédure :
-  <a href="https://uclouvain.be/fr/decouvrir/recours.html">https://uclouvain.be/fr/decouvrir/recours.html</a>.
+  Afin de connaître cette procédure, je vous invite à consulter l’article 19 du Règlement Général des Études et
+  des Examens disponible à l’adresse suivante : <a href="https://uclouvain.be/fr/decouvrir/rgee.html">
+  https://uclouvain.be/fr/decouvrir/rgee.html</a>.
 </p>
