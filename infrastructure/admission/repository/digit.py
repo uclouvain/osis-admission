@@ -201,6 +201,7 @@ class DigitRepository(IDigitRepository):
                 professional_curex_uuids=proposal.professional_curex_to_merge,
                 educational_curex_uuids=proposal.educational_curex_to_merge,
                 validation=proposal.validation,
+                last_registration_id=proposal.proposal_merge_person.last_registration_id,
             ) for proposal in person_merge_proposals
         ]
 
