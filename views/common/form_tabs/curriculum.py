@@ -281,10 +281,6 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
             )
         )
 
-    def get_object(self, queryset=None):
-        # To prevent to search it several times
-        return getattr(self, 'object', None) or super().get_object(queryset=queryset)
-
     def has_permission(self):
         self.object = self.get_object()
         return super().has_permission() and not any(
