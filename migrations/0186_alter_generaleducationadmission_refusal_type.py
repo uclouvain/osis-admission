@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0184_alter_categorizedfreedocument_checklist_tab'),
+        ('admission', '0185_send_to_fac_mail_template_admission_type'),
     ]
 
     operations = [
