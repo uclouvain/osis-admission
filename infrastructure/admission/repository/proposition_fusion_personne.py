@@ -139,6 +139,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             professional_curex_uuids=person_merge_proposal.professional_curex_to_merge,
             educational_curex_uuids=person_merge_proposal.educational_curex_to_merge,
             validation=person_merge_proposal.validation,
+            last_registration_id=person.last_registration_id,
         )
 
     @classmethod
