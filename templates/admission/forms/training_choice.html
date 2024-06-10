@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
   {% panel _('Choose your course') %}
 
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-6 required_field">
         {% bootstrap_field form.training_type %}
       </div>
       <div class="col-md-6">
@@ -40,13 +40,24 @@
     </div>
 
     <div id="training-container">
-      <div id="general-education-training-container">
-        {% bootstrap_field form.general_education_training %}
-      </div>
+      {% if view.is_general %}
+        <div id="general-education-training-container" class="required_field">
+          {% bootstrap_field form.general_education_training %}
+        </div>
+      {% elif view.is_continuing %}
+        <div id="continuing-education-training-container" class="required_field row">
+          <div class="col-md-2">
+            {% bootstrap_field form.academic_year %}
+          </div>
+          <div class="col-md-10">
+            {% bootstrap_field form.continuing_education_training %}
+          </div>
+        </div>
+      {% endif %}
     </div>
   {% endpanel %}
 
-  {% if admission.formation.type|admission_training_type == 'MASTER' %}
+  {% if view.is_general and admission.formation.type|admission_training_type == 'MASTER' %}
     {% translate 'Specific profile' context 'admission' as specific_profile_title %}
     {% panel specific_profile_title id="student-profile" %}
       <div class="required_field">
@@ -70,6 +81,38 @@
     {% endpanel %}
   {% endif %}
 
+  {% if view.is_continuing %}
+    <div class="row">
+      <div
+        class="col-md-12 closed-continuing-fields"
+        {% if not form.display_closed_continuing_fields %}style="display: none"{% endif %}
+      >
+        <p id="closed-continuing-alert" class="alert alert-danger">
+          {% blocktranslate trimmed %}
+            This course is closed. The candidate can express its interest by ticking the box below or by contacting
+            a course administrator.
+          {% endblocktranslate %}
+        </p>
+        {% bootstrap_field form.interested_mark %}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12 required_field">
+        {% bootstrap_field form.motivations placeholder='' %}
+      </div>
+    </div>
+
+    <div
+      class="row long-continuing-fields"
+      {% if not form.display_long_continuing_fields %}style="display: none"{% endif %}
+    >
+      <div class="col-md-12 required_field">
+        {% bootstrap_field form.ways_to_find_out_about_the_course %}
+      </div>
+    </div>
+  {% endif %}
+
   {% if form.specific_question_answers.field.fields %}
     {% panel _('Specific aspects') %}
       {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
@@ -86,8 +129,8 @@
               duration: 0,
           };
 
-          {% if admission.formation.type|admission_training_type == 'MASTER' %}
-              // Display scholarship search fields when it's required
+          {% if view.is_general and admission.formation.type|admission_training_type == 'MASTER' %}
+              {# Display scholarship search fields when it's required #}
               $('#double-degree-scholarship-field').dependsOn({
                   'input[name="has_double_degree_scholarship"]': {
                       values: ['True'],
@@ -105,6 +148,22 @@
                       values: ['True'],
                   },
               }, defaultOptions);
+          {% elif view.is_continuing %}
+              const longContinuingFields = $('.long-continuing-fields');
+              const closedContinuingFields = $('.closed-continuing-fields');
+
+              {# Reset the training field when the campus or the year changes #}
+              $('#id_campus, #id_academic_year').on('change', function(event){
+                  $('#id_continuing_education_training').val('').trigger('change');
+              });
+
+              {# Toggle the fields depending on the continuing training information #}
+              $('#id_continuing_education_training').on('change', function(event){
+                  const data = $(this).select2('data')[0];
+                  closedContinuingFields.toggle(data?.state === 'CLOSED');
+                  longContinuingFields.toggle(data?.registration_required === true);
+              });
+
           {% endif %}
 
           document.dispatchEvent(new Event('refreshFormInitial'));

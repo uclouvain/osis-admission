@@ -80,7 +80,7 @@
       >
         {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions label=fac_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|label_with_user_icon form_group_class='required_field form-group' %}
 
-        <strong>{% translate 'Free additional conditions' %}</strong>
+        <strong>{% translate 'Free additional conditions' %} {{ ''|label_with_user_icon }}</strong>
         <table id="fac-decision-additional-approval-conditions-formset" class="table table-bordered">
           {{ fac_decision_free_approval_condition_formset.management_form }}
           {% for form in fac_decision_free_approval_condition_formset.forms %}

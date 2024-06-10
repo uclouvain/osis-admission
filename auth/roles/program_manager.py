@@ -90,8 +90,10 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_project': is_part_of_education_group,
             'admission.view_admission_cotutelle': is_part_of_education_group,
             'admission.view_admission_training_choice': is_part_of_education_group,
+            'admission.change_admission_training_choice': is_part_of_education_group & continuing.in_manager_status,
             'admission.view_admission_accounting': is_part_of_education_group,
             'admission.view_admission_specific_questions': is_part_of_education_group,
+            'admission.change_admission_specific_questions': is_part_of_education_group & continuing.in_manager_status,
             # Supervision
             'admission.view_admission_supervision': is_part_of_education_group,
             'admission.change_admission_supervision': is_part_of_education_group,
@@ -102,12 +104,22 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
             'admission.view_documents_management': is_part_of_education_group
-            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.is_submitted)),
+            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.not_cancelled)),
             'admission.edit_documents': is_part_of_education_group
-            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.is_submitted)),
-            'admission.change_documents_management': is_part_of_education_group
-            & ((general.is_general & general.in_fac_status) | (continuing.is_continuing & continuing.is_submitted)),
-            'admission.cancel_document_request': is_part_of_education_group & general.in_fac_document_request_status,
+            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.not_cancelled)),
+            'admission.request_documents': is_part_of_education_group
+            & (
+                (general.is_general & general.in_fac_status)
+                | (continuing.is_continuing & continuing.can_request_documents)
+            ),
+            'admission.cancel_document_request': is_part_of_education_group
+            & (
+                (general.is_general & general.in_fac_document_request_status)
+                | (continuing.is_continuing & continuing.in_document_request_status)
+            ),
+            'admission.generate_in_progress_analysis_folder': is_part_of_education_group
+            & continuing.is_continuing
+            & continuing.in_progress,
             'admission.view_checklist': is_part_of_education_group & (general.is_submitted | continuing.is_submitted),
             'admission.change_checklist': is_part_of_education_group
             & continuing.is_continuing

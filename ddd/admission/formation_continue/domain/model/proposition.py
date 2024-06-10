@@ -100,6 +100,7 @@ class Proposition(interface.RootEntity):
     type_adresse_facturation: Optional[ChoixTypeAdresseFacturation] = None
     adresse_facturation: Optional[Adresse] = None
 
+    documents_demandes: Dict = attr.Factory(dict)
     documents_additionnels: List[str] = attr.Factory(list)
 
     motivations: Optional[str] = ''
@@ -134,13 +135,14 @@ class Proposition(interface.RootEntity):
     motif_de_refus_autre: Optional[str] = ''
     motif_d_annulation: Optional[str] = ''
 
-    def modifier_choix_formation(
+    def _modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
         reponses_questions_specifiques: Dict,
         motivations: str,
         moyens_decouverte_formation: List[str],
         marque_d_interet: Optional[bool],
+        auteur: str,
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -149,7 +151,43 @@ class Proposition(interface.RootEntity):
             ChoixMoyensDecouverteFormation[moyen] for moyen in moyens_decouverte_formation
         ]
         self.marque_d_interet = marque_d_interet
-        self.auteur_derniere_modification = self.matricule_candidat
+        self.auteur_derniere_modification = auteur
+
+    def modifier_choix_formation_par_candidat(
+        self,
+        formation_id: FormationIdentity,
+        reponses_questions_specifiques: Dict,
+        motivations: str,
+        moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
+    ):
+        self._modifier_choix_formation(
+            formation_id=formation_id,
+            reponses_questions_specifiques=reponses_questions_specifiques,
+            motivations=motivations,
+            moyens_decouverte_formation=moyens_decouverte_formation,
+            marque_d_interet=marque_d_interet,
+            auteur=self.matricule_candidat,
+        )
+
+    def modifier_choix_formation_par_gestionnaire(
+        self,
+        formation_id: FormationIdentity,
+        reponses_questions_specifiques: Dict,
+        motivations: str,
+        moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
+        gestionnaire: str,
+    ):
+        self._modifier_choix_formation(
+            formation_id=formation_id,
+            reponses_questions_specifiques=reponses_questions_specifiques,
+            motivations=motivations,
+            moyens_decouverte_formation=moyens_decouverte_formation,
+            marque_d_interet=marque_d_interet,
+            auteur=gestionnaire,
+        )
+        self.annee_calculee = formation_id.annee
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionContinue.ANNULEE
@@ -200,6 +238,7 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         copie_titre_sejour: List[str],
         documents_additionnels: List[str],
+        auteur: str,
     ):
         self.inscription_a_titre = ChoixInscriptionATitre[inscription_a_titre] if inscription_a_titre else None
         self.nom_siege_social = nom_siege_social or ''
@@ -225,7 +264,7 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.copie_titre_sejour = copie_titre_sejour
         self.documents_additionnels = documents_additionnels
-        self.auteur_derniere_modification = self.matricule_candidat
+        self.auteur_derniere_modification = auteur
 
     def verifier_informations_complementaires(self):
         """Vérification de la validité des informations complémentaires."""
@@ -355,3 +394,15 @@ class Proposition(interface.RootEntity):
             extra={'blocage': "closed"},
         )
         self.auteur_derniere_modification = gestionnaire
+
+    def reclamer_documents(self, auteur_modification):
+        self.statut = ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC
+        self.auteur_derniere_modification = auteur_modification
+
+    def annuler_reclamation_documents(self, auteur_modification: str):
+        self.statut = ChoixStatutPropositionContinue.CONFIRMEE
+        self.auteur_derniere_modification = auteur_modification
+
+    def completer_documents_par_candidat(self):
+        self.statut = ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC
+        self.auteur_derniere_modification = self.matricule_candidat

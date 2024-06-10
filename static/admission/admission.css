@@ -193,6 +193,10 @@ fieldset.custom-fieldset > legend {
   margin-bottom: 0;
 }
 
+.mb-15 {
+  margin-bottom: 15px;
+}
+
 .field-with-tooltip .label-container {
   max-width: 100%;
   margin-bottom: 5px;

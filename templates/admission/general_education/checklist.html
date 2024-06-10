@@ -62,6 +62,7 @@
     {% can_update_tab 'training-choice' as can_update_training_choice_tab %}
     {% can_update_tab 'specific-questions' as can_update_specific_questions_tab %}
     {% can_update_tab 'curriculum' as can_update_curriculum %}
+    {% can_update_tab 'education' as can_update_education %}
 
     {% if can_update_person_tab %}
       {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
@@ -158,7 +159,7 @@
                   {{ ''|tab_edit_button:'#choix_formation'|safe }}
                 {% endif %}
               </dt>
-              <dd>
+              <dd class="mb-15">
                 {% with formation=admission.formation %}
                   {% if admission|est_premiere_annee %}
                     {{ formation.sigle }}-1 - {{ formation.intitule|intitule_premiere_annee }} ({{ formation.campus }})
@@ -169,10 +170,10 @@
               </dd>
 
               <dt>{% trans "Number of previous registration" context 'admission' %}</dt>
-              <dd>{% trans "Unavailable" %}</dd>
+              <dd class="mb-15">{% trans "Unavailable" %}</dd>
 
               <dt>{% trans "Number of additional years the candidate can have" context 'admission' %}</dt>
-              <dd>{% trans "Unavailable" %}</dd>
+              <dd class="mb-15">{% trans "Unavailable" %}</dd>
             </dl>
 
             {% panel _("Parcours") %}
@@ -308,25 +309,41 @@
             {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
               {% if experience.valorisee_par_admissions != None and view.kwargs.uuid not in experience.valorisee_par_admissions %}
                 {% with last_valuated_admission_by_experience_uuid|get_item:child.extra.identifiant as last_valuated_admission %}
-                  <p class="alert alert-warning">
-                    {% if last_valuated_admission %}
-                      {% admission_url last_valuated_admission.uuid last_valuated_admission.type_formation as admission_url %}
-                      {% blocktranslate trimmed with admission_reference=last_valuated_admission.numero_demande admission_url=admission_url %}
-                        This experience has been added by the applicant in another application, to proceed to a modification,
-                        click on his/her <a href="{{ admission_url }}" target="_blank">other application {{ admission_reference }}</a>.
-                      {% endblocktranslate %}
-                    {% else %}
-                      {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
+                  <div class="flex-content alert alert-warning">
+                    <p>
+                      {% if last_valuated_admission %}
+                        {% admission_url last_valuated_admission.uuid last_valuated_admission.type_formation as admission_url %}
+                        {% blocktranslate trimmed with admission_reference=last_valuated_admission.numero_demande admission_url=admission_url %}
+                          This experience has been added by the applicant in another application, to proceed to a modification,
+                          click on his/her <a href="{{ admission_url }}" target="_blank">other application {{ admission_reference }}</a>.
+                        {% endblocktranslate %}
+                      {% else %}
+                        {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
+                      {% endif %}
+                    </p>
+                    {% experience_valuation_url experience=experience as valuate_experience_url %}
+                    {% if valuate_experience_url %}
+                      {% concat 'valuate-experience-modal-single-' child.extra.identifiant as valuate_modal_id %}
+                      <button
+                        class="btn btn-warning"
+                        data-toggle="modal"
+                        data-target="#{{ valuate_modal_id }}"
+                      >
+                        {% translate 'Valuate' %}
+                      </button>
                     {% endif %}
-                  </p>
-                  {% endwith %}
+                  </div>
+                  {% if valuate_experience_url %}
+                    {% include 'admission/modal/confirm_modal.html' with confirm_url=valuate_experience_url confirm_message=_('Do you confirm the valuation of this experience?') confirm_id=valuate_modal_id confirm_button_class="btn-success" %}
+                  {% endif %}
+                {% endwith %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
                 {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant %}
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=can_update_curriculum specific_questions=specific_questions_by_tab %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True can_update_curriculum=can_update_curriculum can_update_education=can_update_education specific_questions=specific_questions_by_tab %}
                 </div>
               {% endif %}
             {% endwith %}
@@ -359,7 +376,7 @@
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
               {% endpanel %}
             {% endif %}
-            {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Dynamic questions about "Specific aspects" sub-tab') %}
+            {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Specific questions') %}
           </div>
 
         </div>
@@ -402,18 +419,10 @@
         {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
 
         <div class="info-part">
+          {% include 'admission/general_education/includes/checklist/sic_decision_sic_fraud_status.html' %}
           <dl>
-            <dt>{% trans "Fraudster status from SIC" %}</dt>
-            <dd>
-              {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
-                <span class="bg-danger">{% trans "Fraudster" %}</span>
-              {% else %}
-                {% trans "No fraud identified" %}
-              {% endif %}
-            </dd>
-
             <dt>{% trans "Fraudster status from ARES" %}</dt>
-            <dd>
+            <dd class="mb-15">
               Not implemented yet.
             </dd>
 
@@ -1037,9 +1046,13 @@
     }
 
     #checklist-menu li.active {
-      cursor: pointer;
+      pointer-events: none;
       background: inherit;
       color: inherit;
+    }
+
+    #checklist-menu li.active ul {
+      pointer-events: initial;
     }
 
     #checklist-menu li.active > div > a, #checklist-menu li.active > a {
@@ -1292,7 +1305,7 @@
     }
 
 
-    #requested-documents-selects tbody tr.tab-name {
+    tbody tr.tab-name {
       background-color: #f5f5f5;
     }
 

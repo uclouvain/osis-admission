@@ -86,6 +86,8 @@ class PropositionDTO(interface.DTO):
     moyens_decouverte_formation: List[str]
 
     documents_demandes: Dict
+    documents_libres_fac_uclouvain: List[str]
+    documents_libres_sic_uclouvain: List[str]
 
     marque_d_interet: Optional[bool]
     aide_a_la_formation: Optional[bool]
@@ -117,3 +119,7 @@ class PropositionDTO(interface.DTO):
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+
+    @property
+    def annee_demande(self):
+        return self.annee_calculee or self.formation.annee

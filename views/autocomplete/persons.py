@@ -25,6 +25,7 @@
 # ##############################################################################
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.postgres.search import SearchVector
 from django.db.models import Q, Exists, OuterRef, F
 
 from admission.auth.roles.promoter import Promoter
@@ -60,9 +61,14 @@ class CandidatesAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetVi
         q = self.request.GET.get('q', '')
 
         return (
-            Candidate.objects.filter(
-                Q(person__first_name__icontains=q)
-                | Q(person__last_name__icontains=q)
+            Candidate.objects.annotate(
+                name=SearchVector(
+                    'person__first_name',
+                    'person__last_name',
+                ),
+            )
+            .filter(
+                Q(name=q)
                 | Q(person__email__icontains=q)
                 | Q(person__private_email__icontains=q)
                 | Q(person__student__registration_id__icontains=q)
@@ -73,6 +79,7 @@ class CandidatesAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetVi
                 last_name=F('person__last_name'),
                 global_id=F('person__global_id'),
             )
+            .distinct()
             if q
             else []
         )

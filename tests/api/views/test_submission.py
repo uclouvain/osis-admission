@@ -229,7 +229,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.third_admission_ok.refresh_from_db()
 
         # Valuation of the secondary studies
-        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, None)
+        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, self.third_admission_ok.candidate)
 
         # Valuation of the curriculum experiences
         self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)
@@ -893,7 +893,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.third_admission_ok.refresh_from_db()
 
         # Valuation of the secondary studies
-        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, None)
+        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, self.third_admission_ok.candidate)
 
         # Valuation of the curriculum experiences
         self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)

@@ -77,12 +77,14 @@ class VerifierCurriculum(interface.DomainService):
 
             credits_necessaires_etranger = experience.systeme_evaluation in SYSTEMES_EVALUATION_AVEC_CREDITS
             for annee in experience.annees:
-                releve_annuel_manquant = not releve_global_necessaire and (
-                    not annee.releve_notes or traduction_necessaire and not annee.traduction_releve_notes
+                releve_annuel_manquant = (
+                    not releve_global_necessaire
+                    and (not annee.releve_notes or traduction_necessaire and not annee.traduction_releve_notes)
+                    and (annee.resultat != Result.WAITING_RESULT.name)
                 )
                 doit_renseigner_credits = (
                     annee.annee >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE if pays_belge else credits_necessaires_etranger
-                ) and (annee.resultat != Result.WAITING_RESULT.name or annee.annee < annee_courante)
+                ) and (annee.resultat != Result.WAITING_RESULT.name)
                 if (
                     not annee.resultat
                     or releve_annuel_manquant

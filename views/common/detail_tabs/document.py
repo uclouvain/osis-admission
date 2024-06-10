@@ -45,7 +45,6 @@ from admission.ddd.admission.formation_continue import commands as continuing_ed
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.forms.admission.document import (
-    UploadFreeDocumentForm,
     RequestFreeDocumentForm,
     RequestDocumentForm,
     ReplaceDocumentForm,
@@ -62,6 +61,7 @@ from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd import interface
 from osis_common.utils.htmx import HtmxMixin
+from osis_document.utils import get_file_url
 
 __namespace__ = 'document'
 
@@ -80,12 +80,10 @@ __all__ = [
     'RetypeDocumentView',
 ]
 
-from osis_document.utils import get_file_url
-
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = UploadManagerDocumentForm
-    permission_required = 'admission.change_documents_management'
+    permission_required = 'admission.edit_documents'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
     default_htmx_trigger_form_extra = {
@@ -95,18 +93,26 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
     urlpatterns = 'free-internal-upload'
     message_on_success = _('The document has been uploaded')
     prefix = 'upload-free-internal-document-form'
+    commands = {
+        CONTEXT_GENERAL: general_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand,
+    }
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['context'] = self.current_context
+        return kwargs
 
     @property
     def document_type(self):
-        return (
-            TypeEmplacementDocument.LIBRE_INTERNE_FAC.name
-            if self.is_fac
-            else TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
-        )
+        if self.is_continuing or self.is_fac:
+            return TypeEmplacementDocument.LIBRE_INTERNE_FAC.name
+        else:
+            return TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
 
     def form_valid(self, form) -> HttpResponse:
         document_id = message_bus_instance.invoke(
-            general_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand(
+            self.commands[self.current_context](
                 uuid_proposition=self.kwargs.get('uuid'),
                 auteur=self.request.user.person.global_id,
                 uuid_document=form.cleaned_data['file'][0],
@@ -115,7 +121,7 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
-        return super().form_valid(self.form_class(prefix=self.prefix))
+        return super().form_valid(self.form_class(prefix=self.prefix, context=self.current_context))
 
 
 class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
@@ -126,6 +132,7 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
 
     def get_form_kwargs(self):
         return {
+            'context': self.current_context,
             'data': {
                 'file_name': _('Analysis folder'),
                 'file_0': admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True),
@@ -133,11 +140,13 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
         }
 
 
-def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool) -> bool:
+def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool, context: str) -> bool:
     """
     Check if the document can be edited by the person.
+    For the general admissions:
     - FAC user can only update their own documents
     - SIC user can update all documents except the FAC and SYSTEM ones
+    For the continuing admissions: FAC and SIC users can update all documents except the SYSTEM ones.
     """
 
     document_type = document.type
@@ -146,10 +155,10 @@ def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool) -
         return False
 
     if document_type in EMPLACEMENTS_FAC:
-        return is_fac
+        return (is_fac and context == CONTEXT_GENERAL) or context == CONTEXT_CONTINUING
 
     if document_type in EMPLACEMENTS_SIC:
-        return is_sic
+        return (is_sic and context == CONTEXT_GENERAL) or context == CONTEXT_CONTINUING
 
     return False
 
@@ -163,21 +172,33 @@ def can_retype_document(document: AdmissionDocument, document_identifier: str) -
 
 
 class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    permission_required = 'admission.change_documents_management'
+    permission_required = 'admission.edit_documents'
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
+    commands = {
+        CONTEXT_GENERAL: general_education_commands.InitialiserEmplacementDocumentLibreAReclamerCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.InitialiserEmplacementDocumentLibreAReclamerCommand,
+    }
+
+    @property
+    def document_type(self):
+        if self.is_continuing or self.is_fac:
+            return TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name
+        else:
+            return TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['context'] = self.current_context
+        return kwargs
 
     def form_valid(self, form) -> HttpResponse:
         document_id = message_bus_instance.invoke(
-            general_education_commands.InitialiserEmplacementDocumentLibreAReclamerCommand(
+            self.commands[self.current_context](
                 uuid_proposition=self.kwargs.get('uuid'),
                 auteur=self.request.user.person.global_id,
-                type_emplacement=(
-                    TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name
-                    if self.is_fac
-                    else TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
-                ),
+                type_emplacement=self.document_type,
                 libelle_en=form.cleaned_data['file_name_en'],
                 libelle_fr=form.cleaned_data['file_name_fr'],
                 raison=form.cleaned_data.get('reason', ''),
@@ -200,7 +221,7 @@ class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['only_limited_request_choices'] = self.is_fac
+        kwargs['only_limited_request_choices'] = self.is_general & self.is_fac
         kwargs['candidate_language'] = self.admission.candidate.language
         return kwargs
 
@@ -240,7 +261,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['document_identifier'] = document_identifier
         context['document_type'] = document.type
         context['requestable_document'] = document.requestable
-        editable_document = can_edit_document(document, self.is_fac, self.is_sic)
+        editable_document = can_edit_document(document, self.is_fac, self.is_sic, self.current_context)
         context['editable_document'] = editable_document
         context['retypable_document'] = can_retype_document(document, document_identifier)
         context['read_only_document'] = self.request.GET.get('read-only') == '1'
@@ -267,7 +288,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             candidate_language=self.admission.candidate.language,
             initial=request_initial,
             editable_document=editable_document,
-            only_limited_request_choices=self.is_fac and document.type in EMPLACEMENTS_FAC,
+            only_limited_request_choices=self.is_general and self.is_fac and document.type in EMPLACEMENTS_FAC,
         )
 
         context['retype_form'] = RetypeDocumentForm(admission_uuid=self.admission_uuid, identifier=document_identifier)
@@ -285,8 +306,9 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
         CONTEXT_GENERAL: None,
         CONTEXT_CONTINUING: None,
     }
-    permission_required = 'admission.change_documents_management'
+    permission_required = 'admission.edit_documents'
     name = 'document-action'
+    close_modal_on_htmx_request = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -316,7 +338,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
         if not self.document:
             raise Http404
 
-        return has_permission and can_edit_document(self.document, self.is_fac, self.is_sic)
+        return has_permission and can_edit_document(self.document, self.is_fac, self.is_sic, self.current_context)
 
 
 class RequestCandidateDocumentView(DocumentFormView):
@@ -324,10 +346,18 @@ class RequestCandidateDocumentView(DocumentFormView):
     template_name = 'admission/document/request_document.html'
     htmx_template_name = 'admission/document/request_document.html'
     urlpatterns = {'candidate-request': 'candidate-request/<str:identifier>'}
+    request_commands = {
+        CONTEXT_GENERAL: general_education_commands.ModifierReclamationEmplacementDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.ModifierReclamationEmplacementDocumentCommand,
+    }
+    cancel_commands = {
+        CONTEXT_GENERAL: general_education_commands.AnnulerReclamationEmplacementDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.AnnulerReclamationEmplacementDocumentCommand,
+    }
 
     @cached_property
     def editable_document(self):
-        return can_edit_document(self.document, self.is_fac, self.is_sic)
+        return can_edit_document(self.document, self.is_fac, self.is_sic, self.current_context)
 
     def has_permission(self):
         return super().has_permission() and self.document.requestable is True
@@ -351,13 +381,15 @@ class RequestCandidateDocumentView(DocumentFormView):
         kwargs = super().get_form_kwargs()
         kwargs['candidate_language'] = self.admission.candidate.language
         kwargs['editable_document'] = self.editable_document
-        kwargs['only_limited_request_choices'] = self.is_fac and self.document.type in EMPLACEMENTS_FAC
+        kwargs['only_limited_request_choices'] = (
+            self.is_general and self.is_fac and self.document.type in EMPLACEMENTS_FAC
+        )
         return kwargs
 
     def form_valid(self, form):
         if form.cleaned_data['request_status']:
             message_bus_instance.invoke(
-                general_education_commands.ModifierReclamationEmplacementDocumentCommand(
+                self.request_commands[self.current_context](
                     uuid_proposition=self.admission_uuid,
                     identifiant_emplacement=self.document_identifier,
                     raison=form.cleaned_data['reason'],
@@ -371,7 +403,7 @@ class RequestCandidateDocumentView(DocumentFormView):
                 self.message_on_success = _('The request status has been changed')
         else:
             document_id = message_bus_instance.invoke(
-                general_education_commands.AnnulerReclamationEmplacementDocumentCommand(
+                self.cancel_commands[self.current_context](
                     uuid_proposition=self.admission_uuid,
                     identifiant_emplacement=self.document_identifier,
                     auteur=self.request.user.person.global_id,
@@ -387,10 +419,14 @@ class RequestCandidateDocumentView(DocumentFormView):
 
 class DeleteDocumentView(DocumentFormView):
     urlpatterns = {'delete': 'delete/<str:identifier>'}
+    commands = {
+        CONTEXT_GENERAL: general_education_commands.SupprimerEmplacementDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.SupprimerEmplacementDocumentCommand,
+    }
 
     def delete(self, request, *args, **kwargs):
         document_id = message_bus_instance.invoke(
-            general_education_commands.SupprimerEmplacementDocumentCommand(
+            self.command(
                 uuid_proposition=self.admission_uuid,
                 identifiant_emplacement=self.document_identifier,
                 auteur=self.request.user.person.global_id,
@@ -420,10 +456,18 @@ class RequestStatusChangeDocumentView(DocumentFormView):
         'refresh_list': False,
         'keep_modal_open': True,
     }
+    request_commands = {
+        CONTEXT_GENERAL: general_education_commands.ModifierReclamationEmplacementDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.ModifierReclamationEmplacementDocumentCommand,
+    }
+    cancel_commands = {
+        CONTEXT_GENERAL: general_education_commands.AnnulerReclamationEmplacementDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.AnnulerReclamationEmplacementDocumentCommand,
+    }
 
     @cached_property
     def editable_document(self):
-        return can_edit_document(self.document, self.is_fac, self.is_sic)
+        return can_edit_document(self.document, self.is_fac, self.is_sic, self.current_context)
 
     def has_permission(self):
         return super().has_permission() and self.document.requestable is True
@@ -432,13 +476,16 @@ class RequestStatusChangeDocumentView(DocumentFormView):
         kwargs = super().get_form_kwargs()
         kwargs['document_identifier'] = self.document_identifier
         kwargs['proposition_uuid'] = self.admission_uuid
-        kwargs['only_limited_request_choices'] = self.is_fac and self.document.type in EMPLACEMENTS_FAC
+        kwargs['only_limited_request_choices'] = (
+            self.is_general and self.is_fac and self.document.type in EMPLACEMENTS_FAC
+        )
+        kwargs['context'] = self.current_context
         return kwargs
 
     def form_valid(self, form):
         if form.cleaned_data[self.document_identifier]:
             message_bus_instance.invoke(
-                general_education_commands.ModifierReclamationEmplacementDocumentCommand(
+                self.request_commands[self.current_context](
                     uuid_proposition=self.admission_uuid,
                     identifiant_emplacement=self.document_identifier,
                     raison=self.document.reason,
@@ -449,7 +496,7 @@ class RequestStatusChangeDocumentView(DocumentFormView):
             self.message_on_success = _('The request status has been changed')
         else:
             message_bus_instance.invoke(
-                general_education_commands.AnnulerReclamationEmplacementDocumentCommand(
+                self.cancel_commands[self.current_context](
                     uuid_proposition=self.admission_uuid,
                     identifiant_emplacement=self.document_identifier,
                     auteur=self.request.user.person.global_id,
@@ -465,6 +512,10 @@ class ReplaceDocumentView(DocumentFormView):
     urlpatterns = {'replace': 'replace/<str:identifier>'}
     template_name = 'admission/document/replace_document.html'
     htmx_template_name = 'admission/document/replace_document.html'
+    commands = {
+        CONTEXT_GENERAL: general_education_commands.RemplacerEmplacementDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.RemplacerEmplacementDocumentCommand,
+    }
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
         return super().post(request, *args, **kwargs)
@@ -482,7 +533,7 @@ class ReplaceDocumentView(DocumentFormView):
 
     def form_valid(self, form):
         document_id = message_bus_instance.invoke(
-            general_education_commands.RemplacerEmplacementDocumentCommand(
+            self.command(
                 uuid_proposition=self.admission_uuid,
                 identifiant_emplacement=self.document_identifier,
                 uuid_document=form.cleaned_data['file'][0],
@@ -506,6 +557,10 @@ class UploadDocumentByManagerView(DocumentFormView):
     urlpatterns = {'upload': 'upload/<str:identifier>'}
     template_name = 'admission/document/upload_document.html'
     htmx_template_name = 'admission/document/upload_document.html'
+    commands = {
+        CONTEXT_GENERAL: general_education_commands.RemplirEmplacementDocumentParGestionnaireCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.RemplirEmplacementDocumentParGestionnaireCommand,
+    }
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -520,7 +575,7 @@ class UploadDocumentByManagerView(DocumentFormView):
 
     def form_valid(self, form):
         document_id = message_bus_instance.invoke(
-            general_education_commands.RemplirEmplacementDocumentParGestionnaireCommand(
+            self.command(
                 uuid_proposition=self.admission_uuid,
                 identifiant_emplacement=self.document_identifier,
                 uuid_document=form.cleaned_data['file'][0],

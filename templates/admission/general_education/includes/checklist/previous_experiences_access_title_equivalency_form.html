@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,13 @@
         {% field_data _('Status') original_admission.foreign_access_title_equivalency_status|enum_display:'StatutEquivalenceTitreAcces' %}
       </div>
     </div>
+    {% if original_admission.foreign_access_title_equivalency_status == 'RESTRICTIVE' %}
+      <div class="row">
+        <div class="col-md-6">
+          {% field_data _('Information about the restriction') original_admission.foreign_access_title_equivalency_restriction_about %}
+        </div>
+      </div>
+    {% endif %}
     <div class="row">
       <div class="col-md-6">
         {% field_data _('State') original_admission.foreign_access_title_equivalency_state|enum_display:'EtatEquivalenceTitreAcces' %}
@@ -69,6 +76,11 @@
         </div>
         <div id="equivalency-status-container" class="col-md-6 required_field">
           {% bootstrap_field past_experiences_admission_access_title_equivalency_form.foreign_access_title_equivalency_status %}
+        </div>
+      </div>
+      <div class="row">
+        <div id="equivalency-about-container" class="col-md-12">
+          {% bootstrap_field past_experiences_admission_access_title_equivalency_form.foreign_access_title_equivalency_restriction_about %}
         </div>
       </div>
       <div class="row">
@@ -125,6 +137,10 @@
                       'EQUIVALENCE_GRADE_ACADEMIQUE_FWB',
                       'EQUIVALENCE_DE_NIVEAU'
                   ]},
+          }, { duration: 0, valueOnDisable: '', });
+
+          $('#equivalency-about-container').dependsOn({
+              '#id_foreign_access_title_equivalency_status': { values: ['RESTRICTIVE'] },
           }, { duration: 0, valueOnDisable: '', });
 
           $('#equivalency-state-container').dependsOn({

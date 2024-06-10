@@ -41,13 +41,24 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistFormationContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistFormationGenerale,
+)
 from admission.forms import (
     OTHER_EMPTY_CHOICE,
     autocomplete,
     get_year_choices,
+    AdmissionHTMLCharField,
 )
-from admission.templatetags.admission import formatted_language, document_request_status_css_class
+from admission.templatetags.admission import (
+    formatted_language,
+    document_request_status_css_class,
+    CONTEXT_GENERAL,
+    CONTEXT_CONTINUING,
+)
 from admission.views.autocomplete.categorized_free_documents import CategorizedFreeDocumentsAutocomplete
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
@@ -101,8 +112,7 @@ def get_request_status_choices(only_limited_request_choices):
 
 class FreeDocumentHelperFormMixin(forms.Form):
     checklist_tab = forms.ChoiceField(
-        label=pgettext_lazy('admission', 'Checklist'),
-        choices=OTHER_EMPTY_CHOICE + OngletsChecklist.choices_except(OngletsChecklist.experiences_parcours_anterieur),
+        label=_('Document category'),
         required=False,
     )
 
@@ -127,7 +137,7 @@ class FreeDocumentHelperFormMixin(forms.Form):
         required=False,
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, context, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.tokens = {
@@ -137,6 +147,16 @@ class FreeDocumentHelperFormMixin(forms.Form):
         current_academic_year = AcademicYear.objects.current()
 
         self.current_language = get_language()
+
+        self.fields['checklist_tab'].choices = (
+            OTHER_EMPTY_CHOICE
+            + {
+                CONTEXT_GENERAL: OngletsChecklistFormationGenerale.choices_except(
+                    OngletsChecklistFormationGenerale.experiences_parcours_anterieur,
+                ),
+                CONTEXT_CONTINUING: OngletsChecklistFormationContinue.choices(),
+            }[context]
+        )
 
         self.fields['academic_year'].choices = get_year_choices(
             min_year=current_academic_year.year - 100,
@@ -259,6 +279,7 @@ class ChangeRequestDocumentForm(forms.Form):
         document_identifier,
         proposition_uuid,
         only_limited_request_choices,
+        context,
     ):
         document_field = forms.ChoiceField(
             label=label,
@@ -270,7 +291,7 @@ class ChangeRequestDocumentForm(forms.Form):
         document_field.widget.attrs['hx-swap'] = 'none'
         document_field.widget.attrs['hx-target'] = 'this'
         document_field.widget.attrs['hx-post'] = resolve_url(
-            'admission:general-education:document:candidate-request-status',
+            f'admission:{context}:document:candidate-request-status',
             uuid=proposition_uuid,
             identifier=document_identifier,
         )
@@ -281,6 +302,7 @@ class ChangeRequestDocumentForm(forms.Form):
         document_identifier,
         proposition_uuid,
         only_limited_request_choices,
+        context,
         *args,
         **kwargs,
     ):
@@ -291,6 +313,7 @@ class ChangeRequestDocumentForm(forms.Form):
             document_identifier=document_identifier,
             proposition_uuid=proposition_uuid,
             only_limited_request_choices=only_limited_request_choices,
+            context=context,
         )
 
 
@@ -355,7 +378,7 @@ class RequestAllDocumentsForm(forms.Form):
         label=_('Message object'),
     )
 
-    message_content = forms.CharField(
+    message_content = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )
@@ -365,6 +388,7 @@ class RequestAllDocumentsForm(forms.Form):
         documents: List[EmplacementDocumentDTO],
         proposition_uuid,
         only_limited_request_choices,
+        context,
         *args,
         **kwargs,
     ):
@@ -384,20 +408,14 @@ class RequestAllDocumentsForm(forms.Form):
 
         for document in documents:
             if document.est_a_reclamer:
-                if document.document_uuids:
-                    label = '<span class="fa-solid fa-paperclip"></span> '
-                else:
-                    label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
-                    label += '<span class="fa-solid fa-building-columns"></span> '
-                label += document.libelle
-
+                label = document.libelle_avec_icone
                 document_field = ChangeRequestDocumentForm.create_change_request_document_field(
                     label=label,
                     document_identifier=document.identifiant,
                     request_status=document.statut_reclamation,
                     proposition_uuid=proposition_uuid,
                     only_limited_request_choices=only_limited_request_choices,
+                    context=context,
                 )
 
                 self.fields[document.identifiant] = document_field

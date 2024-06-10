@@ -61,6 +61,8 @@ class AdmissionTask(models.Model):
         )
         DOCTORATE_MERGE = 'DOCTORATE_MERGE', _('Merging of each document field of a doctorate proposition into one PDF')
         GENERAL_FOLDER = 'GENERAL_FOLDER', _('Analysis folder for a general education admission')
+        CONTINUING_FOLDER = 'CONTINUING_FOLDER', _('Analysis folder for a continuing education admission')
+        DOCTORATE_FOLDER = 'DOCTORATE_FOLDER', _('Analysis folder for a doctorate education admission')
 
     task = models.ForeignKey(
         'osis_async.AsyncTask',

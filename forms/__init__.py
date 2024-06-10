@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import html
 from typing import List, Optional, Dict
 
 import phonenumbers
@@ -38,6 +39,8 @@ from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.academic_year import AcademicYear
+from base.models.campus import Campus
+from education_group.forms.fields import MainCampusChoiceField
 from education_group.templatetags.education_group_extra import format_to_academic_year
 from reference.models.country import Country
 
@@ -328,3 +331,18 @@ class NullBooleanSelectField(forms.NullBooleanField):
                 ('false', _('No')),
             )
         )
+
+
+class AdmissionMainCampusChoiceField(MainCampusChoiceField):
+    def label_from_instance(self, obj: Campus) -> str:
+        return obj.name
+
+
+class AdmissionHTMLCharField(forms.CharField):
+    def clean(self, value):
+        cleaned_value = super().clean(value)
+
+        if cleaned_value:
+            return html.unescape(cleaned_value)
+
+        return cleaned_value

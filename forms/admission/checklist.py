@@ -45,6 +45,8 @@ from django.utils.translation import (
     gettext,
     override,
 )
+
+from admission.templatetags.admission import CONTEXT_GENERAL
 from osis_document.utils import is_uuid
 
 from admission.contrib.models import GeneralEducationAdmission
@@ -80,6 +82,7 @@ from admission.forms import (
     FilterFieldWidget,
     EMPTY_CHOICE_AS_LIST,
     get_initial_choices_for_additional_approval_conditions,
+    AdmissionHTMLCharField,
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
@@ -686,11 +689,13 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
         fields = [
             'foreign_access_title_equivalency_type',
             'foreign_access_title_equivalency_status',
+            'foreign_access_title_equivalency_restriction_about',
             'foreign_access_title_equivalency_state',
             'foreign_access_title_equivalency_effective_date',
         ]
         widgets = {
             'foreign_access_title_equivalency_effective_date': CustomDateInput,
+            'foreign_access_title_equivalency_restriction_about': forms.TextInput,
         }
 
     class Media:
@@ -707,6 +712,9 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
 
         displayed_fields = {
             'foreign_access_title_equivalency_type',
+        }
+        optional_fields = {
+            'foreign_access_title_equivalency_restriction_about',
         }
 
         if equivalency_type in {
@@ -729,6 +737,8 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
                     displayed_fields.add('foreign_access_title_equivalency_effective_date')
 
         for field in self.fields:
+            if field in optional_fields:
+                continue
             if field in displayed_fields:
                 if not cleaned_data.get(field):
                     self.add_error(field, FIELD_REQUIRED_MESSAGE)
@@ -755,20 +765,14 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
 
         for document in documents:
             if document.est_a_reclamer:
-                if document.document_uuids:
-                    label = '<span class="fa-solid fa-paperclip"></span> '
-                else:
-                    label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
-                    label += '<span class="fa-solid fa-building-columns"></span> '
-                label += document.libelle
-
+                label = document.libelle_avec_icone
                 document_field = ChangeRequestDocumentForm.create_change_request_document_field(
                     label=label,
                     document_identifier=document.identifiant,
                     request_status=document.statut_reclamation,
                     proposition_uuid=instance.uuid,
                     only_limited_request_choices=False,
+                    context=CONTEXT_GENERAL,
                 )
 
                 self.fields[document.identifiant] = document_field
@@ -916,9 +920,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
 
         # Initialize additional approval conditions field
-        self.fields['with_additional_approval_conditions'].required = True
-
-        self.fields['with_prerequisite_courses'].required = True
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields
@@ -940,8 +941,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         )
 
         self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
-
-        self.fields['program_planned_years_number'].required = True
 
         self.fields['tuition_fees_amount'].required = True
         self.fields['tuition_fees_amount'].choices = [(None, '-')] + self.fields['tuition_fees_amount'].choices
@@ -965,18 +964,30 @@ class SicDecisionApprovalForm(forms.ModelForm):
             self.fields['is_mobility'].required = False
             self.fields['mobility_months_amount'].required = False
 
-        if not self.is_admission:
-            del self.fields['must_report_to_sic']
-        else:
-            self.fields['must_report_to_sic'].required = True
-            self.initial['must_report_to_sic'] = False
-
         if self.is_admission and candidate_nationality_is_no_ue_5:
             self.initial['must_provide_student_visa_d'] = True
         else:
             del self.fields['must_provide_student_visa_d']
 
-        self.fields['communication_to_the_candidate'].required = False
+        if not self.is_admission:
+            self.fields.pop('tuition_fees_amount', None)
+            self.fields.pop('tuition_fees_amount_other', None)
+            self.fields.pop('tuition_fees_dispensation', None)
+            self.fields.pop('particular_cost', None)
+            self.fields.pop('rebilling_or_third_party_payer', None)
+            self.fields.pop('first_year_inscription_and_status', None)
+            self.fields.pop('is_mobility', None)
+            self.fields.pop('mobility_months_amount', None)
+            self.fields.pop('must_report_to_sic', None)
+            self.fields.pop('communication_to_the_candidate', None)
+            self.fields.pop('must_provide_student_visa_d', None)
+        else:
+            self.initial['must_report_to_sic'] = False
+            self.fields['must_report_to_sic'].required = True
+            self.fields['program_planned_years_number'].required = True
+            self.fields['communication_to_the_candidate'].required = False
+            self.fields['with_additional_approval_conditions'].required = True
+            self.fields['with_prerequisite_courses'].required = True
 
     def clean_all_additional_approval_conditions(self):
         # This field can contain uuids of existing conditions or free conditions as strings
@@ -1080,26 +1091,30 @@ class SicDecisionFinalRefusalForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, with_email, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['body'].widget.attrs['data-config'] = json.dumps(
-            {
-                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
-                'language': get_language(),
-            }
-        )
+        if with_email:
+            self.fields['body'].widget.attrs['data-config'] = json.dumps(
+                {
+                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                    'language': get_language(),
+                }
+            )
+        else:
+            del self.fields['body']
+            del self.fields['subject']
 
 
 class SicDecisionFinalApprovalForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )

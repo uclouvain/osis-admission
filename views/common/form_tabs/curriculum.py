@@ -29,13 +29,16 @@ from typing import Union, List
 from uuid import UUID
 
 from django.contrib import messages
-from django.db.models import ProtectedError, QuerySet
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import ProtectedError, QuerySet, OuterRef, Exists, Q
 from django.forms import forms
 from django.shortcuts import redirect, get_object_or_404, resolve_url
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
@@ -48,6 +51,7 @@ from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
 from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
@@ -58,10 +62,12 @@ __all__ = [
     'CurriculumEducationalExperienceFormView',
     'CurriculumEducationalExperienceDeleteView',
     'CurriculumEducationalExperienceDuplicateView',
+    'CurriculumEducationalExperienceValuateView',
     'CurriculumGlobalFormView',
     'CurriculumNonEducationalExperienceFormView',
     'CurriculumNonEducationalExperienceDeleteView',
     'CurriculumNonEducationalExperienceDuplicateView',
+    'CurriculumNonEducationalExperienceValuateView',
 ]
 
 
@@ -102,12 +108,34 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     update_requested_documents = True
     update_admission_author = True
 
+    def has_permission(self):
+        return super().has_permission() and (
+            not self.educational_experience
+            or not any(
+                getattr(self.educational_experience, field)
+                for field in ['external_id', 'cv_injection', 'admission_injection']
+            )
+        )
+
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
         pass
 
     @property
     def educational_experience_filter_uuid(self):
         return {'uuid': self.experience_id}
+
+    @property
+    def educational_experience_annotations(self):
+        return {
+            'valuated_from_admissions': ArrayAgg(
+                'valuated_from_admission__uuid',
+                filter=Q(valuated_from_admission__isnull=False),
+            ),
+            'admission_injection': Exists(
+                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+            ),
+            'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+        }
 
     def traitement_specifique_de_creation(self):
         # Consider the experience as valuated
@@ -153,7 +181,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
 class CurriculumNonEducationalExperienceFormView(
     AdmissionFormMixin,
     LoadDossierViewMixin,
-    EditExperienceNonAcademiqueView
+    EditExperienceNonAcademiqueView,
 ):
     urlpatterns = {
         'non_educational': 'non_educational/<uuid:experience_uuid>',
@@ -166,6 +194,28 @@ class CurriculumNonEducationalExperienceFormView(
     }
     update_requested_documents = True
     update_admission_author = True
+
+    @property
+    def non_educational_experience_annotations(self):
+        return {
+            'valuated_from_admissions': ArrayAgg(
+                'valuated_from_admission__uuid',
+                filter=Q(valuated_from_admission__isnull=False),
+            ),
+            'admission_injection': Exists(
+                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+            ),
+            'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+        }
+
+    def has_permission(self):
+        return super().has_permission() and (
+            not self.non_educational_experience
+            or not any(
+                getattr(self.non_educational_experience, field)
+                for field in ['external_id', 'cv_injection', 'admission_injection']
+            )
+        )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
         pass
@@ -214,6 +264,28 @@ class CurriculumNonEducationalExperienceFormView(
 class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperienceMixin):
     permission_required = 'admission.change_admission_curriculum'
     template_name = 'admission/empty_template.html'
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                valuated_from_admissions=ArrayAgg(
+                    'valuated_from_admission__uuid',
+                    filter=Q(valuated_from_admission__isnull=False),
+                ),
+                admission_injection=Exists(
+                    AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+                ),
+                cv_injection=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=self.experience_id)),
+            )
+        )
+
+    def has_permission(self):
+        self.object = self.get_object()
+        return super().has_permission() and not any(
+            getattr(self.object, field) for field in ['external_id', 'cv_injection', 'admission_injection']
+        )
 
     @property
     def person(self):
@@ -448,3 +520,56 @@ class CurriculumEducationalExperienceDuplicateView(CurriculumBaseExperienceDupli
 
     def additional_duplications_save(self, duplicated_objects):
         EducationalExperienceYear.objects.bulk_create(duplicated_objects)
+
+
+class CurriculumBaseExperienceValuateView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+    permission_required = 'admission.change_admission_curriculum'
+    form_class = forms.Form
+    experience_model = None
+    valuated_experience_model = None
+    valuated_experience_field_id_name = None
+    update_requested_documents = True
+    update_admission_author = True
+    message_on_success = _('The experience has been valuated.')
+
+    @cached_property
+    def experience(self) -> Union[EducationalExperience, ProfessionalExperience]:
+        return get_object_or_404(self.experience_model, uuid=self.experience_id)
+
+    @property
+    def experience_id(self):
+        return str(self.kwargs.get('experience_uuid', None))
+
+    def get_success_url(self):
+        return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
+
+    def form_valid(self, form):
+        self.valuated_experience_model.objects.create(
+            baseadmission=self.admission,
+            **{self.valuated_experience_field_id_name: self.experience.uuid},
+        )
+        return super().form_valid(form)
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        # Add the experience to the checklist if it's not already there
+        if 'current' in admission.checklist and not any(
+            experience
+            for experience in admission.checklist['current']['parcours_anterieur']['enfants']
+            if experience.get('extra', {}).get('identifiant') == self.experience_id
+        ):
+            experience_checklist = Checklist.initialiser_checklist_experience(self.experience_id).to_dict()
+            admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
+
+
+class CurriculumNonEducationalExperienceValuateView(CurriculumBaseExperienceValuateView):
+    urlpatterns = {'non_educational_valuate': 'non_educational/<uuid:experience_uuid>/valuate'}
+    experience_model = ProfessionalExperience
+    valuated_experience_model = AdmissionProfessionalValuatedExperiences
+    valuated_experience_field_id_name = 'professionalexperience_id'
+
+
+class CurriculumEducationalExperienceValuateView(CurriculumBaseExperienceValuateView):
+    urlpatterns = {'educational_valuate': 'educational/<uuid:experience_uuid>/valuate'}
+    experience_model = EducationalExperience
+    valuated_experience_model = AdmissionEducationalValuatedExperiences
+    valuated_experience_field_id_name = 'educationalexperience_id'

@@ -35,6 +35,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
@@ -49,6 +50,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
@@ -59,6 +61,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
 from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
 from reference.tests.factories.country import CountryFactory
 
 
@@ -141,6 +144,49 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         response = self.client.get(self.form_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_curriculum_is_not_allowed_for_injected_experiences(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # The experience come from EPC
+        self.experience.external_id = 'EPC1'
+        self.experience.save(update_fields=['external_id'])
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Reset the experience
+        self.experience.external_id = ''
+        self.experience.save(update_fields=['external_id'])
+
+        # The experience has been injected from the curriculum
+        cv_injection = CurriculumEPCInjection.objects.create(
+            person=self.general_admission.candidate,
+            type_experience=ExperienceType.PROFESSIONAL.name,
+            experience_uuid=self.experience.uuid,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        cv_injection.delete()
+
+        # The admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.general_admission, professionalexperience=self.experience
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        admission_injection.delete()
 
     def test_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
@@ -484,6 +530,51 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
+    def test_delete_experience_from_curriculum_is_not_allowed_for_injected_experiences(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # The experience come from EPC
+        self.experience.external_id = 'EPC1'
+        self.experience.save(update_fields=['external_id'])
+
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Reset the experience
+        self.experience.external_id = ''
+        self.experience.save(update_fields=['external_id'])
+
+        # The experience has been injected from the curriculum
+        cv_injection = CurriculumEPCInjection.objects.create(
+            person=self.general_admission.candidate,
+            type_experience=ExperienceType.PROFESSIONAL.name,
+            experience_uuid=self.experience.uuid,
+        )
+
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        cv_injection.delete()
+
+        # The admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+        )
+
+        valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.general_admission, professionalexperience=self.experience
+        )
+
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        valuation.delete()
+
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        admission_injection.delete()
+
     def test_delete_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -818,3 +909,135 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
             .get('parcours_anterieur', {})
             .get('enfants', []),
         )
+
+    @freezegun.freeze_time('2022-01-01')
+    class CurriculumNonEducationalExperienceValuateViewTestCase(TestCase):
+        @classmethod
+        def setUpTestData(cls):
+            # Create data
+            cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
+            entity = EntityWithVersionFactory()
+
+            cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+                training__management_entity=entity,
+                status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            )
+
+            # Create users
+            cls.sic_manager_user = SicManagementRoleFactory(entity=entity).person.user
+            cls.program_manager_user = ProgramManagerRoleFactory(
+                education_group=cls.general_admission.training.education_group,
+            ).person.user
+
+        def setUp(self):
+            # Create data
+            self.experience: ProfessionalExperience = ProfessionalExperienceFactory(
+                person=self.general_admission.candidate,
+            )
+
+            # Targeted url
+            self.valuate_url = resolve_url(
+                'admission:general-education:update:curriculum:non_educational_valuate',
+                uuid=self.general_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            )
+
+        def test_valuate_experience_from_curriculum_is_not_allowed_for_fac_users(self):
+            self.client.force_login(self.program_manager_user)
+            response = self.client.post(self.valuate_url)
+
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        def test_valuate_experience_from_curriculum_is_allowed_for_sic_users(self):
+            self.client.force_login(self.sic_manager_user)
+
+            expected_url = resolve_url('admission:general-education:checklist', uuid=self.general_admission.uuid)
+
+            response = self.client.post(self.valuate_url)
+
+            self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+        def test_valuate_experience_from_curriculum_and_redirect(self):
+            self.client.force_login(self.sic_manager_user)
+
+            admission_url = resolve_url('admission')
+            expected_url = f'{admission_url}#custom_hash'
+
+            response = self.client.post(f'{self.valuate_url}?next={admission_url}&next_hash_url=custom_hash')
+
+            self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+        def test_valuate_unknown_experience_returns_404(self):
+            self.client.force_login(self.sic_manager_user)
+
+            response = self.client.post(
+                resolve_url(
+                    'admission:general-education:update:curriculum:non_educational_valuate',
+                    uuid=self.general_admission.uuid,
+                    experience_uuid=uuid.uuid4(),
+                ),
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        def test_valuate_known_experience(self):
+            self.client.force_login(self.sic_manager_user)
+
+            default_experience_checklist = Checklist.initialiser_checklist_experience(
+                str(self.experience.uuid)
+            ).to_dict()
+
+            response = self.client.post(self.valuate_url)
+
+            self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+            # Check that the experience has been valuated
+            valuation = AdmissionProfessionalValuatedExperiences.objects.filter(
+                professionalexperience_id=self.experience.uuid,
+                baseadmission=self.general_admission,
+            ).first()
+            self.assertIsNotNone(valuation)
+
+            # Check that the experience has been added to the checklist
+            self.general_admission.refresh_from_db()
+
+            saved_experience_checklist = [
+                experience_checklist
+                for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
+            ]
+
+            self.assertEqual(len(saved_experience_checklist), 1)
+            self.assertEqual(saved_experience_checklist[0], default_experience_checklist)
+
+            # Check that the modified informations have been updated
+            self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+            self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+            # Keep the experience checklist if one is already there
+            saved_experience_checklist[0]['extra']['custom'] = 'custom value'
+            self.general_admission.save(update_fields=['checklist'])
+
+            valuation.delete()
+
+            response = self.client.post(self.valuate_url)
+
+            # Check that the experience has been valuated
+            valuation = AdmissionProfessionalValuatedExperiences.objects.filter(
+                professionalexperience_id=self.experience.uuid,
+                baseadmission=self.general_admission,
+            ).first()
+            self.assertIsNotNone(valuation)
+
+            # Check that the experience checklist has been kept
+            self.general_admission.refresh_from_db()
+
+            new_saved_experience_checklist = [
+                experience_checklist
+                for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
+            ]
+
+            self.assertEqual(len(new_saved_experience_checklist), 1)
+            self.assertNotEqual(new_saved_experience_checklist[0], default_experience_checklist)
+            self.assertEqual(new_saved_experience_checklist[0], saved_experience_checklist[0])

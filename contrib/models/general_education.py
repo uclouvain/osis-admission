@@ -395,6 +395,11 @@ class GeneralEducationAdmission(BaseAdmission):
         max_length=30,
         verbose_name=_('Foreign access title equivalence status'),
     )
+    foreign_access_title_equivalency_restriction_about = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_('Information about the restriction'),
+    )
     foreign_access_title_equivalency_state = models.CharField(
         choices=EtatEquivalenceTitreAcces.choices(),
         blank=True,

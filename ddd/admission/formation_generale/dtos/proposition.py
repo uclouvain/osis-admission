@@ -34,6 +34,7 @@ from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     DroitsInscriptionMontant,
@@ -123,6 +124,14 @@ class PropositionDTO(interface.DTO):
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 
+    @property
+    def est_inscription(self):
+        return self.type == TypeDemande.INSCRIPTION.name
+
+    @property
+    def est_admission(self):
+        return self.type == TypeDemande.ADMISSION.name
+
 
 @attr.dataclass(frozen=True, slots=True)
 class PropositionGestionnaireDTO(PropositionDTO):
@@ -185,6 +194,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     millesime_condition_acces: Optional[int]
     type_equivalence_titre_acces: str
     statut_equivalence_titre_acces: str
+    information_a_propos_de_la_restriction: str
     etat_equivalence_titre_acces: str
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date]
 

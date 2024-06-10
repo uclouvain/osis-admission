@@ -66,6 +66,10 @@ class SpecificQuestionsMixinView(AdmissionFormMixin, LoadDossierViewMixin):
             sigle=self.proposition.formation.sigle,
         )
 
+    @property
+    def display_residence_permit_question(self):
+        return self.is_continuing and self.identification_dto.pays_nationalite_europeen is False
+
 
 class SpecificQuestionsDetailView(SpecificQuestionsMixinView, TemplateView):
     template_name = 'admission/details/specific_questions.html'

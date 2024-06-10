@@ -24,7 +24,9 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <form
+    {% block sic_decision_approval_form_attributes %}
     hx-post="{% url view.base_namespace|add:':sic-decision-approval' uuid=view.kwargs.uuid %}"
+    {% endblock %}
     hx-target="this"
     hx-swap="outerHTML"
     id="sic-decision-approval-form"
@@ -32,7 +34,11 @@
 >
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <h3 class="modal-title" id="myModalLabel">{% translate "Approval to validate" %}</h3>
+    <h3 class="modal-title" id="myModalLabel">
+      {% block sic_decision_approval_form_title %}
+      {% translate "Approval to validate" %}
+      {% endblock %}
+    </h3>
   </div>
   <div class="modal-body" style="overflow:auto;">
 
@@ -40,7 +46,7 @@
 
     {% bootstrap_form_errors sic_decision_approval_form %}
 
-    <div id="sic-approval-requested-documents-selects" class="form-group required_field">
+    <div id="sic-approval-requested-documents-selects" class="form-group">
       <div id="sic-approval-delete-confirm-element" class="hidden delete-confirm-element">
         <button type="button" class="btn btn-danger delete-confirm-button">{% translate 'Confirm' %}</button>
         <button type="button" class="btn btn-default delete-cancel-button">{% translate 'Cancel' %}</button>
@@ -78,7 +84,7 @@
         {% empty %}
           <tr class="tab-name">
             <td colspan="2">
-              {% translate 'No document is defined as requestable. At least one is required.' %}
+              {% translate 'No document is defined as requestable.' %}
             </td>
           </tr>
         {% endfor %}
@@ -98,7 +104,7 @@
         </label>
       </div>
     {% endif %}
-  
+
     {% bootstrap_field sic_decision_approval_form.with_additional_approval_conditions %}
     <div
         id="sic-decision-additional-approval-conditions-container"
@@ -123,7 +129,7 @@
         id="sic-decision-additional-trainings-container"
         class="hidden"
     >
-      {% bootstrap_field sic_decision_approval_form.prerequisite_courses classes='required_field' %}
+      {% bootstrap_field sic_decision_approval_form.prerequisite_courses form_group_class="form-group required_field" %}
       <div class="form-group">
         <label class="control-label">
           {{ sic_decision_approval_form.prerequisite_courses_fac_comment.field.label }}
@@ -134,11 +140,11 @@
       </div>
     </div>
 
-    <div class="required_field">
+    <div class="{% if sic_decision_approval_form.is_admission %}required_field{% endif %}">
       {% bootstrap_field sic_decision_approval_form.program_planned_years_number %}
     </div>
 
-    <fieldset class="custom-fieldset">
+    <fieldset class="custom-fieldset mb-15">
       <legend>
         <strong>
           {% translate 'Contact person for the design of the annual program' %}
@@ -154,40 +160,7 @@
       </div>
     </fieldset>
 
-    {% bootstrap_field sic_decision_approval_form.tuition_fees_amount %}
-    {% bootstrap_field sic_decision_approval_form.tuition_fees_amount_other %}
-    {% bootstrap_field sic_decision_approval_form.tuition_fees_dispensation %}
-
-    {% if sic_decision_approval_form.is_vip %}
-    <fieldset class="custom-fieldset">
-      <legend>
-        <strong>
-          {% translate 'Scholarship-DD-Erasmus' %}
-        </strong>
-      </legend>
-      {% bootstrap_field sic_decision_approval_form.particular_cost %}
-      {% bootstrap_field sic_decision_approval_form.rebilling_or_third_party_payer %}
-      {% bootstrap_field sic_decision_approval_form.first_year_inscription_and_status %}
-    </fieldset>
-    {% endif %}
-
-    {% if sic_decision_approval_form.is_hue %}
-      {% bootstrap_field sic_decision_approval_form.is_mobility %}
-      {% bootstrap_field sic_decision_approval_form.mobility_months_amount %}
-    {% endif %}
-
-    {% if sic_decision_approval_form.is_admission %}
-      {% bootstrap_field sic_decision_approval_form.must_report_to_sic %}
-    {% endif %}
-
-    <div class="form-group">
-      <label class="control-label">
-        {{ sic_decision_approval_form.communication_to_the_candidate.field.label }}
-        <strong>({% translate 'contact language'%} </strong>
-        <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
-      </label>
-     {{ sic_decision_approval_form.communication_to_the_candidate }}
-    </div>
+    {% block sic_decision_approval_form_additional_fields %}{% endblock %}
 
   </div>
 
@@ -213,25 +186,20 @@
     </button>
   </div>
 
+  {% block additional_scripts %}
+  {% endblock %}
+
   <script>
     $(document).ready(function() {
         $('#sic-decision-approval-form [data-toggle=popover]').popover();
-
-        $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
-            '#id_sic-decision-approval-tuition_fees_amount': {values: ['AUTRE']},
-        }, {duration: 0, valueOnDisable: '',});
-
-        {% if sic_decision_approval_form.is_hue %}
-            $('#id_sic-decision-approval-mobility_months_amount').dependsOn({
-                '#id_sic-decision-approval-is_mobility': {values: ['True']},
-            }, {duration: 0, valueOnDisable: '',});
-        {% endif %}
 
         let changesInRequestedDocuments = false;
         const selectsContainer = $('#sic-approval-requested-documents-selects');
         const requestedDocumentsSelects = $('#sic-approval-requested-documents-selects select');
         const confirmElement = $('#sic-approval-delete-confirm-element');
-        let confirmEvents = new Set();
+        const confirmEvents = new Set();
+        const inProgressEvents = new Set();
+        const parentModal = $('#sic-decision-approval-modal');
 
         const updateConfirmButtonDisabled = function () {
           if ($('#sic-decision-approval-form option[value=IMMEDIATEMENT]:selected').length === 0) {
@@ -263,16 +231,23 @@
             }
         });
 
-        {# Display a confirmation element it the document is not requested anymore #}
+        selectsContainer.on('htmx:afterRequest', 'select', function (event) {
+            inProgressEvents.delete(this.id);
+            updateConfirmButtonDisabled();
+        });
+
+        {# Display a confirmation element if the document is not requested anymore #}
         selectsContainer.on('change', 'select', function (event) {
             if ($(this).val() === '') {
+                inProgressEvents.delete(this.id);
                 const clonedConfirmElement = confirmElement.clone();
                 clonedConfirmElement.removeClass('hidden');
                 clonedConfirmElement[0].id += '-' + $(this).attr('name');
                 $(this).closest('.form-group').append(clonedConfirmElement);
                 clonedConfirmElement.children('button:first').focus();
             } else {
-              updateConfirmButtonDisabled();
+                inProgressEvents.add(this.id);
+                updateConfirmButtonDisabled();
             }
         });
 
@@ -281,6 +256,7 @@
             const row = $(this).closest('tr');
             const select = row.find('select');
             confirmEvents.add(select[0].id);
+            inProgressEvents.add(select[0].id);
             select[0].dispatchEvent(new CustomEvent('confirmStatusChange'));
             updateConfirmButtonDisabled();
         });
@@ -288,8 +264,9 @@
         {# Cancel the cancellation of the request of the document #}
         selectsContainer.on('click', '.delete-cancel-button', function (event) {
             const select = $(this).closest('div.form-group').children('select');
-            select[0].value = select.data('previous');
+            select.val(select.data('previous'));
             $(this).closest('div').remove();
+            updateConfirmButtonDisabled();
         });
 
         selectsContainer.on('formValidation', 'select', function (event) {
@@ -311,18 +288,18 @@
             }
         });
 
-        {# Reset the document list and the document detail if some updates were made #}
-        $('#sic-decision-approval-modal [data-dismiss="modal"]').on('click', function (event) {
-            if (changesInRequestedDocuments) {
-                $('#sic-decision-approval-form').trigger('formValidation', [
-                    {
-                        is_valid: true,
-                        refresh_details: true,
-                        refresh_list: true,
-                    }
-                ]);
+        {# Reset sic approval panel container containing the document list if some document updates were made #}
+        function manageModalOnHide(event) {
+            if (inProgressEvents.size) {
+              event.preventDefault();
+              return;
+            } else if (changesInRequestedDocuments) {
+              $('#sic-decision-approval-panel-container')?.[0].dispatchEvent(new Event('documents-list-refresh-event'));
             }
-        });
+            parentModal.off('hide.bs.modal', manageModalOnHide);
+        }
+
+        parentModal.on('hide.bs.modal', manageModalOnHide);
     });
   </script>
 
@@ -342,7 +319,6 @@
 
             {# Initialize rich editors #}
             initializeCKEditor('id_sic-decision-approval-prerequisite_courses_fac_comment');
-            initializeCKEditor('id_sic-decision-approval-communication_to_the_candidate');
 
             {% if sic_decision_approval_form.all_required_forms_are_valid %}
                 $('#sic-decision-approval-modal').modal('hide');

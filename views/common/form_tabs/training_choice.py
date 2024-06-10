@@ -27,8 +27,14 @@ from django.urls import reverse
 from django.views.generic import FormView
 
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.formation_generale.commands import ModifierChoixFormationParGestionnaireCommand
-from admission.forms.admission.training_choice import TrainingChoiceForm
+from admission.ddd.admission.formation_continue.commands import (
+    ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationContinueParGestionnaireCommand,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationGeneraleParGestionnaireCommand,
+)
+from admission.forms.admission.training_choice import GeneralTrainingChoiceForm, ContinuingTrainingChoiceForm
+from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
@@ -40,26 +46,48 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
     permission_required = 'admission.change_admission_training_choice'
     update_requested_documents = True
     urlpatterns = 'training-choice'
-    form_class = TrainingChoiceForm
     specific_questions_tab = Onglets.CHOIX_FORMATION
+
+    def get_form_class(self):
+        return {
+            CONTEXT_GENERAL: GeneralTrainingChoiceForm,
+            CONTEXT_CONTINUING: ContinuingTrainingChoiceForm,
+        }[self.current_context]
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['proposition'] = self.proposition
+        kwargs['user'] = self.request.user
         kwargs['form_item_configurations'] = self.specific_questions
         return kwargs
 
     def form_valid(self, form):
-        message_bus_instance.invoke(
-            ModifierChoixFormationParGestionnaireCommand(
-                uuid_proposition=self.admission_uuid,
-                gestionnaire=self.request.user.person.global_id,
-                bourse_double_diplome=form.cleaned_data['double_degree_scholarship'],
-                bourse_internationale=form.cleaned_data['international_scholarship'],
-                bourse_erasmus_mundus=form.cleaned_data['erasmus_mundus_scholarship'],
-                reponses_questions_specifiques=form.cleaned_data['specific_question_answers'],
+        if self.is_general:
+            message_bus_instance.invoke(
+                ModifierChoixFormationGeneraleParGestionnaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    bourse_double_diplome=form.cleaned_data['double_degree_scholarship'],
+                    bourse_internationale=form.cleaned_data['international_scholarship'],
+                    bourse_erasmus_mundus=form.cleaned_data['erasmus_mundus_scholarship'],
+                    reponses_questions_specifiques=form.cleaned_data['specific_question_answers'],
+                )
             )
-        )
+
+        elif self.is_continuing:
+            message_bus_instance.invoke(
+                ModifierChoixFormationContinueParGestionnaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    sigle_formation=form.cleaned_data['continuing_education_training'],
+                    annee_formation=form.cleaned_data['academic_year'].year,
+                    reponses_questions_specifiques=form.cleaned_data['specific_question_answers'],
+                    motivations=form.cleaned_data['motivations'],
+                    moyens_decouverte_formation=form.cleaned_data['ways_to_find_out_about_the_course'],
+                    marque_d_interet=form.cleaned_data['interested_mark'],
+                )
+            )
+
         return super().form_valid(form)
 
     def get_success_url(self):

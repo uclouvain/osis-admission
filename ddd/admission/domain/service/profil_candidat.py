@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -138,11 +138,13 @@ class ProfilCandidat(interface.DomainService):
     ) -> None:
         etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
 
-        if etudes_secondaires.valorisees:
-            # Des études secondaires valorisées par une admission sont considérées valides pour les futures admissions
-            return
-
         if formation.type == TrainingType.BACHELOR:
+            if not etudes_secondaires.valorisation.diplome_est_modifiable(
+                diplome=etudes_secondaires.experience,
+                formation=formation.type.name,
+            ):
+                return
+
             est_potentiel_vae = profil_candidat_translator.est_potentiel_vae(matricule)
             BachelierEtudesSecondairesValidatorList(
                 diplome_etudes_secondaires=etudes_secondaires.diplome_etudes_secondaires,
@@ -154,6 +156,10 @@ class ProfilCandidat(interface.DomainService):
                 formation=formation,
             ).validate()
         else:
+            # Des études secondaires valorisées par une admission sont considérées valides pour les futures admissions
+            if etudes_secondaires.valorisation.est_valorise:
+                return
+
             EtudesSecondairesValidatorList(
                 diplome_etudes_secondaires=etudes_secondaires.diplome_etudes_secondaires,
                 annee_diplome_etudes_secondaires=etudes_secondaires.annee_diplome_etudes_secondaires,

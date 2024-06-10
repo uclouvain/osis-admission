@@ -29,6 +29,7 @@ from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonne
 from admission.api.views.curriculum import *
 from admission.api.views.documents import (
     GeneralRequestedDocumentListView,
+    ContinuingRequestedDocumentListView,
 )
 from admission.api.views.secondary_studies import (
     SecondaryStudiesViewSet,

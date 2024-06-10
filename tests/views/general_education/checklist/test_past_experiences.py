@@ -309,6 +309,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -324,6 +325,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -339,6 +341,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -354,6 +357,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -369,6 +373,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
                 (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
                 (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
                 (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
@@ -463,11 +468,17 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
+        previous_date = datetime.datetime.today()
+
         self.general_admission.last_update_author = None
         self.general_admission.save(update_fields=['last_update_author'])
         frozen_time.move_to('2023-01-03')
 
         # Without prerequisite courses
+        without_prerequisite_courses_error_message = gettext(
+            'If the answer to the additional courses question is no, there must be no additional LU and the '
+            'communication relating to the additional courses must be completely empty.'
+        )
         response = self.client.post(
             self.url,
             **self.default_headers,
@@ -478,6 +489,40 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, without_prerequisite_courses_error_message)
+
+        # Check the form
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertEqual(form['with_prerequisite_courses'].value(), True)
+
+        # Check the admission
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.with_prerequisite_courses, True)
+        self.assertEqual(self.general_admission.prerequisite_courses_fac_comment, 'Test')
+        self.assertEqual(self.general_admission.prerequisite_courses.count(), 1)
+        self.assertEqual(self.general_admission.last_update_author, None)
+        self.assertEqual(self.general_admission.modified_at, previous_date)
+
+        self.general_admission.prerequisite_courses.clear()
+        self.general_admission.prerequisite_courses_fac_comment = ''
+        self.general_admission.save(update_fields=['prerequisite_courses_fac_comment'])
+
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+            data={
+                'with_prerequisite_courses': False,
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotDjangoMessages(response, without_prerequisite_courses_error_message)
+
+        # Check the form
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertEqual(form['with_prerequisite_courses'].value(), False)
 
         # Check the admission
         self.general_admission.refresh_from_db()
@@ -487,6 +532,14 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertEqual(self.general_admission.prerequisite_courses.count(), 0)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+    def assertDjangoMessage(self, response, message):
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(message, messages)
+
+    def assertNotDjangoMessages(self, response, message):
+        messages = [m.message for m in response.context['messages']]
+        self.assertNotIn(message, messages)
 
     def test_post_form_with_admission_requirement_without_access_titles(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -521,6 +574,62 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.admission_requirement, ConditionAcces.BAC.name)
         self.assertEqual(self.general_admission.admission_requirement_year, self.academic_years[0])
+
+    def test_post_form_with_admission_requirement_and_with_prerequisite_courses(self):
+        master_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=GeneralEducationTrainingFactory(
+                management_entity=self.general_admission.training.management_entity,
+                academic_year=self.general_admission.training.academic_year,
+                education_group_type__name=TrainingType.MASTER_M1.name,
+            ),
+            candidate=self.candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        master_url = resolve_url(self.url_name, uuid=master_general_admission.uuid)
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        # With explicit prerequisite courses
+        response = self.client.post(
+            master_url,
+            **self.default_headers,
+            data={
+                'admission_requirement': ConditionAcces.BAC.name,
+                'admission_requirement_year': self.academic_years[0].pk,
+                'with_prerequisite_courses': False,
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the admission
+        master_general_admission.refresh_from_db()
+
+        self.assertEqual(master_general_admission.admission_requirement, ConditionAcces.BAC.name)
+        self.assertEqual(master_general_admission.admission_requirement_year, self.academic_years[0])
+        self.assertEqual(master_general_admission.with_prerequisite_courses, False)
+
+        # With implicit prerequisite courses
+        response = self.client.post(
+            master_url,
+            **self.default_headers,
+            data={
+                'admission_requirement': ConditionAcces.SNU_TYPE_COURT.name,
+                'admission_requirement_year': self.academic_years[0].pk,
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the admission
+        master_general_admission.refresh_from_db()
+
+        self.assertEqual(master_general_admission.admission_requirement, ConditionAcces.SNU_TYPE_COURT.name)
+        self.assertEqual(master_general_admission.admission_requirement_year, self.academic_years[0])
+        self.assertEqual(master_general_admission.with_prerequisite_courses, True)
 
     def test_post_form_with_admission_requirement_with_access_titles(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ CHOIX_POUR_BACHELIER = [
 CHOIX_POUR_MASTER = [
     ConditionAcces.BAC,
     ConditionAcces.BAMA15,
+    ConditionAcces.SNU_TYPE_COURT,
     ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE,
     ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE,
     ConditionAcces.VALORISATION_180_ECTS,
@@ -116,5 +117,5 @@ CHOIX_PAR_FORMATION: Dict[str, List[ConditionAcces]] = {
 
 class TypeTitreAccesSelectionnable(ChoiceEnum):
     EXPERIENCE_ACADEMIQUE = _('Academic experience')
-    EXPERIENCE_NON_ACADEMIQUE = _('Non-academic experience')
+    EXPERIENCE_NON_ACADEMIQUE = _('Non-academic activity')
     ETUDES_SECONDAIRES = _('Secondary studies')
