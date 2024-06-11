@@ -81,7 +81,8 @@ class SearchAccountView(HtmxMixin, FormView, HtmxPermissionRequiredMixin):
         return self.proposal_merge.proposal_merge_person if self.proposal_merge else None
 
     def get_initial(self):
-        return model_to_dict(self.merge_person) if self.proposal_merge.status == PersonMergeStatus.PENDING.name else {}
+        return model_to_dict(self.merge_person) \
+            if self.proposal_merge and self.proposal_merge.status == PersonMergeStatus.PENDING.name else {}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
