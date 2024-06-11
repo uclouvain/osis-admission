@@ -2,3 +2,5 @@ python-dateutil==2.8.2
 img2pdf==0.5.1
 pikepdf==6.2.9
 phonenumberslite==8.13.27
+
+git+https://github.com/uclouvain/osis-document.git@ugrade-pdfjs#egg=osis_document
