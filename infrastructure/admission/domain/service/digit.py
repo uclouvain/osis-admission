@@ -41,7 +41,6 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
 TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX = ['8', '9']
-EMPTY_LIST_STR = "[]"
 
 class DigitService(IDigitService):
     @classmethod
@@ -54,9 +53,9 @@ class DigitService(IDigitService):
             genre: str,
             date_naissance: str,
             niss: str
-    ) -> str:
+    ):
         if not waffle.switch_is_active('fusion-digit') or matricule[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
-            return EMPTY_LIST_STR
+            return []
 
         original_person = Person.objects.get(global_id=matricule)
 
@@ -68,7 +67,7 @@ class DigitService(IDigitService):
         )
 
         if person_merge_proposal.status in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.MERGED.name]:
-            return EMPTY_LIST_STR
+            return []
 
         if niss:
             # keep only digits in niss
