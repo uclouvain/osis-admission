@@ -1672,9 +1672,6 @@ msgstr ""
 msgid "Confirm and send the message"
 msgstr ""
 
-msgid "Confirm and send to SIC"
-msgstr ""
-
 msgid "Confirm restoring activity to submitted"
 msgstr ""
 
@@ -2866,6 +2863,9 @@ msgid "Facebook"
 msgstr ""
 
 msgid "Faculty"
+msgstr ""
+
+msgid "Faculty comment about financability dispensation"
 msgstr ""
 
 msgid "Faculty comment about the collaborative program"
