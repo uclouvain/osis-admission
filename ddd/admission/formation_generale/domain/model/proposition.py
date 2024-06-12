@@ -818,12 +818,6 @@ class Proposition(interface.RootEntity):
         if statut == DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE:
             self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in refus_uuids_motifs]
             self.autres_motifs_refus = refus_autres_motifs
-        elif statut == DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE:
-            self.checklist_actuelle.financabilite = StatutChecklist(
-                statut=ChoixStatutChecklist.GEST_REUSSITE,
-                libelle=__('Dispensation granted'),
-                extra={'reussite': "derogation"},
-            )
 
     def notifier_candidat_derogation_financabilite(self, gestionnaire: str):
         self.financabilite_derogation_statut = DerogationFinancement.CANDIDAT_NOTIFIE

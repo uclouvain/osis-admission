@@ -118,7 +118,7 @@ class CommentForm(forms.Form):
         required=False,
     )
 
-    def __init__(self, form_url, comment=None, label=None, *args, **kwargs):
+    def __init__(self, form_url, comment=None, label=None, permission=None, *args, **kwargs):
         disabled = kwargs.pop('disabled', False)
 
         super().__init__(*args, **kwargs)
@@ -144,6 +144,9 @@ class CommentForm(forms.Form):
 
         self.fields['comment'].label = labels.get(comment_type, label or _('Comment'))
         self.permission = permissions.get(comment_type, 'admission.checklist_change_comment')
+
+        if permission is not None:
+            self.permission = permission
 
         if comment:
             self.fields['comment'].initial = comment.content
@@ -1169,6 +1172,8 @@ class FinancabiliteDispensationForm(forms.Form):
     def __init__(self, is_central_manager, is_program_manager, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not is_central_manager and not is_program_manager:
+            self.fields['dispensation_status'].disabled = True
+        elif not is_central_manager and self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name:
             self.fields['dispensation_status'].disabled = True
 
 
