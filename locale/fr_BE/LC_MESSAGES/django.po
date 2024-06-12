@@ -1765,9 +1765,6 @@ msgstr "Confirmer"
 msgid "Confirm and send the message"
 msgstr "Confirmer et envoyer le message"
 
-msgid "Confirm and send to SIC"
-msgstr "Enregistrer et envoyer en SIC"
-
 msgid "Confirm restoring activity to submitted"
 msgstr "Confirmer la remise au statut soumise de cette activité"
 
@@ -3043,6 +3040,9 @@ msgstr "Sur Facebook"
 
 msgid "Faculty"
 msgstr "Faculté"
+
+msgid "Faculty comment about financability dispensation"
+msgstr "Commentaire facultaire sur la dérogation à la finançabilité"
 
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"

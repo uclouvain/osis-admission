@@ -1985,9 +1985,19 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='financabilite__derogation'
                     ),
                     prefix='financabilite__derogation',
-                    label=_('Comment about financability dispensation'),
+                    label=_('Faculty comment about financability dispensation'),
+                    permission='admission.checklist_change_fac_comment',
                 ),
             }
+            disable_unavailable_forms(
+                {
+                    comment_form: self.request.user.has_perm(
+                        comment_form.permission,
+                        self.admission,
+                    )
+                    for comment_form in context['comment_forms'].values()
+                }
+            )
 
         return context
 
@@ -2459,7 +2469,10 @@ class ChecklistView(
 
             comments_labels = {
                 'decision_sic__derogation': _('Comment about dispensation'),
-                'financabilite__derogation': _('Comment about financability dispensation'),
+                'financabilite__derogation': _('Faculty comment about financability dispensation'),
+            }
+            comments_permissions = {
+                'financabilite__derogation': 'admission.checklist_change_fac_comment',
             }
 
             context['comment_forms'] = {
@@ -2468,6 +2481,7 @@ class ChecklistView(
                     form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                     prefix=tab_name,
                     label=comments_labels.get(tab_name, None),
+                    permission=comments_permissions.get(tab_name, None),
                 )
                 for tab_name in tab_names
             }
