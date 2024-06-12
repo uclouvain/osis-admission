@@ -136,7 +136,5 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_debug_info': is_part_of_education_group & is_debug,
             # Exports
             'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,
-            # Fusion
-            'admission.merge_candidate_with_known_person': is_part_of_education_group,
         }
         return rules.RuleSet(ruleset)
