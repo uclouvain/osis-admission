@@ -154,7 +154,9 @@ class FreeDocumentHelperFormMixin(forms.Form):
                 CONTEXT_GENERAL: OngletsChecklistFormationGenerale.choices_except(
                     OngletsChecklistFormationGenerale.experiences_parcours_anterieur,
                 ),
-                CONTEXT_CONTINUING: OngletsChecklistFormationContinue.choices(),
+                CONTEXT_CONTINUING: OngletsChecklistFormationContinue.choices_except(
+                    OngletsChecklistFormationContinue.decision,
+                ),
             }[context]
         )
 
