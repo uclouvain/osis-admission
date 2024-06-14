@@ -3140,7 +3140,10 @@ msgstr ""
 msgid "Global"
 msgstr ""
 
-msgid "Global FAC/CDD comments"
+msgid "Global FAC comments"
+msgstr ""
+
+msgid "Global IUFC comments"
 msgstr ""
 
 msgid "Global SIC comments"
@@ -7181,6 +7184,11 @@ msgid "UE"
 msgstr ""
 
 msgid "UUID"
+msgstr ""
+
+msgid ""
+"Unable to validate the admission because an error occured while searching "
+"for existing person in DIGIT"
 msgstr ""
 
 msgid ""

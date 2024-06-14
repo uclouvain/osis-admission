@@ -3394,8 +3394,11 @@ msgstr ""
 msgid "Global"
 msgstr "Global"
 
-msgid "Global FAC/CDD comments"
-msgstr "Commentaires globaux FAC/CDD"
+msgid "Global FAC comments"
+msgstr "Commentaires globaux FAC"
+
+msgid "Global IUFC comments"
+msgstr "Commentaires globaux IUFC"
 
 msgid "Global SIC comments"
 msgstr "Commentaires globaux SIC"
@@ -7924,16 +7927,18 @@ msgid "UUID"
 msgstr "UUID"
 
 msgid ""
+"Unable to validate the admission because an error occured while searching "
+"for existing person in DIGIT"
+msgstr ""
+"Impossible de valider le dossier d'admission car une erreur s'est produite "
+"lors de la recherche de compte existant dans DIGIT"
+
+msgid ""
 "Unable to validate the admission because of a potential person duplicates "
 "exists."
 msgstr ""
 "Impossible de valider le dossier d'admission car il existe au moins un "
 "doublon potentiel de personne."
-
-msgid ""
-"Unable to validate the admission because an error occured while searching for existing person in DIGIT"
-msgstr ""
-"Impossible de valider le dossier d'admission car une erreur s'est produite lors de la recherche de compte existant dans DIGIT"
 
 msgid "Unable to validate the admission because of an invalid DIGIT ticket."
 msgstr ""
