@@ -405,7 +405,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
         form = response.context['form']
         self.assertCountEqual(
             form.fields['checklist_tab'].choices,
-            OTHER_EMPTY_CHOICE + OngletsChecklistContinue.choices(),
+            OTHER_EMPTY_CHOICE + OngletsChecklistContinue.choices_except(OngletsChecklistContinue.decision),
         )
 
         self.assertCountEqual(
@@ -424,7 +424,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
         # With invalid chosen predefined file
 
         categorized_document = CategorizedFreeDocumentFactory(
-            checklist_tab=OngletsChecklistContinue.decision.name,
+            checklist_tab=OngletsChecklistContinue.fiche_etudiant.name,
             with_academic_year=True,
             long_label_fr='Mon document libre {annee_academique}',
             long_label_en='My free document {annee_academique}',
@@ -434,7 +434,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
             data={
                 'free-document-request-form-file_name': 'My file name',
                 'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'free-document-request-form-checklist_tab': OngletsChecklistContinue.fiche_etudiant.name,
+                'free-document-request-form-checklist_tab': '',
                 'free-document-request-form-document_type': categorized_document.pk,
             },
             **self.default_headers,
@@ -442,11 +442,6 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        # Because the selected checklist tab and the selected document checklist tab must be the same
-        self.assertIn(
-            gettext('The document must be related to the specified checklist tab'),
-            response.context['form'].errors.get('checklist_tab', []),
-        )
         # Because the academic year has not been selected while it is mandatory
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('academic_year', []))
 
@@ -457,7 +452,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
                 'free-document-request-form-file_name': 'My file name',
                 'free-document-request-form-reason': 'My reason',
                 'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'free-document-request-form-checklist_tab': OngletsChecklistContinue.decision.name,
+                'free-document-request-form-checklist_tab': OngletsChecklistContinue.fiche_etudiant.name,
                 'free-document-request-form-academic_year': '2019-2020',
                 'free-document-request-form-document_type': categorized_document.pk,
             },
@@ -509,7 +504,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
                 'status': StatutEmplacementDocument.A_RECLAMER.name,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'automatically_required': False,
-                'related_checklist_tab': OngletsChecklistContinue.decision.name,
+                'related_checklist_tab': OngletsChecklistContinue.fiche_etudiant.name,
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -545,7 +540,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
                 'free-document-request-form-file_name': 'My file name',
                 'free-document-request-form-reason': 'My reason',
                 'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'free-document-request-form-checklist_tab': OngletsChecklistContinue.decision.name,
+                'free-document-request-form-checklist_tab': OngletsChecklistContinue.fiche_etudiant.name,
                 'free-document-request-form-academic_year': '2019-2020',
             },
             **self.default_headers,
@@ -596,7 +591,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
                 'status': StatutEmplacementDocument.A_RECLAMER.name,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'automatically_required': False,
-                'related_checklist_tab': OngletsChecklistContinue.decision.name,
+                'related_checklist_tab': OngletsChecklistContinue.fiche_etudiant.name,
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
