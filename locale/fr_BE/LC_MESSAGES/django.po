@@ -3423,8 +3423,11 @@ msgstr ""
 msgid "Global"
 msgstr "Global"
 
-msgid "Global FAC/CDD comments"
-msgstr "Commentaires globaux FAC/CDD"
+msgid "Global FAC comments"
+msgstr "Commentaires globaux FAC"
+
+msgid "Global IUFC comments"
+msgstr "Commentaires globaux IUFC"
 
 msgid "Global SIC comments"
 msgstr "Commentaires globaux SIC"

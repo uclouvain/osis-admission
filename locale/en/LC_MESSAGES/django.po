@@ -3160,7 +3160,10 @@ msgstr ""
 msgid "Global"
 msgstr ""
 
-msgid "Global FAC/CDD comments"
+msgid "Global FAC comments"
+msgstr ""
+
+msgid "Global IUFC comments"
 msgstr ""
 
 msgid "Global SIC comments"
