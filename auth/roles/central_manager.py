@@ -132,7 +132,8 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_change_sic_comment': is_entity_manager & general.is_submitted,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager,
-            'admission.checklist_change_comment': is_entity_manager & general.is_submitted,
+            'admission.checklist_change_comment': is_entity_manager
+            & ((general.is_general & general.is_submitted) | continuing.is_continuing),
             'admission.checklist_change_sic_decision': is_entity_manager & general.in_sic_status,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,

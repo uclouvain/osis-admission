@@ -75,7 +75,7 @@
         >
           <i class="fas fa-download"></i>
         </a>
-        {% if retypable_document %}
+        {% if retypable_document and can_edit_documents %}
           <button
               class="btn btn-default"
               data-toggle="modal"
@@ -86,7 +86,7 @@
           </button>
         {% endif %}
         {% include 'admission/document/retype_modal.html' %}
-        {% if editable_document %}
+        {% if editable_document and can_edit_documents %}
           <button
               class="btn btn-danger"
               data-toggle="modal"
@@ -110,7 +110,7 @@
 
         {% endif %}
 
-      {% elif editable_document %}
+      {% elif editable_document and can_edit_documents %}
         {# Missing documents #}
         <button
             class="btn btn-default"
@@ -126,7 +126,7 @@
       {% endif %}
     </div>
 
-    {% if requestable_document %}
+    {% if requestable_document and can_edit_documents %}
       <div>
         {% if document_uuid %}<hr>{% endif %}
         {% include 'admission/document/request_document.html' %}
