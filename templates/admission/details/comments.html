@@ -31,14 +31,14 @@
   <div class="comment-viewer"
        data-url="{% url base_namespace|add:':sic-comments' view.kwargs.uuid %}"
        data-tags="{{ COMMENT_TAG_SIC }}"
-       data-header-title="{% trans "Global SIC comments" %}"
+       data-header-title="{% if view.is_continuing %}{% trans "Global IUFC comments" %}{% else %}{% trans "Global SIC comments" %}{% endif %}"
        data-rich-text-config="{{ ckeditor_config }}"
        data-panel-class="panel panel-primary"
   ></div>
   <div class="comment-viewer"
      data-url="{% url base_namespace|add:':fac-comments' view.kwargs.uuid %}"
      data-tags="{{ COMMENT_TAG_FAC }}"
-     data-header-title="{% trans "Global FAC/CDD comments" %}"
+     data-header-title="{% trans "Global FAC comments" %}"
      data-rich-text-config="{{ ckeditor_config }}"
      data-panel-class="panel panel-primary"
   ></div>

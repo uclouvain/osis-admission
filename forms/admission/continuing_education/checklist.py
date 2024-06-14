@@ -43,7 +43,6 @@ class StudentReportForm(forms.ModelForm):
     class Meta:
         model = ContinuingEducationAdmission
         fields = [
-            'interested_mark',
             'edition',
             'in_payement_order',
             'reduced_rights',
@@ -58,7 +57,6 @@ class StudentReportForm(forms.ModelForm):
             'tff_label',
         ]
         widgets = {
-            'interested_mark': forms.CheckboxInput(),
             'in_payement_order': forms.CheckboxInput(),
             'reduced_rights': forms.CheckboxInput(),
             'pay_by_training_cheque': forms.CheckboxInput(),
