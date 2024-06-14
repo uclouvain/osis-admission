@@ -143,10 +143,11 @@ class CommentForm(forms.Form):
         }
 
         self.fields['comment'].label = labels.get(comment_type, label or _('Comment'))
-        self.permission = permissions.get(comment_type, 'admission.checklist_change_comment')
 
         if permission is not None:
             self.permission = permission
+        else:
+            self.permission = permissions.get(comment_type, 'admission.checklist_change_comment')
 
         if comment:
             self.fields['comment'].initial = comment.content
