@@ -53,6 +53,7 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_FAC_FOR_IUFC,
 )
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 
 __all__ = [
     'ChangeStatusView',
@@ -61,7 +62,7 @@ __all__ = [
 
 __namespace__ = False
 
-from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
 
 
 class ChangeStatusSerializer(serializers.Serializer):
@@ -159,11 +160,18 @@ class SaveCommentView(AdmissionFormMixin, FormView):
         'authentication': 'admission.checklist_change_past_experiences',
     }
 
+    permission_by_tab = {
+        COMMENT_FINANCABILITE_DISPENSATION: 'admission.checklist_change_fac_comment',
+    }
+
     @cached_property
     def tags(self):
         return self.kwargs['tab'].split('__')
 
     def get_permission_required(self):
+        self.permission_required = self.permission_by_tab.get(self.kwargs['tab'], None)
+        if self.permission_required is not None:
+            return super().get_permission_required()
         self.permission_required = next(
             (self.permission_by_custom_tag[tag] for tag in self.tags if tag in self.permission_by_custom_tag),
             'admission.checklist_change_comment',
