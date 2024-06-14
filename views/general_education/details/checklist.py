@@ -2350,6 +2350,7 @@ class FinancabiliteDerogationRefusView(
                 form.add_error(None, exception.message)
             return self.form_invalid(form)
 
+        self.htmx_refresh = True
         return super().form_valid(form)
 
 
