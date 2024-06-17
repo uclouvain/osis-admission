@@ -1431,6 +1431,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             documents_additionnels=[],
             poste_diplomatique=None,
             financabilite_regle_calcule="",
+            financabilite_regle_calcule_situation='',
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
             financabilite_regle_etabli_par="",

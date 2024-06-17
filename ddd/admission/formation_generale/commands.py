@@ -511,6 +511,7 @@ class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
     financabilite_regle_calcule: str
+    financabilite_regle_calcule_situation: str
     financabilite_regle_calcule_le: datetime.datetime
 
 

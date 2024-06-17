@@ -27,9 +27,9 @@ from admission.ddd.admission.formation_generale.commands import SpecifierFinanca
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import RegleCalculeResultatAvecFinancable
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 
 
 def specifier_financabilite_regle(
@@ -42,7 +42,7 @@ def specifier_financabilite_regle(
 
     # THEN
     proposition.specifier_financabilite_regle(
-        RegleCalculeResultatAvecFinancable[cmd.financabilite_regle],
+        SituationFinancabilite[cmd.financabilite_regle],
         cmd.etabli_par,
         cmd.gestionnaire,
     )

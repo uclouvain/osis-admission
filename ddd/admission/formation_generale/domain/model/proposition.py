@@ -68,8 +68,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     PoursuiteDeCycle,
-    RegleCalculeResultatAvecFinancable,
-    RegleDeFinancement,
     DecisionFacultaireEnum,
     BesoinDeDerogation,
     TypeDeRefus,
@@ -98,6 +96,8 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite, SITUATION_FINANCABILITE_PAR_ETAT
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
@@ -151,9 +151,10 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
-    financabilite_regle_calcule: RegleCalculeResultatAvecFinancable = ''
+    financabilite_regle_calcule: EtatFinancabilite = ''
+    financabilite_regle_calcule_situation: SituationFinancabilite = ''
     financabilite_regle_calcule_le: Optional[datetime.datetime] = None
-    financabilite_regle: RegleDeFinancement = ''
+    financabilite_regle: SituationFinancabilite = ''
     financabilite_regle_etabli_par: str = ''
 
     financabilite_derogation_statut: DerogationFinancement = ''
@@ -787,17 +788,19 @@ class Proposition(interface.RootEntity):
 
     def specifier_financabilite_resultat_calcul(
         self,
-        financabilite_regle_calcule: RegleCalculeResultatAvecFinancable,
+        financabilite_regle_calcule: EtatFinancabilite,
+        financabilite_regle_calcule_situation: SituationFinancabilite,
         financabilite_regle_calcule_le: datetime.datetime,
         auteur_modification: str,
     ):
         self.financabilite_regle_calcule = financabilite_regle_calcule
+        self.financabilite_regle_calcule_situation = financabilite_regle_calcule_situation
         self.financabilite_regle_calcule_le = financabilite_regle_calcule_le
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_financabilite_regle(
         self,
-        financabilite_regle: RegleCalculeResultatAvecFinancable,
+        financabilite_regle: SituationFinancabilite,
         etabli_par: str,
         auteur_modification: str,
     ):
@@ -805,11 +808,18 @@ class Proposition(interface.RootEntity):
         self.financabilite_regle_etabli_par = etabli_par
         self.auteur_derniere_modification = auteur_modification
 
-        self.checklist_actuelle.financabilite = StatutChecklist(
-            statut=ChoixStatutChecklist.GEST_REUSSITE,
-            libelle=__('Approval'),
-            extra={'reussite': 'financable'},
-        )
+        if financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]:
+            self.checklist_actuelle.financabilite = StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_REUSSITE,
+                libelle=__('Approval'),
+                extra={'reussite': 'financable'},
+            )
+        elif financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]:
+            self.checklist_actuelle.financabilite = StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_BLOCAGE,
+                libelle=__('Not financeable'),
+                extra={'to_be_completed': '0'},
+            )
 
     def specifier_derogation_financabilite(
         self,

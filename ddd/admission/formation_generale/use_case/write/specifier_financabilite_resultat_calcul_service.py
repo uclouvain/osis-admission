@@ -29,6 +29,8 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 
 
 def specifier_financabilite_resultat_calcul(
@@ -41,7 +43,8 @@ def specifier_financabilite_resultat_calcul(
 
     # THEN
     proposition.specifier_financabilite_resultat_calcul(
-        financabilite_regle_calcule=cmd.financabilite_regle_calcule,
+        financabilite_regle_calcule=EtatFinancabilite[cmd.financabilite_regle_calcule],
+        financabilite_regle_calcule_situation=SituationFinancabilite[cmd.financabilite_regle_calcule_situation],
         financabilite_regle_calcule_le=cmd.financabilite_regle_calcule_le,
         auteur_modification=cmd.gestionnaire,
     )
