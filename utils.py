@@ -41,6 +41,7 @@ from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.utils import timezone
 from django.utils.translation import pgettext, override, get_language, gettext
+from django_htmx.http import trigger_client_event
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.central_manager import CentralManager
@@ -200,20 +201,11 @@ def add_messages_into_htmx_response(request, response):
     msgs = list(messages.get_messages(request))
 
     if msgs:
-        response['HX-Trigger'] = json.dumps(
-            {
-                'messages': [{'message': str(msg.message), 'tags': msg.tags} for msg in msgs],
-            },
-        )
+        trigger_client_event(response, 'messages', [{'message': str(msg.message), 'tags': msg.tags} for msg in msgs])
 
 
 def add_close_modal_into_htmx_response(response):
-    if 'HX-Trigger' in response:
-        trigger = json.loads(response['HX-Trigger'])
-        trigger['closeModal'] = ""
-        response['HX-Trigger'] = json.dumps(trigger)
-    else:
-        response['HX-Trigger'] = json.dumps({'closeModal': ""})
+    trigger_client_event(response, 'closeModal')
 
 
 def get_portal_admission_list_url() -> str:
