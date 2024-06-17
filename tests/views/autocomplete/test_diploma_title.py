@@ -29,6 +29,7 @@ from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
+from base.models.enums.establishment_type import EstablishmentTypeEnum
 from reference.models.diploma_title import mapping_study_cycle
 from reference.models.enums.study_type import StudyType
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -157,6 +158,93 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
+                    self.politic_title_data,
+                ],
+            },
+        )
+
+    def test_retrieve_specific_establishment_type_diploma_titles(self):
+        self.client.force_login(user=self.user)
+
+        # Establishment type: non university -> return non university titles
+        response = self.client.get(
+            self.url,
+            data={
+                'forward': json.dumps(
+                    {
+                        'establishment_type': EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
+                        'display_study_type': True,
+                    },
+                ),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = response.json()
+
+        self.assertEqual(
+            json_response,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    self.politic_title_data,
+                ],
+            },
+        )
+
+        # Establishment type: university -> return university titles
+        response = self.client.get(
+            self.url,
+            data={
+                'forward': json.dumps(
+                    {
+                        'establishment_type': EstablishmentTypeEnum.UNIVERSITY.name,
+                        'display_study_type': True,
+                    },
+                ),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = response.json()
+
+        self.assertEqual(
+            json_response,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    self.bachelor_title_data,
+                    self.master_title_data,
+                ],
+            },
+        )
+
+        # Establishment type: high school -> return all university titles
+        response = self.client.get(
+            self.url,
+            data={
+                'forward': json.dumps(
+                    {
+                        'establishment_type': EstablishmentTypeEnum.HIGH_SCHOOL.name,
+                        'display_study_type': True,
+                    },
+                ),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = response.json()
+
+        self.assertEqual(
+            json_response,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    self.bachelor_title_data,
+                    self.master_title_data,
                     self.politic_title_data,
                 ],
             },
