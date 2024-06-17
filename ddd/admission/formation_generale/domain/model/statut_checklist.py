@@ -120,8 +120,9 @@ INDEX_ONGLETS_CHECKLIST = {
 class ConfigurationStatutChecklist(interface.ValueObject):
     identifiant: str
     libelle: str
-    statut: ChoixStatutChecklist
+    statut: Optional[ChoixStatutChecklist] = None
     extra: Dict[str, any] = attr.Factory(dict)
+    identifiant_parent: Optional[str] = None
 
     def matches_dict(self, other_configuration_as_dictionary: Dict[str, any]) -> bool:
         """
@@ -144,7 +145,16 @@ class ConfigurationStatutChecklist(interface.ValueObject):
         if extra is None:
             extra = {}
 
-        return self.statut.name == status and self.extra.items() <= extra.items()
+        return bool(self.statut) and self.statut.name == status and self.extra.items() <= extra.items()
+
+    def merge_statuses(self, other_status):
+        return ConfigurationStatutChecklist(
+            identifiant=self.identifiant,
+            libelle=self.libelle,
+            statut=self.statut or other_status.statut,
+            extra={**self.extra, **other_status.extra},
+            identifiant_parent=self.identifiant_parent,
+        )
 
 
 @attr.dataclass
@@ -298,11 +308,11 @@ onglets_parcours_anterieur_experiences = ConfigurationOngletChecklist(
         ConfigurationStatutChecklist(
             identifiant=f'AUTHENTIFICATION.{etat_authentification.name}',
             libelle=etat_authentification.value,
-            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            statut=None,
             extra={
                 'etat_authentification': etat_authentification.name,
-                'authentification': '1',
             },
+            identifiant_parent='AUTHENTIFICATION',
         )
         for etat_authentification in EtatAuthentificationParcours
     ]
@@ -356,11 +366,11 @@ onglet_financabilite = ConfigurationOngletChecklist(
         ConfigurationStatutChecklist(
             identifiant=f'BESOIN_DEROGATION.{besoin_derogation.name}',
             libelle=besoin_derogation.value,
-            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            statut=None,
             extra={
                 'etat_besoin_derogation': besoin_derogation.name,
-                'en_cours': 'derogation',
             },
+            identifiant_parent='BESOIN_DEROGATION',
         )
         for besoin_derogation in DerogationFinancement
     ]
@@ -497,11 +507,11 @@ onglet_decision_sic = ConfigurationOngletChecklist(
         ConfigurationStatutChecklist(
             identifiant=f'BESOIN_DEROGATION.{etat_besoin_derogation.name}',
             libelle=etat_besoin_derogation.value,
-            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            statut=None,
             extra={
                 'etat_besoin_derogation': etat_besoin_derogation.name,
-                'en_cours': 'derogation',
             },
+            identifiant_parent='BESOIN_DEROGATION',
         )
         for etat_besoin_derogation in BesoinDeDerogation
     ]
