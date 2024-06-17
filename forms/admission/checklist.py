@@ -98,6 +98,9 @@ from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite, \
+    SITUATION_FINANCABILITE_PAR_ETAT
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
 from osis_document.utils import is_uuid
@@ -1161,6 +1164,30 @@ class FinancabiliteApprovalForm(forms.ModelForm):
         fields = [
             'financability_rule',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['financability_rule'].choices = (
+            choice
+            for choice in self.fields['financability_rule'].choices
+            if SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]
+        )
+
+
+class FinancabiliteNotFinanceableForm(forms.ModelForm):
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'financability_rule',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['financability_rule'].choices = (
+            choice
+            for choice in self.fields['financability_rule'].choices
+            if SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]
+        )
 
 
 class FinancabiliteDispensationForm(forms.Form):

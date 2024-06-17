@@ -366,9 +366,6 @@ msgstr "Accord dérogation direction"
 msgid "ACKNOWLEDGED"
 msgstr "Réceptionné"
 
-msgid "ACQUIS_75_POURCENTS_CREDITS"
-msgstr "Acquis 75 pourcents crédits du PAE de l'année précédente"
-
 msgid "ADMISSIBLE"
 msgstr "Recevable"
 
@@ -389,9 +386,6 @@ msgstr "Autre"
 
 msgid "AVIS_DIRECTION_DEMANDE"
 msgstr "Avis direction demandé"
-
-msgid "A_CLARIFIER"
-msgstr "À clarifier"
 
 msgid "Absence of debt"
 msgstr "Absence de dettes"
@@ -1258,9 +1252,6 @@ msgstr "CDD :"
 msgid "CDDs"
 msgstr "CDDs"
 
-msgid "CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS"
-msgstr "120 crédits non encore acquis"
-
 msgid "CEP"
 msgstr "CEP"
 
@@ -1276,15 +1267,6 @@ msgstr "Décision de la bourse de la CFWB"
 
 msgid "CHEMISTRY"
 msgstr "Chimie"
-
-msgid "CINQ_G_1ERE_INSCRIPTION_MEME_CYCLE"
-msgstr "5G 1ère inscription au même cycle"
-
-msgid "CINQ_G_2EME_INSCRIPTION_AVEC_REORIENTATION"
-msgstr "5G 2ème inscription avec réorientation"
-
-msgid "CINQ_G_2EME_INSCRIPTION_MEME_CYCLE"
-msgstr "5G 2ème inscription au même cycle"
 
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr "Carte CIRE, séjour illimité ou d'étranger"
@@ -3187,6 +3169,9 @@ msgstr "Règle calculé de financabilité"
 msgid "Financability computed rule on"
 msgstr "Règle calculé de financabilité le"
 
+msgid "Financability computed rule situation"
+msgstr "Situation calculée de financabilité"
+
 msgid "Financability dispensation"
 msgstr "Dérogation à la financabilité"
 
@@ -3214,8 +3199,9 @@ msgstr "Règle de financabilité"
 msgid "Financability rule established by"
 msgstr "Règle de financabilité établi par"
 
-msgid "Financable"
-msgstr "Finançable"
+#, python-format
+msgid "Financable - %(rule)s (Established by %(established_by)s)"
+msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
 
 msgid "Financeability"
 msgstr "Financabilité"
@@ -3232,6 +3218,9 @@ msgstr "Proposition de l'algorithme de financabilité le %(date)s : %(result)s"
 
 msgid "Financeable"
 msgstr "Financable"
+
+msgid "Financeable - %(rule)s (Established by %(established_by)s)"
+msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
 
 msgid "Financing rule"
 msgstr "Règle de financement"
@@ -3864,9 +3853,6 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
-
-msgid "INDISPONIBLE"
-msgstr "Indisponible"
 
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
@@ -5042,9 +5028,6 @@ msgstr "NOMA"
 msgid "NON_CONCERNE"
 msgstr "Non concerné·e"
 
-msgid "NON_FINANCABLE"
-msgstr "Non finançable"
-
 msgid "NON_SOUMISE"
 msgstr "Non soumise"
 
@@ -5233,6 +5216,9 @@ msgstr "Non concerné·e"
 
 msgid "Not financeable"
 msgstr "Non-finançable"
+
+msgid "Not financeable - %(rule)s (Established by %(established_by)s)"
+msgstr "Non finançable - %(rule)s (Établi par %(established_by)s)"
 
 msgid "Not free"
 msgstr "Non libre"
@@ -5487,12 +5473,6 @@ msgstr "PDF récapitulatif de la proposition"
 
 msgid "PHYSICS"
 msgstr "Physique"
-
-msgid "PREMIERE_INSCRIPTION_MEME_CYCLE"
-msgstr "1ère inscription au même cycle"
-
-msgid "PREMIERE_REORIENTATION_SUR_5_ANS"
-msgstr "Première réorientation sur 5 ans"
 
 msgid "PRESIDENT"
 msgstr "PRESIDENT"
@@ -6185,9 +6165,6 @@ msgstr ""
 msgid "Recipient"
 msgstr "Destinataire"
 
-msgid "Recompute"
-msgstr "Recalculer"
-
 msgctxt "F"
 msgid "Rector"
 msgstr "Rectrice"
@@ -6521,9 +6498,6 @@ msgstr "Rôle: Direction SIC"
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Bourse de recherche"
 
-msgid "SECONDE_INSCRIPTION_MEME_CYCLE"
-msgstr "2ème inscription au même cycle"
-
 msgid "SECRETAIRE"
 msgstr "SECRETAIRE"
 
@@ -6569,24 +6543,6 @@ msgstr "Statistiques"
 
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Confirmation soumise"
-
-msgid "SUR_2_ANS_45_CREDITS_11BA"
-msgstr "Sur 2 ans, 45 crédits et 1/2 crédits inscrits 11BA sauf 1ère année"
-
-msgid "SUR_2_ANS_45_CREDITS_MEME_CYCLE"
-msgstr "Sur 2 ans, 45 crédits et 1/2 crédits inscrits même cycle"
-
-msgid "SUR_2_ANS_MOITIE_CREDITS"
-msgstr "Sur 2 ans, 1/2 crédits inscrits même cycle car allègement"
-
-msgid "SUR_3_ANS_45_CREDITS_11BA"
-msgstr "Sur 3 ans, 45 crédits et 1/2 crédits inscrits 11BA sauf 1ère année"
-
-msgid "SUR_3_ANS_45_CREDITS_MEME_CYCLE"
-msgstr "Sur 3 ans, 45 crédits et 1/2 crédits inscrits même cycle"
-
-msgid "SUR_3_ANS_MOITIE_CREDITS"
-msgstr "Sur 3 ans, 1/2 crédits inscrits même cycle car allègement"
 
 msgid "SYST_REUSSITE"
 msgstr "Système réussite"
@@ -7054,9 +7010,6 @@ msgstr "Pour validation"
 
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
-
-msgid "TROISIEME_INSCRIPTION_PREMIER_CYCLE_AVEC_REORIENTATION"
-msgstr "3ème inscription au 1er cycle avec réorientation"
 
 msgid "Tab"
 msgstr "Onglet"
