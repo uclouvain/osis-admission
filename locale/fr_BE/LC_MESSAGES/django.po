@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-22 18:08+0100\n"
+"POT-Creation-Date: 2024-05-28 15:25+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -599,6 +599,13 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
 
+msgid ""
+"Admission is not yet valid for searching UCLouvain. The following fields are "
+"required: "
+msgstr ""
+"L'admission n'est pas encore pour rechercher une correspondance UCLouvain. "
+"Les champs suivants sont requis: "
+
 #, python-format
 msgid ""
 "Admission request for the academic year %(academic_year)s to the program:"
@@ -1057,6 +1064,9 @@ msgstr "Autoriser"
 msgid "Authors"
 msgstr "Auteurs et autrices"
 
+msgid "Available information (Digit)"
+msgstr "Information connue (Digit)"
+
 msgid "Awaiting approval"
 msgstr "En révision"
 
@@ -1428,6 +1438,9 @@ msgctxt "gender"
 msgid "Candidate"
 msgstr "Candidat·e"
 
+msgid "Candidate information"
+msgstr "Information du candidat"
+
 msgid "Candidate nationality"
 msgstr "Nationalité du candidat"
 
@@ -1615,6 +1628,9 @@ msgstr "Nationalité"
 
 msgid "City"
 msgstr "Ville"
+
+msgid "Civil state"
+msgstr "État civil"
 
 msgid "Civil status"
 msgstr "État civil"
@@ -2046,6 +2062,9 @@ msgstr "Pays de naissance"
 msgid "Country of citizenship"
 msgstr "Pays de nationalité"
 
+msgid "Country of citizenship name"
+msgstr "Pays de nationalité"
+
 msgctxt "admission"
 msgid "Course"
 msgstr "Formation"
@@ -2420,6 +2439,9 @@ msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 msgid "Disabled"
 msgstr "Désactivé"
 
+msgid "Discard fusion"
+msgstr "Rejeter la fusion"
+
 msgid "Dispensation needed"
 msgstr "Besoin dérogation"
 
@@ -2666,6 +2688,9 @@ msgstr "Édition"
 msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
+
+msgid "Educational experience"
+msgstr "Expériences académiques"
 
 msgid "Educational experiences"
 msgstr "Expériences académiques"
@@ -2928,6 +2953,9 @@ msgstr "Date (prévue) de délivrance du diplôme (document signé)"
 
 msgid "Experience knowledge valorisation"
 msgstr "Valorisation des acquis d'expérience"
+
+msgid "Experience merge proposal"
+msgstr "Proposition de fusion du parcours antérieur"
 
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
@@ -3307,6 +3335,9 @@ msgstr "Financement"
 msgid "Funding type"
 msgstr "Type de financement"
 
+msgid "Fusion proposal"
+msgstr "Proposition de fusion"
+
 msgid "GEOGRAPHY"
 msgstr "Géographie"
 
@@ -3429,6 +3460,9 @@ msgstr "Cacher le menu de la checklist"
 
 msgid "Hide the states of the checklist"
 msgstr "Cacher les états de la checklist"
+
+msgid "High school graduation year"
+msgstr "Année d'obtention du diplôme d'études secondaires"
 
 msgctxt "tab"
 msgid "History"
@@ -3728,6 +3762,12 @@ msgstr "En cours"
 
 msgid "IUFC comment for the Faculty"
 msgstr "Commentaire de l'IUFC pour la Faculté"
+
+msgid "Id card expiry date"
+msgstr "Date de fin de validité de la carte d'identité"
+
+msgid "Id card number"
+msgstr "Numéro de carte d'identité"
 
 msgid "Identification"
 msgstr "Identification"
@@ -4133,6 +4173,9 @@ msgstr "Nom / Prénom / E-mail / NOMA"
 
 msgid "Last name / First name / Global id"
 msgstr "Nom / Prénom / Identifiant global"
+
+msgid "Last registration id"
+msgstr "Dernier NOMA connu"
 
 msgid "Last update author"
 msgstr "Auteur de la dernière mise à jour"
@@ -4685,6 +4728,19 @@ msgstr "Affiliations"
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
 
+msgctxt "admission"
+msgid "Merge"
+msgstr "Fusionner"
+
+msgid "Merge all non-empty data from digit match to merge form"
+msgstr "Fusionner toutes les données valides provenant de la correspondance"
+
+msgid "Merge all non-empty data from original to merge form"
+msgstr "Fusionner toutes les données valides provenant de l'original"
+
+msgid "Merge with existing entry"
+msgstr "Fusionner avec l'entrée existante"
+
 msgid "Merging of each document field of a continuing proposition into one PDF"
 msgstr "Fusion de chaque champ document d'une proposition continue en un PDF"
 
@@ -4734,6 +4790,9 @@ msgid ""
 msgstr ""
 "Formule 2 (La défense et la soutenance sont organisées le même jour, et "
 "soumises à une condition de recevabilité)"
+
+msgid "Middle name"
+msgstr "Autres prénoms"
 
 msgid "Missing"
 msgstr "Manquants"
@@ -4878,6 +4937,9 @@ msgstr "Nom du gestionnaire qui envois l'email"
 
 msgid "Name of the working list"
 msgstr "Nom de la liste de travail"
+
+msgid "National number"
+msgstr "Numéro de registre national belge (NISS)"
 
 msgid "Nationality"
 msgstr "Nationalité"
@@ -5028,6 +5090,9 @@ msgstr "Non libre"
 
 msgid "Not fundable"
 msgstr "Non-finançable"
+
+msgid "Not specified"
+msgstr "Non précisée"
 
 msgctxt "admission-header"
 msgid "Not specified"
@@ -5661,6 +5726,9 @@ msgstr "Expérience précédente de recherche"
 msgid "Private"
 msgstr "Privé"
 
+msgid "Private email"
+msgstr "Email privée"
+
 msgid "Processing by Fac"
 msgstr "Traitement en Fac"
 
@@ -5672,6 +5740,9 @@ msgstr "Professionnel"
 
 msgid "Professional email"
 msgstr "Adresse e-mail professionnelle"
+
+msgid "Professional experience"
+msgstr "Expérience professionnelle"
 
 msgid "Professional experiences"
 msgstr "Expériences professionnelles"
@@ -5842,6 +5913,9 @@ msgstr "Refusée"
 
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
+
+msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
+msgstr "Refus 95 générique - irrecevabilité"
 
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr "Refus article 95 Jury"
@@ -6123,6 +6197,9 @@ msgstr "Bourse de recherche"
 msgid "Research seminar"
 msgstr "Séminaire de recherche"
 
+msgid "Resend"
+msgstr "Renvoyer"
+
 msgid "Reset"
 msgstr "Réinitialiser"
 
@@ -6171,6 +6248,9 @@ msgstr "Épreuve de confirmation à représenter"
 
 msgid "Retaking of the test"
 msgstr "Confirmation à représenter"
+
+msgid "Retrieve from DigIT"
+msgstr "Récupérer depuis DigIT"
 
 msgid "Retype"
 msgstr "Retyper"
@@ -6347,6 +6427,9 @@ msgstr "Enregistrer et transmettre en SIC"
 
 msgid "Save and view result"
 msgstr "Enregistrer et voir le résultat"
+
+msgid "Save fusion proposal"
+msgstr "Enregistrer la proposition de fusion"
 
 msgid "Scholarship"
 msgstr "Boursier"
@@ -7800,6 +7883,9 @@ msgstr "Type de communication"
 msgid "Type of paper"
 msgstr "Type d'épreuve"
 
+msgid "Type of the application"
+msgstr "Type de l'application"
+
 msgid "Type of training"
 msgstr "Type de formation"
 
@@ -7846,11 +7932,33 @@ msgstr "UE"
 msgid "UUID"
 msgstr "UUID"
 
+msgid ""
+"Unable to validate the admission because an error occured while searching "
+"for existing person in DIGIT"
+msgstr ""
+"Impossible de valider le dossier d'admission car une erreur s'est produite "
+"lors de la recherche de compte existant dans DIGIT"
+
+msgid ""
+"Unable to validate the admission because of a potential person duplicates "
+"exists."
+msgstr ""
+"Impossible de valider le dossier d'admission car il existe au moins un "
+"doublon potentiel de personne."
+
+msgid "Unable to validate the admission because of an invalid DIGIT ticket."
+msgstr ""
+"Impossible de valider le dossier d'admission car il existe des erreurs "
+"rendant invalide le ticket envoyé à DIGIT."
+
 msgid "Unavailable"
 msgstr "Non disponible"
 
 msgid "Undecided"
 msgstr "Non décidé"
+
+msgid "Undo"
+msgstr "Défaire"
 
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
@@ -7958,6 +8066,9 @@ msgstr "Diplômes ou expériences valorisées :"
 msgid "Values"
 msgstr "Valeurs"
 
+msgid "Verify"
+msgstr "Vérifier"
+
 msgid "Viewed at"
 msgstr "Vue le"
 
@@ -8058,6 +8169,9 @@ msgstr ""
 
 msgid "Whole view"
 msgstr "Vue complète"
+
+msgid "Will be automatically retrieved from candidate"
+msgstr "Sera automatiquement récupéré du parcours fourni par le candidat"
 
 msgid "With academic year"
 msgstr "Avec une année académique"

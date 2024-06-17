@@ -30,6 +30,7 @@ from celery.schedules import crontab
 from backoffice.celery import app as celery_app
 from . import process_admission_tasks
 from . import check_academic_calendar
+from . import retrieve_digit_tickets_status
 
 tasks = {
     'Generate admission files': {
@@ -40,6 +41,14 @@ tasks = {
         'task': 'admission.tasks.check_academic_calendar.run',
         'schedule': crontab(minute=0, hour=0, day_of_month='*', month_of_year='*', day_of_week=0),
     },
+    '|Admission| Retrieve digit person tickets status': {
+        'task': 'admission.tasks.retrieve_digit_tickets_status.run',
+        'schedule': crontab(minute='*/5'),
+    },
+    '|Admission| Retry digit duplicates finding': {
+        'task': 'admission.tasks.retry_digit_duplicates_finding.run',
+        'schedule': crontab(minute='*/5'),
+    }
 }
 
 celery_app.conf.beat_schedule.update(tasks)

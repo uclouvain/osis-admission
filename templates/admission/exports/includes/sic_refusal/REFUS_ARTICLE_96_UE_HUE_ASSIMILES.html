@@ -40,6 +40,18 @@
   nous constatons que vous n'êtes pas finançable pour des raisons académiques.
 </p>
 
+{% if proposition.motifs_refus %}
+  <p>
+    Aucune dérogation ne peut vous être accordée:
+  </p>
+
+  <ul>
+    {% for motif in proposition.motifs_refus %}
+      <li>{{ motif.motif }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
 <p>
   Par conséquent, et en application de l'article 96, § 1er du décret du 7 novembre 2013 définissant le paysage de
   l'enseignement supérieur et l'organisation académique des études, votre demande d'admission est refusée.

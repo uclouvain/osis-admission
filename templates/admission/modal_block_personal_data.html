@@ -1,0 +1,159 @@
+{% load static i18n bootstrap3 admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+<div class="merge-panel-container">
+
+    <div class="panel panel-default flex-3">
+        <div class="panel-heading original-data-heading">
+            <div class="panel-title">
+                <div class="bold-text">{% trans 'Candidate information' %}</div>
+                {{ candidate.last_name }}, {{ candidate.first_name }}
+            </div>
+            <div class="merge-btn-container">
+                <button data-toggle="tooltip" title="{% trans 'Merge all non-empty data from original to merge form' %}" data-merge-source="original" class="btn btn-default btn-merge-all">
+                    <i class="fa fa-angles-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="panel-body original-data">
+            {% for label, value in candidate.items %}
+                {% if label != 'global_id' %}
+                <div class="flex-merge-input">
+                    <div class="input-field-data">
+                        {% input_field_data label value False %}
+                    </div>
+                    <div class="merge-btn-container">
+                        <button data-merge-source="original" data-merge-label="{{ label }}" class="btn btn-xs btn-default btn-merge">
+                            <i style="font-size: 10px;" class="fa fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-primary flex-3">
+        <div class="panel-heading fusion-data-heading">
+            <div class="panel-title">
+                    <div class="bold-text">{% trans 'Fusion proposal' %}</div>
+                    {{ candidate.last_name }}, {{ candidate.first_name }}
+            </div>
+        </div>
+        <form id="proposal-form" method="post" action="{{ request.get_full_path }}" class="panel-body fusion-data">
+            {{ form.media }}
+            {% csrf_token %}
+            {% for field in form %}
+                {% bootstrap_field field %}
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="panel panel-default flex-3">
+        <div class="panel-heading digit-data-heading">
+                <div class="merge-btn-container">
+                    <button data-toggle="tooltip" title="{% trans 'Merge all non-empty data from digit match to merge form' %}" data-merge-source="digit-0" class="btn btn-default btn-merge-all">
+                        <i class="fa fa-angles-left"></i>
+                    </button>
+                </div>
+                <div class="panel-title form-group">
+                        <div class="bold-text text-nowrap">{% trans 'Available information (Digit)' %}</div>
+                        {% for match in matches %}
+                          <div id="match-{{ forloop.counter0 }}" class="match-name" data-matricule="{{ match.person.matricule|format_matricule }}"
+                                  {% if merge_person and merge_person.selected_global_id != match.person.matricule|format_matricule %}
+                                    style="display: none;"
+                                  {% elif not merge_person and not forloop.first %}
+                                    style="display: none;"
+                                  {% endif %}">
+                            {{ match.person.lastName }}, {{ match.person.firstName }} -
+                            {% for account in match.applicationAccounts %}
+                            {% if account.source == "ETU" %}
+                                <span id="noma-badge" data-noma="{{ account.sourceId }}" class="badge panel-default-badge-primary">NOMA: {{ account.sourceId }}</span>
+                            {% endif %}
+                            {% endfor %}
+                          </div>
+                        {% endfor %}
+                </div>
+        </div>
+
+        <div class="panel-body digit-data">
+        {% for match in matches %}
+            <span class="match-data-panel digit-{{ forloop.counter0 }}-data"
+              {% if merge_person and merge_person.selected_global_id != match.person.matricule|format_matricule %}
+                style="display: none;"
+              {% elif not merge_person and not forloop.first %}
+                style="display: none;"
+              {% endif %}">
+            {% for label, value in match|map_fields_items %}
+                <div class="flex-merge-input">
+                    <div class="merge-btn-container">
+                        <button data-merge-source="digit-{{ forloop.parentloop.counter0 }}" data-merge-label="{{ label }}" class="btn btn-xs btn-default btn-merge">
+                            <i style="font-size: 10px;" class="fa fa-arrow-left"></i>
+                        </button>
+                    </div>
+                    <div class="input-field-data">
+                        {% if label == "birth_date" %}
+                            {% input_field_data label value|date:"d/m/Y" False %}
+                        {% else %}
+                            {% input_field_data label value False %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            </span>
+        {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+
+    showDiffWarning(0);
+    document.addEventListener("selectMergePerson", () => showDiffWarning());
+
+    function showDiffWarning(matchId){
+
+        const selectedMatchId = (matchId == null) ? $('#match').select2('data')[0].id : matchId;
+
+        document.querySelectorAll('.original-data .form-control[id]').forEach((el) => {
+           const candidateValue = el.value;
+           const digitValue = document.querySelector(`.digit-${selectedMatchId}-data #${el.id}.form-control`).value;
+
+           el.parentElement.classList.toggle("has-warning", candidateValue !== digitValue);
+           el.parentElement.querySelector('i')?.remove();
+
+           if(candidateValue !== digitValue){
+               el.parentElement.querySelector('label').insertAdjacentHTML(
+                   "beforeend", "<i class='fas fa-warning text-warning' data-toggle='tooltip' title='Data differs from digit'></i>"
+               )
+           }
+        });
+    }
+</script>

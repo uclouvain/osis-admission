@@ -85,6 +85,11 @@ templates.register(
             description=_('Acronym of the training'),
             example='SPRI2MS/DI',
         ),
+        Token(
+            name='application_type',
+            description=_('Type of the application'),
+            example='admission',
+        ),
     ],
 )
 
