@@ -46,9 +46,6 @@ from django.utils.translation import (
     override,
 )
 
-from admission.templatetags.admission import CONTEXT_GENERAL
-from osis_document.utils import is_uuid
-
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import (
@@ -65,9 +62,6 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
@@ -87,8 +81,14 @@ from admission.forms import (
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
+from admission.templatetags.admission import CONTEXT_GENERAL
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
-from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
+from admission.views.common.detail_tabs.comments import (
+    COMMENT_TAG_SIC,
+    COMMENT_TAG_FAC,
+    COMMENT_TAG_IUFC_FOR_FAC,
+    COMMENT_TAG_FAC_FOR_IUFC,
+)
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidget
@@ -100,6 +100,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
+from osis_document.utils import is_uuid
 
 FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 
@@ -122,26 +123,31 @@ class CommentForm(forms.Form):
 
         super().__init__(*args, **kwargs)
 
-        form_for_sic = self.prefix.endswith(f'__{COMMENT_TAG_SIC}')
-        form_for_fac = self.prefix.endswith(f'__{COMMENT_TAG_FAC}')
+        comment_type = self.prefix.split('__')[-1]
 
         self.fields['comment'].widget.attrs['hx-post'] = form_url
 
-        if form_for_fac:
-            label = _('Faculty comment for the SIC')
-            self.permission = 'admission.checklist_change_fac_comment'
-        elif form_for_sic:
-            label = _('SIC comment for the faculty')
-            self.permission = 'admission.checklist_change_sic_comment'
-        else:
-            if not label:
-                label = _('Comment')
-            self.permission = 'admission.checklist_change_comment'
+        labels = {
+            COMMENT_TAG_SIC: _('SIC comment for the faculty'),
+            COMMENT_TAG_FAC: _('Faculty comment for the SIC'),
+            COMMENT_TAG_IUFC_FOR_FAC: _('IUFC comment for the Faculty'),
+            COMMENT_TAG_FAC_FOR_IUFC: _('Faculty comment for IUFC'),
+            'authentication': _('Comment about the authentication'),
+        }
+
+        permissions = {
+            COMMENT_TAG_SIC: 'admission.checklist_change_sic_comment',
+            COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
+            COMMENT_TAG_IUFC_FOR_FAC: 'admission.continuing_checklist_change_iufc_comment',
+            COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
+        }
+
+        self.fields['comment'].label = labels.get(comment_type, label or _('Comment'))
 
         if permission is not None:
             self.permission = permission
-
-        self.fields['comment'].label = label
+        else:
+            self.permission = permissions.get(comment_type, 'admission.checklist_change_comment')
 
         if comment:
             self.fields['comment'].initial = comment.content

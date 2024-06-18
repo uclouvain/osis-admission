@@ -43,6 +43,7 @@ from admission.tests.factories.roles import (
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.program_manager import ProgramManagerFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -216,3 +217,27 @@ class PersonDetailViewTestCase(TestCase):
                 boite_postale='',
             ),
         )
+
+    def test_permissions_with_several_permissions(self):
+        # The candidate has a program manager role from admission
+        admission_program_manager = ProgramManagerRoleFactory(
+            education_group=self.general_admission.training.education_group
+        )
+
+        user = admission_program_manager.person.user
+
+        self.client.force_login(user=user)
+
+        response = self.client.get(self.confirmed_general_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        # The candidate has a program manager role from admission and another one from base from different groups
+        base_program_manager = ProgramManagerFactory(
+            person=admission_program_manager.person,
+            education_group=self.continuing_admission.training.education_group,
+        )
+
+        response = self.client.get(self.confirmed_general_url)
+
+        self.assertEqual(response.status_code, 200)
