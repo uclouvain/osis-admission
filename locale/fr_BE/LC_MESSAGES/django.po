@@ -4129,6 +4129,12 @@ msgstr "Commentaire interne"
 msgid "Internal comment:"
 msgstr "Commentaire interne :"
 
+msgid "Internal experience"
+msgstr "Expérience interne"
+
+msgid "Internal experiences to choose as access titles"
+msgstr "Les expériences internes à choisir comme des titres d'accès"
+
 msgid "Internal label"
 msgstr "Label interne"
 
@@ -7433,6 +7439,10 @@ msgid ""
 "The inscription type admission was authorised the %(date)s by %(author)s."
 msgstr ""
 "La demande de type inscription a été autorisée le %(date)s par %(author)s."
+
+msgid "The internal experiences chosen as access titles of this admission."
+msgstr ""
+"Les expériences internes choisies comme titres d'accès pour cette admission."
 
 msgid "The jury is not in progress"
 msgstr "Le jury n'est pas en cours"
