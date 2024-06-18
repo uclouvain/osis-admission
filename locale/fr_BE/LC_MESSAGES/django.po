@@ -3423,8 +3423,11 @@ msgstr ""
 msgid "Global"
 msgstr "Global"
 
-msgid "Global FAC/CDD comments"
-msgstr "Commentaires globaux FAC/CDD"
+msgid "Global FAC comments"
+msgstr "Commentaires globaux FAC"
+
+msgid "Global IUFC comments"
+msgstr "Commentaires globaux IUFC"
 
 msgid "Global SIC comments"
 msgstr "Commentaires globaux SIC"
@@ -6537,9 +6540,6 @@ msgstr "Secrétaire"
 msgid "Sector"
 msgstr "Secteur"
 
-msgid "Select a document"
-msgstr "Sélectionner un document"
-
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
@@ -8861,6 +8861,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes,no"
+msgstr "oui,non"
 
 msgid "yes,no,"
 msgstr "oui,non,"

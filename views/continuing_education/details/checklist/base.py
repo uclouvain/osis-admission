@@ -42,7 +42,7 @@ from admission.ddd.admission.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
     RecupererQuestionsSpecifiquesQuery,
@@ -376,7 +376,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 ListerToutesDemandesQuery(
                     annee_academique=self.admission.determined_academic_year.year,
                     matricule_candidat=self.admission.candidate.global_id,
-                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
+                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
                 )
             )
             if demande.uuid != self.admission_uuid

@@ -3160,7 +3160,10 @@ msgstr ""
 msgid "Global"
 msgstr ""
 
-msgid "Global FAC/CDD comments"
+msgid "Global FAC comments"
+msgstr ""
+
+msgid "Global IUFC comments"
 msgstr ""
 
 msgid "Global SIC comments"
@@ -5966,9 +5969,6 @@ msgstr ""
 msgid "Sector"
 msgstr ""
 
-msgid "Select a document"
-msgstr ""
-
 msgid "Select a mail template"
 msgstr ""
 
@@ -8003,6 +8003,9 @@ msgid "ucl"
 msgstr "UCLouvain"
 
 msgid "use"
+msgstr ""
+
+msgid "yes,no"
 msgstr ""
 
 msgid "yes,no,"

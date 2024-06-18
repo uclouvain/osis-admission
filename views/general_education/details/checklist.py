@@ -59,9 +59,13 @@ from osis_mail_template.models import MailTemplate
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.commands import ListerToutesDemandesQuery, GetStatutTicketPersonneQuery, \
-    RechercherParcoursAnterieurQuery
+from admission.ddd.admission.commands import (
+    ListerToutesDemandesQuery,
+    GetStatutTicketPersonneQuery,
+    RechercherParcoursAnterieurQuery,
+)
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
     ResumeCandidatDTO,
@@ -81,9 +85,9 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsEtudesSecondaires,
 )
 from admission.ddd.admission.enums.statut import (
-    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
+    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
@@ -132,6 +136,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
     TypeDeRefus,
 )
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
@@ -295,7 +300,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         for admission in candidate_admissions:
             if (
-                admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+                admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
                 and admission.annee_demande == self.admission.determined_academic_year.year
                 and admission.uuid != self.admission_uuid
             ):
@@ -913,7 +918,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
         # The panel is only display in some sic checklist statuses
         display_panel = any(
-            sic_checklist_statuses[value].matches(sic_checklist)
+            sic_checklist_statuses[value].matches_dict(sic_checklist)
             for value in [
                 'A_TRAITER',
                 'A_COMPLETER',
@@ -929,11 +934,11 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 # The faculty does not refuse the enrolment
                 and not ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_facultaire.name][
                     'REFUS'
-                ].matches(current_checklist.get(OngletsChecklist.decision_facultaire.name, {}))
+                ].matches_dict(current_checklist.get(OngletsChecklist.decision_facultaire.name, {}))
                 # The enrolment is financeable
                 and not ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.financabilite.name][
                     'NON_FINANCABLE'
-                ].matches(current_checklist.get(OngletsChecklist.financabilite.name, {}))
+                ].matches_dict(current_checklist.get(OngletsChecklist.financabilite.name, {}))
             )
 
         return display_panel
@@ -1538,6 +1543,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()
 
+        # Define checklist info
         try:
             status, extra = self.kwargs['status'].split('-')
             if status == 'GEST_BLOCAGE':
@@ -1548,6 +1554,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             status = self.kwargs['status']
             extra = {}
 
+        # Define global status
         if status == 'GEST_BLOCAGE' and extra == {'blocage': 'closed'}:
             global_status = ChoixStatutPropositionGenerale.CLOTUREE.name
         else:
@@ -1555,6 +1562,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
 
         admission_status_has_changed = admission.status != global_status
 
+        # Save the new statuses
         change_admission_status(
             tab='decision_sic',
             admission_status=status,
@@ -1567,11 +1575,28 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
 
         response = self.render_to_response(self.get_context_data())
 
+        # Historize the change of global status
         if admission_status_has_changed:
+            checklist_status = onglet_decision_sic.get_status(status=status, extra=extra)
+            admission_status = ChoixStatutPropositionGenerale.get_value(global_status)
+
+            checklist_status_labels = {}
+            admission_status_labels = {}
+            for language in [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]:
+                with translation.override(language):
+                    checklist_status_labels[language] = str(checklist_status.libelle if checklist_status else '')
+                    admission_status_labels[language] = str(admission_status)
+
             add_history_entry(
                 admission.uuid,
-                'Le statut de la proposition a évolué au cours du processus de décision SIC.',
-                'The status of the proposal has changed during the SIC decision process.',
+                'Le statut de la proposition a évolué au cours du processus de décision SIC : {} ({}).'.format(
+                    admission_status_labels[settings.LANGUAGE_CODE_FR],
+                    checklist_status_labels[settings.LANGUAGE_CODE_FR],
+                ),
+                'The status of the proposal has changed during the SIC decision process: {} ({}).'.format(
+                    admission_status_labels[settings.LANGUAGE_CODE_EN],
+                    checklist_status_labels[settings.LANGUAGE_CODE_EN],
+                ),
                 '{first_name} {last_name}'.format(
                     first_name=self.request.user.person.first_name,
                     last_name=self.request.user.person.last_name,
@@ -2048,6 +2073,7 @@ class ChecklistView(
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
         return experiences
+
 
 class ApplicationFeesView(
     AdmissionFormMixin,
