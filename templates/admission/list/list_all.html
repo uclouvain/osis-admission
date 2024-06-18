@@ -143,11 +143,11 @@
                       {# Unselect the sub options if the parent option is unselected #}
                       if (this.value === optionValuePrefix) {
                           if(this.checked === false) {
-                              currentInputs.prop('checked', false);
+                              $(this).closest('ul').find(`[value^="${optionValuePrefix}"]`).prop('checked', false);
                           }
                       } else if (this.checked === true) {
                           {# Select the parent option if one of the sub options is selected #}
-                          currentInputs.filter(`[value="${optionValuePrefix}"]`).prop('checked', true);
+                          $(this).closest('ul').find(`[value="${optionValuePrefix}"]`).prop('checked', true);
                       }
                   });
               }

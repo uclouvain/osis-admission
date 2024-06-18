@@ -233,6 +233,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     'AUTHENTIFICATION',
                 ),
                 (
+                    OngletsChecklist.financabilite.name,
+                    'BESOIN_DEROGATION',
+                ),
+                (
                     OngletsChecklist.decision_sic.name,
                     'BESOIN_DEROGATION',
                 ),
@@ -299,6 +303,14 @@ class ListerToutesDemandes(IListerToutesDemandes):
                                 if dispensation_needed:
                                     current_checklist_filters &= Q(
                                         generaleducationadmission__dispensation_needed=dispensation_needed,
+                                    )
+                            elif tab_name == OngletsChecklist.financabilite.name:
+                                # Filter on the dispensation status if necessary
+                                dispensation_needed = current_extra.pop('etat_besoin_derogation', None)
+
+                                if dispensation_needed:
+                                    current_checklist_filters &= Q(
+                                        generaleducationadmission__financability_dispensation_status=dispensation_needed,
                                     )
 
                             current_checklist_filters &= Q(
