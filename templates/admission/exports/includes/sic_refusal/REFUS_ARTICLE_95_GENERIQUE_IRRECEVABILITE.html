@@ -34,17 +34,9 @@
   l’objet d’une réponse favorable.
 </p>
 
-{% if proposition.motifs_refus %}
-  {% if proposition.motifs_refus|length == 1 %}
-    <p>{{ proposition.motifs_refus.0.motif }}</p>
-  {% else %}
-    <ul>
-      {% for motif in proposition.motifs_refus %}
-        <li>{{ motif.motif }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endif %}
+{% for motif in proposition.motifs_refus %}
+  <p>{{ motif.motif }}</p>
+{% endfor %}
 
 <p>
   Toutefois, si vous estimez que les motifs de cette décision d'irrecevabilité ne sont pas fondés et que vous disposez
