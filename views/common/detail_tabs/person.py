@@ -30,9 +30,6 @@ from admission.views.common.mixins import LoadDossierViewMixin
 
 __all__ = ['AdmissionPersonDetailView']
 
-from base.models.person_merge_proposal import PersonMergeProposal
-from osis_common.utils.models import get_object_or_none
-
 
 class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
     permission_required = 'admission.view_admission_person'

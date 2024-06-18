@@ -40,5 +40,6 @@ from .recuperer_resume_proposition_service import recuperer_resume_proposition
 from .recuperer_titres_acces_selectionnables_proposition_service import (
     recuperer_titres_acces_selectionnables_proposition,
 )
+from .verifier_curriculum_apres_soumission_service import verifier_curriculum_apres_soumission
 from .verifier_curriculum_service import verifier_curriculum
 from .verifier_proposition_service import verifier_proposition
