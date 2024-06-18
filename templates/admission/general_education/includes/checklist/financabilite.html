@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -38,8 +38,14 @@
         {% else %}
           {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='info' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
         {% endif %}
-        {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' open_modal='#financabilite-confirm-modal-GEST_EN_COURS' %}
+        {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' en_cours="expert" class='warning' open_modal='#financabilite-confirm-modal-GEST_EN_COURS-expert' %}
         {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-1' %}
+        {% if original_admission.type_demande == 'ADMISSION' %}
+          {% translate "The 'Dispensation needed' status is reserved to enrolment application." as dispensation_disabled_tooltip %}
+          {% checklist_state_button tab='financabilite' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' tooltip=dispensation_disabled_tooltip disabled=True %}
+        {% else %}
+          {% checklist_state_button tab='financabilite' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' open_modal='#financabilite-confirm-modal-GEST_EN_COURS-derogation' %}
+        {% endif %}
         {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='0' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-0' %}
       {% else %}
         {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
@@ -47,24 +53,110 @@
         {% else %}
           {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='info' %}
         {% endif %}
-        {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
+        {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' en_cours="expert" class='warning' %}
         {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' %}
+        {% if original_admission.type_demande == 'ADMISSION' %}
+          {% translate "The 'Dispensation needed' status is reserved to enrolment application." as dispensation_disabled_tooltip %}
+          {% checklist_state_button tab='financabilite' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' tooltip=dispensation_disabled_tooltip disabled=True %}
+        {% else %}
+          {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-derogation' as change_status_url %}
+          {% checklist_state_button tab='financabilite' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' htmx_post=change_status_url %}
+        {% endif %}
         {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='0' class='danger' htmx_post=change_status_url_blocage %}
       {% endif %}
-      {% checklist_state_button tab='financabilite' label=_("Financeable") icon='check' state='GEST_REUSSITE' class='success' open_modal='#financabilite-approval-modal' %}
+      {% if original_admission.type_demande == 'ADMISSION' or original_admission.financability_dispensation_status != 'ACCORD_DE_DEROGATION_FACULTAIRE' %}
+        {% translate "The 'Dispensation granted' status is reserved to enrolment application whith financability dispensation status set to 'Faculty dispensation granted'." as dispensation_disabled_tooltip %}
+        {% checklist_state_button tab='financabilite' label=_("Dispensation granted") icon='check' state='GEST_REUSSITE' reussite="derogation" class='success' tooltip=dispensation_disabled_tooltip disabled=True %}
+      {% else %}
+        {% checklist_state_button tab='financabilite' label=_("Dispensation granted") icon='check' state='GEST_REUSSITE' reussite="derogation" class='success' %}
+      {% endif %}
+      {% checklist_state_button tab='financabilite' label=_("Financeable") icon='check' state='GEST_REUSSITE' reussite="financable" class='success' open_modal='#financabilite-approval-modal' %}
     </div>
 
     {% bootstrap_form comment_forms.financabilite %}
 
+    {% if original_admission.financability_dispensation_first_notification_on %}
+      {% if original_admission.financability_dispensation_last_notification_on %}
+        <div class="alert alert-warning">{% blocktranslate with date=original_admission.financability_dispensation_first_notification_on|date:'DATETIME_FORMAT' sender=original_admission.financability_dispensation_first_notification_by %}First mail sent to the candidate on {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
+        <div class="alert alert-warning">{% blocktranslate with date=original_admission.financability_dispensation_last_notification_on|date:'DATETIME_FORMAT' sender=original_admission.financability_dispensation_last_notification_by %}Last mail sent to the candidate on {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
+      {% else %}
+        <div class="alert alert-warning">{% blocktranslate with date=original_admission.financability_dispensation_first_notification_on|date:'DATETIME_FORMAT' sender=original_admission.financability_dispensation_first_notification_by %}Mail sent to the candidate on {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
+      {% endif %}
+    {% endif %}
+
+    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' %}
+      {% bootstrap_form financability_dispensation_form %}
+
+      {% bootstrap_form comment_forms.financabilite__derogation %}
+
+      <script>
+        {% has_perm 'admission.checklist_financability_dispensation' as checklist_financability_dispensation_perm %}
+        {% if not checklist_financability_dispensation_perm %}
+            $('input[name=financabilite_derogation-dispensation_status][value=NON_CONCERNE]').prop('disabled', true);
+            $('input[name=financabilite_derogation-dispensation_status][value=CANDIDAT_NOTIFIE]').prop('disabled', true);
+        {% endif %}
+
+        $('input[name=financabilite_derogation-dispensation_status]').on('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            $('#financabilite-derogation-modal-' + $(this).val()).modal('show');
+        });
+      </script>
+    {% elif original_admission.financability_dispensation_status %}
+      <dl>
+        <dt>{% trans 'Financability dispensation needed' %}</dt>
+        <dd>{{ original_admission.financability_dispensation_status|enum_display:"DerogationFinancement" }}</dd>
+
+        {% if comment_forms.financabilite_derogation.fields.comment.initial %}
+        <dt>{% trans 'Comment about financability dispensation' %}</dt>
+        <dd>
+          <div class="form-group">
+            <textarea class="form-control" disabled>{{ comment_forms.financabilite_derogation.fields.comment.initial|default_if_none:"" }}</textarea>
+          </div>
+        </dd>
+        {% endif %}
+      </dl>
+    {% endif %}
+    {% if original_admission.financability_dispensation_status == 'REFUS_DE_DEROGATION_FACULTAIRE' %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">{% trans "Refusal reasons" %}</h4>
+        </div>
+        <div class="panel-body">
+          {% if admission.motifs_refus %}
+          <ul class="refusal-reasons-list">
+            {% for reason in admission.motifs_refus %}
+              {% ifchanged reason.categorie %}
+                {% if not forloop.first %}
+                  </ul></li>
+                {% endif %}
+                <li>{{ reason.categorie }}<ul>
+              {% endifchanged %}
+              <li>{{ reason.motif }}</li>
+              {% if forloop.last %}
+              </ul></li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+          {% else %}
+            -
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
     <div class="panel panel-default">
-      <div class="panel-heading">{% trans "Financing rule" %}</div>
+      <div class="panel-heading">
+        <h4 class="panel-title">{% trans "Financing rule" %}</h4>
+      </div>
       <div class="panel-body {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}bg-danger{% elif current.statut == 'GEST_REUSSITE' %}bg-success{% endif %}">
         {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}
           {% blocktrans trimmed with rule='NON_FINANCABLE'|financability_enum_display established_by=original_admission.financability_rule_established_by %}
             {{ rule }} (Established by {{ established_by }})
           {% endblocktrans %}
           <br>
-        {% elif current.statut == 'GEST_REUSSITE' %}
+        {% elif current.statut == 'GEST_REUSSITE' and current.extra.reussite == 'financable' %}
           {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_rule_established_by %}
             {{ rule }} (Established by {{ established_by }})
           {% endblocktrans %}
@@ -94,11 +186,13 @@
 
     {% if current.extra.to_be_completed == '0' or current.statut == 'GEST_REUSSITE' %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status=initial.statut as change_status_url_initial %}
-      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS' as change_status_url_en_cours %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-expert' as change_status_url_en_cours_expert %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-derogation' as change_status_url_en_cours_derogation %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-1' as change_status_url_blocage_ulterieur %}
 
       {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status=initial.statut target_url=change_status_url_initial %}
-      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_EN_COURS" target_url=change_status_url_en_cours %}
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_EN_COURS-expert" target_url=change_status_url_en_cours_expert %}
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_EN_COURS-derogation" target_url=change_status_url_en_cours_derogation %}
       {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE-1" target_url=change_status_url_blocage_ulterieur %}
       {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE-0" target_url=change_status_url_blocage %}
     {% endif %}

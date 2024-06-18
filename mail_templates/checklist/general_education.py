@@ -326,3 +326,43 @@ templates.register(
         ),
     ],
 )
+
+ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION = 'osis-admission-financability-dispensation-notification'
+templates.register(
+    ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
+    description=_('Email sent to the candidate to inform him that a financability dispensation is needed.'),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='training_campus',
+            description=_('Teaching campus of the training'),
+            example="Louvain-la-Neuve",
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='greetings_end',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Madame",
+        ),
+        Token(
+            name='contact_link',
+            description=_("Contact link"),
+            example="https://osis.uclouvain.be/...",
+        ),
+    ],
+)

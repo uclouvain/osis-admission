@@ -30,9 +30,9 @@ import freezegun
 
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierFinancabiliteRegleCommand,
+    SpecifierDerogationFinancabiliteCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist, \
-    RegleCalculeResultatAvecFinancable
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist, DerogationFinancement
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -44,7 +44,7 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 
 
 @freezegun.freeze_time('2020-11-01')
-class TestSpecifierFinancabiliteRegle(TestCase):
+class TestSpecifierDerogationFinancabilite(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
@@ -70,15 +70,31 @@ class TestSpecifierFinancabiliteRegle(TestCase):
             ),
         )
 
-        self.command = SpecifierFinancabiliteRegleCommand(
+    def test_should_specifier_derogation_non_concerne_etre_ok(self):
+        command = SpecifierDerogationFinancabiliteCommand(
             uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-            financabilite_regle='SECONDE_INSCRIPTION_MEME_CYCLE',
-            etabli_par='uuid-GESTIONNAIRE',
             gestionnaire='0123456789',
+            statut=DerogationFinancement.NON_CONCERNE.name,
         )
 
-    def test_should_specifier_regle_etre_ok(self):
-        proposition_id = self.message_bus.invoke(self.command)
+        proposition_id = self.message_bus.invoke(command)
+
+        proposition = self.proposition_repository.get(proposition_id)
+
+        # Résultat de la commande
+        self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
+
+        # Proposition mise à jour
+        self.assertEqual(proposition.financabilite_derogation_statut, DerogationFinancement.NON_CONCERNE)
+
+    def test_should_specifier_derogation_accord_etre_ok(self):
+        command = SpecifierDerogationFinancabiliteCommand(
+            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+            gestionnaire='0123456789',
+            statut=DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name,
+        )
+
+        proposition_id = self.message_bus.invoke(command)
 
         proposition = self.proposition_repository.get(proposition_id)
 
@@ -87,8 +103,44 @@ class TestSpecifierFinancabiliteRegle(TestCase):
 
         # Proposition mise à jour
         self.assertEqual(
-            proposition.financabilite_regle,
-            RegleCalculeResultatAvecFinancable.SECONDE_INSCRIPTION_MEME_CYCLE
+            proposition.financabilite_derogation_statut, DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE
         )
-        self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
-        self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.GEST_REUSSITE)
+
+    def test_should_specifier_derogation_refus_etre_ok(self):
+        command = SpecifierDerogationFinancabiliteCommand(
+            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+            gestionnaire='0123456789',
+            statut=DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
+            refus_uuids_motifs=[],
+            refus_autres_motifs=['foobar'],
+        )
+
+        proposition_id = self.message_bus.invoke(command)
+
+        proposition = self.proposition_repository.get(proposition_id)
+
+        # Résultat de la commande
+        self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
+
+        # Proposition mise à jour
+        self.assertEqual(
+            proposition.financabilite_derogation_statut, DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE
+        )
+        self.assertEqual(proposition.autres_motifs_refus, ['foobar'])
+
+    def test_should_specifier_derogation_abandon_etre_ok(self):
+        command = SpecifierDerogationFinancabiliteCommand(
+            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+            gestionnaire='0123456789',
+            statut=DerogationFinancement.ABANDON_DU_CANDIDAT.name,
+        )
+
+        proposition_id = self.message_bus.invoke(command)
+
+        proposition = self.proposition_repository.get(proposition_id)
+
+        # Résultat de la commande
+        self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
+
+        # Proposition mise à jour
+        self.assertEqual(proposition.financabilite_derogation_statut, DerogationFinancement.ABANDON_DU_CANDIDAT)

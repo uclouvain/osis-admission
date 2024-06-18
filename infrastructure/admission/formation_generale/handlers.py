@@ -41,6 +41,9 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.notifier_candidat_derogation_financabilite_service import (
+    notifier_candidat_derogation_financabilite,
+)
 from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
     refuser_admission_par_sic,
 )
@@ -50,6 +53,9 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_inscripti
 from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
+)
+from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
+    specifier_derogation_financabilite,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
@@ -706,6 +712,21 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: fusionner_candidat_avec_personne_existante(
             cmd,
             proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
+        )
+    ),
+    SpecifierDerogationFinancabiliteCommand: (
+        lambda msg_bus, cmd: specifier_derogation_financabilite(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    NotifierCandidatDerogationFinancabiliteCommand: (
+        lambda msg_bus, cmd: notifier_candidat_derogation_financabilite(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
 }

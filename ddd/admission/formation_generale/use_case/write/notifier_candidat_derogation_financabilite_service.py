@@ -23,18 +23,19 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import SpecifierBesoinDeDerogationSicCommand
+from admission.ddd.admission.formation_generale.commands import NotifierCandidatDerogationFinancabiliteCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import BesoinDeDerogation
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def specifier_besoin_de_derogation(
-    cmd: 'SpecifierBesoinDeDerogationSicCommand',
+def notifier_candidat_derogation_financabilite(
+    cmd: 'NotifierCandidatDerogationFinancabiliteCommand',
     proposition_repository: 'IPropositionRepository',
+    notification: 'INotification',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -43,7 +44,18 @@ def specifier_besoin_de_derogation(
     # WHEN
 
     # THEN
-    proposition.specifier_besoin_de_derogation(BesoinDeDerogation[cmd.besoin_de_derogation], auteur_modification=cmd.gestionnaire)
+    proposition.notifier_candidat_derogation_financabilite(gestionnaire=cmd.gestionnaire)
     proposition_repository.save(proposition)
+
+    message = notification.notifier_candidat_derogation_financabilite(
+        proposition=proposition,
+        objet_message=cmd.objet_message,
+        corps_message=cmd.corps_message,
+    )
+    historique.historiser_derogation_financabilite(
+        proposition=proposition,
+        message=message,
+        gestionnaire=cmd.gestionnaire,
+    )
 
     return proposition_id

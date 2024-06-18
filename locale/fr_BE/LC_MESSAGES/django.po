@@ -348,11 +348,17 @@ msgid "A translation of your secondary school diploma by a sworn translator"
 msgstr ""
 "Une traduction de votre diplôme d'études secondaires par un traducteur juré"
 
+msgid "ABANDON_DU_CANDIDAT"
+msgstr "Abandon du·de la candidat·e"
+
 msgid "ACCEPTED"
 msgstr "Accepté"
 
 msgid "ACCEPTEE"
 msgstr "Acceptée"
+
+msgid "ACCORD_DE_DEROGATION_FACULTAIRE"
+msgstr "Accord de dérogation facultaire"
 
 msgid "ACCORD_DIRECTION"
 msgstr "Accord dérogation direction"
@@ -1200,6 +1206,9 @@ msgstr "Membre du comité d'accompagnement"
 msgid "CA members"
 msgstr "Membres du comité d'accompagnement"
 
+msgid "CANDIDAT_NOTIFIE"
+msgstr "Candidat·e notifié·e"
+
 msgid "CDD"
 msgstr "CDD"
 
@@ -1479,6 +1488,9 @@ msgstr "Candidat non trouvé."
 msgid "Candidate of the admission"
 msgstr "Candidat de la proposition"
 
+msgid "Candidate withdrawal"
+msgstr "Abandon du candidat"
+
 msgid "Candidate's country of nationality"
 msgstr "Pays de la nationalité du candidat"
 
@@ -1693,6 +1705,9 @@ msgstr "Commentaire"
 msgid "Comment about dispensation"
 msgstr "Commentaire sur la dérogation"
 
+msgid "Comment about financability dispensation"
+msgstr "Commentaire sur la dérogation à la financabilité"
+
 msgid "Comment about jury"
 msgstr "Commentaire sur le jury"
 
@@ -1857,6 +1872,9 @@ msgstr "Coordonnées"
 
 msgid "Contact language"
 msgstr "Langue de contact"
+
+msgid "Contact link"
+msgstr "Lien de contact"
 
 msgid "Contact person for the design of the annual program"
 msgstr "Personne de contact pour la composition du programme annuel"
@@ -2332,13 +2350,13 @@ msgid "Decision of the faculty"
 msgstr "Décision de la faculté"
 
 msgid "Declared assimilated"
-msgstr "Déclaré(e) assimilé(e)"
+msgstr "Déclaré·e assimilé·e"
 
 msgid "Declared assimilated or not"
-msgstr "Déclaré(e) assimilé(e) ou non"
+msgstr "Déclaré·e assimilé·e ou non"
 
 msgid "Declared not assimilated"
-msgstr "Déclaré(e) non assimilé(e)"
+msgstr "Déclaré·e non assimilé·e"
 
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
@@ -2470,6 +2488,12 @@ msgstr "Désactivé"
 
 msgid "Discard fusion"
 msgstr "Rejeter la fusion"
+
+msgid "Dispensation"
+msgstr "Dérogation"
+
+msgid "Dispensation granted"
+msgstr "Dérogation accordée"
 
 msgid "Dispensation needed"
 msgstr "Besoin dérogation"
@@ -2764,6 +2788,13 @@ msgstr "E-mail envoyé au candidat UE+5 lorsque SIC approuve une proposition."
 msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
 msgstr ""
 "E-mail envoyé au candidat H(UE+5) lorsque SIC approuve une proposition."
+
+msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed."
+msgstr ""
+"E-mail envoyé au candidat pour l'informer qu'une dérogation à la "
+"financabilité est nécessaire."
 
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
@@ -3067,6 +3098,9 @@ msgstr "Sur Facebook"
 msgid "Faculty"
 msgstr "Faculté"
 
+msgid "Faculty comment about financability dispensation"
+msgstr "Commentaire facultaire sur la dérogation à la finançabilité"
+
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
 
@@ -3081,6 +3115,15 @@ msgstr "Commentaire de la Faculté pour le SIC :"
 
 msgid "Faculty decision:"
 msgstr "Décision facultaire :"
+
+msgid "Faculty dispensation approval"
+msgstr "Accord de dérogation facultaire"
+
+msgid "Faculty dispensation notification"
+msgstr "Notification de dérogation facultaire"
+
+msgid "Faculty dispensation refusal"
+msgstr "Refus de dérogation facultaire"
 
 msgid "Faculty process"
 msgstr "Traitement facultaire"
@@ -3121,6 +3164,27 @@ msgstr "Règle calculé de financabilité"
 msgid "Financability computed rule on"
 msgstr "Règle calculé de financabilité le"
 
+msgid "Financability dispensation"
+msgstr "Dérogation à la financabilité"
+
+msgid "Financability dispensation first notification by"
+msgstr "Première notification à la dérogation à la financabilité par"
+
+msgid "Financability dispensation first notification on"
+msgstr "Première notification à la dérogation à la financabilité le"
+
+msgid "Financability dispensation last notification by"
+msgstr "Dernière notification à la dérogation à la financabilité par"
+
+msgid "Financability dispensation last notification on"
+msgstr "Dernière notification à la dérogation à la financabilité le"
+
+msgid "Financability dispensation needed"
+msgstr "Besoin de dérogation à la financabilité"
+
+msgid "Financability dispensation status"
+msgstr "Statut de dérogation à la financabilité"
+
 msgid "Financability rule"
 msgstr "Règle de financabilité"
 
@@ -3148,6 +3212,10 @@ msgstr "Financable"
 
 msgid "Financing rule"
 msgstr "Règle de financement"
+
+#, python-format
+msgid "First mail sent to the candidate on %(date)s by %(sender)s."
+msgstr "Premier mail envoyé au/à la candidat·e le %(date)s par %(sender)s."
 
 msgid "First name"
 msgstr "Prénom"
@@ -3240,6 +3308,9 @@ msgstr ""
 "boutons radios (\"BOUTONS_RADIOS\") en utilisant la propriété "
 "\"TYPE_SELECTION\".<br>Exemple complet : <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
+
+msgid "For the attention of"
+msgstr "A l'attention de"
 
 #, python-format
 msgid ""
@@ -3772,7 +3843,7 @@ msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
 
 msgid "INITIAL_NON_CONCERNE"
-msgstr "Initial non concerné(e)"
+msgstr "Initial non concerné·e"
 
 msgid "INSCRIPTION"
 msgstr "Inscription"
@@ -3982,7 +4053,7 @@ msgid "Include or exclude the checklist filters"
 msgstr "Inclure ou exclure les filtres de la checklist"
 
 msgid "Incomplete field"
-msgstr "Non renseigné(e)"
+msgstr "Non renseigné·e"
 
 msgid ""
 "Information about a potential cotutelle are to be inputted in the \"Doctoral "
@@ -4184,6 +4255,10 @@ msgstr "Dernière email envoyé le"
 
 msgid "Last hour views:"
 msgstr "Vues de la dernière heure :"
+
+#, python-format
+msgid "Last mail sent to the candidate on %(date)s by %(sender)s."
+msgstr "Dernier mail envoyé au/à la candidat·e le %(date)s par %(sender)s."
 
 msgid "Last modif."
 msgstr "Dernière modif."
@@ -4480,6 +4555,10 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat suite à l'approbation ou au refus d'un membre du "
 "groupe de supervision"
+
+#, python-format
+msgid "Mail sent to the candidate on %(date)s by %(sender)s."
+msgstr "Mail envoyé au/à la candidat·e le %(date)s par %(sender)s."
 
 msgid ""
 "Mail sent to the candidate to confirm supervision group signature requests "
@@ -4929,7 +5008,7 @@ msgid "NOMA"
 msgstr "NOMA"
 
 msgid "NON_CONCERNE"
-msgstr "Non concerné(e)"
+msgstr "Non concerné·e"
 
 msgid "NON_FINANCABLE"
 msgstr "Non finançable"
@@ -5565,11 +5644,20 @@ msgstr "Veuillez définir le régime linguistique ou précisez un autre régime.
 msgid "Please complete this field: {}"
 msgstr "Merci de spécifier une valeur pour le champ suivant : {}"
 
+msgid "Please confirm the change to \"Not concerned\"."
+msgstr "Veuillez confirmer le passage à 'Non-concerné·e'."
+
 msgid "Please confirm the change to this new state."
 msgstr "Veuillez confirmer le passage à ce nouvel état."
 
 msgid "Please confirm the change to this new status."
 msgstr "Merci de confirmer le changement vers ce nouveau statut."
+
+msgid "Please confirm the faculty dispensation approval."
+msgstr "Veuillez confirmer l'accord de dérogation facultaire."
+
+msgid "Please confirm the withdrawal of the candidate."
+msgstr "Veuillez confirmer l'abandon du·de la candidat·e."
 
 msgid "Please enter your work email address"
 msgstr "Veuillez encoder votre adresse e-mail-professionnelle"
@@ -5987,6 +6075,9 @@ msgstr "Refus BAC HUE académique"
 
 msgid "REFUS_COMPLEMENT_TARDIF"
 msgstr "Refus complément tardif"
+
+msgid "REFUS_DE_DEROGATION_FACULTAIRE"
+msgstr "Refus de dérogation facultaire"
 
 msgid "REFUS_DIRECTION"
 msgstr "Refus dérogation direction"
@@ -6666,6 +6757,9 @@ msgstr "Autorisation d'inscription signée"
 msgid "Sir"
 msgstr "Monsieur"
 
+msgid "Sir, Madam"
+msgstr "Madame, Monsieur"
+
 msgid "Solidarity student"
 msgstr "Étudiant solidaire"
 
@@ -6757,7 +6851,7 @@ msgid "Specific questions"
 msgstr "Questions spécifiques"
 
 msgid "Specified"
-msgstr "Renseigné(e)"
+msgstr "Renseigné·e"
 
 msgid "Specify if other"
 msgstr "Si autre, précisez"
@@ -6976,6 +7070,19 @@ msgid ""
 msgstr ""
 "La formation doctorale doit être complétée avant de soumettre les modalités "
 "de défense et la proposition de jury"
+
+msgid ""
+"The 'Dispensation granted' status is reserved to enrolment application whith "
+"financability dispensation status set to 'Faculty dispensation granted'."
+msgstr ""
+"Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
+"inscription dont la situation de dérogation à la finançabilité est 'accord "
+"de dérogation facultaire'."
+
+msgid "The 'Dispensation needed' status is reserved to enrolment application."
+msgstr ""
+"Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
+"inscription."
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
@@ -8012,7 +8119,7 @@ msgstr "Numéro unique d'entreprise"
 
 msgctxt "document"
 msgid "Unknown"
-msgstr "Inconnu(e)"
+msgstr "Inconnu·e"
 
 msgid "Unknown PDF type."
 msgstr "Type de PDF inconnu."
@@ -8394,7 +8501,7 @@ msgid "Yes, only in Tournai (E12)"
 msgstr "Oui, sur Tournai uniquement (12 EUR)"
 
 msgid "Yes,No,Incomplete field"
-msgstr "Oui,Non,Non renseigné(e)"
+msgstr "Oui,Non,Non renseigné·e"
 
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
@@ -8735,6 +8842,11 @@ msgstr "Votre note a bien été ajoutée."
 
 msgid "Your participation in the event"
 msgstr "Votre participation à l'événement"
+
+msgid ""
+"Your past experiences does not ensure the expected garanties for success"
+msgstr ""
+"Votre parcours antérieur n'offre pas les garanties attendues de réussite."
 
 msgid "Your previous NOMA (matriculation number)"
 msgstr "Votre ancien NOMA (numéro de matricule)"
