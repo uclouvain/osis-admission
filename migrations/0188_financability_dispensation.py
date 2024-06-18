@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('base', '0681_auto_20240422_1702'),
-        ('admission', '0184_alter_categorizedfreedocument_checklist_tab'),
+        ('admission', '0187_mail_template_inscription_decision_sic'),
     ]
 
     operations = [
