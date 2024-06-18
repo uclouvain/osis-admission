@@ -168,6 +168,29 @@ msgid ""
 "to delete the custom mail template? This cannot be undone.</p>"
 msgstr ""
 
+#, python-brace-format
+msgid "<p>Contact person for setting up your annual programme: {contact}</p>"
+msgstr ""
+
+#, python-brace-format
+msgid "<p>Course duration: 1 year</p>"
+msgid_plural "<p>Course duration: {years} years</p>"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-brace-format
+msgid ""
+"<p>Depending on your previous experience, your faculty will supplement your "
+"annual programme with additional classes (for more information: <a "
+"href=\"{link}\">{link}</a>).</p>"
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"<p>We also wish to inform you that the additional documents below should be "
+"sent as soon as possible to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
+msgstr ""
+
 msgid ""
 "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
 "strong>"
@@ -954,9 +977,6 @@ msgid "Authorization"
 msgstr ""
 
 msgid "Authorization to validate"
-msgstr ""
-
-msgid "Authorize"
 msgstr ""
 
 msgid "Authors"
@@ -2296,9 +2316,6 @@ msgstr ""
 msgid "Do you have an international scholarship?"
 msgstr ""
 
-msgid "Do you want to authorize this inscription type admission now?"
-msgstr ""
-
 msgid "Do you want to continue?"
 msgstr ""
 
@@ -2558,6 +2575,9 @@ msgid ""
 msgstr ""
 
 msgid "Email sent to the candidate when IUFC validate the application."
+msgstr ""
+
+msgid "Email sent to the candidate when SIC approves an inscription."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
@@ -4557,6 +4577,9 @@ msgstr ""
 msgid "Noma"
 msgstr ""
 
+msgid "Noma of the candidate"
+msgstr ""
+
 msgid "Non doctor reason"
 msgstr ""
 
@@ -4875,6 +4898,21 @@ msgid "Page size"
 msgstr ""
 
 msgid "Paid"
+msgstr ""
+
+msgid "Paragraph including the person to contact"
+msgstr ""
+
+msgid "Paragraph including the planned years"
+msgstr ""
+
+msgid "Paragraph including the prerequisite courses"
+msgstr ""
+
+msgid "Paragraph including the prerequisite courses detail"
+msgstr ""
+
+msgid "Paragraph including the required documents"
 msgstr ""
 
 msgid "Parcours"

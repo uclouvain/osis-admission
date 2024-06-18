@@ -212,6 +212,38 @@ msgstr ""
 "vous sûr de vouloir supprimer ce template d'email personnalisé ? Cette "
 "action est irréversible.</p>"
 
+#, python-brace-format
+msgid "<p>Contact person for setting up your annual programme: {contact}</p>"
+msgstr ""
+"<p>Personne de contact pour la composition du programme annuel : {contact}</"
+"p>"
+
+#, python-brace-format
+msgid "<p>Course duration: 1 year</p>"
+msgid_plural "<p>Course duration: {years} years</p>"
+msgstr[0] "<p>Durée des études : 1 an.</p>"
+msgstr[1] "<p>Durée des études : {years} ans.</p>"
+
+#, python-brace-format
+msgid ""
+"<p>Depending on your previous experience, your faculty will supplement your "
+"annual programme with additional classes (for more information: <a "
+"href=\"{link}\">{link}</a>).</p>"
+msgstr ""
+"<p>Au vu de votre parcours antérieur, votre faculté complétera votre "
+"programme annuel par des compléments de formation (enseignements "
+"supplémentaires) (pour plus d’informations : <a href=\"{link}\">{link}</a>)."
+"</p>"
+
+#, python-brace-format
+msgid ""
+"<p>We also wish to inform you that the additional documents below should be "
+"sent as soon as possible to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
+msgstr ""
+"<p>Par ailleurs, nous profitons de ce courrier pour vous signaler que les "
+"documents complémentaires ci-dessous sont à nous fournir dès que possible à "
+"l’adresse <a href=\"mailto:{mail}\">{mail}</a> :</p>"
+
 msgid ""
 "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
 "strong>"
@@ -1057,9 +1089,6 @@ msgstr "Autorisation"
 
 msgid "Authorization to validate"
 msgstr "Autorisation à valider"
-
-msgid "Authorize"
-msgstr "Autoriser"
 
 msgid "Authors"
 msgstr "Auteurs et autrices"
@@ -2489,9 +2518,6 @@ msgstr "Avez-vous obtenu un diplôme de fin d'études secondaires ?"
 msgid "Do you have an international scholarship?"
 msgstr "Bénéficiez-vous d'une bourse internationale ?"
 
-msgid "Do you want to authorize this inscription type admission now?"
-msgstr "Voulez-vous autoriser cette demande de type inscription maintenant ?"
-
 msgid "Do you want to continue?"
 msgstr "Souhaitez-vous continuer ?"
 
@@ -2769,6 +2795,9 @@ msgstr ""
 
 msgid "Email sent to the candidate when IUFC validate the application."
 msgstr "E-mail envoyé au candidat lorsque l'IUFC valide une proposition."
+
+msgid "Email sent to the candidate when SIC approves an inscription."
+msgstr "E-mail envoyé au candidat lorsque SIC approuve une inscription."
 
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
@@ -5038,6 +5067,9 @@ msgstr "Non."
 msgid "Noma"
 msgstr "Noma"
 
+msgid "Noma of the candidate"
+msgstr "Noma du candidat"
+
 msgid "Non doctor reason"
 msgstr "Justification"
 
@@ -5372,6 +5404,21 @@ msgstr "Taille de la page"
 
 msgid "Paid"
 msgstr "Payé"
+
+msgid "Paragraph including the person to contact"
+msgstr "Paragraphe incluant la personne à contacter"
+
+msgid "Paragraph including the planned years"
+msgstr "Paragraphe incluant les années planifiées"
+
+msgid "Paragraph including the prerequisite courses"
+msgstr "Paragraphe à propos des compléments"
+
+msgid "Paragraph including the prerequisite courses detail"
+msgstr "Paragraphe à propos des compléments en détail"
+
+msgid "Paragraph including the required documents"
+msgstr "Paragraphe incluant les documents requis."
 
 msgid "Parcours"
 msgstr "Parcours"

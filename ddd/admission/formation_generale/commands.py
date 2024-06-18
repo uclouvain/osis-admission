@@ -623,6 +623,8 @@ class ApprouverAdmissionParSicCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverInscriptionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
+    objet_message: str
+    corps_message: str
     auteur: str
 
 

@@ -23,9 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import itertools
+
 import attr
 import datetime
-from typing import Dict, Set, Optional, List
+from typing import Dict, Set, Optional, List, Union
 
 from django.conf import settings
 from django.db.models import QuerySet
@@ -38,7 +40,7 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ngettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -165,7 +167,8 @@ from admission.forms.admission.checklist import (
     PastExperiencesAdmissionAccessTitleForm,
     SinglePastExperienceAuthenticationForm,
 )
-from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
+from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
+from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL, INSCRIPTION_EMAIL_SIC_APPROVAL
 from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_SIC_REFUSAL,
     ADMISSION_EMAIL_SIC_APPROVAL,
@@ -183,6 +186,7 @@ from admission.utils import (
     get_access_titles_names,
     get_salutation_prefix,
     format_academic_year,
+    get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
@@ -191,8 +195,9 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.models.student import Student
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -1096,10 +1101,144 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'training_acronym': self.proposition.formation.sigle,
         }
 
-        if self.admission.candidate.country_of_citizenship.european_union:
-            template_name = ADMISSION_EMAIL_SIC_APPROVAL_EU
+        if self.proposition.type == TypeDemande.ADMISSION.name:
+            if self.admission.candidate.country_of_citizenship.european_union:
+                template_name = ADMISSION_EMAIL_SIC_APPROVAL_EU
+            else:
+                template_name = ADMISSION_EMAIL_SIC_APPROVAL
         else:
-            template_name = ADMISSION_EMAIL_SIC_APPROVAL
+            with translation.override(self.admission.candidate.language):
+                contact_person_paragraph = ''
+                nom = self.proposition.nom_personne_contact_programme_annuel_annuel
+                email = self.proposition.email_personne_contact_programme_annuel_annuel
+                if nom or email:
+                    contact = ''
+                    if nom:
+                        contact = nom
+                    if nom and email:
+                        contact += ', '
+                    if email:
+                        contact += f'<a href="{email}">{email}</a>'
+
+                    contact_person_paragraph = _(
+                        "<p>Contact person for setting up your annual programme: {contact}</p>"
+                    ).format(contact=contact)
+
+                planned_years_paragraph = ''
+                years = self.proposition.nombre_annees_prevoir_programme
+                if years:
+                    planned_years_paragraph = ngettext(
+                        "<p>Course duration: 1 year</p>",
+                        "<p>Course duration: {years} years</p>",
+                        years,
+                    ).format(years=years)
+
+                prerequisite_courses_paragraph = ''
+                if self.proposition.avec_complements_formation:
+                    link = get_training_url(
+                        training_type=self.admission.training.education_group_type.name,
+                        training_acronym=self.admission.training.acronym,
+                        partial_training_acronym=self.admission.training.partial_acronym,
+                        suffix='cond_adm',
+                    )
+                    prerequisite_courses_paragraph = _(
+                        "<p>Depending on your previous experience, your faculty will supplement your annual programme "
+                        "with additional classes (for more information: <a href=\"{link}\">{link}</a>).</p>"
+                    ).format(link=link)
+
+                prerequisite_courses_detail_paragraph = ''
+                if self.proposition.complements_formation:
+                    prerequisite_courses_detail_paragraph = "<ul>"
+                    for complement_formation in self.proposition.complements_formation:
+                        prerequisite_courses_detail_paragraph += f"<li>{complement_formation.code} "
+                        if candidate.language == settings.LANGUAGE_CODE_EN and complement_formation.full_title_en:
+                            prerequisite_courses_detail_paragraph += complement_formation.full_title_en
+                        else:
+                            prerequisite_courses_detail_paragraph += complement_formation.full_title
+                        if complement_formation.credits:
+                            prerequisite_courses_detail_paragraph += f"({complement_formation.full_title} ECTS)"
+                        prerequisite_courses_detail_paragraph += '</li>'
+                    prerequisite_courses_detail_paragraph += "</ul>"
+                if self.proposition.commentaire_complements_formation:
+                    prerequisite_courses_detail_paragraph += self.proposition.commentaire_complements_formation
+
+                # Documents
+                documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
+                    RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                        uuid_proposition=self.admission_uuid,
+                        avec_document_libres=True,
+                    )
+                )
+
+                experiences_curriculum_par_uuid: Dict[
+                    str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]
+                ] = {
+                    str(experience.uuid): experience
+                    for experience in itertools.chain(
+                        documents_resume.resume.curriculum.experiences_non_academiques,
+                        documents_resume.resume.curriculum.experiences_academiques,
+                    )
+                }
+
+                documents = documents_resume.emplacements_documents
+                documents_names = []
+
+                for document in documents:
+                    if document.est_a_reclamer:
+                        document_identifier = document.identifiant.split('.')
+
+                        if (
+                            document_identifier[0] == OngletsDemande.CURRICULUM.name
+                            and (document_identifier[-1] in CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM)
+                            and document_identifier[1] in experiences_curriculum_par_uuid
+                        ):
+                            # For the curriculum experiences, we would like to get the name of the experience
+                            documents_names.append(
+                                '{document_label} : {cv_xp_label}. {document_communication}'.format(
+                                    document_label=document.libelle_langue_candidat,
+                                    cv_xp_label=experiences_curriculum_par_uuid[
+                                        document_identifier[1]
+                                    ].titre_pdf_decision_sic,
+                                    document_communication=document.justification_gestionnaire,
+                                )
+                            )
+
+                        else:
+                            documents_names.append(
+                                '{document_label}. {document_communication}'.format(
+                                    document_label=document.libelle_langue_candidat,
+                                    document_communication=document.justification_gestionnaire,
+                                )
+                            )
+
+                required_documents_paragraph = ''
+                if documents_names:
+                    required_documents_paragraph = _(
+                        "<p>We also wish to inform you that the additional documents below should be sent as soon as possible"
+                        " to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
+                    ).format(mail=tokens['admission_email'])
+                    required_documents_paragraph += '<ul>'
+                    for document_name in documents_names:
+                        required_documents_paragraph += f'<li>{document_name}</li>'
+                    required_documents_paragraph += '</ul>'
+
+                noma = ''
+                student = Student.objects.filter(person=self.admission.candidate).values('registration_id').first()
+                if student is not None:
+                    noma = student['registration_id']
+
+            tokens.update(
+                {
+                    'noma': noma,
+                    'contact_person_paragraph': contact_person_paragraph,
+                    'planned_years_paragraph': planned_years_paragraph,
+                    'prerequisite_courses_paragraph': prerequisite_courses_paragraph,
+                    'prerequisite_courses_detail_paragraph': prerequisite_courses_detail_paragraph,
+                    'required_documents_paragraph': required_documents_paragraph,
+                }
+            )
+
+            template_name = INSCRIPTION_EMAIL_SIC_APPROVAL
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -1113,19 +1252,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             subject = ''
             body = ''
 
-        is_inscription = self.admission.type_demande == TypeDemande.INSCRIPTION.name
         return SicDecisionFinalApprovalForm(
-            data=self.request.POST
-            if self.request.method == 'POST'
-            and is_inscription
-            or ('sic-decision-approval-final-subject' in self.request.POST)
-            else None,
+            data=self.request.POST if 'sic-decision-approval-final-subject' in self.request.POST else None,
             prefix='sic-decision-approval-final',
             initial={
                 'subject': subject,
                 'body': body,
             },
-            is_inscription=is_inscription,
         )
 
 
@@ -1347,6 +1480,8 @@ class SicApprovalFinalDecisionView(
                 message_bus_instance.invoke(
                     ApprouverInscriptionParSicCommand(
                         uuid_proposition=self.admission_uuid,
+                        objet_message=form.cleaned_data['subject'],
+                        corps_message=form.cleaned_data['body'],
                         auteur=self.request.user.person.global_id,
                     )
                 )
