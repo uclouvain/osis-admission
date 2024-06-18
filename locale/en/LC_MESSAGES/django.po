@@ -6913,6 +6913,11 @@ msgstr ""
 msgid "The status has been changed to %(status)s."
 msgstr ""
 
+msgid ""
+"The status of the checklist for the financability must be \"Not concerned\" "
+"or \"Financable\" or \"Dispensation granted\"."
+msgstr ""
+
 #, python-brace-format
 msgid ""
 "The status of the request is currently \"{current_status}\". Only the "
