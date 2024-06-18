@@ -4673,6 +4673,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - count
+                - results
                 properties:
                   count:
                     type: integer
@@ -4702,7 +4705,7 @@ paths:
       - autocomplete
   /autocomplete/person:
     get:
-      operationId: listPersons
+      operationId: listPeople
       description: Autocomplete person
       parameters:
       - name: limit
@@ -4735,6 +4738,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - count
+                - results
                 properties:
                   count:
                     type: integer
@@ -4803,6 +4809,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - count
+                - results
                 properties:
                   count:
                     type: integer
@@ -4870,6 +4879,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - count
+                - results
                 properties:
                   count:
                     type: integer
