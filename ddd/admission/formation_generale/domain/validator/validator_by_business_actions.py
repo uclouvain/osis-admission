@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import List, Optional, Dict
 
 import attr
@@ -139,6 +140,32 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 equivalence=self.equivalence_diplome,
                 type_formation=self.type_formation,
                 experiences_academiques=self.experiences_academiques,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    annee_soumission: int
+    date_soumission: datetime.date
+    annee_diplome_etudes_secondaires: Optional[int]
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
+    experiences_academiques: List[ExperienceAcademiqueDTO]
+    experiences_academiques_incompletes: Dict[str, str]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldAnneesCVRequisesCompletees(
+                annee_courante=self.annee_soumission,
+                experiences_academiques=self.experiences_academiques,
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+                annee_derniere_inscription_ucl=None,
+                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                experiences_non_academiques=self.experiences_non_academiques,
+                date_reference=self.date_soumission,
             ),
         ]
 

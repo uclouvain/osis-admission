@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
+    date_reference: Optional[datetime.date] = None
 
     def validate(self, *args, **kwargs):
         annee_minimale = IProfilCandidatTranslator.get_annee_minimale_a_completer_cv(
@@ -63,7 +64,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
             ]
         )
 
-        dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum()
+        dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum(self.date_reference)
 
         mois_a_valoriser = self._recuperer_tous_les_mois_restant_a_valoriser(
             annee_minimale=annee_minimale,

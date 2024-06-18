@@ -717,4 +717,12 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
         )
     ),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            academic_year_repository=_academic_year_repository,
+        )
+    ),
 }

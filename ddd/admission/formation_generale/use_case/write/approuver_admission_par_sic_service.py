@@ -93,7 +93,12 @@ def approuver_admission_par_sic(
     )
 
     # WHEN
-    proposition.approuver_par_sic(auteur_modification=cmd.auteur, documents_dto=documents_dto)
+    proposition.approuver_par_sic(
+        auteur_modification=cmd.auteur,
+        documents_dto=documents_dto,
+        curriculum_dto=resume_dto.curriculum,
+        academic_year_repository=academic_year_repository,
+    )
 
     # THEN
     pdf_generation.generer_attestation_accord_sic(
@@ -119,13 +124,10 @@ def approuver_admission_par_sic(
 
     noma = NomaGenerateurService.generer_noma(
         compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-        annee=proposition.formation_id.annee
+        annee=proposition.formation_id.annee,
     )
 
-    digit.submit_person_ticket(
-        global_id=proposition.matricule_candidat,
-        noma=noma
-    )
+    digit.submit_person_ticket(global_id=proposition.matricule_candidat, noma=noma)
 
     message = notification.accepter_proposition_par_sic(
         proposition=proposition,

@@ -298,3 +298,11 @@ class EtatChecklistFinancabiliteNonValidePourApprouverDemande(BusinessException)
             '"Not concerned" or "Financable" or "Dispensation granted".'
         )
         super().__init__(message, **kwargs)
+
+
+class CurriculumNonCompletePourAcceptationException(BusinessException):
+    status_code = "FORMATION-GENERALE-33"
+
+    def __init__(self, **kwargs):
+        message = _("The 'Approved' status requires the last 5 years to be justified in the previous experience.")
+        super().__init__(message, **kwargs)

@@ -87,7 +87,12 @@ def approuver_inscription_par_sic(
     )
 
     # WHEN
-    proposition.approuver_par_sic(auteur_modification=cmd.auteur, documents_dto=documents_dto)
+    proposition.approuver_par_sic(
+        auteur_modification=cmd.auteur,
+        documents_dto=documents_dto,
+        curriculum_dto=resume_dto.curriculum,
+        academic_year_repository=academic_year_repository,
+    )
 
     # THEN
     proposition_repository.save(entity=proposition)

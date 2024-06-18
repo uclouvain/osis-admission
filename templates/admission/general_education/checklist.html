@@ -318,6 +318,20 @@
           {% bootstrap_form comment_forms.parcours_anterieur %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
           {% panel _("Previous experience") %}
+            {% if view.missing_curriculum_periods %}
+              <div class="alert alert-warning" role="alert">
+                {% blocktranslate trimmed count nb_messages=view.missing_curriculum_periods|length %}
+                  The following period must be justified in the curriculum:
+                  {% plural %}
+                  The following periods must be justified in the curriculum:
+                {% endblocktranslate %}
+                <ul>
+                  {% for missing_curriculum_period in view.missing_curriculum_periods %}
+                    <li>{{ missing_curriculum_period }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
             {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' show_actions=can_update_curriculum %}
           {% endpanel %}
           <div class="info-part">

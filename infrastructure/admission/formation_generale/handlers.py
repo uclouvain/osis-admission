@@ -740,4 +740,12 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
         )
     ),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+        )
+    ),
 }

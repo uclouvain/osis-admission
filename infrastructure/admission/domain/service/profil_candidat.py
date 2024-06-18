@@ -542,8 +542,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_secondary_studies_valuation_annotations(cls):
-        be_institute_address = ''
-
         return dict(
             belgian_highschool_diploma_institute_address=Concat(
                 F('belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress__street'),
