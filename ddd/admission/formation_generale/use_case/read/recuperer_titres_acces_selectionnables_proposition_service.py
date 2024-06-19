@@ -29,14 +29,17 @@ from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.formation_generale.commands import RecupererTitresAccesSelectionnablesPropositionQuery
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def recuperer_titres_acces_selectionnables_proposition(
     cmd: 'RecupererTitresAccesSelectionnablesPropositionQuery',
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> Dict[str, TitreAccesSelectionnableDTO]:
     proposition_identity = PropositionIdentity(uuid=cmd.uuid_proposition)
     return titre_acces_selectionnable_repository.search_dto_by_proposition(
         proposition_identity=proposition_identity,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=cmd.seulement_selectionnes,
     )

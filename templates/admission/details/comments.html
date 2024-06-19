@@ -31,14 +31,14 @@
   <div class="comment-viewer"
        data-url="{% url base_namespace|add:':sic-comments' view.kwargs.uuid %}"
        data-tags="{{ COMMENT_TAG_SIC }}"
-       data-header-title="{% trans "Global SIC comments" %}"
+       data-header-title="{% if view.is_continuing %}{% trans "Global IUFC comments" %}{% else %}{% trans "Global SIC comments" %}{% endif %}"
        data-rich-text-config="{{ ckeditor_config }}"
        data-panel-class="panel panel-primary"
   ></div>
   <div class="comment-viewer"
      data-url="{% url base_namespace|add:':fac-comments' view.kwargs.uuid %}"
      data-tags="{{ COMMENT_TAG_FAC }}"
-     data-header-title="{% trans "Global FAC/CDD comments" %}"
+     data-header-title="{% trans "Global FAC comments" %}"
      data-rich-text-config="{{ ckeditor_config }}"
      data-panel-class="panel panel-primary"
   ></div>
@@ -60,6 +60,24 @@
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }},FAC"
                  data-header-title="{% translate 'Faculty comment for the SIC' %}"
+            ></div>
+          </div>
+        </div>
+      {% elif checklist_tag == 'financabilite' %}
+        <div class="comment-thread panel panel-panel panel-info">
+          <div class="panel-heading clearfix">
+            {{ checklist_title }}
+          </div>
+          <div class="panel-body">
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }}"
+                 data-header-title="{% translate 'Global' %}"
+            ></div>
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }},derogation"
+                 data-header-title="{% translate 'Financability dispensation' %}"
             ></div>
           </div>
         </div>
@@ -87,6 +105,24 @@
                    data-header-title="{{ experience_name }} > {% translate 'Comment about the authentication' %}"
               ></div>
             {% endfor %}
+          </div>
+        </div>
+      {% elif checklist_tag == 'decision_sic' %}
+        <div class="comment-thread panel panel-panel panel-info">
+          <div class="panel-heading clearfix">
+            {{ checklist_title }}
+          </div>
+          <div class="panel-body">
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }}"
+                 data-header-title="{% translate 'Global' %}"
+            ></div>
+            <div class="comment-viewer"
+                 data-url="{{ other_comments_url }}"
+                 data-tags="{{ checklist_tag }},derogation"
+                 data-header-title="{% translate 'Dispensation' %}"
+            ></div>
           </div>
         </div>
       {% else %}

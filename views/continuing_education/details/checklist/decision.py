@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.conf import settings
 from django.views.generic import TemplateView, FormView
 from osis_history.utilities import add_history_entry
 from osis_mail_template.utils import transform_html_to_text
@@ -38,10 +38,12 @@ from admission.ddd.admission.formation_continue.commands import (
     ValiderPropositionCommand,
     ApprouverParFacCommand,
     CloturerPropositionCommand,
+    AnnulerReclamationDocumentsAuCandidatCommand,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixStatutChecklist,
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT,
 )
 from admission.forms.admission.continuing_education.checklist import (
     DecisionFacApprovalForm,
@@ -52,6 +54,7 @@ from admission.forms.admission.continuing_education.checklist import (
     CloseForm,
     SendToFacForm,
 )
+from admission.infrastructure.utils import get_message_to_historize
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.continuing_education.details.checklist.base import CheckListDefaultContextMixin
@@ -238,6 +241,13 @@ class CloseFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPermis
 
     def form_valid(self, form):
         try:
+            if self.admission.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT:
+                message_bus_instance.invoke(
+                    AnnulerReclamationDocumentsAuCandidatCommand(
+                        uuid_proposition=self.admission_uuid,
+                        auteur=self.request.user.person.global_id,
+                    )
+                )
             message_bus_instance.invoke(
                 CloturerPropositionCommand(
                     uuid_proposition=self.admission_uuid,
@@ -275,8 +285,9 @@ class DecisionChangeStatusToBeProcessedView(CheckListDefaultContextMixin, HtmxPe
 
         add_history_entry(
             admission.uuid,
-            'Le statut de la proposition a évolué au cours du processus de décision.',
-            'The status of the proposal has changed during the decision process.',
+            'Le statut de la proposition a évolué au cours du processus de décision : Demande confirmée (À traiter).',
+            'The status of the proposal has changed during the decision process: Application confirmed '
+            '(To be processed).',
             '{first_name} {last_name}'.format(
                 first_name=self.request.user.person.first_name,
                 last_name=self.request.user.person.last_name,
@@ -309,8 +320,10 @@ class DecisionChangeStatusTakenInChargeView(CheckListDefaultContextMixin, HtmxPe
 
         add_history_entry(
             admission.uuid,
-            'Le statut de la proposition a évolué au cours du processus de décision.',
-            'The status of the proposal has changed during the decision process.',
+            'Le statut de la proposition a évolué au cours du processus de décision : Demande confirmée '
+            '(Pris en charge).',
+            'The status of the proposal has changed during the decision process: Application confirmed '
+            '(Taken in charge).',
             '{first_name} {last_name}'.format(
                 first_name=self.request.user.person.first_name,
                 last_name=self.request.user.person.last_name,
@@ -349,4 +362,15 @@ class SendToFacFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPe
 
             email_message = EmailNotificationHandler.build(email_notification)
             EmailNotificationHandler.create(email_message, person=manager.person)
+
+            message_a_historiser = get_message_to_historize(email_message)
+
+            add_history_entry(
+                self.admission_uuid,
+                message_a_historiser[settings.LANGUAGE_CODE_FR],
+                message_a_historiser[settings.LANGUAGE_CODE_EN],
+                f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
+                tags=['proposition', 'email-to-fac', 'message'],
+            )
+
         return super().form_valid(form)

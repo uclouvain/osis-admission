@@ -23,10 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
 import datetime
-from typing import Dict, Set, Optional, List
+import itertools
+from typing import Dict, Set, Optional, List, Union
 
+import attr
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
@@ -38,17 +39,10 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
-
-from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
-)
-from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -57,9 +51,15 @@ from osis_mail_template.models import MailTemplate
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.commands import ListerToutesDemandesQuery, GetStatutTicketPersonneQuery, \
-    RechercherParcoursAnterieurQuery
+from admission.ddd.admission.commands import (
+    ListerToutesDemandesQuery,
+    GetStatutTicketPersonneQuery,
+    RechercherParcoursAnterieurQuery,
+)
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
     ResumeCandidatDTO,
@@ -70,18 +70,16 @@ from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSe
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
-    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     StatutReclamationEmplacementDocument,
-    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     DocumentsEtudesSecondaires,
 )
 from admission.ddd.admission.enums.statut import (
-    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
+    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
@@ -118,6 +116,8 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererResumePropositionQuery,
     ApprouverInscriptionTardiveParFaculteCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
+    SpecifierDerogationFinancabiliteCommand,
+    NotifierCandidatDerogationFinancabiliteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -127,9 +127,14 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    OngletsChecklist,
     TypeDeRefus,
+    OngletsChecklist,
+    DerogationFinancement,
 )
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
@@ -144,6 +149,9 @@ from admission.forms.admission.checklist import (
     FinancabiliteApprovalForm,
     SicDecisionApprovalDocumentsForm,
     FreeAdditionalApprovalConditionForm,
+    FinancabiliteDispensationForm,
+    FinancabilityDispensationRefusalForm,
+    FinancabiliteNotificationForm,
 )
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -165,7 +173,12 @@ from admission.forms.admission.checklist import (
     PastExperiencesAdmissionAccessTitleForm,
     SinglePastExperienceAuthenticationForm,
 )
-from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
+from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
+from admission.mail_templates import (
+    ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
+    ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
+    INSCRIPTION_EMAIL_SIC_APPROVAL,
+)
 from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_SIC_REFUSAL,
     ADMISSION_EMAIL_SIC_APPROVAL,
@@ -177,12 +190,14 @@ from admission.mail_templates.checklist import (
 )
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
+    add_close_modal_into_htmx_response,
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_access_titles_names,
     get_salutation_prefix,
     format_academic_year,
+    get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
@@ -191,11 +206,15 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.models.student import Student
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -219,6 +238,11 @@ __all__ = [
     'FinancabiliteChangeStatusView',
     'FinancabiliteApprovalView',
     'FinancabiliteComputeRuleView',
+    'FinancabiliteDerogationNonConcerneView',
+    'FinancabiliteDerogationNotificationView',
+    'FinancabiliteDerogationAbandonCandidatView',
+    'FinancabiliteDerogationRefusView',
+    'FinancabiliteDerogationAccordView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
     'SicApprovalDecisionView',
@@ -290,7 +314,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         for admission in candidate_admissions:
             if (
-                admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+                admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
                 and admission.annee_demande == self.admission.determined_academic_year.year
                 and admission.uuid != self.admission_uuid
             ):
@@ -908,7 +932,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
         # The panel is only display in some sic checklist statuses
         display_panel = any(
-            sic_checklist_statuses[value].matches(sic_checklist)
+            sic_checklist_statuses[value].matches_dict(sic_checklist)
             for value in [
                 'A_TRAITER',
                 'A_COMPLETER',
@@ -924,11 +948,11 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 # The faculty does not refuse the enrolment
                 and not ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_facultaire.name][
                     'REFUS'
-                ].matches(current_checklist.get(OngletsChecklist.decision_facultaire.name, {}))
+                ].matches_dict(current_checklist.get(OngletsChecklist.decision_facultaire.name, {}))
                 # The enrolment is financeable
                 and not ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.financabilite.name][
                     'NON_FINANCABLE'
-                ].matches(current_checklist.get(OngletsChecklist.financabilite.name, {}))
+                ].matches_dict(current_checklist.get(OngletsChecklist.financabilite.name, {}))
             )
 
         return display_panel
@@ -1096,10 +1120,144 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'training_acronym': self.proposition.formation.sigle,
         }
 
-        if self.admission.candidate.country_of_citizenship.european_union:
-            template_name = ADMISSION_EMAIL_SIC_APPROVAL_EU
+        if self.proposition.type == TypeDemande.ADMISSION.name:
+            if self.admission.candidate.country_of_citizenship.european_union:
+                template_name = ADMISSION_EMAIL_SIC_APPROVAL_EU
+            else:
+                template_name = ADMISSION_EMAIL_SIC_APPROVAL
         else:
-            template_name = ADMISSION_EMAIL_SIC_APPROVAL
+            with translation.override(self.admission.candidate.language):
+                contact_person_paragraph = ''
+                nom = self.proposition.nom_personne_contact_programme_annuel_annuel
+                email = self.proposition.email_personne_contact_programme_annuel_annuel
+                if nom or email:
+                    contact = ''
+                    if nom:
+                        contact = nom
+                    if nom and email:
+                        contact += ', '
+                    if email:
+                        contact += f'<a href="{email}">{email}</a>'
+
+                    contact_person_paragraph = _(
+                        "<p>Contact person for setting up your annual programme: {contact}</p>"
+                    ).format(contact=contact)
+
+                planned_years_paragraph = ''
+                years = self.proposition.nombre_annees_prevoir_programme
+                if years:
+                    planned_years_paragraph = ngettext(
+                        "<p>Course duration: 1 year</p>",
+                        "<p>Course duration: {years} years</p>",
+                        years,
+                    ).format(years=years)
+
+                prerequisite_courses_paragraph = ''
+                if self.proposition.avec_complements_formation:
+                    link = get_training_url(
+                        training_type=self.admission.training.education_group_type.name,
+                        training_acronym=self.admission.training.acronym,
+                        partial_training_acronym=self.admission.training.partial_acronym,
+                        suffix='cond_adm',
+                    )
+                    prerequisite_courses_paragraph = _(
+                        "<p>Depending on your previous experience, your faculty will supplement your annual programme "
+                        "with additional classes (for more information: <a href=\"{link}\">{link}</a>).</p>"
+                    ).format(link=link)
+
+                prerequisite_courses_detail_paragraph = ''
+                if self.proposition.complements_formation:
+                    prerequisite_courses_detail_paragraph = "<ul>"
+                    for complement_formation in self.proposition.complements_formation:
+                        prerequisite_courses_detail_paragraph += f"<li>{complement_formation.code} "
+                        if candidate.language == settings.LANGUAGE_CODE_EN and complement_formation.full_title_en:
+                            prerequisite_courses_detail_paragraph += complement_formation.full_title_en
+                        else:
+                            prerequisite_courses_detail_paragraph += complement_formation.full_title
+                        if complement_formation.credits:
+                            prerequisite_courses_detail_paragraph += f"({complement_formation.full_title} ECTS)"
+                        prerequisite_courses_detail_paragraph += '</li>'
+                    prerequisite_courses_detail_paragraph += "</ul>"
+                if self.proposition.commentaire_complements_formation:
+                    prerequisite_courses_detail_paragraph += self.proposition.commentaire_complements_formation
+
+                # Documents
+                documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
+                    RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                        uuid_proposition=self.admission_uuid,
+                        avec_document_libres=True,
+                    )
+                )
+
+                experiences_curriculum_par_uuid: Dict[
+                    str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]
+                ] = {
+                    str(experience.uuid): experience
+                    for experience in itertools.chain(
+                        documents_resume.resume.curriculum.experiences_non_academiques,
+                        documents_resume.resume.curriculum.experiences_academiques,
+                    )
+                }
+
+                documents = documents_resume.emplacements_documents
+                documents_names = []
+
+                for document in documents:
+                    if document.est_a_reclamer:
+                        document_identifier = document.identifiant.split('.')
+
+                        if (
+                            document_identifier[0] == OngletsDemande.CURRICULUM.name
+                            and (document_identifier[-1] in CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM)
+                            and document_identifier[1] in experiences_curriculum_par_uuid
+                        ):
+                            # For the curriculum experiences, we would like to get the name of the experience
+                            documents_names.append(
+                                '{document_label} : {cv_xp_label}. {document_communication}'.format(
+                                    document_label=document.libelle_langue_candidat,
+                                    cv_xp_label=experiences_curriculum_par_uuid[
+                                        document_identifier[1]
+                                    ].titre_pdf_decision_sic,
+                                    document_communication=document.justification_gestionnaire,
+                                )
+                            )
+
+                        else:
+                            documents_names.append(
+                                '{document_label}. {document_communication}'.format(
+                                    document_label=document.libelle_langue_candidat,
+                                    document_communication=document.justification_gestionnaire,
+                                )
+                            )
+
+                required_documents_paragraph = ''
+                if documents_names:
+                    required_documents_paragraph = _(
+                        "<p>We also wish to inform you that the additional documents below should be sent as soon as possible"
+                        " to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
+                    ).format(mail=tokens['admission_email'])
+                    required_documents_paragraph += '<ul>'
+                    for document_name in documents_names:
+                        required_documents_paragraph += f'<li>{document_name}</li>'
+                    required_documents_paragraph += '</ul>'
+
+                noma = ''
+                student = Student.objects.filter(person=self.admission.candidate).values('registration_id').first()
+                if student is not None:
+                    noma = student['registration_id']
+
+            tokens.update(
+                {
+                    'noma': noma,
+                    'contact_person_paragraph': contact_person_paragraph,
+                    'planned_years_paragraph': planned_years_paragraph,
+                    'prerequisite_courses_paragraph': prerequisite_courses_paragraph,
+                    'prerequisite_courses_detail_paragraph': prerequisite_courses_detail_paragraph,
+                    'required_documents_paragraph': required_documents_paragraph,
+                }
+            )
+
+            template_name = INSCRIPTION_EMAIL_SIC_APPROVAL
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -1113,19 +1271,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             subject = ''
             body = ''
 
-        is_inscription = self.admission.type_demande == TypeDemande.INSCRIPTION.name
         return SicDecisionFinalApprovalForm(
-            data=self.request.POST
-            if self.request.method == 'POST'
-            and is_inscription
-            or ('sic-decision-approval-final-subject' in self.request.POST)
-            else None,
+            data=self.request.POST if 'sic-decision-approval-final-subject' in self.request.POST else None,
             prefix='sic-decision-approval-final',
             initial={
                 'subject': subject,
                 'body': body,
             },
-            is_inscription=is_inscription,
         )
 
 
@@ -1347,6 +1499,8 @@ class SicApprovalFinalDecisionView(
                 message_bus_instance.invoke(
                     ApprouverInscriptionParSicCommand(
                         uuid_proposition=self.admission_uuid,
+                        objet_message=form.cleaned_data['subject'],
+                        corps_message=form.cleaned_data['body'],
                         auteur=self.request.user.person.global_id,
                     )
                 )
@@ -1403,6 +1557,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()
 
+        # Define checklist info
         try:
             status, extra = self.kwargs['status'].split('-')
             if status == 'GEST_BLOCAGE':
@@ -1413,6 +1568,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             status = self.kwargs['status']
             extra = {}
 
+        # Define global status
         if status == 'GEST_BLOCAGE' and extra == {'blocage': 'closed'}:
             global_status = ChoixStatutPropositionGenerale.CLOTUREE.name
         else:
@@ -1420,6 +1576,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
 
         admission_status_has_changed = admission.status != global_status
 
+        # Save the new statuses
         change_admission_status(
             tab='decision_sic',
             admission_status=status,
@@ -1432,11 +1589,28 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
 
         response = self.render_to_response(self.get_context_data())
 
+        # Historize the change of global status
         if admission_status_has_changed:
+            checklist_status = onglet_decision_sic.get_status(status=status, extra=extra)
+            admission_status = ChoixStatutPropositionGenerale.get_value(global_status)
+
+            checklist_status_labels = {}
+            admission_status_labels = {}
+            for language in [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]:
+                with translation.override(language):
+                    checklist_status_labels[language] = str(checklist_status.libelle if checklist_status else '')
+                    admission_status_labels[language] = str(admission_status)
+
             add_history_entry(
                 admission.uuid,
-                'Le statut de la proposition a évolué au cours du processus de décision SIC.',
-                'The status of the proposal has changed during the SIC decision process.',
+                'Le statut de la proposition a évolué au cours du processus de décision SIC : {} ({}).'.format(
+                    admission_status_labels[settings.LANGUAGE_CODE_FR],
+                    checklist_status_labels[settings.LANGUAGE_CODE_FR],
+                ),
+                'The status of the proposal has changed during the SIC decision process: {} ({}).'.format(
+                    admission_status_labels[settings.LANGUAGE_CODE_EN],
+                    checklist_status_labels[settings.LANGUAGE_CODE_EN],
+                ),
                 '{first_name} {last_name}'.format(
                     first_name=self.request.user.person.first_name,
                     last_name=self.request.user.person.last_name,
@@ -1474,9 +1648,877 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
         return super().get(request, *args, **kwargs)
 
 
+def get_internal_experiences(noma: str) -> List[ExperienceParcoursInterneDTO]:
+    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(noma=noma))
+
+
+class ApplicationFeesView(
+    AdmissionFormMixin,
+    RequestApplicationFeesContextDataMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'application-fees'
+    urlpatterns = {'application-fees': 'application-fees/<str:status>'}
+    permission_required = 'admission.change_payment'
+    template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
+    form_class = Form
+
+    def form_valid(self, form):
+        current_status = self.kwargs.get('status')
+        remind = self.request.GET.get('remind')
+
+        if current_status == ChoixStatutChecklist.GEST_BLOCAGE.name:
+            if remind:
+                cmd = EnvoyerRappelPaiementCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            else:
+                cmd = SpecifierPaiementNecessaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+                self.htmx_refresh = True
+        else:
+            cmd = SpecifierPaiementPlusNecessaireCommand(
+                uuid_proposition=self.admission_uuid,
+                gestionnaire=self.request.user.person.global_id,
+                statut_checklist_frais_dossier=self.kwargs['status'],
+            )
+            self.htmx_refresh = 'confirm' in self.request.GET
+
+        try:
+            message_bus_instance.invoke(cmd)
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesStatusView(
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-status'
+    urlpatterns = {'past-experiences-change-status': 'past-experiences-change-status/<str:status>'}
+    permission_required = 'admission.change_checklist'
+    template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
+    form_class = StatusForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.valid_operation = False
+
+    def get_initial(self):
+        return self.admission.checklist['current']['parcours_anterieur']['statut']
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['data'] = self.kwargs
+        return kwargs
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition=self.admission_uuid,
+                    statut=form.cleaned_data['status'],
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+            self.valid_operation = True
+        except MultipleBusinessExceptions:
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesAdmissionRequirementView(
+    PastExperiencesMixin,
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-admission-requirement'
+    urlpatterns = 'past-experiences-admission-requirement'
+    permission_required = 'admission.change_checklist'
+    template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
+    )
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past_experiences_admission_requirement_form'] = context['form']
+        return context
+
+    def get_form(self, form_class=None):
+        return self.past_experiences_admission_requirement_form
+
+    def reset_form_data(self, form):
+        form.data = {
+            'admission_requirement': self.admission.admission_requirement,
+            'admission_requirement_year': self.admission.admission_requirement_year_id,
+            'with_prerequisite_courses': self.admission.with_prerequisite_courses,
+        }
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierConditionAccesPropositionCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    condition_acces=form.cleaned_data['admission_requirement'],
+                    millesime_condition_acces=form.cleaned_data['admission_requirement_year']
+                    and form.cleaned_data['admission_requirement_year'].year,
+                    avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
+                )
+            )
+
+            # The admission requirement year can be updated via the command
+            self.reset_form_data(form)
+
+        except (BusinessException, MultipleBusinessExceptions) as exception:
+            self.message_on_failure = (
+                exception.exceptions.pop().message
+                if isinstance(exception, MultipleBusinessExceptions)
+                else exception.message
+            )
+
+            self.reset_form_data(form)
+
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesAccessTitleView(
+    PastExperiencesMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-access-title'
+    urlpatterns = 'past-experiences-access-title'
+    permission_required = 'admission.checklist_select_access_title'
+    template_name = 'admission/general_education/includes/checklist/parcours_row_access_title.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/parcours_row_access_title.html'
+    form_class = Form
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.checked: Optional[bool] = None
+        self.experience_uuid: str = ''
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['checked'] = self.checked
+        context['url'] = self.request.get_full_path()
+        context['experience_uuid'] = self.request.GET.get('experience_uuid')
+        context['can_choose_access_title'] = True  # True as the user can access to the current view
+
+        # Get the list of the selected access titles
+        access_titles: Dict[str, TitreAccesSelectionnableDTO] = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        if access_titles:
+            command_result: ResumePropositionDTO = message_bus_instance.invoke(
+                RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
+            )
+
+            internal_experiences = []
+
+            if any(
+                title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name
+                for title in access_titles.values()
+            ):
+                student = Student.objects.filter(person=self.admission.candidate).only('registration_id').first()
+                if student:
+                    internal_experiences = get_internal_experiences(noma=student.registration_id)
+
+            context['selected_access_titles_names'] = get_access_titles_names(
+                access_titles=access_titles,
+                curriculum_dto=command_result.curriculum,
+                etudes_secondaires_dto=command_result.etudes_secondaires,
+                internal_experiences=internal_experiences,
+            )
+
+        return context
+
+    def form_valid(self, form):
+        experience_type = self.request.GET.get('experience_type')
+        self.experience_uuid = self.request.GET.get('experience_uuid')
+        self.checked = 'access-title' in self.request.POST
+        try:
+            message_bus_instance.invoke(
+                SpecifierExperienceEnTantQueTitreAccesCommand(
+                    uuid_proposition=self.admission_uuid,
+                    uuid_experience=self.experience_uuid,
+                    selectionne=self.checked,
+                    type_experience=experience_type,
+                )
+            )
+
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            self.checked = not self.checked
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesAccessTitleEquivalencyView(
+    PastExperiencesMixin,
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-access-title-equivalency'
+    urlpatterns = 'past-experiences-access-title-equivalency'
+    permission_required = 'admission.change_checklist'
+    template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
+    )
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past_experiences_admission_access_title_equivalency_form'] = context['form']
+        return context
+
+    def get_form(self, form_class=None):
+        return self.past_experiences_admission_access_title_equivalency_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    type_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_type'],
+                    information_a_propos_de_la_restriction=form.cleaned_data[
+                        'foreign_access_title_equivalency_restriction_about'
+                    ],
+                    statut_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_status'],
+                    etat_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_state'],
+                    date_prise_effet_equivalence_titre_acces=form.cleaned_data[
+                        'foreign_access_title_equivalency_effective_date'
+                    ],
+                )
+            )
+
+        except MultipleBusinessExceptions as exception:
+            self.message_on_failure = exception.exceptions.pop().message
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class ChangeExtraView(AdmissionFormMixin, FormView):
+    urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
+    permission_required = 'admission.change_checklist'
+    template_name = 'admission/forms/default_form.html'
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['form_url'] = resolve_url(
+            f'{self.base_namespace}:change-checklist-extra',
+            uuid=self.admission_uuid,
+            tab=self.kwargs['tab'],
+        )
+        return form_kwargs
+
+    def get_form_class(self):
+        return {
+            'assimilation': AssimilationForm,
+        }[self.kwargs['tab']]
+
+    def form_valid(self, form):
+        admission = self.get_permission_object()
+        tab_name = self.kwargs['tab']
+
+        if admission.checklist.get('current') is None:
+            admission.checklist['current'] = {}
+
+        admission.checklist['current'].setdefault(tab_name, {})
+        tab_data = admission.checklist['current'][tab_name]
+        tab_data.setdefault('extra', {})
+        tab_data['extra'].update(form.cleaned_data)
+        admission.modified_at = datetime.datetime.today()
+        admission.last_update_author = self.request.user.person
+        admission.save(update_fields=['checklist', 'modified_at', 'last_update_author'])
+        return super().form_valid(form)
+
+
+class ChoixFormationFormView(LoadDossierViewMixin, FormView):
+    urlpatterns = 'choix-formation-update'
+    permission_required = 'admission.change_checklist'
+    template_name = 'admission/general_education/includes/checklist/choix_formation_form.html'
+    form_class = ChoixFormationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.htmx:
+            return redirect(
+                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
+                + '#choix_formation'
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['formation'] = self.proposition.formation
+        return kwargs
+
+    def get_initial(self):
+        return {
+            'type_demande': self.proposition.type,
+            'annee_academique': self.proposition.annee_calculee,
+            'formation': self.proposition.formation.sigle,
+            'poursuite_cycle': self.proposition.poursuite_de_cycle,
+        }
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ModifierChecklistChoixFormationCommand(
+                    uuid_proposition=str(self.kwargs['uuid']),
+                    gestionnaire=self.request.user.person.global_id,
+                    type_demande=form.cleaned_data['type_demande'],
+                    sigle_formation=form.cleaned_data['formation'],
+                    annee_formation=form.cleaned_data['annee_academique'],
+                    poursuite_de_cycle=form.cleaned_data['poursuite_cycle'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+        return HttpResponse(headers={'HX-Refresh': 'true'})
+
+
+class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
+    urlpatterns = 'choix-formation-detail'
+    permission_required = 'admission.change_checklist'
+    template_name = 'admission/general_education/includes/checklist/choix_formation_detail.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.htmx:
+            return redirect(
+                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
+                + '#choix_formation'
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+
+class FinancabiliteContextMixin(CheckListDefaultContextMixin):
+    @cached_property
+    def financability_dispensation_refusal_form(self):
+        form_kwargs = {
+            'prefix': 'financability-dispensation-refusal',
+        }
+        if self.request.method == 'POST' and 'financability-dispensation-refusal-reasons' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+        else:
+            form_kwargs['initial'] = {
+                'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
+                + self.admission.other_refusal_reasons,
+            }
+
+        return FinancabilityDispensationRefusalForm(**form_kwargs)
+
+    @cached_property
+    def financability_dispensation_notification_form(self):
+        candidate = self.admission.candidate
+
+        training_title = {
+            settings.LANGUAGE_CODE_FR: self.proposition.formation.intitule_fr,
+            settings.LANGUAGE_CODE_EN: self.proposition.formation.intitule,
+        }[candidate.language]
+
+        with override(language=candidate.language):
+            greetings = {
+                ChoixGenre.H.name: pgettext('male gender', 'Dear'),
+                ChoixGenre.F.name: pgettext('female gender', 'Dear'),
+                ChoixGenre.X.name: _("For the attention of"),
+            }.get(candidate.gender or ChoixGenre.X.name)
+
+            greetings_ends = {
+                ChoixGenre.H.name: _('Sir'),
+                ChoixGenre.F.name: _('Madam'),
+                ChoixGenre.X.name: _("Sir, Madam"),
+            }.get(candidate.gender or ChoixGenre.X.name)
+
+        tokens = {
+            'admission_reference': self.proposition.reference,
+            'candidate_first_name': self.proposition.prenom_candidat,
+            'candidate_last_name': self.proposition.nom_candidat,
+            'academic_year': format_academic_year(self.proposition.formation.annee),
+            'training_title': training_title,
+            'training_acronym': self.proposition.formation.sigle,
+            'training_campus': self.proposition.formation.campus.nom,
+            'greetings': greetings,
+            'greetings_end': greetings_ends,
+            'contact_link': get_training_url(
+                training_type=self.admission.training.education_group_type.name,
+                training_acronym=self.admission.training.acronym,
+                partial_training_acronym=self.admission.training.partial_acronym,
+                suffix='contacts',
+            ),
+        }
+
+        try:
+            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
+                ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
+                self.admission.candidate.language,
+            )
+
+            subject = mail_template.render_subject(tokens=tokens)
+            body = mail_template.body_as_html(tokens=tokens)
+        except EmptyMailTemplateContent:
+            subject = ''
+            body = ''
+
+        form_kwargs = {
+            'prefix': 'financability-dispensation-notification',
+        }
+        if self.request.method == 'POST' and 'financability-dispensation-notification-body' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+        else:
+            form_kwargs['initial'] = {
+                'subject': subject,
+                'body': body,
+            }
+
+        return FinancabiliteNotificationForm(**form_kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['financabilite_approval_form'] = FinancabiliteApprovalForm(
+            instance=self.admission,
+            prefix='financabilite',
+        )
+
+        context['financability_dispensation_form'] = FinancabiliteDispensationForm(
+            is_central_manager=self.request.user.has_perm(
+                'admission.checklist_financability_dispensation',
+                self.admission,
+            ),
+            is_program_manager=self.request.user.has_perm(
+                'admission.checklist_financability_dispensation_fac',
+                self.admission,
+            ),
+            initial={
+                'dispensation_status': self.admission.financability_dispensation_status,
+            },
+            prefix='financabilite_derogation',
+        )
+
+        context['financability_dispensation_refusal_form'] = self.financability_dispensation_refusal_form
+        context['financability_dispensation_notification_form'] = self.financability_dispensation_notification_form
+
+        if self.request.htmx:
+            comment = CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid, tags__contains=['financabilite']
+            ).first()
+            comment_derogation = CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid, tags__contains=['financabilite__derogation']
+            ).first()
+
+            context['comment_forms'] = {
+                'financabilite': CommentForm(
+                    comment=comment,
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab='financabilite',
+                    ),
+                    prefix='financabilite',
+                ),
+                'financabilite__derogation': CommentForm(
+                    comment=comment_derogation,
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='financabilite__derogation'
+                    ),
+                    prefix='financabilite__derogation',
+                    label=_('Faculty comment about financability dispensation'),
+                    permission='admission.checklist_change_fac_comment',
+                ),
+            }
+            disable_unavailable_forms(
+                {
+                    comment_form: self.request.user.has_perm(
+                        comment_form.permission,
+                        self.admission,
+                    )
+                    for comment_form in context['comment_forms'].values()
+                }
+            )
+
+        return context
+
+
+class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-change-status': 'financability-change-checklist-status/<str:status>'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+
+        try:
+            status, extra = self.kwargs['status'].split('-')
+            if status == 'GEST_BLOCAGE':
+                extra = {'to_be_completed': extra}
+            elif status == 'GEST_EN_COURS':
+                extra = {'en_cours': extra}
+            elif status == 'GEST_REUSSITE':
+                extra = {'reussite': extra}
+        except ValueError:
+            status = self.kwargs['status']
+            extra = {}
+
+        change_admission_status(
+            tab='financabilite',
+            admission_status=status,
+            extra=extra,
+            admission=admission,
+            replace_extra=True,
+            author=self.request.user.person,
+        )
+
+        if status == 'GEST_BLOCAGE' and extra.get('to_be_completed') == '0':
+            admission.financability_rule_established_by = request.user.person
+            admission.save(update_fields=['financability_rule_established_by'])
+
+        response = self.render_to_response(self.get_context_data())
+        response.headers['HX-Refresh'] = 'true'
+        return response
+
+
+class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
+    urlpatterns = {'financability-approval': 'financability-checklist-approval'}
+    template_name = 'admission/general_education/includes/checklist/financabilite_approval_form.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def get_form(self, form_class=None):
+        return FinancabiliteApprovalForm(
+            instance=self.admission if self.request.method != 'POST' else None,
+            data=self.request.POST if self.request.method == 'POST' else None,
+            prefix='financabilite',
+        )
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteRegleCommand(
+                uuid_proposition=self.admission_uuid,
+                financabilite_regle=form.cleaned_data['financability_rule'],
+                etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        response = render(
+            self.request,
+            'admission/general_education/includes/checklist/financabilite.html',
+            context=self.get_context_data(),
+        )
+        response.headers['HX-Refresh'] = 'true'
+        return response
+
+
+class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-compute-rule': 'financability-compute-rule'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+        admission.update_financability_computed_rule(author=self.request.user.person)
+        return self.render_to_response(self.get_context_data())
+
+
+class FinancabiliteDerogationNonConcerneView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-derogation-non-concerne': 'financability-derogation-non-concerne'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.checklist_financability_dispensation'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierDerogationFinancabiliteCommand(
+                uuid_proposition=self.admission_uuid,
+                statut=DerogationFinancement.NON_CONCERNE.name,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        response = self.render_to_response(self.get_context_data())
+        add_close_modal_into_htmx_response(response=response)
+        return response
+
+
+class FinancabiliteDerogationNotificationView(
+    AdmissionFormMixin,
+    FinancabiliteContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'financability-derogation-notification': 'financability-derogation-notification'}
+    permission_required = 'admission.checklist_financability_dispensation'
+    template_name = (
+        htmx_template_name
+    ) = 'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    )
+
+    def get_form(self, form_class=None):
+        return self.financability_dispensation_notification_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                NotifierCandidatDerogationFinancabiliteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    objet_message=form.cleaned_data['subject'],
+                    corps_message=form.cleaned_data['body'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class FinancabiliteDerogationAbandonCandidatView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-derogation-abandon': 'financability-derogation-abandon'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.checklist_financability_dispensation_fac'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierDerogationFinancabiliteCommand(
+                uuid_proposition=self.admission_uuid,
+                statut=DerogationFinancement.ABANDON_DU_CANDIDAT.name,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        response = self.render_to_response(self.get_context_data())
+        add_close_modal_into_htmx_response(response=response)
+        return response
+
+
+class FinancabiliteDerogationRefusView(
+    AdmissionFormMixin,
+    FinancabiliteContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'financability-derogation-refus': 'financability-derogation-refus'}
+    permission_required = 'admission.checklist_financability_dispensation_fac'
+    template_name = (
+        htmx_template_name
+    ) = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+
+    def get_form(self, form_class=None):
+        return self.financability_dispensation_refusal_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierDerogationFinancabiliteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    statut=DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
+                    gestionnaire=self.request.user.person.global_id,
+                    refus_uuids_motifs=form.cleaned_data['reasons'],
+                    refus_autres_motifs=form.cleaned_data['other_reasons'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+
+        self.htmx_refresh = True
+        return super().form_valid(form)
+
+
+class FinancabiliteDerogationAccordView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-derogation-accord': 'financability-derogation-accord'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.checklist_financability_dispensation_fac'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierDerogationFinancabiliteCommand(
+                uuid_proposition=self.admission_uuid,
+                statut=DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        response = self.render_to_response(self.get_context_data())
+        add_close_modal_into_htmx_response(response=response)
+        response.headers['HX-Refresh'] = 'true'
+        return response
+
+
+class SinglePastExperienceMixin(
+    PastExperiencesMixin,
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    @cached_property
+    def experience_uuid(self):
+        return self.request.GET.get('identifier')
+
+    @property
+    def experience(self):
+        return next(
+            (
+                experience
+                for experience in self.admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience['extra']['identifiant'] == self.experience_uuid
+            ),
+            None,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current'] = self.experience
+        context['initial'] = self.experience or {}
+        authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
+        context.setdefault('comment_forms', {})
+        context['comment_forms'][authentication_comment_identifier] = CommentForm(
+            comment=CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
+            ).first(),
+            form_url=resolve_url(
+                f'{self.base_namespace}:save-comment',
+                uuid=self.admission_uuid,
+                tab=authentication_comment_identifier,
+            ),
+            prefix=authentication_comment_identifier,
+            disabled=not can_edit_experience_authentication(self.experience),
+            label=_('Comment about the authentication'),
+        )
+        context['experience_authentication_history_entry'] = (
+            HistoryEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags__contains=['proposition', 'experience-authentication', 'message'],
+                extra_data__experience_id=self.experience_uuid,
+            )
+            .order_by('-created')
+            .first()
+        )
+
+        return context
+
+    def get_success_url(self):
+        return self.request.get_full_path()
+
+    def command(self, form):
+        raise NotImplementedError
+
+    def form_valid(self, form):
+        try:
+            self.command(form)
+        except ExperienceNonTrouveeException as exception:
+            self.message_on_failure = exception.message
+            return super().form_invalid(form)
+        return super().form_valid(form)
+
+
+class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
+    name = 'single-past-experience-change-status'
+    urlpatterns = 'single-past-experience-change-status'
+    permission_required = 'admission.checklist_change_past_experiences'
+    template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
+    form_class = ExperienceStatusForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['authentication_form'] = SinglePastExperienceAuthenticationForm(self.experience)
+        return context
+
+    def command(self, form):
+        message_bus_instance.invoke(
+            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                uuid_proposition=self.admission_uuid,
+                uuid_experience=self.experience_uuid,
+                gestionnaire=self.request.user.person.global_id,
+                statut=form.cleaned_data['status'],
+                statut_authentification=form.cleaned_data['authentification'],
+            )
+        )
+
+
+class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
+    name = 'single-past-experience-change-authentication'
+    urlpatterns = 'single-past-experience-change-authentication'
+    permission_required = 'admission.checklist_change_past_experiences'
+    template_name = 'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
+    )
+    form_class = SinglePastExperienceAuthenticationForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['checklist_experience_data'] = self.experience
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['authentication_form'] = context['form']
+        return context
+
+    def command(self, form):
+        message_bus_instance.invoke(
+            ModifierAuthentificationExperienceParcoursAnterieurCommand(
+                uuid_proposition=self.admission_uuid,
+                uuid_experience=self.experience_uuid,
+                gestionnaire=self.request.user.person.global_id,
+                etat_authentification=form.cleaned_data['state'],
+            )
+        )
+
+
 class ChecklistView(
     PastExperiencesMixin,
     FacultyDecisionMixin,
+    FinancabiliteContextMixin,
     SicDecisionMixin,
     RequestApplicationFeesContextDataMixin,
     TemplateView,
@@ -1484,6 +2526,10 @@ class ChecklistView(
     urlpatterns = 'checklist'
     template_name = "admission/general_education/checklist.html"
     permission_required = 'admission.view_checklist'
+
+    @cached_property
+    def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
+        return get_internal_experiences(noma=self.proposition.noma_candidat)
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
@@ -1596,9 +2642,14 @@ class ChecklistView(
                 tab_names.remove(tab)
                 tab_names += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
             tab_names.append('decision_sic__derogation')
+            tab_names.append('financabilite__derogation')
 
             comments_labels = {
                 'decision_sic__derogation': _('Comment about dispensation'),
+                'financabilite__derogation': _('Faculty comment about financability dispensation'),
+            }
+            comments_permissions = {
+                'financabilite__derogation': 'admission.checklist_change_fac_comment',
             }
 
             context['comment_forms'] = {
@@ -1607,6 +2658,7 @@ class ChecklistView(
                     form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                     prefix=tab_name,
                     label=comments_labels.get(tab_name, None),
+                    permission=comments_permissions.get(tab_name, None),
                 )
                 for tab_name in tab_names
             }
@@ -1617,11 +2669,6 @@ class ChecklistView(
                     uuid=self.admission_uuid,
                     tab='assimilation',
                 ),
-            )
-
-            context['financabilite_approval_form'] = FinancabiliteApprovalForm(
-                instance=self.admission,
-                prefix='financabilite',
             )
 
             # Documents
@@ -1648,7 +2695,6 @@ class ChecklistView(
 
             experiences = self._get_experiences(command_result.resume)
             experiences_by_uuid = self._get_experiences_by_uuid(command_result.resume)
-
             context['experiences'] = experiences
             context['experiences_by_uuid'] = experiences_by_uuid
 
@@ -1659,6 +2705,7 @@ class ChecklistView(
                 access_titles=self.selectable_access_titles,
                 curriculum_dto=command_result.resume.curriculum,
                 etudes_secondaires_dto=command_result.resume.etudes_secondaires,
+                internal_experiences=self.internal_experiences,
             )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
@@ -1896,6 +2943,7 @@ class ChecklistView(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
+            experiences_parcours_interne=self.internal_experiences,
         )
 
     def _get_financabilite(self):
@@ -1913,591 +2961,3 @@ class ChecklistView(
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
         return experiences
-
-class ApplicationFeesView(
-    AdmissionFormMixin,
-    RequestApplicationFeesContextDataMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'application-fees'
-    urlpatterns = {'application-fees': 'application-fees/<str:status>'}
-    permission_required = 'admission.change_payment'
-    template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
-    form_class = Form
-
-    def form_valid(self, form):
-        current_status = self.kwargs.get('status')
-        remind = self.request.GET.get('remind')
-
-        if current_status == ChoixStatutChecklist.GEST_BLOCAGE.name:
-            if remind:
-                cmd = EnvoyerRappelPaiementCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                )
-            else:
-                cmd = SpecifierPaiementNecessaireCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                )
-                self.htmx_refresh = True
-        else:
-            cmd = SpecifierPaiementPlusNecessaireCommand(
-                uuid_proposition=self.admission_uuid,
-                gestionnaire=self.request.user.person.global_id,
-                statut_checklist_frais_dossier=self.kwargs['status'],
-            )
-            self.htmx_refresh = 'confirm' in self.request.GET
-
-        try:
-            message_bus_instance.invoke(cmd)
-        except BusinessException as exception:
-            self.message_on_failure = exception.message
-            return super().form_invalid(form)
-
-        return super().form_valid(form)
-
-
-class PastExperiencesStatusView(
-    AdmissionFormMixin,
-    CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'past-experiences-status'
-    urlpatterns = {'past-experiences-change-status': 'past-experiences-change-status/<str:status>'}
-    permission_required = 'admission.change_checklist'
-    template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
-    form_class = StatusForm
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.valid_operation = False
-
-    def get_initial(self):
-        return self.admission.checklist['current']['parcours_anterieur']['statut']
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['data'] = self.kwargs
-        return kwargs
-
-    def form_valid(self, form):
-        try:
-            message_bus_instance.invoke(
-                ModifierStatutChecklistParcoursAnterieurCommand(
-                    uuid_proposition=self.admission_uuid,
-                    statut=form.cleaned_data['status'],
-                    gestionnaire=self.request.user.person.global_id,
-                )
-            )
-            self.valid_operation = True
-        except MultipleBusinessExceptions:
-            return super().form_invalid(form)
-
-        return super().form_valid(form)
-
-
-class PastExperiencesAdmissionRequirementView(
-    PastExperiencesMixin,
-    AdmissionFormMixin,
-    CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'past-experiences-admission-requirement'
-    urlpatterns = 'past-experiences-admission-requirement'
-    permission_required = 'admission.change_checklist'
-    template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
-    )
-    htmx_template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
-    )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['past_experiences_admission_requirement_form'] = context['form']
-        return context
-
-    def get_form(self, form_class=None):
-        return self.past_experiences_admission_requirement_form
-
-    def reset_form_data(self, form):
-        form.data = {
-            'admission_requirement': self.admission.admission_requirement,
-            'admission_requirement_year': self.admission.admission_requirement_year_id,
-            'with_prerequisite_courses': self.admission.with_prerequisite_courses,
-        }
-
-    def form_valid(self, form):
-        try:
-            message_bus_instance.invoke(
-                SpecifierConditionAccesPropositionCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                    condition_acces=form.cleaned_data['admission_requirement'],
-                    millesime_condition_acces=form.cleaned_data['admission_requirement_year']
-                    and form.cleaned_data['admission_requirement_year'].year,
-                    avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
-                )
-            )
-
-            # The admission requirement year can be updated via the command
-            self.reset_form_data(form)
-
-        except (BusinessException, MultipleBusinessExceptions) as exception:
-            self.message_on_failure = (
-                exception.exceptions.pop().message
-                if isinstance(exception, MultipleBusinessExceptions)
-                else exception.message
-            )
-
-            self.reset_form_data(form)
-
-            return super().form_invalid(form)
-
-        return super().form_valid(form)
-
-
-class PastExperiencesAccessTitleView(
-    PastExperiencesMixin,
-    AdmissionFormMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'past-experiences-access-title'
-    urlpatterns = 'past-experiences-access-title'
-    permission_required = 'admission.checklist_select_access_title'
-    template_name = 'admission/general_education/includes/checklist/parcours_row_access_title.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/parcours_row_access_title.html'
-    form_class = Form
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.checked: Optional[bool] = None
-        self.experience_uuid: str = ''
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['checked'] = self.checked
-        context['url'] = self.request.get_full_path()
-        context['experience_uuid'] = self.request.GET.get('experience_uuid')
-        context['can_choose_access_title'] = True  # True as the user can access to the current view
-
-        # Get the list of the selected access titles
-        access_titles: Dict[str, TitreAccesSelectionnableDTO] = message_bus_instance.invoke(
-            RecupererTitresAccesSelectionnablesPropositionQuery(
-                uuid_proposition=self.admission_uuid,
-                seulement_selectionnes=True,
-            )
-        )
-
-        if access_titles:
-            command_result: ResumePropositionDTO = message_bus_instance.invoke(
-                RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
-            )
-
-            context['selected_access_titles_names'] = get_access_titles_names(
-                access_titles=access_titles,
-                curriculum_dto=command_result.curriculum,
-                etudes_secondaires_dto=command_result.etudes_secondaires,
-            )
-
-        return context
-
-    def form_valid(self, form):
-        experience_type = self.request.GET.get('experience_type')
-        self.experience_uuid = self.request.GET.get('experience_uuid')
-        self.checked = 'access-title' in self.request.POST
-        try:
-            message_bus_instance.invoke(
-                SpecifierExperienceEnTantQueTitreAccesCommand(
-                    uuid_proposition=self.admission_uuid,
-                    uuid_experience=self.experience_uuid,
-                    selectionne=self.checked,
-                    type_experience=experience_type,
-                )
-            )
-
-        except BusinessException as exception:
-            self.message_on_failure = exception.message
-            self.checked = not self.checked
-            return super().form_invalid(form)
-
-        return super().form_valid(form)
-
-
-class PastExperiencesAccessTitleEquivalencyView(
-    PastExperiencesMixin,
-    AdmissionFormMixin,
-    CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'past-experiences-access-title-equivalency'
-    urlpatterns = 'past-experiences-access-title-equivalency'
-    permission_required = 'admission.change_checklist'
-    template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
-    )
-    htmx_template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
-    )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['past_experiences_admission_access_title_equivalency_form'] = context['form']
-        return context
-
-    def get_form(self, form_class=None):
-        return self.past_experiences_admission_access_title_equivalency_form
-
-    def form_valid(self, form):
-        try:
-            message_bus_instance.invoke(
-                SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                    type_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_type'],
-                    information_a_propos_de_la_restriction=form.cleaned_data[
-                        'foreign_access_title_equivalency_restriction_about'
-                    ],
-                    statut_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_status'],
-                    etat_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_state'],
-                    date_prise_effet_equivalence_titre_acces=form.cleaned_data[
-                        'foreign_access_title_equivalency_effective_date'
-                    ],
-                )
-            )
-
-        except MultipleBusinessExceptions as exception:
-            self.message_on_failure = exception.exceptions.pop().message
-            return super().form_invalid(form)
-
-        return super().form_valid(form)
-
-
-class ChangeExtraView(AdmissionFormMixin, FormView):
-    urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
-    permission_required = 'admission.change_checklist'
-    template_name = 'admission/forms/default_form.html'
-
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-        form_kwargs['form_url'] = resolve_url(
-            f'{self.base_namespace}:change-checklist-extra',
-            uuid=self.admission_uuid,
-            tab=self.kwargs['tab'],
-        )
-        return form_kwargs
-
-    def get_form_class(self):
-        return {
-            'assimilation': AssimilationForm,
-        }[self.kwargs['tab']]
-
-    def form_valid(self, form):
-        admission = self.get_permission_object()
-        tab_name = self.kwargs['tab']
-
-        if admission.checklist.get('current') is None:
-            admission.checklist['current'] = {}
-
-        admission.checklist['current'].setdefault(tab_name, {})
-        tab_data = admission.checklist['current'][tab_name]
-        tab_data.setdefault('extra', {})
-        tab_data['extra'].update(form.cleaned_data)
-        admission.modified_at = datetime.datetime.today()
-        admission.last_update_author = self.request.user.person
-        admission.save(update_fields=['checklist', 'modified_at', 'last_update_author'])
-        return super().form_valid(form)
-
-
-class ChoixFormationFormView(LoadDossierViewMixin, FormView):
-    urlpatterns = 'choix-formation-update'
-    permission_required = 'admission.change_checklist'
-    template_name = 'admission/general_education/includes/checklist/choix_formation_form.html'
-    form_class = ChoixFormationForm
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.htmx:
-            return redirect(
-                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
-                + '#choix_formation'
-            )
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['formation'] = self.proposition.formation
-        return kwargs
-
-    def get_initial(self):
-        return {
-            'type_demande': self.proposition.type,
-            'annee_academique': self.proposition.annee_calculee,
-            'formation': self.proposition.formation.sigle,
-            'poursuite_cycle': self.proposition.poursuite_de_cycle,
-        }
-
-    def form_valid(self, form):
-        try:
-            message_bus_instance.invoke(
-                ModifierChecklistChoixFormationCommand(
-                    uuid_proposition=str(self.kwargs['uuid']),
-                    gestionnaire=self.request.user.person.global_id,
-                    type_demande=form.cleaned_data['type_demande'],
-                    sigle_formation=form.cleaned_data['formation'],
-                    annee_formation=form.cleaned_data['annee_academique'],
-                    poursuite_de_cycle=form.cleaned_data['poursuite_cycle'],
-                )
-            )
-        except MultipleBusinessExceptions as multiple_exceptions:
-            for exception in multiple_exceptions.exceptions:
-                form.add_error(None, exception.message)
-            return self.form_invalid(form)
-        return HttpResponse(headers={'HX-Refresh': 'true'})
-
-
-class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
-    urlpatterns = 'choix-formation-detail'
-    permission_required = 'admission.change_checklist'
-    template_name = 'admission/general_education/includes/checklist/choix_formation_detail.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.htmx:
-            return redirect(
-                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
-                + '#choix_formation'
-            )
-        return super().dispatch(request, *args, **kwargs)
-
-
-class FinancabiliteContextMixin(CheckListDefaultContextMixin):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__contains=['financabilite']).first()
-
-        context['comment_forms'] = {
-            'financabilite': CommentForm(
-                comment=comment,
-                form_url=resolve_url(
-                    f'{self.base_namespace}:save-comment',
-                    uuid=self.admission_uuid,
-                    tab='financabilite',
-                ),
-                prefix='financabilite',
-            )
-        }
-
-        context['financabilite_approval_form'] = FinancabiliteApprovalForm(
-            instance=self.admission,
-            prefix='financabilite',
-        )
-
-        return context
-
-
-class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
-    urlpatterns = {'financability-change-status': 'financability-change-checklist-status/<str:status>'}
-    template_name = 'admission/general_education/includes/checklist/financabilite.html'
-    permission_required = 'admission.change_checklist'
-    http_method_names = ['post']
-
-    def post(self, request, *args, **kwargs):
-        admission = self.get_permission_object()
-
-        try:
-            status, extra = self.kwargs['status'].split('-')
-            if status == 'GEST_BLOCAGE':
-                extra = {'to_be_completed': extra}
-        except ValueError:
-            status = self.kwargs['status']
-            extra = {}
-
-        change_admission_status(
-            tab='financabilite',
-            admission_status=status,
-            extra=extra,
-            admission=admission,
-            replace_extra=True,
-            author=self.request.user.person,
-        )
-
-        if status == 'GEST_BLOCAGE' and extra.get('to_be_completed') == '0':
-            admission.financability_rule_established_by = request.user.person
-            admission.save(update_fields=['financability_rule_established_by'])
-
-        return self.render_to_response(self.get_context_data())
-
-
-class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
-    urlpatterns = {'financability-approval': 'financability-checklist-approval'}
-    template_name = 'admission/general_education/includes/checklist/financabilite_approval_form.html'
-    permission_required = 'admission.change_checklist'
-    http_method_names = ['post']
-
-    def get_form(self, form_class=None):
-        return FinancabiliteApprovalForm(
-            instance=self.admission if self.request.method != 'POST' else None,
-            data=self.request.POST if self.request.method == 'POST' else None,
-            prefix='financabilite',
-        )
-
-    def form_valid(self, form):
-        message_bus_instance.invoke(
-            SpecifierFinancabiliteRegleCommand(
-                uuid_proposition=self.admission_uuid,
-                financabilite_regle=form.cleaned_data['financability_rule'],
-                etabli_par=self.request.user.person.uuid,
-                gestionnaire=self.request.user.person.global_id,
-            )
-        )
-
-        return render(
-            self.request,
-            'admission/general_education/includes/checklist/financabilite.html',
-            context=self.get_context_data(),
-        )
-
-
-class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
-    urlpatterns = {'financability-compute-rule': 'financability-compute-rule'}
-    template_name = 'admission/general_education/includes/checklist/financabilite.html'
-    permission_required = 'admission.change_checklist'
-    http_method_names = ['post']
-
-    def post(self, request, *args, **kwargs):
-        admission = self.get_permission_object()
-        admission.update_financability_computed_rule(author=self.request.user.person)
-        return self.render_to_response(self.get_context_data())
-
-
-class SinglePastExperienceMixin(
-    PastExperiencesMixin,
-    AdmissionFormMixin,
-    CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    @cached_property
-    def experience_uuid(self):
-        return self.request.GET.get('identifier')
-
-    @property
-    def experience(self):
-        return next(
-            (
-                experience
-                for experience in self.admission.checklist['current']['parcours_anterieur']['enfants']
-                if experience['extra']['identifiant'] == self.experience_uuid
-            ),
-            None,
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['current'] = self.experience
-        context['initial'] = self.experience or {}
-        authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
-        context.setdefault('comment_forms', {})
-        context['comment_forms'][authentication_comment_identifier] = CommentForm(
-            comment=CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid,
-                tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
-            ).first(),
-            form_url=resolve_url(
-                f'{self.base_namespace}:save-comment',
-                uuid=self.admission_uuid,
-                tab=authentication_comment_identifier,
-            ),
-            prefix=authentication_comment_identifier,
-            disabled=not can_edit_experience_authentication(self.experience),
-            label=_('Comment about the authentication'),
-        )
-        context['experience_authentication_history_entry'] = (
-            HistoryEntry.objects.filter(
-                object_uuid=self.admission_uuid,
-                tags__contains=['proposition', 'experience-authentication', 'message'],
-                extra_data__experience_id=self.experience_uuid,
-            )
-            .order_by('-created')
-            .first()
-        )
-
-        return context
-
-    def get_success_url(self):
-        return self.request.get_full_path()
-
-    def command(self, form):
-        raise NotImplementedError
-
-    def form_valid(self, form):
-        try:
-            self.command(form)
-        except ExperienceNonTrouveeException as exception:
-            self.message_on_failure = exception.message
-            return super().form_invalid(form)
-        return super().form_valid(form)
-
-
-class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
-    name = 'single-past-experience-change-status'
-    urlpatterns = 'single-past-experience-change-status'
-    permission_required = 'admission.checklist_change_past_experiences'
-    template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
-    form_class = ExperienceStatusForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['authentication_form'] = SinglePastExperienceAuthenticationForm(self.experience)
-        return context
-
-    def command(self, form):
-        message_bus_instance.invoke(
-            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
-                uuid_proposition=self.admission_uuid,
-                uuid_experience=self.experience_uuid,
-                gestionnaire=self.request.user.person.global_id,
-                statut=form.cleaned_data['status'],
-                statut_authentification=form.cleaned_data['authentification'],
-            )
-        )
-
-
-class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
-    name = 'single-past-experience-change-authentication'
-    urlpatterns = 'single-past-experience-change-authentication'
-    permission_required = 'admission.checklist_change_past_experiences'
-    template_name = 'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
-    htmx_template_name = (
-        'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
-    )
-    form_class = SinglePastExperienceAuthenticationForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['checklist_experience_data'] = self.experience
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['authentication_form'] = context['form']
-        return context
-
-    def command(self, form):
-        message_bus_instance.invoke(
-            ModifierAuthentificationExperienceParcoursAnterieurCommand(
-                uuid_proposition=self.admission_uuid,
-                uuid_experience=self.experience_uuid,
-                gestionnaire=self.request.user.person.global_id,
-                etat_authentification=form.cleaned_data['state'],
-            )
-        )

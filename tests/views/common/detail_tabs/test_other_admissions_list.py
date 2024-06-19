@@ -195,3 +195,21 @@ class GeneralOtherAdmissionsListViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['autres_demandes']), 1)
+
+        # Invalid status -> don't retrieve it
+        for status in [
+            ChoixStatutPropositionContinue.ANNULEE.name,
+            ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name,
+            ChoixStatutPropositionContinue.EN_BROUILLON.name,
+        ]:
+            other_admission.status = status
+            other_admission.save(update_fields=['status'])
+
+            response = self.client.get(self.url)
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(
+                len(response.context['autres_demandes']),
+                0,
+                'No admission must be returned for status "{}"'.format(status),
+            )

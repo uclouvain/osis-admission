@@ -33,6 +33,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from osis_common.ddd.interface import DomainService
 
 
@@ -48,6 +49,7 @@ class IPDFGeneration(DomainService):
         profil_candidat_translator: IProfilCandidatTranslator,
         titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ) -> None:
         raise NotImplementedError
 

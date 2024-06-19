@@ -27,15 +27,35 @@
 import datetime
 from email.message import EmailMessage
 
+from django.conf import settings
 from django.utils import formats
 from osis_history.utilities import add_history_entry
 
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_historique import IHistorique
+from admission.infrastructure.utils import get_message_to_historize
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 
 class Historique(IHistorique):
+    @classmethod
+    def historiser_mail_decision(
+        cls,
+        proposition: Proposition,
+        gestionnaire_dto: PersonneConnueUclDTO,
+        message: EmailMessage,
+    ):
+        message_a_historiser = get_message_to_historize(message)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "decision", "message"],
+        )
+
     @classmethod
     def historiser_mettre_en_attente(
         cls,
@@ -52,6 +72,7 @@ class Historique(IHistorique):
             en_message = (
                 f'An e-mail notifying that the dossier has been put on hold was sent to "{recipient}" on ' f'{now}.'
             )
+            cls.historiser_mail_decision(proposition=proposition, gestionnaire_dto=gestionnaire_dto, message=message)
         else:
             fr_message = f"Le dossier a été mis en attente le {now}."
             en_message = f"The dossier has been put on hold on {now}."
@@ -83,6 +104,7 @@ class Historique(IHistorique):
                 f'An e-mail notifying that the dossier has been approved by the faculty was sent to "{recipient}" on '
                 f'{now}.'
             )
+            cls.historiser_mail_decision(proposition=proposition, gestionnaire_dto=gestionnaire_dto, message=message)
         else:
             fr_message = f"Le dossier a été accepté par la faculté le {now}."
             en_message = f"The dossier has been approved by the faculty on {now}."
@@ -109,6 +131,7 @@ class Historique(IHistorique):
             recipient = message['To']
             fr_message = f'Un mail informant du refus du dossier a été envoyé à "{recipient}" le {now}.'
             en_message = f'An e-mail notifying that the dossier has been denied was sent to "{recipient}" on ' f'{now}.'
+            cls.historiser_mail_decision(proposition=proposition, gestionnaire_dto=gestionnaire_dto, message=message)
         else:
             fr_message = f"Le dossier a été refusé le {now}."
             en_message = f"The dossier has been denied on {now}."
@@ -137,6 +160,7 @@ class Historique(IHistorique):
             en_message = (
                 f'An e-mail notifying that the dossier has been canceled was sent to "{recipient}" on ' f'{now}.'
             )
+            cls.historiser_mail_decision(proposition=proposition, gestionnaire_dto=gestionnaire_dto, message=message)
         else:
             fr_message = f"Le dossier a été annulé le {now}."
             en_message = f"The dossier has been canceled on {now}."
@@ -165,6 +189,7 @@ class Historique(IHistorique):
             en_message = (
                 f'An e-mail notifying that the dossier has been validated was sent to "{recipient}" on ' f'{now}.'
             )
+            cls.historiser_mail_decision(proposition=proposition, gestionnaire_dto=gestionnaire_dto, message=message)
         else:
             fr_message = f"Le dossier a été validé le {now}."
             en_message = f"The dossier has been validated on {now}."
@@ -188,7 +213,7 @@ class Historique(IHistorique):
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f"Le dossier a été clôturer le {now}.",
+            f"Le dossier a été clôturé le {now}.",
             f"The dossier has been closed on {now}.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "decision", "status-changed"],

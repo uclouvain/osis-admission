@@ -31,18 +31,21 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def modifier_statut_checklist_parcours_anterieur(
     cmd: 'ModifierStatutChecklistParcoursAnterieurCommand',
     proposition_repository: 'IPropositionRepository',
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     titres_acces_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
         proposition_identity=proposition_id,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=True,
     )
 

@@ -40,6 +40,9 @@ from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy,
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
+
+from base.models.student import Student
+from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
@@ -112,12 +115,24 @@ class AdmissionAdminForm(forms.ModelForm):
         required=False,
         widget=FilteredSelectMultiple(verbose_name=_('Professional experiences'), is_stacked=False),
     )
+    internal_access_titles = forms.ModelMultipleChoiceField(
+        queryset=InscriptionProgrammeCycle.objects.none(),
+        required=False,
+        widget=FilteredSelectMultiple(
+            verbose_name=_('Internal experiences to choose as access titles'),
+            is_stacked=False,
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['educational_valuated_experiences'].queryset = self.instance.candidate.educationalexperience_set
         self.fields['professional_valuated_experiences'].queryset = self.instance.candidate.professionalexperience_set
         self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
+
+        student = Student.objects.filter(person=self.instance.candidate).first()
+        if student:
+            self.fields['internal_access_titles'].queryset = InscriptionProgrammeCycle.objects.filter(etudiant=student)
 
 
 class ReadOnlyFilesMixin:
@@ -834,7 +849,8 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
                 f'response => {{alert(\'Successfully retrieved data from digit for '
                 f'{obj.person.last_name.upper()}, {obj.person.first_name.capitalize()}:'
                 f' saved in Person merge proposals\')}})"'
-                f'>{_("Retrieve from DigIT")}</a>')
+                f'>{_("Retrieve from DigIT")}</a>'
+            )
         else:
             return mark_safe(f'<button class="button" disabled>{_("Retrieve from DigIT")}</button>')
 
