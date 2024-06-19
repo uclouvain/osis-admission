@@ -131,23 +131,26 @@ def _clean_data_from_duplicate_registration_ids(similarity_data):
     if not similarity_data:
         return similarity_data
 
-    registration_ids_by_matricule = {}
-
     for result in similarity_data:
-        matricule = result['person']['matricule']
+        # for each global_id returned by DigIT (global_id == matricule)
+        global_id = result['person']['matricule']
 
         # get registration_ids from DigIT response (registration_id == sourceId)
-        registration_ids = [account['sourceId'] for account in result['applicationAccounts'] if account['source'] == 'ETU']
+        registration_ids = [
+            account['sourceId'] for account in result['applicationAccounts'] if account['source'] == 'ETU'
+        ]
 
         if len(registration_ids) > 1:
-            logger.info(f"DUPLICATE REGISTRATION IDs: {registration_ids} for {matricule}")
+            logger.info(f"DUPLICATE REGISTRATION IDs: {registration_ids} for {global_id}")
+
+            # discriminate registration_ids to keep only one
             captured_noma = _discriminate_registration_id(registration_ids)
             logger.info(f"DEDUPLICATING: kept {captured_noma}")
 
             # overwrite applicationAccounts in response to keep one registration_id
-            result['applicationAccounts'] = [a for a in result['applicationAccounts'] if a['sourceId'] == captured_noma]
-
-        registration_ids_by_matricule[matricule] = registration_ids
+            result['applicationAccounts'] = [
+                a for a in result['applicationAccounts'] if a['sourceId'] == captured_noma
+            ]
 
     return similarity_data
 
