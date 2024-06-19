@@ -179,6 +179,12 @@
         <div role="tabpanel" class="tab-pane" id="financabilite">
 
           {% include "admission/general_education/includes/checklist/financabilite.html" %}
+          
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_non_concerne_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_abandon_du_candidat_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_refus_de_derogation_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_accord_de_derogation_modal.html" %}
 
           <div class="info-part">
             <dl>
@@ -1057,6 +1063,7 @@
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
+  <link href="{% static 'osis_profile/css/parcours.css' %}" rel="stylesheet" >
   <style>
     #three-pane-checklist {
       display: flex;

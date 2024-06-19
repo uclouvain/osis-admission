@@ -27,7 +27,7 @@ import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.aggregates import StringAgg, ArrayAgg
+from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
@@ -52,6 +52,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
+    STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE_OU_ANNULEE,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
@@ -229,7 +230,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
                             STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE
                         )
                     )
-                    | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+                    | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE_OU_ANNULEE)
                     | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
                 )
                 .values('candidate_id')
@@ -374,6 +375,12 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         related_name='valuated_from_admission',
         verbose_name=_('The educational experiences that have been valuated from this admission.'),
         through='AdmissionEducationalValuatedExperiences',
+    )
+    internal_access_titles = models.ManyToManyField(
+        'epc.InscriptionProgrammeCycle',
+        blank=True,
+        related_name='+',
+        verbose_name=_('The internal experiences chosen as access titles of this admission.'),
     )
     detailed_status = models.JSONField(
         default=dict,

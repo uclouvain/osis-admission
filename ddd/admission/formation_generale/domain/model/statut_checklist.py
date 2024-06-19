@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     DecisionFacultaireEnum,
     OngletsChecklist,
+    DerogationFinancement,
 )
 from osis_common.ddd import interface
 
@@ -122,22 +123,37 @@ class ConfigurationStatutChecklist(interface.ValueObject):
     statut: ChoixStatutChecklist
     extra: Dict[str, any] = attr.Factory(dict)
 
-    def matches(self, other_configuration_as_dictionary: Dict[str, any]) -> bool:
+    def matches_dict(self, other_configuration_as_dictionary: Dict[str, any]) -> bool:
         """
         Check if this configuration matches the other one.
         :param other_configuration_as_dictionary: A dictionary containing the other configuration.
         :return: True if this configuration matches the other one, False otherwise.
         """
-        return (
-            self.statut.name == other_configuration_as_dictionary.get('statut', '')
-            and self.extra.items() <= other_configuration_as_dictionary.get('extra', {}).items()
+        return self.matches(
+            other_configuration_as_dictionary.get('statut', ''),
+            other_configuration_as_dictionary.get('extra', {}),
         )
+
+    def matches(self, status: str, extra: Optional[Dict[str, any]] = None) -> bool:
+        """
+        Check if this configuration matches the given status and extra.
+        :param status: the status to match.
+        :param extra: the extra to match.
+        :return: True if this configuration matches the given status and extra, False otherwise.
+        """
+        if extra is None:
+            extra = {}
+
+        return self.statut.name == status and self.extra.items() <= extra.items()
 
 
 @attr.dataclass
 class ConfigurationOngletChecklist(interface.ValueObject):
     identifiant: OngletsChecklist
     statuts: List[ConfigurationStatutChecklist]
+
+    def get_status(self, status: str, extra: Optional[Dict[str, any]] = None) -> Optional[ConfigurationStatutChecklist]:
+        return next((statut for statut in self.statuts if statut.matches(status, extra)), None)
 
 
 STATUTS_CHECKLIST_PAR_ONGLET: Dict[str, Dict[str, ConfigurationStatutChecklist]] = {}
@@ -327,7 +343,28 @@ onglet_financabilite = ConfigurationOngletChecklist(
             identifiant='AVIS_EXPERT',
             libelle=_('Expert opinion'),
             statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'expert'},
         ),
+        ConfigurationStatutChecklist(
+            identifiant='BESOIN_DEROGATION',
+            libelle=_('Dispensation needed'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'derogation'},
+        ),
+    ]
+    + [
+        ConfigurationStatutChecklist(
+            identifiant=f'BESOIN_DEROGATION.{besoin_derogation.name}',
+            libelle=besoin_derogation.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={
+                'etat_besoin_derogation': besoin_derogation.name,
+                'en_cours': 'derogation',
+            },
+        )
+        for besoin_derogation in DerogationFinancement
+    ]
+    + [
         ConfigurationStatutChecklist(
             identifiant='A_COMPLETER',
             libelle=_('To be completed'),
@@ -341,9 +378,16 @@ onglet_financabilite = ConfigurationOngletChecklist(
             extra={'to_be_completed': '0'},
         ),
         ConfigurationStatutChecklist(
+            identifiant='DEROGATION_ACCORDEE',
+            libelle=_('Dispensation granted'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            extra={'reussite': 'derogation'},
+        ),
+        ConfigurationStatutChecklist(
             identifiant='FINANCABLE',
             libelle=_('Financeable'),
             statut=ChoixStatutChecklist.GEST_REUSSITE,
+            extra={'reussite': 'financable'},
         ),
     ],
 )

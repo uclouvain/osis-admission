@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DispenseOuDroitsMajores,
     MobiliteNombreDeMois,
     TypeDeRefus,
+    DerogationFinancement,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
@@ -166,6 +167,39 @@ class GeneralEducationAdmission(BaseAdmission):
     financability_rule_established_by = models.ForeignKey(
         'base.Person',
         verbose_name=_('Financability rule established by'),
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        editable=False,
+    )
+
+    financability_dispensation_status = models.CharField(
+        verbose_name=_('Financability dispensation status'),
+        choices=DerogationFinancement.choices(),
+        max_length=100,
+        default='',
+    )
+    financability_dispensation_first_notification_on = models.DateTimeField(
+        verbose_name=_('Financability dispensation first notification on'),
+        null=True,
+        editable=False,
+    )
+    financability_dispensation_first_notification_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_('Financability dispensation first notification by'),
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        editable=False,
+    )
+    financability_dispensation_last_notification_on = models.DateTimeField(
+        verbose_name=_('Financability dispensation last notification on'),
+        null=True,
+        editable=False,
+    )
+    financability_dispensation_last_notification_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_('Financability dispensation last notification by'),
         on_delete=models.PROTECT,
         related_name='+',
         null=True,

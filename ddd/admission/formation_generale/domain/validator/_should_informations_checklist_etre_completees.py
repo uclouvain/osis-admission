@@ -51,6 +51,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
     BesoinDeDerogation,
+    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -71,6 +72,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     DemandeDoitEtreAdmissionException,
     DemandeDoitEtreInscriptionException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
+    EtatChecklistFinancabiliteNonValidePourApprouverDemande,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -300,3 +302,15 @@ class ShouldNePasAvoirDeDocumentReclameImmediat(BusinessValidator):
             for document in self.documents_dto
         ):
             raise DocumentAReclamerImmediatException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(BusinessValidator):
+    checklist_actuelle: StatutsChecklistGenerale
+
+    def validate(self, *args, **kwargs):
+        if (
+            self.checklist_actuelle.financabilite.statut != ChoixStatutChecklist.INITIAL_NON_CONCERNE
+            and self.checklist_actuelle.financabilite.statut != ChoixStatutChecklist.GEST_REUSSITE
+        ):
+            raise EtatChecklistFinancabiliteNonValidePourApprouverDemande
