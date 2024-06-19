@@ -110,8 +110,6 @@ class DigitService(IDigitService):
             }
         )
 
-        similarity_data = person_merge_proposal.similarity_result
-
         return similarity_data
 
 
@@ -128,9 +126,6 @@ def _get_status_from_digit_response(similarity_data):
 
 
 def _clean_data_from_duplicate_registration_ids(similarity_data):
-    if not similarity_data:
-        return similarity_data
-
     for result in similarity_data:
         # for each global_id returned by DigIT (global_id == matricule)
         global_id = result['person']['matricule']
