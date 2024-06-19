@@ -144,13 +144,14 @@ def _clean_data_from_duplicate_registration_ids(similarity_data):
             logger.info(f"DUPLICATE REGISTRATION IDs: {registration_ids} for {global_id}")
 
             # discriminate registration_ids to keep only one
-            captured_noma = _discriminate_registration_id(registration_ids)
-            logger.info(f"DEDUPLICATING: kept {captured_noma}")
+            captured_registration_id = _discriminate_registration_id(registration_ids)
+            logger.info(f"DEDUPLICATING: kept {captured_registration_id}")
 
-            # overwrite applicationAccounts in response to keep one registration_id
-            result['applicationAccounts'] = [
-                a for a in result['applicationAccounts'] if a['sourceId'] == captured_noma
-            ]
+            if captured_registration_id:
+                # overwrite applicationAccounts in response to keep one registration_id
+                result['applicationAccounts'] = [
+                    a for a in result['applicationAccounts'] if a['sourceId'] == captured_registration_id
+                ]
 
     return similarity_data
 
@@ -158,7 +159,7 @@ def _clean_data_from_duplicate_registration_ids(similarity_data):
 def _discriminate_registration_id(registration_ids):
     qs = Student.objects.filter(registration_id__in=registration_ids)
     student = find_student_by_discriminating(qs)
-    return student.registration_id
+    return student.registration_id if student else None
 
 
 def _mock_search_digit_account_return_response():
