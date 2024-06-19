@@ -44,6 +44,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DecisionFacultaireEnum,
     BesoinDeDerogation,
     OngletsChecklist,
+    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
@@ -1382,6 +1383,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
         current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        current_checklist['extra'] = {'en_cours': 'expert'}
         second_admission.save(update_fields=['checklist'])
 
         response = self._do_request(
@@ -1450,7 +1452,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
         current_checklist['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
-        current_checklist['extra'] = {'to_be_completed': '0'}
+        current_checklist['extra'] = {'reussite': 'financable'}
         second_admission.save(update_fields=['checklist'])
 
         response = self._do_request(
@@ -1462,6 +1464,18 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_9=[
+                'BESOIN_DEROGATION',
+                f'BESOIN_DEROGATION.{DerogationFinancement.ABANDON_DU_CANDIDAT.name}',
+            ],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
 
     def test_list_filter_by_training_choice_checklist_status(self):
         self.client.force_login(user=self.sic_management_user)

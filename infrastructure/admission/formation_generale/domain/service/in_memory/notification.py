@@ -31,8 +31,9 @@ from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumen
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
-    IEmailDestinataireRepository
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 
 
 class NotificationInMemory(INotification):
@@ -89,4 +90,13 @@ class NotificationInMemory(INotification):
 
     @classmethod
     def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+        pass
+
+    @classmethod
+    def notifier_candidat_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
         pass

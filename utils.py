@@ -80,6 +80,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
@@ -340,6 +341,7 @@ def get_access_titles_names(
     access_titles: Dict[str, TitreAccesSelectionnableDTO],
     curriculum_dto: CurriculumAdmissionDTO,
     etudes_secondaires_dto: EtudesSecondairesAdmissionDTO,
+    internal_experiences: List[ExperienceParcoursInterneDTO],
 ) -> List[str]:
     """
     Returns the list of access titles formatted names in reverse chronological order.
@@ -359,16 +361,26 @@ def get_access_titles_names(
             curriculum_dto.experiences_academiques,
             curriculum_dto.experiences_non_academiques,
             [etudes_secondaires_dto.experience],
+            internal_experiences,
         )
         if experience
     }
 
     for access_title in access_titles_list:
         experience_name = ''
+        experience = curriculum_experiences_by_uuid.get(access_title.uuid_experience)
 
-        if access_title.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name:
+        if access_title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name:
+            # Internal experience
+            if isinstance(experience, ExperienceParcoursInterneDTO):
+                experience_derniere_annee = experience.derniere_annee
+                experience_name = '{title} ({year}) - UCL'.format(
+                    title=experience_derniere_annee.intitule_formation,
+                    year=format_academic_year(experience_derniere_annee.annee),
+                )
+
+        elif access_title.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name:
             # Secondary studies
-            experience = curriculum_experiences_by_uuid.get(access_title.uuid_experience)
             if isinstance(experience, DiplomeBelgeEtudesSecondairesDTO):
                 experience_name = '{title} ({year}) - {institute}'.format(
                     title=str(etudes_secondaires_dto.diplome_belge),
@@ -390,7 +402,6 @@ def get_access_titles_names(
                 )
         else:
             # Curriculum experiences
-            experience = curriculum_experiences_by_uuid.get(access_title.uuid_experience)
             if isinstance(experience, ExperienceAcademiqueDTO):
                 experience_name = '{title} ({year}) - {institute}'.format(
                     title=f'{experience.nom_formation} ({experience.nom_formation_equivalente_communaute_fr})'

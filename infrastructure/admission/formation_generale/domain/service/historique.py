@@ -313,3 +313,33 @@ class Historique(IHistorique):
             tags=['proposition', 'experience-authentication', 'institute-contact', 'message'],
             extra_data={'experience_id': uuid_experience},
         )
+
+    @classmethod
+    def historiser_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: Optional[EmailMessage] = None,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        status = proposition.financabilite_derogation_statut.value
+
+        if message is not None:
+            message_a_historiser = get_message_to_historize(message)
+
+            add_history_entry(
+                proposition.entity_id.uuid,
+                message_a_historiser[settings.LANGUAGE_CODE_FR],
+                message_a_historiser[settings.LANGUAGE_CODE_EN],
+                "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+                tags=['proposition', 'financabilite', 'financabilite-derogation', 'message'],
+            )
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f'Le statut de besoin de dérogation à la financabilité est passé à {status} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Status of financability dispensation needs changed to {status} on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'financabilite', 'financabilite-derogation'],
+        )

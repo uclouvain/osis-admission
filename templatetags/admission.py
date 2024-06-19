@@ -103,6 +103,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
@@ -865,8 +866,9 @@ def part_of_dict(member, container):
 
 @register.simple_tag
 def is_current_checklist_status(current, state, extra):
-    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) \
-        if current and state else False
+    return (
+        current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) if current and state else False
+    )
 
 
 @register.simple_tag
@@ -1419,7 +1421,12 @@ def experience_details_template(
 @register.simple_tag(takes_context=True)
 def checklist_experience_action_links_context(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
+    experience: Union[
+        ExperienceAcademiqueDTO,
+        ExperienceNonAcademiqueDTO,
+        EtudesSecondairesAdmissionDTO,
+        ExperienceParcoursInterneDTO,
+    ],
     current_year,
     prefix,
     parcours_tab_id='',
@@ -1432,13 +1439,16 @@ def checklist_experience_action_links_context(
     result_context = {
         'prefix': prefix,
         'experience_uuid': str(experience.uuid),
-        'edit_link_button_in_new_tab': experience.epc_experience,
+        'edit_link_button_in_new_tab': getattr(experience, 'epc_experience', False),
         'update_url': '',
         'delete_url': '',
         'duplicate_url': '',
     }
 
-    if experience.__class__ == EtudesSecondairesAdmissionDTO:
+    if experience.__class__ == ExperienceParcoursInterneDTO:
+        return result_context
+
+    elif experience.__class__ == EtudesSecondairesAdmissionDTO:
         if not experience.epc_experience:
             result_context['update_url'] = (
                 resolve_url(
@@ -1452,8 +1462,11 @@ def checklist_experience_action_links_context(
                 'edit-etudes-secondaires-view',
                 noma=context['admission'].noma_candidat,
             )
-    elif (experience.valorisee_par_admissions and
-          proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year):
+    elif (
+        experience.valorisee_par_admissions
+        and proposition_uuid in experience.valorisee_par_admissions
+        and experience.derniere_annee == current_year
+    ):
         if experience.__class__ == ExperienceAcademiqueDTO:
             result_context['duplicate_url'] = resolve_url(
                 f'{base_namespace}:update:curriculum:educational_duplicate',
@@ -1716,7 +1729,7 @@ def digit_error_description(error_code):
         "RSTARTDATE0001": "La date de début est null",
         "RSTARTDATE0002": "La date de début est d'un format incorrect",
         "RSTOPDATE0001": "La date de début est null",
-        "RSTOPDATE0002": "La date de début est d'un format incorrect"
+        "RSTOPDATE0002": "La date de début est d'un format incorrect",
     }
 
     return error_mapping[error_code]

@@ -70,6 +70,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     TypeDeRefus,
     ChoixStatutChecklist,
     DispenseOuDroitsMajores,
+    DerogationFinancement,
 )
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
@@ -101,6 +102,8 @@ from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
 from osis_document.utils import is_uuid
 
+FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
+
 
 class CommentForm(forms.Form):
     comment = forms.CharField(
@@ -115,7 +118,7 @@ class CommentForm(forms.Form):
         required=False,
     )
 
-    def __init__(self, form_url, comment=None, label=None, *args, **kwargs):
+    def __init__(self, form_url, comment=None, label=None, permission=None, *args, **kwargs):
         disabled = kwargs.pop('disabled', False)
 
         super().__init__(*args, **kwargs)
@@ -140,7 +143,11 @@ class CommentForm(forms.Form):
         }
 
         self.fields['comment'].label = labels.get(comment_type, label or _('Comment'))
-        self.permission = permissions.get(comment_type, 'admission.checklist_change_comment')
+
+        if permission is not None:
+            self.permission = permission
+        else:
+            self.permission = permissions.get(comment_type, 'admission.checklist_change_comment')
 
         if comment:
             self.fields['comment'].initial = comment.content
@@ -297,6 +304,9 @@ class FacDecisionRefusalForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         all_reasons = RefusalReason.objects.select_related('category').all().order_by('category__order', 'order')
+        category = getattr(self, 'reasons_category', None)
+        if category:
+            all_reasons = all_reasons.filter(category__name=category)
 
         choices = get_group_by_choices(
             queryset=all_reasons,
@@ -1125,18 +1135,24 @@ class SicDecisionFinalApprovalForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        is_inscription = kwargs.pop('is_inscription')
         super().__init__(*args, **kwargs)
-        if is_inscription:
-            del self.fields['subject']
-            del self.fields['body']
-        else:
-            self.fields['body'].widget.attrs['data-config'] = json.dumps(
-                {
-                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
-                    'language': get_language(),
-                }
-            )
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                'language': get_language(),
+            }
+        )
+
+
+class FinancabilityDispensationRefusalForm(FacDecisionRefusalForm):
+    def __init__(self, *args, **kwargs):
+        self.reasons_category = FINANCABILITE_REFUS_CATEGORY
+
+        super().__init__(*args, **kwargs)
+
+        self.fields['reasons'].widget.free_options_placeholder = _(
+            'Your past experiences does not ensure the expected garanties for success'
+        )
 
 
 class FinancabiliteApprovalForm(forms.ModelForm):
@@ -1145,6 +1161,40 @@ class FinancabiliteApprovalForm(forms.ModelForm):
         fields = [
             'financability_rule',
         ]
+
+
+class FinancabiliteDispensationForm(forms.Form):
+    dispensation_status = forms.ChoiceField(
+        label=_('Financability dispensation needed'),
+        choices=DerogationFinancement.choices(),
+        widget=forms.RadioSelect(),
+    )
+
+    def __init__(self, is_central_manager, is_program_manager, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not is_central_manager and not is_program_manager:
+            self.fields['dispensation_status'].disabled = True
+        elif not is_central_manager and self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name:
+            self.fields['dispensation_status'].disabled = True
+
+
+class FinancabiliteNotificationForm(forms.Form):
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                'language': get_language(),
+            }
+        )
 
 
 def can_edit_experience_authentication(checklist_experience_data):

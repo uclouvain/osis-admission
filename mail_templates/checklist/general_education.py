@@ -191,6 +191,95 @@ templates.register(
     tokens=ADMISSION_EMAIL_SIC_APPROVAL_TOKENS,
 )
 
+INSCRIPTION_EMAIL_SIC_APPROVAL = 'osis-inscription-sic-approval'
+INSCRIPTION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
+    Token(
+        name='academic_year',
+        description=_("Academic year of the admission"),
+        example="2023-2024",
+    ),
+    Token(
+        name='academic_year_start_date',
+        description=_("Start date of the academic year of the admission"),
+        example="14 September",
+    ),
+    Token(
+        name='admission_email',
+        description=_("Email receiving the documents"),
+        example="inscription-lln@uclouvain.be",
+    ),
+    Token(
+        name='greetings',
+        description=_("Greetings depending on the gender of the candidate"),
+        example="Cher·ère",
+    ),
+    Token(
+        name='enrollment_authorization_document_link',
+        description=_("Enrollment authorization document link"),
+        example="https://osis.uclouvain.be/...",
+    ),
+    Token(
+        name='visa_application_document_link',
+        description=_("Visa application document link"),
+        example="https://osis.uclouvain.be/...",
+    ),
+    Token(
+        name='training_campus',
+        description=_('Teaching campus of the training'),
+        example="Louvain-la-Neuve",
+    ),
+    Token(
+        name='training_acronym',
+        description=_('Acronym of the training'),
+        example='SPRI2MS/DI',
+    ),
+    Token(
+        name='noma',
+        description=_('Noma of the candidate'),
+        example='',
+    ),
+    Token(
+        name='contact_person_paragraph',
+        description=_('Paragraph including the person to contact'),
+        example='Personne de contact pour la composition du programme annuel : John Dow.',
+    ),
+    Token(
+        name='planned_years_paragraph',
+        description=_('Paragraph including the planned years'),
+        example='Durée des études : 2 ans.',
+    ),
+    Token(
+        name='prerequisite_courses_paragraph',
+        description=_('Paragraph including the prerequisite courses'),
+        example=(
+            'Au vu de votre parcours antérieur, votre faculté complétera votre programme annuel par des '
+            'compléments de formation (enseignements supplémentaires) (pour plus d’informations :'
+            ' https://uclouvain.be/prog-2024-gest2m1-cond_adm). »'
+        ),
+    ),
+    Token(
+        name='prerequisite_courses_detail_paragraph',
+        description=_('Paragraph including the prerequisite courses detail'),
+        example='Détail des compléments de formation :',
+    ),
+    Token(
+        name='required_documents_paragraph',
+        description=_('Paragraph including the required documents'),
+        example=(
+            'Par ailleurs, nous profitons de ce courrier pour vous signaler que les documents complémentaires '
+            'ci-dessous sont à nous fournir dès que possible à l’adresse info-mons@uclouvain.be :'
+        ),
+    ),
+]
+templates.register(
+    INSCRIPTION_EMAIL_SIC_APPROVAL,
+    description=_(
+        'Email sent to the candidate when SIC approves an inscription.',
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=INSCRIPTION_EMAIL_SIC_APPROVAL_TOKENS,
+)
+
 ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS = (
     'osis-admission-check-background-authentication-to-checkers'
 )
@@ -234,6 +323,46 @@ templates.register(
             name='training_campus',
             description=_('Teaching campus of the training'),
             example="Louvain-la-Neuve",
+        ),
+    ],
+)
+
+ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION = 'osis-admission-financability-dispensation-notification'
+templates.register(
+    ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
+    description=_('Email sent to the candidate to inform him that a financability dispensation is needed.'),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='training_campus',
+            description=_('Teaching campus of the training'),
+            example="Louvain-la-Neuve",
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='greetings_end',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Madame",
+        ),
+        Token(
+            name='contact_link',
+            description=_("Contact link"),
+            example="https://osis.uclouvain.be/...",
         ),
     ],
 )

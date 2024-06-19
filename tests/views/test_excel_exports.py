@@ -662,6 +662,21 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(row_data[8], 'non')
         self.assertEqual(row_data[11], '')
 
+        self.admission.in_payement_order = None
+        self.admission.save()
+
+        results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
+            ListerDemandesQuery(numero=self.admission.reference)
+        )
+
+        self.assertEqual(len(results), 1)
+
+        result = results[0]
+
+        row_data = view.get_row_data(result)
+
+        self.assertEqual(row_data[8], 'non')
+
     def test_export_configuration(self):
         candidate = PersonFactory()
         campus = CampusFactory()

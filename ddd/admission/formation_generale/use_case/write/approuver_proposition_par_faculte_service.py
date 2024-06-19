@@ -39,6 +39,7 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_proposition_par_faculte(
@@ -51,6 +52,7 @@ def approuver_proposition_par_faculte(
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> PropositionIdentity:
     # GIVEN
     annee_courante = (
@@ -65,6 +67,7 @@ def approuver_proposition_par_faculte(
 
     titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
         proposition_identity=proposition.entity_id,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=True,
     )
 
@@ -84,6 +87,7 @@ def approuver_proposition_par_faculte(
         profil_candidat_translator=profil_candidat_translator,
         titres_selectionnes=titres_selectionnes,
         annee_courante=annee_courante,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
     )
 
     proposition_repository.save(entity=proposition)
