@@ -31,6 +31,7 @@ from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
+from admission.auth.roles.program_manager import ProgramManager
 from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
@@ -205,6 +206,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'billing_address_type': entity.type_adresse_facturation.name if entity.type_adresse_facturation else '',
                 'motivations': entity.motivations,
                 'ways_to_find_out_about_the_course': [way.name for way in entity.moyens_decouverte_formation],
+                'other_way_to_find_out_about_the_course': entity.autre_moyen_decouverte_formation or '',
                 'checklist': {
                     'initial': entity.checklist_initiale
                     and attrs.asdict(entity.checklist_initiale, value_serializer=cls._serialize)
@@ -302,6 +304,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             moyens_decouverte_formation=[
                 ChoixMoyensDecouverteFormation[way] for way in admission.ways_to_find_out_about_the_course
             ],
+            autre_moyen_decouverte_formation=admission.other_way_to_find_out_about_the_course,
             marque_d_interet=admission.interested_mark,
             edition=ChoixEdition[admission.edition] if admission.edition else None,
             checklist_initiale=checklist_initiale and StatutsChecklistContinue.from_dict(checklist_initiale),
@@ -413,6 +416,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 or admission.sigle_entite_gestion,  # from annotation
                 credits=admission.training.credits,
             ),
+            adresses_emails_gestionnaires_formation=(
+                ProgramManager.objects.filter(education_group_id=admission.training.education_group_id).values_list(
+                    'person__email',
+                    flat=True,
+                )
+            ),
             reference=admission.formatted_reference,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool or '',
@@ -458,6 +467,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
+            autre_moyen_decouverte_formation=admission.other_way_to_find_out_about_the_course,
             aide_a_la_formation=admission.training.specificiufcinformations.training_assistance
             if getattr(admission.training, 'specificiufcinformations', None)
             else None,

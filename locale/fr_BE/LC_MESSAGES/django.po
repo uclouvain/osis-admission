@@ -1215,6 +1215,11 @@ msgstr ""
 "d’admission soit acceptée). En cas d’annulation, les modalités dépendent des "
 "Facultés."
 
+msgctxt "ways_hear_about_training"
+msgid "By someone who has already taken this course in a previous edition"
+msgstr ""
+"Par quelqu’un ayant déjà suivi cette formation dans une édition précédente"
+
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
 
@@ -1905,10 +1910,6 @@ msgstr "Formation continue"
 
 msgid "Continuing education admission"
 msgstr "Admission en formation continue"
-
-msgctxt "ways_hear_about_training"
-msgid "Continuing education website"
-msgstr "Par le site de la formation continue"
 
 msgid "Continuing enrolment applications"
 msgstr "Demandes d'inscription en formation continue"
@@ -3372,10 +3373,6 @@ msgstr "La formation n'est pas disponible pour cette année."
 msgid "Former UCLouvain student"
 msgstr "Ancien·ne étudiant·e UCLouvain"
 
-msgctxt "ways_hear_about_training"
-msgid "Former students"
-msgstr "Par des anciens étudiants"
-
 msgid "Fraudster"
 msgstr "Fraudeur"
 
@@ -3423,10 +3420,6 @@ msgstr "Valeur en français"
 
 msgid "French values"
 msgstr "Valeurs en français"
-
-msgctxt "ways_hear_about_training"
-msgid "Friends"
-msgstr "Par des amis"
 
 msgid "From"
 msgstr "De"
@@ -3607,11 +3600,25 @@ msgstr "Composition de ménage ou acte de mariage"
 msgid "Household composition, or copy of your birth certificate"
 msgstr "Composition de ménage, ou copie de votre acte de naissance"
 
-msgid "How did the candidate find out about this course?"
-msgstr "Comment le candidat a connu l'existence de cette formation ?"
+msgid "How did the candidate hear about this course?"
+msgstr ""
+"Par quel canal de communication le candidat a connu l'existence de cette "
+"formation ?"
 
 msgid "How did you hear about this course?"
-msgstr "Comment avez-vous connu l'existence de cette formation ?"
+msgstr ""
+"Par quel canal de communication avez-vous connu l'existence de cette "
+"formation ?"
+
+msgid "How else did the candidate hear about this course?"
+msgstr ""
+"Par quel autre canal de communication le candidat a connu l'existence de "
+"cette formation ?"
+
+msgid "How else did you hear about this course?"
+msgstr ""
+"Par quel autre canal de communication avez-vous connu l'existence de cette "
+"formation ?"
 
 msgid "I am a long-term resident in the European Union outside Belgium"
 msgstr "Je suis résident·e de longue durée en Union Européenne hors Belgique "
@@ -8109,6 +8116,10 @@ msgstr "Documents UCLouvain libres FAC"
 msgid "UCLouvain SIC free documents"
 msgstr "Documents UCLouvain libres SIC"
 
+msgctxt "ways_hear_about_training"
+msgid "UCLouvain continuing education website"
+msgstr "Par le site de la formation continue UCLouvain"
+
 msgid "UCLouvain logo"
 msgstr "Logo de l'UCLouvain"
 
@@ -8387,8 +8398,8 @@ msgid "Without free documents"
 msgstr "Sans les documents libres"
 
 msgctxt "ways_hear_about_training"
-msgid "Word of mouth"
-msgstr "Par le bouche à oreille"
+msgid "Word of mouth (family, friends, colleagues, ...)"
+msgstr "Par le bouche à oreille (famille, amis, collègues, ...)"
 
 msgid "Work contract"
 msgstr "Type de contrat de travail"
@@ -8936,8 +8947,8 @@ msgstr "Transfert bancaire"
 msgid "by the Enrolment Office"
 msgstr "par le Service des Inscriptions de l'UCLouvain"
 
-msgid "by the University Institute for Continuing Education (IUFC)"
-msgstr "par l'Institut Universitaire de Formation Continue (IUFC)"
+msgid "by the faculty"
+msgstr "par la faculté"
 
 msgctxt "payment"
 msgid "canceled"
@@ -9015,8 +9026,8 @@ msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
 msgid "the UCLouvain Registration Service"
 msgstr "au Service des Inscriptions de l'UCLouvain"
 
-msgid "the University Institute of Continuing Education"
-msgstr "à l'Institut Universitaire de Formation Continue (IUFC)"
+msgid "the faculty"
+msgstr "la faculté"
 
 msgid "the person concerned"
 msgstr "la personne concernée"

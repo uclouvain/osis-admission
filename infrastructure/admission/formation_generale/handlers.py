@@ -48,9 +48,6 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
-from admission.ddd.admission.formation_generale.use_case.write.notifier_candidat_derogation_financabilite_service import (
-    notifier_candidat_derogation_financabilite,
-)
 from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
     refuser_admission_par_sic,
 )
@@ -69,12 +66,6 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_informations_acceptation_proposition_par_sic_service import (
-    specifier_informations_acceptation_proposition_par_sic,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_motifs_refus_proposition_par_sic_service import (
-    specifier_motifs_refus_proposition_par_sic,
 )
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,

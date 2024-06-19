@@ -180,7 +180,14 @@ class ContinuingEducationAdmission(BaseAdmission):
         models.CharField(max_length=30, choices=ChoixMoyensDecouverteFormation.choices()),
         blank=True,
         default=list,
-        verbose_name=_('How did the candidate find out about this course?'),
+        verbose_name=_('How did the candidate hear about this course?'),
+    )
+
+    other_way_to_find_out_about_the_course = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('How else did the candidate hear about this course?'),
+        max_length=1000,
     )
 
     interested_mark = models.BooleanField(

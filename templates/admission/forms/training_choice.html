@@ -84,8 +84,8 @@
   {% if view.is_continuing %}
     <div class="row">
       <div
-        class="col-md-12 closed-continuing-fields"
-        {% if not form.display_closed_continuing_fields %}style="display: none"{% endif %}
+          class="col-md-12 closed-continuing-fields"
+          {% if not form.display_closed_continuing_fields %}style="display: none"{% endif %}
       >
         <p id="closed-continuing-alert" class="alert alert-danger">
           {% blocktranslate trimmed %}
@@ -104,11 +104,18 @@
     </div>
 
     <div
-      class="row long-continuing-fields"
-      {% if not form.display_long_continuing_fields %}style="display: none"{% endif %}
+        class="long-continuing-fields"
+        {% if not form.display_long_continuing_fields %}style="display: none"{% endif %}
     >
-      <div class="col-md-12 required_field">
-        {% bootstrap_field form.ways_to_find_out_about_the_course %}
+      <div class="row">
+        <div class="col-md-12 required_field">
+          {% bootstrap_field form.ways_to_find_out_about_the_course %}
+        </div>
+      </div>
+      <div id="other-way-to-find-out-about-the-course-container" class="row">
+        <div class="col-md-12 required_field">
+          {% bootstrap_field form.other_way_to_find_out_about_the_course placeholder='' %}
+        </div>
       </div>
     </div>
   {% endif %}
@@ -163,6 +170,10 @@
                   closedContinuingFields.toggle(data?.state === 'CLOSED');
                   longContinuingFields.toggle(data?.registration_required === true);
               });
+
+              $('#other-way-to-find-out-about-the-course-container').dependsOn({
+                  'input[name="ways_to_find_out_about_the_course"][value="AUTRE"]': { checked: true}
+              }, defaultOptions);
 
           {% endif %}
 

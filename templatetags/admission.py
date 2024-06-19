@@ -35,6 +35,7 @@ from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
+from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
@@ -73,6 +74,7 @@ from admission.ddd.admission.enums.emplacement_document import StatutReclamation
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE,
+    ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
@@ -88,7 +90,11 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_GENERALE,
 )
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO, PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+    PropositionDTO as PropositionGeneraleDTO,
+)
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -1647,7 +1653,7 @@ def sic_in_final_statut(checklist_statut):
 
 
 @register.filter
-def access_conditions_url(proposition: PropositionDTO):
+def access_conditions_url(proposition: PropositionGeneraleDTO):
     training = BaseAdmission.objects.values(
         'training__education_group_type__name', 'training__acronym', 'training__partial_acronym'
     ).get(uuid=proposition.uuid)
@@ -1754,3 +1760,20 @@ def digit_error_description(error_code):
     }
 
     return error_mapping[error_code]
+
+
+@register.filter
+def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO):
+    """
+    Format the list of ways to find out about the course of a proposition.
+    :param proposition: The proposition
+    :return: An unordered list of ways to find out about the course (including the "other" case, if any)
+    """
+    return unordered_list(
+        [
+            ChoixMoyensDecouverteFormation.get_value(way)
+            if way != ChoixMoyensDecouverteFormation.AUTRE.name
+            else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            for way in proposition.moyens_decouverte_formation
+        ]
+    )

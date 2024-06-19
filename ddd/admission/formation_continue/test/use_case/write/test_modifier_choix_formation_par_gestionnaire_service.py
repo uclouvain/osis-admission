@@ -57,6 +57,7 @@ class TestModifierChoixFormationParGestionnaireService(SimpleTestCase):
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
                 ChoixMoyensDecouverteFormation.AUTRE.name,
             ],
+            autre_moyen_decouverte_formation='Autre moyen',
             marque_d_interet=True,
             gestionnaire="gestionnaire",
             reponses_questions_specifiques={'q1': 'v1'},
@@ -79,6 +80,7 @@ class TestModifierChoixFormationParGestionnaireService(SimpleTestCase):
                 ChoixMoyensDecouverteFormation.AUTRE,
             ],
         )
+        self.assertEqual(proposition.autre_moyen_decouverte_formation, 'Autre moyen')
         self.assertEqual(proposition.marque_d_interet, True)
         self.assertEqual(proposition.auteur_derniere_modification, 'gestionnaire')
         self.assertEqual(proposition.reponses_questions_specifiques, {'q1': 'v1'})
