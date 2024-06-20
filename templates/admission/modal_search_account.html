@@ -161,7 +161,7 @@
             const valueToCopy = document.querySelector(`.${source}-data #${label}`).value;
             const destinationInput = document.querySelector(`.fusion-data #id_${destinationLabel}`);
 
-            if(destinationInput && valueToCopy){
+            if(destinationInput && valueToCopy !== undefined){
 
                 if(label === 'national_number') {
                     $(destinationInput).val(valueToCopy).mask('00.00.00-000.00');
