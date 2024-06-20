@@ -42,7 +42,7 @@ def create_financabilite_reasons(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0189_merge_20240618_1500'),
+        ('admission', '0190_baseadmission_internal_access_titles'),
     ]
 
     operations = [
