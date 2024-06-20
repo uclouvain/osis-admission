@@ -42,9 +42,19 @@
 
     {% if authentication_form.state.value == 'AUTHENTIFICATION_DEMANDEE' or authentication_form.state.value == 'ETABLISSEMENT_CONTACTE' %}
       {% if experience_authentication_history_entry %}
-          <p class="alert alert-warning">
-            {{ experience_authentication_history_entry|history_entry_message }}
-          </p>
+        <div class="alert alert-warning">
+          <button
+              type="button"
+              class="btn btn-xs btn-default admission-collapse-button pull-right"
+              data-toggle="collapse"
+              data-target="#experience-authentication-message-{{ current.extra.identifiant }}"
+              aria-expanded="false"
+          >
+            <i class="fa-solid fa-chevron-up"></i>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <p id="experience-authentication-message-{{ current.extra.identifiant }}" class="experience-authentication-message">{{ experience_authentication_history_entry|history_entry_message }}</p>
+        </div>
       {% endif %}
     {% endif %}
 

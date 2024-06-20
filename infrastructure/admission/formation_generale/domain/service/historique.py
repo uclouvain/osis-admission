@@ -279,16 +279,20 @@ class Historique(IHistorique):
         message: EmailMessage,
         uuid_experience: str,
     ):
-        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        manager_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        manager_name = f"{manager_dto.prenom} {manager_dto.nom}"
 
         now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
         recipient = message['To']
+        message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f'Mail envoyé à "{recipient}" le {now} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
-            f'Mail sent to "{recipient}" on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
-            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            f'Mail envoyé à "{recipient}" le {now} par {manager_name}.\n\n'
+            f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
+            f'Mail sent to "{recipient}" on {now} by {manager_name}.\n\n'
+            f'{message_a_historiser[settings.LANGUAGE_CODE_EN]}',
+            manager_name,
             tags=['proposition', 'experience-authentication', 'authentication-request', 'message'],
             extra_data={'experience_id': uuid_experience},
         )
@@ -301,15 +305,19 @@ class Historique(IHistorique):
         message: EmailMessage,
         uuid_experience: str,
     ):
-        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        manager_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        manager_name = f"{manager_dto.prenom} {manager_dto.nom}"
 
         now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f'Mail envoyé à le/la candidat·e le {now} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
-            f'Mail sent to the candidate on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
-            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            f'Mail envoyé à le/la candidat·e le {now} par {manager_name}.\n\n'
+            f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
+            f'Mail sent to the candidate on {now} by {manager_name}.\n\n'
+            f'{message_a_historiser[settings.LANGUAGE_CODE_EN]}',
+            manager_name,
             tags=['proposition', 'experience-authentication', 'institute-contact', 'message'],
             extra_data={'experience_id': uuid_experience},
         )

@@ -1393,5 +1393,17 @@
       min-width: 0 !important;
     }
 
+    {# Customize the experience authentication message (history entry) #}
+    .experience-authentication-message {
+      white-space: pre-line;
+      min-height: 1.5em;
+      height: 1.5em;
+      display: block !important;
+      overflow-y: hidden;
+    }
+
+    .experience-authentication-message.collapse.in {
+      height: auto;
+    }
   </style>
 {% endblock style %}
