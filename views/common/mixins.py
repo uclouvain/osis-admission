@@ -63,6 +63,8 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
+
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
@@ -75,7 +77,7 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions 
 )
 from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
 from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
-from admission.templatetags.admission import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -143,7 +145,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
 
     @cached_property
-    def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO]:
+    def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO, PropositionContinueDTO]:
         cmd = {
             CONTEXT_DOCTORATE: GetPropositionCommand(uuid_proposition=self.admission_uuid),
             CONTEXT_CONTINUING: RecupererPropositionQuery(uuid_proposition=self.admission_uuid),

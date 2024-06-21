@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@
 ##############################################################################
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
-from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read.recuperer_informations_destinataire_service\
-    import recuperer_informations_destinataire
+from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
 from admission.ddd.admission.use_case.read import *
 from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
@@ -39,6 +39,7 @@ from admission.infrastructure.admission.shared_kernel.email_destinataire.reposit
     EmailDestinataireInMemoryRepository
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
+_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -48,6 +49,18 @@ COMMAND_HANDLERS = {
     ),
     RecupererInformationsDestinataireQuery: lambda msg_bus, query: recuperer_informations_destinataire(
         query,
-        email_destinataire_repository=EmailDestinataireInMemoryRepository()
+        email_destinataire_repository=EmailDestinataireInMemoryRepository(),
+    ),
+    RecupererEtudesSecondairesQuery: lambda msg_bus, query: recuperer_etudes_secondaires(
+        query,
+        profil_candidat_translator=_profil_candidat_translator,
+    ),
+    RecupererExperienceAcademiqueQuery: lambda msg_bus, query: recuperer_experience_academique(
+        query,
+        profil_candidat_translator=_profil_candidat_translator,
+    ),
+    RecupererExperienceNonAcademiqueQuery: lambda msg_bus, query: recuperer_experience_non_academique(
+        query,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
 }

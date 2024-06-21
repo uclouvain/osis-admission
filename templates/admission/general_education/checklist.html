@@ -312,7 +312,7 @@
           </div>
         </div>
       {% endwith %}
-      {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur %}
+      {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur next_url=next_base_url|add:'parcours_anterieur' %}
         <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
           {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
           {% bootstrap_form comment_forms.parcours_anterieur %}
@@ -330,9 +330,9 @@
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
             <div class="mt-1">
               {% if can_update_curriculum %}
-                {% url 'admission:general-education:update:curriculum:global' view.kwargs.uuid as global_curriculum_update_url %}
+                {% url 'admission:general-education:update:curriculum' view.kwargs.uuid as global_curriculum_update_url %}
               {% endif %}
-              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url %}
+              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url|add:next_url %}
             </div>
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}

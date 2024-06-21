@@ -45,9 +45,7 @@ from admission.contrib.models.base import (
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
-from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
@@ -63,7 +61,6 @@ __all__ = [
     'CurriculumEducationalExperienceDeleteView',
     'CurriculumEducationalExperienceDuplicateView',
     'CurriculumEducationalExperienceValuateView',
-    'CurriculumGlobalFormView',
     'CurriculumNonEducationalExperienceFormView',
     'CurriculumNonEducationalExperienceDeleteView',
     'CurriculumNonEducationalExperienceDuplicateView',
@@ -71,28 +68,7 @@ __all__ = [
 ]
 
 
-class CurriculumGlobalFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
-    urlpatterns = {'global': ''}
-    template_name = 'admission/forms/curriculum.html'
-    permission_required = 'admission.change_admission_curriculum'
-    form_class = ConfigurableFormMixin
-    update_requested_documents = True
-    update_admission_author = True
-    specific_questions_tab = Onglets.CURRICULUM
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['form_item_configurations'] = self.specific_questions
-        return kwargs
-
-    def get_initial(self):
-        return {'specific_question_answers': self.admission.specific_question_answers}
-
-    def update_current_admission_on_form_valid(self, form, admission):
-        admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
-
-    def get_success_url(self):
-        return self.request.get_full_path()
+__namespace__ = 'curriculum'
 
 
 class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierViewMixin, EditExperienceAcademiqueView):
@@ -102,9 +78,6 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     }
     template_name = 'admission/forms/curriculum_educational_experience.html'
     permission_required = 'admission.change_admission_curriculum'
-    extra_context = {
-        'without_menu': True,
-    }
     update_requested_documents = True
     update_admission_author = True
 
@@ -144,7 +117,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             educationalexperience_id=self._experience_id,
         )
         # Add the experience to the checklist
-        if 'current' in self.admission.checklist:
+        if 'current' in self.admission.checklist and 'parcours_anterieur' in self.admission.checklist['current']:
             admission = self.admission
             experience_checklist = Checklist.initialiser_checklist_experience(self._experience_id).to_dict()
             admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
@@ -155,27 +128,36 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         return self.admission.candidate
 
     def get_success_url(self):
-        return self.next_url or reverse(
-            self.base_namespace + ':update:curriculum:educational',
-            kwargs={
-                'uuid': self.admission_uuid,
-                'experience_uuid': self.experience_id,
-            },
-        )
+        if self.next_url:
+            return self.next_url
+
+        if self.is_general:
+            return resolve_url(
+                f'{self.base_namespace}:update:curriculum:educational',
+                uuid=self.admission_uuid,
+                experience_uuid=self.experience_id,
+            )
+
+        return resolve_url(f'{self.base_namespace}:curriculum', uuid=self.admission_uuid)
 
     def delete_url(self):
         if self.experience_id:
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:educational_delete',
-                uuid=self.proposition.uuid,
+                uuid=self.admission_uuid,
                 experience_uuid=self.experience_id,
             )
 
     def get_context_data(self, **kwargs):
-        return {
-            **super().get_context_data(**kwargs),
-            'prevent_quitting_template': 'admission/includes/prevent_quitting_button.html',
-        }
+        context_data = super().get_context_data(**kwargs)
+
+        if self.is_continuing:
+            context_data['next_url'] = self.get_success_url()
+            context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
+        else:
+            context_data['prevent_quitting_template'] = 'admission/includes/prevent_quitting_button.html'
+
+        return context_data
 
 
 class CurriculumNonEducationalExperienceFormView(
@@ -189,9 +171,6 @@ class CurriculumNonEducationalExperienceFormView(
     }
     template_name = 'admission/forms/curriculum_non_educational_experience.html'
     permission_required = 'admission.change_admission_curriculum'
-    extra_context = {
-        'without_menu': True,
-    }
     update_requested_documents = True
     update_admission_author = True
 
@@ -231,34 +210,43 @@ class CurriculumNonEducationalExperienceFormView(
             professionalexperience_id=self._experience_id,
         )
         # Add the experience to the checklist
-        if 'current' in self.admission.checklist:
+        if 'current' in self.admission.checklist and 'parcours_anterieur' in self.admission.checklist['current']:
             admission = self.admission
             experience_checklist = Checklist.initialiser_checklist_experience(self._experience_id).to_dict()
             admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
             admission.save(update_fields=['checklist'])
 
     def get_success_url(self):
-        return self.next_url or reverse(
-            self.base_namespace + ':update:curriculum:non_educational',
-            kwargs={
-                'uuid': self.admission_uuid,
-                'experience_uuid': self.experience_id,
-            },
-        )
+        if self.next_url:
+            return self.next_url
+
+        if self.is_general:
+            return resolve_url(
+                f'{self.base_namespace}:update:curriculum:non_educational',
+                uuid=self.admission_uuid,
+                experience_uuid=self.experience_id,
+            )
+
+        return resolve_url(f'{self.base_namespace}:curriculum', uuid=self.admission_uuid)
 
     def delete_url(self):
         if self.experience_id:
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:non_educational_delete',
-                uuid=self.proposition.uuid,
+                uuid=self.admission_uuid,
                 experience_uuid=self.experience_id,
             )
 
     def get_context_data(self, **kwargs):
-        return {
-            **super().get_context_data(**kwargs),
-            'prevent_quitting_template': 'admission/includes/prevent_quitting_button.html',
-        }
+        context_data = super().get_context_data(**kwargs)
+
+        if self.is_continuing:
+            context_data['next_url'] = self.get_success_url()
+            context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
+        else:
+            context_data['prevent_quitting_template'] = 'admission/includes/prevent_quitting_button.html'
+
+        return context_data
 
 
 class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperienceMixin):
@@ -314,7 +302,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
         # Delete the information of the experience from the checklist
         admission: BaseAdmission = self.admission
 
-        if 'current' in admission.checklist:
+        if 'current' in admission.checklist and 'parcours_anterieur' in admission.checklist['current']:
             experiences = admission.checklist['current']['parcours_anterieur']['enfants']
 
             experience_uuid = str(self.kwargs.get('experience_uuid'))
@@ -333,7 +321,14 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
         return delete
 
     def get_success_url(self):
-        return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
+        kwargs = {
+            'uuid': self.admission_uuid,
+        }
+        return (
+            self.next_url or reverse(f'{self.base_namespace}:checklist', kwargs=kwargs)
+            if self.is_general
+            else reverse(f'{self.base_namespace}:curriculum', kwargs=kwargs)
+        )
 
 
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
@@ -480,7 +475,14 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         return super().form_valid(form)
 
     def get_success_url(self):
-        return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
+        kwargs = {
+            'uuid': self.admission_uuid,
+        }
+        return (
+            self.next_url or reverse(f'{self.base_namespace}:checklist', kwargs=kwargs)
+            if self.is_general
+            else reverse(f'{self.base_namespace}:curriculum', kwargs=kwargs)
+        )
 
 
 class CurriculumNonEducationalExperienceDuplicateView(CurriculumBaseExperienceDuplicateView):
@@ -552,10 +554,14 @@ class CurriculumBaseExperienceValuateView(AdmissionFormMixin, LoadDossierViewMix
 
     def update_current_admission_on_form_valid(self, form, admission):
         # Add the experience to the checklist if it's not already there
-        if 'current' in admission.checklist and not any(
-            experience
-            for experience in admission.checklist['current']['parcours_anterieur']['enfants']
-            if experience.get('extra', {}).get('identifiant') == self.experience_id
+        if (
+            'current' in admission.checklist
+            and 'parcours_anterieur' in admission.checklist['current']
+            and not any(
+                experience
+                for experience in admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience.get('extra', {}).get('identifiant') == self.experience_id
+            )
         ):
             experience_checklist = Checklist.initialiser_checklist_experience(self.experience_id).to_dict()
             admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)

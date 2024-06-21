@@ -46,6 +46,7 @@ from django.utils.translation import (
     override,
 )
 
+from admission.constants import CONTEXT_GENERAL
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import (
@@ -81,7 +82,6 @@ from admission.forms import (
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
-from admission.templatetags.admission import CONTEXT_GENERAL
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_SIC,

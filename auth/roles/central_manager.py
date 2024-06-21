@@ -81,9 +81,11 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & general.in_sic_status,
             'admission.view_admission_secondary_studies': is_entity_manager,
-            'admission.change_admission_secondary_studies': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_secondary_studies': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status),
             'admission.view_admission_curriculum': is_entity_manager,
-            'admission.change_admission_curriculum': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_curriculum': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status),
             'admission.view_admission_project': is_entity_manager,
             'admission.change_admission_project': is_entity_manager & general.in_sic_status,
             'admission.view_admission_cotutelle': is_entity_manager,

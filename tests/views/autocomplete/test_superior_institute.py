@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -66,6 +66,7 @@ class SuperiorInstituteAutocompleteTestCase(TestCase):
                 'Place de la République 1, 1348 Louvain-la-Neuve</span>'
             ),
             'community': first_university.community,
+            'establishment_type': first_university.establishment_type,
         }
 
         second_university = UniversityFactory(
@@ -85,6 +86,7 @@ class SuperiorInstituteAutocompleteTestCase(TestCase):
             'id': second_university.id,
             'text': 'Université de Mons <span class="school-address">Rue de l’Université 2, 7000 Mons</span>',
             'community': second_university.community,
+            'establishment_type': second_university.establishment_type,
         }
 
         third_university = UniversityFactory(
@@ -104,6 +106,7 @@ class SuperiorInstituteAutocompleteTestCase(TestCase):
             'id': third_university.id,
             'text': 'Université de Lille <span class="school-address">Place du marché 3, 59000 Lille</span>',
             'community': third_university.community,
+            'establishment_type': third_university.establishment_type,
         }
 
         first_superior_non_university = SuperiorNonUniversityFactory(
@@ -123,6 +126,7 @@ class SuperiorInstituteAutocompleteTestCase(TestCase):
             'id': first_superior_non_university.id,
             'text': 'Ecole de commerce <span class="school-address">Boulevard du triomphe 4, 1000 Bruxelles</span>',
             'community': first_superior_non_university.community,
+            'establishment_type': first_superior_non_university.establishment_type,
         }
 
         cls.user = User.objects.create_user(

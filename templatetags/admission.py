@@ -46,7 +46,14 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES, ORDERED_CAMPUSES_UUIDS
+from admission.constants import (
+    IMAGE_MIME_TYPES,
+    ORDERED_CAMPUSES_UUIDS,
+    CONTEXT_ADMISSION,
+    CONTEXT_DOCTORATE,
+    CONTEXT_GENERAL,
+    CONTEXT_CONTINUING,
+)
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -95,7 +102,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import get_access_conditions_url
+from admission.utils import get_access_conditions_url, get_experience_urls
 from base.models.enums.civil_state import CivilState
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
@@ -108,11 +115,6 @@ from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
-
-CONTEXT_ADMISSION = 'admission'
-CONTEXT_DOCTORATE = 'doctorate'
-CONTEXT_GENERAL = 'general-education'
-CONTEXT_CONTINUING = 'continuing-education'
 
 PERMISSION_BY_ADMISSION_CLASS = {
     DoctorateAdmission: 'doctorateadmission',
@@ -404,6 +406,10 @@ TAB_TREES = {
         Tab('continuing-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
         ],
+        Tab('experience', _('Previous experience'), 'list-alt'): [
+            Tab('education', _('Secondary studies')),
+            Tab('curriculum', _('Curriculum')),
+        ],
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
             Tab('specific-questions', _('Specific aspects')),
         ],
@@ -464,7 +470,9 @@ def default_tab_context(context):
     match = context['request'].resolver_match
     active_tab = match.url_name
 
-    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+    if 'curriculum' in match.namespaces:
+        active_tab = 'curriculum'
+    elif len(match.namespaces) > 2 and match.namespaces[2] != 'update':
         active_tab = match.namespaces[2]
     elif len(match.namespaces) > 3 and match.namespaces[3] == 'jury-member':
         active_tab = 'jury'
@@ -1546,6 +1554,19 @@ def checklist_experience_action_links(
     parcours_tab_id,
 ):
     return checklist_experience_action_links_context(context, experience, current_year, prefix, parcours_tab_id)
+
+
+@register.simple_tag(takes_context=True)
+def experience_urls(
+    context,
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
+):
+    return get_experience_urls(
+        user=context['request'].user,
+        admission=context['view'].admission,
+        experience=experience,
+        candidate_noma=context['view'].proposition.noma_candidat,
+    )
 
 
 @register.filter

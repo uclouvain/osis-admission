@@ -25,7 +25,9 @@
 # ##############################################################################
 from dal import autocomplete
 
+from base.models.enums.establishment_type import EstablishmentTypeEnum
 from reference.models.diploma_title import DiplomaTitle, get_diploma_label_with_study_type
+from reference.models.enums.study_type import StudyType
 
 __all__ = [
     'DiplomaTitleAutocomplete',
@@ -36,11 +38,22 @@ def get_diploma_label(diploma_title: DiplomaTitle) -> str:
     return diploma_title.title
 
 
+# TODO to move into reference
 class DiplomaTitleAutocomplete(autocomplete.Select2QuerySetView):
     urlpatterns = 'diploma-title'
 
     def get_queryset(self):
         queryset = DiplomaTitle.objects.filter(active=True)
+
+        establishment_type = self.forwarded.get('establishment_type')
+        if establishment_type:
+            establishment_study_type = {
+                EstablishmentTypeEnum.UNIVERSITY.name: StudyType.UNIVERSITY.name,
+                EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name: StudyType.NON_UNIVERSITY.name,
+            }.get(establishment_type)
+
+            if establishment_study_type:
+                queryset = queryset.filter(study_type=establishment_study_type)
 
         study_type = self.forwarded.get('study_type')
         if study_type:
