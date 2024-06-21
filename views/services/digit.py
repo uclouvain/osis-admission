@@ -128,7 +128,7 @@ class SearchDigitAccountView(FormView, PermissionRequiredMixin):
                 last_name=candidate.last_name,
                 first_name=candidate.first_name,
                 other_first_name=candidate.middle_name,
-                birth_date=str(candidate.birth_date),
+                birth_date=str(candidate.birth_date) if candidate.birth_date else "",
                 sex=candidate.sex,
                 niss=candidate.national_number,
             )
@@ -139,14 +139,14 @@ class SearchDigitAccountView(FormView, PermissionRequiredMixin):
     @staticmethod
     def _is_valid_for_search(request, candidate):
         candidate_required_fields = [
-            "last_name", "first_name", "birth_date",
+            "last_name", "first_name",
         ]
         missing_fields = [field for field in candidate_required_fields if not getattr(candidate, field)]
         has_missing_fields = any(missing_fields)
 
         if has_missing_fields:
             display_error_messages(request, _(
-                "Admission is not yet valid for searching UCLouvain. The following fields are required: "
+                "Admission is not yet valid for searching UCLouvain account. The following fields are required: "
             ) + ", ".join(missing_fields))
 
         return has_missing_fields

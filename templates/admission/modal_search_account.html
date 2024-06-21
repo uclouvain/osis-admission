@@ -26,7 +26,7 @@
 
 <script src="{% static 'js/jquery.mask.min.js' %}"></script>
 
-<div class="modal-dialog modal-xl-responsive" tabindex="-1" role="document">
+<div id="merge-modal" class="modal-dialog modal-xl-responsive" tabindex="-1" role="document">
     <div id="merge-form-modal-content" class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
         <div class="modal-header">
             <h4 class="modal-title" id="">{% trans "Merge with existing entry" %}</h4>
@@ -118,8 +118,7 @@
         return $('<table style="width: 100%"><tbody><tr><td style="width: 25%;"> ' + split[0] + '</td><td style="width: 25%;"> ' + split[1] + '<td style="width: 25%;"> ' + split[2] + '</td><td style="width: 25%;"> ' + split[3] + '</td></tr></tbody></table>');
     }
 
-    $('.modal').on('shown.bs.modal', function() {
-
+    function initMergeSelect(){
         $('#match').select2({
             minimumResultsForSearch: -1,
             dropdownCssClass: 'match-select',
@@ -148,7 +147,10 @@
 
         $('#match').trigger('change');
 
-    });
+    }
+
+    $('.modal').on('shown.bs.modal', initMergeSelect);
+    htmx.onLoad((el) => {if(el.id === "merge-modal") initMergeSelect()});
 
 
     // merge input from data source to fusion form using btn-merge
@@ -161,7 +163,7 @@
             const valueToCopy = document.querySelector(`.${source}-data #${label}`).value;
             const destinationInput = document.querySelector(`.fusion-data #id_${destinationLabel}`);
 
-            if(destinationInput && valueToCopy){
+            if(destinationInput && valueToCopy !== undefined){
 
                 if(label === 'national_number') {
                     $(destinationInput).val(valueToCopy).mask('00.00.00-000.00');

@@ -33,8 +33,10 @@ import waffle
 from django.conf import settings
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
+from base.business.student import find_student_by_discriminating
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.models.student import Student
 
 MOCK_DIGIT_SERVICE_CALL = settings.MOCK_DIGIT_SERVICE_CALL
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -97,6 +99,8 @@ class DigitService(IDigitService):
 
         logger.info(f"DIGIT Response: {similarity_data}")
 
+        similarity_data = _clean_data_from_duplicate_registration_ids(similarity_data)
+
         PersonMergeProposal.objects.update_or_create(
             original_person=original_person,
             defaults={
@@ -105,8 +109,6 @@ class DigitService(IDigitService):
                 "last_similarity_result_update": datetime.datetime.now(),
             }
         )
-
-        similarity_data = person_merge_proposal.similarity_result
 
         return similarity_data
 
@@ -121,6 +123,38 @@ def _get_status_from_digit_response(similarity_data):
             return PersonMergeStatus.MATCH_FOUND.name
     else:
         return PersonMergeStatus.NO_MATCH.name
+
+
+def _clean_data_from_duplicate_registration_ids(similarity_data):
+    for result in similarity_data:
+        # for each global_id returned by DigIT (global_id == matricule)
+        global_id = result['person']['matricule']
+
+        # get registration_ids from DigIT response (registration_id == sourceId)
+        registration_ids = [
+            account['sourceId'] for account in result['applicationAccounts'] if account['source'] == 'ETU'
+        ]
+
+        if len(registration_ids) > 1:
+            logger.info(f"DUPLICATE REGISTRATION IDs: {registration_ids} for {global_id}")
+
+            # discriminate registration_ids to keep only one
+            captured_registration_id = _discriminate_registration_id(registration_ids)
+            logger.info(f"DEDUPLICATING: kept {captured_registration_id}")
+
+            if captured_registration_id:
+                # overwrite applicationAccounts in response to keep one registration_id
+                result['applicationAccounts'] = [
+                    a for a in result['applicationAccounts'] if a['sourceId'] == captured_registration_id
+                ]
+
+    return similarity_data
+
+
+def _discriminate_registration_id(registration_ids):
+    qs = Student.objects.filter(registration_id__in=registration_ids)
+    student = find_student_by_discriminating(qs)
+    return student.registration_id if student else None
 
 
 def _mock_search_digit_account_return_response():
