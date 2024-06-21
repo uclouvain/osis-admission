@@ -43,7 +43,12 @@ from django.utils.translation import gettext_lazy as _, get_language, pgettext_l
 from osis_comment.models import CommentDeleteMixin
 from osis_history.models import HistoryEntry
 
-from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
+from admission.constants import (
+    ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES,
+    CONTEXT_DOCTORATE,
+    CONTEXT_GENERAL,
+    CONTEXT_CONTINUING,
+)
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.contrib.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -525,7 +530,6 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         return self.reference_str
 
     def get_admission_context(self):
-        from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 
         if hasattr(self, 'generaleducationadmission'):
             return CONTEXT_GENERAL

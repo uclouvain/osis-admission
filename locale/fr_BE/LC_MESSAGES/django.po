@@ -405,6 +405,9 @@ msgstr "Règlement général des études"
 msgid "Academic course"
 msgstr "Formation académique"
 
+msgid "Academic courses"
+msgstr "Formations académiques"
+
 msgid "Academic experience"
 msgstr "Expérience académique"
 
@@ -442,6 +445,9 @@ msgstr "Acceptée"
 
 msgid "Access condition:"
 msgstr "Condition d'accès :"
+
+msgid "Access experience details"
+msgstr "Accéder aux détails de l'expérience"
 
 msgid "Access title"
 msgstr "Titre d'accès"
@@ -544,6 +550,9 @@ msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
 msgid "Add a new member"
 msgstr "Ajouter un nouveau membre."
 
+msgid "Add a non-academic activity"
+msgstr "Ajouter une activité non-académique"
+
 msgid "Add a paper"
 msgstr "Ajouter une épreuve"
 
@@ -573,6 +582,9 @@ msgstr "Ajouter un séminaire"
 
 msgid "Add a service"
 msgstr "Ajouter un service"
+
+msgid "Add an academic course"
+msgstr "Ajouter une formation académique"
 
 msgid "Add an activity"
 msgstr "Ajouter une activité"
@@ -1122,6 +1134,9 @@ msgstr "Bachelier"
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
+
+msgid "Back to overview"
+msgstr "Revenir à la vue d'ensemble"
 
 msgctxt "admission"
 msgid "Back to page"
@@ -4929,9 +4944,6 @@ msgstr "Date modif."
 msgid "Modification of the secondary studies"
 msgstr "Modification des études secondaires"
 
-msgid "Modification of the specificities of the curriculum"
-msgstr "Modification des spécificités du curriculum"
-
 msgid "Modification requested"
 msgstr "Modification demandée"
 
@@ -5160,6 +5172,9 @@ msgstr "Noma du candidat"
 
 msgid "Non doctor reason"
 msgstr "Justification"
+
+msgid "Non-academic activities"
+msgstr "Activités non-académiques"
 
 msgid "Non-academic activity"
 msgstr "Activité non-académique"
@@ -5570,6 +5585,9 @@ msgstr "Méthode de paiement"
 
 msgid "Pending application fee"
 msgstr "Frais de dossier en attente"
+
+msgid "Period"
+msgstr "Période"
 
 msgid "Permanent residence card of a family member of a European Union citizen"
 msgstr ""
@@ -6279,6 +6297,9 @@ msgctxt "jury member"
 msgid "Remove"
 msgstr "Retirer"
 
+msgid "Remove experience"
+msgstr "Supprimer l'expérience"
+
 msgctxt "jury member"
 msgid "Remove?"
 msgstr "Retirer ?"
@@ -6856,6 +6877,9 @@ msgstr "Question spécifique"
 msgid "Specific questions"
 msgstr "Questions spécifiques"
 
+msgid "Specificities"
+msgstr "Spécificités"
+
 msgid "Specified"
 msgstr "Renseigné·e"
 
@@ -7125,6 +7149,12 @@ msgstr "Le numéro de registre national belge doit être composé de 11 chiffres
 
 msgid "The CA members"
 msgstr "Les membres du comité d’accompagnement"
+
+msgid "The CV does not yet contain any academic course."
+msgstr "Le CV ne contient pas encore de formation académique."
+
+msgid "The CV does not yet contain any non-academic activity."
+msgstr "Le CV ne contient pas encore d'activité non-académique."
 
 msgid "The IBAN account number is valid"
 msgstr "Le numéro de compte IBAN est valide"
@@ -8566,6 +8596,15 @@ msgstr ""
 "pour votre dossier (justificatifs, preuve de niveau de langue, ...)."
 
 msgid ""
+"You can find more information on the French Community webpage <a "
+"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
+"</a>"
+msgstr ""
+"Vous trouverez davantage d'information sur la page de la Communauté "
+"française <a href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://"
+"equisup.cfwb.be/</a>"
+
+msgid ""
 "You can not cancel this application, it is in the \"Validated\" state. "
 "Please contact Noemie Pecher."
 msgstr ""
@@ -8981,6 +9020,10 @@ msgstr "à l'Institut Universitaire de Formation Continue (IUFC)"
 
 msgid "the person concerned"
 msgstr "la personne concernée"
+
+msgctxt "admission-date"
+msgid "to"
+msgstr "à"
 
 msgid "to the UCLouvain Registration Service"
 msgstr "au Service des Inscriptions de l'UCLouvain"

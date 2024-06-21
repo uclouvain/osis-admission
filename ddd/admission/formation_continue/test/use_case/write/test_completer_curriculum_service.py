@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ class TestCompleterCurriculumService(SimpleTestCase):
                 '1': 'answer_1',
                 '2': 'answer_2',
             },
+            auteur_modification='0123456789',
         )
 
     def test_should_completer_curriculum(self):
@@ -59,6 +60,7 @@ class TestCompleterCurriculumService(SimpleTestCase):
         self.assertEqual(proposition.reponses_questions_specifiques, self.cmd.reponses_questions_specifiques)
         self.assertEqual(proposition.curriculum, self.cmd.curriculum)
         self.assertEqual(proposition.equivalence_diplome, self.cmd.equivalence_diplome)
+        self.assertEqual(proposition.auteur_derniere_modification, self.cmd.auteur_modification)
 
     def test_should_vider_curriculum(self):
         cmd = attr.evolve(

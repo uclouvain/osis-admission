@@ -156,6 +156,6 @@ def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("This action is limited to a specific admission context."))
 def is_doctorate(self, user: User, obj: DoctorateAdmission):
-    from admission.templatetags.admission import CONTEXT_DOCTORATE
+    from admission.constants import CONTEXT_DOCTORATE
 
     return obj.get_admission_context() == CONTEXT_DOCTORATE

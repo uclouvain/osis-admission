@@ -26,6 +26,11 @@
 {% endcomment %}
 
 {% block actions-group %}
+
+  {% if is_continuing %}
+    {{ block.super }}
+  {% endif %}
+
 {% endblock %}
 
 {% block tab_content %}

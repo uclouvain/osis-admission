@@ -34,7 +34,7 @@ from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesParGestionnaireCommand as CompleterQuestionsSpecifiquesGeneralesParGestionnaireCommand,
 )
 from admission.forms.admission.specific_questions import GeneralSpecificQuestionsForm, ContinuingSpecificQuestionsForm
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.views.common.detail_tabs.specific_questions import SpecificQuestionsMixinView
 from infrastructure.messages_bus import message_bus_instance
 

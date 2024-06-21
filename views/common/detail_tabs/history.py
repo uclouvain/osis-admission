@@ -28,7 +28,7 @@ from django.views.generic import TemplateView
 from osis_history.contrib.mixins import HistoryEntryListAPIMixin
 from rules.contrib.views import LoginRequiredMixin
 
-from admission.templatetags.admission import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,

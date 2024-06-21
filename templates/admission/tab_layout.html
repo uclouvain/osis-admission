@@ -90,8 +90,10 @@
               {% block actions %}
                 {% if form or force_form %}
                   {# Form -> link to the details page #}
+                  {% if not next_url %}
                   {% can_read_tab tab_context.active_tab as can_read_tab %}
                   {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
+                  {% endif %}
                   <li>
                     <button class="btn btn-primary" type="submit" form="admission-form" style="width: 100%">
                       {% translate 'Save' context 'admission' %}
@@ -142,11 +144,15 @@
           {# Display the form if needed #}
           <form id="admission-form" class="osis-form" method="post" action="">
             {% csrf_token %}
-            {% block form %}{% endblock %}
+            {% block form %}
+              <p>{% trans "This page is currently under construction." %}</p>
+            {% endblock %}
           </form>
           <div class="text-right">
+            {% if not next_url %}
             {% can_read_tab tab_context.active_tab as can_read_tab %}
             {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
+            {% endif %}
             <a
                 href="{% if next_url %}{{ next_url }}{% else %}{{ read_url }}{% endif %}"
                 class="btn btn-default"
@@ -160,8 +166,6 @@
               {% translate 'Save' context 'admission' %}
             </button>
           </div>
-        {% else %}
-          <p>{% trans "This page is currently under construction." %}</p>
         {% endif %}
       {% endblock %}
       {% if children|length > 1 %}
