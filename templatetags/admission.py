@@ -73,8 +73,6 @@ from admission.ddd.admission.formation_continue.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
-    RegleDeFinancement,
-    RegleCalculeResultatAvecFinancable,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     ChoixStatutChecklist,
 )
@@ -101,6 +99,8 @@ from admission.utils import get_access_conditions_url
 from base.models.enums.civil_state import CivilState
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
@@ -1213,9 +1213,11 @@ def document_request_status_css_class(document_request_status):
 
 @register.filter
 def financability_enum_display(value):
-    if value in RegleDeFinancement.get_names():
-        return '{} - {}'.format(_('Financable'), RegleDeFinancement[value].value)
-    return RegleCalculeResultatAvecFinancable[value].value
+    if not value:
+        return ''
+    if value in SituationFinancabilite.get_names():
+        return SituationFinancabilite[value].value
+    return EtatFinancabilite[value].value
 
 
 @register.filter

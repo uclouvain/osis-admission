@@ -44,8 +44,6 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    RegleDeFinancement,
-    RegleCalculeResultatAvecFinancable,
     PoursuiteDeCycle,
     BesoinDeDerogation,
     DroitsInscriptionMontant,
@@ -57,6 +55,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
+from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
@@ -148,7 +149,14 @@ class GeneralEducationAdmission(BaseAdmission):
     # Financability
     financability_computed_rule = models.CharField(
         verbose_name=_('Financability computed rule'),
-        choices=RegleCalculeResultatAvecFinancable.choices(),
+        choices=EtatFinancabilite.choices(),
+        max_length=100,
+        default='',
+        editable=False,
+    )
+    financability_computed_rule_situation = models.CharField(
+        verbose_name=_('Financability computed rule situation'),
+        choices=SituationFinancabilite.choices(),
         max_length=100,
         default='',
         editable=False,
@@ -160,7 +168,7 @@ class GeneralEducationAdmission(BaseAdmission):
     )
     financability_rule = models.CharField(
         verbose_name=_('Financability rule'),
-        choices=RegleDeFinancement.choices(),
+        choices=SituationFinancabilite.choices(),
         max_length=100,
         default='',
     )
@@ -499,14 +507,21 @@ class GeneralEducationAdmission(BaseAdmission):
         )
         from infrastructure.messages_bus import message_bus_instance
 
-        # TODO à faire dans le DDD ? + Calculer à la soumission
-        financabilite_regle_calcule = 'INDISPONIBLE'
+        financabilite = message_bus_instance.invoke(
+            DeterminerSiCandidatEstFinancableQuery(
+                matricule_fgs=self.candidate.global_id,
+                sigle_formation=self.training.acronym,
+                annee=self.training.academic_year.year,
+                est_en_reorientation=self.is_external_reorientation,
+            )
+        )
 
         message_bus_instance.invoke(
             SpecifierFinancabiliteResultatCalculCommand(
                 uuid_proposition=self.uuid,
                 gestionnaire=author.global_id,
-                financabilite_regle_calcule=financabilite_regle_calcule,
+                financabilite_regle_calcule=financabilite.etat,
+                financabilite_regle_calcule_situation=financabilite.situation,
                 financabilite_regle_calcule_le=timezone.now(),
             )
         )
