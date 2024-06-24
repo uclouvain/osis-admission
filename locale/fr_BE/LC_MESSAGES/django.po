@@ -650,11 +650,11 @@ msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
 
 msgid ""
-"Admission is not yet valid for searching UCLouvain. The following fields are "
-"required: "
+"Admission is not yet valid for searching UCLouvain account. The following "
+"fields are required: "
 msgstr ""
-"L'admission n'est pas encore pour rechercher une correspondance UCLouvain. "
-"Les champs suivants sont requis: "
+"L'admission n'est pas encore valide pour rechercher une correspondance "
+"UCLouvain. Les champs suivants sont requis: "
 
 #, python-format
 msgid ""
