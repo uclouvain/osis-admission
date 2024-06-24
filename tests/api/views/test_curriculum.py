@@ -721,6 +721,7 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
         self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+        self.assertEqual(updated_admission.last_update_author, self.user.person)
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')

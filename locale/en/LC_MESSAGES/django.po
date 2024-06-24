@@ -334,6 +334,9 @@ msgstr ""
 msgid "Academic course"
 msgstr ""
 
+msgid "Academic courses"
+msgstr ""
+
 msgid "Academic experience"
 msgstr ""
 
@@ -370,6 +373,9 @@ msgid "Accepted"
 msgstr ""
 
 msgid "Access condition:"
+msgstr ""
+
+msgid "Access experience details"
 msgstr ""
 
 msgid "Access title"
@@ -469,6 +475,9 @@ msgstr ""
 msgid "Add a new member"
 msgstr ""
 
+msgid "Add a non-academic activity"
+msgstr ""
+
 msgid "Add a paper"
 msgstr ""
 
@@ -497,6 +506,9 @@ msgid "Add a seminar"
 msgstr ""
 
 msgid "Add a service"
+msgstr ""
+
+msgid "Add an academic course"
 msgstr ""
 
 msgid "Add an activity"
@@ -1010,6 +1022,9 @@ msgid "Bachelor"
 msgstr ""
 
 msgid "Back to checklist"
+msgstr ""
+
+msgid "Back to overview"
 msgstr ""
 
 msgctxt "admission"
@@ -4443,9 +4458,6 @@ msgstr ""
 msgid "Modification of the secondary studies"
 msgstr ""
 
-msgid "Modification of the specificities of the curriculum"
-msgstr ""
-
 msgid "Modification requested"
 msgstr ""
 
@@ -4667,6 +4679,9 @@ msgid "Noma of the candidate"
 msgstr ""
 
 msgid "Non doctor reason"
+msgstr ""
+
+msgid "Non-academic activities"
 msgstr ""
 
 msgid "Non-academic activity"
@@ -5062,6 +5077,9 @@ msgid "Payment method"
 msgstr ""
 
 msgid "Pending application fee"
+msgstr ""
+
+msgid "Period"
 msgstr ""
 
 msgid "Permanent residence card of a family member of a European Union citizen"
@@ -5714,6 +5732,9 @@ msgctxt "jury member"
 msgid "Remove"
 msgstr ""
 
+msgid "Remove experience"
+msgstr ""
+
 msgctxt "jury member"
 msgid "Remove?"
 msgstr ""
@@ -6263,6 +6284,9 @@ msgstr ""
 msgid "Specific questions"
 msgstr ""
 
+msgid "Specificities"
+msgstr ""
+
 msgid "Specified"
 msgstr ""
 
@@ -6500,6 +6524,12 @@ msgstr ""
 
 msgid "The CA members"
 msgstr "The supervisory panel members"
+
+msgid "The CV does not yet contain any academic course."
+msgstr ""
+
+msgid "The CV does not yet contain any non-academic activity."
+msgstr ""
 
 msgid "The IBAN account number is valid"
 msgstr ""
@@ -7763,6 +7793,12 @@ msgid ""
 msgstr ""
 
 msgid ""
+"You can find more information on the French Community webpage <a "
+"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
+"</a>"
+msgstr ""
+
+msgid ""
 "You can not cancel this application, it is in the \"Validated\" state. "
 "Please contact Noemie Pecher."
 msgstr ""
@@ -8112,6 +8148,10 @@ msgid "the University Institute of Continuing Education"
 msgstr ""
 
 msgid "the person concerned"
+msgstr ""
+
+msgctxt "admission-date"
+msgid "to"
 msgstr ""
 
 msgid "to the UCLouvain Registration Service"

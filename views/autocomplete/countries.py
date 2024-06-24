@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import get_language
 from rules.contrib.views import LoginRequiredMixin
 
+from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
 
 __all__ = [
@@ -50,6 +51,9 @@ class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView
     def name_field(self):
         return 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
 
+    def exclude_be(self) -> bool:
+        return False
+
     def get_queryset(self):
         search_term = self.request.GET.get('q', '')
 
@@ -58,6 +62,9 @@ class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView
         active = self.forwarded.get('active', None)
         if active is not None:
             qs = qs.filter(active=active)
+
+        if self.exclude_be():
+            qs = qs.exclude(iso_code=BE_ISO_CODE)
 
         return qs.order_by(self.name_field)
 

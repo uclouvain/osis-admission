@@ -25,7 +25,6 @@
 # ##############################################################################
 
 import datetime
-import itertools
 import uuid
 from unittest import mock
 
@@ -36,23 +35,24 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
+from admission.constants import CONTEXT_CONTINUING
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
     AdmissionEducationalValuatedExperiencesFactory,
 )
-from admission.tests.factories.faculty_decision import FreeAdditionalApprovalConditionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
@@ -62,12 +62,15 @@ from base.models.academic_year import AcademicYear
 from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
-from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
+from osis_profile.forms.experience_academique import (
+    EDUCATIONAL_EXPERIENCE_FIELDS_BY_CONTEXT,
+    EDUCATIONAL_EXPERIENCE_YEAR_FIELDS_BY_CONTEXT,
+)
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, Reduction, Grade
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
@@ -78,7 +81,7 @@ from reference.tests.factories.language import LanguageFactory
 
 
 # TODO: Remove duplicate tests with osis_profile
-class CurriculumEducationalExperienceFormViewTestCase(TestCase):
+class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create data
@@ -1823,32 +1826,30 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         )
 
 
-@freezegun.freeze_time('2022-01-01')
-class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
+class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create data
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022, 2023]]
+        cls.old_academic_years = [AcademicYearFactory(year=year) for year in [2003, 2004, 2005, 2006, 2007]]
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
-        first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        EntityVersionFactory(entity=first_doctoral_commission)
+        cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
+        cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
+        cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
+        cls.greek = LanguageFactory(code='EL')
         cls.french = LanguageFactory(code='FR')
+        cls.entity = EntityVersionFactory().entity
 
-        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
+        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training__management_entity=cls.entity,
             training__academic_year=cls.academic_years[0],
-            candidate__language=settings.LANGUAGE_CODE_EN,
-            candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
-            candidate__last_registration_year=None,
-            candidate__id_photo=[],
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
 
         # Create users
-        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.entity).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.general_admission.training.education_group,
+            education_group=cls.continuing_admission.training.education_group,
         ).person.user
         cls.first_cycle_diploma = DiplomaTitleFactory(
             cycle=Cycle.FIRST_CYCLE.name,
@@ -1864,39 +1865,79 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             community=CommunityEnum.FRENCH_SPEAKING.name,
             establishment_type=EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
         )
+        cls.files_names = [
+            'graduate_degree',
+            'graduate_degree_translation',
+            'transcript',
+            'transcript_translation',
+            'dissertation_summary',
+            '2020-transcript',
+            '2020-transcript_translation',
+            '2021-transcript',
+            '2021-transcript_translation',
+            '2022-transcript',
+            '2022-transcript_translation',
+            '2023-transcript',
+            '2023-transcript_translation',
+        ]
+        cls.files_uuids = {file_name: uuid.uuid4() for file_name in cls.files_names}
+        cls.new_file_uuids = {file_name: uuid.uuid4() for file_name in cls.files_names}
 
     def setUp(self):
         # Create data
         self.experience: EducationalExperience = EducationalExperienceFactory(
-            person=self.general_admission.candidate,
+            person=self.continuing_admission.candidate,
             country=self.be_country,
             program=self.first_cycle_diploma,
             fwb_equivalent_program=self.first_cycle_diploma,
             institute=self.first_institute,
             linguistic_regime=self.french,
-            education_name='Computer science',
-            institute_name='University of Louvain',
-            institute_address='Rue de Louvain, 1000 Bruxelles',
+            education_name='',
+            institute_name='',
+            institute_address='',
+            obtained_diploma=True,
+            evaluation_type=EvaluationSystem.ECTS_CREDITS.name,
+            transcript_type=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            obtained_grade=Grade.GREAT_DISTINCTION.name,
+            graduate_degree=[self.files_uuids['graduate_degree']],
+            transcript=[self.files_uuids['transcript']],
+            graduate_degree_translation=[],
+            transcript_translation=[],
+            rank_in_diploma='10 on 100',
             expected_graduation_date=datetime.date(2024, 1, 1),
+            dissertation_title='The new title',
+            dissertation_score='A',
+            dissertation_summary=[self.files_uuids['dissertation_summary']],
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[0],
+            result=Result.SUCCESS.name,
+            registered_credit_number=10,
+            acquired_credit_number=9,
+            transcript=[],
+            transcript_translation=[],
             with_block_1=True,
-            reduction='',
+            with_complement=True,
+            fwb_registered_credit_number=20,
+            fwb_acquired_credit_number=19,
+            reduction=Reduction.A150.name,
             is_102_change_of_course=True,
         )
         self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[2],
-            with_complement=True,
+            result=Result.SUCCESS.name,
+            registered_credit_number=30,
+            acquired_credit_number=29,
+            transcript=[],
+            transcript_translation=[],
+            with_block_1=False,
+            with_complement=False,
+            fwb_registered_credit_number=40,
+            fwb_acquired_credit_number=39,
             reduction=Reduction.A150.name,
-        )
-        # Targeted url
-        self.delete_url = resolve_url(
-            'admission:general-education:update:curriculum:educational_delete',
-            uuid=self.general_admission.uuid,
-            experience_uuid=self.experience.uuid,
+            is_102_change_of_course=False,
         )
 
         # Mock osis document api
@@ -1914,713 +1955,270 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         patched.side_effect = lambda _, value, __: value
         self.addCleanup(patcher.stop)
 
-    def test_delete_experience_from_curriculum_is_not_allowed_for_fac_users(self):
-        self.client.force_login(self.program_manager_user)
-        response = self.client.delete(self.delete_url)
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_delete_experience_from_curriculum_is_allowed_for_sic_users(self):
-        self.client.force_login(self.sic_manager_user)
-        response = self.client.delete(self.delete_url)
-
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-
-    def test_delete_experience_from_curriculum_is_not_allowed_for_injected_experiences(self):
-        self.client.force_login(self.sic_manager_user)
-
-        # The experience come from EPC
-        self.experience.external_id = 'EPC1'
-        self.experience.save(update_fields=['external_id'])
-
-        response = self.client.get(self.delete_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Reset the experience
-        self.experience.external_id = ''
-        self.experience.save(update_fields=['external_id'])
-
-        # The experience has been injected from the curriculum
-        cv_injection = CurriculumEPCInjection.objects.create(
-            person=self.general_admission.candidate,
-            type_experience=ExperienceType.PROFESSIONAL.name,
-            experience_uuid=self.experience.uuid,
-        )
-
-        response = self.client.get(self.delete_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        cv_injection.delete()
-
-        # The admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
-            admission=self.general_admission,
-        )
-
-        valuation = AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission=self.general_admission, educationalexperience=self.experience
-        )
-
-        response = self.client.get(self.delete_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        valuation.delete()
-
-        response = self.client.get(self.delete_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        admission_injection.delete()
-
-    def test_delete_experience_from_curriculum_and_redirect(self):
-        self.client.force_login(self.sic_manager_user)
-
-        admission_url = resolve_url('admission')
-        expected_url = f'{admission_url}#custom_hash'
-
-        response = self.client.delete(f'{self.delete_url}?next={admission_url}&next_hash_url=custom_hash')
-        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
-
-    def test_delete_unknown_experience_returns_404(self):
-        self.client.force_login(self.sic_manager_user)
-
-        response = self.client.delete(
-            resolve_url(
-                'admission:general-education:update:curriculum:educational_delete',
-                uuid=self.general_admission.uuid,
-                experience_uuid=uuid.uuid4(),
-            ),
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_delete_experience_used_as_approval_condition_is_not_allowed(self):
-        self.client.force_login(self.sic_manager_user)
-
-        approval_condition = FreeAdditionalApprovalConditionFactory(
-            admission=self.general_admission,
-            related_experience=self.experience,
-            name_fr='Condition de test',
-            name_en='Test condition',
-        )
-
-        response = self.client.delete(self.delete_url, follow=True)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        messages = [m.message for m in response.context['messages']]
-        self.assertIn(
-            gettext(
-                'Cannot delete the experience because it is used as additional condition for the '
-                'proposition {admission}.'.format(admission=approval_condition.admission)
-            ),
-            messages,
-        )
-
-    def test_delete_known_experience(self):
-        self.client.force_login(self.sic_manager_user)
-
-        # Simulate a valuated experience
-        AdmissionEducationalValuatedExperiences.objects.create(
-            baseadmission_id=self.general_admission.uuid,
-            educationalexperience_id=self.experience.uuid,
-        )
-
-        self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
-            Checklist.initialiser_checklist_experience(experience_uuid=self.experience.uuid).to_dict()
-        ]
-
-        self.general_admission.save()
-
-        response = self.client.delete(self.delete_url)
-
-        self.assertFalse(EducationalExperience.objects.filter(uuid=self.experience.uuid).exists())
-
-        self.assertFalse(
-            EducationalExperienceYear.objects.filter(
-                educational_experience__uuid=self.experience.uuid,
-            ).exists()
-        )
-
-        self.assertFalse(
-            AdmissionEducationalValuatedExperiences.objects.filter(
-                educationalexperience_id=self.experience.uuid
-            ).exists()
-        )
-
-        self.general_admission.refresh_from_db()
-
-        self.assertEqual(
-            self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
-            [],
-        )
-
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
-            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
-            self.general_admission.requested_documents,
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-
-
-@freezegun.freeze_time('2022-01-01')
-class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Create data
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
-        first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        EntityVersionFactory(entity=first_doctoral_commission)
-
-        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=cls.academic_years[0],
-            candidate__language=settings.LANGUAGE_CODE_EN,
-            candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
-            candidate__last_registration_year=None,
-            candidate__id_photo=[],
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-        )
-        cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
-        cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
-
-        cls.first_cycle_diploma = DiplomaTitleFactory(
-            cycle=Cycle.FIRST_CYCLE.name,
-        )
-        cls.second_cycle_diploma = DiplomaTitleFactory(
-            cycle=Cycle.SECOND_CYCLE.name,
-        )
-        cls.first_institute = OrganizationFactory(
-            community=CommunityEnum.FRENCH_SPEAKING.name,
-            establishment_type=EstablishmentTypeEnum.UNIVERSITY.name,
-        )
-        cls.second_institute = OrganizationFactory(
-            community=CommunityEnum.FRENCH_SPEAKING.name,
-            establishment_type=EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
-        )
-        cls.french = LanguageFactory(code='FR')
-
-        # Create users
-        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
-        cls.program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.general_admission.training.education_group,
-        ).person.user
-
-        cls.files_uuids = [uuid.uuid4() for _ in range(9)]
-        cls.files_uuids_str = [str(current_uuid) for current_uuid in cls.files_uuids]
-        cls.duplicate_files_uuids = [uuid.uuid4() for _ in cls.files_uuids]
-        cls.duplicate_files_uuids_str = [str(current_uuid) for current_uuid in cls.duplicate_files_uuids]
-
-    def setUp(self):
-        # Create data
-        self.experience: EducationalExperience = EducationalExperienceFactory(
-            external_id='custom_id_1',
-            person=self.general_admission.candidate,
-            institute_name='University of Louvain',
-            country=self.be_country,
-            institute=self.first_institute,
-            institute_address='Rue de Louvain, 1000 Bruxelles',
-            program=self.first_cycle_diploma,
-            fwb_equivalent_program=self.second_cycle_diploma,
-            education_name='Computer science',
-            study_system=TeachingTypeEnum.SOCIAL_PROMOTION.name,
-            evaluation_type=EvaluationSystem.ECTS_CREDITS.name,
-            linguistic_regime=self.french,
-            transcript_type=TranscriptType.ONE_A_YEAR.name,
-            obtained_diploma=True,
-            obtained_grade=Grade.GREAT_DISTINCTION.name,
-            graduate_degree=[self.files_uuids[0]],
-            graduate_degree_translation=[self.files_uuids[1]],
-            transcript=[self.files_uuids[2]],
-            transcript_translation=[self.files_uuids[3]],
-            rank_in_diploma='10',
-            expected_graduation_date=datetime.date(2024, 1, 1),
-            dissertation_title='Dissertations',
-            dissertation_score='15',
-            dissertation_summary=[self.files_uuids[4]],
-        )
-        self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
-            external_id='custom_id_11',
-            educational_experience=self.experience,
-            academic_year=self.academic_years[0],
-            registered_credit_number=21,
-            acquired_credit_number=20,
-            result=Result.SUCCESS.name,
-            transcript=[self.files_uuids[5]],
-            transcript_translation=[self.files_uuids[7]],
-            with_block_1=True,
-            with_complement=True,
-            fwb_registered_credit_number=11,
-            fwb_acquired_credit_number=10,
-            reduction=Reduction.A150.name,
-            is_102_change_of_course=True,
-        )
-        self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
-            external_id='custom_id_12',
-            educational_experience=self.experience,
-            academic_year=self.academic_years[1],
-            registered_credit_number=31,
-            acquired_credit_number=30,
-            result=Result.SUCCESS.name,
-            transcript=[self.files_uuids[6]],
-            transcript_translation=[self.files_uuids[8]],
-            with_block_1=False,
-            with_complement=False,
-            fwb_registered_credit_number=13,
-            fwb_acquired_credit_number=12,
-            reduction=Reduction.A151.name,
-            is_102_change_of_course=False,
-        )
         # Targeted url
-        self.duplicate_url = resolve_url(
-            'admission:general-education:update:curriculum:educational_duplicate',
-            uuid=self.general_admission.uuid,
+        self.form_url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational',
+            uuid=self.continuing_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
+        self.details_url = resolve_url(
+            'admission:continuing-education:curriculum',
+            uuid=self.continuing_admission.uuid,
+        )
+        self.create_url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational_create',
+            uuid=self.continuing_admission.uuid,
+        )
 
-        # Mock osis document api
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
-        self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
-        self.get_several_remote_metadata_patched.return_value = {
-            f'token{index}': {
-                'name': f'the_file_{index}.pdf',
-                'size': 1,
-            }
-            for index in range(len(self.files_uuids))
-        }
-        self.addCleanup(self.get_several_remote_metadata_patcher.stop)
-
-        self.get_remote_tokens_patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
-        self.get_remote_tokens_patched = self.get_remote_tokens_patcher.start()
-        self.get_remote_tokens_patched.return_value = {
-            self.files_uuids_str[index]: f'token{index}' for index in range(len(self.files_uuids))
-        }
-        self.addCleanup(self.get_remote_tokens_patcher.stop)
-
-        self.documents_remote_duplicate_patcher = mock.patch('osis_document.api.utils.documents_remote_duplicate')
-        self.documents_remote_duplicate_patched = self.documents_remote_duplicate_patcher.start()
-        self.documents_remote_duplicate_patched.return_value = {
-            self.files_uuids_str[index]: self.duplicate_files_uuids_str[index] for index in range(len(self.files_uuids))
-        }
-        self.addCleanup(self.documents_remote_duplicate_patcher.stop)
-
-    def test_duplicate_experience_from_curriculum_is_not_allowed_for_fac_users(self):
+    def test_update_curriculum_is_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
-        response = self.client.post(self.duplicate_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_duplicate_experience_from_curriculum_is_allowed_for_sic_users(self):
+    def test_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
-        response = self.client.post(self.duplicate_url)
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_duplicate_experience_from_curriculum_and_redirect(self):
+    def test_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
-        expected_url = f'{admission_url}#custom_hash'
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.post(f'{self.duplicate_url}?next={admission_url}&next_hash_url=custom_hash')
-        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+        base_form = response.context['base_form']
+        formset = response.context['year_formset']
 
-    def test_duplicate_unknown_experience_returns_404(self):
+        enabled_fields = EDUCATIONAL_EXPERIENCE_FIELDS_BY_CONTEXT[CONTEXT_CONTINUING]
+        for field in base_form.fields:
+            self.assertEqual(base_form.fields[field].disabled, field not in enabled_fields)
+
+        disabled_fields = EDUCATIONAL_EXPERIENCE_YEAR_FIELDS_BY_CONTEXT[CONTEXT_CONTINUING]
+        for form in formset:
+            for field in form.fields:
+                self.assertEqual(form.fields[field].disabled, field not in disabled_fields)
+
+    def test_form_submission_to_create_an_experience(self):
         self.client.force_login(self.sic_manager_user)
 
         response = self.client.post(
-            resolve_url(
-                'admission:general-education:update:curriculum:educational_duplicate',
-                uuid=self.general_admission.uuid,
-                experience_uuid=uuid.uuid4(),
-            ),
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    @freezegun.freeze_time('2022-02-02')
-    def test_duplicate_known_but_not_valuated_experience(self):
-        self.client.force_login(self.sic_manager_user)
-
-        educational_experiences = EducationalExperience.objects.filter(person=self.general_admission.candidate)
-
-        self.assertEqual(educational_experiences.count(), 1)
-
-        base_original_experience = educational_experiences.first()
-        base_original_years = base_original_experience.educationalexperienceyear_set.all().order_by(
-            'academic_year__year'
-        )
-
-        response = self.client.post(self.duplicate_url)
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-
-        # Check the data of the duplicated experience
-        educational_experiences = EducationalExperience.objects.filter(person=self.general_admission.candidate)
-
-        self.assertEqual(educational_experiences.count(), 2)
-
-        if educational_experiences[0].uuid == base_original_experience.uuid:
-            original_experience, duplicated_experience = educational_experiences
-        else:
-            duplicated_experience, original_experience = educational_experiences
-
-        fields_to_duplicate = [
-            'person',
-            'institute_name',
-            'country',
-            'institute',
-            'institute_address',
-            'program',
-            'fwb_equivalent_program',
-            'education_name',
-            'study_system',
-            'evaluation_type',
-            'linguistic_regime',
-            'transcript_type',
-            'obtained_diploma',
-            'obtained_grade',
-            'rank_in_diploma',
-            'expected_graduation_date',
-            'dissertation_title',
-            'dissertation_score',
-        ]
-
-        fields_to_update = [
-            'external_id',
-            'graduate_degree',
-            'graduate_degree_translation',
-            'transcript',
-            'transcript_translation',
-            'dissertation_summary',
-        ]
-
-        fields_years_to_duplicate = [
-            'academic_year',
-            'registered_credit_number',
-            'acquired_credit_number',
-            'result',
-            'with_block_1',
-            'with_complement',
-            'fwb_registered_credit_number',
-            'fwb_acquired_credit_number',
-            'reduction',
-            'is_102_change_of_course',
-        ]
-
-        fields_years_to_update = [
-            'external_id',
-            'educational_experience',
-            'transcript',
-            'transcript_translation',
-        ]
-
-        # Check that the original experience has not been updated
-
-        # Main object
-        for field in itertools.chain(fields_to_duplicate, fields_to_update):
-            self.assertEqual(
-                getattr(base_original_experience, field),
-                getattr(original_experience, field),
-                f'"{field}" must not be updated',
-            )
-
-        # Sub objects (years)
-        original_years = original_experience.educationalexperienceyear_set.all().order_by('academic_year__year')
-
-        for index in range(len(original_years)):
-            base_experience_year = base_original_years[index]
-            original_experience_year = original_years[index]
-            for field in itertools.chain(fields_years_to_duplicate, fields_years_to_update):
-                self.assertEqual(getattr(base_experience_year, field), getattr(original_experience_year, field))
-
-        # Check that the duplicated experience is a valid copy of the original
-
-        # Main object
-        for field in fields_to_duplicate:
-            self.assertEqual(getattr(duplicated_experience, field), getattr(original_experience, field))
-
-        for field in fields_to_update:
-            self.assertNotEqual(getattr(duplicated_experience, field), getattr(original_experience, field))
-
-        self.assertEqual(duplicated_experience.external_id, None)
-        self.assertEqual(duplicated_experience.graduate_degree, [self.duplicate_files_uuids[0]])
-        self.assertEqual(duplicated_experience.graduate_degree_translation, [self.duplicate_files_uuids[1]])
-        self.assertEqual(duplicated_experience.transcript, [self.duplicate_files_uuids[2]])
-        self.assertEqual(duplicated_experience.transcript_translation, [self.duplicate_files_uuids[3]])
-        self.assertEqual(duplicated_experience.dissertation_summary, [self.duplicate_files_uuids[4]])
-
-        # Sub objects (years)
-        duplicated_years = duplicated_experience.educationalexperienceyear_set.all().order_by('academic_year__year')
-
-        for index in range(len(original_years)):
-            original_experience_year = original_years[index]
-            duplicated_experience_year = duplicated_years[index]
-            for field in fields_years_to_duplicate:
-                self.assertEqual(getattr(duplicated_experience_year, field), getattr(original_experience_year, field))
-
-            for field in fields_years_to_update:
-                self.assertNotEqual(
-                    getattr(duplicated_experience_year, field),
-                    getattr(original_experience_year, field),
-                )
-
-            self.assertEqual(duplicated_experience_year.external_id, None)
-            self.assertEqual(duplicated_experience_year.educational_experience, duplicated_experience)
-            self.assertEqual(duplicated_experience_year.transcript, [self.duplicate_files_uuids[5 + index]])
-            self.assertEqual(duplicated_experience_year.transcript_translation, [self.duplicate_files_uuids[7 + index]])
-
-        self.documents_remote_duplicate_patched.assert_called_once()
-
-        call_args = self.documents_remote_duplicate_patched.call_args[1]
-
-        self.assertCountEqual(call_args.get('uuids'), self.files_uuids)
-        self.assertEqual(call_args.get('with_modified_upload'), True)
-        self.assertEqual(
-            call_args.get('upload_path_by_uuid'),
-            {
-                self.files_uuids_str[index]: f'{self.general_admission.candidate.uuid}/curriculum/the_file_{index}.pdf'
-                for index in range(len(self.files_uuids_str))
+            self.create_url,
+            data={
+                'base_form-start': '2020',
+                'base_form-end': '2021',
+                'base_form-country': self.be_country.iso_code,
+                'base_form-other_institute': False,
+                'base_form-institute_name': 'Custom institute name',
+                'base_form-institute_address': 'Custom institute address',
+                'base_form-institute': self.first_institute.pk,
+                'base_form-program': self.first_cycle_diploma.pk,
+                'base_form-other_program': False,
+                'base_form-education_name': 'Custom education name',
+                'base_form-evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+                'base_form-linguistic_regime': self.french.code,
+                'base_form-transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
+                'base_form-obtained_diploma': True,
+                'base_form-obtained_grade': Grade.GREAT_DISTINCTION.name,
+                'base_form-graduate_degree_0': [self.new_file_uuids['graduate_degree']],
+                'base_form-graduate_degree_translation_0': [self.new_file_uuids['graduate_degree_translation']],
+                'base_form-transcript_0': [self.new_file_uuids['transcript']],
+                'base_form-transcript_translation_0': [self.new_file_uuids['transcript_translation']],
+                'base_form-rank_in_diploma': '10 on 100',
+                'base_form-expected_graduation_date': datetime.date(2022, 1, 1),
+                'base_form-dissertation_title': 'The new title',
+                'base_form-dissertation_score': 'A',
+                'base_form-dissertation_summary_0': [self.new_file_uuids['dissertation_summary']],
+                'year_formset-2020-is_enrolled': True,
+                'year_formset-2020-academic_year': 2020,
+                'year_formset-2020-result': Result.SUCCESS_WITH_RESIDUAL_CREDITS.name,
+                'year_formset-2020-acquired_credit_number': 100,
+                'year_formset-2020-registered_credit_number': 150,
+                'year_formset-2020-transcript_0': [self.new_file_uuids['2020-transcript']],
+                'year_formset-2020-transcript_translation_0': [self.new_file_uuids['2020-transcript_translation']],
+                'year_formset-2021-is_enrolled': True,
+                'year_formset-2021-academic_year': 2021,
+                'year_formset-2021-acquired_credit_number': '',
+                'year_formset-2021-registered_credit_number': '',
+                'year_formset-2021-result': '',
+                'year_formset-2021-transcript_0': [],
+                'year_formset-2021-transcript_translation_0': [],
+                'year_formset-TOTAL_FORMS': '2',
+                'year_formset-INITIAL_FORMS': '0',
             },
         )
 
-        # Check that the admission has been updated
-        self.general_admission.refresh_from_db()
-
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime(2022, 2, 2, 0, 0))
-
-    def test_duplicate_known_valuated_experience(self):
-        self.client.force_login(self.sic_manager_user)
-
-        # Simulate valuated experiences
-        other_valuated_admission_without_checklist = GeneralEducationAdmissionFactory(
-            training=self.general_admission.training,
-            candidate=self.general_admission.candidate,
-            status=self.general_admission.status,
-            checklist={},
-        )
-        other_valuated_admission_with_checklist = GeneralEducationAdmissionFactory(
-            training=self.general_admission.training,
-            candidate=self.general_admission.candidate,
-            status=self.general_admission.status,
-        )
-        other_not_valuated_admission = GeneralEducationAdmissionFactory(
-            training=self.general_admission.training,
-            candidate=self.general_admission.candidate,
-            status=self.general_admission.status,
+        experiences = EducationalExperience.objects.exclude(
+            person=self.continuing_admission.candidate,
+            pk=self.experience.pk,
         )
 
-        educational_experiences = EducationalExperience.objects.filter(person=self.general_admission.candidate)
+        self.assertEqual(len(experiences), 1)
 
-        self.assertEqual(educational_experiences.count(), 1)
+        experience = experiences[0]
 
-        experience = educational_experiences.first()
-
-        valuations = [
-            AdmissionEducationalValuatedExperiences.objects.create(
-                baseadmission_id=admission.uuid,
-                educationalexperience_id=self.experience.uuid,
-            )
-            for admission in [
-                self.general_admission,
-                other_valuated_admission_with_checklist,
-                other_valuated_admission_without_checklist,
-            ]
-        ]
-
-        response = self.client.post(self.duplicate_url)
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-
-        # Check the data of the valuations
-        educational_experiences = EducationalExperience.objects.filter(person=self.general_admission.candidate)
-
-        self.assertEqual(educational_experiences.count(), 2)
-
-        if educational_experiences[0].uuid == experience.uuid:
-            original_experience, duplicated_experience = educational_experiences
-        else:
-            duplicated_experience, original_experience = educational_experiences
-
-        default_checklist = Checklist.initialiser_checklist_experience(
-            experience_uuid=str(duplicated_experience.uuid),
-        ).to_dict()
-
-        duplicated_valuations = AdmissionEducationalValuatedExperiences.objects.filter(
-            educationalexperience_id=duplicated_experience.uuid,
-        ).select_related('baseadmission')
-
-        self.assertEqual(duplicated_valuations.count(), 3)
-
-        self.assertCountEqual(
-            [valuation.baseadmission.uuid for valuation in duplicated_valuations],
-            [
-                self.general_admission.uuid,
-                other_valuated_admission_with_checklist.uuid,
-                other_valuated_admission_without_checklist.uuid,
-            ],
-        )
-
-        # Check that the checklists have been well initialized
-        self.general_admission.refresh_from_db()
-        other_valuated_admission_without_checklist.refresh_from_db()
-        other_valuated_admission_with_checklist.refresh_from_db()
-        other_not_valuated_admission.refresh_from_db()
-
-        self.assertIn(
-            default_checklist,
-            self.general_admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('enfants', []),
-        )
-
-        self.assertIn(
-            default_checklist,
-            other_valuated_admission_with_checklist.checklist.get('current', {})
-            .get('parcours_anterieur', {})
-            .get('enfants', []),
-        )
-
-        self.assertNotIn(
-            default_checklist,
-            other_not_valuated_admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('enfants', []),
-        )
-
-        self.assertNotIn(
-            default_checklist,
-            other_valuated_admission_without_checklist.checklist.get('current', {})
-            .get('parcours_anterieur', {})
-            .get('enfants', []),
-        )
-
-
-@freezegun.freeze_time('2022-01-01')
-class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Create data
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
-        entity = EntityWithVersionFactory()
-
-        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training__management_entity=entity,
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-        )
-
-        # Create users
-        cls.sic_manager_user = SicManagementRoleFactory(entity=entity).person.user
-        cls.program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.general_admission.training.education_group,
-        ).person.user
-
-    def setUp(self):
-        # Create data
-        self.experience: EducationalExperience = EducationalExperienceFactory(
-            person=self.general_admission.candidate,
-        )
-
-        # Targeted url
-        self.valuate_url = resolve_url(
-            'admission:general-education:update:curriculum:educational_valuate',
-            uuid=self.general_admission.uuid,
-            experience_uuid=self.experience.uuid,
-        )
-
-    def test_valuate_experience_from_curriculum_is_not_allowed_for_fac_users(self):
-        self.client.force_login(self.program_manager_user)
-        response = self.client.post(self.valuate_url)
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_valuate_experience_from_curriculum_is_allowed_for_sic_users(self):
-        self.client.force_login(self.sic_manager_user)
-
-        expected_url = resolve_url('admission:general-education:checklist', uuid=self.general_admission.uuid)
-
-        response = self.client.post(self.valuate_url)
-
-        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
-
-    def test_valuate_experience_from_curriculum_and_redirect(self):
-        self.client.force_login(self.sic_manager_user)
-
-        admission_url = resolve_url('admission')
-        expected_url = f'{admission_url}#custom_hash'
-
-        response = self.client.post(f'{self.valuate_url}?next={admission_url}&next_hash_url=custom_hash')
-
-        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
-
-    def test_valuate_unknown_experience_returns_404(self):
-        self.client.force_login(self.sic_manager_user)
-
-        response = self.client.post(
-            resolve_url(
-                'admission:general-education:update:curriculum:educational_valuate',
-                uuid=self.general_admission.uuid,
-                experience_uuid=uuid.uuid4(),
+        self.assertRedirects(
+            response=response,
+            expected_url=resolve_url(
+                'admission:continuing-education:curriculum',
+                uuid=self.continuing_admission.uuid,
             ),
         )
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        # Check the experience (only the continuing fields are filled)
+        self.assertEqual(experience.country, self.be_country)
+        self.assertEqual(experience.institute_name, '')
+        self.assertEqual(experience.institute_address, '')
+        self.assertEqual(experience.institute, self.first_institute)
+        self.assertEqual(experience.program, self.first_cycle_diploma)
+        self.assertEqual(experience.education_name, '')
+        self.assertEqual(experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)  # Automatically computed
+        self.assertEqual(experience.linguistic_regime, None)
+        self.assertEqual(experience.transcript_type, '')
+        self.assertEqual(experience.obtained_diploma, True)
+        self.assertEqual(experience.obtained_grade, '')
+        self.assertEqual(experience.graduate_degree, [self.new_file_uuids['graduate_degree']])
+        self.assertEqual(experience.graduate_degree_translation, [])
+        self.assertEqual(experience.transcript, [])
+        self.assertEqual(experience.transcript_translation, [])
+        self.assertEqual(experience.rank_in_diploma, '')
+        self.assertEqual(experience.expected_graduation_date, None)
+        self.assertEqual(experience.dissertation_title, '')
+        self.assertEqual(experience.dissertation_score, '')
+        self.assertEqual(experience.dissertation_summary, [])
 
-    def test_valuate_known_experience(self):
+        years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
+
+        self.assertEqual(len(years), 2)
+        self.assertEqual(years[0].academic_year, self.academic_years[0])
+        self.assertEqual(years[0].result, '')
+        self.assertEqual(years[0].registered_credit_number, None)
+        self.assertEqual(years[0].acquired_credit_number, None)
+        self.assertEqual(years[0].transcript, [])
+        self.assertEqual(years[0].transcript_translation, [])
+        self.assertEqual(years[0].with_block_1, None)
+        self.assertEqual(years[0].with_complement, None)
+        self.assertEqual(years[0].fwb_registered_credit_number, None)
+        self.assertEqual(years[0].fwb_acquired_credit_number, None)
+        self.assertEqual(years[0].reduction, '')
+        self.assertEqual(years[0].is_102_change_of_course, None)
+
+        self.assertEqual(years[1].academic_year, self.academic_years[1])
+        self.assertEqual(years[1].result, '')
+        self.assertEqual(years[1].registered_credit_number, None)
+        self.assertEqual(years[1].acquired_credit_number, None)
+        self.assertEqual(years[1].transcript, [])
+        self.assertEqual(years[1].transcript_translation, [])
+        self.assertEqual(years[1].with_block_1, None)
+        self.assertEqual(years[1].with_complement, None)
+        self.assertEqual(years[1].fwb_registered_credit_number, None)
+        self.assertEqual(years[1].fwb_acquired_credit_number, None)
+        self.assertEqual(years[1].reduction, '')
+        self.assertEqual(years[1].is_102_change_of_course, None)
+
+    def test_form_submission_to_update_an_experience(self):
         self.client.force_login(self.sic_manager_user)
 
-        default_experience_checklist = Checklist.initialiser_checklist_experience(str(self.experience.uuid)).to_dict()
+        response = self.client.post(
+            self.form_url,
+            data={
+                'base_form-start': '2020',
+                'base_form-end': '2023',
+                'base_form-country': self.be_country.iso_code,
+                'base_form-other_institute': True,
+                'base_form-institute_name': 'Custom institute name',
+                'base_form-institute_address': 'Custom institute address',
+                'base_form-institute': self.first_institute.pk,
+                'base_form-program': self.first_cycle_diploma.pk,
+                'base_form-other_program': True,
+                'base_form-education_name': 'Custom education name',
+                'base_form-evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+                'base_form-linguistic_regime': self.greek.code,
+                'base_form-transcript_type': TranscriptType.ONE_A_YEAR.name,
+                'base_form-obtained_diploma': True,
+                'base_form-obtained_grade': Grade.GREATER_DISTINCTION.name,
+                'base_form-graduate_degree_0': [self.new_file_uuids['graduate_degree']],
+                'base_form-graduate_degree_translation_0': [self.new_file_uuids['graduate_degree_translation']],
+                'base_form-transcript_0': [self.new_file_uuids['transcript']],
+                'base_form-transcript_translation_0': [self.new_file_uuids['transcript_translation']],
+                'base_form-rank_in_diploma': '11 on 100',
+                'base_form-expected_graduation_date': datetime.date(2025, 1, 1),
+                'base_form-dissertation_title': 'The new title v2',
+                'base_form-dissertation_score': 'B',
+                'base_form-dissertation_summary_0': [self.new_file_uuids['dissertation_summary']],
+                # Update existing one
+                'year_formset-2022-is_enrolled': True,
+                'year_formset-2022-academic_year': 2022,
+                'year_formset-2022-result': Result.FAILURE.name,
+                'year_formset-2022-acquired_credit_number': 220,
+                'year_formset-2022-registered_credit_number': 221,
+                'year_formset-2022-transcript_0': [self.new_file_uuids['2022-transcript']],
+                'year_formset-2022-transcript_translation_0': [self.new_file_uuids['2022-transcript_translation']],
+                # Add new one
+                'year_formset-2023-is_enrolled': True,
+                'year_formset-2023-academic_year': 2023,
+                'year_formset-2023-result': Result.SUCCESS_WITH_RESIDUAL_CREDITS.name,
+                'year_formset-2023-acquired_credit_number': 230,
+                'year_formset-2023-registered_credit_number': 231,
+                'year_formset-2023-transcript_0': [self.new_file_uuids['2023-transcript']],
+                'year_formset-2023-transcript_translation_0': [self.new_file_uuids['2023-transcript_translation']],
+                'year_formset-TOTAL_FORMS': '2',
+                'year_formset-INITIAL_FORMS': '2',
+            },
+        )
 
-        response = self.client.post(self.valuate_url)
+        self.assertRedirects(response=response, expected_url=self.details_url)
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.experience.refresh_from_db()
+        experience = self.experience
 
-        # Check that the experience has been valuated
-        valuation = AdmissionEducationalValuatedExperiences.objects.filter(
-            educationalexperience_id=self.experience.uuid,
-            baseadmission=self.general_admission,
-        ).first()
-        self.assertIsNotNone(valuation)
+        # Check the experience (only the continuing fields are updated)
+        self.assertEqual(experience.country, self.be_country)
+        self.assertEqual(experience.institute_name, 'Custom institute name')
+        self.assertEqual(experience.institute_address, 'Custom institute address')
+        self.assertEqual(experience.institute, None)
+        self.assertEqual(experience.program, None)
+        self.assertEqual(experience.education_name, 'Custom education name')
+        self.assertEqual(experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)  # Automatically computed
+        self.assertEqual(experience.linguistic_regime, None)  # Automatically cleaned
+        self.assertEqual(experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
+        self.assertEqual(experience.obtained_diploma, True)
+        self.assertEqual(experience.obtained_grade, Grade.GREAT_DISTINCTION.name)
+        self.assertEqual(experience.graduate_degree, [self.new_file_uuids['graduate_degree']])
+        self.assertEqual(experience.graduate_degree_translation, [])
+        self.assertEqual(experience.transcript, [self.files_uuids['transcript']])
+        self.assertEqual(experience.transcript_translation, [])
+        self.assertEqual(experience.rank_in_diploma, '10 on 100')
+        self.assertEqual(experience.expected_graduation_date, datetime.date(2024, 1, 1))
+        self.assertEqual(experience.dissertation_title, 'The new title')
+        self.assertEqual(experience.dissertation_score, 'A')
+        self.assertEqual(experience.dissertation_summary, [self.files_uuids['dissertation_summary']])
 
-        # Check that the experience has been added to the checklist
-        self.general_admission.refresh_from_db()
+        years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 
-        saved_experience_checklist = [
-            experience_checklist
-            for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
-            if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
-        ]
+        self.assertEqual(len(years), 2)
+        self.assertEqual(years[0].academic_year, self.academic_years[2])
+        self.assertEqual(years[0].result, Result.SUCCESS.name)
+        self.assertEqual(years[0].registered_credit_number, 30)
+        self.assertEqual(years[0].acquired_credit_number, 29)
+        self.assertEqual(years[0].transcript, [])
+        self.assertEqual(years[0].transcript_translation, [])
 
-        self.assertEqual(len(saved_experience_checklist), 1)
-        self.assertEqual(saved_experience_checklist[0], default_experience_checklist)
+        self.assertEqual(years[0].with_block_1, None)
+        self.assertEqual(years[0].with_complement, None)
+        self.assertEqual(years[0].fwb_registered_credit_number, None)
+        self.assertEqual(years[0].fwb_acquired_credit_number, None)
+        self.assertEqual(years[0].reduction, Reduction.A150.name)
+        self.assertEqual(years[0].is_102_change_of_course, None)
 
-        # Check that the modified informations have been updated
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-
-        # Keep the experience checklist if one is already there
-        saved_experience_checklist[0]['extra']['custom'] = 'custom value'
-        self.general_admission.save(update_fields=['checklist'])
-
-        valuation.delete()
-
-        response = self.client.post(self.valuate_url)
-
-        # Check that the experience has been valuated
-        valuation = AdmissionEducationalValuatedExperiences.objects.filter(
-            educationalexperience_id=self.experience.uuid,
-            baseadmission=self.general_admission,
-        ).first()
-        self.assertIsNotNone(valuation)
-
-        # Check that the experience checklist has been kept
-        self.general_admission.refresh_from_db()
-
-        new_saved_experience_checklist = [
-            experience_checklist
-            for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
-            if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
-        ]
-
-        self.assertEqual(len(new_saved_experience_checklist), 1)
-        self.assertNotEqual(new_saved_experience_checklist[0], default_experience_checklist)
-        self.assertEqual(new_saved_experience_checklist[0], saved_experience_checklist[0])
+        self.assertEqual(years[1].academic_year, self.academic_years[3])
+        self.assertEqual(years[1].result, '')
+        self.assertEqual(years[1].registered_credit_number, None)
+        self.assertEqual(years[1].acquired_credit_number, None)
+        self.assertEqual(years[1].transcript, [])
+        self.assertEqual(years[1].transcript_translation, [])
+        self.assertEqual(years[1].with_block_1, None)
+        self.assertEqual(years[1].with_complement, None)
+        self.assertEqual(years[1].fwb_registered_credit_number, None)
+        self.assertEqual(years[1].fwb_acquired_credit_number, None)
+        self.assertEqual(years[1].reduction, '')
+        self.assertEqual(years[1].is_102_change_of_course, None)

@@ -127,6 +127,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterCurriculumCommand(interface.CommandRequest):
     uuid_proposition: str
+    auteur_modification: str
 
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)

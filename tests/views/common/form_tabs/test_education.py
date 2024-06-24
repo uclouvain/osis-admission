@@ -34,12 +34,14 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
@@ -56,7 +58,11 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.education_group_year import Master120TrainingFactory, EducationGroupYearBachelorFactory
+from base.tests.factories.education_group_year import (
+    Master120TrainingFactory,
+    EducationGroupYearBachelorFactory,
+    ContinuingEducationTrainingFactory,
+)
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
@@ -629,6 +635,126 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(HighSchoolDiplomaAlternative.objects.filter(person=self.general_admission.candidate).exists())
+
+
+@freezegun.freeze_time("2022-01-01")
+class AdmissionEducationFormViewForContinuingTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create data
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
+        first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        EntityVersionFactory(entity=first_doctoral_commission)
+
+        cls.training = ContinuingEducationTrainingFactory(
+            management_entity=first_doctoral_commission,
+            academic_year=cls.academic_years[1],
+        )
+
+        cls.specific_question = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(),
+            tab=OngletsDemande.ETUDES_SECONDAIRES.name,
+            academic_year=cls.training.academic_year,
+        )
+        cls.specific_question_uuid = str(cls.specific_question.form_item.uuid)
+
+        cls.other_specific_question = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(),
+            tab=OngletsDemande.CURRICULUM.name,
+        )
+        cls.other_specific_question_uuid = str(cls.other_specific_question.form_item.uuid)
+
+        # Create users
+        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
+        cls.program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.training.education_group,
+        ).person.user
+
+    def setUp(self):
+        # Mocked data
+        self.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training=self.training,
+            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
+            candidate__graduated_from_high_school_year=self.academic_years[1],
+            candidate__id_photo=[],
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            specific_question_answers={
+                self.other_specific_question_uuid: 'My other answer',
+            },
+        )
+
+        # Url
+        self.form_url = resolve_url(
+            'admission:continuing-education:update:education',
+            uuid=self.continuing_admission.uuid,
+        )
+
+        # Mock osis document api
+        patcher = mock.patch("osis_document.api.utils.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch(
+            'osis_document.api.utils.get_remote_metadata',
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: value
+
+    def test_update_education_is_allowed_for_fac_users(self):
+        self.client.force_login(self.program_manager_user)
+        response = self.client.get(self.form_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_education_is_allowed_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.get(self.form_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_submit_valid_data(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.post(
+            self.form_url,
+            data={
+                'graduated_from_high_school': GotDiploma.YES.name,
+                'graduated_from_high_school_year': self.academic_years[0].year,
+                'specific_question_answers_0': 'My answer',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        # Check saved data
+        self.continuing_admission.refresh_from_db()
+        candidate = self.continuing_admission.candidate
+
+        self.assertEqual(candidate.graduated_from_high_school, GotDiploma.YES.name)
+        self.assertEqual(candidate.graduated_from_high_school_year, self.academic_years[0])
+
+        self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=candidate).exists())
+        self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=candidate).exists())
+        self.assertFalse(HighSchoolDiplomaAlternative.objects.filter(person=candidate).exists())
+
+        self.assertEqual(
+            self.continuing_admission.specific_question_answers,
+            {
+                self.specific_question_uuid: 'My answer',
+                self.other_specific_question_uuid: 'My other answer',
+            },
+        )
+
+        # Check additional updates
+        self.assertEqual(self.continuing_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.continuing_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.continuing_admission.requested_documents,
+        )
 
 
 @freezegun.freeze_time("2022-01-01")
