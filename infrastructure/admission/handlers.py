@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,8 +27,7 @@ from django.conf import settings
 
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
-from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read.recuperer_informations_destinataire_service\
-    import recuperer_informations_destinataire
+from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
 from admission.ddd.admission.use_case.read import *
 from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
 from admission.ddd.admission.use_case.read.recuperer_matricule_digit import recuperer_matricule_digit
@@ -36,10 +35,14 @@ from admission.ddd.admission.use_case.write.modifier_matricule_candidat import m
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
 from admission.infrastructure.admission.event_handler.reagir_a_proposition_soumise import recherche_et_validation_digit
 from admission.infrastructure.admission.repository.digit import DigitRepository
-from admission.infrastructure.admission.repository.proposition_fusion_personne import \
-    PropositionPersonneFusionRepository
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import \
-    EmailDestinataireRepository
+from admission.infrastructure.admission.repository.proposition_fusion_personne import (
+    PropositionPersonneFusionRepository,
+)
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
+    EmailDestinataireRepository,
+)
+
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -48,19 +51,31 @@ COMMAND_HANDLERS = {
     ),
     RecupererInformationsDestinataireQuery: lambda msg_bus, query: recuperer_informations_destinataire(
         query,
-        email_destinataire_repository=EmailDestinataireRepository()
+        email_destinataire_repository=EmailDestinataireRepository(),
     ),
     GetPropositionFusionQuery: lambda msg_bus, query: get_proposition_fusion_personne(
         query,
-        proposition_fusion_repository=PropositionPersonneFusionRepository()
+        proposition_fusion_repository=PropositionPersonneFusionRepository(),
     ),
     RecupererMatriculeDigitQuery: lambda msg_bus, query: recuperer_matricule_digit(
         query,
-        digit_repository=DigitRepository()
+        digit_repository=DigitRepository(),
     ),
     ModifierMatriculeCandidatCommand: lambda msg_bus, query: modifier_matricule_candidat(
         query,
-        digit_repository=DigitRepository()
+        digit_repository=DigitRepository(),
+    ),
+    RecupererEtudesSecondairesQuery: lambda msg_bus, query: recuperer_etudes_secondaires(
+        query,
+        profil_candidat_translator=ProfilCandidatTranslator(),
+    ),
+    RecupererExperienceAcademiqueQuery: lambda msg_bus, query: recuperer_experience_academique(
+        query,
+        profil_candidat_translator=ProfilCandidatTranslator(),
+    ),
+    RecupererExperienceNonAcademiqueQuery: lambda msg_bus, query: recuperer_experience_non_academique(
+        query,
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
 }
 

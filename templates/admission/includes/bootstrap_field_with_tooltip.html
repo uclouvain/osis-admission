@@ -6,7 +6,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,13 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% if field.is_hidden %}
-  {% bootstrap_field field %}
-{% else %}
-  <div
-      id="container_{{ field.name }}"
-      class="field-with-tooltip form-group {{ classes }} {% if field.errors %}has-error{% elif field.form.is_bound %}{% endif %}"
-  >
+<div
+  id="container_{{ field.name }}"
+  class="field-with-tooltip form-group {{ classes }} {% if field.errors %}has-error{% elif field.form.is_bound %}has-success{% endif %}"
+>
+  {% if field.is_hidden %}
+    {% bootstrap_field field %}
+  {% else %}
     <div class="label-container">
       <label class="control-label" for="{{ field.id_for_label }}">
         {% if label != None %}
@@ -54,5 +54,5 @@
       ></a>
     </div>
     {% bootstrap_field field show_help=False label='' %}
-  </div>
-{% endif %}
+  {% endif %}
+</div>

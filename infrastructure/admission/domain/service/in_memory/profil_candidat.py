@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
@@ -978,7 +979,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
+    def get_curriculum(
+        cls,
+        matricule: str,
+        annee_courante: int,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+    ) -> 'CurriculumAdmissionDTO':
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
 
@@ -1155,3 +1162,37 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
         )
+
+    @classmethod
+    def get_experience_academique(
+        cls,
+        matricule: str,
+        uuid_proposition: str,
+        uuid_experience: str,
+    ) -> 'ExperienceAcademiqueDTO':
+        curriculum = cls.get_curriculum(matricule, datetime.date.today().year, uuid_proposition)
+
+        try:
+            return next(
+                experience for experience in curriculum.experiences_academiques if experience.uuid == uuid_experience
+            )
+        except StopIteration:
+            raise ExperienceNonTrouveeException
+
+    @classmethod
+    def get_experience_non_academique(
+        cls,
+        matricule: str,
+        uuid_proposition: str,
+        uuid_experience: str,
+    ) -> 'ExperienceNonAcademiqueDTO':
+        curriculum = cls.get_curriculum(matricule, datetime.date.today().year, uuid_proposition)
+
+        try:
+            return next(
+                experience
+                for experience in curriculum.experiences_non_academiques
+                if experience.uuid == uuid_experience
+            )
+        except StopIteration:
+            raise ExperienceNonTrouveeException

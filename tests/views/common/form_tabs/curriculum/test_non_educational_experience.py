@@ -31,11 +31,12 @@ from unittest import mock
 
 import freezegun
 from django.conf import settings
+from django.forms import MultipleHiddenInput
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
 from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
@@ -43,11 +44,13 @@ from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
@@ -72,11 +75,11 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     def setUpTestData(cls):
         # Create data
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2020]]
-        first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        EntityVersionFactory(entity=first_doctoral_commission)
+
+        entity = EntityVersionFactory().entity
 
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
+            training__management_entity=entity,
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
@@ -86,10 +89,20 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
+        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            candidate=cls.general_admission.candidate,
+            training__management_entity=entity,
+            training__academic_year=cls.academic_years[0],
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
         # Create users
-        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
-        cls.program_manager_user = ProgramManagerRoleFactory(
+        cls.sic_manager_user = SicManagementRoleFactory(entity=entity).person.user
+        cls.general_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.general_admission.training.education_group,
+        ).person.user
+        cls.continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.continuing_admission.training.education_group,
         ).person.user
 
         cls.file_uuid = uuid.uuid4()
@@ -122,37 +135,46 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
 
-        # Targeted url
-        self.form_url = resolve_url(
+        # Targeted urls
+        self.general_form_url = resolve_url(
             'admission:general-education:update:curriculum:non_educational',
             uuid=self.general_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
-        self.create_url = resolve_url(
+        self.general_create_url = resolve_url(
             'admission:general-education:update:curriculum:non_educational_create',
             uuid=self.general_admission.uuid,
         )
+        self.continuing_form_url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational',
+            uuid=self.continuing_admission.uuid,
+            experience_uuid=self.experience.uuid,
+        )
+        self.continuing_create_url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational_create',
+            uuid=self.continuing_admission.uuid,
+        )
 
-    def test_update_curriculum_is_not_allowed_for_fac_users(self):
-        self.client.force_login(self.program_manager_user)
-        response = self.client.get(self.form_url)
+    def test_general_update_curriculum_is_not_allowed_for_fac_users(self):
+        self.client.force_login(self.general_program_manager_user)
+        response = self.client.get(self.general_form_url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_update_curriculum_is_allowed_for_sic_users(self):
+    def test_general_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
-        response = self.client.get(self.form_url)
+        response = self.client.get(self.general_form_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_update_curriculum_is_not_allowed_for_injected_experiences(self):
+    def test_general_update_curriculum_is_not_allowed_for_injected_experiences(self):
         self.client.force_login(self.sic_manager_user)
 
         # The experience come from EPC
         self.experience.external_id = 'EPC1'
         self.experience.save(update_fields=['external_id'])
 
-        response = self.client.get(self.form_url)
+        response = self.client.get(self.general_form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # Reset the experience
@@ -166,7 +188,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             experience_uuid=self.experience.uuid,
         )
 
-        response = self.client.get(self.form_url)
+        response = self.client.get(self.general_form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         cv_injection.delete()
@@ -176,22 +198,22 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             admission=self.general_admission,
         )
 
-        response = self.client.get(self.form_url)
+        response = self.client.get(self.general_form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         AdmissionProfessionalValuatedExperiencesFactory(
             baseadmission=self.general_admission, professionalexperience=self.experience
         )
 
-        response = self.client.get(self.form_url)
+        response = self.client.get(self.general_form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         admission_injection.delete()
 
-    def test_form_initialization(self):
+    def test_general_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
 
-        response = self.client.get(self.form_url)
+        response = self.client.get(self.general_form_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -257,10 +279,10 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         # Activity
         self.assertEqual(form['activity'].value(), 'Activity')
 
-    def test_submit_form_with_missing_fields(self):
+    def test_general_submit_form_with_missing_fields(self):
         self.client.force_login(self.sic_manager_user)
 
-        response = self.client.post(self.form_url)
+        response = self.client.post(self.general_form_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -274,11 +296,11 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('end_date_year', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('type', []))
 
-    def test_submit_form_with_missing_fields_for_work(self):
+    def test_general_submit_form_with_missing_fields_for_work(self):
         self.client.force_login(self.sic_manager_user)
 
         response = self.client.post(
-            self.form_url,
+            self.general_form_url,
             {
                 'start_date_month': 1,
                 'start_date_year': 2020,
@@ -301,11 +323,11 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
 
         self.assertEqual(form.cleaned_data['activity'], '')
 
-    def test_submit_form_with_missing_fields_for_other_activity(self):
+    def test_general_submit_form_with_missing_fields_for_other_activity(self):
         self.client.force_login(self.sic_manager_user)
 
         response = self.client.post(
-            self.form_url,
+            self.general_form_url,
             {
                 'start_date_month': 1,
                 'start_date_year': 2020,
@@ -330,11 +352,11 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(form.cleaned_data['sector'], '')
         self.assertEqual(form.cleaned_data['institute_name'], '')
 
-    def test_submit_valid_form_for_work(self):
+    def test_general_submit_valid_form_for_work(self):
         self.client.force_login(self.sic_manager_user)
 
         response = self.client.post(
-            self.form_url,
+            self.general_form_url,
             {
                 'start_date_month': 2,
                 'start_date_year': 2019,
@@ -369,14 +391,14 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             self.general_admission.requested_documents,
         )
 
-    def test_submit_valid_form_for_other_activity_and_redirect(self):
+    def test_general_submit_valid_form_for_other_activity_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
         admission_url = resolve_url('admission')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(
-            f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
+            f'{self.general_form_url}?next={admission_url}&next_hash_url=custom_hash',
             {
                 'start_date_month': 2,
                 'start_date_year': 2019,
@@ -402,11 +424,11 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(self.experience.institute_name, '')
         self.assertEqual(self.experience.activity, 'Activity')
 
-    def test_submit_valid_form_for_create_a_new_work_activity(self):
+    def test_general_submit_valid_form_for_create_a_new_work_activity(self):
         self.client.force_login(self.sic_manager_user)
 
         response = self.client.post(
-            self.create_url,
+            self.general_create_url,
             {
                 'start_date_month': 2,
                 'start_date_year': 2019,
@@ -469,6 +491,58 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 'enfants': [],
             },
         )
+
+    def test_continuing_update_curriculum_is_allowed_for_fac_users(self):
+        self.client.force_login(self.continuing_program_manager_user)
+        response = self.client.get(self.continuing_form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_continuing_update_curriculum_is_allowed_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.get(self.continuing_form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+        self.assertEqual(form.fields['certificate'].disabled, True)
+        self.assertIsInstance(form.fields['certificate'].widget, MultipleHiddenInput)
+
+    def test_continuing_submit_form(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.post(
+            self.continuing_form_url,
+            {
+                'start_date_month': 1,
+                'start_date_year': 2020,
+                'end_date_month': 5,
+                'end_date_year': 2020,
+                'type': ActivityType.INTERNSHIP.name,
+                'role': 'Role',
+                'sector': ActivitySector.PRIVATE.name,
+                'institute_name': 'Institute',
+                'activity': 'Activity',
+                'certificate_0': 'certificate-token',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        # Check the experience
+        self.experience.refresh_from_db()
+
+        self.assertEqual(self.experience.start_date, datetime.date(2020, 1, 1))
+        self.assertEqual(self.experience.end_date, datetime.date(2020, 5, 31))
+        self.assertEqual(self.experience.type, ActivityType.INTERNSHIP.name)
+        self.assertEqual(self.experience.role, '')
+        self.assertEqual(self.experience.sector, '')
+        self.assertEqual(self.experience.institute_name, '')
+        self.assertEqual(self.experience.activity, '')
+        self.assertEqual(self.experience.certificate, [self.file_uuid])
+
+        # Check the admission
+        self.continuing_admission.refresh_from_db()
+        self.assertEqual(self.continuing_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.continuing_admission.last_update_author, self.sic_manager_user.person)
 
 
 @freezegun.freeze_time('2022-01-01')

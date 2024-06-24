@@ -45,6 +45,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     CurriculumAExperiencesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO
 from osis_common.ddd import interface
 
 
@@ -75,7 +76,33 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
+    def get_curriculum(
+        cls,
+        matricule: str,
+        annee_courante: int,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+    ) -> 'CurriculumAdmissionDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_experience_academique(
+        cls,
+        matricule: str,
+        uuid_proposition: str,
+        uuid_experience: str,
+    ) -> 'ExperienceAcademiqueDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_experience_non_academique(
+        cls,
+        matricule: str,
+        uuid_proposition: str,
+        uuid_experience: str,
+    ) -> 'ExperienceNonAcademiqueDTO':
         raise NotImplementedError
 
     @classmethod

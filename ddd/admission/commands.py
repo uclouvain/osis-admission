@@ -28,6 +28,7 @@ from typing import Optional, List, Dict
 
 import attr
 
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
@@ -188,6 +189,21 @@ class RefuserPropositionFusionCommand(interface.CommandRequest):
 class RechercherParcoursAnterieurQuery(interface.QueryRequest):
     global_id: str
     uuid_proposition: str
+    experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererExperienceAcademiqueQuery(interface.QueryRequest):
+    global_id: str
+    uuid_proposition: str
+    uuid_experience: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererExperienceNonAcademiqueQuery(interface.QueryRequest):
+    global_id: str
+    uuid_proposition: str
+    uuid_experience: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -222,7 +238,6 @@ class RetrieveListePropositionFusionEnErreurQuery(interface.QueryRequest):
     pass
 
 
-
 @attr.dataclass(frozen=True, slots=True)
 class FusionnerCandidatAvecPersonneExistanteCommand(interface.CommandRequest):
     candidate_global_id: str
@@ -237,3 +252,8 @@ class RecupererMatriculeDigitQuery(interface.QueryRequest):
 class ModifierMatriculeCandidatCommand(interface.QueryRequest):
     digit_global_id: str
     candidate_global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererEtudesSecondairesQuery(interface.QueryRequest):
+    matricule_candidat: str
