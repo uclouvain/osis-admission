@@ -41,7 +41,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
 from base.models.enums.entity_type import EntityType
 from base.models.specific_iufc_informations import SpecificIUFCInformations
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -253,13 +253,21 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             entity_type=EntityType.FACULTY.name,
             acronym='CMC',
         )
-        cls.admission = ContinuingEducationAdmissionFactory(
+        cls.admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=cls.commission.entity,
             training__credits=180,
         )
-        cls.admission_without_specific_iufc_info = ContinuingEducationAdmissionFactory(
+        cls.admission_without_specific_iufc_info: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=cls.commission.entity,
             training__credits=180,
+        )
+        cls.first_program_manager = ProgramManagerRoleFactory(
+            education_group=cls.admission.training.education_group,
+            person__email='john.doe@example.be',
+        )
+        cls.second_program_manager = ProgramManagerRoleFactory(
+            education_group=cls.admission.training.education_group,
+            person__email='joe.doe@example.be',
         )
         cls.admission_without_specific_iufc_info.training.specificiufcinformations.delete()
         cls.admission_with_billing_address = ContinuingEducationAdmissionFactory(
@@ -328,7 +336,6 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')
-        self.maxDiff = None
         self.assertDictEqual(json_response['formation'], training_json)
         self.assertEqual(json_response['matricule_candidat'], self.admission.candidate.global_id)
         self.assertEqual(json_response['prenom_candidat'], self.admission.candidate.first_name)
@@ -354,6 +361,14 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(
             json_response.get('moyens_decouverte_formation'),
             self.admission.ways_to_find_out_about_the_course,
+        )
+        self.assertEqual(
+            json_response.get('autre_moyen_decouverte_formation'),
+            self.admission.other_way_to_find_out_about_the_course,
+        )
+        self.assertCountEqual(
+            json_response.get('adresses_emails_gestionnaires_formation'),
+            [self.first_program_manager.person.email, self.second_program_manager.person.email],
         )
         self.assertEqual(json_response.get('marque_d_interet'), self.admission.interested_mark)
 

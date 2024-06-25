@@ -575,8 +575,8 @@ msgid "Admission form items"
 msgstr ""
 
 msgid ""
-"Admission is not yet valid for searching UCLouvain. The following fields are "
-"required: "
+"Admission is not yet valid for searching UCLouvain account. The following "
+"fields are required: "
 msgstr ""
 
 #, python-format
@@ -1098,6 +1098,10 @@ msgid ""
 "By finalising my application, I undertake to pay the registration fees upon "
 "receipt of the invoice (provided my application is accepted). In case of "
 "cancellation, the modalities depend on the Faculties."
+msgstr ""
+
+msgctxt "ways_hear_about_training"
+msgid "By someone who has already taken this course in a previous edition"
 msgstr ""
 
 msgid "CA Member"
@@ -1763,10 +1767,6 @@ msgid "Continuing education"
 msgstr ""
 
 msgid "Continuing education admission"
-msgstr ""
-
-msgctxt "ways_hear_about_training"
-msgid "Continuing education website"
 msgstr ""
 
 msgid "Continuing enrolment applications"
@@ -3109,10 +3109,6 @@ msgstr ""
 msgid "Former UCLouvain student"
 msgstr ""
 
-msgctxt "ways_hear_about_training"
-msgid "Former students"
-msgstr ""
-
 msgid "Fraudster"
 msgstr ""
 
@@ -3159,10 +3155,6 @@ msgid "French value"
 msgstr ""
 
 msgid "French values"
-msgstr ""
-
-msgctxt "ways_hear_about_training"
-msgid "Friends"
 msgstr ""
 
 msgid "From"
@@ -3333,10 +3325,16 @@ msgstr ""
 msgid "Household composition, or copy of your birth certificate"
 msgstr ""
 
-msgid "How did the candidate find out about this course?"
+msgid "How did the candidate hear about this course?"
 msgstr ""
 
 msgid "How did you hear about this course?"
+msgstr ""
+
+msgid "How else did the candidate hear about this course?"
+msgstr ""
+
+msgid "How else did you hear about this course?"
 msgstr ""
 
 msgid "I am a long-term resident in the European Union outside Belgium"
@@ -7354,6 +7352,10 @@ msgstr ""
 msgid "UCLouvain SIC free documents"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "UCLouvain continuing education website"
+msgstr ""
+
 msgid "UCLouvain logo"
 msgstr ""
 
@@ -7609,7 +7611,7 @@ msgid "Without free documents"
 msgstr ""
 
 msgctxt "ways_hear_about_training"
-msgid "Word of mouth"
+msgid "Word of mouth (family, friends, colleagues, ...)"
 msgstr ""
 
 msgid "Work contract"
@@ -8065,7 +8067,7 @@ msgstr "Bank transfer"
 msgid "by the Enrolment Office"
 msgstr ""
 
-msgid "by the University Institute for Continuing Education (IUFC)"
+msgid "by the faculty"
 msgstr ""
 
 msgctxt "payment"
@@ -8144,7 +8146,7 @@ msgstr ""
 msgid "the UCLouvain Registration Service"
 msgstr ""
 
-msgid "the University Institute of Continuing Education"
+msgid "the faculty"
 msgstr ""
 
 msgid "the person concerned"

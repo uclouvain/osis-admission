@@ -59,6 +59,7 @@ class InformationsComplementairesValidatorList(TwoStepsMultipleBusinessException
 class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     motivations: str
     moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation]
+    autre_moyen_decouverte_formation: Optional[str]
     informations_specifiques_formation: Optional[InformationsSpecifiquesDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -69,6 +70,7 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldRenseignerChoixDeFormation(
                 motivations=self.motivations,
                 moyens_decouverte_formation=self.moyens_decouverte_formation,
+                autre_moyen_decouverte_formation=self.autre_moyen_decouverte_formation,
                 informations_specifiques_formation=self.informations_specifiques_formation,
             ),
             ShouldFormationEtreOuverte(

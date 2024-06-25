@@ -655,6 +655,8 @@ class ContinuingEducationPropositionDTOSerializer(
             'documents_additionnels',
             'motivations',
             'moyens_decouverte_formation',
+            'autre_moyen_decouverte_formation',
+            'adresses_emails_gestionnaires_formation',
             'aide_a_la_formation',
             'inscription_au_role_obligatoire',
             'etat_formation',

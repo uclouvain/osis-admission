@@ -27,11 +27,11 @@
     <i class="fas fa-xmark text-muted"></i>
   {% elif statut == 'GEST_EN_COURS' %}
     {% if extra.en_cours == 'taken_in_charge' %}
-      <i class="fas fa-pencil text-danger"></i>
+      <i class="fas fa-pencil text-warning"></i>
     {% elif extra.en_cours == 'fac_approval' %}
       <i class="fas fa-circle-arrow-right text-success"></i>
     {% elif extra.en_cours == 'on_hold' %}
-      <i class="fas fa-circle-stop text-warning"></i>
+      <i class="fas fa-circle-stop text-info"></i>
     {% else %}
       <i class="fas fa-pencil text-warning"></i>
     {% endif %}

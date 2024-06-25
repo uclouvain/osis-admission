@@ -331,7 +331,9 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
                                 if dispensation_needed:
                                     current_checklist_filters &= Q(
-                                        generaleducationadmission__financability_dispensation_status=dispensation_needed,
+                                        generaleducationadmission__financability_dispensation_status=(
+                                            dispensation_needed
+                                        ),
                                     )
 
                             if current_extra:

@@ -1233,8 +1233,8 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 required_documents_paragraph = ''
                 if documents_names:
                     required_documents_paragraph = _(
-                        "<p>We also wish to inform you that the additional documents below should be sent as soon as possible"
-                        " to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
+                        "<p>We also wish to inform you that the additional documents below should be sent as soon "
+                        "as possible to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
                     ).format(mail=tokens['admission_email'])
                     required_documents_paragraph += '<ul>'
                     for document_name in documents_names:
