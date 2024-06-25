@@ -75,7 +75,6 @@ class TestSpecifierFinancabiliteResultatCalcul(TestCase):
             uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
             financabilite_regle_calcule=EtatFinancabilite.FINANCABLE.name,
             financabilite_regle_calcule_situation=SituationFinancabilite.REPRISE_APRES_5_ANS.name,
-            financabilite_regle_calcule_le=timezone.now(),
             gestionnaire='0123456789',
         )
 

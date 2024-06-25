@@ -237,6 +237,7 @@ __all__ = [
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
     'PastExperiencesAccessTitleView',
+    'FinancabiliteComputeRuleView',
     'FinancabiliteChangeStatusView',
     'FinancabiliteApprovalView',
     'FinancabiliteDerogationNonConcerneView',
@@ -2116,15 +2117,27 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
 
         admission = self.get_permission_object()
 
-        if admission.checklist['current']['financabilite']['statut'] not in {
-            ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
-            ChoixStatutChecklist.GEST_REUSSITE.name,
-        } and not (
-            admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
-            and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
-        ):
-            admission.update_financability_computed_rule(author=self.request.user.person)
-            context['original_admission'].refresh_from_db()
+        context['financabilite_compute_rule_needed'] = (
+            admission.checklist['current']['financabilite']['statut'] not in {
+                ChoixStatutChecklist.GEST_REUSSITE.name,
+            } and not (
+                admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+                and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
+            )
+        )
+        context['financabilite_show_verdict_different_alert'] = (
+            (
+                admission.checklist['current']['financabilite']['statut'] in {
+                    ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
+                    ChoixStatutChecklist.GEST_REUSSITE.name,
+                } or (
+                    admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+                    and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
+                )
+            )
+            and admission.financability_rule
+            and admission.financability_computed_rule_situation != admission.financability_rule
+        )
 
         context['financabilite_approval_form'] = FinancabiliteApprovalForm(
             instance=self.admission,
@@ -2192,6 +2205,24 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
             )
 
         return context
+
+
+class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-compute-rule': 'financability-compute-rule'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+        if admission.checklist['current']['financabilite']['statut'] not in {
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        } and not (
+            admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+            and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
+        ):
+            admission.update_financability_computed_rule(author=self.request.user.person)
+        return self.render_to_response(self.get_context_data())
 
 
 class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):

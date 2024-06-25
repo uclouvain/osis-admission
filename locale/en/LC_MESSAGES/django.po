@@ -569,8 +569,8 @@ msgid "Admission form items"
 msgstr ""
 
 msgid ""
-"Admission is not yet valid for searching UCLouvain. The following fields are "
-"required: "
+"Admission is not yet valid for searching UCLouvain account. The following "
+"fields are required: "
 msgstr ""
 
 #, python-format
@@ -7496,6 +7496,11 @@ msgid "Waiting for signature"
 msgstr ""
 
 msgid "Wallonie Bruxelles International (WBI)"
+msgstr ""
+
+msgid ""
+"Warning, the financability verdict selected is different from the "
+"proposition from the financability algorithm."
 msgstr ""
 
 msgid ""
