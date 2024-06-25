@@ -262,6 +262,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
                 ChoixMoyensDecouverteFormation.LINKEDIN.name,
             ],
             'marque_d_interet': True,
+            'autre_moyen_decouverte_formation': 'Other way',
         }
 
         cls.url = resolve_url('admission_api_v1:continuing_training_choice')
@@ -289,6 +290,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
             ],
         )
         self.assertEqual(admission.interested_mark, True)
+        self.assertEqual(admission.other_way_to_find_out_about_the_course, 'Other way')
 
         history_entry: HistoryEntry = HistoryEntry.objects.filter(
             object_uuid=admission.uuid,
@@ -475,6 +477,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
             ],
             'marque_d_interet': True,
+            'autre_moyen_decouverte_formation': 'Other way',
         }
 
         AdmissionFormItemInstantiationFactory(
@@ -547,6 +550,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
             ],
         )
+        self.assertEqual(admission.other_way_to_find_out_about_the_course, 'Other way')
         self.assertEqual(admission.interested_mark, True)
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):

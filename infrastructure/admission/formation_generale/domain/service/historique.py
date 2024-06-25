@@ -338,8 +338,10 @@ class Historique(IHistorique):
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f'Le statut de besoin de dérogation à la financabilité est passé à {status} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
-            f'Status of financability dispensation needs changed to {status} on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Le statut de besoin de dérogation à la financabilité est passé à {status} par {gestionnaire_dto.prenom} '
+            f'{gestionnaire_dto.nom}.',
+            f'Status of financability dispensation needs changed to {status} on {now} by {gestionnaire_dto.prenom} '
+            f'{gestionnaire_dto.nom}.',
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
             tags=['proposition', 'financabilite', 'financabilite-derogation'],
         )

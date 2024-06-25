@@ -1330,6 +1330,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             documents_additionnels=[],
             motivations='My motivation',
             moyens_decouverte_formation=[],
+            autre_moyen_decouverte_formation='',
+            adresses_emails_gestionnaires_formation=[],
             documents_demandes={},
             marque_d_interet=False,
             aide_a_la_formation=False,

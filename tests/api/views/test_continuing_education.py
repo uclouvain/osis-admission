@@ -23,21 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.tests.factories.roles import ProgramManagerRoleFactory
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.specific_iufc_informations import SpecificIUFCInformations
+from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.specific_iufc_informations import SpecificIUFCInformationsFactory
 from base.tests.factories.user import UserFactory
 
 
+@freezegun.freeze_time('2023-01-01')
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class ContinuingEducationTestCase(APITestCase):
     @classmethod
@@ -48,7 +50,18 @@ class ContinuingEducationTestCase(APITestCase):
             training_assistance=False,
             registration_required=True,
             state=StateIUFC.OPEN.name,
+            training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
         )
+
+        cls.academic_years = AcademicYearFactory.produce(2023, number_past=2, number_future=2)
+
+        cls.continuing_academic_calendars = [
+            AcademicCalendarFactory(
+                data_year=academic_year,
+                reference=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
+            )
+            for academic_year in cls.academic_years
+        ]
 
         cls.base_url = 'retrieve-continuing-education-specific-information'
 
@@ -95,38 +108,7 @@ class ContinuingEducationTestCase(APITestCase):
         self.assertEqual(json_response['aide_a_la_formation'], False)
         self.assertEqual(json_response['inscription_au_role_obligatoire'], True)
         self.assertEqual(json_response['etat'], StateIUFC.OPEN.name)
-        self.assertEqual(json_response['emails_gestionnaires'], [])
-
-    def test_retrieve_specific_information_of_known_training_with_managers_emails(self):
-        self.client.force_authenticate(user=self.user)
-
-        current_training_managers = [
-            ProgramManagerRoleFactory(
-                education_group=self.training_specific_information.training.education_group,
-            )
-            for _ in range(2)
-        ]
-
-        ProgramManagerRoleFactory(
-            education_group=EducationGroupYearFactory(
-                acronym='OTHER',
-                academic_year=self.training_specific_information.training.academic_year,
-            ).education_group,
-        )
-        ProgramManagerRoleFactory(
-            education_group=EducationGroupYearFactory(
-                acronym=self.training_specific_information.training.acronym,
-                academic_year=AcademicYearFactory(year=1800),
-            ).education_group,
-        )
-
-        response = self.client.get(path=self.url, format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        json_response = response.json()
-
-        self.assertCountEqual(
-            json_response['emails_gestionnaires'],
-            [current_training_manager.person.email for current_training_manager in current_training_managers],
+        self.assertEqual(
+            json_response['lien_informations_pratiques_formation'],
+            f'https://uclouvain.be/prog-2022-{self.training_specific_information.training.acronym}-infos_pratiques',
         )

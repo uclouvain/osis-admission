@@ -38,8 +38,11 @@ from rest_framework.views import APIView
 
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.commands import ValiderTicketPersonneCommand, RechercherCompteExistantQuery, \
-    GetPropositionFusionQuery
+from admission.ddd.admission.commands import (
+    ValiderTicketPersonneCommand,
+    RechercherCompteExistantQuery,
+    GetPropositionFusionQuery,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
@@ -77,6 +80,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
 
     # use an intermediary status for DIGIT VALIDATION
     from infrastructure.messages_bus import message_bus_instance
+
     validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
     proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
 
@@ -84,7 +88,12 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
         if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
             raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
         if proposition_fusion.status == PersonMergeStatus.ERROR.name:
-            raise Exception(_("Unable to validate the admission because an error occured while searching for existing person in DIGIT"))
+            raise Exception(
+                _(
+                    "Unable to validate the admission because an error occured while searching for existing "
+                    "person in DIGIT"
+                )
+            )
 
     if validation.valid is False:
         raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))

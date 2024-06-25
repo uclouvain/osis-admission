@@ -46,7 +46,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixMoyensDecouverteFormation,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
@@ -89,6 +92,7 @@ from admission.templatetags.admission import (
     candidate_language,
     experience_valuation_url,
     checklist_experience_action_links_context,
+    format_ways_to_find_out_about_the_course,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -1192,6 +1196,48 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertEqual(
             candidate_language(settings.LANGUAGE_CODE_EN),
             f' <strong>(langue de contact </strong><span class="label label-admission-primary">EN</span>)',
+        )
+
+    def test_format_ways_to_find_out_about_the_course(self):
+        self.assertEqual(
+            format_ways_to_find_out_about_the_course(
+                MagicMock(
+                    moyens_decouverte_formation=[
+                        ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.name,
+                        ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.name,
+                    ],
+                    autre_moyen_decouverte_formation='Other way',
+                )
+            ),
+            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n'
+            f'\t<li>{ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.value}</li>',
+        )
+
+        self.assertEqual(
+            format_ways_to_find_out_about_the_course(
+                MagicMock(
+                    moyens_decouverte_formation=[
+                        ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.name,
+                        ChoixMoyensDecouverteFormation.AUTRE.name,
+                    ],
+                    autre_moyen_decouverte_formation='Other way',
+                )
+            ),
+            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n' f'\t<li>Other way</li>',
+        )
+
+        self.assertEqual(
+            format_ways_to_find_out_about_the_course(
+                MagicMock(
+                    moyens_decouverte_formation=[
+                        ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.name,
+                        ChoixMoyensDecouverteFormation.AUTRE.name,
+                    ],
+                    autre_moyen_decouverte_formation='',
+                )
+            ),
+            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n'
+            f'\t<li>{ChoixMoyensDecouverteFormation.AUTRE.value}</li>',
         )
 
 

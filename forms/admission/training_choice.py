@@ -223,11 +223,25 @@ class ContinuingTrainingChoiceForm(BaseTrainingChoiceForm):
         widget=forms.CheckboxSelectMultiple,
     )
 
+    other_way_to_find_out_about_the_course = forms.CharField(
+        label='',
+        max_length=1000,
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                'aria-label': _('How else did you hear about this course?'),
+            },
+        ),
+    )
+
     interested_mark = forms.NullBooleanField(
         label=_('Yes, I am interested in this course'),
         required=False,
         widget=forms.CheckboxInput,
     )
+
+    class Media:
+        js = ('js/dependsOn.min.js',)
 
     def __init__(self, proposition: PropositionContinueDTO, user: User, *args, **kwargs):
         self.training_type = AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[
@@ -241,6 +255,7 @@ class ContinuingTrainingChoiceForm(BaseTrainingChoiceForm):
             'academic_year': proposition.annee_demande,
             'interested_mark': proposition.marque_d_interet,
             'ways_to_find_out_about_the_course': proposition.moyens_decouverte_formation,
+            'other_way_to_find_out_about_the_course': proposition.autre_moyen_decouverte_formation,
             'motivations': proposition.motivations,
             'specific_question_answers': proposition.reponses_questions_specifiques,
         }
@@ -310,3 +325,12 @@ class ContinuingTrainingChoiceForm(BaseTrainingChoiceForm):
 
         if not self.display_closed_continuing_fields:
             cleaned_data['interested_mark'] = None
+
+        if (
+            cleaned_data.get('ways_to_find_out_about_the_course')
+            and ChoixMoyensDecouverteFormation.AUTRE.name in cleaned_data['ways_to_find_out_about_the_course']
+        ):
+            if not cleaned_data.get('other_way_to_find_out_about_the_course'):
+                self.add_error('other_way_to_find_out_about_the_course', FIELD_REQUIRED_MESSAGE)
+        else:
+            cleaned_data['other_way_to_find_out_about_the_course'] = ''

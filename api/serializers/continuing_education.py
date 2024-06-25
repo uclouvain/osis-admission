@@ -25,8 +25,14 @@
 # ##############################################################################
 from rest_framework import serializers
 
+from admission.utils import get_practical_information_url
 from base.utils.serializers import DTOSerializer
+from ddd.logic.formation_catalogue.commands import RecupererFormationQuery
+from ddd.logic.formation_catalogue.domain.validators.exceptions import TrainingNotFoundException
+from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
+from infrastructure.messages_bus import message_bus_instance
+
 
 __all__ = [
     'InformationsSpecifiquesFormationContinueDTOSerializer',
@@ -35,22 +41,38 @@ __all__ = [
 
 class InformationsSpecifiquesFormationContinueDTOSerializer(DTOSerializer):
     etat = serializers.SerializerMethodField()
-    emails_gestionnaires = serializers.SerializerMethodField()
+    lien_informations_pratiques_formation = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Define custom schemas as the default schema type of a SerializerMethodField is string
-        self.fields['emails_gestionnaires'].field_schema = {
-            'type': 'array',
-            'items': {'type': 'string'},
+        self.fields['lien_informations_pratiques_formation'].field_schema = {
+            'type': 'string',
         }
 
     def get_etat(self, obj):
         return obj.etat.name if obj.etat else ''
 
-    def get_emails_gestionnaires(self, obj):
-        return self.context['manager_emails']
+    def get_lien_informations_pratiques_formation(self, obj):
+        if not self.context['acronym'] or not self.context['academic_year']:
+            return ''
+
+        try:
+            training: TrainingDto = message_bus_instance.invoke(
+                RecupererFormationQuery(
+                    sigle_formation=self.context['acronym'],
+                    annee_formation=self.context['academic_year'],
+                )
+            )
+        except TrainingNotFoundException:
+            return ''
+
+        return get_practical_information_url(
+            training_type=training.type,
+            training_acronym=training.acronym,
+            partial_training_acronym=training.code,
+        )
 
     class Meta:
         source = InformationsSpecifiquesDTO

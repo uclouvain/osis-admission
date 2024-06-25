@@ -33,7 +33,7 @@ def fix_missing_country_of_citizenship(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0190_baseadmission_internal_access_titles'),
+        ('admission', '0191_financabilite_refusal_reasons'),
     ]
 
     operations = [
