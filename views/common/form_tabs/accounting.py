@@ -37,7 +37,7 @@ __all__ = ['AccountingFormView']
 
 class AccountingFormView(AccountingMixinView, FormView):
     template_name = 'admission/forms/accounting.html'
-    permission_required = 'admission.view_admission_accounting'
+    permission_required = 'admission.change_admission_accounting'
     urlpatterns = 'accounting'
     update_requested_documents = True
     form_class = AccountingForm
