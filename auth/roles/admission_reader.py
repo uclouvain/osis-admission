@@ -27,7 +27,7 @@ import rules
 from rules import RuleSet
 
 from admission.auth.predicates.common import has_education_group_of_types, is_part_of_education_group
-from admission.auth.predicates.general import is_submitted
+from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -69,7 +69,9 @@ class AdmissionReader(ParcoursViewer):
             'admission.view_admission_supervision': is_part_of_education_group,
             'admission.view_historyentry': is_part_of_education_group,
             # Management
-            'admission.view_documents_management': is_part_of_education_group & is_submitted,
-            'admission.view_checklist': is_part_of_education_group & is_submitted,
+            'admission.view_documents_management': is_part_of_education_group
+            & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
+            'admission.view_checklist': is_part_of_education_group
+            & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
         }
         return RuleSet(ruleset)

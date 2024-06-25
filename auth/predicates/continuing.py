@@ -56,7 +56,7 @@ def in_progress(self, user: User, obj: ContinuingEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: ContinuingEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE
+    return isinstance(obj, ContinuingEducationAdmission) and obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE
 
 
 @predicate(bind=True)
@@ -73,7 +73,7 @@ def in_manager_status(self, user: User, obj: ContinuingEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
 def not_cancelled(self, user: User, obj: ContinuingEducationAdmission):
-    return obj.status != ChoixStatutPropositionContinue.ANNULEE.name
+    return isinstance(obj, ContinuingEducationAdmission) and obj.status != ChoixStatutPropositionContinue.ANNULEE.name
 
 
 @predicate(bind=True)
@@ -81,7 +81,10 @@ def not_cancelled(self, user: User, obj: ContinuingEducationAdmission):
     not_in_continuing_statuses_predicate_message({ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name})
 )
 def in_document_request_status(self, user: User, obj: ContinuingEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT
+    return (
+        isinstance(obj, ContinuingEducationAdmission)
+        and obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT
+    )
 
 
 @predicate(bind=True)
@@ -94,7 +97,7 @@ def in_document_request_status(self, user: User, obj: ContinuingEducationAdmissi
     )
 )
 def can_request_documents(self, user: User, obj: ContinuingEducationAdmission):
-    return obj.status in {
+    return isinstance(obj, ContinuingEducationAdmission) and obj.status in {
         ChoixStatutPropositionContinue.CONFIRMEE.name,
         ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
     }

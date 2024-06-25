@@ -101,25 +101,28 @@ def can_view_payment(self, user: User, obj: GeneralEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE
+    return isinstance(obj, GeneralEducationAdmission) and obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
 def not_cancelled(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status != ChoixStatutPropositionGenerale.ANNULEE.name
+    return isinstance(obj, GeneralEducationAdmission) and obj.status != ChoixStatutPropositionGenerale.ANNULEE.name
 
 
 @predicate(bind=True)
 @predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC))
 def in_fac_status(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
+    return isinstance(obj, GeneralEducationAdmission) and obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
 
 
 @predicate(bind=True)
 @predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS))
 def in_fac_status_extended(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS
+    return (
+        isinstance(obj, GeneralEducationAdmission)
+        and obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS
+    )
 
 
 @predicate(bind=True)
@@ -133,7 +136,10 @@ def in_sic_status(self, user: User, obj: GeneralEducationAdmission):
     not_in_general_statuses_predicate_message({ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name})
 )
 def in_sic_document_request_status(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status == ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
+    return (
+        isinstance(obj, GeneralEducationAdmission)
+        and obj.status == ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
+    )
 
 
 @predicate(bind=True)
@@ -141,13 +147,19 @@ def in_sic_document_request_status(self, user: User, obj: GeneralEducationAdmiss
     not_in_general_statuses_predicate_message({ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name})
 )
 def in_fac_document_request_status(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status == ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+    return (
+        isinstance(obj, GeneralEducationAdmission)
+        and obj.status == ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+    )
 
 
 @predicate(bind=True)
 @predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS))
 def in_sic_status_extended(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS
+    return (
+        isinstance(obj, GeneralEducationAdmission)
+        and obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS
+    )
 
 
 @predicate(bind=True)
@@ -163,7 +175,10 @@ def in_sic_status_or_application_fees(self, user: User, obj: GeneralEducationAdm
     not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION)
 )
 def can_send_to_fac_faculty_decision(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status in STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION
+    return (
+        isinstance(obj, GeneralEducationAdmission)
+        and obj.status in STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION
+    )
 
 
 @predicate(bind=True)

@@ -71,29 +71,30 @@ class CentralManager(EntityRoleModel):
             'admission.appose_sic_notice': is_entity_manager,
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.is_doctorate),
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status),
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.is_doctorate),
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status),
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.is_doctorate),
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status),
             'admission.view_admission_languages': is_entity_manager,
-            'admission.change_admission_languages': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status,
             'admission.view_admission_secondary_studies': is_entity_manager,
             'admission.change_admission_secondary_studies': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status),
             'admission.view_admission_curriculum': is_entity_manager,
             'admission.change_admission_curriculum': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status),
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status),
             'admission.view_admission_project': is_entity_manager,
-            'admission.change_admission_project': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_project': is_entity_manager & doctorate.in_sic_status,
             'admission.view_admission_cotutelle': is_entity_manager,
-            'admission.change_admission_cotutelle': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_cotutelle': is_entity_manager & doctorate.in_sic_status,
             'admission.view_admission_supervision': is_entity_manager,
-            'admission.change_admission_supervision': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_supervision': is_entity_manager & doctorate.in_sic_status,
             'admission.view_admission_accounting': is_entity_manager,
-            'admission.change_admission_accounting': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_accounting': is_entity_manager
+            & (general.in_sic_status | doctorate.in_sic_status),
             'admission.view_admission_specific_questions': is_entity_manager,
             'admission.change_admission_specific_questions': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status),
@@ -106,39 +107,47 @@ class CentralManager(EntityRoleModel):
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
             'admission.view_documents_management': is_entity_manager
-            & ((general.is_general & general.not_cancelled) | (continuing.is_continuing & continuing.not_cancelled)),
+            & (general.not_cancelled | continuing.not_cancelled | doctorate.not_cancelled),
             'admission.edit_documents': is_entity_manager
-            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.is_submitted)),
+            & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.request_documents': is_entity_manager
-            & (
-                (general.is_general & general.in_sic_status)
-                | (continuing.is_continuing & continuing.can_request_documents)
-            ),
+            & (general.in_sic_status | continuing.can_request_documents | doctorate.in_sic_status),
             'admission.cancel_document_request': is_entity_manager
             & (
-                (general.is_general & general.in_sic_document_request_status)
-                | (continuing.is_continuing & continuing.in_document_request_status)
+                general.in_sic_document_request_status
+                | continuing.in_document_request_status
+                | doctorate.in_sic_document_request_status
             ),
             'admission.generate_in_progress_analysis_folder': is_entity_manager
-            & ((general.is_general & general.in_progress) | (continuing.is_continuing & continuing.in_progress)),
-            'admission.view_checklist': is_entity_manager & (general.is_submitted | continuing.is_submitted),
-            'admission.change_checklist': is_entity_manager & (general.in_sic_status | continuing.is_submitted),
+            & (
+                (general.is_general & general.in_progress)
+                | (continuing.is_continuing & continuing.in_progress)
+                | (doctorate.is_doctorate & doctorate.in_progress)
+            ),
+            'admission.view_checklist': is_entity_manager
+            & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
+            'admission.change_checklist': is_entity_manager
+            & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status),
             'admission.change_checklist_iufc': is_entity_manager & continuing.is_submitted,
             'admission.change_payment': is_entity_manager & general.in_sic_status_or_application_fees,
             'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager
-            & general.can_send_to_fac_faculty_decision,
+            & (general.can_send_to_fac_faculty_decision | doctorate.can_send_to_fac_faculty_decision),
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_entity_manager
-            & general.in_fac_status,
-            'admission.checklist_change_past_experiences': is_entity_manager & general.in_sic_status,
-            'admission.checklist_select_access_title': is_entity_manager & general.in_sic_status,
-            'admission.checklist_change_sic_comment': is_entity_manager & general.is_submitted,
+            & (general.in_fac_status | doctorate.in_fac_status),
+            'admission.checklist_change_past_experiences': is_entity_manager
+            & (general.in_sic_status | doctorate.in_sic_status),
+            'admission.checklist_select_access_title': is_entity_manager
+            & (general.in_sic_status | doctorate.in_sic_status),
+            'admission.checklist_change_sic_comment': is_entity_manager
+            & (general.is_submitted | doctorate.is_submitted),
             'admission.checklist_financability_dispensation': is_entity_manager,
             'admission.checklist_financability_dispensation_fac': is_entity_manager,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager,
             'admission.checklist_change_comment': is_entity_manager
-            & ((general.is_general & general.is_submitted) | continuing.is_continuing),
-            'admission.checklist_change_sic_decision': is_entity_manager & general.in_sic_status,
+            & (general.is_submitted | continuing.is_continuing | doctorate.is_submitted),
+            'admission.checklist_change_sic_decision': is_entity_manager
+            & (general.in_sic_status | doctorate.in_sic_status),
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
             # Fusion
