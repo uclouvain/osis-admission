@@ -791,12 +791,11 @@ class Proposition(interface.RootEntity):
         self,
         financabilite_regle_calcule: EtatFinancabilite,
         financabilite_regle_calcule_situation: SituationFinancabilite,
-        financabilite_regle_calcule_le: datetime.datetime,
-        auteur_modification: str,
+        auteur_modification: Optional[str] = '',
     ):
         self.financabilite_regle_calcule = financabilite_regle_calcule
         self.financabilite_regle_calcule_situation = financabilite_regle_calcule_situation
-        self.financabilite_regle_calcule_le = financabilite_regle_calcule_le
+        self.financabilite_regle_calcule_le = now()
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_financabilite_regle(

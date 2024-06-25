@@ -522,7 +522,6 @@ class GeneralEducationAdmission(BaseAdmission):
                 gestionnaire=author.global_id,
                 financabilite_regle_calcule=financabilite.etat,
                 financabilite_regle_calcule_situation=financabilite.situation,
-                financabilite_regle_calcule_le=timezone.now(),
             )
         )
 

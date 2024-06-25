@@ -1167,11 +1167,12 @@ class FinancabiliteApprovalForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['financability_rule'].choices = (
+        self.fields['financability_rule'].choices = EMPTY_CHOICE + tuple(
             choice
             for choice in self.fields['financability_rule'].choices
             if SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]
         )
+        self.initial['financability_rule'] = ''
 
 
 class FinancabiliteNotFinanceableForm(forms.ModelForm):
@@ -1183,11 +1184,12 @@ class FinancabiliteNotFinanceableForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['financability_rule'].choices = (
+        self.fields['financability_rule'].choices = EMPTY_CHOICE + tuple(
             choice
             for choice in self.fields['financability_rule'].choices
             if SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]
         )
+        self.initial['financability_rule'] = ''
 
 
 class FinancabiliteDispensationForm(forms.Form):

@@ -58,8 +58,11 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.financabilite.dtos.parcours import ParcoursDTO, ParcoursAcademiqueInterneDTO, \
+    ParcoursAcademiqueExterneDTO
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
 
 
 @freezegun.freeze_time('2020-10-15')
@@ -67,6 +70,7 @@ class ElementsConfirmationTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         ProfilCandidatInMemoryTranslator.reset()
+        FinancabiliteInMemoryFetcher.reset()
 
     def test_recuperer_elements_confirmation_doctorat(self):
         elements = message_bus_in_memory_instance.invoke(
@@ -274,7 +278,15 @@ class ElementsConfirmationTestCase(TestCase):
                 )
             )
 
+    @freezegun.freeze_time('2024-10-15')
     def test_soumettre_elements_confirmation_differents_radio(self):
+        FinancabiliteInMemoryFetcher.save(ParcoursDTO(
+            matricule_fgs='0000000001',
+            parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+            parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+            annee_diplome_etudes_secondaires=2015,
+            nombre_tentative_de_passer_concours_pass_et_las=0,
+        ))
         with patch.object(
             ElementsConfirmationInMemory,
             'est_candidat_avec_etudes_secondaires_belges_francophones',
@@ -282,15 +294,15 @@ class ElementsConfirmationTestCase(TestCase):
         ), patch.object(
             GetCurrentAcademicYear,
             'get_starting_academic_year',
-            lambda *_: AcademicYear(AcademicYearIdentity(2020), None, None),
+            lambda *_: AcademicYear(AcademicYearIdentity(2024), None, None),
         ), self.assertRaises(
             ElementsConfirmationNonConcordants
         ):
             message_bus_in_memory_instance.invoke(
                 SoumettrePropositionGeneraleCommand(
-                    uuid_proposition="uuid-BACHELIER-ECO1",
-                    annee=2020,
-                    pool=AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
+                    uuid_proposition="uuid-BACHELIER-FINANCABILITE",
+                    annee=2024,
+                    pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
                     elements_confirmation={
                         'reglement_general': ElementsConfirmationInMemory.REGLEMENT_GENERAL,
                         'protection_donnees': ElementsConfirmationInMemory.PROTECTION_DONNEES,
