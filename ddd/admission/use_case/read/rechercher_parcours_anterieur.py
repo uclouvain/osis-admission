@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import datetime
 
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.repository.i_osis_profile import IOsisProfileRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -49,4 +48,5 @@ def rechercher_parcours_anterieur(
         matricule=cmd.global_id,
         annee_courante=annee_courante,
         uuid_proposition=cmd.uuid_proposition,
+        experiences_cv_recuperees=cmd.experiences_cv_recuperees,
     )

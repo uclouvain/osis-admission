@@ -56,9 +56,8 @@ from admission.forms import (
 from admission.templatetags.admission import (
     formatted_language,
     document_request_status_css_class,
-    CONTEXT_GENERAL,
-    CONTEXT_CONTINUING,
 )
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.views.autocomplete.categorized_free_documents import CategorizedFreeDocumentsAutocomplete
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
@@ -154,7 +153,9 @@ class FreeDocumentHelperFormMixin(forms.Form):
                 CONTEXT_GENERAL: OngletsChecklistFormationGenerale.choices_except(
                     OngletsChecklistFormationGenerale.experiences_parcours_anterieur,
                 ),
-                CONTEXT_CONTINUING: OngletsChecklistFormationContinue.choices(),
+                CONTEXT_CONTINUING: OngletsChecklistFormationContinue.choices_except(
+                    OngletsChecklistFormationContinue.decision,
+                ),
             }[context]
         )
 

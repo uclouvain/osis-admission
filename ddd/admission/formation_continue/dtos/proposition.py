@@ -42,6 +42,7 @@ from osis_common.ddd import interface
 class PropositionDTO(interface.DTO):
     uuid: str
     formation: FormationDTO
+    adresses_emails_gestionnaires_formation: List[str]
     reference: str
     annee_calculee: Optional[int]
     pot_calcule: Optional[str]
@@ -84,6 +85,7 @@ class PropositionDTO(interface.DTO):
 
     motivations: str
     moyens_decouverte_formation: List[str]
+    autre_moyen_decouverte_formation: str
 
     documents_demandes: Dict
     documents_libres_fac_uclouvain: List[str]

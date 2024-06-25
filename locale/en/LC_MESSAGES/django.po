@@ -168,6 +168,29 @@ msgid ""
 "to delete the custom mail template? This cannot be undone.</p>"
 msgstr ""
 
+#, python-brace-format
+msgid "<p>Contact person for setting up your annual programme: {contact}</p>"
+msgstr ""
+
+#, python-brace-format
+msgid "<p>Course duration: 1 year</p>"
+msgid_plural "<p>Course duration: {years} years</p>"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-brace-format
+msgid ""
+"<p>Depending on your previous experience, your faculty will supplement your "
+"annual programme with additional classes (for more information: <a "
+"href=\"{link}\">{link}</a>).</p>"
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"<p>We also wish to inform you that the additional documents below should be "
+"sent as soon as possible to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
+msgstr ""
+
 msgid ""
 "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
 "strong>"
@@ -254,11 +277,17 @@ msgstr ""
 msgid "A translation of your secondary school diploma by a sworn translator"
 msgstr ""
 
+msgid "ABANDON_DU_CANDIDAT"
+msgstr "Candidate withdrawal"
+
 msgid "ACCEPTED"
 msgstr "Accepted"
 
 msgid "ACCEPTEE"
 msgstr "Accepted"
+
+msgid "ACCORD_DE_DEROGATION_FACULTAIRE"
+msgstr "Faculty dispensation approval"
 
 msgid "ACCORD_DIRECTION"
 msgstr ""
@@ -305,6 +334,9 @@ msgstr ""
 msgid "Academic course"
 msgstr ""
 
+msgid "Academic courses"
+msgstr ""
+
 msgid "Academic experience"
 msgstr ""
 
@@ -341,6 +373,9 @@ msgid "Accepted"
 msgstr ""
 
 msgid "Access condition:"
+msgstr ""
+
+msgid "Access experience details"
 msgstr ""
 
 msgid "Access title"
@@ -440,6 +475,9 @@ msgstr ""
 msgid "Add a new member"
 msgstr ""
 
+msgid "Add a non-academic activity"
+msgstr ""
+
 msgid "Add a paper"
 msgstr ""
 
@@ -468,6 +506,9 @@ msgid "Add a seminar"
 msgstr ""
 
 msgid "Add a service"
+msgstr ""
+
+msgid "Add an academic course"
 msgstr ""
 
 msgid "Add an activity"
@@ -534,8 +575,8 @@ msgid "Admission form items"
 msgstr ""
 
 msgid ""
-"Admission is not yet valid for searching UCLouvain. The following fields are "
-"required: "
+"Admission is not yet valid for searching UCLouvain account. The following "
+"fields are required: "
 msgstr ""
 
 #, python-format
@@ -956,9 +997,6 @@ msgstr ""
 msgid "Authorization to validate"
 msgstr ""
 
-msgid "Authorize"
-msgstr ""
-
 msgid "Authors"
 msgstr ""
 
@@ -984,6 +1022,9 @@ msgid "Bachelor"
 msgstr ""
 
 msgid "Back to checklist"
+msgstr ""
+
+msgid "Back to overview"
 msgstr ""
 
 msgctxt "admission"
@@ -1059,11 +1100,18 @@ msgid ""
 "cancellation, the modalities depend on the Faculties."
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "By someone who has already taken this course in a previous edition"
+msgstr ""
+
 msgid "CA Member"
 msgstr "Supervisory panel member"
 
 msgid "CA members"
 msgstr ""
+
+msgid "CANDIDAT_NOTIFIE"
+msgstr "Candidate notified"
 
 msgid "CDD"
 msgstr ""
@@ -1340,6 +1388,9 @@ msgstr ""
 msgid "Candidate of the admission"
 msgstr ""
 
+msgid "Candidate withdrawal"
+msgstr ""
+
 msgid "Candidate's country of nationality"
 msgstr ""
 
@@ -1537,6 +1588,9 @@ msgstr ""
 msgid "Comment about dispensation"
 msgstr ""
 
+msgid "Comment about financability dispensation"
+msgstr ""
+
 msgid "Comment about jury"
 msgstr ""
 
@@ -1697,6 +1751,9 @@ msgstr ""
 msgid "Contact language"
 msgstr ""
 
+msgid "Contact link"
+msgstr ""
+
 msgid "Contact person for the design of the annual program"
 msgstr ""
 
@@ -1710,10 +1767,6 @@ msgid "Continuing education"
 msgstr ""
 
 msgid "Continuing education admission"
-msgstr ""
-
-msgctxt "ways_hear_about_training"
-msgid "Continuing education website"
 msgstr ""
 
 msgid "Continuing enrolment applications"
@@ -2251,6 +2304,12 @@ msgstr ""
 msgid "Discard fusion"
 msgstr ""
 
+msgid "Dispensation"
+msgstr ""
+
+msgid "Dispensation granted"
+msgstr ""
+
 msgid "Dispensation needed"
 msgstr ""
 
@@ -2294,9 +2353,6 @@ msgid "Do you have a secondary school diploma?"
 msgstr ""
 
 msgid "Do you have an international scholarship?"
-msgstr ""
-
-msgid "Do you want to authorize this inscription type admission now?"
 msgstr ""
 
 msgid "Do you want to continue?"
@@ -2535,6 +2591,11 @@ msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
 msgstr ""
 
 msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed."
+msgstr ""
+
+msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
 msgstr ""
@@ -2558,6 +2619,9 @@ msgid ""
 msgstr ""
 
 msgid "Email sent to the candidate when IUFC validate the application."
+msgstr ""
+
+msgid "Email sent to the candidate when SIC approves an inscription."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
@@ -2816,6 +2880,9 @@ msgstr ""
 msgid "Faculty"
 msgstr ""
 
+msgid "Faculty comment about financability dispensation"
+msgstr ""
+
 msgid "Faculty comment about the collaborative program"
 msgstr ""
 
@@ -2829,6 +2896,15 @@ msgid "Faculty comment for the SIC:"
 msgstr ""
 
 msgid "Faculty decision:"
+msgstr ""
+
+msgid "Faculty dispensation approval"
+msgstr ""
+
+msgid "Faculty dispensation notification"
+msgstr ""
+
+msgid "Faculty dispensation refusal"
 msgstr ""
 
 msgid "Faculty process"
@@ -2870,6 +2946,27 @@ msgstr ""
 msgid "Financability computed rule on"
 msgstr ""
 
+msgid "Financability dispensation"
+msgstr ""
+
+msgid "Financability dispensation first notification by"
+msgstr ""
+
+msgid "Financability dispensation first notification on"
+msgstr ""
+
+msgid "Financability dispensation last notification by"
+msgstr ""
+
+msgid "Financability dispensation last notification on"
+msgstr ""
+
+msgid "Financability dispensation needed"
+msgstr ""
+
+msgid "Financability dispensation status"
+msgstr ""
+
 msgid "Financability rule"
 msgstr ""
 
@@ -2896,6 +2993,10 @@ msgid "Financeable"
 msgstr ""
 
 msgid "Financing rule"
+msgstr ""
+
+#, python-format
+msgid "First mail sent to the candidate on %(date)s by %(sender)s."
 msgstr ""
 
 msgid "First name"
@@ -2965,6 +3066,9 @@ msgid ""
 "\"CASES_A_COCHER\"}</code>."
 msgstr ""
 
+msgid "For the attention of"
+msgstr ""
+
 #, python-format
 msgid ""
 "For the jury president, %(manager_first_name)s %(manager_last_name)s on "
@@ -3003,10 +3107,6 @@ msgid "Formation is not available for this year."
 msgstr ""
 
 msgid "Former UCLouvain student"
-msgstr ""
-
-msgctxt "ways_hear_about_training"
-msgid "Former students"
 msgstr ""
 
 msgid "Fraudster"
@@ -3055,10 +3155,6 @@ msgid "French value"
 msgstr ""
 
 msgid "French values"
-msgstr ""
-
-msgctxt "ways_hear_about_training"
-msgid "Friends"
 msgstr ""
 
 msgid "From"
@@ -3140,7 +3236,10 @@ msgstr ""
 msgid "Global"
 msgstr ""
 
-msgid "Global FAC/CDD comments"
+msgid "Global FAC comments"
+msgstr ""
+
+msgid "Global IUFC comments"
 msgstr ""
 
 msgid "Global SIC comments"
@@ -3226,10 +3325,16 @@ msgstr ""
 msgid "Household composition, or copy of your birth certificate"
 msgstr ""
 
-msgid "How did the candidate find out about this course?"
+msgid "How did the candidate hear about this course?"
 msgstr ""
 
 msgid "How did you hear about this course?"
+msgstr ""
+
+msgid "How else did the candidate hear about this course?"
+msgstr ""
+
+msgid "How else did you hear about this course?"
 msgstr ""
 
 msgid "I am a long-term resident in the European Union outside Belgium"
@@ -3653,6 +3758,12 @@ msgstr ""
 msgid "Internal comment:"
 msgstr ""
 
+msgid "Internal experience"
+msgstr ""
+
+msgid "Internal experiences to choose as access titles"
+msgstr ""
+
 msgid "Internal label"
 msgstr ""
 
@@ -3778,6 +3889,10 @@ msgid "Last email sent the"
 msgstr ""
 
 msgid "Last hour views:"
+msgstr ""
+
+#, python-format
+msgid "Last mail sent to the candidate on %(date)s by %(sender)s."
 msgstr ""
 
 msgid "Last modif."
@@ -4039,6 +4154,10 @@ msgstr ""
 msgid ""
 "Mail sent to the applicant following approval or rejection by a member of "
 "the supervisory group"
+msgstr ""
+
+#, python-format
+msgid "Mail sent to the candidate on %(date)s by %(sender)s."
 msgstr ""
 
 msgid ""
@@ -4337,9 +4456,6 @@ msgstr ""
 msgid "Modification of the secondary studies"
 msgstr ""
 
-msgid "Modification of the specificities of the curriculum"
-msgstr ""
-
 msgid "Modification requested"
 msgstr ""
 
@@ -4557,7 +4673,13 @@ msgstr ""
 msgid "Noma"
 msgstr ""
 
+msgid "Noma of the candidate"
+msgstr ""
+
 msgid "Non doctor reason"
+msgstr ""
+
+msgid "Non-academic activities"
 msgstr ""
 
 msgid "Non-academic activity"
@@ -4877,6 +4999,21 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
+msgid "Paragraph including the person to contact"
+msgstr ""
+
+msgid "Paragraph including the planned years"
+msgstr ""
+
+msgid "Paragraph including the prerequisite courses"
+msgstr ""
+
+msgid "Paragraph including the prerequisite courses detail"
+msgstr ""
+
+msgid "Paragraph including the required documents"
+msgstr ""
+
 msgid "Parcours"
 msgstr ""
 
@@ -4938,6 +5075,9 @@ msgid "Payment method"
 msgstr ""
 
 msgid "Pending application fee"
+msgstr ""
+
+msgid "Period"
 msgstr ""
 
 msgid "Permanent residence card of a family member of a European Union citizen"
@@ -5011,10 +5151,19 @@ msgstr ""
 msgid "Please complete this field: {}"
 msgstr ""
 
+msgid "Please confirm the change to \"Not concerned\"."
+msgstr ""
+
 msgid "Please confirm the change to this new state."
 msgstr ""
 
 msgid "Please confirm the change to this new status."
+msgstr ""
+
+msgid "Please confirm the faculty dispensation approval."
+msgstr ""
+
+msgid "Please confirm the withdrawal of the candidate."
 msgstr ""
 
 msgid "Please enter your work email address"
@@ -5388,6 +5537,9 @@ msgstr ""
 msgid "REFUS_COMPLEMENT_TARDIF"
 msgstr ""
 
+msgid "REFUS_DE_DEROGATION_FACULTAIRE"
+msgstr "Faculty dispensation refusal"
+
 msgid "REFUS_DIRECTION"
 msgstr ""
 
@@ -5576,6 +5728,9 @@ msgstr ""
 
 msgctxt "jury member"
 msgid "Remove"
+msgstr ""
+
+msgid "Remove experience"
 msgstr ""
 
 msgctxt "jury member"
@@ -5928,9 +6083,6 @@ msgstr ""
 msgid "Sector"
 msgstr ""
 
-msgid "Select a document"
-msgstr ""
-
 msgid "Select a mail template"
 msgstr ""
 
@@ -6055,6 +6207,9 @@ msgstr ""
 msgid "Sir"
 msgstr ""
 
+msgid "Sir, Madam"
+msgstr ""
+
 msgid "Solidarity student"
 msgstr ""
 
@@ -6125,6 +6280,9 @@ msgid "Specific question"
 msgstr ""
 
 msgid "Specific questions"
+msgstr ""
+
+msgid "Specificities"
 msgstr ""
 
 msgid "Specified"
@@ -6332,6 +6490,14 @@ msgid ""
 "preparation and the jury proposition."
 msgstr ""
 
+msgid ""
+"The 'Dispensation granted' status is reserved to enrolment application whith "
+"financability dispensation status set to 'Faculty dispensation granted'."
+msgstr ""
+
+msgid "The 'Dispensation needed' status is reserved to enrolment application."
+msgstr ""
+
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
 
@@ -6356,6 +6522,12 @@ msgstr ""
 
 msgid "The CA members"
 msgstr "The supervisory panel members"
+
+msgid "The CV does not yet contain any academic course."
+msgstr ""
+
+msgid "The CV does not yet contain any non-academic activity."
+msgstr ""
 
 msgid "The IBAN account number is valid"
 msgstr ""
@@ -6624,6 +6796,9 @@ msgid ""
 "The inscription type admission was authorised the %(date)s by %(author)s."
 msgstr ""
 
+msgid "The internal experiences chosen as access titles of this admission."
+msgstr ""
+
 msgid "The jury is not in progress"
 msgstr ""
 
@@ -6773,6 +6948,11 @@ msgstr ""
 
 #, python-format
 msgid "The status has been changed to %(status)s."
+msgstr ""
+
+msgid ""
+"The status of the checklist for the financability must be \"Not concerned\" "
+"or \"Financable\" or \"Dispensation granted\"."
 msgstr ""
 
 #, python-brace-format
@@ -7172,6 +7352,10 @@ msgstr ""
 msgid "UCLouvain SIC free documents"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "UCLouvain continuing education website"
+msgstr ""
+
 msgid "UCLouvain logo"
 msgstr ""
 
@@ -7427,7 +7611,7 @@ msgid "Without free documents"
 msgstr ""
 
 msgctxt "ways_hear_about_training"
-msgid "Word of mouth"
+msgid "Word of mouth (family, friends, colleagues, ...)"
 msgstr ""
 
 msgid "Work contract"
@@ -7608,6 +7792,12 @@ msgstr ""
 msgid ""
 "You can add any document you feel is relevant to your application "
 "(supporting documents, proof of language level, etc.)."
+msgstr ""
+
+msgid ""
+"You can find more information on the French Community webpage <a "
+"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
+"</a>"
 msgstr ""
 
 msgid ""
@@ -7841,6 +8031,10 @@ msgstr ""
 msgid "Your participation in the event"
 msgstr ""
 
+msgid ""
+"Your past experiences does not ensure the expected garanties for success"
+msgstr ""
+
 msgid "Your previous NOMA (matriculation number)"
 msgstr ""
 
@@ -7873,7 +8067,7 @@ msgstr "Bank transfer"
 msgid "by the Enrolment Office"
 msgstr ""
 
-msgid "by the University Institute for Continuing Education (IUFC)"
+msgid "by the faculty"
 msgstr ""
 
 msgctxt "payment"
@@ -7952,10 +8146,14 @@ msgstr ""
 msgid "the UCLouvain Registration Service"
 msgstr ""
 
-msgid "the University Institute of Continuing Education"
+msgid "the faculty"
 msgstr ""
 
 msgid "the person concerned"
+msgstr ""
+
+msgctxt "admission-date"
+msgid "to"
 msgstr ""
 
 msgid "to the UCLouvain Registration Service"
@@ -7965,6 +8163,9 @@ msgid "ucl"
 msgstr "UCLouvain"
 
 msgid "use"
+msgstr ""
+
+msgid "yes,no"
 msgstr ""
 
 msgid "yes,no,"

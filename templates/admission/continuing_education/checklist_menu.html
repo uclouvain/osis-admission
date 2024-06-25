@@ -36,31 +36,13 @@
             href="#{{ checklist_item_name }}"
         >
           <a>
-            {% include 'admission/continuing_education/checklist_menu_item_status.html' with statut=statut item_name=checklist_item_name %}
+            {% include 'admission/continuing_education/checklist_menu_item_status.html' with statut=statut extra=current.extra item_name=checklist_item_name %}
             {{ checklist_tabs|get_item:checklist_item_name }}
             {% if checklist_additional_icons and checklist_additional_icons|get_item_or_none:checklist_item_name %}
               {% include 'admission/continuing_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name additional_icon=checklist_additional_icons|get_item:checklist_item_name %}
             {% endif %}
           </a>
         </div>
-        {% if current.enfants %}
-          <ul class="list-group sub-items" id="checklist-menu-item-child-{{ checklist_item_name }}">
-            {% for child in current.enfants %}
-              {% concat checklist_item_name '__' child.extra.identifiant as child_identifier %}
-              <li
-                  class="list-group-item sub-item {{ bg_classes|get_item:child_identifier }}"
-                  data-toggle="tab"
-                  href="#{{ child_identifier }}"
-              >
-                <a class="sub-item-link">
-                  {% include 'admission/continuing_education/checklist_menu_item_status.html' with statut=child.statut item_name=child_identifier %}
-                  {{ checklist_tabs|get_item:child_identifier }}
-                  {% include 'admission/continuing_education/checklist_menu_item_additional_icon.html' with item_name=child_identifier additional_icon=checklist_additional_icons|get_item:child_identifier %}
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        {% endif %}
       </li>
     {% endwith %}
   {% endfor %}

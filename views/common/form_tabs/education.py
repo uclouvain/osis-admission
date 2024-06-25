@@ -26,10 +26,10 @@
 from typing import List
 from uuid import UUID
 
+from django.urls import reverse
 from django.utils.functional import cached_property
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
@@ -47,13 +47,11 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
     urlpatterns = 'education'
     template_name = 'admission/forms/education.html'
     specific_questions_tab = Onglets.ETUDES_SECONDAIRES
-    extra_context = {
-        'without_menu': True,
-    }
     update_requested_documents = True
     update_admission_author = True
     permission_required = 'admission.change_admission_secondary_studies'
     foreign_form_class = AdmissionBachelorEducationForeignDiplomaForm
+    extra_context = {'force_form': True}
 
     def has_permission(self):
         return super().has_permission() and self.can_be_updated
@@ -99,10 +97,14 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
 
     @cached_property
     def is_med_dent_training(self):
-        return est_formation_medecine_ou_dentisterie(self.proposition.formation.code_domaine)
+        return self.proposition.formation.est_formation_medecine_ou_dentisterie
 
     def get_success_url(self):
-        return self.next_url or self.request.get_full_path()
+        return (
+            self.next_url or self.request.get_full_path()
+            if self.is_general
+            else reverse(f'{self.base_namespace}:education', kwargs=self.kwargs)
+        )
 
     def update_current_admission_on_form_valid(self, form, admission):
         admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}

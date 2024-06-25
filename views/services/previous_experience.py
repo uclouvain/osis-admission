@@ -28,6 +28,7 @@ from django.views.generic import TemplateView
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.templatetags.admission import format_matricule
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from osis_common.utils.htmx import HtmxMixin
 
@@ -46,11 +47,17 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
 
     @property
     def candidate(self):
+        # retrieve using DDD
         return Person.objects.values(
             'first_name', 'middle_name', 'last_name', 'email', 'gender', 'birth_date', 'civil_state',
             'birth_place', 'country_of_citizenship__name', 'national_number', 'id_card_number',
             'passport_number', 'last_registration_id', 'global_id',
         ).get(baseadmissions__uuid=self.kwargs['admission_uuid'])
+
+    @property
+    def person_merge_proposal(self):
+        # retrieve using DDD
+        return PersonMergeProposal.objects.get(original_person__global_id=self.candidate['global_id'])
 
     @property
     def provided_experience(self):
@@ -82,6 +89,7 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
             self.provided_experience.experiences_academiques, key=lambda exp: exp.titre_formate, reverse=True
         )
         context['provided_high_school_graduation_year'] = self.provided_experience.annee_diplome_etudes_secondaires
+        context['person_merge_proposal'] = self.person_merge_proposal
         if self.known_experience:
             context['professional_experience'] = self._merge_professional_experiences()
             context['educational_experience'] = self._merge_academic_experiences()

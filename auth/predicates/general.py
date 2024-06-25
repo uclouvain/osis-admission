@@ -169,6 +169,6 @@ def can_send_to_fac_faculty_decision(self, user: User, obj: GeneralEducationAdmi
 @predicate(bind=True)
 @predicate_failed_msg(message=_("This action is limited to a specific admission context."))
 def is_general(self, user: User, obj: GeneralEducationAdmission):
-    from admission.templatetags.admission import CONTEXT_GENERAL
+    from admission.constants import CONTEXT_GENERAL
 
     return obj.admission_context == CONTEXT_GENERAL

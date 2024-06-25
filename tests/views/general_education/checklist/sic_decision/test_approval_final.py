@@ -134,6 +134,8 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.checklist['current']['parcours_anterieur'][
             'statut'
         ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.checklist['current']['financabilite']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.checklist['current']['financabilite']['extra'] = {'reussite': 'financable'}
         self.general_admission.save(update_fields=['checklist'])
         self.general_admission.refusal_reasons.add(RefusalReasonFactory())
         self.url = resolve_url(
@@ -314,7 +316,15 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
         self.general_admission.save()
 
-        response = self.client.post(self.url, data={}, **self.default_headers)
+        # Choose an existing reason
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-approval-final-subject': 'subject',
+                'sic-decision-approval-final-body': 'body',
+            },
+            **self.default_headers,
+        )
 
         # Check the response
         self.assertEqual(response.status_code, 200)

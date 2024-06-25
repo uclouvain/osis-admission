@@ -127,6 +127,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterCurriculumCommand(interface.CommandRequest):
     uuid_proposition: str
+    auteur_modification: str
 
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
@@ -523,6 +524,23 @@ class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierDerogationFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    statut: str
+    gestionnaire: str
+    refus_uuids_motifs: List[str] = attr.Factory(list)
+    refus_autres_motifs: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
@@ -623,6 +641,8 @@ class ApprouverAdmissionParSicCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverInscriptionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
+    objet_message: str
+    corps_message: str
     auteur: str
 
 

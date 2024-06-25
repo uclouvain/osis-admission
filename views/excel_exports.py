@@ -390,7 +390,7 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             row.formation,
             str(ChoixEdition.get_value(row.edition)) if row.edition else '',
             row.sigle_faculte,
-            yesno(row.paye),
+            yesno(row.paye, _('yes,no')),
             str(ChoixStatutPropositionContinue.get_value(row.etat_demande)),
             '',  # TODO Add EPC status
             row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',

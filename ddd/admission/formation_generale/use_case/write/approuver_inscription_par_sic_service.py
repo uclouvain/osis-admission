@@ -45,6 +45,7 @@ def approuver_inscription_par_sic(
     cmd: ApprouverInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    notification: 'INotification',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
@@ -93,17 +94,23 @@ def approuver_inscription_par_sic(
 
     noma = NomaGenerateurService.generer_noma(
         compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-        annee=proposition.formation_id.annee
+        annee=proposition.formation_id.annee,
     )
 
     # use event publication to trigger submit ticket in digit
     digit.submit_person_ticket(
         global_id=proposition.matricule_candidat,
-        noma=noma
+        noma=noma,
     )
 
+    message = notification.accepter_proposition_par_sic(
+        proposition=proposition,
+        objet_message=cmd.objet_message,
+        corps_message=cmd.corps_message,
+    )
     historique.historiser_acceptation_sic(
         proposition=proposition,
+        message=message,
         gestionnaire=cmd.auteur,
     )
 

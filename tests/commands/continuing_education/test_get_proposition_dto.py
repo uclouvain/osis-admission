@@ -107,7 +107,7 @@ class GetPropositionDTOTestCase(TestCase):
             billing_address_recipient='recipient@example.be',
             billing_address_postal_box='b1',
             motivations='Motivations',
-            ways_to_find_out_about_the_course=[ChoixMoyensDecouverteFormation.AMIS.name],
+            ways_to_find_out_about_the_course=[ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.name],
             requested_documents='',
             interested_mark=True,
             edition=ChoixEdition.QUATRE.name,

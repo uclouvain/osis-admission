@@ -31,7 +31,10 @@ import freezegun
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierFinancabiliteRegleCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    RegleCalculeResultatAvecFinancable,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -85,6 +88,9 @@ class TestSpecifierFinancabiliteRegle(TestCase):
         self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
 
         # Proposition mise à jour
-        self.assertEqual(proposition.financabilite_regle, 'SECONDE_INSCRIPTION_MEME_CYCLE')
+        self.assertEqual(
+            proposition.financabilite_regle,
+            RegleCalculeResultatAvecFinancable.SECONDE_INSCRIPTION_MEME_CYCLE,
+        )
         self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
         self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.GEST_REUSSITE)

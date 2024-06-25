@@ -30,7 +30,6 @@ from waffle import switch_is_active
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
-from osis_role.cache import predicate_cache
 from osis_role.errors import predicate_failed_msg
 
 
@@ -51,6 +50,17 @@ def is_debug(*args):
     return switch_is_active("debug")
 
 
+def _build_queryset_cache_key_from_role_qs(role_qs, suffix):
+    """
+    Return a cache key based on the model class of the queryset. This is useful when we want to cache a queryset for a
+    user who has several roles.
+    :param role_qs: The role queryset
+    :param suffix: The suffix of the cache key
+    :return: The cache key
+    """
+    return f'{role_qs.model.__module__}_{role_qs.model.__name__}_{suffix}'.replace('.', '_')
+
+
 def has_scope(*scopes):
     assert len(scopes) > 0, 'You must provide at least one scope name'
 
@@ -58,25 +68,41 @@ def has_scope(*scopes):
 
     @predicate(name, bind=True)
     def fn(self, user):
-        if not hasattr(user, '_admission_scopes'):
-            user._admission_scopes = set(
-                scope for scope_list in self.context['role_qs'].values_list('scopes', flat=True) for scope in scope_list
+        cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], 'admission_scopes')
+
+        if not hasattr(user, cache_key):
+            setattr(
+                user,
+                cache_key,
+                set(
+                    scope
+                    for scope_list in self.context['role_qs'].values_list('scopes', flat=True)
+                    for scope in scope_list
+                ),
             )
-        return set([s.name for s in scopes]) <= user._admission_scopes
+        return set([s.name for s in scopes]) <= getattr(user, cache_key)
 
     return fn
 
 
 @predicate(bind=True)
-@predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_part_of_education_group(self, user: User, obj: BaseAdmission):
-    return obj.training.education_group_id in self.context['role_qs'].get_education_groups_affected()
+    cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], 'education_groups_affected')
+
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, self.context['role_qs'].get_education_groups_affected())
+
+    return obj.training.education_group_id in getattr(user, cache_key)
 
 
 @predicate(bind=True)
-@predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_entity_manager(self, user: User, obj: BaseAdmission):
-    return obj.training.management_entity_id in self.context['role_qs'].get_entities_ids()
+    cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], 'entities_ids')
+
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, self.context['role_qs'].get_entities_ids())
+
+    return obj.training.management_entity_id in getattr(user, cache_key)
 
 
 def has_education_group_of_types(*education_group_types):
@@ -84,12 +110,19 @@ def has_education_group_of_types(*education_group_types):
 
     @predicate(name, bind=True)
     def fn(self, user: User):
-        if not hasattr(user, '_education_group_types'):
-            user._education_group_types = set(
-                self.context['role_qs'].values_list(
-                    'education_group__educationgroupyear__education_group_type__name', flat=True
-                )
+        cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], 'education_group_types')
+
+        if not hasattr(user, cache_key):
+            setattr(
+                user,
+                cache_key,
+                set(
+                    self.context['role_qs'].values_list(
+                        'education_group__educationgroupyear__education_group_type__name',
+                        flat=True,
+                    )
+                ),
             )
-        return set(education_group_types) & user._education_group_types
+        return set(education_group_types) & getattr(user, cache_key)
 
     return fn

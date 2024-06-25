@@ -105,6 +105,7 @@ class Proposition(interface.RootEntity):
 
     motivations: Optional[str] = ''
     moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation] = attr.Factory(list)
+    autre_moyen_decouverte_formation: Optional[str] = ''
 
     checklist_initiale: Optional[StatutsChecklistContinue] = None
     checklist_actuelle: Optional[StatutsChecklistContinue] = None
@@ -141,6 +142,7 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         motivations: str,
         moyens_decouverte_formation: List[str],
+        autre_moyen_decouverte_formation: Optional[str],
         marque_d_interet: Optional[bool],
         auteur: str,
     ):
@@ -150,6 +152,7 @@ class Proposition(interface.RootEntity):
         self.moyens_decouverte_formation = [
             ChoixMoyensDecouverteFormation[moyen] for moyen in moyens_decouverte_formation
         ]
+        self.autre_moyen_decouverte_formation = autre_moyen_decouverte_formation
         self.marque_d_interet = marque_d_interet
         self.auteur_derniere_modification = auteur
 
@@ -159,6 +162,7 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         motivations: str,
         moyens_decouverte_formation: List[str],
+        autre_moyen_decouverte_formation: Optional[str],
         marque_d_interet: Optional[bool],
     ):
         self._modifier_choix_formation(
@@ -166,6 +170,7 @@ class Proposition(interface.RootEntity):
             reponses_questions_specifiques=reponses_questions_specifiques,
             motivations=motivations,
             moyens_decouverte_formation=moyens_decouverte_formation,
+            autre_moyen_decouverte_formation=autre_moyen_decouverte_formation,
             marque_d_interet=marque_d_interet,
             auteur=self.matricule_candidat,
         )
@@ -176,6 +181,7 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         motivations: str,
         moyens_decouverte_formation: List[str],
+        autre_moyen_decouverte_formation: Optional[str],
         marque_d_interet: Optional[bool],
         gestionnaire: str,
     ):
@@ -184,6 +190,7 @@ class Proposition(interface.RootEntity):
             reponses_questions_specifiques=reponses_questions_specifiques,
             motivations=motivations,
             moyens_decouverte_formation=moyens_decouverte_formation,
+            autre_moyen_decouverte_formation=autre_moyen_decouverte_formation,
             marque_d_interet=marque_d_interet,
             auteur=gestionnaire,
         )
@@ -214,11 +221,12 @@ class Proposition(interface.RootEntity):
         curriculum: List[str],
         equivalence_diplome: List[str],
         reponses_questions_specifiques: Dict,
+        auteur_modification: str,
     ):
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques
-        self.auteur_derniere_modification = self.matricule_candidat
+        self.auteur_derniere_modification = auteur_modification
 
     def completer_informations_complementaires(
         self,
@@ -275,6 +283,7 @@ class Proposition(interface.RootEntity):
         ChoixFormationValidatorList(
             motivations=self.motivations,
             moyens_decouverte_formation=self.moyens_decouverte_formation,
+            autre_moyen_decouverte_formation=self.autre_moyen_decouverte_formation,
             informations_specifiques_formation=informations_specifiques_formation,
         ).validate()
 

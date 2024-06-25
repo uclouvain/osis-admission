@@ -38,8 +38,11 @@ from rest_framework.views import APIView
 
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.commands import ValiderTicketPersonneCommand, RechercherCompteExistantQuery, \
-    GetPropositionFusionQuery
+from admission.ddd.admission.commands import (
+    ValiderTicketPersonneCommand,
+    RechercherCompteExistantQuery,
+    GetPropositionFusionQuery,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
@@ -53,6 +56,7 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_FAC_FOR_IUFC,
 )
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 
 __all__ = [
     'ChangeStatusView',
@@ -61,7 +65,7 @@ __all__ = [
 
 __namespace__ = False
 
-from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
 
 
 class ChangeStatusSerializer(serializers.Serializer):
@@ -76,6 +80,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
 
     # use an intermediary status for DIGIT VALIDATION
     from infrastructure.messages_bus import message_bus_instance
+
     validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
     proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
 
@@ -83,7 +88,12 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
         if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
             raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
         if proposition_fusion.status == PersonMergeStatus.ERROR.name:
-            raise Exception(_("Unable to validate the admission because an error occured while searching for existing person in DIGIT"))
+            raise Exception(
+                _(
+                    "Unable to validate the admission because an error occured while searching for existing "
+                    "person in DIGIT"
+                )
+            )
 
     if validation.valid is False:
         raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))
@@ -159,11 +169,18 @@ class SaveCommentView(AdmissionFormMixin, FormView):
         'authentication': 'admission.checklist_change_past_experiences',
     }
 
+    permission_by_tab = {
+        COMMENT_FINANCABILITE_DISPENSATION: 'admission.checklist_change_fac_comment',
+    }
+
     @cached_property
     def tags(self):
         return self.kwargs['tab'].split('__')
 
     def get_permission_required(self):
+        self.permission_required = self.permission_by_tab.get(self.kwargs['tab'], None)
+        if self.permission_required is not None:
+            return super().get_permission_required()
         self.permission_required = next(
             (self.permission_by_custom_tag[tag] for tag in self.tags if tag in self.permission_by_custom_tag),
             'admission.checklist_change_comment',

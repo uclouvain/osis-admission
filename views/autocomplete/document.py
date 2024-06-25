@@ -36,7 +36,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False

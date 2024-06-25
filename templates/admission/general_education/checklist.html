@@ -179,6 +179,12 @@
         <div role="tabpanel" class="tab-pane" id="financabilite">
 
           {% include "admission/general_education/includes/checklist/financabilite.html" %}
+          
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_non_concerne_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_abandon_du_candidat_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_refus_de_derogation_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_accord_de_derogation_modal.html" %}
 
           <div class="info-part">
             <dl>
@@ -306,7 +312,7 @@
           </div>
         </div>
       {% endwith %}
-      {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur %}
+      {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur next_url=next_base_url|add:'parcours_anterieur' %}
         <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
           {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
           {% bootstrap_form comment_forms.parcours_anterieur %}
@@ -324,9 +330,9 @@
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
             <div class="mt-1">
               {% if can_update_curriculum %}
-                {% url 'admission:general-education:update:curriculum:global' view.kwargs.uuid as global_curriculum_update_url %}
+                {% url 'admission:general-education:update:curriculum' view.kwargs.uuid as global_curriculum_update_url %}
               {% endif %}
-              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url %}
+              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url|add:next_url %}
             </div>
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
@@ -1057,6 +1063,7 @@
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
+  <link href="{% static 'osis_profile/css/parcours.css' %}" rel="stylesheet" >
   <style>
     #three-pane-checklist {
       display: flex;

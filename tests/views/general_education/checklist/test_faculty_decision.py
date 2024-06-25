@@ -84,9 +84,15 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from base.tests.factories.student import StudentFactory
 from epc.models.enums.condition_acces import ConditionAcces
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from osis_profile.models import (
     EducationalExperience,
     ProfessionalExperience,
@@ -1003,6 +1009,49 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         # Check that the admission has not been updated
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_sic_with_fac_user_to_approve_with_internal_experience_as_access_title(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.with_additional_approval_conditions = False
+        self.general_admission.with_prerequisite_courses = False
+        self.general_admission.program_planned_years_number = 1
+        self.general_admission.save()
+
+        student = StudentFactory(person=self.general_admission.candidate)
+
+        pce_a = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DISTINCTION.name,
+            sigle_formation="SF1",
+        )
+        pce_a_uuid = str(uuid.UUID(int=pce_a.pk))
+        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_year=self.academic_years[0],
+        )
+
+        self.general_admission.internal_access_titles.add(pce_a)
+
+        candidate = self.general_admission.candidate
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(
+            pdf_context['access_titles_names'][0],
+            f'2021-2022 : {pce_a_pae_a.programme.offer.title}',
+        )
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self, frozen_time):

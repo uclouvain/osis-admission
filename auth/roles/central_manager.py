@@ -81,9 +81,11 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & general.in_sic_status,
             'admission.view_admission_secondary_studies': is_entity_manager,
-            'admission.change_admission_secondary_studies': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_secondary_studies': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status),
             'admission.view_admission_curriculum': is_entity_manager,
-            'admission.change_admission_curriculum': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_curriculum': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status),
             'admission.view_admission_project': is_entity_manager,
             'admission.change_admission_project': is_entity_manager & general.in_sic_status,
             'admission.view_admission_cotutelle': is_entity_manager,
@@ -130,9 +132,12 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_change_past_experiences': is_entity_manager & general.in_sic_status,
             'admission.checklist_select_access_title': is_entity_manager & general.in_sic_status,
             'admission.checklist_change_sic_comment': is_entity_manager & general.is_submitted,
+            'admission.checklist_financability_dispensation': is_entity_manager,
+            'admission.checklist_financability_dispensation_fac': is_entity_manager,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager,
-            'admission.checklist_change_comment': is_entity_manager & general.is_submitted,
+            'admission.checklist_change_comment': is_entity_manager
+            & ((general.is_general & general.is_submitted) | continuing.is_continuing),
             'admission.checklist_change_sic_decision': is_entity_manager & general.in_sic_status,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,

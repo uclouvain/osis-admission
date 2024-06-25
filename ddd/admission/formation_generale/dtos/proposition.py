@@ -93,6 +93,12 @@ class PropositionDTO(interface.DTO):
     financabilite_regle: str
     financabilite_regle_etabli_par: str
 
+    financabilite_derogation_statut: str
+    financabilite_derogation_premiere_notification_le: Optional[datetime.datetime]
+    financabilite_derogation_premiere_notification_par: str
+    financabilite_derogation_derniere_notification_le: Optional[datetime.datetime]
+    financabilite_derogation_derniere_notification_par: str
+
     documents_demandes: Dict
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]

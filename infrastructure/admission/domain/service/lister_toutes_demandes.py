@@ -25,8 +25,7 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
-from contextlib import suppress
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Set
 
 from django.conf import settings
 from django.db.models import (
@@ -207,30 +206,38 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if quarantaine in [True, False]:
             if quarantaine:
                 qs = qs.filter(
-                    Q(candidate__personmergeproposal__isnull=False) &
-                    ~Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name) &
-                    ~Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name) &
-                    ~Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
+                    Q(candidate__personmergeproposal__isnull=False)
+                    & ~Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name)
+                    & ~Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name)
+                    & ~Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
                 )
             else:
                 qs = qs.filter(
-                    Q(candidate__personmergeproposal__isnull=True) |
-                    Q(candidate__personmergeproposal__status__isnull=True) |
-                    Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name) |
-                    Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name) |
-                    Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
+                    Q(candidate__personmergeproposal__isnull=True)
+                    | Q(candidate__personmergeproposal__status__isnull=True)
+                    | Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name)
+                    | Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name)
+                    | Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
                 )
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
+
             json_path_to_checks = defaultdict(set)
             all_checklist_filters = Q()
 
             # Manage the case of the "AUTHENTIFICATION" and "BESOIN_DEROGATION" filters which are hierarchical
             # If one sub item is selected, the parent must be unselected as the parent itself includes all sub items
+            # (AND query if both parent and sub items are selected)
+            selected_parent_identifiers_by_tab: Dict[str, Set[str]] = defaultdict(set)
+
             for (tab_name, prefix_identifier,) in [
                 (
                     OngletsChecklist.experiences_parcours_anterieur.name,
                     'AUTHENTIFICATION',
+                ),
+                (
+                    OngletsChecklist.financabilite.name,
+                    'BESOIN_DEROGATION',
                 ),
                 (
                     OngletsChecklist.decision_sic.name,
@@ -239,8 +246,11 @@ class ListerToutesDemandes(IListerToutesDemandes):
             ]:
                 current_filters = filtres_etats_checklist.get(tab_name)
                 if any(f'{prefix_identifier}.' in current_filter for current_filter in current_filters):
-                    with suppress(ValueError):
+                    try:
                         current_filters.remove(prefix_identifier)
+                        selected_parent_identifiers_by_tab[tab_name].add(prefix_identifier)
+                    except ValueError:
+                        pass
 
             for tab_name, status_values in filtres_etats_checklist.items():
                 if not status_values:
@@ -253,11 +263,23 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 if not current_tab:
                     continue
 
+                selected_parent_identifiers = selected_parent_identifiers_by_tab.get(tab_name)
+
                 for status_value in status_values:
                     current_status_filter: Optional[ConfigurationStatutChecklist] = current_tab.get(status_value)
 
                     if not current_status_filter:
                         continue
+
+                    if (
+                        current_status_filter.identifiant_parent
+                        and selected_parent_identifiers
+                        and current_status_filter.identifiant_parent in selected_parent_identifiers
+                    ):
+                        # For the sub statuses, if the parent is selected, we filter on both items (AND query)
+                        current_status_filter = current_status_filter.merge_statuses(
+                            current_tab[current_status_filter.identifiant_parent]
+                        )
 
                     # Specific cases
                     if tab_name == OngletsChecklist.experiences_parcours_anterieur.name:
@@ -278,15 +300,18 @@ class ListerToutesDemandes(IListerToutesDemandes):
                         json_path_to_checks['checklist'].add('current')
 
                     else:
+                        current_checklist_filters = Q()
+                        with_json_checklist_filter = False
+
                         # Filter on the checklist tab status
-                        current_checklist_filters = Q(
-                            **{
-                                f'checklist__current__{tab_name}__statut': current_status_filter.statut.name,
-                            }
-                        )
-                        json_path_to_checks[f'checklist__current__{tab_name}'].add('statut')
-                        json_path_to_checks['checklist__current'].add(tab_name)
-                        json_path_to_checks['checklist'].add('current')
+                        if current_status_filter.statut:
+                            current_checklist_filters = Q(
+                                **{
+                                    f'checklist__current__{tab_name}__statut': current_status_filter.statut.name,
+                                }
+                            )
+                            json_path_to_checks[f'checklist__current__{tab_name}'].add('statut')
+                            with_json_checklist_filter = True
 
                         # Filter on the checklist tab extra if necessary
                         if current_status_filter.extra:
@@ -300,13 +325,29 @@ class ListerToutesDemandes(IListerToutesDemandes):
                                     current_checklist_filters &= Q(
                                         generaleducationadmission__dispensation_needed=dispensation_needed,
                                     )
+                            elif tab_name == OngletsChecklist.financabilite.name:
+                                # Filter on the dispensation status if necessary
+                                dispensation_needed = current_extra.pop('etat_besoin_derogation', None)
 
-                            current_checklist_filters &= Q(
-                                **{
-                                    f'checklist__current__{tab_name}__extra__contains': current_extra,
-                                }
-                            )
-                            json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')
+                                if dispensation_needed:
+                                    current_checklist_filters &= Q(
+                                        generaleducationadmission__financability_dispensation_status=(
+                                            dispensation_needed
+                                        ),
+                                    )
+
+                            if current_extra:
+                                current_checklist_filters &= Q(
+                                    **{
+                                        f'checklist__current__{tab_name}__extra__contains': current_extra,
+                                    }
+                                )
+                                json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')
+                                with_json_checklist_filter = True
+
+                        if with_json_checklist_filter:
+                            json_path_to_checks['checklist__current'].add(tab_name)
+                            json_path_to_checks['checklist'].add('current')
 
                     all_checklist_filters |= current_checklist_filters
 
