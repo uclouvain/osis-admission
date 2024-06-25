@@ -3219,6 +3219,7 @@ msgstr "Proposition de l'algorithme de financabilité le %(date)s : %(result)s"
 msgid "Financeable"
 msgstr "Financable"
 
+#, python-format
 msgid "Financeable - %(rule)s (Established by %(established_by)s)"
 msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
 
@@ -5217,6 +5218,7 @@ msgstr "Non concerné·e"
 msgid "Not financeable"
 msgstr "Non-finançable"
 
+#, python-format
 msgid "Not financeable - %(rule)s (Established by %(established_by)s)"
 msgstr "Non finançable - %(rule)s (Établi par %(established_by)s)"
 
@@ -8280,6 +8282,13 @@ msgstr "En attente de signature"
 
 msgid "Wallonie Bruxelles International (WBI)"
 msgstr "Wallonie Bruxelles International (WBI)"
+
+msgid ""
+"Warning, the financability verdict selected is different from the "
+"proposition from the financability algorithm."
+msgstr ""
+"Attention, le verdict de finançabilité qui a été sélectionné diffère de la "
+"proposition émise par l’algorithme de finançabilité."
 
 msgid ""
 "We congratulate you on your successful completion of the paper and wish you "

@@ -7508,6 +7508,11 @@ msgid "Wallonie Bruxelles International (WBI)"
 msgstr ""
 
 msgid ""
+"Warning, the financability verdict selected is different from the "
+"proposition from the financability algorithm."
+msgstr ""
+
+msgid ""
 "We congratulate you on your successful completion of the paper and wish you "
 "every success in your doctoral training."
 msgstr ""

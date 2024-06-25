@@ -28,6 +28,11 @@
   {% has_perm 'admission.change_checklist' as can_change_checklist %}
   <div role="tabpanel" class="tab-pane" id="financabilite-content"
        hx-target="this" hx-swap-oob="true">
+
+    {% if financabilite_show_verdict_different_alert %}
+    <p class="alert alert-warning">{% translate "Warning, the financability verdict selected is different from the proposition from the financability algorithm." %}</p>
+    {% endif %}
+
     <div class="form-group btn-group status-group" role="group">
       {% translate 'To be processed' as initial_candidat_label %}
       {% translate 'Not concerned' as initial_non_concerne_label %}
@@ -180,16 +185,15 @@
           {% endif %}
           <br>
         {% endif %}
-        <em>
-        {% if original_admission.financability_computed_rule == '' %}
-          {% trans "Financeabilty algorithm proposition not computed yet." %}
-        {% else %}
-          {% blocktrans trimmed with date=original_admission.financability_computed_rule_on result=original_admission.financability_computed_rule|financability_enum_display %}
-            Financeabilty algorithm proposition on the {{ date }} : {{ result }}
-          {% endblocktrans %}
-          {% if original_admission.financability_computed_rule_situation %} - {{ original_admission.financability_computed_rule_situation|financability_enum_display }}{% endif %}
-        {% endif %}
-        </em>
+        <div
+            id="financabilite-computed-rule"
+            {% if financabilite_compute_rule_needed %}
+            hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}"
+            hx-trigger="financabiliteComputeRule"
+            {% endif %}
+        >
+          {% include "admission/general_education/includes/checklist/financabilite_computed_rule.html" %}
+        </div>
       </div>
     </div>
 
