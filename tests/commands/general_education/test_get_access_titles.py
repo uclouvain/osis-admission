@@ -24,8 +24,9 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Dict
+from typing import Dict
 from unittest.mock import patch
+from uuid import UUID
 
 import freezegun
 from django.test import TestCase
@@ -61,8 +62,14 @@ from admission.tests.factories.secondary_studies import (
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.student import StudentFactory
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result
 
 
@@ -91,7 +98,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertEqual(len(access_titles), 0)
 
     def test_get_access_title_with_cv_academic_experience(self):
-        access_titles: List[TitreAccesSelectionnableDTO]
+        access_titles: Dict[str, TitreAccesSelectionnableDTO]
 
         general_admission = GeneralEducationAdmissionFactory(
             training=self.training,
@@ -206,7 +213,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertEqual(len(access_titles), 0)
 
     def test_get_access_title_with_cv_non_academic_experience(self):
-        access_titles: List[TitreAccesSelectionnableDTO]
+        access_titles: Dict[str, TitreAccesSelectionnableDTO]
 
         general_admission = GeneralEducationAdmissionFactory(
             training=self.training,
@@ -452,3 +459,127 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
 
         self.assertEqual(len(access_titles), 0)
+
+    def test_get_access_title_with_internal_experience(self):
+        access_titles: Dict[str, TitreAccesSelectionnableDTO]
+
+        general_admission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        student = StudentFactory(person=general_admission.candidate)
+
+        pce_a = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DISTINCTION.name,
+            sigle_formation="SF1",
+        )
+        pce_a_uuid = str(UUID(int=pce_a.pk))
+        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_year=self.academic_years[0],
+        )
+        pce_a_pae_b = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            statut=StatutInscriptionProgrammAnnuel.INTERUNIVERSITAIRE.name,
+            etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
+            programme__offer__academic_year=self.academic_years[1],
+        )
+
+        pce_b = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DIPLOMABLE.name,
+            sigle_formation="SF2",
+        )
+        pce_b_uuid = str(UUID(int=pce_b.pk))
+        pce_b_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_b,
+            statut='',
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_year=self.academic_years[1],
+        )
+
+        pce_c = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision='',
+            sigle_formation="SF3",
+        )
+        pce_c_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_c,
+            statut='',
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_year=self.academic_years[0],
+        )
+        pce_c_pae_b = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_c,
+            statut=StatutInscriptionProgrammAnnuel.INTERUNIVERSITAIRE.name,
+            etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
+            programme__offer__academic_year=self.academic_years[1],
+        )
+
+        # We retrieve the experience with diploma (or leading to one)
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 2)
+
+        self.assertIn(pce_a_uuid, access_titles)
+        self.assertIn(pce_b_uuid, access_titles)
+
+        self.assertEqual(access_titles[pce_b_uuid].uuid_experience, pce_b_uuid)
+        self.assertEqual(
+            access_titles[pce_b_uuid].type_titre,
+            TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name,
+        )
+        self.assertEqual(access_titles[pce_b_uuid].selectionne, False)
+        self.assertEqual(access_titles[pce_b_uuid].annee, self.academic_years[1].year)
+        self.assertEqual(access_titles[pce_b_uuid].pays_iso_code, BE_ISO_CODE)
+
+        self.assertEqual(access_titles[pce_a_uuid].uuid_experience, pce_a_uuid)
+        self.assertEqual(
+            access_titles[pce_a_uuid].type_titre,
+            TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name,
+        )
+        self.assertEqual(access_titles[pce_a_uuid].selectionne, False)
+        self.assertEqual(access_titles[pce_a_uuid].annee, self.academic_years[1].year)
+        self.assertEqual(access_titles[pce_a_uuid].pays_iso_code, BE_ISO_CODE)
+
+        # Select an internal experience as access title
+        general_admission.internal_access_titles.add(pce_a)
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 2)
+
+        self.assertIn(pce_a_uuid, access_titles)
+        self.assertIn(pce_b_uuid, access_titles)
+
+        self.assertEqual(access_titles[pce_b_uuid].uuid_experience, pce_b_uuid)
+        self.assertEqual(access_titles[pce_b_uuid].selectionne, False)
+        self.assertEqual(access_titles[pce_a_uuid].uuid_experience, pce_a_uuid)
+        self.assertEqual(access_titles[pce_a_uuid].selectionne, True)
+
+        # Only retrieve the experiences that have been selected
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+
+        self.assertIn(pce_a_uuid, access_titles)
+
+        self.assertEqual(access_titles[pce_a_uuid].uuid_experience, pce_a_uuid)
+        self.assertEqual(access_titles[pce_a_uuid].selectionne, True)

@@ -35,6 +35,7 @@ from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
+from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
@@ -46,7 +47,14 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES, ORDERED_CAMPUSES_UUIDS
+from admission.constants import (
+    IMAGE_MIME_TYPES,
+    ORDERED_CAMPUSES_UUIDS,
+    CONTEXT_ADMISSION,
+    CONTEXT_DOCTORATE,
+    CONTEXT_GENERAL,
+    CONTEXT_CONTINUING,
+)
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -66,6 +74,7 @@ from admission.ddd.admission.enums.emplacement_document import StatutReclamation
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE,
+    ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
@@ -81,7 +90,11 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_GENERALE,
 )
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO, PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+    PropositionDTO as PropositionGeneraleDTO,
+)
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -97,21 +110,17 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import get_access_conditions_url
+from admission.utils import get_access_conditions_url, get_experience_urls
 from base.models.enums.civil_state import CivilState
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
-
-CONTEXT_ADMISSION = 'admission'
-CONTEXT_DOCTORATE = 'doctorate'
-CONTEXT_GENERAL = 'general-education'
-CONTEXT_CONTINUING = 'continuing-education'
 
 PERMISSION_BY_ADMISSION_CLASS = {
     DoctorateAdmission: 'doctorateadmission',
@@ -403,6 +412,10 @@ TAB_TREES = {
         Tab('continuing-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
         ],
+        Tab('experience', _('Previous experience'), 'list-alt'): [
+            Tab('education', _('Secondary studies')),
+            Tab('curriculum', _('Curriculum')),
+        ],
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
             Tab('specific-questions', _('Specific aspects')),
         ],
@@ -463,7 +476,9 @@ def default_tab_context(context):
     match = context['request'].resolver_match
     active_tab = match.url_name
 
-    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+    if 'curriculum' in match.namespaces:
+        active_tab = 'curriculum'
+    elif len(match.namespaces) > 2 and match.namespaces[2] != 'update':
         active_tab = match.namespaces[2]
     elif len(match.namespaces) > 3 and match.namespaces[3] == 'jury-member':
         active_tab = 'jury'
@@ -865,8 +880,9 @@ def part_of_dict(member, container):
 
 @register.simple_tag
 def is_current_checklist_status(current, state, extra):
-    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) \
-        if current and state else False
+    return (
+        current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) if current and state else False
+    )
 
 
 @register.simple_tag
@@ -1419,7 +1435,12 @@ def experience_details_template(
 @register.simple_tag(takes_context=True)
 def checklist_experience_action_links_context(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
+    experience: Union[
+        ExperienceAcademiqueDTO,
+        ExperienceNonAcademiqueDTO,
+        EtudesSecondairesAdmissionDTO,
+        ExperienceParcoursInterneDTO,
+    ],
     current_year,
     prefix,
     parcours_tab_id='',
@@ -1432,13 +1453,16 @@ def checklist_experience_action_links_context(
     result_context = {
         'prefix': prefix,
         'experience_uuid': str(experience.uuid),
-        'edit_link_button_in_new_tab': experience.epc_experience,
+        'edit_link_button_in_new_tab': getattr(experience, 'epc_experience', False),
         'update_url': '',
         'delete_url': '',
         'duplicate_url': '',
     }
 
-    if experience.__class__ == EtudesSecondairesAdmissionDTO:
+    if experience.__class__ == ExperienceParcoursInterneDTO:
+        return result_context
+
+    elif experience.__class__ == EtudesSecondairesAdmissionDTO:
         if not experience.epc_experience:
             result_context['update_url'] = (
                 resolve_url(
@@ -1452,8 +1476,11 @@ def checklist_experience_action_links_context(
                 'edit-etudes-secondaires-view',
                 noma=context['admission'].noma_candidat,
             )
-    elif (experience.valorisee_par_admissions and
-          proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year):
+    elif (
+        experience.valorisee_par_admissions
+        and proposition_uuid in experience.valorisee_par_admissions
+        and experience.derniere_annee == current_year
+    ):
         if experience.__class__ == ExperienceAcademiqueDTO:
             result_context['duplicate_url'] = resolve_url(
                 f'{base_namespace}:update:curriculum:educational_duplicate',
@@ -1531,6 +1558,19 @@ def checklist_experience_action_links(
     parcours_tab_id,
 ):
     return checklist_experience_action_links_context(context, experience, current_year, prefix, parcours_tab_id)
+
+
+@register.simple_tag(takes_context=True)
+def experience_urls(
+    context,
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
+):
+    return get_experience_urls(
+        user=context['request'].user,
+        admission=context['view'].admission,
+        experience=experience,
+        candidate_noma=context['view'].proposition.noma_candidat,
+    )
 
 
 @register.filter
@@ -1613,7 +1653,7 @@ def sic_in_final_statut(checklist_statut):
 
 
 @register.filter
-def access_conditions_url(proposition: PropositionDTO):
+def access_conditions_url(proposition: PropositionGeneraleDTO):
     training = BaseAdmission.objects.values(
         'training__education_group_type__name', 'training__acronym', 'training__partial_acronym'
     ).get(uuid=proposition.uuid)
@@ -1716,7 +1756,24 @@ def digit_error_description(error_code):
         "RSTARTDATE0001": "La date de début est null",
         "RSTARTDATE0002": "La date de début est d'un format incorrect",
         "RSTOPDATE0001": "La date de début est null",
-        "RSTOPDATE0002": "La date de début est d'un format incorrect"
+        "RSTOPDATE0002": "La date de début est d'un format incorrect",
     }
 
     return error_mapping[error_code]
+
+
+@register.filter
+def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO):
+    """
+    Format the list of ways to find out about the course of a proposition.
+    :param proposition: The proposition
+    :return: An unordered list of ways to find out about the course (including the "other" case, if any)
+    """
+    return unordered_list(
+        [
+            ChoixMoyensDecouverteFormation.get_value(way)
+            if way != ChoixMoyensDecouverteFormation.AUTRE.name
+            else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            for way in proposition.moyens_decouverte_formation
+        ]
+    )

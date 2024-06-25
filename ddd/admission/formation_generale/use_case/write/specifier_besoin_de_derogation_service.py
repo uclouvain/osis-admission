@@ -27,6 +27,7 @@ from admission.ddd.admission.formation_generale.commands import SpecifierBesoinD
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import BesoinDeDerogation
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
@@ -42,7 +43,10 @@ def specifier_besoin_de_derogation(
     # WHEN
 
     # THEN
-    proposition.specifier_besoin_de_derogation(cmd.besoin_de_derogation, auteur_modification=cmd.gestionnaire)
+    proposition.specifier_besoin_de_derogation(
+        BesoinDeDerogation[cmd.besoin_de_derogation],
+        auteur_modification=cmd.gestionnaire,
+    )
     proposition_repository.save(proposition)
 
     return proposition_id

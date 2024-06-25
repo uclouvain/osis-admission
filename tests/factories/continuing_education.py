@@ -87,9 +87,10 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
     motivations = 'My motivations'
     ways_to_find_out_about_the_course = [
-        ChoixMoyensDecouverteFormation.AMIS.name,
+        ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.name,
         ChoixMoyensDecouverteFormation.LINKEDIN.name,
     ]
+    other_way_to_find_out_about_the_course = 'Other way'
     interested_mark = False
 
     class Params:

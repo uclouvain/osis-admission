@@ -54,18 +54,18 @@
 
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='danger' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='danger' open_modal='#decision-hold-modal' %}
+      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
+      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
       {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
       {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
 
     {% elif current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'fac_approval' %}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='danger' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='danger' open_modal='#decision-hold-modal' %}
+      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
+      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
       {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
       {% if is_iufc %}
@@ -76,36 +76,36 @@
 
     {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'denied' %}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='danger' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='danger' open_modal='#decision-hold-modal' %}
+      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
+      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
       {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
       {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
 
     {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'canceled' %}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='danger' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='danger' open_modal='#decision-hold-modal' %}
+      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
+      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
       {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
       {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
 
     {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'closed' %}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='danger' tooltip=closed_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='danger' tooltip=closed_disabled_str|force_escape disabled=True %}
+      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' tooltip=closed_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' tooltip=closed_disabled_str|force_escape disabled=True %}
+      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' tooltip=closed_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' tooltip=closed_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' tooltip=closed_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=closed_disabled_str|force_escape disabled=True %}
 
     {% elif current.statut == 'GEST_REUSSITE' %}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='danger' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='danger' tooltip=validation_other_disabled_str|force_escape disabled=True %}
+      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' tooltip=validation_other_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' tooltip=validation_other_disabled_str|force_escape disabled=True %}
+      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' tooltip=validation_other_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' tooltip=validation_other_disabled_str|force_escape disabled=True %}
       {% if is_iufc %}
         {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
@@ -116,9 +116,9 @@
 
     {% else %}  {# Initial / on hold #}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post='decision-change-status-to-be-processed' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='danger' htmx_post='decision-change-status-taken-in-charge' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='danger' open_modal='#decision-hold-modal' %}
+      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' htmx_post='decision-change-status-taken-in-charge' %}
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
+      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
       {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
       {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}

@@ -25,6 +25,10 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% if back_to_overview %}
+  {% include 'admission/includes/back_to_cv_overview_link.html' %}
+{% endif %}
+
 {% if edit_link_button or duplicate_link_button or delete_link_button %}
   <div class="btn-group btn-group-sm" role="group">
 

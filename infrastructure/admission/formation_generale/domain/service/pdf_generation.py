@@ -60,10 +60,12 @@ from admission.infrastructure.utils import (
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
 from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
 
 ENTITY_SIC = 'SIC'
@@ -176,6 +178,7 @@ class PDFGeneration(IPDFGeneration):
         profil_candidat_translator: IProfilCandidatTranslator,
         titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ) -> None:
         # Get the information to display on the pdf
         context = cls.get_base_fac_decision_context(
@@ -188,13 +191,39 @@ class PDFGeneration(IPDFGeneration):
         # Get the names of the access titles
         secondary_studies_dto = None
         cv_dto = None
+        internal_experiences_dtos = None
 
         context['access_titles_names'] = []
 
         for access_title in sorted(titres_selectionnes, key=lambda title: title.annee, reverse=True):
 
+            # Internal experiences
+            if access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE:
+                if internal_experiences_dtos is None:
+                    internal_experiences_dtos = experience_parcours_interne_translator.recuperer(
+                        noma=context['proposition'].noma_candidat,
+                    )
+
+                selected_internal_experience = next(
+                    (
+                        experience
+                        for experience in internal_experiences_dtos
+                        if experience.uuid == access_title.entity_id.uuid_experience
+                    ),
+                    None,
+                )
+
+                if selected_internal_experience:
+                    last_experience_year = selected_internal_experience.derniere_annee
+                    context['access_titles_names'].append(
+                        '{year} : {title}'.format(
+                            year=format_academic_year(last_experience_year.annee),
+                            title=last_experience_year.intitule_formation,
+                        )
+                    )
+
             # Secondary studies
-            if access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
+            elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
                 if secondary_studies_dto is None:
                     secondary_studies_dto = profil_candidat_translator.get_etudes_secondaires(
                         matricule=proposition.matricule_candidat,

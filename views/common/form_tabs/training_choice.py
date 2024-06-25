@@ -34,7 +34,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationGeneraleParGestionnaireCommand,
 )
 from admission.forms.admission.training_choice import GeneralTrainingChoiceForm, ContinuingTrainingChoiceForm
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
@@ -84,6 +84,7 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
                     reponses_questions_specifiques=form.cleaned_data['specific_question_answers'],
                     motivations=form.cleaned_data['motivations'],
                     moyens_decouverte_formation=form.cleaned_data['ways_to_find_out_about_the_course'],
+                    autre_moyen_decouverte_formation=form.cleaned_data['other_way_to_find_out_about_the_course'],
                     marque_d_interet=form.cleaned_data['interested_mark'],
                 )
             )

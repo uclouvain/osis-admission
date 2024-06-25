@@ -517,7 +517,7 @@ class ContinuingTrainingChoiceFormViewTestCase(TestCase):
             interested_mark=False,
             ways_to_find_out_about_the_course=[
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
-                ChoixMoyensDecouverteFormation.AMIS.name,
+                ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.name,
             ],
             motivations='My first motivations',
             determined_academic_year=self.academic_years[0],
@@ -591,7 +591,7 @@ class ContinuingTrainingChoiceFormViewTestCase(TestCase):
             form['ways_to_find_out_about_the_course'].value(),
             [
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
-                ChoixMoyensDecouverteFormation.AMIS.name,
+                ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.name,
             ],
         )
         self.assertEqual(form['interested_mark'].value(), False)
@@ -742,6 +742,7 @@ class ContinuingTrainingChoiceFormViewTestCase(TestCase):
                 'academic_year': self.other_training_same_entity.academic_year.year,
                 'motivations': 'New motivations',
                 'ways_to_find_out_about_the_course': [ChoixMoyensDecouverteFormation.FACEBOOK.name],
+                'other_way_to_find_out_about_the_course': 'Other way',
                 'interested_mark': False,
             },
         )
@@ -758,6 +759,7 @@ class ContinuingTrainingChoiceFormViewTestCase(TestCase):
             self.continuing_admission.ways_to_find_out_about_the_course,
             [ChoixMoyensDecouverteFormation.FACEBOOK.name],
         )
+        self.assertEqual(self.continuing_admission.other_way_to_find_out_about_the_course, '')
 
         # Reset the interested_mark which is not displayed for an opened course
         self.assertEqual(self.continuing_admission.interested_mark, None)
@@ -772,7 +774,8 @@ class ContinuingTrainingChoiceFormViewTestCase(TestCase):
                 'continuing_education_training': self.other_training_same_entity.acronym,
                 'academic_year': self.other_training_same_entity.academic_year.year,
                 'motivations': 'New motivations',
-                'ways_to_find_out_about_the_course': [ChoixMoyensDecouverteFormation.FACEBOOK.name],
+                'ways_to_find_out_about_the_course': [ChoixMoyensDecouverteFormation.AUTRE.name],
+                'other_way_to_find_out_about_the_course': 'Other way',
                 'interested_mark': False,
             },
         )
@@ -787,8 +790,9 @@ class ContinuingTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.motivations, 'New motivations')
         self.assertEqual(
             self.continuing_admission.ways_to_find_out_about_the_course,
-            [ChoixMoyensDecouverteFormation.FACEBOOK.name],
+            [ChoixMoyensDecouverteFormation.AUTRE.name],
         )
+        self.assertEqual(self.continuing_admission.other_way_to_find_out_about_the_course, 'Other way')
         self.assertEqual(self.continuing_admission.interested_mark, False)
 
         # For a short course

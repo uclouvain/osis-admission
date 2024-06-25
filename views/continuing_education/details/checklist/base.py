@@ -42,13 +42,14 @@ from admission.ddd.admission.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
     RecupererQuestionsSpecifiquesQuery,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
+from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
     CommentForm,
 )
@@ -92,6 +93,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     @cached_property
     def can_update_checklist_tab(self):
         return has_perm('admission.change_checklist', user=self.request.user, obj=self.admission)
+
+    @cached_property
+    def can_update_iufc_checklist_tab(self):
+        return has_perm('admission.change_checklist_iufc', user=self.request.user, obj=self.admission)
 
     @cached_property
     def mail_tokens(self):
@@ -347,11 +352,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'decision__FAC_for_IUFC',
         ]
 
-        labels = {
-            'decision__IUFC_for_FAC': _('IUFC comment for the Faculty'),
-            'decision__FAC_for_IUFC': _('Faculty comment for IUFC'),
-        }
-
         comments = {
             ('__'.join(c.tags)): c
             for c in CommentEntry.objects.filter(
@@ -365,10 +365,26 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 comment=comments.get(tab_name, None),
                 form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                 prefix=tab_name,
-                label=labels.get(tab_name),
             )
             for tab_name in tab_names
         }
+
+        disable_unavailable_forms(
+            forms_by_access={
+                context['student_report_form']: self.can_update_checklist_tab,
+                context['decision_fac_approval_form']: self.can_update_checklist_tab,
+                context['decision_hold_form']: self.can_update_checklist_tab,
+                context['decision_deny_form']: self.can_update_checklist_tab,
+                context['decision_cancel_form']: self.can_update_checklist_tab,
+                context['decision_validation_form']: self.can_update_iufc_checklist_tab,
+                context['decision_close_form']: self.can_update_checklist_tab,
+                context['decision_send_to_fac_form']: self.can_update_iufc_checklist_tab,
+                **{
+                    comment_form: self.request.user.has_perm(comment_form.permission, self.admission)
+                    for comment_form in context['comment_forms'].values()
+                },
+            }
+        )
 
         context['autres_demandes'] = [
             demande
@@ -376,7 +392,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 ListerToutesDemandesQuery(
                     annee_academique=self.admission.determined_academic_year.year,
                     matricule_candidat=self.admission.candidate.global_id,
-                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
+                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
                 )
             )
             if demande.uuid != self.admission_uuid

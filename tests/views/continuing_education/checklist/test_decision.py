@@ -25,14 +25,21 @@
 # ##############################################################################
 from email import message_from_string
 
+import freezegun
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionContinue,
@@ -144,7 +151,7 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertIsInstance(response.context['decision_hold_form'], DecisionHoldForm)
 
-    def test_post_hold_iufc(self):
+    def test_valid_post_hold_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
         url = resolve_url(
@@ -178,6 +185,21 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.EN_ATTENTE.name)
         self.assertEqual(self.continuing_admission.on_hold_reason, ChoixMotifAttente.COMPLET.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
+
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
 
     def test_get_fac_approval_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -222,6 +244,21 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.approval_condition_by_faculty, 'foobar')
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
+
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
 
     def test_get_deny_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -271,6 +308,21 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.refusal_reason, ChoixMotifRefus.FULL.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
+
     def test_get_cancel_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
@@ -318,6 +370,21 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name)
         self.assertEqual(self.continuing_admission.cancel_reason, 'foobar')
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
+
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
 
     def test_get_validation_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -368,6 +435,21 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
+
     def test_get_close_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
@@ -409,6 +491,89 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CLOTUREE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
+        # Check that one historic entry has been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertEqual(
+            historic_entries[0].tags,
+            ['proposition', 'decision', 'status-changed'],
+        )
+
+    @freezegun.freeze_time('2024-01-01')
+    def test_post_close_iufc_during_a_documents_request(self):
+        self.client.force_login(user=self.iufc_manager_user)
+
+        self.continuing_admission.status = ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name
+        self.continuing_admission.requested_documents = {
+            'CURRICULUM.CURRICULUM': {
+                'last_actor': '00321234',
+                'reason': 'Le document est à mettre à jour.',
+                'type': TypeEmplacementDocument.NON_LIBRE.name,
+                'last_action_at': '2023-01-02T00:00:00',
+                'status': StatutEmplacementDocument.RECLAME.name,
+                'requested_at': '2023-01-02T00:00:00',
+                'deadline_at': '2023-01-19',
+                'automatically_required': False,
+                'related_checklist_tab': '',
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            }
+        }
+
+        self.continuing_admission.save(update_fields=['status', 'requested_documents'])
+
+        url = resolve_url(
+            'admission:continuing-education:decision-close',
+            uuid=self.continuing_admission.uuid,
+        )
+
+        response = self.client.post(
+            url,
+            data={},
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.continuing_admission.refresh_from_db()
+
+        self.assertEqual(
+            self.continuing_admission.checklist['current']['decision']['statut'],
+            ChoixStatutChecklist.GEST_BLOCAGE.name,
+        )
+        self.assertDictEqual(
+            self.continuing_admission.checklist['current']['decision']['extra'],
+            {'blocage': 'closed'},
+        )
+        self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CLOTUREE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
+
+        # Check that no document is requested anymore
+        self.assertEqual(
+            self.continuing_admission.requested_documents['CURRICULUM.CURRICULUM'],
+            {
+                'last_actor': self.iufc_manager_user.person.global_id,
+                'reason': 'Le document est à mettre à jour.',
+                'type': TypeEmplacementDocument.NON_LIBRE.name,
+                'last_action_at': '2024-01-01T00:00:00',
+                'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
+                'requested_at': '',
+                'deadline_at': '',
+                'automatically_required': False,
+                'related_checklist_tab': '',
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+        )
+
+        # Check that one historic entry has been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'status-changed']],
+        )
+
     def test_get_to_be_processed_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
@@ -446,6 +611,15 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
+
+        # Check that one historic entry has been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertEqual(
+            historic_entries[0].tags,
+            ['proposition', 'decision', 'status-changed'],
+        )
 
     def test_get_taken_in_charge_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -488,6 +662,15 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
+
+        # Check that one historic entry has been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertEqual(
+            historic_entries[0].tags,
+            ['proposition', 'decision', 'status-changed'],
+        )
 
     def test_get_send_to_fac_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -580,6 +763,21 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.on_hold_reason, ChoixMotifAttente.COMPLET.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
+
     def test_get_fac_approval_fac(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -623,6 +821,21 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.approval_condition_by_faculty, 'foobar')
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
+
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
 
     def test_get_deny_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -672,6 +885,21 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.refusal_reason, ChoixMotifRefus.FULL.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
+
     def test_get_cancel_fac(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -719,6 +947,21 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name)
         self.assertEqual(self.continuing_admission.cancel_reason, 'foobar')
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
+
+        # Check that a notification has been created
+        notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
+        self.assertEqual(len(notifications), 1)
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+
+        # Check that two historic entries have been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 2)
+
+        self.assertCountEqual(
+            [entry.tags for entry in historic_entries],
+            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
 
     def test_get_validation_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -797,6 +1040,15 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CLOTUREE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
+        # Check that one historic entry has been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertEqual(
+            historic_entries[0].tags,
+            ['proposition', 'decision', 'status-changed'],
+        )
+
     def test_get_to_be_processed_fac(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -834,6 +1086,15 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
+
+        # Check that one historic entry has been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertEqual(
+            historic_entries[0].tags,
+            ['proposition', 'decision', 'status-changed'],
+        )
 
     def test_get_taken_in_charge_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -876,6 +1137,15 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
+
+        # Check that one historic entry has been created
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertEqual(
+            historic_entries[0].tags,
+            ['proposition', 'decision', 'status-changed'],
+        )
 
     def test_get_send_to_fac_fac(self):
         self.client.force_login(user=self.fac_manager_user)

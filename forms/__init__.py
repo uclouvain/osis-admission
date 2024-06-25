@@ -50,6 +50,7 @@ OTHER_EMPTY_CHOICE = (('', _('Other')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
 EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
+REQUIRED_FIELD_CLASS = 'required_field'
 
 DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
@@ -208,7 +209,7 @@ class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         to_field_name = kwargs.get('to_field_name', '')
 
-        forward_params = [
+        forward_params = kwargs.pop('additional_forward_params', []) + [
             forward.Const(True, 'active'),
         ]
 
@@ -219,7 +220,7 @@ class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
         kwargs.setdefault(
             'widget',
             autocomplete.ListSelect2(
-                url="admission:autocomplete:countries",
+                url=kwargs.pop('autocomplete_url_path', 'admission:autocomplete:countries'),
                 attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
                 forward=forward_params,
             ),
