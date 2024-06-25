@@ -34,7 +34,19 @@ class ChoixStatutPropositionDoctorale(ChoiceEnum):
     EN_ATTENTE_DE_SIGNATURE = _('Waiting for signature')
     CONFIRMEE = _('Application confirmed')
     ANNULEE = _('Cancelled application')
+
+    TRAITEMENT_FAC = _('Processing by Fac')
+    A_COMPLETER_POUR_FAC = _('To be completed for Fac')
+    COMPLETEE_POUR_FAC = _('Completed for Fac')
+    RETOUR_DE_FAC = _('Feedback from Fac')
+
+    A_COMPLETER_POUR_SIC = _('To be completed for the Enrolment Office (SIC)')
+    COMPLETEE_POUR_SIC = _('Completed for SIC')
+    ATTENTE_VALIDATION_DIRECTION = _('Awaiting management approval')
+
+    CLOTUREE = _('Closed')
     INSCRIPTION_AUTORISEE = _('Application accepted')
+    INSCRIPTION_REFUSEE = _('Application denied')
 
 
 STATUTS_PROPOSITION_AVANT_SOUMISSION = {
@@ -52,6 +64,47 @@ STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE = STATUTS_PROPOSITION_AVANT_SOUMISSION
 STATUTS_PROPOSITION_DOCTORALE_SOUMISE = (
     set(ChoixStatutPropositionDoctorale.get_names()) - STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 )
+
+# Le gestionnaire FAC a la main
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC = {
+    ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name,
+    ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+}
+
+# Le gestionnaire FAC a la main ou attend une réponse du candidat
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS = STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC | {
+    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+}
+
+# Le gestionnaire SIC a la main
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC = {
+    ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+    ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
+    ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
+    ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
+    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+    ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name,
+    ChoixStatutPropositionDoctorale.CLOTUREE.name,
+}
+
+# Le gestionnaire SIC a la main et peut envoyer le dossier à la faculté pour que celle-ci donne sa décision
+STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION = {
+    ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+    ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
+    ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
+}
+
+
+# Le gestionnaire SIC a la main ou attend une réponse du candidat
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS = STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC | {
+    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+}
+
+# Le candidat doit répondre à une demande du système ou d'un gestionnaire
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT = {
+    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+}
 
 
 class ChoixCommissionProximiteCDEouCLSM(ChoiceEnum):
