@@ -33,6 +33,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def verifier_curriculum_apres_soumission(
@@ -40,6 +41,7 @@ def verifier_curriculum_apres_soumission(
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -50,6 +52,7 @@ def verifier_curriculum_apres_soumission(
         proposition=proposition,
         academic_year_repository=academic_year_repository,
         profil_candidat_translator=profil_candidat_translator,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
     )
 
     # THEN

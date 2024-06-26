@@ -200,3 +200,8 @@ class IProfilCandidatTranslator(interface.DomainService):
 
         if noms:
             return DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO(annee=derniere_annee, noms=noms)
+
+    @classmethod
+    @abstractmethod
+    def recuperer_noma(cls, matricule: str) -> str:
+        raise NotImplementedError

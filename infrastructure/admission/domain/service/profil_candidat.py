@@ -72,6 +72,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.models.person_merge_proposal import PersonMergeProposal
+from base.models.student import Student
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -951,3 +952,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ),
             connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
         )
+
+    @classmethod
+    def recuperer_noma(cls, matricule: str) -> str:
+        student: Optional[Student] = Student.objects.filter(person__global_id=matricule).first()
+        return student.registration_id if student else ''

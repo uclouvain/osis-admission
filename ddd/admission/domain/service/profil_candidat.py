@@ -59,6 +59,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from osis_common.ddd import interface
 
 
@@ -232,7 +233,8 @@ class ProfilCandidat(interface.DomainService):
         cls,
         proposition,
         academic_year_repository: 'IAcademicYearRepository',
-        profil_candidat_translator: Optional['IProfilCandidatTranslator'] = None,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         date_soumission = proposition.soumise_le.date()
@@ -240,6 +242,10 @@ class ProfilCandidat(interface.DomainService):
         annee_soumission = (
             GetCurrentAcademicYear().get_starting_academic_year(date_soumission, academic_year_repository).year
         )
+
+        noma_candidat = profil_candidat_translator.recuperer_noma(proposition.matricule_candidat)
+
+        experiences_parcours_interne = experience_parcours_interne_translator.recuperer(noma=noma_candidat)
 
         curriculum = (
             profil_candidat_translator.get_curriculum(
@@ -264,6 +270,7 @@ class ProfilCandidat(interface.DomainService):
             experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
+            experiences_parcours_interne=experiences_parcours_interne,
         ).validate()
 
     @classmethod

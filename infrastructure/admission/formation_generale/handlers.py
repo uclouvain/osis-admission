@@ -650,6 +650,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             digit=DigitRepository(),
             compteur_noma=CompteurAnnuelPourNomaRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -666,6 +667,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             digit=DigitRepository(),
             compteur_noma=CompteurAnnuelPourNomaRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -746,6 +748,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
 }

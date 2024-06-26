@@ -36,6 +36,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.ddd.utils.business_validator import BusinessValidator, MultipleBusinessExceptions
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -46,6 +47,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
+    experiences_parcours_interne: Optional[List[ExperienceParcoursInterneDTO]] = None
     date_reference: Optional[datetime.date] = None
 
     def validate(self, *args, **kwargs):
@@ -55,6 +57,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
             annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
         )
 
+        # Les expériences académiques externes complètes valorisent certaines années
         annees_valorisees = set(
             [
                 annee.annee
@@ -63,6 +66,13 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
                 for annee in xp.annees
             ]
         )
+
+        # Les expériences académiques internes valides valorisent certaines années
+        if self.experiences_parcours_interne:
+            for experience_interne in self.experiences_parcours_interne:
+                for annee_experience_interne in experience_interne.annees:
+                    if not annee_experience_interne.etat_inscription_en_erreur:
+                        annees_valorisees.add(annee_experience_interne.annee)
 
         dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum(self.date_reference)
 
@@ -74,6 +84,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
 
         nb_mois_a_valoriser = mois_a_valoriser.count()
 
+        # Les activités non-académiques externes valorisent certains mois
         if self.experiences_non_academiques and mois_a_valoriser:
             nb_mois_a_valoriser = self.verifier_mois_valorises_par_les_experiences_non_academiques(
                 mois_a_valoriser=mois_a_valoriser,

@@ -53,7 +53,11 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
+    ExperienceParcoursInterneInMemoryTranslator,
+)
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     Result,
@@ -62,6 +66,10 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     ActivityType,
     ActivitySector,
+)
+from osis_profile.tests.factories.curriculum import (
+    ExperienceParcoursInterneDTOFactory,
+    AnneeExperienceParcoursInterneDTOFactory,
 )
 
 
@@ -149,6 +157,33 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             'autre_activite': '',
             'personne': '0000000001',
         }
+
+        cls.experiences_parcours_internes = [
+            ExperienceParcoursInterneDTOFactory(
+                annees=[
+                    AnneeExperienceParcoursInterneDTOFactory(
+                        etat_inscription=EtatInscriptionFormation.ERREUR.name,
+                        annee=2011,
+                    ),
+                    AnneeExperienceParcoursInterneDTOFactory(
+                        etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+                        annee=2012,
+                    ),
+                    AnneeExperienceParcoursInterneDTOFactory(
+                        etat_inscription=EtatInscriptionFormation.ANNULATION_UCL.name,
+                        annee=2013,
+                    ),
+                ]
+            ),
+            ExperienceParcoursInterneDTOFactory(
+                annees=[
+                    AnneeExperienceParcoursInterneDTOFactory(
+                        etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+                        annee=2014,
+                    ),
+                ]
+            ),
+        ]
 
     def assertAnneesCurriculum(self, exceptions, messages):
         messages_renvoyes = []
@@ -386,6 +421,24 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
+    def test_should_retourner_erreur_en_fonction_experiences_academiques_internes_candidat(self):
+        with mock.patch.object(
+            ExperienceParcoursInterneInMemoryTranslator,
+            'recuperer',
+            return_value=self.experiences_parcours_internes,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+
+            self.assertAnneesCurriculum(
+                context.exception.exceptions,
+                [
+                    'De Septembre 2010 à Février 2011',
+                    'De Septembre 2011 à Février 2012',
+                    'De Septembre 2013 à Février 2014',
+                ],
+            )
+
     def test_should_retourner_erreur_en_fonction_experiences_academiques_et_activites_non_academiques_candidat(self):
         self.experiences_academiques.append(self.experience_academiques_complete)
 
@@ -397,13 +450,17 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             )
         )
 
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd)
+        with mock.patch.object(
+            ExperienceParcoursInterneInMemoryTranslator,
+            'recuperer',
+            return_value=self.experiences_parcours_internes,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
 
-        self.assertAnneesCurriculum(
-            context.exception.exceptions,
-            [
-                'De Septembre 2010 à Janvier 2011',
-                'De Décembre 2012 à Février 2013',
-            ],
-        )
+            self.assertAnneesCurriculum(
+                context.exception.exceptions,
+                [
+                    'De Septembre 2010 à Janvier 2011',
+                ],
+            )

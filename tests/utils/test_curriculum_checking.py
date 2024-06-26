@@ -38,6 +38,12 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.utils import get_missing_curriculum_periods
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.student import StudentFactory
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 
 
 class GetMissingCurriculumPeriodsTestCase(TestCase):
@@ -177,5 +183,49 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
                 'De Septembre 2014 à Décembre 2014',
+            ],
+        )
+
+    def test_with_internal_experience(self):
+        student = StudentFactory(person=self.admission.candidate)
+
+        pce_a = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DISTINCTION.name,
+            sigle_formation="SF1",
+        )
+        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_year=self.academic_years[2010],
+        )
+        pce_a_pae_b = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            etat_inscription=EtatInscriptionFormation.ERREUR.name,
+            programme__offer__academic_year=self.academic_years[2012],
+        )
+        pce_a_pae_c = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
+            programme__offer__academic_year=self.academic_years[2013],
+        )
+        pce_b = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DISTINCTION.name,
+            sigle_formation="SF2",
+        )
+        pce_b_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_b,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_year=self.academic_years[2014],
+        )
+
+        result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
+
+        self.assertCountEqual(
+            result,
+            [
+                'De Septembre 2011 à Février 2012',
+                'De Septembre 2012 à Février 2013',
             ],
         )

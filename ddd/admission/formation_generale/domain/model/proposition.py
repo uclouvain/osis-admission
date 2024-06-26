@@ -34,6 +34,7 @@ from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
@@ -1023,6 +1024,8 @@ class Proposition(interface.RootEntity):
         documents_dto: List[EmplacementDocumentDTO],
         curriculum_dto: CurriculumAdmissionDTO,
         academic_year_repository: IAcademicYearRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1055,6 +1058,8 @@ class Proposition(interface.RootEntity):
                 proposition=self,
                 curriculum_dto=curriculum_dto,
                 academic_year_repository=academic_year_repository,
+                profil_candidat_translator=profil_candidat_translator,
+                experience_parcours_interne_translator=experience_parcours_interne_translator,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])

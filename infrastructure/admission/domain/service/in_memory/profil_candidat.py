@@ -1196,3 +1196,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
         except StopIteration:
             raise ExperienceNonTrouveeException
+
+    @classmethod
+    def recuperer_noma(cls, matricule: str) -> str:
+        return ''

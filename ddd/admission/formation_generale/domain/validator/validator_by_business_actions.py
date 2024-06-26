@@ -100,6 +100,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from epc.models.enums.condition_acces import ConditionAcces
 
 
@@ -152,6 +153,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
+    experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -166,6 +168,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 date_reference=self.date_soumission,
+                experiences_parcours_interne=self.experiences_parcours_interne,
             ),
         ]
 
