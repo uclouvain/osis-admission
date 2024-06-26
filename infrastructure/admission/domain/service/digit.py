@@ -33,10 +33,12 @@ import waffle
 from django.conf import settings
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
+from admission.templatetags.admission import format_matricule
 from base.business.student import find_student_by_discriminating
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.models.student import Student
+from osis_common.utils.models import get_object_or_none
 
 MOCK_DIGIT_SERVICE_CALL = settings.MOCK_DIGIT_SERVICE_CALL
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -101,6 +103,8 @@ class DigitService(IDigitService):
 
         similarity_data = _clean_data_from_duplicate_registration_ids(similarity_data)
 
+        similarity_data = _retrieve_private_email_in_data(similarity_data)
+
         PersonMergeProposal.objects.update_or_create(
             original_person=original_person,
             defaults={
@@ -128,7 +132,7 @@ def _get_status_from_digit_response(similarity_data):
 def _clean_data_from_duplicate_registration_ids(similarity_data):
     for result in similarity_data:
         # for each global_id returned by DigIT (global_id == matricule)
-        global_id = result['person']['matricule']
+        global_id = format_matricule(result['person']['matricule'])
 
         # get registration_ids from DigIT response (registration_id == sourceId)
         registration_ids = [
@@ -156,6 +160,13 @@ def _discriminate_registration_id(registration_ids):
     student = find_student_by_discriminating(qs)
     return student.registration_id if student else None
 
+
+def _retrieve_private_email_in_data(similarity_data):
+    for result in similarity_data:
+        global_id = format_matricule(result['person']['matricule'])
+        person = get_object_or_none(Person, global_id=global_id)
+        result['person']['private_email'] = person.private_email if person and person.private_email else None
+    return similarity_data
 
 def _mock_search_digit_account_return_response():
     return json.loads(
