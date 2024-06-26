@@ -30,7 +30,6 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator.exceptions import ElementsConfirmationNonConcordants
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
@@ -39,6 +38,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes, AcademicCalendarTypes as Pool
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd import interface
 
 IFormationTranlator = Union[IFormationContinueTranslator, IFormationGeneraleTranslator, IDoctoratTranslator]
@@ -158,7 +158,7 @@ class IElementsConfirmation(interface.DomainService):
         cls,
         proposition: Union['PropositionDoctorale', 'PropositionGenerale', 'PropositionContinue'],
         formation_translator: 'IFormationTranlator',
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         annee_soumise: int = None,
     ) -> List['ElementConfirmation']:
         elements = []
@@ -323,7 +323,7 @@ class IElementsConfirmation(interface.DomainService):
         proposition: Union['PropositionDoctorale', 'PropositionGenerale', 'PropositionContinue'],
         annee_soumise: int,
         formation_translator: 'IFormationTranlator',
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
     ) -> None:
         attendu = cls.recuperer(proposition, formation_translator, profil_candidat_translator, annee_soumise)
         if len(soumis) != len(attendu):

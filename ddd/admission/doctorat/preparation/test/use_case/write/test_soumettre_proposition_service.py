@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 import datetime
+from unittest import TestCase
 
 import attr
 import freezegun
 import mock
-from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import SoumettrePropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -39,24 +39,21 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
-from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 @freezegun.freeze_time('2020-11-01')
@@ -115,7 +112,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionDoctorale.CONFIRMEE)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
-        with mock.patch.multiple(ProfilCandidatInMemoryTranslator.profil_candidats[0], pays_naissance=''):
+        with mock.patch.multiple(ProfilInMemoryRepository.profil[0], pays_naissance=''):
             proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 
             with self.assertRaises(MultipleBusinessExceptions) as context:

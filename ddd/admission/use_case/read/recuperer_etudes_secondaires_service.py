@@ -24,13 +24,13 @@
 #
 # ##############################################################################
 from admission.ddd.admission.commands import RecupererEtudesSecondairesQuery
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def recuperer_etudes_secondaires(
     cmd: RecupererEtudesSecondairesQuery,
-    profil_candidat_translator: IProfilCandidatTranslator,
+    profil_candidat_translator: IProfilRepository,
 ) -> EtudesSecondairesAdmissionDTO:
     return profil_candidat_translator.get_etudes_secondaires(
         matricule=cmd.matricule_candidat,

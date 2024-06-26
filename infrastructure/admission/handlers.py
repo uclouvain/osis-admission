@@ -38,11 +38,10 @@ from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import (
     PropositionPersonneFusionRepository,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
-
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -67,15 +66,15 @@ COMMAND_HANDLERS = {
     ),
     RecupererEtudesSecondairesQuery: lambda msg_bus, query: recuperer_etudes_secondaires(
         query,
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
     ),
     RecupererExperienceAcademiqueQuery: lambda msg_bus, query: recuperer_experience_academique(
         query,
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
     ),
     RecupererExperienceNonAcademiqueQuery: lambda msg_bus, query: recuperer_experience_non_academique(
         query,
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
     ),
 }
 

@@ -44,6 +44,6 @@ class TestListerPropositionsCandidatService(SimpleTestCase):
         self.assertEqual(results[0].formation.intitule, 'Formation USCC4')
         self.assertEqual(results[0].formation.campus.nom, 'Louvain-la-Neuve')
         self.assertEqual(results[0].statut, ChoixStatutPropositionContinue.EN_BROUILLON.name)
-        self.assertEqual(results[0].matricule_candidat, '0123456789')
+        self.assertEqual(results[0].matricule, '0123456789')
         self.assertEqual(results[0].prenom_candidat, 'Jean')
         self.assertEqual(results[0].nom_candidat, 'Dupont')

@@ -101,7 +101,6 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
 from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryFactory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
@@ -154,20 +153,20 @@ from infrastructure.shared_kernel.campus.repository.in_memory.campus import Uclo
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
-from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
-    CompteurAnnuelPourNomaInMemoryRepository,
-)
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
-
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
+    CompteurAnnuelPourNomaInMemoryRepository,
+)
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _proposition_repository = PropositionInMemoryRepository()
 _bourse_translator = BourseInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
-_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_profil_candidat_translator = ProfilInMemoryRepository()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _academic_year_repository = AcademicYearInMemoryRepository()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()

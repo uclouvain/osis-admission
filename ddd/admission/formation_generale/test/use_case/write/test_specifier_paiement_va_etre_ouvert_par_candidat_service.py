@@ -45,13 +45,13 @@ from admission.ddd.admission.formation_generale.test.factory.paiement import Pai
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 @freezegun.freeze_time('2020-11-01')
@@ -73,8 +73,8 @@ class TestSpecifierPaiementVaEtreOuvertParCandidat(TestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
-        self.candidat_translator = ProfilCandidatInMemoryTranslator()
-        self.candidat = self.candidat_translator.profil_candidats[1]
+        self.candidat_translator = ProfilInMemoryRepository()
+        self.candidat = self.candidat_translator.profil[1]
         self.proposition = self.proposition_repository.get(
             PropositionIdentity(
                 uuid='uuid-MASTER-SCI-CONFIRMED',

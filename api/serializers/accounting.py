@@ -32,15 +32,13 @@ from admission.ddd.admission.doctorat.preparation import commands as doctorate_e
 from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO as DoctorateAccountingDTO
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO as GeneralAccountingDTO
-from admission.infrastructure.admission.domain.service.profil_candidat import (
-    ProfilCandidatTranslator,
-)
 from admission.utils import takewhile_return_attribute_values
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
 from base.models.person import Person
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.utils.serializers import DTOSerializer
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 from osis_profile.models import EducationalExperienceYear
 
 
@@ -48,7 +46,7 @@ def get_last_french_community_high_education_institutes(candidate: Person, date:
     # Absence of debts conditions -> check, on the basis of the CV, the absence of debt to the last high
     # education establishment of the French community attended by the candidate, when it is not UCLouvain, and
     # only within the scope of the academic years that must be justified
-    cv_minimal_years = ProfilCandidatTranslator.get_annees_minimum_curriculum(
+    cv_minimal_years = ProfilRepository.get_annees_minimum_curriculum(
         global_id=candidate.global_id,
         current_year=AcademicYear.objects.current(date).year,
     )

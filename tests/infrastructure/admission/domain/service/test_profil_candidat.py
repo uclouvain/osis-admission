@@ -25,7 +25,6 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
@@ -33,6 +32,7 @@ from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
 )
 from base.tests.factories.person import PersonFactory
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 
 
 class ValorisationEtudesSecondairesTestCase(TestCase):
@@ -42,21 +42,21 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         super().setUpTestData()
 
     def test_with_an_unknown_person(self):
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires('unknown')
+        valuation = ProfilRepository.valorisation_etudes_secondaires('unknown')
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
     def test_with_a_person_without_admission_or_diploma(self):
         person = PersonFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
     def test_with_a_person_with_admission_but_no_diploma(self):
         admission = GeneralEducationAdmissionFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
@@ -66,7 +66,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
             candidate=admission.candidate,
             valuated_secondary_studies_person=admission.candidate,
         )
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(
             valuation.types_formations_admissions_valorisees,
@@ -77,14 +77,14 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
     def test_with_a_person_with_admission_and_high_school_diploma_alternative(self):
         admission = GeneralEducationAdmissionFactory()
         diploma = HighSchoolDiplomaAlternativeFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
         diploma.person = admission.candidate
         diploma.save(update_fields=['person'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
@@ -94,7 +94,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
             candidate=admission.candidate,
             valuated_secondary_studies_person=admission.candidate,
         )
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(
             valuation.types_formations_admissions_valorisees,
@@ -108,7 +108,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
             valuated_secondary_studies_person=self.person,
         )
         diploma = HighSchoolDiplomaAlternativeFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
@@ -116,14 +116,14 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
     def test_with_a_person_with_admission_and_belgian_high_school_diploma(self):
         admission = GeneralEducationAdmissionFactory()
         diploma = BelgianHighSchoolDiplomaFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
         diploma.person = admission.candidate
         diploma.save(update_fields=['person'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
@@ -133,7 +133,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
             candidate=admission.candidate,
             valuated_secondary_studies_person=admission.candidate,
         )
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(
             valuation.types_formations_admissions_valorisees,
@@ -144,7 +144,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         # Valuated by an admission and EPC
         diploma.external_id = 'EPC-1'
         diploma.save(update_fields=['external_id'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(
             valuation.types_formations_admissions_valorisees,
@@ -155,7 +155,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         # Valuated by EPC
         admission.valuated_secondary_studies_person = None
         admission.save(update_fields=['valuated_secondary_studies_person'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertTrue(valuation.est_valorise)
@@ -166,13 +166,13 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
             valuated_secondary_studies_person=self.person,
         )
         diploma = BelgianHighSchoolDiplomaFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
         other_diploma = BelgianHighSchoolDiplomaFactory(external_id='EPC-0')
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
@@ -180,7 +180,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         # Valuated by EPC
         diploma.external_id = 'EPC-1'
         diploma.save(update_fields=['external_id'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertTrue(valuation.est_valorise)
@@ -188,14 +188,14 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
     def test_with_a_person_with_admission_and_foreign_high_school_diploma(self):
         admission = GeneralEducationAdmissionFactory()
         diploma = ForeignHighSchoolDiplomaFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
         diploma.person = admission.candidate
         diploma.save(update_fields=['person'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
@@ -205,7 +205,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
             candidate=admission.candidate,
             valuated_secondary_studies_person=admission.candidate,
         )
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(
             valuation.types_formations_admissions_valorisees,
@@ -216,7 +216,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         # Valuated by an admission and EPC
         diploma.external_id = 'EPC-1'
         diploma.save(update_fields=['external_id'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(
             valuation.types_formations_admissions_valorisees,
@@ -227,7 +227,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         # Valuated by EPC
         admission.valuated_secondary_studies_person = None
         admission.save(update_fields=['valuated_secondary_studies_person'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(admission.candidate.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(admission.candidate.global_id)
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertTrue(valuation.est_valorise)
@@ -238,13 +238,13 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
             valuated_secondary_studies_person=self.person,
         )
         diploma = ForeignHighSchoolDiplomaFactory()
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
         other_diploma = ForeignHighSchoolDiplomaFactory(external_id='EPC-0')
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
@@ -252,7 +252,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         # Valuated by EPC
         diploma.external_id = 'EPC-1'
         diploma.save(update_fields=['external_id'])
-        valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
+        valuation = ProfilRepository.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertTrue(valuation.est_valorise)

@@ -28,7 +28,6 @@ from admission.ddd.admission.domain.service.i_calendrier_inscription import ICal
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
 from admission.ddd.admission.enums import Onglets
@@ -46,6 +45,7 @@ from admission.ddd.admission.formation_continue.domain.service.i_question_specif
 from admission.ddd.admission.formation_continue.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def soumettre_proposition(
@@ -53,7 +53,7 @@ def soumettre_proposition(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
     titres_acces: 'ITitresAcces',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     calendrier_inscription: 'ICalendrierInscription',
     element_confirmation: 'IElementsConfirmation',
     notification: 'INotification',

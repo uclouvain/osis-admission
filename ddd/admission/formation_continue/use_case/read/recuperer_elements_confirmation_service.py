@@ -27,13 +27,13 @@
 from typing import List
 
 from admission.ddd.admission.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.formation_continue.commands import RecupererElementsConfirmationQuery
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def recuperer_elements_confirmation(
@@ -41,7 +41,7 @@ def recuperer_elements_confirmation(
     proposition_repository: 'IPropositionRepository',
     element_confirmation: 'IElementsConfirmation',
     formation_translator: 'IFormationContinueTranslator',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
 ) -> List['ElementConfirmation']:
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)

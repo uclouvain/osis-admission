@@ -90,17 +90,15 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    ExperienceNonAcademique,
-    ProfilCandidatInMemoryTranslator,
-    ExperienceAcademique,
-    AnneeExperienceAcademique,
-)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import (
+    AnneeExperienceAcademique,
+    ExperienceAcademique, ExperienceNonAcademique, ProfilInMemoryRepository,
+)
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     Result,
@@ -132,16 +130,16 @@ class TestVerifierPropositionServiceCommun(TestCase):
         }
 
     def setUp(self) -> None:
-        self.candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.candidat_translator = ProfilInMemoryRepository()
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.proposition = PropositionInMemoryRepository().get(
             entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
         )
         self.groupe_supervision = self.groupe_supervision_repository.get_by_proposition_id(self.proposition.entity_id)
-        self.candidat = self.candidat_translator.profil_candidats[0]
-        self.adresse_domicile_legal = self.candidat_translator.adresses_candidats[0]
-        self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
+        self.candidat = self.candidat_translator.profil[0]
+        self.adresse_domicile_legal = self.candidat_translator.adresses[0]
+        self.adresse_correspondance = self.candidat_translator.adresses[1]
         self.experiences_non_academiques = self.candidat_translator.experiences_non_academiques
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
@@ -262,7 +260,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             self.assertIsInstance(context.exception.exceptions.pop(), CarteIdentiteeNonSpecifieeException)
 
     def test_should_retourner_erreur_si_adresse_domicile_legal_non_renseignee(self):
-        with mock.patch.object(self.candidat_translator.coordonnees_candidats[0], 'domicile_legal', None):
+        with mock.patch.object(self.candidat_translator.coordonnees[0], 'domicile_legal', None):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), AdresseDomicileLegalNonCompleteeException)

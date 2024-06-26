@@ -33,9 +33,9 @@ from admission.calendar.admission_calendar import (
 )
 from admission.ddd.admission.enums import Onglets
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 
 __all__ = [
     'SpecificQuestionsDetailView',
@@ -48,7 +48,7 @@ class SpecificQuestionsMixinView(AdmissionFormMixin, LoadDossierViewMixin):
 
     @cached_property
     def identification_dto(self):
-        return ProfilCandidatTranslator.get_identification(
+        return ProfilRepository.get_identification(
             matricule=self.proposition.matricule_candidat,
         )
 

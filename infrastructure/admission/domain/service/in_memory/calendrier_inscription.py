@@ -29,9 +29,9 @@ from typing import List, Tuple
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import get_current_year
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 from osis_profile import PLUS_5_ISO_CODES
 
 
@@ -85,5 +85,5 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         return identification.pays_nationalite in (
-            ProfilCandidatInMemoryTranslator.pays_union_europeenne | PLUS_5_ISO_CODES
+            ProfilInMemoryRepository.pays_union_europeenne | PLUS_5_ISO_CODES
         ) or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)

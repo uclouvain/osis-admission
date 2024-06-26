@@ -65,8 +65,9 @@ from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
 from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 ENTITY_SIC = 'SIC'
 ENTITY_SICB = 'SICB'
@@ -175,6 +176,7 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: PersonneConnueUclDTO,
         proposition_repository: IPropositionRepository,
         unites_enseignement_translator: IUnitesEnseignementTranslator,
+        profil_repository: 'IProfilRepository',
         profil_candidat_translator: IProfilCandidatTranslator,
         titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
@@ -225,7 +227,7 @@ class PDFGeneration(IPDFGeneration):
             # Secondary studies
             elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
                 if secondary_studies_dto is None:
-                    secondary_studies_dto = profil_candidat_translator.get_etudes_secondaires(
+                    secondary_studies_dto = profil_repository.get_etudes_secondaires(
                         matricule=proposition.matricule_candidat,
                     )
                 context['access_titles_names'].append(secondary_studies_dto.titre_formate)
@@ -297,7 +299,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_sic_temporaire(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
@@ -333,7 +335,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_accord_sic(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -414,7 +416,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_accord_annexe_sic(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -461,7 +463,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_refus_sic(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
@@ -500,7 +502,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_refus_inscription_sic(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,

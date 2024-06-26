@@ -167,7 +167,7 @@ class PropositionInMemoryRepository(
     ) -> List['Proposition']:
         returned = cls.entities
         if matricule_candidat:
-            returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
+            returned = filter(lambda p: p.matricule == matricule_candidat, returned)
         if entity_ids:  # pragma: no cover
             returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(returned)
@@ -193,7 +193,7 @@ class PropositionInMemoryRepository(
     ) -> List['PropositionDTO']:
         returned = cls.entities
         if matricule_candidat:
-            returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
+            returned = filter(lambda p: p.matricule == matricule_candidat, returned)
         if numero is not None:
             returned = filter(lambda p: p.reference == numero, returned)
         if type:

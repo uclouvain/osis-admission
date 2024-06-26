@@ -59,13 +59,13 @@ from admission.infrastructure.admission.domain.service.in_memory.bourse import B
 from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
 from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
 from admission.infrastructure.utils import dto_to_dict
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 @dataclass
@@ -121,7 +121,7 @@ class PropositionInMemoryRepository(
     ) -> List['Proposition']:
         returned = cls.entities
         if matricule_candidat:
-            returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
+            returned = filter(lambda p: p.matricule == matricule_candidat, returned)
         if entity_ids:  # pragma: no cover
             returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(returned)
@@ -223,7 +223,7 @@ class PropositionInMemoryRepository(
 
     @classmethod
     def _load_dto(cls, proposition: Proposition) -> PropositionDTO:
-        candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
+        candidat = ProfilInMemoryRepository.get_identification(proposition.matricule_candidat)
         formation = FormationGeneraleInMemoryTranslator.get_dto(
             proposition.formation_id.sigle,
             proposition.formation_id.annee,
@@ -313,7 +313,7 @@ class PropositionInMemoryRepository(
         propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)
         base_proposition = cls._load_dto(proposition)
         motifs_refus = [cls.motifs_refus.get(motif_refus.uuid) for motif_refus in proposition.motifs_refus]
-        candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
+        candidat = ProfilInMemoryRepository.get_identification(proposition.matricule_candidat)
         formation_choisie_fac = (
             FormationGeneraleInMemoryTranslator.get_dto(
                 proposition.autre_formation_choisie_fac_id.sigle,
@@ -422,7 +422,7 @@ class PropositionInMemoryRepository(
         Checklist.initialiser(
             proposition=proposition,
             formation=FormationGeneraleInMemoryTranslator.get(proposition.formation_id),
-            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
+            profil_candidat_translator=ProfilInMemoryRepository(),
             annee_courante=proposition.annee_calculee,
             questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
         )

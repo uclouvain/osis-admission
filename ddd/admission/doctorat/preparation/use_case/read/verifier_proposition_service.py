@@ -39,18 +39,18 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def verifier_proposition(
     cmd: 'VerifierPropositionQuery',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     academic_year_repository: 'IAcademicYearRepository',
     titres_acces: 'ITitresAcces',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',

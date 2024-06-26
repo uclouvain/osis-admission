@@ -27,7 +27,6 @@ import datetime
 
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverPropositionParFaculteCommand,
@@ -39,7 +38,8 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def approuver_proposition_par_faculte(
@@ -50,7 +50,7 @@ def approuver_proposition_par_faculte(
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     unites_enseignement_translator: 'IUnitesEnseignementTranslator',
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     academic_year_repository: 'IAcademicYearRepository',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> PropositionIdentity:

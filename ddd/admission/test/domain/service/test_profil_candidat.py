@@ -28,11 +28,11 @@ import datetime
 from unittest import TestCase
 
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.models.enums.community import CommunityEnum
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_profile.models.enums.curriculum import TranscriptType, Result, Grade, EvaluationSystem
 
 
@@ -70,7 +70,7 @@ class ProfilCandidatTestCase(TestCase):
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_sans_etablissement(self):
         self.assertIsNone(
-            IProfilCandidatTranslator.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
+            IProfilRepository.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
                 experiences_academiques=[],
                 annee_minimale=2021,
             )
@@ -78,7 +78,7 @@ class ProfilCandidatTestCase(TestCase):
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_avec_etablissement_hors_delais(self):
         self.assertIsNone(
-            IProfilCandidatTranslator.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
+            IProfilRepository.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
                 experiences_academiques=[
                     ExperienceAcademiqueDTO(
                         **self.default_args,
@@ -109,7 +109,7 @@ class ProfilCandidatTestCase(TestCase):
         )
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_avec_etablissements_valides(self):
-        resultat = IProfilCandidatTranslator.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
+        resultat = IProfilRepository.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
             experiences_academiques=[
                 # Not the last one -> Don't keep it
                 ExperienceAcademiqueDTO(

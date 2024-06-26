@@ -28,7 +28,6 @@ from unittest import TestCase, mock
 import freezegun
 
 from admission.ddd.admission.domain.validator.exceptions import (
-    ConditionsAccessNonRempliesException,
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
@@ -48,7 +47,6 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
@@ -58,6 +56,7 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -76,7 +75,7 @@ class TestVerifierPropositionService(TestCase):
         self.proposition_repository = PropositionInMemoryRepository
         self.addCleanup(self.proposition_repository.reset)
         self.complete_proposition = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-USCC1'))
-        self.candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.candidat_translator = ProfilInMemoryRepository()
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
         self.verifier_commande = VerifierPropositionQuery(uuid_proposition=self.complete_proposition.entity_id.uuid)
 

@@ -29,7 +29,6 @@ from typing import List
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
@@ -37,6 +36,7 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd import interface
 
 
@@ -47,7 +47,7 @@ class VerifierProposition(interface.DomainService):
         proposition_candidat: 'Proposition',
         formation_translator: 'IFormationContinueTranslator',
         titres_acces: 'ITitresAcces',
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         calendrier_inscription: 'ICalendrierInscription',
         maximum_propositions_service: 'IMaximumPropositionsAutorisees',
         questions_specifiques: List[QuestionSpecifique],

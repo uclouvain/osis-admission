@@ -35,7 +35,6 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
     Date,
     IAnneeInscriptionFormationTranslator,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess, ITitresAcces
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
@@ -47,6 +46,7 @@ from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 __all__ = [
     "AdmissionPoolExternalEnrollmentChangeCalendar",
@@ -154,7 +154,7 @@ class PoolCalendar(AcademicEventSessionCalendarHelper, ABC):
         residential_address: 'AdressePersonnelleDTO',
         annee_derniere_inscription_ucl: Optional[int],
         matricule_candidat: str,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         proposition: 'PropositionGenerale' = None,
     ) -> bool:
         raise NotImplementedError

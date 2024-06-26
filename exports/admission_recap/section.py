@@ -33,7 +33,6 @@ from admission.calendar.admission_calendar import (
 )
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets, CHOIX_AFFILIATION_SPORT_SELON_SITE
@@ -65,6 +64,7 @@ from admission.infrastructure.admission.domain.service.calendrier_inscription im
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
 from osis_profile.views.edit_experience_academique import SYSTEMES_EVALUATION_AVEC_CREDITS
@@ -414,7 +414,7 @@ def get_specific_questions_section(
 def get_accounting_section(context: ResumePropositionDTO, load_content: bool) -> Section:
     """Returns the accounting section."""
     last_fr_institutes = (
-        IProfilCandidatTranslator.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
+        IProfilRepository.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
             experiences_academiques=context.curriculum.experiences_academiques,
             annee_minimale=context.curriculum.annee_minimum_a_remplir,
         )

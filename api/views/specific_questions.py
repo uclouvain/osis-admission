@@ -31,13 +31,12 @@ from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import SpecificQuestionSerializer
 from admission.contrib.models import AdmissionFormItemInstantiation
-from admission.ddd.admission.formation_generale.commands import (
-    CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationGeneraleCommand,
-)
 from admission.ddd.admission.formation_continue.commands import (
     CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationContinueCommand,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.ddd.admission.formation_generale.commands import (
+    CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationGeneraleCommand,
+)
 from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
@@ -45,6 +44,7 @@ from admission.utils import (
 )
 from base.models.person import Person
 from infrastructure.messages_bus import message_bus_instance
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -181,7 +181,7 @@ class GeneralIdentificationView(APIPermissionRequiredMixin, RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         admission = self.get_permission_object()
-        identification_dto = ProfilCandidatTranslator.get_identification(
+        identification_dto = ProfilRepository.get_identification(
             matricule=admission.candidate.global_id,
         )
         serializer = serializers.IdentificationDTOSerializer(instance=identification_dto)

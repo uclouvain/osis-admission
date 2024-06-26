@@ -33,9 +33,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.ddd.utils.business_validator import BusinessValidator, MultipleBusinessExceptions
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -48,7 +48,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     experiences_academiques_incompletes: Dict[str, str]
 
     def validate(self, *args, **kwargs):
-        annee_minimale = IProfilCandidatTranslator.get_annee_minimale_a_completer_cv(
+        annee_minimale = IProfilRepository.get_annee_minimale_a_completer_cv(
             annee_courante=self.annee_courante,
             annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
@@ -63,7 +63,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
             ]
         )
 
-        dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum()
+        dernier_mois_a_valoriser = IProfilRepository.get_date_maximale_curriculum()
 
         mois_a_valoriser = self._recuperer_tous_les_mois_restant_a_valoriser(
             annee_minimale=annee_minimale,
@@ -155,14 +155,14 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
                         freq=MONTHLY,
                         dtstart=datetime.date(
                             annee,
-                            IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER,
+                            IProfilRepository.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER,
                             1,
                         ),
                         until=min(
                             dernier_mois_a_valoriser,
                             datetime.date(
                                 annee + 1,
-                                IProfilCandidatTranslator.MOIS_FIN_ANNEE_ACADEMIQUE_A_VALORISER,
+                                IProfilRepository.MOIS_FIN_ANNEE_ACADEMIQUE_A_VALORISER,
                                 1,
                             ),
                         ),

@@ -32,16 +32,16 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
 from base.models.enums.education_group_types import TrainingType
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 class TypeDemandeTestCase(TestCase):
     def setUp(self):
         self.calendrier_inscription = CalendrierInscriptionInMemory()
-        self.profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.profil_candidat_translator = ProfilInMemoryRepository()
         self.titres_acces_in_memory = TitresAccesInMemory()
 
     def tearDown(self):

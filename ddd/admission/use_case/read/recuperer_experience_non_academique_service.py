@@ -25,13 +25,13 @@
 # ##############################################################################
 
 from admission.ddd.admission.commands import RecupererExperienceNonAcademiqueQuery
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def recuperer_experience_non_academique(
     cmd: 'RecupererExperienceNonAcademiqueQuery',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
 ) -> ExperienceNonAcademiqueDTO:
     return profil_candidat_translator.get_experience_non_academique(
         matricule=cmd.global_id,

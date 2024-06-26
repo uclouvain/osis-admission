@@ -31,19 +31,17 @@ from rest_framework import serializers
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
-from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
+from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
-)
-from admission.infrastructure.admission.domain.service.profil_candidat import (
-    ProfilCandidatTranslator,
 )
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import current_academic_year
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from base.utils.serializers import DTOSerializer
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
@@ -313,11 +311,11 @@ class CurriculumDetailsSerializer(serializers.Serializer):
 
     def get_minimal_date(self, _):
         current_year = current_academic_year()
-        return ProfilCandidatTranslator.get_annees_minimum_curriculum(
+        return ProfilRepository.get_annees_minimum_curriculum(
             global_id=self.context.get('related_person').global_id,
             current_year=current_year.year,
         ).get('minimal_date')
 
     @staticmethod
     def get_maximal_date(_):
-        return ProfilCandidatTranslator.get_date_maximale_curriculum()
+        return ProfilRepository.get_date_maximale_curriculum()

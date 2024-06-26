@@ -25,7 +25,6 @@
 # ##############################################################################
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery
@@ -34,6 +33,7 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def determiner_annee_academique_et_pot(
@@ -41,7 +41,7 @@ def determiner_annee_academique_et_pot(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
     titres_acces: 'ITitresAcces',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     calendrier_inscription: 'ICalendrierInscription',
 ) -> 'InfosDetermineesDTO':
     # GIVEN

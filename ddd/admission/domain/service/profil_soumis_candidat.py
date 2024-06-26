@@ -23,10 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import datetime
 
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd import interface
 
 
@@ -34,7 +33,7 @@ class ProfilSoumisCandidatTranslator(interface.DomainService):
     @classmethod
     def recuperer(
         cls,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         matricule_candidat: str,
     ) -> ProfilCandidat:
         identification = profil_candidat_translator.get_identification(matricule_candidat)

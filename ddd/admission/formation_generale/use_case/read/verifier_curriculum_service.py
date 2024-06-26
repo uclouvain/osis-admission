@@ -25,11 +25,11 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.formation_generale.commands import VerifierCurriculumQuery
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from ...domain.builder.proposition_identity_builder import PropositionIdentityBuilder
 from ...domain.model.proposition import PropositionIdentity
 from ...domain.service.i_formation import IFormationGeneraleTranslator
@@ -39,7 +39,7 @@ from ...repository.i_proposition import IPropositionRepository
 def verifier_curriculum(
     cmd: 'VerifierCurriculumQuery',
     proposition_repository: 'IPropositionRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     academic_year_repository: 'IAcademicYearRepository',
     formation_translator: 'IFormationGeneraleTranslator',
 ) -> 'PropositionIdentity':

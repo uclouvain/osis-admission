@@ -29,9 +29,9 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     GroupeDeSupervisionDTO,
     PropositionDTO as PropositionDoctoraleDTO,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO, AdmissionPropositionDTO, AdmissionComptabiliteDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd import interface
 
 
@@ -39,7 +39,7 @@ class ResumeProposition(interface.DomainService):
     @classmethod
     def get_resume(
         cls,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         annee_courante: int,
         proposition_dto: AdmissionPropositionDTO,
         comptabilite_dto: Optional[AdmissionComptabiliteDTO] = None,

@@ -30,16 +30,15 @@ from admission.ddd.admission.use_case.read import *
 from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import\
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import \
     EmailDestinataireInMemoryRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
-_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_profil_candidat_translator = ProfilInMemoryRepository()
 
 
 COMMAND_HANDLERS = {

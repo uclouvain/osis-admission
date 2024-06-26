@@ -43,7 +43,6 @@ from admission.ddd.admission.formation_continue.commands import (
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -53,6 +52,7 @@ from admission.infrastructure.admission.repository.in_memory.emplacement_documen
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 @freezegun.freeze_time('2023-10-01')
@@ -78,7 +78,7 @@ class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(SimpleTestCase
 
         self.candidate = next(
             candidat
-            for candidat in ProfilCandidatInMemoryTranslator.profil_candidats
+            for candidat in ProfilInMemoryRepository.profil
             if candidat.matricule == '0123456789'
         )
 

@@ -32,7 +32,7 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 class TitreAccesSelectionnableInMemoryRepository(InMemoryGenericRepository, ITitreAccesSelectionnableRepository):

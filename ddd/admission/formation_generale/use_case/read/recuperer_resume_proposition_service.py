@@ -25,10 +25,9 @@
 ##############################################################################
 import datetime
 
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -37,12 +36,13 @@ from admission.ddd.admission.formation_generale.domain.service.i_comptabilite im
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def recuperer_resume_proposition(
     cmd: 'RecupererResumePropositionQuery',
     proposition_repository: 'IPropositionRepository',
-    i_profil_candidat_translator: 'IProfilCandidatTranslator',
+    i_profil_candidat_translator: 'IProfilRepository',
     i_comptabilite_translator: 'IComptabiliteTranslator',
     academic_year_repository: 'IAcademicYearRepository',
 ) -> 'ResumePropositionDTO':

@@ -58,12 +58,13 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleInformationsComplementairesValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd import interface
 
 
 class ProfilCandidat(interface.DomainService):
     @classmethod
-    def verifier_identification(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+    def verifier_identification(cls, matricule: str, profil_candidat_translator: 'IProfilRepository') -> None:
         identification = profil_candidat_translator.get_identification(matricule)
         IdentificationValidatorList(
             identite_signaletique=CandidatSignaletique(
@@ -95,7 +96,7 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_coordonnees(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+    def verifier_coordonnees(cls, matricule: str, profil_candidat_translator: 'IProfilRepository') -> None:
         coordonnees = profil_candidat_translator.get_coordonnees(matricule)
 
         CoordonneesValidatorList(
@@ -122,7 +123,7 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_langues_connues(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+    def verifier_langues_connues(cls, matricule: str, profil_candidat_translator: 'IProfilRepository') -> None:
         codes_langues_connues = profil_candidat_translator.get_langues_connues(matricule)
 
         LanguesConnuesValidatorList(
@@ -133,7 +134,7 @@ class ProfilCandidat(interface.DomainService):
     def verifier_etudes_secondaires(
         cls,
         matricule: str,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         formation: Formation,
     ) -> None:
         etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
@@ -230,7 +231,7 @@ class ProfilCandidat(interface.DomainService):
     def verifier_curriculum_formation_continue(
         cls,
         matricule: str,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
     ) -> None:
         existence_experiences_cv = profil_candidat_translator.get_existence_experiences_curriculum(matricule=matricule)
 
@@ -243,7 +244,7 @@ class ProfilCandidat(interface.DomainService):
     def verifier_comptabilite_doctorat(
         cls,
         proposition: PropositionDoctorat,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         annee_courante: int,
     ):
         conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
@@ -263,7 +264,7 @@ class ProfilCandidat(interface.DomainService):
     def verifier_comptabilite_formation_generale(
         cls,
         proposition: PropositionGenerale,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         annee_courante: int,
         formation: Formation,
     ):
@@ -284,7 +285,7 @@ class ProfilCandidat(interface.DomainService):
     def verifier_informations_complementaires_formation_generale(
         cls,
         proposition: PropositionGenerale,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
         FormationGeneraleInformationsComplementairesValidatorList(

@@ -27,13 +27,13 @@ from abc import abstractmethod
 from typing import Optional, List
 
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd.interface import DomainService
 
 
@@ -46,7 +46,7 @@ class IPDFGeneration(DomainService):
         gestionnaire: PersonneConnueUclDTO,
         proposition_repository: IPropositionRepository,
         unites_enseignement_translator: IUnitesEnseignementTranslator,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
@@ -69,7 +69,7 @@ class IPDFGeneration(DomainService):
     def generer_sic_temporaire(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
@@ -82,7 +82,7 @@ class IPDFGeneration(DomainService):
     def generer_attestation_accord_sic(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -94,7 +94,7 @@ class IPDFGeneration(DomainService):
     def generer_attestation_accord_annexe_sic(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -106,7 +106,7 @@ class IPDFGeneration(DomainService):
     def generer_attestation_refus_sic(
         cls,
         proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
@@ -120,7 +120,7 @@ class IPDFGeneration(DomainService):
         cls,
         proposition_repository: IPropositionRepository,
         proposition: Proposition,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        profil_candidat_translator: IProfilRepository,
         campus_repository: IUclouvainCampusRepository,
         gestionnaire: str,
         temporaire: bool = False,

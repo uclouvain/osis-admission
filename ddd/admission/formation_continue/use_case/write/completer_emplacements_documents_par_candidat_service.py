@@ -32,14 +32,13 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
     IEmplacementsDocumentsPropositionTranslator,
 )
 from admission.ddd.admission.domain.service.i_historique import IHistorique
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     DocumentsDemandesCompletesValidatorList,
 )
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.commands import CompleterEmplacementsDocumentsParCandidatCommand
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
@@ -51,13 +50,14 @@ from admission.ddd.admission.repository.i_emplacement_document import IEmplaceme
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def completer_emplacements_documents_par_candidat(
     cmd: 'CompleterEmplacementsDocumentsParCandidatCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
     proposition_repository: 'IPropositionRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',

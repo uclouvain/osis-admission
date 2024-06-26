@@ -32,7 +32,7 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnableIdentity,
 )
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 from osis_common.ddd import interface
 from osis_common.ddd.interface import EntityIdentity, RootEntity
 

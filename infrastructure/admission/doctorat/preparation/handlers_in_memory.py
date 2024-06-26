@@ -32,11 +32,11 @@ from admission.infrastructure.admission.domain.service.in_memory.annee_inscripti
     AnneeInscriptionFormationInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
@@ -59,7 +59,7 @@ _proposition_repository = PropositionInMemoryRepository()
 _groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
 _demande_repository = DemandeInMemoryRepository()
 _academic_year_repository = AcademicYearInMemoryRepository()
-_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_profil_candidat_translator = ProfilInMemoryRepository()
 _promoteur_translator = PromoteurInMemoryTranslator()
 _doctorat_translator = DoctoratInMemoryTranslator()
 _bourse_translator = BourseInMemoryTranslator()

@@ -45,15 +45,15 @@ from admission.ddd.admission.domain.builder.formation_identity import FormationI
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.domain.service.profil_soumis_candidat import (
     ProfilSoumisCandidatTranslator,
 )
+from admission.ddd.admission.enums.question_specifique import Onglets
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def soumettre_proposition(
@@ -61,7 +61,7 @@ def soumettre_proposition(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     demande_repository: 'IDemandeRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     academic_year_repository: 'IAcademicYearRepository',
     historique: 'IHistorique',
     notification: 'INotification',

@@ -28,10 +28,9 @@ import datetime
 from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
     ReinitialiserEmplacementsDocumentsNonLibresPropositionService,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
 )
@@ -43,12 +42,13 @@ from admission.ddd.admission.formation_continue.repository.i_proposition import 
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def recalculer_emplacements_documents_non_libres_proposition(
     cmd: 'RecalculerEmplacementsDocumentsNonLibresPropositionCommand',
     proposition_repository: 'IPropositionRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     emplacement_document_repository: 'IEmplacementDocumentRepository',

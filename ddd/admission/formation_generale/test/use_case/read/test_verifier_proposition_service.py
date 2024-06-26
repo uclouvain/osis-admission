@@ -76,12 +76,6 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     InformationsVisaNonCompleteesException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import _ComptabiliteFactory
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    AnneeExperienceAcademique,
-    ExperienceAcademique,
-    ProfilCandidatInMemoryTranslator,
-    ExperienceNonAcademique,
-)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -97,6 +91,10 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     ValorisationEtudesSecondairesDTO,
 )
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import (
+    AnneeExperienceAcademique,
+    ExperienceAcademique, ExperienceNonAcademique, ProfilInMemoryRepository,
+)
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     Result,
@@ -218,15 +216,15 @@ class TestVerifierPropositionService(TestCase):
         self.proposition_in_memory = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_in_memory.reset)
 
-        self.candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.candidat_translator = ProfilInMemoryRepository()
         self.experiences_academiques = self.candidat_translator.experiences_academiques
 
-        self.candidat = self.candidat_translator.profil_candidats[1]
+        self.candidat = self.candidat_translator.profil[1]
         self.experiences_non_academiques = self.candidat_translator.experiences_non_academiques
 
         self.adresse_residentielle = next(
             adresse
-            for adresse in self.candidat_translator.adresses_candidats
+            for adresse in self.candidat_translator.adresses
             if adresse.personne == self.candidat.matricule
         )
 

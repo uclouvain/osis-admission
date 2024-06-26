@@ -32,9 +32,9 @@ from django.utils.functional import cached_property
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
 from osis_profile.views.edit_etudes_secondaires import EditEtudesSecondairesView
 
@@ -72,7 +72,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         return {
             **super().high_school_diploma,
             'specific_question_answers': self.admission.specific_question_answers,
-            'is_vae_potential': ProfilCandidatTranslator.est_potentiel_vae(self.person.global_id),
+            'is_vae_potential': ProfilRepository.est_potentiel_vae(self.person.global_id),
         }
 
     @cached_property

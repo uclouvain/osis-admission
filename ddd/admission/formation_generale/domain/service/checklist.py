@@ -31,7 +31,6 @@ from django.utils.translation import gettext_noop as _
 
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.model.formation import Formation
-from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets
@@ -49,6 +48,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd import interface
 
 FINANCABILITE_FORMATIONS_NON_CONCERNEES = {
@@ -73,7 +73,7 @@ class Checklist(interface.DomainService):
         cls,
         proposition: Proposition,
         formation: Formation,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
         annee_courante: int,
     ):
@@ -124,11 +124,12 @@ class Checklist(interface.DomainService):
         cls,
         proposition: Proposition,
         formation: Formation,
+        profil_repository: 'IProfilRepository',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
         annee_courante: int = None,
     ) -> Optional[StatutsChecklistGenerale]:
-        identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        identification_dto = profil_repository.get_identification(proposition.matricule_candidat)
         curriculum_dto = profil_candidat_translator.get_curriculum(
             proposition.matricule_candidat,
             annee_courante,

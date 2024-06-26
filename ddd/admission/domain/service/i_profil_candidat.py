@@ -25,27 +25,12 @@
 # ##############################################################################
 import datetime
 from abc import abstractmethod
-from typing import Dict, List, Optional
+from typing import List, Dict
 
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    ConditionsComptabiliteDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
-    DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
-)
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
-from base.models.enums.community import CommunityEnum
-from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationEtudesSecondairesDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    CurriculumAExperiencesDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO
 from osis_common.ddd import interface
 
 
@@ -53,26 +38,6 @@ class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
     MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER = 9
     MOIS_FIN_ANNEE_ACADEMIQUE_A_VALORISER = 2
-
-    @classmethod
-    @abstractmethod
-    def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_langues_connues(cls, matricule: str) -> List[str]:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
-        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -84,59 +49,6 @@ class IProfilCandidatTranslator(interface.DomainService):
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> 'CurriculumAdmissionDTO':
         raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_experience_academique(
-        cls,
-        matricule: str,
-        uuid_proposition: str,
-        uuid_experience: str,
-    ) -> 'ExperienceAcademiqueDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_experience_non_academique(
-        cls,
-        matricule: str,
-        uuid_proposition: str,
-        uuid_experience: str,
-    ) -> 'ExperienceNonAcademiqueDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_conditions_comptabilite(
-        cls,
-        matricule: str,
-        annee_courante: int,
-    ) -> 'ConditionsComptabiliteDTO':
-        raise NotImplementedError
-
-    @classmethod
-    def get_annee_minimale_a_completer_cv(
-        cls,
-        annee_courante: int,
-        annee_diplome_etudes_secondaires: Optional[int] = None,
-        annee_derniere_inscription_ucl: Optional[int] = None,
-    ):
-        return 1 + max(
-            [
-                annee
-                for annee in [
-                    annee_courante - cls.NB_MAX_ANNEES_CV_REQUISES,
-                    annee_diplome_etudes_secondaires,
-                    annee_derniere_inscription_ucl,
-                ]
-                if annee
-            ]
-        )
 
     @classmethod
     def get_date_maximale_curriculum(cls):
@@ -169,29 +81,3 @@ class IProfilCandidatTranslator(interface.DomainService):
     ) -> ResumeCandidatDTO:
         """Retourne toutes les données relatives à un candidat nécessaires à son admission."""
         raise NotImplementedError
-
-    @classmethod
-    def recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
-        cls,
-        experiences_academiques: List[ExperienceAcademiqueDTO],
-        annee_minimale: int,
-    ) -> Optional[DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO]:
-        derniere_annee = 0
-        noms = []
-
-        for experience in experiences_academiques:
-            derniere_annee_actuelle = max(experience_year.annee for experience_year in experience.annees)
-            if (
-                experience.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
-                and experience.code_institut != UCLouvain_acronym
-                and derniere_annee_actuelle >= annee_minimale
-                and derniere_annee_actuelle >= derniere_annee
-            ):
-                if derniere_annee_actuelle > derniere_annee:
-                    derniere_annee = derniere_annee_actuelle
-                    noms = [experience.nom_institut]
-                else:
-                    noms.append(experience.nom_institut)
-
-        if noms:
-            return DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO(annee=derniere_annee, noms=noms)

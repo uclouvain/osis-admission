@@ -45,7 +45,7 @@ class RecupererPropositionGestionnaireServiceTestCase(TestCase):
         self.assertEqual(result.formation.intitule, 'Master en sciences')
         self.assertEqual(result.formation.campus.nom, 'Louvain-la-Neuve')
         self.assertEqual(result.statut, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
-        self.assertEqual(result.matricule_candidat, '0000000001')
+        self.assertEqual(result.matricule, '0000000001')
         self.assertEqual(result.prenom_candidat, 'Jane')
         self.assertEqual(result.nom_candidat, 'Smith')
         self.assertEqual(

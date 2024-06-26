@@ -29,11 +29,11 @@ from django.utils.functional import cached_property
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
 from base.models.organization import Organization
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
@@ -115,7 +115,7 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
         self.fields['can_update_diploma'].field_schema = {'type': 'boolean'}
 
     def get_is_vae_potential(self, person):
-        return ProfilCandidatTranslator.est_potentiel_vae(person.global_id)
+        return ProfilRepository.est_potentiel_vae(person.global_id)
 
     def get_is_valuated(self, person):
         return self.valuation.est_valorise
@@ -178,7 +178,7 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
 
     @cached_property
     def valuation(self):
-        return ProfilCandidatTranslator.valorisation_etudes_secondaires(matricule=self.instance.global_id)
+        return ProfilRepository.valorisation_etudes_secondaires(matricule=self.instance.global_id)
 
     def update(self, instance, validated_data):
         self.load_diploma(instance)

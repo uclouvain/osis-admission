@@ -35,18 +35,18 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def recuperer_resume_proposition(
     cmd: 'RecupererResumePropositionQuery',
     proposition_repository: 'IPropositionRepository',
-    i_profil_candidat_translator: 'IProfilCandidatTranslator',
+    i_profil_candidat_translator: 'IProfilRepository',
     i_comptabilite_translator: 'IComptabiliteTranslator',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     promoteur_translator: 'IPromoteurTranslator',

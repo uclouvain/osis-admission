@@ -45,7 +45,6 @@ from admission.ddd.admission.test.factory.formation import FormationFactory
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionContinueRepository,
 )
@@ -60,13 +59,14 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 @freezegun.freeze_time('2020-10-15')
 class ElementsConfirmationTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        ProfilCandidatInMemoryTranslator.reset()
+        ProfilInMemoryRepository.reset()
 
     def test_recuperer_elements_confirmation_doctorat(self):
         elements = message_bus_in_memory_instance.invoke(
@@ -126,7 +126,7 @@ class ElementsConfirmationTestCase(TestCase):
             self.assertListEqual([e.nom for e in elements], expected)
 
     def test_recuperer_elements_confirmation_frais_dossier(self):
-        with patch.object(ProfilCandidatInMemoryTranslator.profil_candidats[1], 'pays_nationalite', 'AR'):
+        with patch.object(ProfilInMemoryRepository.profil[1], 'pays_nationalite', 'AR'):
             elements = message_bus_in_memory_instance.invoke(
                 RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
             )
@@ -141,10 +141,10 @@ class ElementsConfirmationTestCase(TestCase):
             self.assertListEqual([e.nom for e in elements], expected)
 
     def test_recuperer_elements_confirmation_visa(self):
-        candidat = ProfilCandidatInMemoryTranslator.profil_candidats[1]
+        candidat = ProfilInMemoryRepository.profil[1]
         adresse_residence = next(
             adresse
-            for adresse in ProfilCandidatInMemoryTranslator.adresses_candidats
+            for adresse in ProfilInMemoryRepository.adresses
             if adresse.personne == candidat.matricule
         )
 

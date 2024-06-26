@@ -123,7 +123,6 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
@@ -159,9 +158,9 @@ from admission.infrastructure.admission.shared_kernel.email_destinataire.reposit
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
-from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
-
+from infrastructure.shared_kernel.profil.repository.profil import ProfilRepository
+from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -206,7 +205,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
         titres_acces=TitresAcces(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         calendrier_inscription=CalendrierInscription(),
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
@@ -217,7 +216,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
         titres_acces=TitresAcces(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         calendrier_inscription=CalendrierInscription(),
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
@@ -243,7 +242,7 @@ COMMAND_HANDLERS = {
     VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
         cmd,
         proposition_repository=PropositionRepository(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         academic_year_repository=AcademicYearRepository(),
         formation_translator=FormationGeneraleTranslator(),
     ),
@@ -252,7 +251,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
         titres_acces=TitresAcces(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         calendrier_inscription=CalendrierInscription(),
     ),
     RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
@@ -260,12 +259,12 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         element_confirmation=ElementsConfirmation(),
         formation_translator=FormationGeneraleTranslator(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
     ),
     RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
-        i_profil_candidat_translator=ProfilCandidatTranslator(),
+        i_profil_candidat_translator=ProfilRepository(),
         i_comptabilite_translator=ComptabiliteTranslator(),
         academic_year_repository=AcademicYearRepository(),
     ),
@@ -277,7 +276,7 @@ COMMAND_HANDLERS = {
     RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         comptabilite_translator=ComptabiliteTranslator(),
         question_specifique_translator=QuestionSpecifiqueTranslator(),
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
@@ -292,7 +291,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recalculer_emplacements_documents_non_libres_proposition(
             cmd,
             proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             academic_year_repository=AcademicYearRepository(),
@@ -312,7 +311,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             emplacement_document_repository=EmplacementDocumentRepository(),
             historique=HistoriqueGlobal(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             academic_year_repository=AcademicYearRepository(),
@@ -330,7 +329,7 @@ COMMAND_HANDLERS = {
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         comptabilite_translator=ComptabiliteTranslator(),
         question_specifique_translator=QuestionSpecifiqueTranslator(),
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
@@ -343,7 +342,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             emplacement_document_repository=EmplacementDocumentRepository(),
             historique=HistoriqueGlobal(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             academic_year_repository=AcademicYearRepository(),
@@ -394,7 +393,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_proposition(
             cmd,
             proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             comptabilite_translator=ComptabiliteTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
@@ -481,7 +480,7 @@ COMMAND_HANDLERS = {
         personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         unites_enseignement_translator=UnitesEnseignementTranslator(),
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         academic_year_repository=AcademicYearRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
@@ -597,7 +596,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             historique=HistoriqueFormationGenerale(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
@@ -625,7 +624,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: refuser_admission_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -636,7 +635,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: refuser_inscription_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -647,7 +646,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: approuver_admission_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -667,7 +666,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
@@ -681,7 +680,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_pdf_temporaire_decision_sic(
             cmd,
             proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
+            profil_candidat_translator=ProfilRepository(),
             campus_repository=UclouvainCampusRepository(),
             pdf_generation=PDFGeneration(),
         )
@@ -700,7 +699,7 @@ COMMAND_HANDLERS = {
     ),
     RechercherParcoursAnterieurQuery: lambda msg_bus, cmd: rechercher_parcours_anterieur(
         cmd,
-        profil_candidat_translator=ProfilCandidatTranslator(),
+        profil_candidat_translator=ProfilRepository(),
         academic_year_repository=AcademicYearRepository(),
     ),
     SoumettreTicketPersonneCommand: lambda msg_bus, cmd: soumettre_ticket_creation_personne(

@@ -128,7 +128,6 @@ from admission.exports.admission_recap.section import (
     get_authorization_section,
     get_requestable_free_document_section,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -171,6 +170,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import UnfrozenDTO
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,

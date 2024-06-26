@@ -28,17 +28,17 @@ from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_b
 from admission.ddd.admission.doctorat.preparation.commands import DeterminerAnneeAcademiqueEtPotQuery
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def determiner_annee_academique_et_pot(
     cmd: 'DeterminerAnneeAcademiqueEtPotQuery',
     proposition_repository: 'IPropositionRepository',
     titres_acces: 'ITitresAcces',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     calendrier_inscription: 'ICalendrierInscription',
 ) -> 'InfosDetermineesDTO':
     # GIVEN

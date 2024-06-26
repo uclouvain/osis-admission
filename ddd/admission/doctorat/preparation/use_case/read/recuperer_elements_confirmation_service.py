@@ -33,7 +33,7 @@ from admission.ddd.admission.doctorat.preparation.commands import RecupererEleme
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def recuperer_elements_confirmation(
@@ -41,7 +41,7 @@ def recuperer_elements_confirmation(
     proposition_repository: 'IPropositionRepository',
     element_confirmation: 'IElementsConfirmation',
     formation_translator: 'IDoctoratTranslator',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
 ) -> List['ElementConfirmation']:
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)

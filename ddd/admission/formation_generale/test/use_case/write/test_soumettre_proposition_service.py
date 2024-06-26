@@ -37,7 +37,6 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -48,6 +47,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 class TestSoumettrePropositionGenerale(TestCase):
@@ -56,8 +56,8 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
         self.academic_year_repository = AcademicYearInMemoryRepository()
-        self.candidat_translator = ProfilCandidatInMemoryTranslator()
-        self.candidat = self.candidat_translator.profil_candidats[1]
+        self.candidat_translator = ProfilInMemoryRepository()
+        self.candidat = self.candidat_translator.profil[1]
 
         for annee in range(2016, 2023):
             self.academic_year_repository.save(

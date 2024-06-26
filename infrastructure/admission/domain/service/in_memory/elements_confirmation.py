@@ -30,7 +30,7 @@ from admission.ddd.admission.domain.service.i_elements_confirmation import IElem
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 
 class ElementsConfirmationInMemory(IElementsConfirmation):
@@ -43,7 +43,7 @@ class ElementsConfirmationInMemory(IElementsConfirmation):
         elements = cls.recuperer(
             proposition or PropositionAdmissionSC3DPMinimaleFactory(),
             formation_translator or DoctoratInMemoryTranslator(),
-            profil_translator or ProfilCandidatInMemoryTranslator(),
+            profil_translator or ProfilInMemoryRepository(),
         )
         return {
             element.nom: (f"{element.reponses[0]} {element.texte}" if element.reponses else element.texte)

@@ -26,9 +26,9 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.commands import RecupererPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
@@ -44,7 +44,7 @@ class RecupererPropositionServiceTestCase(SimpleTestCase):
         self.assertEqual(result.formation.intitule, 'Formation USCC4')
         self.assertEqual(result.formation.campus.nom, 'Louvain-la-Neuve')
         self.assertEqual(result.statut, ChoixStatutPropositionContinue.EN_BROUILLON.name)
-        self.assertEqual(result.matricule_candidat, '0123456789')
+        self.assertEqual(result.matricule, '0123456789')
         self.assertEqual(result.prenom_candidat, 'Jean')
         self.assertEqual(result.nom_candidat, 'Dupont')
 

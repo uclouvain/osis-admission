@@ -28,15 +28,6 @@ from admission.ddd.admission.formation_continue.commands import *
 from admission.ddd.admission.formation_continue.use_case.read import *
 from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
-from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
-    AnneeInscriptionFormationInMemoryTranslator,
-)
-from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
-    CalendrierInscriptionInMemory,
-)
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -47,14 +38,21 @@ from admission.ddd.admission.use_case.write import (
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
 )
-
+from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
+    AnneeInscriptionFormationInMemoryTranslator,
+)
+from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.historique import (
     HistoriqueInMemory as HistoriqueGlobalInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
@@ -82,12 +80,13 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
+from infrastructure.shared_kernel.profil.repository.in_memory.profil import ProfilInMemoryRepository
 
 _proposition_repository = PropositionInMemoryRepository()
 _formation_continue_translator = FormationContinueInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
-_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_profil_candidat_translator = ProfilInMemoryRepository()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _academic_year_repository = AcademicYearInMemoryRepository()

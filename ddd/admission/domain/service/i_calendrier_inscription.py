@@ -35,7 +35,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import Titres
 from admission.ddd.admission.domain.validator.exceptions import (
     AucunPoolCorrespondantException,
@@ -54,6 +53,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 from osis_common.ddd import interface
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ class ICalendrierInscription(interface.DomainService):
         matricule_candidat: str,
         titres_acces: 'Titres',
         type_formation: 'TrainingType',
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         proposition: Optional['Proposition'] = None,
     ) -> 'InfosDetermineesDTO':
 
@@ -173,7 +173,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         matricule_candidat: str,
         titres_acces: 'Titres',
         type_formation: 'TrainingType',
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        profil_candidat_translator: 'IProfilRepository',
         formation_translator: 'IFormationTranslator',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,

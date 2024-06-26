@@ -32,7 +32,6 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
     IEmplacementsDocumentsPropositionTranslator,
 )
 from admission.ddd.admission.domain.service.i_historique import IHistorique
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
@@ -47,12 +46,13 @@ from admission.ddd.admission.repository.i_emplacement_document import IEmplaceme
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from ddd.logic.shared_kernel.profil.repository.i_profil import IProfilRepository
 
 
 def annuler_reclamation_documents_au_candidat(
     cmd: 'AnnulerReclamationDocumentsAuCandidatCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    profil_candidat_translator: 'IProfilRepository',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
