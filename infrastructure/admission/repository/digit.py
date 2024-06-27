@@ -31,7 +31,7 @@ from typing import Optional, List
 import requests
 import waffle
 from django.conf import settings
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
@@ -65,7 +65,7 @@ class DigitRepository(IDigitRepository):
         if proposition.exists():
             merge_person = proposition.get().proposal_merge_person
 
-        person = merge_person if merge_person else candidate
+        person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ticket_response = _request_person_ticket_creation(person, noma, addresses)
 
@@ -95,7 +95,7 @@ class DigitRepository(IDigitRepository):
         if proposition.exists():
             merge_person = proposition.get().proposal_merge_person
 
-        person = merge_person if merge_person else candidate
+        person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ticket_response = _request_person_ticket_validation(person, addresses)
 
@@ -155,10 +155,12 @@ class DigitRepository(IDigitRepository):
             return []
 
         tickets = PersonTicketCreation.objects.filter(
-            status__in=[
-                PersonTicketCreationStatus.CREATED.value,
-                PersonTicketCreationStatus.IN_PROGRESS.value,
-            ]
+            ~Q(
+                status__in=[
+                    PersonTicketCreationStatus.DONE.value,
+                    PersonTicketCreationStatus.DONE_WITH_WARNINGS.value,
+                ]
+            )
         ).select_related('person').values(
             'request_id', 'person__last_registration_id', 'person__last_name', 'person__first_name',
             'person__global_id', 'status', 'errors'
@@ -329,3 +331,12 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
         ],
         "physicalPerson": True,
     }
+
+
+def _is_valid_merge_person(person):
+    return bool(person) and all([
+        person.last_name,
+        person.first_name,
+        person.birth_date or person.birth_year,
+        person.gender,
+    ])

@@ -1154,7 +1154,7 @@ def map_fields_items(digit_fields):
         "national_number": "nationalRegister",
         "gender": "gender",
         "birth_date": "birthDate",
-        "email": "",
+        "email": "private_email",
         "civil_state": "",
         "birth_place": "placeOfBirth",
         "country_of_citizenship__name": "nationality",
