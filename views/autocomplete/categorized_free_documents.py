@@ -67,6 +67,9 @@ class CategorizedFreeDocumentsAutocomplete(autocomplete.Select2QuerySetView):
         if 'checklist_tab' in self.forwarded:
             results = results.filter(checklist_tab=self.forwarded['checklist_tab'])
 
+        if 'admission_context' in self.forwarded:
+            results = results.filter(admission_context=self.forwarded['admission_context'])
+
         return results
 
     def get_results(self, context):

@@ -24,8 +24,6 @@
 #
 # ##############################################################################
 
-import datetime
-
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.enums import TypeItemFormulaire
@@ -40,7 +38,6 @@ from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation 
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
 from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
@@ -66,17 +63,9 @@ def approuver_admission_par_sic(
 
     proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
-    annee_courante = (
-        GetCurrentAcademicYear()
-        .get_starting_academic_year(
-            datetime.date.today(),
-            academic_year_repository,
-        )
-        .year
-    )
     resume_dto = ResumeProposition.get_resume(
         profil_candidat_translator=profil_candidat_translator,
-        annee_courante=annee_courante,
+        academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
@@ -119,13 +108,10 @@ def approuver_admission_par_sic(
 
     noma = NomaGenerateurService.generer_noma(
         compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-        annee=proposition.formation_id.annee
+        annee=proposition.formation_id.annee,
     )
 
-    digit.submit_person_ticket(
-        global_id=proposition.matricule_candidat,
-        noma=noma
-    )
+    digit.submit_person_ticket(global_id=proposition.matricule_candidat, noma=noma)
 
     message = notification.accepter_proposition_par_sic(
         proposition=proposition,

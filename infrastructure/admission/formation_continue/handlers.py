@@ -25,6 +25,7 @@
 ##############################################################################
 
 from admission.ddd.admission.formation_continue.commands import *
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_continue.use_case.read import *
 from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
@@ -285,6 +286,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=EmplacementDocumentRepository(),
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -72,18 +72,10 @@ def completer_emplacements_documents_par_candidat(
 
     # Récupération des DTO des emplacements de documents demandés pour avoir le nom de ces documents
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
-    annee_courante = (
-        GetCurrentAcademicYear()
-        .get_starting_academic_year(
-            datetime.date.today(),
-            academic_year_repository,
-        )
-        .year
-    )
     proposition_dto = proposition_repository.get_dto(entity_id=proposition.entity_id)
     resume_dto = ResumeProposition.get_resume(
         profil_candidat_translator=profil_candidat_translator,
-        annee_courante=annee_courante,
+        academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,

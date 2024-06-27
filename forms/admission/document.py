@@ -37,7 +37,6 @@ from django.utils.translation import gettext_lazy as _, get_language, pgettext_l
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument, TOKEN_ACADEMIC_YEAR
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
@@ -46,6 +45,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistFormationGenerale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistDoctorat,
 )
 from admission.forms import (
     OTHER_EMPTY_CHOICE,
@@ -57,7 +59,7 @@ from admission.templatetags.admission import (
     formatted_language,
     document_request_status_css_class,
 )
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.views.autocomplete.categorized_free_documents import CategorizedFreeDocumentsAutocomplete
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
@@ -156,6 +158,9 @@ class FreeDocumentHelperFormMixin(forms.Form):
                 CONTEXT_CONTINUING: OngletsChecklistFormationContinue.choices_except(
                     OngletsChecklistFormationContinue.decision,
                 ),
+                CONTEXT_DOCTORATE: OngletsChecklistDoctorat.choices_except(
+                    OngletsChecklistDoctorat.experiences_parcours_anterieur,
+                ),
             }[context]
         )
 
@@ -167,6 +172,7 @@ class FreeDocumentHelperFormMixin(forms.Form):
         )
 
         self.fields['document_type'].widget.forward.append(forward.Const(self.current_language, 'language'))
+        self.fields['document_type'].widget.forward.append(forward.Const(context, 'admission_context'))
 
     def clean_document_type(self):
         document_type: Optional[CategorizedFreeDocument] = self.cleaned_data.get('document_type')

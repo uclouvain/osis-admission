@@ -24,9 +24,22 @@
 #
 # ##############################################################################
 
+from admission.ddd.admission.doctorat.preparation.commands import AnnulerReclamationDocumentsAuCandidatCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import IComptabiliteTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
+    IGroupeDeSupervisionRepository,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
@@ -36,12 +49,6 @@ from admission.ddd.admission.domain.service.resume_proposition import ResumeProp
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
-from admission.ddd.admission.formation_continue.commands import AnnulerReclamationDocumentsAuCandidatCommand
-from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_continue.domain.service.i_question_specifique import (
-    IQuestionSpecifiqueTranslator,
-)
-from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
@@ -49,21 +56,30 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 
 def annuler_reclamation_documents_au_candidat(
     cmd: 'AnnulerReclamationDocumentsAuCandidatCommand',
-    emplacement_document_repository: 'IEmplacementDocumentRepository',
+    proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
+    emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
-    emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
-    proposition_repository: 'IPropositionRepository',
+    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    promoteur_translator: 'IPromoteurTranslator',
+    membre_ca_translator: 'IMembreCATranslator',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
+    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
-    proposition_dto = proposition_repository.get_dto(entity_id=proposition.entity_id)
-    resume_dto = ResumeProposition.get_resume(
+    resume_dto = ResumeProposition.get_resume_demande_doctorat(
+        uuid_proposition=cmd.uuid_proposition,
+        proposition_repository=proposition_repository,
+        comptabilite_translator=comptabilite_translator,
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
-        proposition_dto=proposition_dto,
+        groupe_supervision_repository=groupe_supervision_repository,
+        promoteur_translator=promoteur_translator,
+        membre_ca_translator=membre_ca_translator,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
@@ -87,12 +103,13 @@ def annuler_reclamation_documents_au_candidat(
         statut=StatutEmplacementDocument.RECLAME,
     )
 
+    # THEN
     emplacement_document_repository.annuler_reclamation_documents_au_candidat(
         documents_reclames=documents_reclames,
         auteur=cmd.auteur,
     )
 
-    proposition.annuler_reclamation_documents(auteur_modification=cmd.auteur)
+    proposition.annuler_reclamation_documents(auteur_modification=cmd.auteur, type_gestionnaire=cmd.type_gestionnaire)
 
     proposition_repository.save(proposition)
     emplacement_document_repository.save_multiple(entities=documents_reclames, auteur=cmd.auteur)
@@ -100,7 +117,7 @@ def annuler_reclamation_documents_au_candidat(
     historique.historiser_annulation_reclamation_documents(
         proposition=proposition,
         acteur=cmd.auteur,
-        par_fac=True,
+        par_fac=cmd.type_gestionnaire == TypeGestionnaire.FAC.name,
     )
 
     return proposition.entity_id

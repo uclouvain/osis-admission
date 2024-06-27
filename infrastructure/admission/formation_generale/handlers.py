@@ -37,6 +37,7 @@ from admission.ddd.admission.commands import (
     FusionnerCandidatAvecPersonneExistanteCommand,
 )
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
     recuperer_pdf_temporaire_decision_sic,
@@ -150,9 +151,8 @@ from admission.infrastructure.admission.shared_kernel.email_destinataire.reposit
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
-from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
-
+from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -353,6 +353,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=EmplacementDocumentRepository(),
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(

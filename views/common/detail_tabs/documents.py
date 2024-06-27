@@ -35,6 +35,10 @@ from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
 from admission.auth.roles.program_manager import ProgramManager
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+    STATUTS_PROPOSITION_AVANT_SOUMISSION,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
@@ -44,6 +48,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -110,6 +115,11 @@ class CancelDocumentRequestView(
                     uuid_proposition=self.admission_uuid,
                     auteur=self.request.user.person.global_id,
                 ),
+                CONTEXT_DOCTORATE: doctorate_education_commands.AnnulerReclamationDocumentsAuCandidatCommand(
+                    uuid_proposition=self.admission_uuid,
+                    auteur=self.request.user.person.global_id,
+                    type_gestionnaire=self.manager_type,
+                ),
             }[self.current_context]
         )
         return super().form_valid(form)
@@ -127,14 +137,17 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
     retrieve_documents_command = {
         CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
         CONTEXT_CONTINUING: continuing_education_commands.RecupererDocumentsPropositionQuery,
+        CONTEXT_DOCTORATE: doctorate_education_commands.RecupererDocumentsPropositionQuery,
     }
     fac_documents_request_command = {
         CONTEXT_GENERAL: general_education_commands.ReclamerDocumentsAuCandidatParFACCommand,
         CONTEXT_CONTINUING: continuing_education_commands.ReclamerDocumentsAuCandidatCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.ReclamerDocumentsAuCandidatCommand,
     }
     sic_documents_request_command = {
         CONTEXT_GENERAL: general_education_commands.ReclamerDocumentsAuCandidatParSICCommand,
         CONTEXT_CONTINUING: continuing_education_commands.ReclamerDocumentsAuCandidatCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.ReclamerDocumentsAuCandidatCommand,
     }
 
     def get_permission_required(self):
@@ -149,10 +162,14 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             if self.request.method == 'POST'
             else 'admission/document/base_htmx.html'
         )
-        if self.admission.status in {
-            ChoixStatutPropositionGenerale.EN_BROUILLON.name,
-            ChoixStatutPropositionContinue.EN_BROUILLON.name,
-        }:
+        if (
+            self.admission.status
+            in {
+                ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                ChoixStatutPropositionContinue.EN_BROUILLON.name,
+            }
+            | STATUTS_PROPOSITION_AVANT_SOUMISSION
+        ):
             self.template_name = 'admission/document/base_in_progress.html'
         else:
             self.template_name = 'admission/document/base.html'
@@ -289,8 +306,8 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
                 settings.LANGUAGE_CODE_EN: self.admission.training.title_english,
             }[self.proposition.langue_contact_candidat],
             'admissions_link_front': get_portal_admission_list_url(),
-            'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
-            'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
+            'admission_link_front': get_portal_admission_url(self.current_context, self.admission_uuid),
+            'admission_link_back': get_backoffice_admission_url(self.current_context, self.admission_uuid),
             'salutation': get_salutation_prefix(self.admission.candidate),
         }
 
@@ -300,6 +317,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         request_command = (self.fac_documents_request_command if self.is_fac else self.sic_documents_request_command)[
             self.current_context
         ]
+        additional_params = {'type_gestionnaire': self.manager_type} if self.is_doctorate else {}
         message_bus_instance.invoke(
             request_command(
                 uuid_proposition=self.admission_uuid,
@@ -308,6 +326,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
                 a_echeance_le=form.cleaned_data['deadline'],
                 objet_message=form.cleaned_data['message_object'],
                 corps_message=form.cleaned_data['message_content'],
+                **additional_params,
             )
         )
         self.message_on_success = _('The documents have been requested to the candidate')

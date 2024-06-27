@@ -24,11 +24,14 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
+from typing import Optional
 
 from django.conf import settings
+from django.utils.translation import gettext_lazy
 from osis_history.utilities import add_history_entry
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.domain.service.i_historique import IHistorique, PropositionAdmission
 from admission.infrastructure.utils import get_message_to_historize
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
@@ -113,7 +116,18 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_demande_complements(cls, proposition: Proposition, acteur: str, message: EmailMessage):
+    def historiser_demande_complements(
+        cls,
+        proposition: Proposition,
+        acteur: str,
+        message: EmailMessage,
+        type_gestionnaire: str = '',
+    ):
+        if type_gestionnaire == TypeGestionnaire.SIC.name:
+            return cls.historiser_demande_complements_sic(proposition, acteur, message)
+        elif type_gestionnaire == TypeGestionnaire.FAC.name:
+            return cls.historiser_demande_complements_fac(proposition, acteur, message)
+
         gestionnaire = PersonneConnueUclTranslator().get(acteur)
 
         message_a_historiser = get_message_to_historize(message)

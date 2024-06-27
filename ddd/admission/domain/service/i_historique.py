@@ -24,11 +24,12 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import Union
+from typing import Union, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionFormationDoctorale,
 )
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as PropositionFormationGenerale,
 )
@@ -59,7 +60,13 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def historiser_demande_complements(cls, proposition: PropositionAdmission, acteur: str, message: EmailMessage):
+    def historiser_demande_complements(
+        cls,
+        proposition: PropositionAdmission,
+        acteur: str,
+        message: EmailMessage,
+        type_gestionnaire: str = '',
+    ):
         raise NotImplementedError
 
     @classmethod

@@ -23,18 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .lister_propositions_supervisees_service import lister_propositions_supervisees
-from .rechercher_doctorats_service import rechercher_doctorats
-from .recuperer_comptabilite_service import recuperer_comptabilite
-from .recuperer_cotutelle_service import recuperer_cotutelle
-from .recuperer_documents_proposition_service import recuperer_documents_proposition
-from .recuperer_documents_reclames_proposition_service import recuperer_documents_reclames_proposition
-from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
-from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
-from .recuperer_proposition_service import recuperer_proposition
-from .recuperer_resume_proposition_service import recuperer_resume_proposition
-from .verifier_curriculum_service import verifier_curriculum
-from .verifier_projet_service import verifier_projet
-from .verifier_proposition_service import verifier_proposition
+
+from admission.contrib.models import DoctorateAdmission
+from admission.infrastructure.admission.repository.emplacement_document import BaseEmplacementDocumentRepository
+
+
+class EmplacementDocumentRepository(BaseEmplacementDocumentRepository):
+    admission_model_class = DoctorateAdmission
