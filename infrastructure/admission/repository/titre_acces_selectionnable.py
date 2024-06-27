@@ -60,8 +60,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
     ) -> List[TitreAccesSelectionnable]:
         # Retrieve the secondary studies
         admission: BaseAdmission = (
-            BaseAdmission.objects.annotate_with_student_registration_id()
-            .select_related(
+            BaseAdmission.objects.select_related(
                 'candidate__belgianhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__country',
@@ -71,6 +70,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             .prefetch_related('internal_access_titles')
             .only(
                 'are_secondary_studies_access_title',
+                'candidate__global_id',
                 'candidate__belgianhighschooldiploma__uuid',
                 'candidate__foreignhighschooldiploma__uuid',
                 'candidate__belgianhighschooldiploma__academic_graduation_year__year',
@@ -125,7 +125,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
         internal_experiences = (
             experience_parcours_interne_translator.recuperer(
-                noma=admission.student_registration_id,
+                matricule=admission.candidate.global_id,
             )
             if not seulement_selectionnes or seulement_selectionnes and internal_access_titles_uuids
             else []
