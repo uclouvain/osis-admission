@@ -6447,6 +6447,9 @@ msgctxt "admission"
 msgid "Telephone (mobile)"
 msgstr ""
 
+msgid "Template title"
+msgstr ""
+
 msgid ""
 "Temporary protection is granted for a period of one year, which can be "
 "extended. This protection is granted in the event of a mass influx of "
