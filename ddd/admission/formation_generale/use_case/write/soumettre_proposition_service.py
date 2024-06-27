@@ -174,6 +174,7 @@ def soumettre_proposition(
             date_naissance=str(identification.date_naissance),
             genre=identification.genre,
             niss=identification.numero_registre_national_belge,
+            annee=proposition.annee_calculee,
         )
     )
 
