@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
@@ -53,8 +53,16 @@ STATUTS_PROPOSITION_AVANT_SOUMISSION = {
     ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
     ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
 }
+
 STATUTS_PROPOSITION_AVANT_INSCRIPTION = STATUTS_PROPOSITION_AVANT_SOUMISSION | {
     ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+    ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+    ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name,
+    ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
+    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+    ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
+    ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
 }
 
 STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE = STATUTS_PROPOSITION_AVANT_SOUMISSION | {
@@ -148,3 +156,15 @@ class ChoixDoctoratDejaRealise(ChoiceEnum):
     YES = _('YES')
     NO = _('NO')
     PARTIAL = _('PARTIAL')
+
+
+class OngletsChecklist(ChoiceEnum):
+    donnees_personnelles = _('Personal data')
+    assimilation = _('Belgian student status')
+    parcours_anterieur = _('Previous experience')
+    experiences_parcours_anterieur = _('Previous experiences')
+    financabilite = _('Financeability')
+    choix_formation = _('Course choice')
+    projet_recherche = pgettext_lazy('tab', 'Research project')
+    decision_facultaire = _('Decision of the faculty')
+    decision_sic = _('Decision of SIC')

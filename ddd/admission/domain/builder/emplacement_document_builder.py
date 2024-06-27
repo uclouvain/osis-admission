@@ -25,7 +25,9 @@
 # ##############################################################################
 
 import datetime
+from typing import Optional, Union
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import OngletsChecklist as OngletsChecklistDoctorat
 from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
@@ -62,7 +64,9 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
         libelle_en: str = '',
         raison: str = '',
         statut_reclamation: str = '',
-        onglet_checklist_associe: str = '',
+        onglet_checklist_associe: Optional[
+            Union[OngletsChecklistGenerale, OngletsChecklistContinue, OngletsChecklistDoctorat]
+        ] = None,
     ) -> 'EmplacementDocument':
         heure_initialisation = datetime.datetime.now()
         return EmplacementDocument(
@@ -80,13 +84,7 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
             justification_gestionnaire=raison,
             derniere_action_le=heure_initialisation,
             statut_reclamation=StatutReclamationEmplacementDocument[statut_reclamation] if statut_reclamation else None,
-            onglet_checklist_associe=getattr(
-                OngletsChecklistGenerale,
-                onglet_checklist_associe,
-                getattr(OngletsChecklistContinue, onglet_checklist_associe, None),
-            )
-            if onglet_checklist_associe
-            else None,
+            onglet_checklist_associe=onglet_checklist_associe,
         )
 
     @classmethod

@@ -45,6 +45,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixTypeAdmission,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -91,6 +92,47 @@ PROPOSITION_ERROR_SCHEMA = {
 
 STATUT_A_COMPLETER = "A_COMPLETER"
 STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS = "TRAITEMENT_UCLOUVAIN_EN_COURS"
+
+
+class PropositionStatusMixin(serializers.Serializer):
+    statut = serializers.SerializerMethodField()
+
+    STATUS_TO_PORTAL_STATUS = {}
+
+    def get_statut(self, obj):
+        return self.STATUS_TO_PORTAL_STATUS.get(obj.statut, obj.statut)
+
+
+class DoctoratePropositionStatusMixin(PropositionStatusMixin):
+    STATUS_TO_PORTAL_STATUS = {
+        ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+    }
+
+
+class GeneralEducationPropositionStatusMixin(PropositionStatusMixin):
+    STATUS_TO_PORTAL_STATUS = {
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+    }
+
+
+class ContinuingEducationPropositionStatusMixin(PropositionStatusMixin):
+    STATUS_TO_PORTAL_STATUS = {
+        ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionContinue.EN_ATTENTE.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+    }
 
 
 class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
@@ -145,7 +187,7 @@ class FormationContinueDTOSerializer(DTOSerializer):
         source = FormationDTO
 
 
-class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctoratePropositionStatusMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
             'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
@@ -180,6 +222,9 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
                     'retrieve_course_enrollment',
                     'destroy_proposition',
                     'retrieve_jury_preparation',
+                    # Documents
+                    'retrieve_documents',
+                    'update_documents',
                 ]
             },
         }
@@ -189,6 +234,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
+    documents_demandes = None
 
     class Meta:
         source = DoctoratPropositionDTO
@@ -208,35 +254,6 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
             'links',
             'pdf_recapitulatif',
         ]
-
-
-class PropositionStatusMixin(serializers.Serializer):
-    statut = serializers.SerializerMethodField()
-
-    STATUS_TO_PORTAL_STATUS = {}
-
-    def get_statut(self, obj):
-        return self.STATUS_TO_PORTAL_STATUS.get(obj.statut, obj.statut)
-
-
-class GeneralEducationPropositionStatusMixin(PropositionStatusMixin):
-    STATUS_TO_PORTAL_STATUS = {
-        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name: STATUT_A_COMPLETER,
-        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
-        ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-        ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-        ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-        ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-        ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-    }
-
-
-class ContinuingEducationPropositionStatusMixin(PropositionStatusMixin):
-    STATUS_TO_PORTAL_STATUS = {
-        ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
-        ChoixStatutPropositionContinue.EN_ATTENTE.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-        ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-    }
 
 
 class GeneralEducationPropositionSearchDTOSerializer(
@@ -380,7 +397,7 @@ class PropositionCreatePermissionsSerializer(serializers.Serializer):
     )
 
 
-class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositionStatusMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
             # Profile
@@ -433,10 +450,14 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Jury
             'retrieve_jury_preparation': DOCTORATE_ACTION_LINKS['retrieve_jury_preparation'],
             'list_jury_members': DOCTORATE_ACTION_LINKS['list_jury_members'],
+            # Documents
+            'retrieve_documents': DOCTORATE_ACTION_LINKS['retrieve_documents'],
+            'update_documents': DOCTORATE_ACTION_LINKS['update_documents'],
         }
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     elements_confirmation = None
+    documents_demandes = None
     # The schema is explicit in PropositionSchema
     erreurs = serializers.JSONField()
 

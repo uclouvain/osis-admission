@@ -149,6 +149,8 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         curriculum=admission.curriculum,
         elements_confirmation=admission.confirmation_elements,
         fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
+        auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
+        documents_demandes=admission.requested_documents,
     )
 
 
@@ -422,6 +424,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
+            langue_contact_candidat=admission.candidate.language,
             code_secteur_formation=admission.code_secteur_formation,  # from PropositionManager annotation
             intitule_secteur_formation=admission.intitule_secteur_formation,  # from PropositionManager annotation
             commission_proximite=admission.proximity_commission,
@@ -470,4 +473,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             elements_confirmation=admission.confirmation_elements,
             soumise_le=admission.submitted_at or admission.pre_admission_submission_date,
             pdf_recapitulatif=admission.pdf_recap,
+            documents_demandes=admission.requested_documents,
+            documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
+            documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
         )

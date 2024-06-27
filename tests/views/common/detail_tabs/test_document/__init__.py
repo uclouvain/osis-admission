@@ -37,8 +37,10 @@ from admission.contrib.models import (
     GeneralEducationAdmission,
     AdmissionFormItem,
     ContinuingEducationAdmission,
+    DoctorateAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
@@ -52,10 +54,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
 )
+from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -89,14 +93,25 @@ class BaseDocumentViewTestCase(TestCase):
             academic_year=cls.academic_years[0],
         )
 
+        cls.doctorate_training = DoctorateFactory(
+            management_entity=cls.first_doctoral_commission,
+            academic_year=cls.academic_years[0],
+        )
+
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.second_sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.continuing_fac_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.continuing_training.education_group
+            education_group=cls.continuing_training.education_group,
+        ).person.user
+        cls.doctorate_fac_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_training.education_group,
+        ).person.user
+        cls.second_doctorate_fac_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_training.education_group,
         ).person.user
         cls.second_fac_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.training.education_group
+            education_group=cls.training.education_group,
         ).person.user
 
         cls.file_uuid = uuid.uuid4()
@@ -176,6 +191,16 @@ class BaseDocumentViewTestCase(TestCase):
             curriculum=[uuid.uuid4()],
             pdf_recap=[uuid.uuid4()],
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+        self.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training=self.doctorate_training,
+            candidate=CompletePersonFactory(
+                language=settings.LANGUAGE_CODE_FR,
+                private_email='candidate@test.be',
+            ),
+            curriculum=[uuid.uuid4()],
+            pdf_recap=[uuid.uuid4()],
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
     def _create_a_free_document(
@@ -261,6 +286,9 @@ class BaseDocumentViewTestCase(TestCase):
         if admission.admission_context == 'continuing-education':
             fac_manager_user = self.continuing_fac_manager_user
             admission.status = ChoixStatutPropositionContinue.CONFIRMEE.name
+        elif admission.admission_context == 'doctorate':
+            fac_manager_user = self.doctorate_fac_manager_user
+            admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
         else:
             fac_manager_user = self.fac_manager_user
             admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name

@@ -25,18 +25,10 @@
 ##############################################################################
 
 from admission.ddd.admission.formation_continue.commands import *
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_continue.use_case.read import *
 from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
-from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
-    AnneeInscriptionFormationInMemoryTranslator,
-)
-from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
-    CalendrierInscriptionInMemory,
-)
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -47,7 +39,15 @@ from admission.ddd.admission.use_case.write import (
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
 )
-
+from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
+    AnneeInscriptionFormationInMemoryTranslator,
+)
+from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.historique import (
     HistoriqueInMemory as HistoriqueGlobalInMemory,
 )
@@ -324,6 +324,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=_emplacement_document_repository,
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(
@@ -351,5 +352,9 @@ COMMAND_HANDLERS = {
             cmd,
             emplacement_document_repository=_emplacement_document_repository,
         )
+    ),
+    RetyperDocumentCommand: lambda msg_bus, cmd: retyper_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
     ),
 }

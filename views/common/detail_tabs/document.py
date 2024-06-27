@@ -41,6 +41,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
@@ -55,7 +56,7 @@ from admission.forms.admission.document import (
     UploadManagerDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -96,6 +97,7 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
     commands = {
         CONTEXT_GENERAL: general_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand,
         CONTEXT_CONTINUING: continuing_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand,
     }
 
     def get_form_kwargs(self):
@@ -143,7 +145,7 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
 def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool, context: str) -> bool:
     """
     Check if the document can be edited by the person.
-    For the general admissions:
+    For the general and doctorate admissions:
     - FAC user can only update their own documents
     - SIC user can update all documents except the FAC and SYSTEM ones
     For the continuing admissions: FAC and SIC users can update all documents except the SYSTEM ones.
@@ -155,10 +157,10 @@ def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool, c
         return False
 
     if document_type in EMPLACEMENTS_FAC:
-        return (is_fac and context == CONTEXT_GENERAL) or context == CONTEXT_CONTINUING
+        return (is_fac and context in {CONTEXT_GENERAL, CONTEXT_DOCTORATE}) or context == CONTEXT_CONTINUING
 
     if document_type in EMPLACEMENTS_SIC:
-        return (is_sic and context == CONTEXT_GENERAL) or context == CONTEXT_CONTINUING
+        return (is_sic and context in {CONTEXT_GENERAL, CONTEXT_DOCTORATE}) or context == CONTEXT_CONTINUING
 
     return False
 
@@ -179,6 +181,7 @@ class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequire
     commands = {
         CONTEXT_GENERAL: general_education_commands.InitialiserEmplacementDocumentLibreAReclamerCommand,
         CONTEXT_CONTINUING: continuing_education_commands.InitialiserEmplacementDocumentLibreAReclamerCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.InitialiserEmplacementDocumentLibreAReclamerCommand,
     }
 
     @property
@@ -221,7 +224,7 @@ class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['only_limited_request_choices'] = self.is_general & self.is_fac
+        kwargs['only_limited_request_choices'] = (self.is_general or self.is_doctorate) & self.is_fac
         kwargs['candidate_language'] = self.admission.candidate.language
         return kwargs
 
@@ -288,7 +291,9 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             candidate_language=self.admission.candidate.language,
             initial=request_initial,
             editable_document=editable_document,
-            only_limited_request_choices=self.is_general and self.is_fac and document.type in EMPLACEMENTS_FAC,
+            only_limited_request_choices=(self.is_general or self.is_doctorate)
+            and self.is_fac
+            and document.type in EMPLACEMENTS_FAC,
         )
 
         context['retype_form'] = RetypeDocumentForm(admission_uuid=self.admission_uuid, identifier=document_identifier)
@@ -305,6 +310,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     commands = {
         CONTEXT_GENERAL: None,
         CONTEXT_CONTINUING: None,
+        CONTEXT_DOCTORATE: None,
     }
     permission_required = 'admission.edit_documents'
     name = 'document-action'
@@ -349,10 +355,12 @@ class RequestCandidateDocumentView(DocumentFormView):
     request_commands = {
         CONTEXT_GENERAL: general_education_commands.ModifierReclamationEmplacementDocumentCommand,
         CONTEXT_CONTINUING: continuing_education_commands.ModifierReclamationEmplacementDocumentCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.ModifierReclamationEmplacementDocumentCommand,
     }
     cancel_commands = {
         CONTEXT_GENERAL: general_education_commands.AnnulerReclamationEmplacementDocumentCommand,
         CONTEXT_CONTINUING: continuing_education_commands.AnnulerReclamationEmplacementDocumentCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.AnnulerReclamationEmplacementDocumentCommand,
     }
 
     @cached_property
@@ -382,7 +390,7 @@ class RequestCandidateDocumentView(DocumentFormView):
         kwargs['candidate_language'] = self.admission.candidate.language
         kwargs['editable_document'] = self.editable_document
         kwargs['only_limited_request_choices'] = (
-            self.is_general and self.is_fac and self.document.type in EMPLACEMENTS_FAC
+            (self.is_general or self.is_doctorate) and self.is_fac and self.document.type in EMPLACEMENTS_FAC
         )
         return kwargs
 
@@ -422,6 +430,7 @@ class DeleteDocumentView(DocumentFormView):
     commands = {
         CONTEXT_GENERAL: general_education_commands.SupprimerEmplacementDocumentCommand,
         CONTEXT_CONTINUING: continuing_education_commands.SupprimerEmplacementDocumentCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.SupprimerEmplacementDocumentCommand,
     }
 
     def delete(self, request, *args, **kwargs):
@@ -459,10 +468,12 @@ class RequestStatusChangeDocumentView(DocumentFormView):
     request_commands = {
         CONTEXT_GENERAL: general_education_commands.ModifierReclamationEmplacementDocumentCommand,
         CONTEXT_CONTINUING: continuing_education_commands.ModifierReclamationEmplacementDocumentCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.ModifierReclamationEmplacementDocumentCommand,
     }
     cancel_commands = {
         CONTEXT_GENERAL: general_education_commands.AnnulerReclamationEmplacementDocumentCommand,
         CONTEXT_CONTINUING: continuing_education_commands.AnnulerReclamationEmplacementDocumentCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.AnnulerReclamationEmplacementDocumentCommand,
     }
 
     @cached_property
@@ -477,7 +488,7 @@ class RequestStatusChangeDocumentView(DocumentFormView):
         kwargs['document_identifier'] = self.document_identifier
         kwargs['proposition_uuid'] = self.admission_uuid
         kwargs['only_limited_request_choices'] = (
-            self.is_general and self.is_fac and self.document.type in EMPLACEMENTS_FAC
+            (self.is_general or self.is_doctorate) and self.is_fac and self.document.type in EMPLACEMENTS_FAC
         )
         kwargs['context'] = self.current_context
         return kwargs
@@ -515,6 +526,7 @@ class ReplaceDocumentView(DocumentFormView):
     commands = {
         CONTEXT_GENERAL: general_education_commands.RemplacerEmplacementDocumentCommand,
         CONTEXT_CONTINUING: continuing_education_commands.RemplacerEmplacementDocumentCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.RemplacerEmplacementDocumentCommand,
     }
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
@@ -560,6 +572,7 @@ class UploadDocumentByManagerView(DocumentFormView):
     commands = {
         CONTEXT_GENERAL: general_education_commands.RemplirEmplacementDocumentParGestionnaireCommand,
         CONTEXT_CONTINUING: continuing_education_commands.RemplirEmplacementDocumentParGestionnaireCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.RemplirEmplacementDocumentParGestionnaireCommand,
     }
 
     def get_form_kwargs(self):
@@ -621,6 +634,7 @@ class RetypeDocumentView(DocumentFormView):
     commands = {
         CONTEXT_GENERAL: general_education_commands.RetyperDocumentCommand,
         CONTEXT_CONTINUING: continuing_education_commands.RetyperDocumentCommand,
+        CONTEXT_DOCTORATE: doctorate_education_commands.RetyperDocumentCommand,
     }
 
     def get_form_kwargs(self):

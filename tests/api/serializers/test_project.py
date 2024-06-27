@@ -32,7 +32,9 @@ from admission.api.serializers.project import (
     ContinuingEducationPropositionStatusMixin,
     STATUT_A_COMPLETER,
     STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+    DoctoratePropositionStatusMixin,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 
@@ -120,5 +122,51 @@ class ContinuingEducationPropositionStatusMixinTestCase(TestCase):
         for status in statuses:
             instance = Mock(statut=status)
             serializer = ContinuingEducationPropositionStatusMixin(instance=instance)
+
+            self.assertEqual(serializer.data['statut'], STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS)
+
+
+class DoctorateEducationPropositionStatusMixinTestCase(TestCase):
+    def test_get_original_status(self):
+        statuses = [
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionDoctorale.CLOTUREE.name,
+        ]
+
+        for status in statuses:
+            instance = Mock(statut=status)
+            serializer = DoctoratePropositionStatusMixin(instance=instance)
+
+            self.assertEqual(serializer.data['statut'], status)
+
+    def test_get_to_complete_status(self):
+        statuses = [
+            ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+            ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+        ]
+
+        for status in statuses:
+            instance = Mock(statut=status)
+            serializer = DoctoratePropositionStatusMixin(instance=instance)
+
+            self.assertEqual(serializer.data['statut'], STATUT_A_COMPLETER)
+
+    def test_get_in_progress_status(self):
+        statuses = [
+            ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
+            ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+            ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name,
+            ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
+        ]
+
+        for status in statuses:
+            instance = Mock(statut=status)
+            serializer = DoctoratePropositionStatusMixin(instance=instance)
 
             self.assertEqual(serializer.data['statut'], STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS)

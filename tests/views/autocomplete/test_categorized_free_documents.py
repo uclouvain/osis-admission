@@ -27,10 +27,11 @@ import json
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.translation import override
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
@@ -52,6 +53,7 @@ class CategorizedFreeDocumentsAutocompleteTestCase(TestCase):
             short_label_en='My document 31',
             long_label_fr='La description de mon premier document uclouvain',
             long_label_en='The description of my first uclouvain document',
+            admission_context=CONTEXT_DOCTORATE,
         )
         cls.first_personal_data_document = CategorizedFreeDocumentFactory(
             checklist_tab=OngletsChecklist.donnees_personnelles.name,
@@ -59,6 +61,7 @@ class CategorizedFreeDocumentsAutocompleteTestCase(TestCase):
             short_label_en='My document 11',
             long_label_fr='La description de mon premier document des données personnelles',
             long_label_en='The description of my first document of the personal data',
+            admission_context=CONTEXT_GENERAL,
         )
         cls.second_personal_data_document = CategorizedFreeDocumentFactory(
             checklist_tab=OngletsChecklist.donnees_personnelles.name,
@@ -66,6 +69,7 @@ class CategorizedFreeDocumentsAutocompleteTestCase(TestCase):
             short_label_en='My document 12',
             long_label_fr='La description de mon deuxième document des données personnelles',
             long_label_en='The description of my second document of the personal data',
+            admission_context=CONTEXT_CONTINUING,
         )
         cls.assimilation_document = CategorizedFreeDocumentFactory(
             checklist_tab=OngletsChecklist.assimilation.name,
@@ -73,6 +77,7 @@ class CategorizedFreeDocumentsAutocompleteTestCase(TestCase):
             short_label_en='My document 21',
             long_label_fr='La description de mon premier document d\'assimilation',
             long_label_en='The description of my first document of the assimilation',
+            admission_context='',
         )
 
         cls.user = User.objects.create_user(
@@ -175,6 +180,38 @@ class CategorizedFreeDocumentsAutocompleteTestCase(TestCase):
         self.assertEqual(len(results), 1)
 
         self.assertEqual(results[0]['id'], self.uclouvain_document.pk)
+
+    def test_get_categorized_free_documents_with_admission_context(self):
+        self.client.force_login(user=self.user)
+
+        # An admission context is specified so only the documents in that context should be returned
+        data = {
+            'forward': json.dumps({'admission_context': CONTEXT_GENERAL}),
+        }
+
+        response = self.client.get(self.url, data=data)
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.first_personal_data_document.pk)
+
+        # An empty string is specified so only the documents that are not related to a context should be returned
+        data = {
+            'forward': json.dumps({'admission_context': ''}),
+        }
+
+        response = self.client.get(self.url, data=data)
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+
+        self.assertEqual(len(results), 1)
+
+        self.assertEqual(results[0]['id'], self.assimilation_document.pk)
 
     def test_get_categorized_free_documents_with_a_search_term(self):
         self.client.force_login(user=self.user)

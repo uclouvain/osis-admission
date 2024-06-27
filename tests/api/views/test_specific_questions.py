@@ -132,6 +132,7 @@ class BaseDoctorateSpecificQuestionListApiTestCase(APITestCase):
             training__management_entity=self.commission,
             training__academic_year__year=2020,
             supervision_group=self.promoter.actor_ptr.process,
+            determined_academic_year__year=2020,
         )
         self.admission = admission
 

@@ -26,12 +26,13 @@
 from django.utils.functional import cached_property
 from django.views.generic import RedirectView
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_SOUMISE
 from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_SOUMISE
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
 from admission.views.common.detail_tabs.documents import DocumentView
 from admission.views.common.detail_tabs.person import AdmissionPersonDetailView
 from admission.views.common.mixins import AdmissionViewMixin
-from admission.views.general_education.details.checklist import ChecklistView
+
 
 __all__ = ['AdmissionRedirectView']
 __namespace__ = False
@@ -50,13 +51,8 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
         'general-education': True,
         'continuing-education': True,
     }
-    available_documents_by_context = {
-        'doctorate': False,
-        'general-education': True,
-        'continuing-education': True,
-    }
     submitted_status_by_context = {
-        'doctorate': set(),
+        'doctorate': STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
         'general-education': STATUTS_PROPOSITION_GENERALE_SOUMISE,
         'continuing-education': STATUTS_PROPOSITION_CONTINUE_SOUMISE,
     }
@@ -72,7 +68,7 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     @cached_property
     def can_access_documents_management(self):
         self.permission_required = DocumentView.permission_required
-        return self.available_documents_by_context[self.current_context] and super().has_permission()
+        return super().has_permission()
 
     @cached_property
     def can_access_person_tab(self):
