@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_historique impo
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
 from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
@@ -54,6 +55,7 @@ def approuver_inscription_par_sic(
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     digit: 'IDigitRepository',
     compteur_noma: 'ICompteurAnnuelPourNomaRepository',
+    experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -87,7 +89,14 @@ def approuver_inscription_par_sic(
     )
 
     # WHEN
-    proposition.approuver_par_sic(auteur_modification=cmd.auteur, documents_dto=documents_dto)
+    proposition.approuver_par_sic(
+        auteur_modification=cmd.auteur,
+        documents_dto=documents_dto,
+        curriculum_dto=resume_dto.curriculum,
+        academic_year_repository=academic_year_repository,
+        profil_candidat_translator=profil_candidat_translator,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
+    )
 
     # THEN
     proposition_repository.save(entity=proposition)

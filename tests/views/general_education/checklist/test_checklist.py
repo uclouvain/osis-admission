@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import itertools
+import factory
 
 import mock
 from django.conf import settings
@@ -74,6 +76,7 @@ class ChecklistViewTestCase(TestCase):
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            submitted_at=factory.LazyAttribute(lambda obj: datetime.datetime(obj.determined_academic_year.year, 1, 1)),
         )
         cls.candidate = cls.general_admission.candidate
 

@@ -140,6 +140,11 @@ class VerifierCurriculumQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
     uuid_proposition: str
 
