@@ -35,7 +35,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from base.tests.factories.user import UserFactory
 
 
 class PredicatesTestCase(TestCase):
@@ -51,6 +50,8 @@ class PredicatesTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.admission = ContinuingEducationAdmissionFactory()
+        cls.general_admission = GeneralEducationAdmissionFactory()
+        cls.doctorate_admission = DoctorateAdmissionFactory()
 
     def _test_admission_statuses(self, predicate, admission, valid_statuses):
         for status in ChoixStatutPropositionContinue.get_names():
@@ -86,6 +87,16 @@ class PredicatesTestCase(TestCase):
             },
         )
 
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.is_submitted(self.general_admission.candidate.user, self.general_admission))
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.doctorate_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.is_submitted(self.doctorate_admission.candidate.user, self.doctorate_admission))
+
     def test_not_cancelled(self):
         self._test_admission_statuses(
             predicate=continuing.not_cancelled,
@@ -93,6 +104,16 @@ class PredicatesTestCase(TestCase):
             valid_statuses=set(ChoixStatutPropositionContinue.get_names())
             - {ChoixStatutPropositionContinue.ANNULEE.name},
         )
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.not_cancelled(self.general_admission.candidate.user, self.general_admission))
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.doctorate_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.not_cancelled(self.doctorate_admission.candidate.user, self.doctorate_admission))
 
     def test_is_continuing(self):
         doctorate_admission = DoctorateAdmissionFactory()
@@ -127,6 +148,16 @@ class PredicatesTestCase(TestCase):
             valid_statuses={ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name},
         )
 
+        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+        self.general_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.not_cancelled(self.general_admission.candidate.user, self.general_admission))
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name
+        self.doctorate_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.not_cancelled(self.doctorate_admission.candidate.user, self.doctorate_admission))
+
     def test_in_manager_status(self):
         self._test_admission_statuses(
             predicate=continuing.in_manager_status,
@@ -142,14 +173,15 @@ class PredicatesTestCase(TestCase):
             },
         )
 
-        user = UserFactory()
-        general_admission = GeneralEducationAdmissionFactory(status=ChoixStatutPropositionGenerale.CONFIRMEE.name)
-        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
-        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
 
-        self.assertFalse(continuing.in_manager_status(user, general_admission))
-        self.assertFalse(continuing.in_manager_status(user, doctorate_admission))
-        self.assertTrue(continuing.in_manager_status(user, continuing_admission))
+        self.assertFalse(continuing.in_manager_status(self.general_admission.candidate, self.general_admission))
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.doctorate_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.in_manager_status(self.doctorate_admission.candidate, self.doctorate_admission))
 
     def test_can_request_documents(self):
         self._test_admission_statuses(
@@ -160,6 +192,16 @@ class PredicatesTestCase(TestCase):
                 ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
             },
         )
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.in_manager_status(self.general_admission.candidate, self.general_admission))
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.doctorate_admission.save(update_fields=['status'])
+
+        self.assertFalse(continuing.in_manager_status(self.doctorate_admission.candidate, self.doctorate_admission))
 
     def test_is_invited_to_complete(self):
         self._test_admission_statuses(
