@@ -90,6 +90,9 @@
                 hx-trigger="click"
                 hx-include="#proposal-form"
                 hx-indicator="#htmx-overlay"
+                {% if not peut_refuser_fusion %}
+                disabled data-toggle="tooltip" title="{% trans 'Cannot discard merge because at least one known person has the same national number' %}"
+                {% endif %}
             >
                  <i class="fas fa-ban" style="margin-right: 3px;"></i>
                 {% trans "Discard fusion" %}
