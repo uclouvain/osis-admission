@@ -129,10 +129,9 @@ class AdmissionAdminForm(forms.ModelForm):
         self.fields['educational_valuated_experiences'].queryset = self.instance.candidate.educationalexperience_set
         self.fields['professional_valuated_experiences'].queryset = self.instance.candidate.professionalexperience_set
         self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
-
-        student = Student.objects.filter(person=self.instance.candidate).first()
-        if student:
-            self.fields['internal_access_titles'].queryset = InscriptionProgrammeCycle.objects.filter(etudiant=student)
+        self.fields['internal_access_titles'].queryset = InscriptionProgrammeCycle.objects.filter(
+            etudiant__person=self.instance.candidate,
+        )
 
 
 class ReadOnlyFilesMixin:

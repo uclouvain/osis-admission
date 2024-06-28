@@ -201,7 +201,7 @@ class PDFGeneration(IPDFGeneration):
             if access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE:
                 if internal_experiences_dtos is None:
                     internal_experiences_dtos = experience_parcours_interne_translator.recuperer(
-                        noma=context['proposition'].noma_candidat,
+                        matricule=proposition.matricule_candidat,
                     )
 
                 selected_internal_experience = next(
