@@ -23,15 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
     ReinitialiserEmplacementsDocumentsNonLibresPropositionService,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
 )
@@ -41,7 +40,6 @@ from admission.ddd.admission.formation_continue.domain.service.i_question_specif
 )
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
@@ -55,17 +53,9 @@ def recalculer_emplacements_documents_non_libres_proposition(
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
-    annee_courante = (
-        GetCurrentAcademicYear()
-        .get_starting_academic_year(
-            datetime.date.today(),
-            academic_year_repository,
-        )
-        .year
-    )
     resume_dto = ResumeProposition.get_resume(
         profil_candidat_translator=profil_candidat_translator,
-        annee_courante=annee_courante,
+        academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )

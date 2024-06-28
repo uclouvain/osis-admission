@@ -24,6 +24,7 @@
 #
 ##############################################################################
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
@@ -145,13 +146,12 @@ from infrastructure.shared_kernel.campus.repository.in_memory.campus import Uclo
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
-from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
-    CompteurAnnuelPourNomaInMemoryRepository,
-)
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
-
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
+    CompteurAnnuelPourNomaInMemoryRepository,
+)
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -382,6 +382,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=_emplacement_document_repository,
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(

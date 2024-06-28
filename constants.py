@@ -61,7 +61,7 @@ ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES = {
     AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY,
     AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA,
 }
-CONTEXT_ADMISSION = 'admission'
 CONTEXT_DOCTORATE = 'doctorate'
+CONTEXT_DOCTORATE_AFTER_ENROLMENT = 'doctorate-after-enrolment'  # TODO doctorate refactorization
 CONTEXT_GENERAL = 'general-education'
 CONTEXT_CONTINUING = 'continuing-education'

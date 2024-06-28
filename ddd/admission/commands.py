@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from abc import abstractmethod
 from typing import Optional, List, Dict
 
 import attr

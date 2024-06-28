@@ -38,6 +38,8 @@ __all__ = [
     'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL',
     'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING',
     'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING',
+    'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE',
+    'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE',
 ]
 
 
@@ -245,5 +247,31 @@ templates.register(
         'education'
     ),
     tag=CONTINUING_ADMISSION_TAG,
+    tokens=DOCUMENTS_CONFIRM_TOKENS,
+)
+
+ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE = (
+    'osis-admission-submission-confirm-with-submitted-and-not-submitted-doctorate'
+)
+templates.register(
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE,
+    description=_(
+        'Mail sent to the candidate to inform him that some requested documents have been received '
+        'and some are still missing for doctorate education'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=DOCUMENTS_CONFIRM_TOKENS,
+)
+
+ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE = (
+    'osis-admission-submission-confirm-with-submitted-doctorate'
+)
+templates.register(
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
+    description=_(
+        'Mail sent to the candidate to inform him that all requested documents have been received '
+        'for doctorate education'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
     tokens=DOCUMENTS_CONFIRM_TOKENS,
 )

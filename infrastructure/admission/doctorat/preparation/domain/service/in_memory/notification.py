@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,11 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
+from typing import List
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import SignataireIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
+from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 
 
 class NotificationInMemory(INotification):
@@ -49,4 +53,22 @@ class NotificationInMemory(INotification):
 
     @classmethod
     def renvoyer_invitation(cls, proposition: Proposition, membre: 'SignataireIdentity'):
+        pass
+
+    @classmethod
+    def envoyer_message_libre_au_candidat(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        pass
+
+    @classmethod
+    def confirmer_reception_documents_envoyes_par_candidat(
+        cls,
+        proposition: PropositionDTO,
+        liste_documents_reclames: List[EmplacementDocument],
+        liste_documents_dto: List[EmplacementDocumentDTO],
+    ):
         pass

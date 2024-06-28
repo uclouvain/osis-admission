@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.101
+  version: 1.0.102
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1530,6 +1530,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PDFRecap'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/documents:
+    get:
+      operationId: list_doctorate_documents
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSpecificQuestionsList'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: create_doctorate_documents
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterEmplacementsDocumentsParCandidatCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -6013,6 +6079,7 @@ components:
                 format: date-time
               statut:
                 type: string
+                readOnly: true
               links:
                 type: object
                 properties:
@@ -6070,6 +6137,10 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_jury_preparation:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_documents:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_documents:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
               pdf_recapitulatif:
@@ -6087,7 +6158,6 @@ components:
             - code_secteur_formation
             - intitule_secteur_formation
             - creee_le
-            - statut
             - pdf_recapitulatif
         general_education_propositions:
           type: array
@@ -6396,6 +6466,7 @@ components:
           format: date-time
         statut:
           type: string
+          readOnly: true
         links:
           type: object
           properties:
@@ -6453,6 +6524,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             retrieve_jury_preparation:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         pdf_recapitulatif:
@@ -6470,7 +6545,6 @@ components:
       - code_secteur_formation
       - intitule_secteur_formation
       - creee_le
-      - statut
       - pdf_recapitulatif
     PersonIdentification:
       type: object
@@ -7327,6 +7401,7 @@ components:
             type: string
         statut:
           type: string
+          readOnly: true
         links:
           type: object
           properties:
@@ -7400,6 +7475,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             list_jury_members:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs:
@@ -7442,7 +7521,6 @@ components:
       - doctorat_deja_realise
       - domaine_these
       - fiche_archive_signatures_envoyees
-      - statut
       - erreurs
       - curriculum
       - pdf_recapitulatif
@@ -7792,6 +7870,93 @@ components:
           type: string
       required:
       - token
+    DocumentSpecificQuestionsList:
+      type: object
+      properties:
+        immediate_requested_documents:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              type:
+                type: string
+              title:
+                type: object
+              text:
+                type: object
+              help_text:
+                type: object
+              configuration:
+                type: object
+              values:
+                type: array
+                items:
+                  type: object
+              tab:
+                type: string
+              tab_name:
+                type: string
+              required:
+                type: boolean
+            required:
+            - uuid
+            - type
+            - title
+            - text
+            - help_text
+            - configuration
+            - values
+            - tab
+            - tab_name
+            - required
+        later_requested_documents:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              type:
+                type: string
+              title:
+                type: object
+              text:
+                type: object
+              help_text:
+                type: object
+              configuration:
+                type: object
+              values:
+                type: array
+                items:
+                  type: object
+              tab:
+                type: string
+              tab_name:
+                type: string
+              required:
+                type: boolean
+            required:
+            - uuid
+            - type
+            - title
+            - text
+            - help_text
+            - configuration
+            - values
+            - tab
+            - tab_name
+            - required
+        deadline:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - immediate_requested_documents
+      - later_requested_documents
+      - deadline
     SupervisionDTO:
       type: object
       properties:
@@ -7979,6 +8144,7 @@ components:
                 type: string
             statut:
               type: string
+              readOnly: true
           required:
           - uuid
           - type_admission
@@ -7988,7 +8154,6 @@ components:
           - code_secteur_formation
           - domaine_these
           - fiche_archive_signatures_envoyees
-          - statut
         supervision:
           type: object
           properties:
@@ -10166,93 +10331,6 @@ components:
       - attestation_boursier
       - titre_identite_sejour_longue_duree_ue
       - titre_sejour_belgique
-    DocumentSpecificQuestionsList:
-      type: object
-      properties:
-        immediate_requested_documents:
-          type: array
-          items:
-            type: object
-            properties:
-              uuid:
-                type: string
-              type:
-                type: string
-              title:
-                type: object
-              text:
-                type: object
-              help_text:
-                type: object
-              configuration:
-                type: object
-              values:
-                type: array
-                items:
-                  type: object
-              tab:
-                type: string
-              tab_name:
-                type: string
-              required:
-                type: boolean
-            required:
-            - uuid
-            - type
-            - title
-            - text
-            - help_text
-            - configuration
-            - values
-            - tab
-            - tab_name
-            - required
-        later_requested_documents:
-          type: array
-          items:
-            type: object
-            properties:
-              uuid:
-                type: string
-              type:
-                type: string
-              title:
-                type: object
-              text:
-                type: object
-              help_text:
-                type: object
-              configuration:
-                type: object
-              values:
-                type: array
-                items:
-                  type: object
-              tab:
-                type: string
-              tab_name:
-                type: string
-              required:
-                type: boolean
-            required:
-            - uuid
-            - type
-            - title
-            - text
-            - help_text
-            - configuration
-            - values
-            - tab
-            - tab_name
-            - required
-        deadline:
-          type: string
-          format: date
-          nullable: true
-      required:
-      - immediate_requested_documents
-      - later_requested_documents
-      - deadline
     PaiementDTO:
       type: object
       properties:
@@ -10817,6 +10895,13 @@ components:
       - annee
       - pool
       - elements_confirmation
+    CompleterEmplacementsDocumentsParCandidatCommand:
+      type: object
+      properties:
+        reponses_documents_a_completer:
+          type: object
+      required:
+      - reponses_documents_a_completer
     SupervisionActorReference:
       type: object
       properties:
@@ -11001,13 +11086,6 @@ components:
       - INSCRIPTION_REFUSEE
       - CLOTUREE
       type: string
-    CompleterEmplacementsDocumentsParCandidatCommand:
-      type: object
-      properties:
-        reponses_documents_a_completer:
-          type: object
-      required:
-      - reponses_documents_a_completer
     SpecifierPaiementVaEtreOuvertParCandidatCommand:
       type: object
       properties:

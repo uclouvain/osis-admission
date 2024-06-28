@@ -42,6 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
@@ -61,6 +62,12 @@ def in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("Invitations have not been sent"))
 def signing_in_progress(self, user: User, obj: DoctorateAdmission):
     return obj.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to complete this admission."))
+def is_invited_to_complete(self, user: User, obj: DoctorateAdmission):
+    return obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT
 
 
 @predicate(bind=True)

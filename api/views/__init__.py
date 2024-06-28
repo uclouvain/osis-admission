@@ -30,6 +30,7 @@ from admission.api.views.curriculum import *
 from admission.api.views.documents import (
     GeneralRequestedDocumentListView,
     ContinuingRequestedDocumentListView,
+    DoctorateRequestedDocumentListView,
 )
 from admission.api.views.secondary_studies import (
     SecondaryStudiesViewSet,

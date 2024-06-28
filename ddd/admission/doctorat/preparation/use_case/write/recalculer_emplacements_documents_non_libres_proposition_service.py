@@ -24,6 +24,20 @@
 #
 # ##############################################################################
 
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import IComptabiliteTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
+    IGroupeDeSupervisionRepository,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
     ReinitialiserEmplacementsDocumentsNonLibresPropositionService,
@@ -31,15 +45,6 @@ from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
-from admission.ddd.admission.formation_generale.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_comptabilite import IComptabiliteTranslator
-from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
-    IQuestionSpecifiqueTranslator,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -50,17 +55,22 @@ def recalculer_emplacements_documents_non_libres_proposition(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
-    academic_year_repository: 'IAcademicYearRepository',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> 'PropositionIdentity':
+    academic_year_repository: 'IAcademicYearRepository',
+    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    promoteur_translator: 'IPromoteurTranslator',
+    membre_ca_translator: 'IMembreCATranslator',
+) -> PropositionIdentity:
     # GIVEN
-    proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
-    comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
-    resume_dto = ResumeProposition.get_resume(
+    resume_dto = ResumeProposition.get_resume_demande_doctorat(
+        uuid_proposition=cmd.uuid_proposition,
+        proposition_repository=proposition_repository,
+        comptabilite_translator=comptabilite_translator,
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
-        proposition_dto=proposition_dto,
-        comptabilite_dto=comptabilite_dto,
+        groupe_supervision_repository=groupe_supervision_repository,
+        promoteur_translator=promoteur_translator,
+        membre_ca_translator=membre_ca_translator,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
@@ -75,5 +85,4 @@ def recalculer_emplacements_documents_non_libres_proposition(
         emplacement_document_repository=emplacement_document_repository,
     )
 
-    # THEN
     return PropositionIdentity(uuid=cmd.uuid_proposition)
