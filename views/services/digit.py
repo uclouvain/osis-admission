@@ -81,7 +81,7 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
             year=self.base_admission.determined_academic_year.year,
             noma=noma,
         )
-        if response['status'] == PersonTicketCreationStatus.CREATED.name:
+        if response and response['status'] == PersonTicketCreationStatus.CREATED.name:
             display_success_messages(request, "Ticket de création de compte envoyé avec succès dans DigIT")
         else:
             display_error_messages(request, "Une erreur est survenue lors de l'envoi dans DigIT")
