@@ -49,3 +49,4 @@ class PropositionSoumiseEvent(Event):
     date_naissance: str
     genre: str
     niss: Optional[str]
+    annee: Optional[str]
