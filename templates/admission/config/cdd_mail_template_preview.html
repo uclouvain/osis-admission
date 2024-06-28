@@ -9,7 +9,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -70,5 +70,9 @@
   {% endfor %}
 
   {% url 'admission:config:cdd-mail-template:edit' identifier=instances.0.identifier pk=instances.0.pk as change_url %}
-  <a href="{{ change_url }}" class="btn btn-default"><span class="fa fa-edit"></span> {% trans "Edit" %}</a>
+  <a href="{{ change_url }}" class="btn btn-primary"><span class="fa fa-edit"></span> {% trans "Edit" %}</a>
+  <a href="{% url 'admission:config:cdd-mail-template:list' %}" class="btn btn-default">
+    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    {% trans "Cancel" %}
+  </a>
 {% endblock %}
