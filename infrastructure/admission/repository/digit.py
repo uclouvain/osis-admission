@@ -31,10 +31,12 @@ from typing import Optional, List
 import requests
 import waffle
 from django.conf import settings
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_AUTORISEE
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
@@ -50,11 +52,30 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 class DigitRepository(IDigitRepository):
     @classmethod
     def submit_person_ticket(cls, global_id: str, noma: str):
-        if not waffle.switch_is_active('fusion-digit') or global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
+        if not waffle.switch_is_active('fusion-digit'):
+            logger.info(f"DIGIT submit ticket canceled: fusion-digit is inactive")
+            return
+
+        if global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
+            logger.info(f"DIGIT submit ticket canceled: matr {global_id[0]} is not a temporary account matricule")
+            return
+
+        # replace with date from academic calendar
+        if not datetime.today() < datetime(datetime.today().year, 6, 1):
+            logger.info(
+                f"DIGIT submit ticket canceled: creation ticket in digit should be done after "
+                f"{datetime(datetime.today().year, 6, 1)}"
+            )
             return
 
         candidate = Person.objects.get(global_id=global_id)
+        status, type_demande = _get_status_and_type_demande(candidate)
 
+        if type_demande == TypeDemande.ADMISSION and status not in STATUTS_TOUTE_PROPOSITION_AUTORISEE:
+            logger.info(f"DIGIT submit ticket canceled: type is admission and application is not accepted")
+            return
+
+        # move this noma to another place
         if noma:
             candidate.last_registration_id = noma
             candidate.save()
@@ -64,8 +85,14 @@ class DigitRepository(IDigitRepository):
         proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
         if proposition.exists():
             merge_person = proposition.get().proposal_merge_person
+            if proposition.status not in [
+                PersonMergeStatus.MERGED.name, PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
+            ]:
+                logger.info(f"DIGIT submit ticket canceled: merge status is {proposition.status} and prevents sending ticket")
+                return
 
-        person = merge_person if merge_person else candidate
+
+        person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ticket_response = _request_person_ticket_creation(person, noma, addresses)
 
@@ -95,7 +122,7 @@ class DigitRepository(IDigitRepository):
         if proposition.exists():
             merge_person = proposition.get().proposal_merge_person
 
-        person = merge_person if merge_person else candidate
+        person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ticket_response = _request_person_ticket_validation(person, addresses)
 
@@ -155,10 +182,12 @@ class DigitRepository(IDigitRepository):
             return []
 
         tickets = PersonTicketCreation.objects.filter(
-            status__in=[
-                PersonTicketCreationStatus.CREATED.value,
-                PersonTicketCreationStatus.IN_PROGRESS.value,
-            ]
+            ~Q(
+                status__in=[
+                    PersonTicketCreationStatus.DONE.value,
+                    PersonTicketCreationStatus.DONE_WITH_WARNINGS.value,
+                ]
+            )
         ).select_related('person').values(
             'request_id', 'person__last_registration_id', 'person__last_name', 'person__first_name',
             'person__global_id', 'status', 'errors'
@@ -329,3 +358,22 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
         ],
         "physicalPerson": True,
     }
+
+
+def _is_valid_merge_person(person):
+    return bool(person) and all([
+        person.last_name,
+        person.first_name,
+        person.birth_date or person.birth_year,
+        person.gender,
+    ])
+
+
+def _get_status_and_type_demande(candidate):
+    # get all admissions listed for the candidate to check admission/registration condition (it sucks)
+    status = None
+    for admission in candidate.baseadmission_set.all():
+        status = admission.general_education_admission.status or admission.doctorate_admission.status or admission.continuing_education_admission
+        if admission.type_demande == TypeDemande.INSCRIPTION.name:
+            return status, TypeDemande.INSCRIPTION.name
+    return status, TypeDemande.ADMISSION.name

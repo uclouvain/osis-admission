@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import re
 from datetime import datetime
 
 from django.forms import model_to_dict
@@ -89,6 +90,7 @@ class SearchAccountView(HtmxMixin, FormView, HtmxPermissionRequiredMixin):
         context['uuid'] = self.kwargs['uuid']
         context['candidate'] = self.candidate
         context['merge_person'] = self.proposal_merge
+        context['peut_refuser_fusion'] = self.peut_refuser_fusion()
         search_context = self.request.session.get('search_context', {})
         context.update(**search_context)
         return context
@@ -155,3 +157,19 @@ class SearchAccountView(HtmxMixin, FormView, HtmxPermissionRequiredMixin):
             'admission:general-education:checklist',
             kwargs={'uuid': self.kwargs['uuid']}
         ) + "#donnees_personnelles"
+
+    def peut_refuser_fusion(self):
+        # pas le temps pour faire ça en DDD
+        candidate = self.candidate
+        digit_results = self.proposal_merge.similarity_result
+        for result in digit_results:
+            # ne peut pas refuser fusion si NISS identiques
+            if result['person']['nationalRegister'] and candidate['national_number'] and (
+                    result['person']['nationalRegister'] == _only_digits(candidate['national_number'])
+            ):
+                return False
+        return True
+
+
+def _only_digits(input_string):
+    return re.sub('[^0-9]', '', input_string)

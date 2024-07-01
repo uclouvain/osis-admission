@@ -31,6 +31,7 @@ from backoffice.celery import app as celery_app
 from . import process_admission_tasks
 from . import check_academic_calendar
 from . import retrieve_digit_tickets_status
+from . import retry_digit_duplicates_finding
 
 tasks = {
     'Generate admission files': {

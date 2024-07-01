@@ -1,4 +1,4 @@
-{% load static i18n bootstrap3 admission %}
+{% load static i18n bootstrap3 admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -24,6 +24,59 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+<h6>{% trans 'High school graduation year' %}</h6>
+<div style="display: flex; gap: 20px;">
+    <div class="input-group">
+        <label>Fournie par le candidat</label>
+        <input class="form-control" type="number" name="high_school_graduation_year" value="{{ provided_high_school_graduation_year }}" style="pointer-events: none;">
+    </div>
+
+    <div class="input-group">
+        <label>Connue du système</label>
+        <input class="form-control" type="number" value="{{ known_high_school_graduation_year }}" disabled>
+    </div>
+</div>
+
+<h6>{% trans 'Educational experience' %}</h6>
+<table class="table table-reponsive">
+    <thead>
+        <tr>
+            <th style="width: 5%;"></th>
+            <th style="width: 15%;">Années</th>
+            <th style="width: 35%;">Formation</th>
+            <th style="width: 35%;">Lieu</th>
+            <th style="width: 10%;">Source</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for experience in educational_experience %}
+        <tr>
+            <td>
+                <input type="checkbox" name="educational" value="{{ experience.uuid }}"
+                {% if person_merge_proposal.status == "PENDING" and experience.uuid|rjust:"0" in person_merge_proposal.educational_curex_to_merge %}
+                   checked
+                {% elif person_merge_proposal.status == "MATCH_FOUND" %}
+                   checked
+                {% endif %}
+                {% if not experience.uuid in mergeable_experiences_uuids %}
+                       disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
+                {% endif %}/>
+            </td>
+            <td>{{ experience.annees|display_academic_years_range }}</td>
+            <td>{{ experience.nom_formation|default_if_none_or_empty:'-' }}</td>
+            <td>{{ experience.nom_institut|default_if_none_or_empty:'-' }}</td>
+            <td>
+                {% if experience.uuid in mergeable_experiences_uuids %}
+                    <div class="badge badge-warning">Connue UCL</div>
+                {% else %}
+                    <div class="badge badge-info">Candidat</div>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 <h6>{% trans 'Professional experience' %}</h6>
 
 <table class="table table-reponsive">
@@ -43,17 +96,22 @@
         {% for experience in professional_experience %}
         <tr>
             <td>
-                <input type="checkbox" name="professional" value="{{ experience.uuid }}" checked
+                <input type="checkbox" name="professional" value="{{ experience.uuid }}"
+                {% if person_merge_proposal.status == "PENDING" and experience.uuid|rjust:"0" in person_merge_proposal.professional_curex_to_merge %}
+                   checked
+                {% elif person_merge_proposal.status == "MATCH_FOUND" %}
+                   checked
+                {% endif %}
                 {% if not experience.uuid in mergeable_experiences_uuids %}
-                       disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
+                   disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
                 {% endif %}/>
             </td>
             <td>{{ experience.date_debut|date:"Y" }} - {{ experience.date_fin|date:"Y" }}</td>
-            <td>{{ experience.type|default_if_none_or_empty:'Non spécifié' }}</td>
-            <td>{{ experience.secteur|default_if_none_or_empty:'Non spécifié' }}</td>
-            <td>{{ experience.activité|default_if_none_or_empty:'Non spécifié' }}</td>
-            <td>{{ experience.fonction|default_if_none_or_empty:'Non spécifié' }}</td>
-            <td>{{ experience.employeur|default_if_none_or_empty:'Non spécifié' }}</td>
+            <td>{{ experience.type|default_if_none_or_empty:'-'|enum_display:"ActivityType" }}</td>
+            <td>{{ experience.secteur|default_if_none_or_empty:'-'|enum_display:"ActivitySector" }}</td>
+            <td>{{ experience.activité|default_if_none_or_empty:'-' }}</td>
+            <td>{{ experience.fonction|default_if_none_or_empty:'-' }}</td>
+            <td>{{ experience.employeur|default_if_none_or_empty:'-' }}</td>
             <td>
                 {% if experience.uuid in mergeable_experiences_uuids %}
                     <div class="badge badge-warning">Connue UCL</div>
@@ -65,51 +123,3 @@
         {% endfor %}
     </tbody>
 </table>
-
-<h6>{% trans 'Educational experience' %}</h6>
-<table class="table table-reponsive">
-    <thead>
-        <tr>
-            <th style="width: 5%;"></th>
-            <th style="width: 15%;">Années</th>
-            <th style="width: 35%;">Formation</th>
-            <th style="width: 35%;">Lieu</th>
-            <th style="width: 10%;">Source</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for experience in educational_experience %}
-        <tr>
-            <td>
-                <input type="checkbox" name="educational" value="{{ experience.uuid }}" checked
-                {% if not experience.uuid in mergeable_experiences_uuids %}
-                       disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
-                {% endif %}/>
-            </td>
-            <td>{{ experience.annees|display_academic_years_range }}</td>
-            <td>{{ experience.nom_formation|default_if_none_or_empty:'Non spécifié' }}</td>
-            <td>{{ experience.nom_institut|default_if_none_or_empty:'Non spécifié' }}</td>
-            <td>
-                {% if experience.uuid in mergeable_experiences_uuids %}
-                    <div class="badge badge-warning">Connue UCL</div>
-                {% else %}
-                    <div class="badge badge-info">Candidat</div>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<h6>{% trans 'High school graduation year' %}</h6>
-<div style="display: flex; gap: 20px;">
-    <div class="input-group">
-        <label>Fournie par le candidat</label>
-        <input class="form-control" type="number" name="high_school_graduation_year" value="{{ provided_high_school_graduation_year }}">
-    </div>
-
-    <div class="input-group">
-        <label>Connue du système</label>
-        <input class="form-control" type="number" value="{{ known_high_school_graduation_year }}" disabled>
-    </div>
-</div>
