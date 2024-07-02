@@ -45,16 +45,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.enums import (
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -72,6 +62,16 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 )
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -84,14 +84,14 @@ class PropositionIdentity(interface.EntityIdentity):
 @attr.dataclass(slots=True, hash=False, eq=False)
 class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
-    type_admission: ChoixTypeAdmission
+    type_admission: ChoixTypeAdmission # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040399/Flux+pr+admission+admission
     formation_id: 'FormationIdentity'
     matricule_candidat: str
     reference: int
-    projet: 'DetailProjet'
+    projet: 'DetailProjet' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037213/Projet+doctoral
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
-    justification: Optional[str] = ''
+    justification: Optional[str] = '' # Au niveau de la pré-admission, on demande de justifier la demande
     statut: ChoixStatutPropositionDoctorale = ChoixStatutPropositionDoctorale.EN_BROUILLON
     commission_proximite: Optional[
         Union[
@@ -99,14 +99,14 @@ class Proposition(interface.RootEntity):
             ChoixCommissionProximiteCDSS,
             ChoixSousDomaineSciences,
         ]
-    ] = None
-    financement: 'Financement' = financement_non_rempli
-    experience_precedente_recherche: 'ExperiencePrecedenteRecherche' = aucune_experience_precedente_recherche
+    ] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037213/Projet+doctoral
+    financement: 'Financement' = financement_non_rempli # https://uclouvain.atlassian.net/wiki/x/3YxmHg
+    experience_precedente_recherche: 'ExperiencePrecedenteRecherche' = aucune_experience_precedente_recherche # https://uclouvain.atlassian.net/wiki/x/3YxmHg
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
 
-    fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
+    fiche_archive_signatures_envoyees: List[str] = attr.Factory(list) # Résumé de la proposition qui est archivée au moment de l'envoie de la demande de signaure
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     curriculum: List[str] = attr.Factory(list)

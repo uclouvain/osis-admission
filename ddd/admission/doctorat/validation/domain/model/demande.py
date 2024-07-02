@@ -29,12 +29,12 @@ from typing import List, Optional
 import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.doctorat.validation.domain.validator.validator_by_business_action import (
     ApprouverDemandeCDDValidatorList,
     RefuserDemandeCDDValidatorList,
 )
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from osis_common.ddd import interface
 
 
@@ -48,10 +48,10 @@ class Demande(interface.RootEntity):
     entity_id: DemandeIdentity
     proposition_id: PropositionIdentity
     profil_soumis_candidat: ProfilCandidat
-    statut_cdd: ChoixStatutCDD = ChoixStatutCDD.TO_BE_VERIFIED
-    statut_sic: ChoixStatutSIC = ChoixStatutSIC.TO_BE_VERIFIED
+    statut_cdd: ChoixStatutCDD = ChoixStatutCDD.TO_BE_VERIFIED # https://uclouvain.atlassian.net/wiki/x/05xmHg
+    statut_sic: ChoixStatutSIC = ChoixStatutSIC.TO_BE_VERIFIED # https://uclouvain.atlassian.net/wiki/x/05xmHg
     matricule_gestionnaire: Optional[str] = ''
-    onglets_ouverts: List[str] = attr.Factory(list)
+    onglets_ouverts: List[str] = attr.Factory(list) # https://uclouvain.atlassian.net/wiki/x/05xmHg
     modifiee_le: Optional[datetime.datetime] = None
     pre_admission_confirmee_le: Optional[datetime.datetime] = None
     admission_confirmee_le: Optional[datetime.datetime] = None

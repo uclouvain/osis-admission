@@ -103,6 +103,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
 
+# Suggestion: Utiliser le numéro de référence comme identité de la proposition
 @attr.dataclass(frozen=True, slots=True)
 class PropositionIdentity(interface.EntityIdentity):
     uuid: str
@@ -111,112 +112,140 @@ class PropositionIdentity(interface.EntityIdentity):
 @attr.dataclass(slots=True, hash=False, eq=False)
 class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
-    formation_id: 'FormationIdentity'
-    matricule_candidat: str
-    reference: int
-    auteur_derniere_modification: str = ''
-    annee_calculee: Optional[int] = None
-    pot_calcule: Optional[AcademicCalendarTypes] = None
+    formation_id: 'FormationIdentity' # Bachelier, master + ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT -> general-education
+    # Suggestion: Renforcer le typing -> transverse à tout le projet
+    matricule_candidat: str # global_id
+    # Suggestion: ajouter une contrainte unique
+    reference: int # numéro qui represente le dossier -> repo recuperer_reference_suivante
+    # Suggestion: Renforcer le typing
+    auteur_derniere_modification: str = ''# global_id (matricule)
+
+    # Suggestion: créer un value object avec annee + pot_calcule
+    # Créer deux pots avec valeurs prefefinies dans les contextes doctorat et IUFC
+    annee_calculee: Optional[int] = None  # l'année du pot dans laquelle la proposition va se trouver (pot_query)
+    pot_calcule: Optional[AcademicCalendarTypes] = None # Voir admission pool
+
     statut: ChoixStatutPropositionGenerale = ChoixStatutPropositionGenerale.EN_BROUILLON
-    type_demande: 'TypeDemande' = TypeDemande.ADMISSION
+    # Calculée lors de la soumission de la proposition et compléter par le gestionnaire adans la suite du process
+    # Question: est ce que tous les champs sont pertinents dans les deux types de demandes? A voir si ce n'est pas nécessaire
+    # de créer deux aggrégats distincts -(?)
+    type_demande: 'TypeDemande' = TypeDemande.ADMISSION # voir confluence
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
     soumise_le: Optional[datetime.datetime] = None
+    # Suggestion: créer un value object pour les assimilations
+    # Question: est ce que le concept comptabilite doit être un value object?
+    # Est ce que l'assimilation doit se trouver dans le concept de comptabilite?
+    # -> Remise en question de cet objet comptabilite (?)
+    comptabilite: 'Comptabilite' = comptabilite_non_remplie # Ref donnée à remplir dans l'onglet comptabilité (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040588/Comptabilit)
 
-    comptabilite: 'Comptabilite' = comptabilite_non_remplie
 
-    bourse_double_diplome_id: Optional[BourseIdentity] = None
-    bourse_internationale_id: Optional[BourseIdentity] = None
-    bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+    bourse_double_diplome_id: Optional[BourseIdentity] = None # uuid du scholarship
+    bourse_internationale_id: Optional[BourseIdentity] = None # uuid du scholarship
+    bourse_erasmus_mundus_id: Optional[BourseIdentity] = None # uuid du scholarship
 
-    est_bachelier_belge: Optional[bool] = None
-    est_reorientation_inscription_externe: Optional[bool] = None
-    attestation_inscription_reguliere: List[str] = attr.Factory(list)
+    # Suggestion: Creuser ces 6 propriétés, à quoi sont elles liées?
+    # Est ce qu'elles déterminent le pot? -> oui
+    est_bachelier_belge: Optional[bool] = None # question spécifique
+    est_reorientation_inscription_externe: Optional[bool] = None # En fonction du CV on pose des questions sur la reorientation -> s'affiche en fonction du pot qui est calculé (2 pots hue changement filiaire) https://uclouvain.atlassian.net/wiki/x/x5xmHg
+    attestation_inscription_reguliere: List[str] = attr.Factory(list) # https://uclouvain.atlassian.net/wiki/x/x5xmHg
 
-    est_modification_inscription_externe: Optional[bool] = None
-    formulaire_modification_inscription: List[str] = attr.Factory(list)
+    est_modification_inscription_externe: Optional[bool] = None # https://uclouvain.atlassian.net/wiki/x/x5xmHg
+    # Renforcer le typage des documents dans un objet transverse au projet (ex: ReferenceDocument )
+    formulaire_modification_inscription: List[str] = attr.Factory(list) # https://uclouvain.atlassian.net/wiki/x/x5xmHg
 
-    est_non_resident_au_sens_decret: Optional[bool] = None
+    est_non_resident_au_sens_decret: Optional[bool] = None # https://uclouvain.atlassian.net/wiki/x/x5xmHg + https://uclouvain.atlassian.net/wiki/x/cJxmHg
+    # Suggestion: Créer un objet QuestionSpecifique et un objet ReponseQuestionSpecifique avec l'id de la réponse (Creuser la structure de donnée à utiliser)
+    reponses_questions_specifiques: Dict = attr.Factory(dict) # lié au formulaire dynamique
+    # Suggestion: changer le typing (ajout de l'id du document)
+    curriculum: List[str] = attr.Factory(list) # curriculum à fournir pour certaines formations (pièce jointe)
+    equivalence_diplome: List[str] = attr.Factory(list) # Pièce jointe fournie par le candidat
+    # Suggestion: Créer un value object par type de case à cocher
+    elements_confirmation: Dict[str, str] = attr.Factory(dict) # Case à cocher à la fin du processus d'admission
 
-    reponses_questions_specifiques: Dict = attr.Factory(dict)
-
-    curriculum: List[str] = attr.Factory(list)
-    equivalence_diplome: List[str] = attr.Factory(list)
-    elements_confirmation: Dict[str, str] = attr.Factory(dict)
-
-    est_inscription_tardive: bool = False
+    est_inscription_tardive: bool = False # Demande en dehors des périodes voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510041200/Calendrier+d+inscription
+    # Remarque: les checklist n'existent que pendant un partie du cycle de vie de la proposition, à partir de la soumission
+    # Question: est ce qu'il faudrait créer un agrégat pour les checklist? avec une gestion d'évenement sur la proposition
+    # ou alors mettre en place le concept de Demande (cad proposition qui a été soumise)
     checklist_initiale: Optional[StatutsChecklistGenerale] = None
     checklist_actuelle: Optional[StatutsChecklistGenerale] = None
+    # Question: est ce qu'il ne faudrait pas migrer le profil soumis candidat propriété dans une Demande?
+    profil_soumis_candidat: ProfilCandidat = None # Donnée du candidat au moment ou il soumet (on garder les informations au moment de la soumission au cas ou le candidat change des info par la suite)
 
-    profil_soumis_candidat: ProfilCandidat = None
+    # Suggestion -> creer un value object qui regroupe ces concepts
+    financabilite_regle_calcule: RegleCalculeResultatAvecFinancable = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
+    financabilite_regle_calcule_le: Optional[datetime.datetime] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
 
-    financabilite_regle_calcule: RegleCalculeResultatAvecFinancable = ''
-    financabilite_regle_calcule_le: Optional[datetime.datetime] = None
-    financabilite_regle: RegleDeFinancement = ''
-    financabilite_regle_etabli_par: str = ''
+    # Suggestion -> creer un value object qui regroupe ces concepts
+    financabilite_regle: RegleDeFinancement = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
+    financabilite_regle_etabli_par: str = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
 
-    financabilite_derogation_statut: DerogationFinancement = ''
-    financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
-    financabilite_derogation_premiere_notification_par: str = ''
-    financabilite_derogation_derniere_notification_le: Optional[datetime.datetime] = None
-    financabilite_derogation_derniere_notification_par: str = ''
-
-    documents_additionnels: List[str] = attr.Factory(list)
-
-    documents_demandes: Dict = attr.Factory(dict)
-
+    # Suggestion -> creer un value object qui regroupe ces concepts
+    financabilite_derogation_statut: DerogationFinancement = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
+    financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
+    financabilite_derogation_premiere_notification_par: str = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
+    financabilite_derogation_derniere_notification_le: Optional[datetime.datetime] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
+    financabilite_derogation_derniere_notification_par: str = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040570/Finan+abilit+checklist
+    # Suggestion: changer le typing (ajout de l'id du document)
+    documents_additionnels: List[str] = attr.Factory(list) # Le candidat peut donner des doc complémentaires (jusqu'à 10)
+    # Suggestion: créer un value object
+    # Question: Creuser pour déterminer si ce champ est encore pertinent?
+    documents_demandes: Dict = attr.Factory(dict) # Documents voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040115/Gestion+des+documents+OSIS-admission
+    # Suggestion: ajouter valeur non concernee dans poursuite de cycle et supprimer le champ qui n'est plus nécessaire
     poursuite_de_cycle_a_specifier: bool = False
-    poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
+    poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED # Pour déterminer si candidat est en premiere annee (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038031/Conditions+d+acc+s) // est_premiere_annee côté osis
 
-    poste_diplomatique: Optional[PosteDiplomatiqueIdentity] = None
+    poste_diplomatique: Optional[PosteDiplomatiqueIdentity] = None # Demande de visa voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510034751/Sp+cificit+s
 
     # Décision facultaire & sic
-    certificat_approbation_fac: List[str] = attr.Factory(list)
-    certificat_refus_fac: List[str] = attr.Factory(list)
-    certificat_approbation_sic: List[str] = attr.Factory(list)
-    certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
-    certificat_refus_sic: List[str] = attr.Factory(list)
+    # Est ce qu'on pourrait sortir ces documents de l'agrégat?
+    certificat_approbation_fac: List[str] = attr.Factory(list) # Document généré
+    certificat_refus_fac: List[str] = attr.Factory(list) # Document généré
+    certificat_approbation_sic: List[str] = attr.Factory(list) # Document généré
+    certificat_approbation_sic_annexe: List[str] = attr.Factory(list) # Document généré
+    certificat_refus_sic: List[str] = attr.Factory(list) # Document généré (subtilité on peut avoir maximum 2 doc généré 1 approbation et 1 refus, on peut faire plusieurs refus/approbation mais on viendra écraser l'existant
 
+    # Suggestion -> créer un value object Decision et à l'interieur on aurait Fac et Sic
     type_de_refus: Optional['TypeDeRefus'] = ''
-    motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
+    motifs_refus: List[MotifRefusIdentity] = attr.Factory(list) # Motif de refus prédéfini, sic/fac peuvent rajouter d'autre motif voir champ autres_motifs_refus ou en base
     autres_motifs_refus: List[str] = attr.Factory(list)
 
-    autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None
-    avec_conditions_complementaires: Optional[bool] = None
-    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity] = attr.Factory(list)
-    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation] = attr.Factory(list)
-    complements_formation: Optional[List[ComplementFormationIdentity]] = attr.Factory(list)
-    avec_complements_formation: Optional[bool] = None
-    commentaire_complements_formation: str = ''
-    nombre_annees_prevoir_programme: Optional[int] = None
-    nom_personne_contact_programme_annuel_annuel: str = ''
-    email_personne_contact_programme_annuel_annuel: str = ''
-    commentaire_programme_conjoint: str = ''
+    autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    avec_conditions_complementaires: Optional[bool] = None # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity] = attr.Factory(list) # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation] = attr.Factory(list) # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    complements_formation: Optional[List[ComplementFormationIdentity]] = attr.Factory(list) # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    avec_complements_formation: Optional[bool] = None # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    commentaire_complements_formation: str = '' # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    nombre_annees_prevoir_programme: Optional[int] = None # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    nom_personne_contact_programme_annuel_annuel: str = '' # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    email_personne_contact_programme_annuel_annuel: str = '' # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
+    commentaire_programme_conjoint: str = '' # Champ utilisé pour l'approbation (voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510038106/D+cision+facultaire+checklist + https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510040885/D+cision+en+SIC+checklist)
     besoin_de_derogation: Optional['BesoinDeDerogation'] = ''
 
-    droits_inscription_montant: Optional['DroitsInscriptionMontant'] = ''
-    droits_inscription_montant_autre: Optional[Decimal] = None
+    droits_inscription_montant: Optional['DroitsInscriptionMontant'] = '' # Champ utilisé pour l'approbation
+    droits_inscription_montant_autre: Optional[Decimal] = None # Champ utilisé pour l'approbation
     dispense_ou_droits_majores: Optional['DispenseOuDroitsMajores'] = ''
-    tarif_particulier: str = ''
-    refacturation_ou_tiers_payant: str = ''
-    annee_de_premiere_inscription_et_statut: str = ''
-    est_mobilite: Optional[bool] = None
-    nombre_de_mois_de_mobilite: Optional['MobiliteNombreDeMois'] = ''
-    doit_se_presenter_en_sic: Optional[bool] = None
-    communication_au_candidat: str = ''
-    doit_fournir_visa_etudes: Optional[bool] = None
-    visa_etudes_d: List[str] = attr.Factory(list)
-    certificat_autorisation_signe: List[str] = attr.Factory(list)
+    tarif_particulier: str = '' # Champ utilisé pour l'approbation
+    refacturation_ou_tiers_payant: str = '' # Champ utilisé pour l'approbation
+    annee_de_premiere_inscription_et_statut: str = '' # Champ utilisé pour l'approbation
+    est_mobilite: Optional[bool] = None # Champ utilisé pour l'approbation
+    nombre_de_mois_de_mobilite: Optional['MobiliteNombreDeMois'] = '' # Champ utilisé pour l'approbation
+    doit_se_presenter_en_sic: Optional[bool] = None # Champ utilisé pour l'approbation
+    communication_au_candidat: str = '' # Champ utilisé pour l'approbation
+    doit_fournir_visa_etudes: Optional[bool] = None # Champ utilisé pour l'approbation https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037063/D+cision+en+SIC+-+mail+et+ses+pi+ces+jointes
+    visa_etudes_d: List[str] = attr.Factory(list) # Champ utilisé pour l'approbation voir https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037063/D+cision+en+SIC+-+mail+et+ses+pi+ces+jointes
+    certificat_autorisation_signe: List[str] = attr.Factory(list) # Champ utilisé pour l'approbation
 
-    condition_acces: Optional[ConditionAcces] = None
-    millesime_condition_acces: Optional[int] = None
+    condition_acces: Optional[ConditionAcces] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037444/Parcours+ant+rieur+checklist
+    millesime_condition_acces: Optional[int] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037444/Parcours+ant+rieur+checklist
 
-    type_equivalence_titre_acces: Optional[TypeEquivalenceTitreAcces] = None
-    statut_equivalence_titre_acces: Optional[StatutEquivalenceTitreAcces] = None
-    information_a_propos_de_la_restriction: str = ''
-    etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
-    date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
+    type_equivalence_titre_acces: Optional[TypeEquivalenceTitreAcces] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037444/Parcours+ant+rieur+checklist
+    statut_equivalence_titre_acces: Optional[StatutEquivalenceTitreAcces] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037444/Parcours+ant+rieur+checklist
+    information_a_propos_de_la_restriction: str = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037444/Parcours+ant+rieur+checklist
+    etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037444/Parcours+ant+rieur+checklist
+    date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037444/Parcours+ant+rieur+checklist
 
     @property
     def premiere_annee_de_bachelier(self) -> bool:

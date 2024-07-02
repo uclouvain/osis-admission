@@ -30,4 +30,4 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class PosteDiplomatiqueIdentity(interface.EntityIdentity):
-    code: int
+    code: int # Table pays -> poste diplomatique

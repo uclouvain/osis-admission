@@ -103,7 +103,7 @@ class Proposition(interface.RootEntity):
     documents_demandes: Dict = attr.Factory(dict)
     documents_additionnels: List[str] = attr.Factory(list)
 
-    motivations: Optional[str] = ''
+    motivations: Optional[str] = '' # Motivation du candidat pour participer à la formation continue
     moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation] = attr.Factory(list)
     autre_moyen_decouverte_formation: Optional[str] = ''
 
@@ -113,11 +113,11 @@ class Proposition(interface.RootEntity):
     profil_soumis_candidat: Optional[ProfilCandidat] = None
 
     marque_d_interet: Optional[bool] = None
-    edition: Optional[ChoixEdition] = None
-    en_ordre_de_paiement: Optional[bool] = None
+    edition: Optional[ChoixEdition] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    en_ordre_de_paiement: Optional[bool] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
     droits_reduits: Optional[bool] = None
     paye_par_cheque_formation: Optional[bool] = None
-    cep: Optional[bool] = None
+    cep: Optional[bool] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510036062/Back+office+IUFC#3.19.-----En-tant-que-gest.-admission-ou-gest.-IUFC,-je-voudrais-avoir-une-entr%C3%A9e-de-checklist-%22Fiche-de-l'%C3%A9tudiant%22-pour-g%C3%A9rer-certaines-informations-du-parcours-de-chaque-%C3%A9tudiant
     etalement_des_paiments: Optional[bool] = None
     etalement_de_la_formation: Optional[bool] = None
     valorisation_des_acquis_d_experience: Optional[bool] = None
@@ -127,14 +127,14 @@ class Proposition(interface.RootEntity):
     intitule_du_tff: Optional[str] = ''
 
     # Decision
-    decision_dernier_mail_envoye_le: Optional[datetime.datetime] = None
-    decision_dernier_mail_envoye_par: Optional[str] = ''
-    motif_de_mise_en_attente: Optional[ChoixMotifAttente] = None
-    motif_de_mise_en_attente_autre: Optional[str] = ''
-    condition_d_approbation_par_la_faculte: Optional[str] = ''
-    motif_de_refus: Optional[ChoixMotifRefus] = None
-    motif_de_refus_autre: Optional[str] = ''
-    motif_d_annulation: Optional[str] = ''
+    decision_dernier_mail_envoye_le: Optional[datetime.datetime] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    decision_dernier_mail_envoye_par: Optional[str] = ''  # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    motif_de_mise_en_attente: Optional[ChoixMotifAttente] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    motif_de_mise_en_attente_autre: Optional[str] = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    condition_d_approbation_par_la_faculte: Optional[str] = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    motif_de_refus: Optional[ChoixMotifRefus] = None # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    motif_de_refus_autre: Optional[str] = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
+    motif_d_annulation: Optional[str] = '' # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510088268/Gestion+IUFC
 
     def _modifier_choix_formation(
         self,

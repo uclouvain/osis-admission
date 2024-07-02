@@ -43,7 +43,7 @@ from osis_common.ddd import interface
 @attr.dataclass
 class StatutChecklist(interface.ValueObject):
     libelle: str
-    enfants: List['StatutChecklist'] = attr.Factory(list)
+    enfants: List['StatutChecklist'] = attr.Factory(list) # sous-onglet de la checklist (parcours antérieur)
     statut: Optional[ChoixStatutChecklist] = None
     extra: Dict[str, any] = attr.Factory(dict)
 

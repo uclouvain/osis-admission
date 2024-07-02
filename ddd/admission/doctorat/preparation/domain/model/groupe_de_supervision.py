@@ -72,10 +72,10 @@ class GroupeDeSupervisionIdentity(interface.EntityIdentity):
 class GroupeDeSupervision(interface.RootEntity):
     entity_id: 'GroupeDeSupervisionIdentity'
     proposition_id: 'PropositionIdentity'
-    signatures_promoteurs: List['SignaturePromoteur'] = attr.Factory(list)
-    signatures_membres_CA: List['SignatureMembreCA'] = attr.Factory(list)
-    cotutelle: Optional['Cotutelle'] = None
-    statut_signature: ChoixStatutSignatureGroupeDeSupervision = ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS
+    signatures_promoteurs: List['SignaturePromoteur'] = attr.Factory(list) # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037213/Projet+doctoral
+    signatures_membres_CA: List['SignatureMembreCA'] = attr.Factory(list) # https://uclouvain.atlassian.net/wiki/spaces/OSIS/pages/510037213/Projet+doctoral
+    cotutelle: Optional['Cotutelle'] = None # https://uclouvain.atlassian.net/wiki/x/3YxmHg
+    statut_signature: ChoixStatutSignatureGroupeDeSupervision = ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS # https://uclouvain.atlassian.net/wiki/x/3YxmHg
     promoteur_reference_id: Optional['PromoteurIdentity'] = None
 
     def designer_promoteur_reference(self, promoteur_id: 'PromoteurIdentity') -> None:

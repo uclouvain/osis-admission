@@ -26,6 +26,7 @@
 from typing import List, Optional
 
 import attr
+
 from admission.ddd.admission.enums.comptabilite import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -37,14 +38,13 @@ from admission.ddd.admission.enums.comptabilite import (
     LienParente,
     TypeSituationAssimilation,
 )
-
 from osis_common.ddd import interface
 
 
 @attr.dataclass(slots=True)
 class Comptabilite(interface.ValueObject):
     # Absence de dettes
-    attestation_absence_dette_etablissement: List[str] = attr.Factory(list)
+    attestation_absence_dette_etablissement: List[str] = attr.Factory(list) # Règle métier absnce de dette envers dernier etab CF (hors uclouvain) + verifier scope année
 
     # Réduction des droits d'inscription
     demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool] = None
@@ -52,6 +52,7 @@ class Comptabilite(interface.ValueObject):
     attestation_enfant_personnel: List[str] = attr.Factory(list)
 
     # Assimilation
+    # -> (Voir confluence les différents cas d'assimilation
     type_situation_assimilation: Optional[TypeSituationAssimilation] = None
 
     # Assimilation 1
@@ -110,6 +111,7 @@ class Comptabilite(interface.ValueObject):
     etudiant_solidaire: Optional[bool] = None
 
     # Compte bancaire
+    # Suggestion: pour chaque type de numero de compte (ex IBAN) on peut avoir un value object avec ses propres règles de validation
     type_numero_compte: Optional[ChoixTypeCompteBancaire] = None
     numero_compte_iban: Optional[str] = ''
     iban_valide: Optional[bool] = None
