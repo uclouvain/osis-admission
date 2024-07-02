@@ -41,7 +41,7 @@ from django.utils.translation import gettext_lazy as _
 from admission.ddd.admission.commands import (
     ValiderTicketPersonneCommand,
     RechercherCompteExistantQuery,
-    GetPropositionFusionQuery,
+    GetPropositionFusionQuery, SoumettreTicketPersonneCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -81,22 +81,31 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     # use an intermediary status for DIGIT VALIDATION
     from infrastructure.messages_bus import message_bus_instance
 
-    validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
-    proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
+    if admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
+        validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
+        proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
 
-    if proposition_fusion:
-        if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
-            raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
-        if proposition_fusion.status == PersonMergeStatus.ERROR.name:
-            raise Exception(
-                _(
-                    "Unable to validate the admission because an error occured while searching for existing "
-                    "person in DIGIT"
+        if proposition_fusion:
+            if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
+                raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
+            if proposition_fusion.status == PersonMergeStatus.ERROR.name:
+                raise Exception(
+                    _(
+                        "Unable to validate the admission because an error occured while searching for existing "
+                        "person in DIGIT"
+                    )
+                )
+
+        if validation.valid is False:
+            raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))
+        else:
+            message_bus_instance.invoke(
+                SoumettreTicketPersonneCommand(
+                    global_id=admission.candidate.global_id,
+                    annee=admission.determined_academic_year,
+                    noma=proposition_fusion.registration_id_sent_to_digit,
                 )
             )
-
-    if validation.valid is False:
-        raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))
 
     admission.last_update_author = author
     admission.modified_at = datetime.datetime.today()
