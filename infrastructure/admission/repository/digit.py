@@ -378,8 +378,6 @@ def _get_status_and_type_demande(candidate):
             status = admission.doctorateadmission.status
         elif hasattr(admission, 'continuingeducationadmission'):
             status = admission.continuingeducationadmission.status
-        else:
-            status = None
         if admission.type_demande == TypeDemande.INSCRIPTION.name:
             return status, TypeDemande.INSCRIPTION.name
     return status, TypeDemande.ADMISSION.name
