@@ -59,7 +59,7 @@
                    checked
                 {% endif %}
                 {% if not experience.uuid in mergeable_experiences_uuids %}
-                       disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
+                   checked disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
                 {% endif %}/>
             </td>
             <td>{{ experience.annees|display_academic_years_range }}</td>
@@ -103,7 +103,7 @@
                    checked
                 {% endif %}
                 {% if not experience.uuid in mergeable_experiences_uuids %}
-                   disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
+                   checked disabled title="{% trans 'Will be automatically retrieved from candidate' %}"
                 {% endif %}/>
             </td>
             <td>{{ experience.date_debut|date:"Y" }} - {{ experience.date_fin|date:"Y" }}</td>
