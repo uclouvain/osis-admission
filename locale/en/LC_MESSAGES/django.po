@@ -475,6 +475,7 @@ msgstr ""
 msgid "Add a new member"
 msgstr ""
 
+msgctxt "admission"
 msgid "Add a non-academic activity"
 msgstr ""
 
@@ -508,6 +509,7 @@ msgstr ""
 msgid "Add a service"
 msgstr ""
 
+msgctxt "admission"
 msgid "Add an academic course"
 msgstr ""
 
