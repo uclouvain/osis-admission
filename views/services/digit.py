@@ -69,8 +69,8 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
         except PersonMergeProposal.DoesNotExist:
             merge_proposal = None
 
-        if merge_proposal.proposal_merge_person and merge_proposal.proposal_merge_person.last_registration_id:
-            noma = merge_proposal.proposal_merge_person.last_registration_id
+        if merge_proposal and merge_proposal.registration_id_sent_to_digit:
+            noma = merge_proposal.registration_id_sent_to_digit
         elif candidate.last_registration_id:
             noma = candidate.last_registration_id
         else:
