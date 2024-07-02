@@ -94,13 +94,13 @@ def approuver_inscription_par_sic(
 
     noma = NomaGenerateurService.generer_noma(
         compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-        annee=proposition.formation_id.annee
+        annee=proposition.formation_id.annee,
     )
 
     # use event publication to trigger submit ticket in digit
     digit.submit_person_ticket(
         global_id=proposition.matricule_candidat,
-        noma=noma
+        noma=noma,
     )
 
     message = notification.accepter_proposition_par_sic(

@@ -256,6 +256,7 @@ class PropositionInMemoryRepository(
             documents_additionnels=proposition.documents_additionnels,
             motivations=proposition.motivations,
             moyens_decouverte_formation=[way.name for way in proposition.moyens_decouverte_formation],
+            autre_moyen_decouverte_formation=proposition.autre_moyen_decouverte_formation,
             aide_a_la_formation=infos_specifiques_iufc.aide_a_la_formation if infos_specifiques_iufc else None,
             inscription_au_role_obligatoire=infos_specifiques_iufc.inscription_au_role_obligatoire
             if infos_specifiques_iufc
@@ -288,4 +289,5 @@ class PropositionInMemoryRepository(
             motif_de_refus_autre=proposition.motif_de_refus_autre,
             motif_d_annulation=proposition.motif_d_annulation,
             profil_soumis_candidat=proposition.profil_soumis_candidat,
+            adresses_emails_gestionnaires_formation=[],
         )

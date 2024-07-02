@@ -62,7 +62,7 @@
   {% field_data _('Motivations') proposition.motivations %}
 
   {% if proposition.inscription_au_role_obligatoire == True %}
-    {% field_data _('How did you hear about this course?') proposition.moyens_decouverte_formation|multiple_enum_display:'ChoixMoyensDecouverteFormation' %}
+    {% field_data _('How did you hear about this course?') proposition|format_ways_to_find_out_about_the_course html_tag='ul' %}
   {% endif %}
 
 {% endif %}

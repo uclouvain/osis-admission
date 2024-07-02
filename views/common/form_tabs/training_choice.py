@@ -84,6 +84,7 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
                     reponses_questions_specifiques=form.cleaned_data['specific_question_answers'],
                     motivations=form.cleaned_data['motivations'],
                     moyens_decouverte_formation=form.cleaned_data['ways_to_find_out_about_the_course'],
+                    autre_moyen_decouverte_formation=form.cleaned_data['other_way_to_find_out_about_the_course'],
                     marque_d_interet=form.cleaned_data['interested_mark'],
                 )
             )

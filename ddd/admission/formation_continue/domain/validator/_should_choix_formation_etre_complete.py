@@ -41,13 +41,18 @@ from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiq
 class ShouldRenseignerChoixDeFormation(BusinessValidator):
     motivations: str
     moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation]
+    autre_moyen_decouverte_formation: Optional[str]
     informations_specifiques_formation: Optional[InformationsSpecifiquesDTO]
 
     def validate(self, *args, **kwargs):
         if not self.motivations or (
             self.informations_specifiques_formation
             and self.informations_specifiques_formation.inscription_au_role_obligatoire is True
-            and not self.moyens_decouverte_formation
+            and (
+                not self.moyens_decouverte_formation
+                or ChoixMoyensDecouverteFormation.AUTRE in self.moyens_decouverte_formation
+                and not self.autre_moyen_decouverte_formation
+            )
         ):
             raise ChoixDeFormationNonRenseigneException
 

@@ -29,7 +29,6 @@ from rest_framework.generics import RetrieveAPIView
 
 from admission.api import serializers
 from admission.api.schema import BetterChoicesSchema
-from admission.auth.roles.program_manager import ProgramManager
 from ddd.logic.formation_catalogue.formation_continue.commands import RecupererInformationsSpecifiquesQuery
 from ddd.logic.formation_catalogue.formation_continue.domain.validator.exceptions import (
     InformationsSpecifiquesNonTrouveesException,
@@ -46,14 +45,8 @@ class RetrieveContinuingEducationSpecificInformationView(RetrieveAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
 
-        context['manager_emails'] = (
-            ProgramManager.objects.filter(
-                education_group__educationgroupyear__acronym=self.kwargs['sigle'],
-                education_group__educationgroupyear__academic_year__year=self.kwargs['annee'],
-            ).values_list('person__email', flat=True)
-            if self.kwargs.get('sigle') and self.kwargs.get('annee')
-            else []
-        )
+        context['acronym'] = self.kwargs.get('sigle')
+        context['academic_year'] = self.kwargs.get('annee')
 
         return context
 

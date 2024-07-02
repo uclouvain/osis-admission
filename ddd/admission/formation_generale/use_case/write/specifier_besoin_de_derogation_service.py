@@ -43,7 +43,10 @@ def specifier_besoin_de_derogation(
     # WHEN
 
     # THEN
-    proposition.specifier_besoin_de_derogation(BesoinDeDerogation[cmd.besoin_de_derogation], auteur_modification=cmd.gestionnaire)
+    proposition.specifier_besoin_de_derogation(
+        BesoinDeDerogation[cmd.besoin_de_derogation],
+        auteur_modification=cmd.gestionnaire,
+    )
     proposition_repository.save(proposition)
 
     return proposition_id

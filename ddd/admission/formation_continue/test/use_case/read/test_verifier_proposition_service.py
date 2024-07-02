@@ -37,7 +37,10 @@ from admission.ddd.admission.domain.validator.exceptions import (
 )
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixMoyensDecouverteFormation,
+)
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ExperiencesCurriculumNonRenseigneesException,
@@ -256,6 +259,22 @@ class TestVerifierPropositionService(TestCase):
         with mock.patch.multiple(
             proposition_formation_longue,
             moyens_decouverte_formation=[],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC4'))
+
+            self.assertHasInstance(
+                context.exception.exceptions,
+                ChoixDeFormationNonRenseigneException,
+            )
+
+    def test_should_retourner_erreur_si_autre_moyen_decouverte_formation_non_renseigne_formation_longue(self):
+        proposition_formation_longue = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-USCC4'))
+
+        with mock.patch.multiple(
+            proposition_formation_longue,
+            moyens_decouverte_formation=[ChoixMoyensDecouverteFormation.AUTRE],
+            autre_moyen_decouverte_formation='',
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC4'))
