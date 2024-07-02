@@ -85,6 +85,9 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
         validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
         proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
 
+        if validation.valid is False:
+            raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))
+
         if proposition_fusion:
             if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
                 raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
@@ -96,9 +99,6 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
                     )
                 )
 
-        if validation.valid is False:
-            raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))
-        else:
             message_bus_instance.invoke(
                 SoumettreTicketPersonneCommand(
                     global_id=admission.candidate.global_id,
