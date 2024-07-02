@@ -372,7 +372,12 @@ def _get_status_and_type_demande(candidate):
     # get all admissions listed for the candidate to check admission/registration condition (it sucks)
     status = None
     for admission in candidate.baseadmission_set.all():
-        status = admission.general_education_admission.status or admission.doctorate_admission.status or admission.continuing_education_admission
+        if hasattr(admission, 'generaleducationadmission'):
+            status = admission.generaleducationadmission.status
+        elif hasattr(admission, 'doctorateadmission'):
+            status = admission.doctorateadmission.status
+        elif hasattr(admission, 'continuingeducationadmission'):
+            status = admission.continuingeducationadmission.status
         if admission.type_demande == TypeDemande.INSCRIPTION.name:
             return status, TypeDemande.INSCRIPTION.name
     return status, TypeDemande.ADMISSION.name
