@@ -550,6 +550,7 @@ msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
 msgid "Add a new member"
 msgstr "Ajouter un nouveau membre."
 
+msgctxt "admission"
 msgid "Add a non-academic activity"
 msgstr "Ajouter une activité non-académique"
 
@@ -583,6 +584,7 @@ msgstr "Ajouter un séminaire"
 msgid "Add a service"
 msgstr "Ajouter un service"
 
+msgctxt "admission"
 msgid "Add an academic course"
 msgstr "Ajouter une formation académique"
 
@@ -5896,7 +5898,7 @@ msgid "Private"
 msgstr "Privé"
 
 msgid "Private email"
-msgstr "Email privée"
+msgstr "Email privé"
 
 msgid "Processing by Fac"
 msgstr "Traitement en Fac"
