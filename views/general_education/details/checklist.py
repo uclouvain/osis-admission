@@ -41,7 +41,8 @@ from django.utils.formats import date_format
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override
 from django.views.generic import TemplateView, FormView
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, View
+from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -152,6 +153,7 @@ from admission.forms.admission.checklist import (
     FinancabiliteDispensationForm,
     FinancabilityDispensationRefusalForm,
     FinancabiliteNotificationForm,
+    FinancabiliteNotFinanceableForm,
 )
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -235,14 +237,17 @@ __all__ = [
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
     'PastExperiencesAccessTitleView',
+    'FinancabiliteComputeRuleView',
     'FinancabiliteChangeStatusView',
     'FinancabiliteApprovalView',
-    'FinancabiliteComputeRuleView',
     'FinancabiliteDerogationNonConcerneView',
     'FinancabiliteDerogationNotificationView',
     'FinancabiliteDerogationAbandonCandidatView',
     'FinancabiliteDerogationRefusView',
     'FinancabiliteDerogationAccordView',
+    'FinancabiliteApprovalSetRuleView',
+    'FinancabiliteNotFinanceableSetRuleView',
+    'FinancabiliteNotFinanceableView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
     'SicApprovalDecisionView',
@@ -2110,9 +2115,37 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        admission = self.get_permission_object()
+
+        context['financabilite_compute_rule_needed'] = (
+            admission.checklist['current']['financabilite']['statut'] not in {
+                ChoixStatutChecklist.GEST_REUSSITE.name,
+            } and not (
+                admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+                and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
+            )
+        )
+        context['financabilite_show_verdict_different_alert'] = (
+            (
+                admission.checklist['current']['financabilite']['statut'] in {
+                    ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
+                    ChoixStatutChecklist.GEST_REUSSITE.name,
+                } or (
+                    admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+                    and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
+                )
+            )
+            and admission.financability_rule
+            and admission.financability_computed_rule_situation != admission.financability_rule
+        )
+
         context['financabilite_approval_form'] = FinancabiliteApprovalForm(
             instance=self.admission,
-            prefix='financabilite',
+            prefix='financabilite-approval',
+        )
+        context['financabilite_not_financeable_form'] = FinancabiliteNotFinanceableForm(
+            instance=self.admission,
+            prefix='financabilite-not-financeable',
         )
 
         context['financability_dispensation_form'] = FinancabiliteDispensationForm(
@@ -2174,6 +2207,24 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
         return context
 
 
+class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-compute-rule': 'financability-compute-rule'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+        if admission.checklist['current']['financabilite']['statut'] not in {
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        } and not (
+            admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+            and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
+        ):
+            admission.update_financability_computed_rule(author=self.request.user.person)
+        return self.render_to_response(self.get_context_data())
+
+
 class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
     urlpatterns = {'financability-change-status': 'financability-change-checklist-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/financabilite.html'
@@ -2208,13 +2259,11 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
             admission.financability_rule_established_by = request.user.person
             admission.save(update_fields=['financability_rule_established_by'])
 
-        response = self.render_to_response(self.get_context_data())
-        response.headers['HX-Refresh'] = 'true'
-        return response
+        return HttpResponseClientRefresh()
 
 
-class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
-    urlpatterns = {'financability-approval': 'financability-checklist-approval'}
+class FinancabiliteApprovalSetRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
+    urlpatterns = {'financability-approval-set-rule': 'financability-checklist-approval-set-rule'}
     template_name = 'admission/general_education/includes/checklist/financabilite_approval_form.html'
     permission_required = 'admission.change_checklist'
     http_method_names = ['post']
@@ -2223,7 +2272,7 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
         return FinancabiliteApprovalForm(
             instance=self.admission if self.request.method != 'POST' else None,
             data=self.request.POST if self.request.method == 'POST' else None,
-            prefix='financabilite',
+            prefix='financabilite-approval',
         )
 
     def form_valid(self, form):
@@ -2236,25 +2285,69 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
             )
         )
 
-        response = render(
-            self.request,
-            'admission/general_education/includes/checklist/financabilite.html',
-            context=self.get_context_data(),
-        )
-        response.headers['HX-Refresh'] = 'true'
-        return response
+        return HttpResponseClientRefresh()
 
 
-class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
-    urlpatterns = {'financability-compute-rule': 'financability-compute-rule'}
-    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, View):
+    urlpatterns = {'financability-approval': 'financability-approval'}
     permission_required = 'admission.change_checklist'
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        admission = self.get_permission_object()
-        admission.update_financability_computed_rule(author=self.request.user.person)
-        return self.render_to_response(self.get_context_data())
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteRegleCommand(
+                uuid_proposition=self.admission_uuid,
+                financabilite_regle=self.admission.financability_computed_rule_situation,
+                etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        return HttpResponseClientRefresh()
+
+
+class FinancabiliteNotFinanceableSetRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
+    urlpatterns = {'financability-not-financeable-set-rule': 'financability-checklist-not-financeable-set-rule'}
+    template_name = 'admission/general_education/includes/checklist/financabilite_non_financable_form.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def get_form(self, form_class=None):
+        return FinancabiliteNotFinanceableForm(
+            instance=self.admission if self.request.method != 'POST' else None,
+            data=self.request.POST if self.request.method == 'POST' else None,
+            prefix='financabilite-not-financeable',
+        )
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteRegleCommand(
+                uuid_proposition=self.admission_uuid,
+                financabilite_regle=form.cleaned_data['financability_rule'],
+                etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        return HttpResponseClientRefresh()
+
+
+class FinancabiliteNotFinanceableView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, View):
+    urlpatterns = {'financability-not-financeable': 'financability-not-financeable'}
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteRegleCommand(
+                uuid_proposition=self.admission_uuid,
+                financabilite_regle=self.admission.financability_computed_rule_situation,
+                etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+        return HttpResponseClientRefresh()
 
 
 class FinancabiliteDerogationNonConcerneView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):

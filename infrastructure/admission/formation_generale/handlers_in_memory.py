@@ -140,6 +140,7 @@ from admission.infrastructure.admission.repository.in_memory.titre_acces_selecti
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import (
     EmailDestinataireInMemoryRepository,
 )
+from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
@@ -181,6 +182,7 @@ _taches_techniques = TachesTechniquesInMemory()
 _digit_repository = DigitInMemoryRepository()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
+_financabilite_fetcher = FinancabiliteInMemoryFetcher()
 
 
 COMMAND_HANDLERS = {
@@ -247,6 +249,7 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardiveInMemory(),
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_global,
+        financabilite_fetcher=_financabilite_fetcher,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

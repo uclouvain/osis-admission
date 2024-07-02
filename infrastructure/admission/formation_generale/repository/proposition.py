@@ -69,7 +69,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
     BesoinDeDerogation,
-    RegleDeFinancement,
     DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
@@ -95,6 +94,8 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.models.student import Student
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
 from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from epc.models.enums.condition_acces import ConditionAcces
@@ -258,7 +259,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     or {},
                 },
                 'cycle_pursuit': entity.poursuite_de_cycle.name,
-                'financability_computed_rule': entity.financabilite_regle_calcule,
+                'financability_computed_rule': entity.financabilite_regle_calcule.name
+                if entity.financabilite_regle_calcule
+                else '',
+                'financability_computed_rule_situation': entity.financabilite_regle_calcule_situation.name
+                if entity.financabilite_regle_calcule_situation
+                else '',
                 'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
                 'financability_rule': entity.financabilite_regle.name if entity.financabilite_regle else '',
                 'financability_rule_established_by': financabilite_regle_etabli_par_person,
@@ -483,9 +489,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             type_de_refus=admission.refusal_type,
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
-            financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule=EtatFinancabilite[admission.financability_computed_rule]
+            if admission.financability_computed_rule
+            else '',
+            financabilite_regle_calcule_situation=SituationFinancabilite[
+                admission.financability_computed_rule_situation
+            ]
+            if admission.financability_computed_rule_situation
+            else '',
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
-            financabilite_regle=RegleDeFinancement[admission.financability_rule]
+            financabilite_regle=SituationFinancabilite[admission.financability_rule]
             if admission.financability_rule
             else '',
             financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
@@ -689,6 +702,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
             financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule_situation=admission.financability_computed_rule_situation,
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
             financabilite_regle=admission.financability_rule,
             financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid

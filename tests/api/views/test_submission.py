@@ -63,7 +63,8 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.faculty_decision import (
     FreeAdditionalApprovalConditionFactory,
 )
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory, \
+    AdmissionFormItemFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -82,6 +83,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from reference.tests.factories.country import CountryFactory
@@ -93,6 +95,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
+        AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL)
 
         # Validation errors
         cls.candidate_errors = IncompletePersonForBachelorFactory(

@@ -510,9 +510,9 @@ class RecupererTitresAccesSelectionnablesPropositionQuery(interface.QueryRequest
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
     uuid_proposition: str
-    gestionnaire: str
     financabilite_regle_calcule: str
-    financabilite_regle_calcule_le: datetime.datetime
+    financabilite_regle_calcule_situation: str
+    gestionnaire: Optional[str] = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

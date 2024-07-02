@@ -32,7 +32,7 @@
     <br>
   {% elif current.statut == 'GEST_REUSSITE' and current.extra.reussite == 'financable' %}
     {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_rule_established_by %}
-      {{ rule }} (Established by {{ established_by }})
+      Financable - {{ rule }} (Established by {{ established_by }})
     {% endblocktrans %}
     <br>
   {% endif %}
@@ -43,6 +43,7 @@
       {% blocktrans trimmed with date=original_admission.financability_computed_rule_on result=original_admission.financability_computed_rule|financability_enum_display %}
         Financeabilty algorithm proposition on the {{ date }} : {{ result }}
       {% endblocktrans %}
+      {% if original_admission.financability_computed_rule_situation %} - {{ original_admission.financability_computed_rule_situation|financability_enum_display }}{% endif %}
     {% endif %}
   </em>
 </div>

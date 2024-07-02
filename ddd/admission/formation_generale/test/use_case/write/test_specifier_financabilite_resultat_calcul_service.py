@@ -38,6 +38,8 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
@@ -71,8 +73,8 @@ class TestSpecifierFinancabiliteResultatCalcul(TestCase):
 
         self.command = SpecifierFinancabiliteResultatCalculCommand(
             uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-            financabilite_regle_calcule='SECONDE_INSCRIPTION_MEME_CYCLE',
-            financabilite_regle_calcule_le=timezone.now(),
+            financabilite_regle_calcule=EtatFinancabilite.FINANCABLE.name,
+            financabilite_regle_calcule_situation=SituationFinancabilite.REPRISE_APRES_5_ANS.name,
             gestionnaire='0123456789',
         )
 
@@ -85,5 +87,6 @@ class TestSpecifierFinancabiliteResultatCalcul(TestCase):
         self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
 
         # Proposition mise à jour
-        self.assertEqual(proposition.financabilite_regle_calcule, 'SECONDE_INSCRIPTION_MEME_CYCLE')
+        self.assertEqual(proposition.financabilite_regle_calcule, EtatFinancabilite.FINANCABLE)
+        self.assertEqual(proposition.financabilite_regle_calcule_situation, SituationFinancabilite.REPRISE_APRES_5_ANS)
         self.assertEqual(proposition.financabilite_regle_calcule_le, timezone.now())
