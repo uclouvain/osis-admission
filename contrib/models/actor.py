@@ -25,11 +25,11 @@
 # ##############################################################################
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
+from osis_signature.models import Actor
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.enums.actor_type import ActorType
-from osis_document.contrib import FileField
-from osis_signature.models import Actor
 
 
 def actor_upload_directory_path(instance: 'SupervisionActor', filename):
@@ -50,20 +50,24 @@ class SupervisionActor(Actor):
     type = models.CharField(
         choices=ActorType.choices(),
         max_length=50,
+        # db_comment='GroupeDeSupervision.signatures_promoteurs'
     )
     is_doctor = models.BooleanField(
         default=False,
+        # db_comment='Pas de lien avec l'agregat'
     )
     internal_comment = models.TextField(
         default='',
         verbose_name=_('Internal comment'),
         blank=True,
+        # db_comment='GroupeDeSupervision.signatures_promoteurs.commentaire_interne'
     )
     rejection_reason = models.CharField(
         default='',
         max_length=50,
         blank=True,
         verbose_name=_('Grounds for denied'),
+        # db_comment='GroupeDeSupervision.signatures_promoteurs.motif_refus'
     )
     pdf_from_candidate = FileField(
         min_files=1,
@@ -71,7 +75,9 @@ class SupervisionActor(Actor):
         mimetypes=['application/pdf'],
         verbose_name=_("PDF file"),
         upload_to=actor_upload_directory_path,
+        # db_comment='GroupeDeSupervision.signatures_promoteurs.pdf'
     )
     is_reference_promoter = models.BooleanField(
         default=False,
+        # db_comment='GroupeDeSupervision.promoteur_reference_id'
     )
