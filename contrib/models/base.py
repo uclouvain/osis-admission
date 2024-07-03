@@ -41,6 +41,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
+from osis_document.contrib import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (
@@ -78,7 +79,6 @@ from base.models.person import Person
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
-from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -343,6 +343,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         editable=False,
         unique=True,
         db_index=True,
+        # db_comment='Proposition.entity_id.uuid'
     )
     candidate = models.ForeignKey(
         to="base.Person",
@@ -350,6 +351,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         related_name="%(class)ss",
         on_delete=models.PROTECT,
         editable=False,
+        # db_comment='Proposition.matricule_candidat'
     )
     type_demande = models.CharField(
         verbose_name=_("Type"),
@@ -357,15 +359,25 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         choices=TypeDemande.choices(),
         db_index=True,
         default=TypeDemande.ADMISSION.name,
+        # db_comment='Proposition.type_demande'
     )
     comment = models.TextField(
         default='',
         verbose_name=_("Comment"),
         blank=True,
+        # db_comment='Proposition.justification'
     )
 
-    created_at = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
-    modified_at = models.DateTimeField(verbose_name=pgettext_lazy('feminine', 'Modified'), auto_now=True)
+    created_at = models.DateTimeField(
+        verbose_name=_('Created'),
+        auto_now_add=True,
+        # db_comment='Proposition.creee_le'
+    )
+    modified_at = models.DateTimeField(
+        verbose_name=pgettext_lazy('feminine', 'Modified'),
+        auto_now=True,
+        # db_comment='Proposition.modified_at'
+    )
 
     professional_valuated_experiences = models.ManyToManyField(
         'osis_profile.ProfessionalExperience',
@@ -373,6 +385,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         related_name='valuated_from_admission',
         verbose_name=_('The professional experiences that have been valuated from this admission.'),
         through='AdmissionProfessionalValuatedExperiences',
+
     )
     educational_valuated_experiences = models.ManyToManyField(
         'osis_profile.EducationalExperience',
@@ -386,6 +399,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
         related_name='+',
         verbose_name=_('The internal experiences chosen as access titles of this admission.'),
+        # db_comment='TitreAccesSelectionnable'
     )
     detailed_status = models.JSONField(
         default=dict,
@@ -397,6 +411,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         verbose_name=pgettext_lazy("admission", "Course"),
         related_name="+",
         on_delete=models.CASCADE,
+        # db_comment='Proposition.formation_id'
     )
     determined_academic_year = models.ForeignKey(
         to="base.AcademicYear",
@@ -404,12 +419,14 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        # db_comment='Proposition.annee_calculee'
     )
     determined_pool = models.CharField(
         choices=tuple((x.name, x.value) for x in AcademicCalendarTypes if x in ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES),
         max_length=70,
         null=True,
         blank=True,
+        # db_comment='Proposition.pot_calcule'
     )
 
     specific_question_answers = ConfigurableModelFormItemField(
@@ -418,6 +435,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         encoder=DjangoJSONEncoder,
         upload_to=admission_directory_path,
         education_field_name='training',
+        # db_comment='Proposition.reponses_questions_specifiques'
     )
 
     curriculum = FileField(
@@ -425,6 +443,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         upload_to=admission_directory_path,
         verbose_name=_('Curriculum'),
         max_files=1,
+        # db_comment='Proposition.curriculum'
     )
     valuated_secondary_studies_person = models.ForeignKey(
         to='base.Person',
@@ -437,20 +456,24 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
         null=True,
         verbose_name=_('Are the secondary studies the access title for this admission?'),
+        # db_comment='TitreAccesSelectionnable.selectionne'
     )
     confirmation_elements = models.JSONField(
         blank=True,
         default=dict,
         encoder=DjangoJSONEncoder,
+        # db_comment='Proposition.elements_confirmation'
     )
     submitted_at = models.DateTimeField(
         verbose_name=_("Submission date"),
         null=True,
+        # db_comment='Proposition.soumise_le'
     )
 
     submitted_profile = models.JSONField(
         verbose_name=_("Submitted profile"),
         default=dict,
+        # db_comment='Proposition.profil_soumis_candidat'
     )
 
     reference = models.BigIntegerField(
@@ -458,6 +481,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         unique=True,
         editable=False,
         null=True,
+        # db_comment='Proposition.reference'
     )
     pdf_recap = FileField(
         blank=True,
@@ -479,6 +503,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         related_name='+',
         null=True,
         blank=True,
+        # db_comment='Proposition.auteur_derniere_modification'
     )
 
     requested_documents = models.JSONField(
@@ -486,6 +511,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         default=dict,
         encoder=DjangoJSONEncoder,
         verbose_name=_('Requested documents'),
+        # db_comment='Proposition.documents_demandes'
     )
     uclouvain_sic_documents = FileField(
         blank=True,
@@ -502,6 +528,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
         default=dict,
         encoder=DjangoJSONEncoder,
+        # db_comment='Proposition.checklist_initiale,Proposition.checklist_actuelle'
     )
 
     objects = BaseAdmissionManager()
@@ -560,6 +587,7 @@ class AdmissionEducationalValuatedExperiences(models.Model):
     is_access_title = models.BooleanField(
         default=False,
         verbose_name=_('Is access title of the proposition?'),
+        # db_comment='TitreAccesSelectionnable.selectionne'
     )
 
 
@@ -580,6 +608,7 @@ class AdmissionProfessionalValuatedExperiences(models.Model):
     is_access_title = models.BooleanField(
         default=False,
         verbose_name=_('Is access title of the proposition?'),
+        # db_comment='TitreAccesSelectionnable.selectionne'
     )
 
 

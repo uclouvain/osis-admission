@@ -78,3 +78,7 @@ class AdmissionTask(models.Model):
     )
 
     objects = AdmissionTaskManager()
+
+    class Meta:
+        pass
+        # db_table_comment = "Fais le lien entre une tache asynchrone et une demande."
