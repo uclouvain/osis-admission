@@ -34,7 +34,7 @@ __all__ = ['OtherAdmissionsListView']
 
 
 class OtherAdmissionsListView(AdmissionViewMixin, TemplateView):
-    permission_required = 'admission.view_enrolment_applications'
+    permission_required = 'admission.view_enrolment_application'
     template_name = 'admission/includes/lite_admission_list.html'
 
     def get_context_data(self, **kwargs):
