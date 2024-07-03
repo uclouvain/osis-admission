@@ -61,7 +61,7 @@ class DigitRepository(IDigitRepository):
             return
 
         # replace with date from academic calendar
-        if not datetime.today() < datetime(datetime.today().year, 6, 1):
+        if datetime.today() < datetime(datetime.today().year, 6, 1):
             logger.info(
                 f"DIGIT submit ticket canceled: creation ticket in digit should be done after "
                 f"{datetime(datetime.today().year, 6, 1)}"
@@ -75,11 +75,6 @@ class DigitRepository(IDigitRepository):
             logger.info(f"DIGIT submit ticket canceled: type is admission and application is not accepted")
             return
 
-        # move this noma to another place
-        if noma:
-            candidate.last_registration_id = noma
-            candidate.save()
-
         # get proposal merge person if any is linked
         merge_person = None
         proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
@@ -90,6 +85,10 @@ class DigitRepository(IDigitRepository):
             ]:
                 logger.info(f"DIGIT submit ticket canceled: merge status is {proposition.status} and prevents sending ticket")
                 return
+
+            if noma:
+                proposition.registration_id_sent_to_digit = candidate.last_registration_id if candidate.last_registration_id else noma
+                proposition.save()
 
 
         person = merge_person if _is_valid_merge_person(merge_person) else candidate
@@ -373,7 +372,12 @@ def _get_status_and_type_demande(candidate):
     # get all admissions listed for the candidate to check admission/registration condition (it sucks)
     status = None
     for admission in candidate.baseadmission_set.all():
-        status = admission.general_education_admission.status or admission.doctorate_admission.status or admission.continuing_education_admission
+        if hasattr(admission, 'generaleducationadmission'):
+            status = admission.generaleducationadmission.status
+        elif hasattr(admission, 'doctorateadmission'):
+            status = admission.doctorateadmission.status
+        elif hasattr(admission, 'continuingeducationadmission'):
+            status = admission.continuingeducationadmission.status
         if admission.type_demande == TypeDemande.INSCRIPTION.name:
             return status, TypeDemande.INSCRIPTION.name
     return status, TypeDemande.ADMISSION.name

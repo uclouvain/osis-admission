@@ -1038,6 +1038,11 @@
               $(this).prop('action', `${$(this).prop('action')}?next={{ request.path }}&next_hash_url=${nextURLHash}`);
           });
 
+          // Update computed rule on financabilite tab show
+          $('#list-group-link-financabilite').on('show.bs.tab', function() {
+              htmx.trigger('#financabilite-computed-rule', 'financabiliteComputeRule');
+          });
+
       })(jQuery)
 
         $('#merge-experience-form').on('submit', (e) => {
