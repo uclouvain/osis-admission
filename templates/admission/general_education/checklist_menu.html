@@ -34,6 +34,7 @@
         <div
             data-toggle="tab"
             href="#{{ checklist_item_name }}"
+            id="list-group-link-{{ checklist_item_name }}"
         >
           <a>
             {% include 'admission/general_education/checklist_menu_item_status.html' with statut=statut item_name=checklist_item_name %}
@@ -59,7 +60,7 @@
                   data-toggle="tab"
                   href="#{{ child_identifier }}"
               >
-                <a class="sub-item-link">
+                <a class="sub-item-link"">
                   {% include 'admission/general_education/checklist_menu_item_status.html' with statut=child.statut item_name=child_identifier %}
                     {{ checklist_tabs|get_item:child_identifier }}
                     {% if child.extra.identifiant in curex_a_fusionner %}

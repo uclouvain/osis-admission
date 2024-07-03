@@ -25,7 +25,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <form
-    hx-post="{% url view.base_namespace|add:':financability-approval-set-rule' uuid=view.kwargs.uuid %}"
+    hx-post="{% url view.base_namespace|add:':financability-not-financeable-set-rule' uuid=view.kwargs.uuid %}"
     hx-target="this"
     hx-swap="outerHTML"
     style="overflow: auto;"
@@ -43,9 +43,9 @@
     {% endif %}
     </em></p>
 
-    {% bootstrap_form_errors financabilite_approval_form %}
+    {% bootstrap_form_errors financabilite_not_financeable_form %}
 
-    {% bootstrap_field financabilite_approval_form.financability_rule %}
+    {% bootstrap_field financabilite_not_financeable_form.financability_rule %}
   </div>
 
   <div class="modal-footer">
@@ -64,7 +64,7 @@
   </div>
 </form>
 
-{% if request.htmx and not financabilite_approval_form.errors %}
+{% if request.htmx and not financabilite_not_financeable_form.errors %}
 <script>
   $('.modal-backdrop').hide();
 </script>

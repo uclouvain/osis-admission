@@ -172,6 +172,13 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             type=TrainingType.CERTIFICATE,
             campus__nom='Charleroi',
         ),
+        FormationFactory(
+            intitule='Master en sciences',
+            entity_id__sigle='ABCD2MC',
+            entity_id__annee=2024,
+            type=TrainingType.MASTER_M1,
+            campus__nom='Louvain-la-Neuve',
+        ),
     ]
 
     @classmethod

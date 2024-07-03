@@ -89,6 +89,7 @@ class PropositionDTO(interface.DTO):
     pdf_recapitulatif: List[str]
 
     financabilite_regle_calcule: str
+    financabilite_regle_calcule_situation: str
     financabilite_regle_calcule_le: Optional[datetime.datetime]
     financabilite_regle: str
     financabilite_regle_etabli_par: str
