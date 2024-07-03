@@ -76,15 +76,51 @@ class OnlinePayment(models.Model):
         BaseAdmission,
         on_delete=models.CASCADE,
         related_name='online_payments',
+        # db_comment="Lien vers la demande.",
     )
 
-    payment_id = models.CharField(max_length=14)
-    status = models.CharField(choices=PaymentStatus.choices(), max_length=10)
-    expiration_date = models.DateTimeField(null=True)
-    method = models.CharField(choices=PaymentMethod.choices(), max_length=17, blank=True, default='')
-    creation_date = models.DateTimeField()
-    updated_date = models.DateTimeField()
-    dashboard_url = models.URLField()
-    checkout_url = models.URLField(blank=True)
-    payment_url = models.URLField()
-    amount = models.DecimalField(decimal_places=2, max_digits=6)
+    payment_id = models.CharField(
+        max_length=14
+        # db_comment="PaiementDTO.identifiant_paiement",
+    )
+    status = models.CharField(
+        choices=PaymentStatus.choices(),
+        max_length=10,
+        # db_comment="PaiementDTO.statut",
+    )
+    expiration_date = models.DateTimeField(
+        null=True
+        # db_comment="PaiementDTO.date_expiration",
+    )
+    method = models.CharField(
+        choices=PaymentMethod.choices(),
+        max_length=17,
+        blank=True,
+        default='',
+        # db_comment="PaiementDTO.methode",
+    )
+    creation_date = models.DateTimeField(
+        # db_comment="PaiementDTO.date_creation",
+    )
+    updated_date = models.DateTimeField(
+        # db_comment="PaiementDTO.date_mise_a_jour",
+    )
+    dashboard_url = models.URLField(
+        # db_comment="Non utilisé dans l'application.",
+    )
+    checkout_url = models.URLField(
+        blank=True,
+        # db_comment="PaiementDTO.url_checkout",
+    )
+    payment_url = models.URLField(
+        # db_comment="Non utilisé dans l'application.",
+    )
+    amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=6,
+        # db_comment="PaiementDTO.montant",
+    )
+
+    class Meta:
+        pass
+        # db_table_comment = "Représente un paiement et son statut."

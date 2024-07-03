@@ -41,17 +41,20 @@ class JuryMember(models.Model):
         editable=False,
         unique=True,
         db_index=True,
+        # db_comment="MembreJuryDTO.uuid",
     )
     role = models.CharField(
         verbose_name=pgettext_lazy('jury', 'Role'),
         choices=RoleJury.choices(),
         max_length=50,
+        # db_comment="MembreJuryDTO.role",
     )
     doctorate = models.ForeignKey(
         'admission.DoctorateAdmission',
         verbose_name=_('PhD'),
         on_delete=models.CASCADE,
         related_name='jury_members',
+        # db_comment="MembreJuryDTO.",
     )
 
     other_institute = models.CharField(
@@ -59,6 +62,7 @@ class JuryMember(models.Model):
         max_length=255,
         default='',
         blank=True,
+        # db_comment="MembreJuryDTO.autre_institution",
     )
 
     # Promoter only
@@ -69,6 +73,7 @@ class JuryMember(models.Model):
         limit_choices_to={"type": ActorType.PROMOTER.name},
         null=True,
         blank=True,
+        # db_comment="Pour promoteur uniquement : renseigne MembreJuryDTO.est_promoteur à True et remplis les informations de nom / ...",
     )
 
     # UCL member only
@@ -78,6 +83,7 @@ class JuryMember(models.Model):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
+        # db_comment="Pour membre UCL uniquement : renseigne MembreJuryDTO.matricule ainsi que les informations de nom / ...",
     )
 
     # External member only
@@ -86,6 +92,7 @@ class JuryMember(models.Model):
         max_length=255,
         default='',
         blank=True,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.institution",
     )
     country = models.ForeignKey(
         'reference.Country',
@@ -93,18 +100,21 @@ class JuryMember(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.pays",
     )
     last_name = models.CharField(
         verbose_name=_('Surname'),
         max_length=255,
         default='',
         blank=True,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.nom",
     )
     first_name = models.CharField(
         verbose_name=_('First name'),
         max_length=255,
         default='',
         blank=True,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.prenom",
     )
     title = models.CharField(
         verbose_name=pgettext_lazy('admission', 'Title'),
@@ -112,12 +122,14 @@ class JuryMember(models.Model):
         max_length=50,
         default='',
         blank=True,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.titre",
     )
     non_doctor_reason = models.TextField(
         verbose_name=_('Non doctor reason'),
         max_length=255,
         default='',
         blank=True,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.justification_non_docteur",
     )
     gender = models.CharField(
         verbose_name=_('Gender'),
@@ -125,15 +137,18 @@ class JuryMember(models.Model):
         max_length=50,
         default='',
         blank=True,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.genre",
     )
     email = models.EmailField(
         verbose_name=pgettext_lazy('admission', 'Email'),
         max_length=255,
         default='',
         blank=True,
+        # db_comment="Pour membre externe uniquement : MembreJuryDTO.email",
     )
 
     class Meta:
+        # db_table_comment = "Représente un membre de jury doctoral."
         constraints = [
             CheckConstraint(
                 check=(
