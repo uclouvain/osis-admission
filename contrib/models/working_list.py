@@ -77,6 +77,7 @@ class WorkingList(OrderedModel):
     class Meta(OrderedModel.Meta):
         verbose_name = _('Working list')
         verbose_name_plural = _('Working lists')
+        # db_table_comment = "Utilisé dans Django uniquement pour les listes de travail prédéfini."
 
     def __str__(self):
         return self.name.get(settings.LANGUAGE_CODE)

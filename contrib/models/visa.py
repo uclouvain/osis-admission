@@ -48,26 +48,35 @@ class DiplomaticPost(models.Model):
     code = models.PositiveSmallIntegerField(
         primary_key=True,
         verbose_name=_('Diplomatic post code'),
+        # db_comment="PosteDiplomatiqueDTO.code",
     )
     name_fr = models.CharField(
         max_length=255,
         verbose_name=_('Name in french'),
+        # db_comment="PosteDiplomatiqueDTO.nom_francais",
     )
     name_en = models.CharField(
         max_length=255,
         verbose_name=_('Name in english'),
+        # db_comment="PosteDiplomatiqueDTO.nom_anglais",
     )
     email = models.EmailField(
         max_length=255,
         verbose_name=pgettext('admission', 'Email'),
+        # db_comment="PosteDiplomatiqueDTO.adresse_email",
     )
     countries = models.ManyToManyField(
         to='reference.Country',
         verbose_name=_('Countries'),
         related_name='+',
+        # db_comment="Renvoyé en réponse de l'API.",
     )
 
     objects = DiplomaticPostManager()
+
+    class Meta:
+        pass
+        # db_table_comment = "Représente un poste diplomatique."
 
     def __str__(self):
         return {

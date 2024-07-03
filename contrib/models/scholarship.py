@@ -35,11 +35,13 @@ class Scholarship(models.Model):
         default=uuid.uuid4,
         editable=False,
         primary_key=True,
+        # db_comment="BourseDTO.uuid",
     )
 
     short_name = models.CharField(
         verbose_name=_('Short name'),
         max_length=50,
+        # db_comment="BourseDTO.nom_court",
     )
 
     long_name = models.CharField(
@@ -47,21 +49,25 @@ class Scholarship(models.Model):
         verbose_name=_('Long name'),
         blank=True,
         default='',
+        # db_comment="BourseDTO.nom_long",
     )
 
     disabled = models.BooleanField(
         verbose_name=_('Disabled'),
         default=False,
+        # db_comment="?",
     )
 
     type = models.CharField(
         verbose_name=_('Type'),
         choices=TypeBourse.choices(),
         max_length=50,
+        # db_comment="BourseDTO.type",
     )
 
     class Meta:
         verbose_name = pgettext_lazy('admission model', 'Scholarship')
+        # db_table_comment = "Représente une bourse."
 
     def __str__(self):
         return self.short_name
