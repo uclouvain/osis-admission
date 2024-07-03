@@ -41,6 +41,7 @@ from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
 
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.models.student import Student
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_document.contrib import FileField
@@ -827,7 +828,7 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
 
 
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
-    list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit')
+    list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit', 'send_to_digit')
 
     @admin.display(description=_('Identifier'))
     def global_id(self, obj):
@@ -853,6 +854,24 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
             )
         else:
             return mark_safe(f'<button class="button" disabled>{_("Retrieve from DigIT")}</button>')
+
+    @admin.display(description=_('Send to DigIT'))
+    def send_to_digit(self, obj):
+        person = obj.person
+        admission = BaseAdmission.objects.filter(candidate=person).first()
+        has_person_merge_proposal = PersonMergeProposal.objects.filter(original_person=person).exists()
+        if admission and has_person_merge_proposal:
+            url = reverse(viewname='admission:services:digit:request-digit-person-creation', kwargs={'uuid': admission.uuid})
+            return mark_safe(
+                f'<a class="button" '
+                f'onclick="fetch(\'{url}\', {{ method: \'POST\' }}).then('
+                f'response => {{alert(\'Successfully sent data to digit for '
+                f'{person.last_name.upper()}, {person.first_name.capitalize()}:'
+                f' saved in Person ticket creations\')}})"'
+                f'>{_("Send to DigIT")}</a>'
+            )
+        else:
+            return mark_safe(f'<button class="button" disabled>{_("Send to DigIT")}</button>')
 
 
 class TypeField(forms.CheckboxSelectMultiple):

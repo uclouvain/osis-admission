@@ -77,9 +77,10 @@ class DigitRepository(IDigitRepository):
 
         # get proposal merge person if any is linked
         merge_person = None
-        proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
+        proposition = PersonMergeProposal.objects.filter(original_person=candidate)
         if proposition.exists():
-            merge_person = proposition.get().proposal_merge_person
+            proposition = proposition.get()
+            merge_person = proposition.proposal_merge_person
             if proposition.status not in [
                 PersonMergeStatus.MERGED.name, PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
             ]:
@@ -91,7 +92,7 @@ class DigitRepository(IDigitRepository):
                 proposition.save()
 
 
-        person = merge_person if _is_valid_merge_person(merge_person) else candidate
+        person = merge_person if merge_person and _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ticket_response = _request_person_ticket_creation(person, noma, addresses)
 
