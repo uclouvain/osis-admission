@@ -23,7 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import logging
 
+from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -55,7 +57,10 @@ from django.utils.translation import gettext_lazy as _
 
 from osis_role.contrib.views import PermissionRequiredMixin
 
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
+
+@method_decorator(csrf_exempt, name='dispatch')
 class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
 
     urlpatterns = {'request-digit-person-creation': 'request-digit-person-creation/<uuid:uuid>'}
@@ -75,6 +80,10 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
             noma = candidate.last_registration_id
         else:
             noma = None
+
+        if not self.base_admission.determined_academic_year:
+            logger.info("[Digit] Envoi ticket Digit annulé - Pas d'année académique déterminée pour générer un NOMA")
+            return redirect(request.META['HTTP_REFERER'])
 
         response = self.create_digit_person(
             global_id=candidate.global_id,
