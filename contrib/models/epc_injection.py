@@ -44,3 +44,11 @@ class EPCInjection(models.Model):
     status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=7)
     payload = models.JSONField(default=dict, blank=True)
     epc_responses = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        db_table_comment = """
+            Modèle technique stockant le dernier payload envoyé à EPC, l'ensemble des réponses venant d'EPC
+            ainsi que le statut de l'injection et le lien vers le dossier à injecter.
+            L'injection vers EPC est nécessaire car lorsque le dossier est validé dans OSIS-Admission, il faut
+            que le module Inscription Centrale ait le dossier afin de créer l'inscription à l'offre.
+        """
