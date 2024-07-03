@@ -43,11 +43,13 @@ class CategorizedFreeDocument(models.Model):
         max_length=255,
         default='',
         blank=True,
+        # db_comment="Onglet de checklist auquel le document est associé",
     )
 
     short_label_fr = models.CharField(
         max_length=255,
         verbose_name=_('Short label in french'),
+        # db_comment="Libellé court en français du document",
     )
 
     short_label_en = models.CharField(
@@ -55,21 +57,29 @@ class CategorizedFreeDocument(models.Model):
         verbose_name=_('Short label in english'),
         default='',
         blank=True,
+        # db_comment="Libellé court en anglais du document",
     )
 
     long_label_fr = models.TextField(
         verbose_name=_('Long label in french'),
+        # db_comment="Libellé long en français du document",
     )
 
     long_label_en = models.TextField(
         blank=True,
         verbose_name=_('Long label in english'),
+        # db_comment="Libellé long en anglais du document",
     )
 
     with_academic_year = models.BooleanField(
         default=False,
         verbose_name=_('With academic year'),
+        # db_comment="Indique si le nom du document contient une année académique configurable",
     )
 
     def __str__(self):
         return self.short_label_fr
+
+    class Meta:
+        pass
+        # db_table_comment = "Modèle utilisé pour l'aide au nommage des documents libres"

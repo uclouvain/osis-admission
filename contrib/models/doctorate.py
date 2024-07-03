@@ -74,12 +74,14 @@ class DoctorateAdmission(BaseAdmission):
         choices=ChoixTypeAdmission.choices(),
         db_index=True,
         default=ChoixTypeAdmission.ADMISSION.name,
+        # db_comment = 'Proposition.type_admission',
     )
     # TODO: remove this field in the future
     valuated_experiences = models.ManyToManyField(
         'osis_profile.Experience',
         related_name='valuated_from',
         verbose_name=_('The experiences that have been valuated from this admission.'),
+        # db_comment = 'Plus utilisé.',
     )
     proximity_commission = models.CharField(
         max_length=255,
@@ -89,6 +91,7 @@ class DoctorateAdmission(BaseAdmission):
         + ChoixSousDomaineSciences.choices(),
         default='',
         blank=True,
+        # db_comment = 'Proposition.commission_proximite',
     )
     # Financement
     financing_type = models.CharField(
@@ -97,41 +100,49 @@ class DoctorateAdmission(BaseAdmission):
         choices=ChoixTypeFinancement.choices(),
         default='',
         blank=True,
+        # db_comment = 'Proposition.financement.type',
     )
     financing_work_contract = models.CharField(
         max_length=255,
         verbose_name=_("Working contract type"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.financement.type_contrat_travail',
     )
     financing_eft = models.PositiveSmallIntegerField(
         verbose_name=_("EFT"),
         blank=True,
         null=True,
+        # db_comment = 'Proposition.financement.eft',
     )
     scholarship_start_date = models.DateField(
         verbose_name=_("Scholarship start date"),
         null=True,
         blank=True,
+        # db_comment = 'Proposition.financement.bourse_date_debut',
     )
     scholarship_end_date = models.DateField(
         verbose_name=_("Scholarship end date"),
         null=True,
         blank=True,
+        # db_comment = 'Proposition.financement.bourse_date_fin',
     )
     scholarship_proof = FileField(
         verbose_name=_("Proof of scholarship"),
         upload_to=admission_directory_path,
+        # db_comment = 'Proposition.financement.bourse_preuve',
     )
     planned_duration = models.PositiveSmallIntegerField(
         verbose_name=_("Planned duration"),
         blank=True,
         null=True,
+        # db_comment = 'Proposition.financement.duree_prevue',
     )
     dedicated_time = models.PositiveSmallIntegerField(
         verbose_name=_("Dedicated time (in EFT)"),
         blank=True,
         null=True,
+        # db_comment = 'Proposition.financement.temps_consacre',
     )
 
     # Projet
@@ -140,11 +151,13 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Project title"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.projet.titre',
     )
     project_abstract = models.TextField(
         verbose_name=_("Abstract"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.projet.resume',
     )
     thesis_language = models.CharField(
         max_length=255,
@@ -152,6 +165,7 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Thesis language"),
         default=ChoixLangueRedactionThese.UNDECIDED.name,
         blank=True,
+        # db_comment = 'Proposition.projet.langue_redaction_these',
     )
     thesis_institute = models.ForeignKey(
         'base.EntityVersion',
@@ -160,32 +174,39 @@ class DoctorateAdmission(BaseAdmission):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
+        # db_comment = 'Proposition.projet.institut_these',
     )
     thesis_location = models.CharField(
         max_length=255,
         verbose_name=_("Thesis location"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.projet.lieu_these',
     )
     project_document = FileField(
         verbose_name=_("Project"),
         upload_to=admission_directory_path,
+        # db_comment = 'Proposition.projet.documents',
     )
     gantt_graph = FileField(
         verbose_name=_("Gantt chart"),
         upload_to=admission_directory_path,
+        # db_comment = 'Proposition.projet.graphe_gantt',
     )
     program_proposition = FileField(
         verbose_name=_("Program proposition"),
         upload_to=admission_directory_path,
+        # db_comment = 'Proposition.projet.proposition_programme_doctoral',
     )
     additional_training_project = FileField(
         verbose_name=_("Complementary training proposition"),
         upload_to=admission_directory_path,
+        # db_comment = 'Proposition.projet.projet_formation_complementaire',
     )
     recommendation_letters = FileField(
         verbose_name=_("Letters of recommendation"),
         upload_to=admission_directory_path,
+        # db_comment = 'Proposition.projet.lettres_recommandation',
     )
 
     # Experience précédente de recherche
@@ -195,105 +216,126 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("PhD already done"),
         default=ChoixDoctoratDejaRealise.NO.name,
         blank=True,
+        # db_comment = 'Proposition.experience_precedente_recherche.doctorat_deja_realise',
     )
     phd_already_done_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.experience_precedente_recherche.institution',
     )
     phd_already_done_thesis_domain = models.CharField(
         max_length=255,
         verbose_name=_("Thesis field"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.experience_precedente_recherche.domaine_these',
     )
     phd_already_done_defense_date = models.DateField(
         verbose_name=_("Defense"),
         null=True,
         blank=True,
+        # db_comment = 'Proposition.experience_precedente_recherche.date_soutenance',
     )
     phd_already_done_no_defense_reason = models.CharField(
         max_length=255,
         verbose_name=_("No defense reason"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.experience_precedente_recherche.raison_non_soutenue',
     )
     cotutelle_motivation = models.CharField(
         max_length=255,
         verbose_name=_("Motivation"),
         default='',
         blank=True,
+        # db_comment = 'GroupeDeSupervision.cotutelle.motivation',
     )
     cotutelle = models.BooleanField(
         null=True,
         blank=True,
+        # db_comment = 'GroupeDeSupervision.cotutelle.',
     )
     cotutelle_institution_fwb = models.BooleanField(
         verbose_name=_("Institution Federation Wallonie-Bruxelles"),
         blank=True,
         null=True,
+        # db_comment = 'GroupeDeSupervision.cotutelle.motivation.institution_fwb',
     )
     cotutelle_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),
         default='',
         blank=True,
+        # db_comment = 'GroupeDeSupervision.cotutelle.institution.',
     )
     cotutelle_opening_request = FileField(
         verbose_name=_("Cotutelle request document"),
         max_files=1,
         upload_to=admission_directory_path,
+        # db_comment = 'GroupeDeSupervision.cotutelle.demande_ouverture',
     )
     cotutelle_convention = FileField(
         verbose_name=_("Joint supervision agreement"),
         max_files=1,
         upload_to=admission_directory_path,
+        # db_comment = 'GroupeDeSupervision.cotutelle.convention',
     )
     cotutelle_other_documents = FileField(
         verbose_name=_("Other cotutelle-related documents"),
         upload_to=admission_directory_path,
+        # db_comment = 'GroupeDeSupervision.cotutelle.autres_documents.',
     )
     archived_record_signatures_sent = FileField(
         verbose_name=_("Archived record when signatures were sent"),
         max_files=1,
         upload_to=admission_directory_path,
         editable=False,
+        # db_comment = 'Proposition.fiche_archive_signatures_envoyees',
     )
 
     status = models.CharField(
         choices=ChoixStatutPropositionDoctorale.choices(),
         max_length=30,
         default=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        # db_comment = 'Proposition.statut',
     )
     status_cdd = models.CharField(
         choices=ChoixStatutCDD.choices(),
         max_length=30,
         default=ChoixStatutCDD.TO_BE_VERIFIED.name,
+        # db_comment = 'Demande.statut_cdd',
     )
     status_sic = models.CharField(
         choices=ChoixStatutSIC.choices(),
         max_length=30,
         default=ChoixStatutSIC.TO_BE_VERIFIED.name,
+        # db_comment = 'Demande.statut_sic',
     )
     post_enrolment_status = models.CharField(
         choices=ChoixStatutDoctorat.choices(),
         max_length=30,
         default=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
         verbose_name=_("Post-enrolment status"),
+        # db_comment = 'Doctorat.statut',
     )
     pre_admission_submission_date = models.DateTimeField(
         verbose_name=_("Pre-admission submission date"),
         null=True,
+        # db_comment = 'Proposition.soumise_le et Demande.pre_admission_confirmee_le',
     )
 
-    supervision_group = SignatureProcessField()
+    supervision_group = SignatureProcessField(
+        # db_comment = 'GroupeDeSupervision',
+    )
 
     other_international_scholarship = models.CharField(
         max_length=255,
         verbose_name=_("Other international scholarship"),
         default='',
         blank=True,
+        # db_comment = 'Proposition.financement.autre_bourse_recherche',
     )
     international_scholarship = models.ForeignKey(
         to="admission.Scholarship",
@@ -302,6 +344,7 @@ class DoctorateAdmission(BaseAdmission):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
+        # db_comment = 'Proposition.financement.bourse_recherche',
     )
 
     # Jury
@@ -310,6 +353,7 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Proposed thesis title"),
         default='',
         blank=True,
+        # db_comment = 'Jury.titre_propose',
     )
     defense_method = models.CharField(
         max_length=255,
@@ -317,11 +361,13 @@ class DoctorateAdmission(BaseAdmission):
         choices=FormuleDefense.choices(),
         default='',
         blank=True,
+        # db_comment = 'Jury.formule_defense.',
     )
     defense_indicative_date = models.DateField(
         verbose_name=_("Defense indicative date"),
         null=True,
         blank=True,
+        # db_comment = 'Jury.date_indicative',
     )
     defense_language = models.CharField(
         max_length=255,
@@ -329,19 +375,23 @@ class DoctorateAdmission(BaseAdmission):
         choices=ChoixLangueRedactionThese.choices(),
         default=ChoixLangueRedactionThese.UNDECIDED.name,
         blank=True,
+        # db_comment = 'Jury.langue_soutenance',
     )
     comment_about_jury = models.TextField(
         default="",
         verbose_name=_("Comment about jury"),
         blank=True,
+        # db_comment = 'Jury.commentaire',
     )
     accounting_situation = models.BooleanField(
         null=True,
         blank=True,
+        # db_comment = 'Jury.situation_comptable,
     )
     jury_approval = FileField(
         verbose_name=_("Jury approval"),
         upload_to=admission_directory_path,
+        # db_comment = 'Jury.approbation_pdf',
     )
 
     # The following properties are here to alias the training_id field to doctorate_id
@@ -364,6 +414,7 @@ class DoctorateAdmission(BaseAdmission):
     class Meta:
         verbose_name = _("Doctorate admission")
         ordering = ('-created_at',)
+        # db_table_comment = "Modèle utilisé dans le cadre d'une admission pour une formation doctorale et pour la formation doctorale (à refactoriser)"
         permissions = [
             ('download_jury_approved_pdf', _("Can download jury-approved PDF")),
             ('upload_jury_approved_pdf', _("Can upload jury-approved PDF")),

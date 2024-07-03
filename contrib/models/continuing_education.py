@@ -53,12 +53,14 @@ class ContinuingEducationAdmission(BaseAdmission):
         choices=ChoixStatutPropositionContinue.choices(),
         max_length=30,
         default=ChoixStatutPropositionContinue.EN_BROUILLON.name,
+        # db_comment='Proposition.statut',
     )
 
     diploma_equivalence = FileField(
         blank=True,
         upload_to=admission_directory_path,
         verbose_name=_('Diploma equivalence'),
+        #         db_comment='Proposition.equivalence_diplome',
     )
 
     residence_permit = FileField(
@@ -66,6 +68,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         verbose_name=_('Residence permit covering the entire course'),
         max_files=1,
+        #         db_comment='Proposition.copie_titre_sejour',
     )
 
     registration_as = models.CharField(
@@ -74,6 +77,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=30,
         verbose_name=_('Registration as'),
+        #         db_comment='Proposition.inscription_a_titre',
     )
 
     head_office_name = models.CharField(
@@ -81,6 +85,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=255,
         verbose_name=_('Head office name'),
+        #         db_comment='Proposition.nom_siege_social',
     )
 
     unique_business_number = models.CharField(
@@ -88,6 +93,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=255,
         verbose_name=_('Unique business number'),
+        #         db_comment='Proposition.numero_unique_entreprise',
     )
 
     vat_number = models.CharField(
@@ -95,6 +101,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=255,
         verbose_name=_('VAT number'),
+        #         db_comment='Proposition.numero_tva_entreprise',
     )
 
     professional_email = models.CharField(
@@ -102,6 +109,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=255,
         verbose_name=_('Professional email'),
+        #         db_comment='Proposition.adresse_mail_professionnelle',
     )
 
     billing_address_type = models.CharField(
@@ -110,6 +118,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=30,
         verbose_name=_('Billing address type'),
+        #         db_comment='Proposition.type_adresse_facturation',
     )
 
     billing_address_recipient = models.CharField(
@@ -117,6 +126,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=255,
         verbose_name=_('Billing address recipient'),
+        #         db_comment='Proposition.adresse_facturation.destinataire',
     )
 
     billing_address_street = models.CharField(
@@ -124,6 +134,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=255,
         verbose_name=_('Billing address street'),
+        #         db_comment='Proposition.adresse_facturation.rue',
     )
 
     billing_address_street_number = models.CharField(
@@ -131,6 +142,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=20,
         verbose_name=_('Billing address street number'),
+        #         db_comment='Proposition.adresse_facturation.numero_rue',
     )
 
     billing_address_postal_box = models.CharField(
@@ -138,6 +150,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=20,
         verbose_name=_('Billing address postal box'),
+        #         db_comment='Proposition.adresse_facturation.boite_postale',
     )
 
     billing_address_postal_code = models.CharField(
@@ -145,6 +158,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=20,
         verbose_name=_('Billing address postal code'),
+        #         db_comment='Proposition.adresse_facturation.code_postal',
     )
 
     billing_address_city = models.CharField(
@@ -152,6 +166,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         max_length=255,
         verbose_name=_('Billing address city'),
+        #         db_comment='Proposition.adresse_facturation.ville',
     )
 
     billing_address_country = models.ForeignKey(
@@ -160,6 +175,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         null=True,
         on_delete=models.PROTECT,
         verbose_name=_('Billing address country'),
+        #         db_comment='Proposition.adresse_facturation.pays',
     )
 
     additional_documents = FileField(
@@ -167,6 +183,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         verbose_name=_('Additional documents'),
         max_files=10,
+        #         db_comment='Proposition.documents_additionnels',
     )
 
     motivations = models.TextField(
@@ -174,6 +191,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         verbose_name=_('Motivations'),
         max_length=1000,
+        #         db_comment='Proposition.motivations',
     )
 
     ways_to_find_out_about_the_course = ArrayField(
@@ -181,6 +199,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         blank=True,
         default=list,
         verbose_name=_('How did the candidate hear about this course?'),
+        #         db_comment='Proposition.moyens_decouverte_formation',
     )
 
     other_way_to_find_out_about_the_course = models.TextField(
@@ -188,11 +207,13 @@ class ContinuingEducationAdmission(BaseAdmission):
         default='',
         verbose_name=_('How else did the candidate hear about this course?'),
         max_length=1000,
+        #         db_comment='Proposition.autre_moyen_decouverte_formation',
     )
 
     interested_mark = models.BooleanField(
         verbose_name=_("Interested mark"),
         null=True,
+        #         db_comment='Proposition.marque_d_interet',
     )
 
     edition = models.CharField(
@@ -201,68 +222,81 @@ class ContinuingEducationAdmission(BaseAdmission):
         verbose_name=_("Edition"),
         default='',
         blank=True,
+        #         db_comment='Proposition.edition',
     )
 
     in_payement_order = models.BooleanField(
         verbose_name=_("In payement order"),
         null=True,
+        #         db_comment='Proposition.en_ordre_de_paiement',
     )
 
     reduced_rights = models.BooleanField(
         verbose_name=_("Reduced rights"),
         null=True,
+        #         db_comment='Proposition.droits_reduits',
     )
 
     pay_by_training_cheque = models.BooleanField(
         verbose_name=_("Pay by training cheque"),
         null=True,
+        #         db_comment='Proposition.paye_par_cheque_formation',
     )
 
     cep = models.BooleanField(
         verbose_name=_("CEP"),
         null=True,
+        #         db_comment='Proposition.cep',
     )
 
     payement_spread = models.BooleanField(
         verbose_name=_("Payement spread"),
         null=True,
+        #         db_comment='Proposition.etalement_des_paiments',
     )
 
     training_spread = models.BooleanField(
         verbose_name=_("Training spread"),
         null=True,
+        #         db_comment='Proposition.etalement_de_la_formation',
     )
 
     experience_knowledge_valorisation = models.BooleanField(
         verbose_name=_("Experience knowledge valorisation"),
         null=True,
+        #         db_comment='Proposition.valorisation_des_acquis_d_experience',
     )
 
     assessment_test_presented = models.BooleanField(
         verbose_name=_("Assessment test presented"),
         null=True,
+        #         db_comment='Proposition.a_presente_l_epreuve_d_evaluation',
     )
 
     assessment_test_succeeded = models.BooleanField(
         verbose_name=_("Assessment test succeeded"),
         null=True,
+        #         db_comment='Proposition.a_reussi_l_epreuve_d_evaluation',
     )
 
     certificate_provided = models.BooleanField(
         verbose_name=_("Certificate provided"),
         null=True,
+        #         db_comment='Proposition.diplome_produit',
     )
 
     tff_label = models.TextField(
         verbose_name=_("TFF label"),
         default='',
         blank=True,
+        #         db_comment='Proposition.intitule_du_tff',
     )
 
     last_email_sent_at = models.DateTimeField(
         verbose_name=_("Last email sent the"),
         null=True,
         blank=True,
+        #         db_comment='Proposition.decision_dernier_mail_envoye_le',
     )
 
     last_email_sent_by = models.ForeignKey(
@@ -272,47 +306,55 @@ class ContinuingEducationAdmission(BaseAdmission):
         related_name='+',
         null=True,
         blank=True,
+        #         db_comment='Proposition.decision_dernier_mail_envoye_par',
     )
 
     on_hold_reason = models.TextField(
         verbose_name=_("On hold reason"),
         choices=ChoixMotifAttente.choices(),
         blank=True,
+        #         db_comment='Proposition.motif_de_mise_en_attente',
     )
 
     on_hold_reason_other = models.TextField(
         verbose_name=_("On hold other reason"),
         default='',
         blank=True,
+        #         db_comment='Proposition.motif_de_mise_en_attente_autre',
     )
 
     approval_condition_by_faculty = models.TextField(
         verbose_name=_("Approval condition by faculty"),
         default='',
         blank=True,
+        #         db_comment='Proposition.condition_d_approbation_par_la_faculte',
     )
 
     refusal_reason = models.TextField(
         verbose_name=_("Refusal reason"),
         choices=ChoixMotifRefus.choices(),
         blank=True,
+        #         db_comment='Proposition.motif_de_refus',
     )
 
     refusal_reason_other = models.TextField(
         verbose_name=_("Refusal reason other"),
         default='',
         blank=True,
+        #         db_comment='Proposition.motif_de_refus_autre',
     )
 
     cancel_reason = models.TextField(
         verbose_name=_("Cancel reason"),
         default='',
         blank=True,
+        #         db_comment='Proposition.motif_d_annulation',
     )
 
     class Meta:
         verbose_name = _("Continuing education admission")
         ordering = ('-created_at',)
+        # db_table_comment = "Modèle utilisé dans le cadre d'une admission pour une formation continue"
         permissions = []
 
     def update_detailed_status(self, author: 'Person' = None):
