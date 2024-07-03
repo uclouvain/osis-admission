@@ -112,16 +112,19 @@ class Activity(models.Model):
         editable=False,
         unique=True,
         db_index=True,
+        # db_comment="Activite.entity_id.uuid",
     )
     doctorate = models.ForeignKey(
         'admission.DoctorateAdmission',
         on_delete=models.CASCADE,
+        # db_comment="Activite.doctorat_id.uuid",
     )
     context = models.CharField(
         verbose_name=_("Context"),
         max_length=30,
         choices=ContexteFormation.choices(),
         default=ContexteFormation.DOCTORAL_TRAINING.name,
+        # db_comment="Activite.contexte",
     )
     ects = models.DecimalField(
         verbose_name=_("ECTS credits"),
@@ -134,15 +137,18 @@ class Activity(models.Model):
         blank=True,
         default=0,
         validators=[validators.MinValueValidator(0)],
+        # db_comment="Activite.ects",
     )
     status = models.CharField(
         max_length=20,
         choices=StatutActivite.choices(),
         default=StatutActivite.NON_SOUMISE.name,
+        # db_comment="Activite.statut",
     )
     category = models.CharField(
         max_length=50,
         choices=CategorieActivite.choices(),
+        # db_comment="Activite.categorie",
     )
     parent = models.ForeignKey(
         'self',
@@ -150,6 +156,7 @@ class Activity(models.Model):
         related_name="children",
         null=True,
         blank=True,
+        # db_comment="Activite.parent_id",
     )
 
     # Common
@@ -158,6 +165,7 @@ class Activity(models.Model):
         default="",
         blank=True,
         verbose_name=_("Activity type"),
+        # db_comment="Utilisé pas tous les DTO",
     )
 
     # Conference, communication, publication
@@ -166,6 +174,7 @@ class Activity(models.Model):
         verbose_name=pgettext_lazy("admission", "Title"),
         default="",
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO, CommunicationDTO, PublicationDTO",
     )
 
     participating_proof = FileField(
@@ -173,11 +182,13 @@ class Activity(models.Model):
         max_files=1,
         blank=True,
         upload_to=training_activity_directory_path,
+        # db_comment="Utilisé par ConferenceDTO, CommunicationDTO, PublicationDTO",
     )
     comment = models.TextField(
         verbose_name=_("Comment"),
         default="",
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO, CommunicationDTO, PublicationDTO",
     )
 
     # Conference
@@ -185,11 +196,13 @@ class Activity(models.Model):
         verbose_name=_("Activity begin date"),
         null=True,
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
     end_date = models.DateField(
         verbose_name=_("Activity end date"),
         null=True,
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
     participating_days = models.DecimalField(
         verbose_name=_("Number of days participating"),
@@ -197,6 +210,7 @@ class Activity(models.Model):
         decimal_places=1,
         null=True,
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
     is_online = models.BooleanField(
         verbose_name=_("Online event"),
@@ -204,6 +218,7 @@ class Activity(models.Model):
         null=True,
         default=None,  # to prevent messing with choices
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
     country = models.ForeignKey(
         'reference.Country',
@@ -211,23 +226,27 @@ class Activity(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
     city = models.CharField(
         max_length=100,
         verbose_name=_("City"),
         default="",
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
     organizing_institution = models.CharField(
         max_length=100,
         verbose_name=_("Organising institution"),
         default="",
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
     website = models.URLField(
         default="",
         verbose_name=pgettext_lazy("admission", "Website"),
         blank=True,
+        # db_comment="Utilisé par ConferenceDTO",
     )
 
     # communication, publication
@@ -236,18 +255,21 @@ class Activity(models.Model):
         choices=ChoixComiteSelection.choices(),
         blank=True,
         default="",
+        # db_comment="Utilisé par CommunicationDTO, PublicationDTO",
     )
     dial_reference = models.CharField(
         max_length=100,
         verbose_name=_("Reference DIAL.Pr"),
         default="",
         blank=True,
+        # db_comment="Utilisé par CommunicationDTO, PublicationDTO",
     )
     acceptation_proof = FileField(
         verbose_name=_("Participation certification"),
         max_files=1,
         blank=True,
         upload_to=training_activity_directory_path,
+        # db_comment="Utilisé par CommunicationDTO, PublicationDTO",
     )
 
     # Communication
@@ -256,16 +278,19 @@ class Activity(models.Model):
         max_files=1,
         blank=True,
         upload_to=training_activity_directory_path,
+        # db_comment="Utilisé par CommunicationDTO",
     )
     subtype = models.CharField(
         verbose_name=_("Activity subtype"),
         max_length=100,
         default="",
         blank=True,
+        # db_comment="Utilisé par CommunicationDTO",
     )
     subtitle = models.TextField(
         blank=True,
         default="",
+        # db_comment="Utilisé par CommunicationDTO",
     )
 
     # Publication
@@ -274,24 +299,28 @@ class Activity(models.Model):
         max_length=100,
         default="",
         blank=True,
+        # db_comment="Utilisé par PublicationDTO",
     )
     role = models.CharField(
         verbose_name=pgettext_lazy("activity", "Role"),
         max_length=100,
         default="",
         blank=True,
+        # db_comment="Utilisé par PublicationDTO",
     )
     keywords = models.CharField(
         verbose_name=pgettext_lazy("admission", "Keywords"),
         max_length=100,
         default="",
         blank=True,
+        # db_comment="Utilisé par PublicationDTO",
     )
     journal = models.CharField(
         verbose_name=_("Journal or publishing house name"),
         max_length=100,
         default="",
         blank=True,
+        # db_comment="Utilisé par PublicationDTO",
     )
 
     publication_status = models.CharField(
@@ -299,6 +328,7 @@ class Activity(models.Model):
         choices=ChoixStatutPublication.choices(),
         blank=True,
         default="",
+        # db_comment="Utilisé par PublicationDTO",
     )
 
     # Seminaires
@@ -307,6 +337,7 @@ class Activity(models.Model):
         max_length=100,
         default="",
         blank=True,
+        # db_comment="Utilisé par SeminaireDTO",
     )
 
     # UCL Course
@@ -315,38 +346,46 @@ class Activity(models.Model):
         null=True,
         blank=True,
         on_delete=models.PROTECT,
+        # db_comment="Utilisé par CoursUclDTO",
     )
     course_completed = models.BooleanField(
         blank=True,
         default=False,
+        # db_comment="Utilisé par CoursUclDTO",
     )
 
     # Process
     reference_promoter_assent = models.BooleanField(
         verbose_name=_("Lead supervisor assent"),
         null=True,
+        # db_comment="Activite.avis_promoteur_reference",
     )
     reference_promoter_comment = models.TextField(
         verbose_name=_("Lead supervisor comment"),
         default="",
+        # db_comment="Activite.commentaire_promoteur_reference",
     )
     cdd_comment = models.TextField(
         verbose_name=_("CDD manager comment"),
         default="",
+        # db_comment="Activite.commentaire_gestionnaire",
     )
 
     # Management
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=pgettext_lazy("admission", "Created at"),
+        # db_comment="",
     )
     modified_at = models.DateTimeField(
         auto_now=True,
         verbose_name=_("Modified at"),
+        # db_comment="",
     )
     can_be_submitted = models.BooleanField(
         default=False,
         verbose_name=_("Can be submitted"),
+        # db_comment="",
     )
 
     objects = models.Manager.from_queryset(ActivityQuerySet)()
@@ -367,6 +406,7 @@ class Activity(models.Model):
         )
 
     class Meta:
+        # db_table_comment = "Représente une activité doctorale (conférence, séminaire, ...)."
         verbose_name = _("Training activity")
         verbose_name_plural = _("Training activities")
         ordering = ['-created_at']
