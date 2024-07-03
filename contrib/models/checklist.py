@@ -64,6 +64,7 @@ class RefusalReason(OrderedModel):
         default=uuid.uuid4,
         editable=False,
         primary_key=True,
+        # db_comment='Proposition.motifs_refus'
     )
 
     name = RichTextField(
@@ -93,16 +94,19 @@ class AdditionalApprovalCondition(models.Model):
         default=uuid.uuid4,
         editable=False,
         primary_key=True,
+        # db_comment='Proposition.conditions_complementaires_existantes'
     )
 
     name_fr = RichTextField(
         verbose_name=_('French name'),
         config_name='link_only',
+        # db_comment='Proposition.conditions_complementaires_existantes'
     )
 
     name_en = RichTextField(
         verbose_name=_('English name'),
         config_name='link_only',
+        # db_comment='Proposition.conditions_complementaires_existantes'
     )
 
     order = models.FloatField(
