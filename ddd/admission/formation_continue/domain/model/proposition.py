@@ -74,7 +74,8 @@ class PropositionIdentity(interface.EntityIdentity):
 class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
     formation_id: 'FormationIdentity'
-    matricule_candidat: str
+    # Suggestion: Renforcer le typing -> transverse à tout le projet
+    matricule_candidat: str # global_id
     reference: int
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
