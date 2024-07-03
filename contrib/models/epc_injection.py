@@ -50,5 +50,7 @@ class EPCInjection(models.Model):
             Modèle technique stockant le dernier payload envoyé à EPC, l'ensemble des réponses venant d'EPC
             ainsi que le statut de l'injection et le lien vers le dossier à injecter.
             L'injection vers EPC est nécessaire car lorsque le dossier est validé dans OSIS-Admission, il faut
-            que le module Inscription Centrale ait le dossier afin de créer l'inscription à l'offre.
+            que le module Inscription Centrale ait le dossier afin de créer l'inscription à l'offre
+            ( = OSIS model : epc.InscriptionProgrammeCycle & epc.InscriptionProgrammeAnnuel
+              = EPC model : epc.etd_pgm & epc.etd_off_etd)
         """
