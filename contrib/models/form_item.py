@@ -567,6 +567,8 @@ class AdmissionFormItemInstantiation(models.Model):
         # d'une formation toute années confondues OU d'une formation annualisée"
 
     def clean(self):
+        # Suggestion déplacer les validations suivantes dans le modèle DB via
+        # https://docs.djangoproject.com/en/3.0/ref/models/constraints/#checkconstraint
         errors = {}
 
         if self.display_according_education == CritereItemFormulaireFormation.UNE_FORMATION.name:
