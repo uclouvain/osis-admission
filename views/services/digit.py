@@ -94,7 +94,8 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
             display_success_messages(request, "Ticket de création de compte envoyé avec succès dans DigIT")
         else:
             display_error_messages(request, "Une erreur est survenue lors de l'envoi dans DigIT")
-        return redirect(request.META['HTTP_REFERER'])
+
+        return redirect(request.META['HTTP_REFERER']) if request.META.get('HTTP_REFERER') else HttpResponse(status=200)
 
     @property
     def base_admission(self):

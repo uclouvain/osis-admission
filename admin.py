@@ -34,6 +34,8 @@ from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
+from django.template import TemplateDoesNotExist
+from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
@@ -829,6 +831,17 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
 
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
     list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit', 'send_to_digit')
+
+    def __init__(self, model, admin_site):
+        template_path = 'admin/send_digit_person_ticket.html'
+        try:
+            get_template(template_path)
+            self.change_list_template = template_path
+        except TemplateDoesNotExist:
+            pass
+
+        super().__init__(model, admin_site)
+
 
     @admin.display(description=_('Identifier'))
     def global_id(self, obj):
