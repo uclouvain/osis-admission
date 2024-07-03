@@ -140,18 +140,22 @@ class FreeAdditionalApprovalCondition(models.Model):
         on_delete=models.CASCADE,
         to=GeneralEducationAdmission,
         verbose_name=_('Admission'),
+        # db_comment='Proposition.conditions_complementaires_libres.demande_allocation_d_etudes_communaute_francaise_belgique'
     )
 
     name_fr = models.TextField(
         verbose_name=_('French name'),
         blank=True,
         default='',
+        # db_comment='Proposition.conditions_complementaires_libres.nom_fr'
+
     )
 
     name_en = models.TextField(
         verbose_name=_('English name'),
         blank=True,
         default='',
+        # db_comment='Proposition.conditions_complementaires_libres.nom_en'
     )
 
     related_experience = models.ForeignKey(
@@ -161,6 +165,7 @@ class FreeAdditionalApprovalCondition(models.Model):
         blank=True,
         null=True,
         to_field='uuid',
+        # db_comment='Proposition.conditions_complementaires_libres.uuid_experience'
     )
 
     def __str__(self):
