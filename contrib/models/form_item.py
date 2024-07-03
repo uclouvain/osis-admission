@@ -113,6 +113,7 @@ class AdmissionFormItem(models.Model):
         default=uuid.uuid4,
         editable=False,
         unique=True,
+        # db_comment = "Identifiant UUID de la configuration".
     )
     academic_years = models.ManyToManyField(
         'base.AcademicYear',
@@ -189,6 +190,7 @@ class AdmissionFormItem(models.Model):
     class Meta:
         verbose_name = _('Admission form item')
         verbose_name_plural = _('Admission form items')
+        # db_table_comment = "Modèle qui stocke la configuration des questions dynamiques".
 
     config_allowed_properties = {
         TypeItemFormulaire.TEXTE.name: {
@@ -445,12 +447,14 @@ class AdmissionFormItemInstantiation(models.Model):
         on_delete=models.PROTECT,
         to='AdmissionFormItem',
         verbose_name=_('Form item'),
+        #db_comment="Reférence vers l'élement du formulaire dynamique"
     )
     academic_year = models.ForeignKey(
         on_delete=models.CASCADE,
         related_name='+',
         to='base.AcademicYear',
         verbose_name=_('Academic year'),
+        #db_comment="Année académique d'application de l'élement du formulaire"
     )
     weight = models.PositiveIntegerField(
         verbose_name=_('Weight'),
@@ -460,15 +464,19 @@ class AdmissionFormItemInstantiation(models.Model):
             'elements for all trainings, then the elements for a type of training, then the elements for a specific '
             'training and finally the elements associated with a single admission).'
         ),
+        #db_comment="Position d'un element par rapport à un autre élément",
     )
     required = models.BooleanField(
         default=False,
         verbose_name=pgettext_lazy('masculine', 'Required'),
+        # db_comment="Est-ce que l'élement du formulaire est obligatoire ?"
     )
     display_according_education = models.CharField(
         choices=CritereItemFormulaireFormation.choices(),
         max_length=30,
         verbose_name=_('Display according education'),
+        # db_comment="Definition de la visibilité d'un élement selon une règle
+        # (CHOIX: TOUTE_FORMATION/TYPE_DE_FORMATION/UNE_FORMATION/UNE_SEULE_ADMISSION) "
     )
     education_group_type = models.ForeignKey(
         blank=True,
@@ -476,6 +484,7 @@ class AdmissionFormItemInstantiation(models.Model):
         on_delete=models.CASCADE,
         to='base.EducationGroupType',
         verbose_name=_('Type of training'),
+        # db_comment="Element visible selon le type de formation et la règle TYPE_DE_FORMATION"
     )
     education_group = models.ForeignKey(
         blank=True,
@@ -483,6 +492,7 @@ class AdmissionFormItemInstantiation(models.Model):
         on_delete=models.CASCADE,
         to='base.EducationGroup',
         verbose_name=pgettext_lazy('admission', 'Education'),
+        # db_comment="Element visible selon la formation et la règle UNE_FORMATION"
     )
     admission = models.ForeignKey(
         blank=True,
@@ -490,12 +500,15 @@ class AdmissionFormItemInstantiation(models.Model):
         on_delete=models.CASCADE,
         to='admission.BaseAdmission',
         verbose_name=_('Admission'),
+        # db_comment="Element visible selon l'admission et la règle UNE_SEULE_ADMISSION"
     )
     candidate_nationality = models.CharField(
         choices=CritereItemFormulaireNationaliteCandidat.choices(),
         default=CritereItemFormulaireNationaliteCandidat.TOUS.name,
         max_length=30,
         verbose_name=_('Candidate nationality'),
+        # db_comment="Definition de la visibilité d'un élement selon une règle sur la nationalité d'un candidat
+        # (Choix: BELGE / NON_BELGE / UE / NON_UE / TOUS | Defaut: TOUS) "
     )
     diploma_nationality = models.CharField(
         choices=CritereItemFormulaireNationaliteDiplome.choices(),
@@ -507,6 +520,8 @@ class AdmissionFormItemInstantiation(models.Model):
             "the candidate hasn't got any Belgian diploma but has a foreign diploma. Similarly, 'Not UE' means that "
             "the candidate hasn't got any UE diploma but has a non-UE diploma."
         ),
+        # db_comment="Definition de la visibilité d'un élement selon une règle sur la nationalité d'un diplôme
+        # (Choix: BELGE / NON_BELGE / UE / NON_UE / TOUS | Defaut: TOUS) "
     )
     study_language = models.CharField(
         choices=CritereItemFormulaireLangueEtudes.choices(),
@@ -517,6 +532,8 @@ class AdmissionFormItemInstantiation(models.Model):
             'Takes into account the language of secondary and higher education. Studies in Belgium are considered as '
             'both French and English studies.'
         ),
+        # db_comment="Definition de la visibilité d'un élement selon une règle sur la langue d'étude
+        # (Choix: AUCUNE_ETUDE_FR / AUCUNE_ETUDE_EN TOUS | Defaut: TOUS) "
     )
     vip_candidate = models.CharField(
         choices=CritereItemFormulaireVIP.choices(),
@@ -527,11 +544,15 @@ class AdmissionFormItemInstantiation(models.Model):
             'A candidate is considered as VIP if he/she is in double degree or if he/she benefits from an '
             'international scholarship or if he/she is Erasmus Mundus.'
         ),
+        # db_comment="Definition de la visibilité d'un élement selon une règle sur la notion de candidat VIP
+        # (Choix: VIP / NON_VIP / TOUS | Defaut: TOUS) "
     )
     tab = models.CharField(
         choices=Onglets.choices(),
         max_length=30,
         verbose_name=_('Tab'),
+        # db_comment="Element visible dans un des onglet du formualire
+        # (Choix: ETUDES_SECONDAIRES / CURRICULUM / CHOIX_FORMATION / INFORMATIONS_ADDITIONNELLES / DOCUMENTS)"
     )
 
     objects = AdmissionFormItemInstantiationManager()
@@ -542,6 +563,8 @@ class AdmissionFormItemInstantiation(models.Model):
     class Meta:
         verbose_name = _('Admission form item instantiation')
         verbose_name_plural = _('Admission form item instantiations')
+        # db_table_comment = "Table qui stocke la configuration des champs dynamiques d'une année spécifique OU
+        # d'une formation toute années confondues OU d'une formation annualisée"
 
     def clean(self):
         errors = {}
