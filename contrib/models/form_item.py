@@ -113,7 +113,7 @@ class AdmissionFormItem(models.Model):
         default=uuid.uuid4,
         editable=False,
         unique=True,
-        # db_comment = "Identifiant UUID de la configuration".
+        # db_comment = "Identifiant UUID d'un element du formulaire configuration".
     )
     academic_years = models.ManyToManyField(
         'base.AcademicYear',
@@ -124,15 +124,19 @@ class AdmissionFormItem(models.Model):
         max_length=255,
         verbose_name=_('Internal label'),
         unique=True,
+        # db_comment="Label interne technique"
     )
     type = models.CharField(
         choices=TypeItemFormulaire.choices(),
         max_length=30,
+        # db_comment="Type d'élement du formulaire (Choix: MESSAGE / TEXTE / DOCUMENT / SELECTION)"
     )
     title = TranslatedJSONField(
         blank=True,
         verbose_name=pgettext_lazy('admission', 'Title'),
         help_text=_('Question label for Document, Selection and Text form elements. Not used for Message elements.'),
+        # db_comment="Libellé de la question pour les éléments de formulaire de type Document, "
+        # "Sélection et Texte. N'est pas utilisé pour les éléments de type Message."
     )
     text = TranslatedJSONField(
         blank=True,
