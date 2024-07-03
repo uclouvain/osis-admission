@@ -235,52 +235,68 @@ class CddConfiguration(models.Model):
         on_delete=models.CASCADE,
         limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
         related_name='admission_config',
+        # db_comment="Entité de la CDD associée",
     )
     is_complementary_training_enabled = models.BooleanField(
         verbose_name=_("Enable complementary training tab"),
         default=False,
         help_text=_('This adds a "Complementary training" tab on admissions concerning this CDD.'),
+        # db_comment="Active ou non l'onglet Formation complémentaire pour les doctorats de cette CDD",
     )
     category_labels = TranslatedMultilineField(
         verbose_name=_("Category labels"),
         default=default_category_labels,
+        # db_comment="Libellés des catégories",
     )
     conference_types = TranslatedMultilineField(
         verbose_name=_("CONFERENCE types"),
         default=default_conference_types,
+        # db_comment="Libellés des types de conférences",
     )
     conference_publication_types = TranslatedMultilineField(
         verbose_name=_("CONFERENCE PUBLICATION types"),
         default=default_conference_publication_types,
+        # db_comment="Types d'activité pour une communication dans la catégorie Conférence",
     )
     communication_types = TranslatedMultilineField(
         verbose_name=_("COMMUNICATION types"),
         default=default_communication_types,
+        # db_comment="Types d'activité pour la catégorie Communication orale (hors conférence)",
     )
     seminar_types = TranslatedMultilineField(
         verbose_name=_("SEMINAR types"),
         default=default_seminar_types,
+        # db_comment="Types d'activité pour la catégorie Séminaire de recherche : assistance",
     )
     publication_types = TranslatedMultilineField(
         verbose_name=_("PUBLICATION types"),
         default=default_publication_types,
+        # db_comment="Types d'activité pour la catégorie Publication",
     )
     service_types = TranslatedMultilineField(
         verbose_name=_("SERVICE types"),
         default=default_service_types,
+        # db_comment="Types d'activité pour la catégorie Service institutionnel, didactique et d'expertise scientifique",
     )
     residency_types = TranslatedMultilineField(
         verbose_name=_("RESIDENCY types"),
         default=default_residency_types,
+        # db_comment="Types d'activité pour la catégorie Séjour de perfectionnement de recherche",
     )
     course_types = TranslatedMultilineField(
         verbose_name=_("COURSE types"),
         default=default_course_types,
+        # db_comment="Types d'activité pour la catégorie Cours",
     )
     complementary_course_types = TranslatedMultilineField(
         verbose_name=_("COURSE types for complementary training"),
         default=default_complementary_course_types,
+        # db_comment="Type de cours pour la formation complémentaire",
     )
 
     def __str__(self):  # pragma: no cover
         return f"Configuration for {self.cdd}"
+
+    class Meta:
+        pass
+        # db_table_comment = "Modèle utilisé pour configurer la CDD associée (activation d'onglets, configuration des libellés des différents types d'activités...)"
