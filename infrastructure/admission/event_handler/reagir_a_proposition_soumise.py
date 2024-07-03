@@ -26,7 +26,8 @@
 import contextlib
 from typing import Any
 
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand
+from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand, \
+    SoumettreTicketPersonneCommand
 from ddd.logic.comptabilite.commands import CreationClientCommand, PasserEcritureComptableFraisDossierAdmissionCommand
 from ddd.logic.comptabilite.domain.validator.exceptions import ClientDejaExistant
 
@@ -45,3 +46,9 @@ def recherche_et_validation_digit(
         niss=event.niss,
     ))
     msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
+    msg_bus.invoke(
+        SoumettreTicketPersonneCommand(
+            global_id=event.matricule,
+            annee=event.annee,
+        )
+    )

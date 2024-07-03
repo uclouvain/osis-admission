@@ -495,3 +495,8 @@ a.no-link {
 .fusion-data #id_identification_type{
   pointer-events: all !important;
 }
+
+.admission-collapse-button[aria-expanded="false"] i.fa-chevron-up,
+.admission-collapse-button[aria-expanded="true"] i.fa-chevron-down {
+  display: none;
+}

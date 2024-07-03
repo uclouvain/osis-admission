@@ -48,6 +48,8 @@ class WorkingList(OrderedModel):
         blank=True,
     )
 
+    quarantine = models.NullBooleanField()
+
     checklist_filters = models.JSONField(
         default=dict,
         verbose_name=_('Checklist filters'),

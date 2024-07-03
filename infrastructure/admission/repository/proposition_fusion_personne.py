@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import logging
+import re
 from typing import Optional, List
 
 from django.conf import settings
@@ -154,13 +155,28 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
 
     @classmethod
     def refuser(cls, global_id: str) -> PropositionFusionPersonneIdentity:
-        person_merge_proposal, _ = PersonMergeProposal.objects.update_or_create(
-            original_person__global_id=global_id,
-            defaults={
-                "status": PersonMergeStatus.REFUSED.name,
-            }
-        )
+        person_merge_proposal = PersonMergeProposal.objects.get(original_person__global_id=global_id)
+        if cls._peut_refuser_fusion(person_merge_proposal):
+            person_merge_proposal.status = PersonMergeStatus.REFUSED.name
+            person_merge_proposal.save()
+        # fail silently
         return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)
+
+    @classmethod
+    def _peut_refuser_fusion(cls, person_merge_proposal):
+        candidate = person_merge_proposal.original_person
+        digit_results = person_merge_proposal.similarity_result
+        for result in digit_results:
+            # ne peut pas refuser fusion si NISS identiques
+            if result['person']['nationalRegister'] and candidate['national_number'] and (
+                    result['person']['nationalRegister'] == cls._only_digits(candidate.national_number)
+            ):
+                return False
+        return True
+
+    @classmethod
+    def _only_digits(cls, input_string):
+        return re.sub('[^0-9]', '', input_string)
 
     @classmethod
     def fusionner(cls, candidate_global_id: str):

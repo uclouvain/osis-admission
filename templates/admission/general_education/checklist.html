@@ -1038,6 +1038,11 @@
               $(this).prop('action', `${$(this).prop('action')}?next={{ request.path }}&next_hash_url=${nextURLHash}`);
           });
 
+          // Update computed rule on financabilite tab show
+          $('#list-group-link-financabilite').on('show.bs.tab', function() {
+              htmx.trigger('#financabilite-computed-rule', 'financabiliteComputeRule');
+          });
+
       })(jQuery)
 
         $('#merge-experience-form').on('submit', (e) => {
@@ -1393,5 +1398,17 @@
       min-width: 0 !important;
     }
 
+    {# Customize the experience authentication message (history entry) #}
+    .experience-authentication-message {
+      white-space: pre-line;
+      min-height: 1.5em;
+      height: 1.5em;
+      display: block !important;
+      overflow-y: hidden;
+    }
+
+    .experience-authentication-message.collapse.in {
+      height: auto;
+    }
   </style>
 {% endblock style %}

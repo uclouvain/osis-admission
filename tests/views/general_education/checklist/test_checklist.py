@@ -44,6 +44,7 @@ from admission.tests.factories.curriculum import (
     AdmissionProfessionalValuatedExperiencesFactory,
     AdmissionEducationalValuatedExperiencesFactory,
 )
+from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
@@ -55,6 +56,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity import EntityWithVersionFactory
+from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from osis_profile.models.enums.curriculum import Result
 
 
@@ -74,6 +76,7 @@ class ChecklistViewTestCase(TestCase):
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            specific_question_answers={str(AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL).uuid): 0},
         )
         cls.candidate = cls.general_admission.candidate
 

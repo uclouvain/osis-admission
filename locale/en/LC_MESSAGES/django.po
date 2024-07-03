@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-28 15:25+0200\n"
+"POT-Creation-Date: 2024-06-28 11:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -295,9 +295,6 @@ msgstr ""
 msgid "ACKNOWLEDGED"
 msgstr "Acknowledged"
 
-msgid "ACQUIS_75_POURCENTS_CREDITS"
-msgstr ""
-
 msgid "ADMISSIBLE"
 msgstr "Admissible"
 
@@ -318,9 +315,6 @@ msgstr ""
 
 msgid "AVIS_DIRECTION_DEMANDE"
 msgstr ""
-
-msgid "A_CLARIFIER"
-msgstr "To be clarified"
 
 msgid "Absence of debt"
 msgstr ""
@@ -475,6 +469,7 @@ msgstr ""
 msgid "Add a new member"
 msgstr ""
 
+msgctxt "admission"
 msgid "Add a non-academic activity"
 msgstr ""
 
@@ -508,6 +503,7 @@ msgstr ""
 msgid "Add a service"
 msgstr ""
 
+msgctxt "admission"
 msgid "Add an academic course"
 msgstr ""
 
@@ -1140,9 +1136,6 @@ msgstr ""
 msgid "CDDs"
 msgstr ""
 
-msgid "CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS"
-msgstr ""
-
 msgid "CEP"
 msgstr ""
 
@@ -1158,15 +1151,6 @@ msgstr ""
 
 msgid "CHEMISTRY"
 msgstr "Chemistry"
-
-msgid "CINQ_G_1ERE_INSCRIPTION_MEME_CYCLE"
-msgstr ""
-
-msgid "CINQ_G_2EME_INSCRIPTION_AVEC_REORIENTATION"
-msgstr ""
-
-msgid "CINQ_G_2EME_INSCRIPTION_MEME_CYCLE"
-msgstr ""
 
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
@@ -1404,6 +1388,11 @@ msgid ""
 msgstr ""
 
 msgid "Cannot delete the experience because it is used in another context."
+msgstr ""
+
+msgid ""
+"Cannot discard merge because at least one known person has the same national "
+"number"
 msgstr ""
 
 msgid "Canvas"
@@ -2946,6 +2935,9 @@ msgstr ""
 msgid "Financability computed rule on"
 msgstr ""
 
+msgid "Financability computed rule situation"
+msgstr ""
+
 msgid "Financability dispensation"
 msgstr ""
 
@@ -2973,7 +2965,8 @@ msgstr ""
 msgid "Financability rule established by"
 msgstr ""
 
-msgid "Financable"
+#, python-format
+msgid "Financable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
 
 msgid "Financeability"
@@ -2990,6 +2983,10 @@ msgid "Financeabilty algorithm proposition on the %(date)s : %(result)s"
 msgstr ""
 
 msgid "Financeable"
+msgstr ""
+
+#, python-format
+msgid "Financeable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
 
 msgid "Financing rule"
@@ -3508,9 +3505,6 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr ""
-
-msgid "INDISPONIBLE"
-msgstr "Not available"
 
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidate"
@@ -4537,9 +4531,6 @@ msgstr ""
 msgid "NON_CONCERNE"
 msgstr "Not concerned"
 
-msgid "NON_FINANCABLE"
-msgstr "Not financeable"
-
 msgid "NON_SOUMISE"
 msgstr ""
 
@@ -4724,6 +4715,10 @@ msgid "Not concerned"
 msgstr ""
 
 msgid "Not financeable"
+msgstr ""
+
+#, python-format
+msgid "Not financeable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
 
 msgid "Not free"
@@ -4964,12 +4959,6 @@ msgstr ""
 
 msgid "PHYSICS"
 msgstr "Physics"
-
-msgid "PREMIERE_INSCRIPTION_MEME_CYCLE"
-msgstr ""
-
-msgid "PREMIERE_REORIENTATION_SUR_5_ANS"
-msgstr ""
 
 msgid "PRESIDENT"
 msgstr ""
@@ -5606,9 +5595,6 @@ msgstr ""
 msgid "Recipient"
 msgstr ""
 
-msgid "Recompute"
-msgstr ""
-
 msgctxt "F"
 msgid "Rector"
 msgstr ""
@@ -5934,9 +5920,6 @@ msgstr ""
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Research scholarship"
 
-msgid "SECONDE_INSCRIPTION_MEME_CYCLE"
-msgstr ""
-
 msgid "SECRETAIRE"
 msgstr ""
 
@@ -5980,24 +5963,6 @@ msgstr "Statistics"
 
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Submitted confirmation"
-
-msgid "SUR_2_ANS_45_CREDITS_11BA"
-msgstr ""
-
-msgid "SUR_2_ANS_45_CREDITS_MEME_CYCLE"
-msgstr ""
-
-msgid "SUR_2_ANS_MOITIE_CREDITS"
-msgstr ""
-
-msgid "SUR_3_ANS_45_CREDITS_11BA"
-msgstr ""
-
-msgid "SUR_3_ANS_45_CREDITS_MEME_CYCLE"
-msgstr ""
-
-msgid "SUR_3_ANS_MOITIE_CREDITS"
-msgstr ""
 
 msgid "SYST_REUSSITE"
 msgstr "System success"
@@ -6441,9 +6406,6 @@ msgstr "To be validated"
 
 msgid "TO_BE_VERIFIED"
 msgstr "To be verified"
-
-msgid "TROISIEME_INSCRIPTION_PREMIER_CYCLE_AVEC_REORIENTATION"
-msgstr ""
 
 msgid "Tab"
 msgstr ""
@@ -7543,6 +7505,11 @@ msgid "Waiting for signature"
 msgstr ""
 
 msgid "Wallonie Bruxelles International (WBI)"
+msgstr ""
+
+msgid ""
+"Warning, the financability verdict selected is different from the "
+"proposition from the financability algorithm."
 msgstr ""
 
 msgid ""
