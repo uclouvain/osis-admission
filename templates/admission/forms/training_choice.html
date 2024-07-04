@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 i18n static admission %}
+{% load component_tags bootstrap3 i18n static admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -28,7 +28,7 @@
 {% block form %}
   {% bootstrap_form_errors form %}
 
-  {% panel _('Choose your course') %}
+  {% component "panel" title=_('Choose your course') %}
 
     <div class="row">
       <div class="col-md-6 required_field">
@@ -55,11 +55,11 @@
         </div>
       {% endif %}
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 
   {% if view.is_general and admission.formation.type|admission_training_type == 'MASTER' %}
     {% translate 'Specific profile' context 'admission' as specific_profile_title %}
-    {% panel specific_profile_title id="student-profile" %}
+    {% component "panel" title=specific_profile_title id="student-profile" %}
       <div class="required_field">
         {% bootstrap_field_with_tooltip form.has_double_degree_scholarship %}
         <div id="double-degree-scholarship-field">
@@ -78,7 +78,7 @@
           {% bootstrap_field form.erasmus_mundus_scholarship show_label=False %}
         </div>
       </div>
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
   {% if view.is_continuing %}
@@ -121,9 +121,9 @@
   {% endif %}
 
   {% if form.specific_question_answers.field.fields %}
-    {% panel _('Specific aspects') %}
+    {% component "panel" title=_('Specific aspects') %}
       {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
 {% endblock %}

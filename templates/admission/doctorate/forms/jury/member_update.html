@@ -1,5 +1,5 @@
 {% extends "admission/doctorate/forms/tab_layout.html" %}
-{% load i18n admission enums bootstrap3 %}
+{% load component_tags i18n admission enums bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -31,10 +31,10 @@
 {% block tab_content %}
   <h3>{% trans "Jury composition" %}</h3>
 
-  {% panel _("Update member") %}
+  {% component "panel" title=_("Update member") %}
     {% trans "Update" context 'verb' as submit_label %}
     {% include "admission/doctorate/forms/jury/includes/member_form.html" with cancel=True %}
-  {% endpanel %}
+  {% endcomponent %}
 
 {% endblock %}
 

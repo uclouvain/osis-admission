@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission index enums academic_year_display %}
+{% load component_tags i18n static admission index enums academic_year_display %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -26,7 +26,7 @@
 {% endcomment %}
 
 {% block tab_content %}
-    {% panel _("Identification") %}
+    {% component "panel" title=_("Identification") %}
         <div style="display:flex; flex-direction: row;">
 
             <div class="original-person-data" style="flex: 1;">
@@ -101,9 +101,9 @@
             {% endif %}
 
         </div>
-    {% endpanel %}
+    {% endcomponent %}
 
-    {% panel _("Identity document") %}
+    {% component "panel" title=_("Identity document") %}
 
         <div style="display:flex; flex-direction: row;">
 
@@ -147,11 +147,9 @@
         {% endif %}
 
         </div>
+    {% endcomponent %}
 
-
-    {% endpanel %}
-
-    {% panel _("Former UCLouvain student") %}
+    {% component "panel" title=_("Former UCLouvain student") %}
         {% if person.last_registration_year %}
             {% field_data _('Have you previously enrolled at UCLouvain?') _('Yes') %}
             <div class="row">
@@ -161,7 +159,7 @@
         {% else %}
             {% field_data _('Have you previously enrolled at UCLouvain?') _('No') %}
         {% endif %}
-    {% endpanel %}
+    {% endcomponent %}
 {% endblock %}
 
 {% block script %}

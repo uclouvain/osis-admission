@@ -1,5 +1,5 @@
 {% extends "admission/doctorate/forms/tab_layout.html" %}
-{% load i18n admission enums bootstrap3 %}
+{% load component_tags i18n admission enums bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -32,7 +32,7 @@
   <h3>{% trans "Jury composition" %}</h3>
 
   {% translate 'President' context 'jury' as president_label %}
-  {% panel president_label %}
+  {% component "panel" title=president_label %}
     <div class="list-group">
     {% for membre in membre_president %}
       <div class="list-group-item membre-container">{% include "admission/doctorate/forms/jury/includes/member.html" %}</div>
@@ -40,9 +40,9 @@
       <div class="list-group-item">{% trans "You need to set a member as president." %}</div>
     {% endfor %}
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 
-  {% panel _("Secretary") %}
+  {% component "panel" title=_("Secretary") %}
     <div class="list-group">
     {% for membre in membre_secretaire %}
       <div class="list-group-item membre-container">{% include "admission/doctorate/forms/jury/includes/member.html" %}</div>
@@ -50,20 +50,20 @@
       <div class="list-group-item">{% trans "You need to set a member as secretary." %}</div>
     {% endfor %}
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 
-  {% panel _("Members") %}
+  {% component "panel" title=_("Members") %}
     <div class="list-group">
     {% for membre in membres %}
       <div class="list-group-item membre-container">{% include "admission/doctorate/forms/jury/includes/member.html" %}</div>
     {% endfor %}
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 
   {% if form %}
-  {% panel _("Add a new member") %}
+  {% component "panel" title=_("Add a new member") %}
     {% include "admission/doctorate/forms/jury/includes/member_form.html" %}
-  {% endpanel %}
+  {% endcomponent %}
   {% endif %}
 
 {% endblock %}

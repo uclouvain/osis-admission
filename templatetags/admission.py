@@ -139,45 +139,6 @@ SAINT_GILLES = 'Bruxelles Saint-Gilles'
 register = template.Library()
 
 
-class PanelNode(template.library.InclusionNode):
-    def __init__(self, nodelist: dict, func, takes_context, args, kwargs, filename):
-        super().__init__(func, takes_context, args, kwargs, filename)
-        self.nodelist_dict = nodelist
-
-    def render(self, context):
-        for context_name, nodelist in self.nodelist_dict.items():
-            context[context_name] = nodelist.render(context)
-        return super().render(context)
-
-
-def register_panel(filename, takes_context=None, name=None):
-    def dec(func):
-        params, varargs, varkw, defaults, kwonly, kwonly_defaults, _ = getfullargspec(func)
-        function_name = name or getattr(func, '_decorated_function', func).__name__
-
-        @wraps(func)
-        def compile_func(parser, token):
-            # {% panel %} and its arguments
-            bits = token.split_contents()[1:]
-            args, kwargs = template.library.parse_bits(
-                parser, bits, params, varargs, varkw, defaults, kwonly, kwonly_defaults, takes_context, function_name
-            )
-            nodelist_dict = {'panel_body': parser.parse(('footer', 'endpanel'))}
-            token = parser.next_token()
-
-            # {% footer %} (optional)
-            if token.contents == 'footer':
-                nodelist_dict['panel_footer'] = parser.parse(('endpanel',))
-                parser.next_token()
-
-            return PanelNode(nodelist_dict, func, takes_context, args, kwargs, filename)
-
-        register.tag(function_name, compile_func)
-        return func
-
-    return dec
-
-
 @register.simple_tag
 def display(*args):
     """Display args if their value is not empty, can be wrapped by parenthesis, or separated by comma or dash"""
@@ -224,35 +185,6 @@ def reduce_list_separated(arg1, arg2, separator=", "):
     elif arg2:
         return SafeString(arg2)
     return ""
-
-
-@register_panel('panel.html', takes_context=True)
-def panel(
-    context,
-    title='',
-    title_level=4,
-    additional_class='',
-    edit_link_button='',
-    edit_link_button_in_new_tab=False,
-    **kwargs,
-):
-    """
-    Template tag for panel
-    :param title: the panel title
-    :param title_level: the title level
-    :param additional_class: css class to add
-    :param edit_link_button: url of the edit button
-    :param edit_link_button_in_new_tab: open the edit link in a new tab
-    :type context: django.template.context.RequestContext
-    """
-    context['title'] = title
-    context['title_level'] = title_level
-    context['additional_class'] = additional_class
-    if edit_link_button:
-        context['edit_link_button'] = edit_link_button
-        context['edit_link_button_in_new_tab'] = edit_link_button_in_new_tab
-    context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
-    return context
 
 
 @register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)

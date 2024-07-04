@@ -1,4 +1,4 @@
-{% load i18n admission %}
+{% load component_tags i18n admission %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -28,12 +28,12 @@
   </p>
 
   {% if proposition.elements_confirmation.hors_delai %}
-    {% panel _("Academic year") %}
+    {% component "panel" title=_("Academic year") %}
       {{ proposition.elements_confirmation.hors_delai|safe }}
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
-  {% panel _("Approvals") additional_class="breakable-panel" %}
+  {% component "panel" title=_("Approvals") additional_class="breakable-panel" %}
     {% for name, content in proposition.elements_confirmation.items %}
       {% if name != 'hors_delai' and name not in undertake_declaration_fields %}
         <dl>
@@ -42,11 +42,11 @@
         </dl>
       {% endif %}
     {% endfor %}
-  {% endpanel %}
+  {% endcomponent %}
 
   {% has_value proposition.elements_confirmation undertake_declaration_fields as has_undertake_declaration_fields %}
   {% if has_undertake_declaration_fields %}
-    {% panel _("Commitment and declaration") %}
+    {% component "panel" title=_("Commitment and declaration") %}
       {% for field in undertake_declaration_fields %}
         {% get_item_or_default proposition.elements_confirmation field as field_value %}
         {% if field_value %}
@@ -56,7 +56,7 @@
           </dl>
         {% endif %}
       {% endfor %}
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
 {% else %}

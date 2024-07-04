@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission index %}
+{% load component_tags i18n static admission index %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -26,7 +26,7 @@
 {% endcomment %}
 
 {% block tab_content %}
-    {% panel _("Legal domicile") %}
+    {% component "panel" title=_("Legal domicile") %}
         <div class="row">
             <div class="col-md-4">{% field_data _("Street") coordonnees.residential.street %}</div>
             {% trans "Number" context "address" as address_number_label %}
@@ -39,10 +39,10 @@
             <div class="col-md-4">{% field_data _("Postcode") coordonnees.residential.postal_code %}</div>
             <div class="col-md-4">{% field_data _("City") coordonnees.residential.city %}</div>
         </div>
-    {% endpanel %}
+    {% endcomponent %}
     {% if coordonnees.contact %}
         {% translate 'Postal address' context 'admission' as contact_panel_title %}
-        {% panel contact_panel_title %}
+        {% component "panel" title=contact_panel_title %}
             <div class="row">
                 <div class="col-md-4">{% field_data _("Street") coordonnees.contact.street %}</div>
                 {% trans "Number" context "address" as address_number_label %}
@@ -55,9 +55,9 @@
                 <div class="col-md-4">{% field_data _("Postcode") coordonnees.contact.postal_code %}</div>
                 <div class="col-md-4">{% field_data _("City") coordonnees.contact.city %}</div>
             </div>
-        {% endpanel %}
+        {% endcomponent %}
     {% endif %}
-    {% panel _("Contact") %}
+    {% component "panel" title=_("Contact") %}
         <div class="row">
             {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}
             {% field_data mobile_phone_label coordonnees.phone_mobile "col-md-6" %}
@@ -67,5 +67,5 @@
         <div class="row">
             {% field_data _('Emergency contact (telephone number)') coordonnees.emergency_contact_phone "col-md-6" %}
         </div>
-    {% endpanel %}
+    {% endcomponent %}
 {% endblock %}

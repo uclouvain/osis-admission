@@ -1,4 +1,4 @@
-{% load i18n admission enums %}
+{% load component_tags i18n admission enums %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -24,7 +24,7 @@
 {% endcomment %}
 
 {% if is_general %}
-  {% panel _('Reduced tuition fee') %}
+  {% component "panel" title=_('Reduced tuition fee') %}
     {% field_data _('Have you applied for a student grant from the French Community of Belgium?') comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique %}
     {% field_data _('Are you the child of a UCLouvain or Martin V staff member?') comptabilite.enfant_personnel %}
     {% if comptabilite.enfant_personnel %}
@@ -39,11 +39,11 @@
         </p>
       </div>
     {% endif %}
-  {% endpanel %}
+  {% endcomponent %}
 {% endif %}
 
 {% if with_assimilation %}
-  {% panel _('Belgian student status') %}
+  {% component "panel" title=_('Belgian student status') %}
     {% if comptabilite.type_situation_assimilation == 'AUCUNE_ASSIMILATION' %}
       {% translate 'You specified that no Belgian student status situation applies to you.' %}
 
@@ -157,17 +157,17 @@
       {% field_data _('Your Belgian student status') comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
     {% endif %}
 
-  {% endpanel %}
+  {% endcomponent %}
 {% endif %}
 
-{% panel _('Memberships') %}
+{% component "panel" title=_('Memberships') %}
   {% if is_general and proposition.formation.campus in sport_affiliation_choices_by_campus %}
     {% field_data _('Would you like to join the sport activities? If so, the cost of membership will be added to your tuition fee.') comptabilite.affiliation_sport|enum_display:'ChoixAffiliationSport' %}
   {% endif %}
   {% field_data _("Would you like to become a Solidarity Student, that is, a member of a programme proposed by UCLouvain's NGO, Louvain Cooperation? This membership will give you access to a fund for your solidarity projects. If so, the membership cost, which is E12, will be added to your tuition fee.") comptabilite.etudiant_solidaire %}
-{% endpanel %}
+{% endcomponent %}
 
-{% panel _('Bank account') %}
+{% component "panel" title=_('Bank account') %}
   {% field_data _('Would you like to enter an account number so that we can issue a refund?') comptabilite.type_numero_compte|enum_display:'ChoixTypeCompteBancaire' %}
   {% if comptabilite.type_numero_compte == 'IBAN' %}
     {% field_data _('IBAN account number') comptabilite.numero_compte_iban %}
@@ -181,4 +181,4 @@
       {% field_data _('Account holder surname') comptabilite.nom_titulaire_compte css_class="col-md-6"  %}
     </div>
   {% endif %}
-{% endpanel %}
+{% endcomponent %}

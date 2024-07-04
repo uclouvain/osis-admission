@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 i18n static admission %}
+{% load component_tags bootstrap3 i18n static admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -65,9 +65,9 @@
       </div>
 
       {% if form.specific_question_answers.field.fields %}
-        {% panel _('Specific aspects') %}
+        {% component "panel" title=_('Specific aspects') %}
           {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
-        {% endpanel %}
+        {% endcomponent %}
       {% endif %}
     </div>
   </div>

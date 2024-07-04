@@ -1,4 +1,4 @@
-{% load i18n static enums admission bootstrap3 %}
+{% load component_tags i18n static enums admission bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -33,7 +33,7 @@
     {% firstof "JS_BUTTON" as edit_link_button %}
   {% endif %}
 
-  {% panel _('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-details' %}
+  {% component "panel" title=_('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-details' %}
     <div class="row">
       <div class="col-md-6">
         {% field_data _('Type') original_admission.foreign_access_title_equivalency_type|enum_display:'TypeEquivalenceTitreAcces' %}
@@ -57,10 +57,10 @@
         {% field_data _('Effective date') original_admission.foreign_access_title_equivalency_effective_date %}
       </div>
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 
   {% firstof "" as edit_link_button %}
-  {% panel _('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-form' edit_link_button=edit_link_button %}
+  {% component "panel" title=_('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-form' edit_link_button=edit_link_button %}
     <form
         hx-boost="true"
         hx-target="#previous-experiences-access-title-equivalency-container"
@@ -98,7 +98,7 @@
         </div>
       </div>
     </form>
-  {% endpanel %}
+  {% endcomponent %}
 
   {{ past_experiences_admission_access_title_equivalency_form.media }}
   <script>

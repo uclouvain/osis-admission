@@ -34,7 +34,7 @@
 {% endif %}
 
 
-{#  We cannot use {% panel %} as the title contains HTML #}
+{#  We cannot use {% component "panel" title=%} as the title contains HTML #}
 <div
     class="panel panel-{{ activity|status_as_class }}"
     data-status="{{ activity|status_list }}"

@@ -1,4 +1,4 @@
-{% load i18n admission enums academic_year_display %}
+{% load component_tags i18n admission enums academic_year_display %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -35,7 +35,7 @@
   {% endif %}
 {% endwith %}
 
-{% panel _("Identification") %}
+{% component "panel" title=_("Identification") %}
 
   <div style="display:flex; flex-direction: row;">
     <div class="original-person-data" style="flex: 1;">
@@ -114,9 +114,9 @@
 
 </div>
 
-{% endpanel %}
+{% endcomponent %}
 
-{% panel _("Identity document") %}
+{% component "panel" title=_("Identity document") %}
 
     <div style="display:flex; flex-direction: row;">
         <div class="original-person-data" style="flex: 1;">
@@ -168,9 +168,9 @@
 
     </div>
 
-{% endpanel %}
+{% endcomponent %}
 
-{% panel _("Former UCLouvain student") %}
+{% component "panel" title=_("Former UCLouvain student") %}
   <div style="display:flex; flex-direction: row;">
     <div class="original-person-data" style="flex: 1;">
 
@@ -203,4 +203,4 @@
 
     {% endif %}
   </div>
-{% endpanel %}
+{% endcomponent %}

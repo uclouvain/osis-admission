@@ -1,4 +1,4 @@
-{% load i18n admission enums academic_year_display %}
+{% load component_tags i18n admission enums academic_year_display %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -24,7 +24,7 @@
 {% endcomment %}
   {% if formation.type == 'BACHELOR' and etudes_secondaires.diplome_belge %}
 
-    {% panel _('Belgian diploma') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
+    {% component "panel" title=_('Belgian diploma') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
 
       {% field_data _('Secondary school graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
 
@@ -41,19 +41,19 @@
       {% display etudes_secondaires.diplome_belge.nom_institut ' ' '(' etudes_secondaires.diplome_belge.adresse_institut ')' as belgian_institute %}
       {% translate 'Institute' context 'admission' as institute_label %}
       {% field_data institute_label belgian_institute %}
-    {% endpanel %}
+    {% endcomponent %}
 
     {% if not hide_files %}
-      {% panel _('Attachments') %}
+      {% component "panel" title=_('Attachments') %}
         {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' or etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
           {% field_data _('Secondary school diploma') etudes_secondaires.diplome_belge.diplome %}
         {% endif %}
-      {% endpanel %}
+      {% endcomponent %}
     {% endif %}
 
   {% elif formation.type == 'BACHELOR' and etudes_secondaires.diplome_etranger %}
 
-    {% panel _('Foreign diploma') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
+    {% component "panel" title=_('Foreign diploma') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
 
       {% field_data _('Secondary school graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
 
@@ -75,10 +75,10 @@
         {% endif %}
       {% endif %}
 
-    {% endpanel %}
+    {% endcomponent %}
 
     {% if not hide_files %}
-      {% panel _('Attachments') %}
+      {% component "panel" title=_('Attachments') %}
         {% field_data _('Secondary school diploma') etudes_secondaires.diplome_etranger.diplome %}
 
         {% if need_translations %}
@@ -89,21 +89,21 @@
         {% if need_translations %}
           {% field_data _('A translation of your official transcript of marks for your final year of secondary school by a sworn translator') etudes_secondaires.diplome_etranger.traduction_releve_notes %}
         {% endif %}
-      {% endpanel %}
+      {% endcomponent %}
     {% endif %}
 
   {% elif formation.type == 'BACHELOR' and etudes_secondaires.alternative_secondaires %}
-    {% panel _('Secondary studies') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
+    {% component "panel" title=_('Secondary studies') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
       {% field_data _('Do you have a secondary school diploma?') _('No') %}
-    {% endpanel %}
+    {% endcomponent %}
     {% if not hide_files %}
-      {% panel _('Attachments') %}
+      {% component "panel" title=_('Attachments') %}
         {% field_data _("Certificate of passing the bachelor's course entrance exam") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
-      {% endpanel %}
+      {% endcomponent %}
     {% endif %}
 
   {% else %}
-    {% panel _('Secondary studies') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
+    {% component "panel" title=_('Secondary studies') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
       {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' %}
         {% blocktranslate trimmed with year=etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year asvar graduation_text %}
           Yes, in {{ year }}.
@@ -116,7 +116,7 @@
         {% blocktranslate asvar graduation_text %}No.{% endblocktranslate %}
       {% endif %}
       {% field_data _('Do you have a secondary school diploma?') graduation_text %}
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
   {% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}

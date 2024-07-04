@@ -1,4 +1,4 @@
-{% load i18n admission enums %}
+{% load component_tags i18n admission enums %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -22,7 +22,7 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% panel _("Course choice") %}
+{% component "panel" title=_("Course choice") %}
   {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' %}
   {% if proposition.justification %}
     {% field_data _("Brief justification") proposition.justification|linebreaks %}
@@ -33,10 +33,10 @@
   {% if proposition.commission_proximite %}
     {% field_data _("Proximity commission / Subdomain") proposition.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
   {% endif %}
-{% endpanel %}
+{% endcomponent %}
 
 {% translate 'Funding' context "admission" as funding_title %}
-{% panel funding_title %}
+{% component "panel" title=funding_title %}
   {% if proposition.type_financement %}
     {% field_data _("Funding type") proposition.type_financement|enum_display:'ChoixTypeFinancement' %}
     {% if proposition.type_financement == "WORK_CONTRACT" %}
@@ -56,9 +56,9 @@
     {% field_data _("Estimated time to complete the PhD (in months)") proposition.duree_prevue|default_if_none:'' %}
     {% field_data allocated_time_label proposition.temps_consacre|default_if_none:'' %}
   {% endif %}
-{% endpanel %}
+{% endcomponent %}
 
-{% panel _("Research project") %}
+{% component "panel" title=_("Research project") %}
   {% field_data _("Project title") proposition.titre_projet %}
   {% field_data _("Project resume") proposition.resume_projet|linebreaks %}
   {% field_data _("Thesis language") proposition.langue_redaction_these|enum_display:'ChoixLangueRedactionThese' %}
@@ -74,9 +74,9 @@
   {% field_data _("Gantt chart") proposition.graphe_gantt %}
   {% field_data _("Letters of recommendation") proposition.lettres_recommandation %}
 
-{% endpanel %}
+{% endcomponent %}
 
-{% panel _("Previous research experience") %}
+{% component "panel" title=_("Previous research experience") %}
   {% field_data _("Have you previously enrolled for a PhD?") proposition.doctorat_deja_realise|enum_display:'ChoixDoctoratDejaRealise' %}
   {% if proposition.doctorat_deja_realise != "NO" %}
     {% field_data _("Institution") proposition.institution %}
@@ -87,4 +87,4 @@
       {% field_data _("No defense reason") proposition.raison_non_soutenue|linebreaks %}
     {% endif %}
   {% endif %}
-{% endpanel %}
+{% endcomponent %}

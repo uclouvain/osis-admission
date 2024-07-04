@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n admission enums static academic_year_display %}
+{% load component_tags i18n admission enums static academic_year_display %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -32,13 +32,13 @@
       {% plural %}
       Certificates stating no debts to the institutions attended during the academic year {{ academic_year}}: {{ names }}.
     {% endblocktranslate %}
-    {% panel _('Absence of debt') %}
+    {% component "panel" title=_('Absence of debt') %}
       {% field_data absence_of_debt_label accounting.attestation_absence_dette_etablissement %}
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
   {% if is_general %}
-    {% panel _('Reduced tuition fee') %}
+    {% component "panel" title=_('Reduced tuition fee') %}
       {% field_data _('Have you applied for a student grant from the French Community of Belgium?') accounting.demande_allocation_d_etudes_communaute_francaise_belgique %}
       {% field_data _('Are you the child of a UCLouvain or Martin V staff member?') accounting.enfant_personnel %}
       {% if accounting.enfant_personnel %}
@@ -53,11 +53,11 @@
           </p>
         </div>
       {% endif %}
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
   {% if with_assimilation %}
-    {% panel _('Belgian student status') %}
+    {% component "panel" title=_('Belgian student status') %}
       {% if accounting.type_situation_assimilation == 'AUCUNE_ASSIMILATION' %}
         {% translate 'You specified that no Belgian student status situation applies to you.' %}
 
@@ -173,17 +173,17 @@
         {% field_data _('Your Belgian student status') accounting.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
       {% endif %}
 
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
-  {% panel _('Memberships') %}
+  {% component "panel" title=_('Memberships') %}
     {% if is_general and admission.formation.campus in sport_affiliation_choices_by_campus %}
       {% field_data _('Would you like to join the sport activities? If so, the cost of membership will be added to your tuition fee.') accounting.affiliation_sport|enum_display:'ChoixAffiliationSport' %}
     {% endif %}
     {% field_data _("Would you like to become a Solidarity Student, that is, a member of a programme proposed by UCLouvain's NGO, Louvain Cooperation? This membership will give you access to a fund for your solidarity projects. If so, the membership cost, which is E12, will be added to your tuition fee.") accounting.etudiant_solidaire %}
-  {% endpanel %}
+  {% endcomponent %}
 
-  {% panel _('Bank account') %}
+  {% component "panel" title=_('Bank account') %}
     {% field_data _('Would you like to enter an account number so that we can issue a refund?') accounting.type_numero_compte|enum_display:'ChoixTypeCompteBancaire' %}
     {% if accounting.type_numero_compte == 'IBAN' %}
       <dl>
@@ -206,7 +206,7 @@
         {% field_data _('Account holder surname') accounting.nom_titulaire_compte css_class="col-md-6"  %}
       </div>
     {% endif %}
-  {% endpanel %}
+  {% endcomponent %}
 {% endblock %}
 
 {% block style %}

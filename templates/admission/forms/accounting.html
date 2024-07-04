@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 i18n admission %}
+{% load component_tags bootstrap3 i18n admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -27,13 +27,13 @@
 
 {% block form %}
   {% if accounting.derniers_etablissements_superieurs_communaute_fr_frequentes %}
-    {% panel _('Absence of debt') %}
+    {% component "panel" title=_('Absence of debt') %}
       {% bootstrap_field form.attestation_absence_dette_etablissement form_group_class="form-group required_field" %}
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
   {% if is_general %}
-    {% panel _('Reduced tuition fee') %}
+    {% component "panel" title=_('Reduced tuition fee') %}
       {% bootstrap_field form.demande_allocation_d_etudes_communaute_francaise_belgique form_group_class="form-group required_field" %}
       {% bootstrap_field_with_tooltip form.enfant_personnel classes="required_field" %}
       <div id="staff-child-container">
@@ -44,11 +44,11 @@
           whether they meet the requirements, and if so, request the certificate that confirms this.
         {% endblocktranslate %}
       </div>
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
   {% if with_assimilation %}
-    {% panel _('Belgian student status') %}
+    {% component "panel" title=_('Belgian student status') %}
       {% with field=form.type_situation_assimilation %}
         <div class="form-group required_field {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %}">
           {% bootstrap_label field.label label_for=form.type_situation_assimilation.0.id_for_label label_class='control-label' %}
@@ -214,10 +214,10 @@
         {% bootstrap_field form.titre_sejour_belgique form_group_class="form-group required_field" %}
       </div>
 
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
-  {% panel _('Memberships') %}
+  {% component "panel" title=_('Memberships') %}
     {% if is_general %}
       {% bootstrap_field form.affiliation_sport form_group_class="form-group required_field" %}
     {% endif %}
@@ -227,9 +227,9 @@
         You will receive a monthly newsletter explaining all the benefits and activities associated with this programme.
       {% endblocktranslate %}
     </p>
-  {% endpanel %}
+  {% endcomponent %}
 
-  {% panel _('Bank account') %}
+  {% component "panel" title=_('Bank account') %}
     {% bootstrap_field form.type_numero_compte form_group_class="form-group required_field" %}
     <div id="bank-iban-container">
       {% bootstrap_field_with_tooltip form.numero_compte_iban classes="required_field" %}
@@ -242,7 +242,7 @@
       {% bootstrap_field form.prenom_titulaire_compte form_group_class="form-group required_field col-md-6" placeholder='' %}
       {% bootstrap_field form.nom_titulaire_compte form_group_class="form-group required_field col-md-6" placeholder='' %}
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 {% endblock %}
 
 {% block style %}

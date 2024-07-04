@@ -1,4 +1,4 @@
-{% load i18n admission %}
+{% load component_tags i18n admission %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -22,18 +22,18 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% panel _("Promoters") %}
+{% component "panel" title=_("Promoters") %}
   {% for signature in groupe_supervision.signatures_promoteurs %}
     {% include "admission/exports/recap/includes/supervision_member_entry.html" with type='PROMOTER' member=signature.promoteur supervision=groupe_supervision %}
   {% empty %}
     {% trans "No one invited" %}
   {% endfor %}
-{% endpanel %}
+{% endcomponent %}
 
-{% panel _("CA members") %}
+{% component "panel" title=_("CA members") %}
   {% for signature in groupe_supervision.signatures_membres_CA %}
     {% include "admission/exports/recap/includes/supervision_member_entry.html" with type='CA_MEMBER' member=signature.membre_CA %}
   {% empty %}
     {% trans "No one invited" %}
   {% endfor %}
-{% endpanel %}
+{% endcomponent %}
