@@ -260,6 +260,22 @@ class DigitRepository(IDigitRepository):
         candidate.external_id = f"osis.person_{digit_global_id}"
         candidate.save()
 
+    @classmethod
+    def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
+        candidate = Person.objects.get(global_id=global_id)
+        if hasattr(candidate, 'personmergeproposal'):
+            return candidate.personmergeproposal.registration_id_sent_to_digit or None
+        else:
+            return None
+
+    @classmethod
+    def has_digit_creation_ticket(cls, global_id: str) -> bool:
+        candidate = Person.objects.get(global_id=global_id)
+        if hasattr(candidate, 'personcreationticket'):
+            return bool(candidate.personcreationticket)
+        else:
+            return False
+
 
 def _retrieve_person_ticket_status(request_id: int):
     if settings.MOCK_DIGIT_SERVICE_CALL:

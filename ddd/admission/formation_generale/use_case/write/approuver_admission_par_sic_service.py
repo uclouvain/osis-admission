@@ -117,15 +117,18 @@ def approuver_admission_par_sic(
         auteur=cmd.auteur,
     )
 
-    noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-        annee=proposition.formation_id.annee
-    )
-
-    digit.submit_person_ticket(
-        global_id=proposition.matricule_candidat,
-        noma=noma
-    )
+    # send digit creation ticket if not sent yet
+    if not digit.has_digit_creation_ticket(global_id=proposition.matricule_candidat):
+        noma = digit.get_registration_id_sent_to_digit(global_id=proposition.matricule_candidat)
+        if noma is None:
+            noma = NomaGenerateurService.generer_noma(
+                compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
+                annee=proposition.formation_id.annee
+            )
+        digit.submit_person_ticket(
+            global_id=proposition.matricule_candidat,
+            noma=noma
+        )
 
     message = notification.accepter_proposition_par_sic(
         proposition=proposition,
