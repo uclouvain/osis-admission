@@ -82,9 +82,14 @@ COMMAND_HANDLERS = {
 EVENT_HANDLERS = {}
 
 if 'admission' in settings.INSTALLED_APPS:
-    from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent
+    from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent, \
+    InscriptionApprouveeParSicEvent, AdmissionApprouveeParSicEvent
+    from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import \
+        reagir_a_approuver_proposition
 
     EVENT_HANDLERS = {
         **EVENT_HANDLERS,
         PropositionSoumiseEvent: [recherche_et_validation_digit],
+        InscriptionApprouveeParSicEvent: [reagir_a_approuver_proposition],
+        AdmissionApprouveeParSicEvent: [reagir_a_approuver_proposition],
     }
