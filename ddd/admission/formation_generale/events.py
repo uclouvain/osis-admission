@@ -49,4 +49,30 @@ class PropositionSoumiseEvent(Event):
     date_naissance: str
     genre: str
     niss: Optional[str]
-    annee: Optional[str]
+    annee: int
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class InscriptionApprouveeParSicEvent(Event):
+    entity_id: 'PropositionIdentity'
+    matricule: str
+    nom: str
+    prenom: str
+    autres_prenoms: Optional[str]
+    date_naissance: str
+    genre: str
+    niss: Optional[str]
+    annee: int
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class AdmissionApprouveeParSicEvent(Event):
+    entity_id: 'PropositionIdentity'
+    matricule: str
+    nom: str
+    prenom: str
+    autres_prenoms: Optional[str]
+    date_naissance: str
+    genre: str
+    niss: Optional[str]
+    annee: int

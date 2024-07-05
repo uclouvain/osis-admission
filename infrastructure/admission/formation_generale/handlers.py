@@ -638,7 +638,8 @@ COMMAND_HANDLERS = {
     ),
     ApprouverAdmissionParSicCommand: (
         lambda msg_bus, cmd: approuver_admission_par_sic(
-            cmd,
+            message_bus=msg_bus,
+            cmd=cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
@@ -650,13 +651,12 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
-            digit=DigitRepository(),
-            compteur_noma=CompteurAnnuelPourNomaRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
         lambda msg_bus, cmd: approuver_inscription_par_sic(
-            cmd,
+            message_bus=msg_bus,
+            cmd=cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
@@ -666,8 +666,6 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
-            digit=DigitRepository(),
-            compteur_noma=CompteurAnnuelPourNomaRepository(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (

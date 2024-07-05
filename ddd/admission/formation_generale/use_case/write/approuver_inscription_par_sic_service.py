@@ -34,14 +34,13 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.events import InscriptionApprouveeParSicEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_digit import IDigitRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
-from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
 
 def approuver_inscription_par_sic(
+    message_bus,
     cmd: ApprouverInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
@@ -52,13 +51,12 @@ def approuver_inscription_par_sic(
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
-    digit: 'IDigitRepository',
-    compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
+    identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
     annee_courante = (
         GetCurrentAcademicYear()
@@ -91,25 +89,6 @@ def approuver_inscription_par_sic(
 
     # THEN
     proposition_repository.save(entity=proposition)
-
-    noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-        annee=proposition.formation_id.annee,
-    )
-
-    # send digit creation ticket if not sent yet
-    if not digit.has_digit_creation_ticket(global_id=proposition.matricule_candidat):
-        noma = digit.get_registration_id_sent_to_digit(global_id=proposition.matricule_candidat)
-        if noma is None:
-            noma = NomaGenerateurService.generer_noma(
-                compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-                annee=proposition.formation_id.annee
-            )
-        digit.submit_person_ticket(
-            global_id=proposition.matricule_candidat,
-            noma=noma
-        )
-
     message = notification.accepter_proposition_par_sic(
         proposition=proposition,
         objet_message=cmd.objet_message,
@@ -121,4 +100,17 @@ def approuver_inscription_par_sic(
         gestionnaire=cmd.auteur,
     )
 
+    message_bus.publish(
+        InscriptionApprouveeParSicEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+            nom=identification.nom,
+            prenom=identification.prenom,
+            autres_prenoms=identification.autres_prenoms,
+            date_naissance=str(identification.date_naissance),
+            genre=identification.genre,
+            niss=identification.numero_registre_national_belge,
+            annee=proposition.annee_calculee,
+        )
+    )
     return proposition.entity_id
