@@ -114,7 +114,7 @@ class DigitService(IDigitService):
             }
         )
 
-        return
+        return similarity_data
 
 
 def _get_status_from_digit_response(similarity_data):
