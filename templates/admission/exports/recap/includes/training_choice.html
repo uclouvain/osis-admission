@@ -1,4 +1,4 @@
-{% load i18n admission enums %}
+{% load component_tags i18n admission enums %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -22,7 +22,7 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% panel _('Choose your course') %}
+{% component "panel" title=_('Choose your course') %}
   {% if is_doctorate %}
     {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' %}
     {% if proposition.justification %}
@@ -38,10 +38,10 @@
       {% field_data _("Proximity commission / Subdomain") proposition.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
     {% endif %}
   {% endif %}
-{% endpanel %}
+{% endcomponent %}
 
 {% if formation.type|admission_training_type == 'MASTER' %}
-  {% panel _('Specific profile') %}
+  {% component "panel" title=_('Specific profile') %}
     {% with proposition.bourse_double_diplome.nom_court|default:_('No') as short_name %}
       {% field_data _('Dual degree scholarship') proposition.bourse_double_diplome.nom_long|default:short_name %}
     {% endwith %}
@@ -51,7 +51,7 @@
     {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
       {% field_data _('Erasmus Mundus') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
     {% endwith %}
-  {% endpanel %}
+  {% endcomponent %}
 {% endif %}
 
 {% if is_continuing %}

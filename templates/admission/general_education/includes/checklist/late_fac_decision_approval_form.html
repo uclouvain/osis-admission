@@ -1,4 +1,4 @@
-{% load i18n admission %}
+{% load component_tags i18n admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -33,7 +33,7 @@
 
     {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic_with_decision' as can_transfer_to_sic %}
 
-    {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to') additional_class='panel-with-default-header-font-size' %}
+    {% component "panel" title=_('Diploma(s) or non-academic activity(ies) giving access to') additional_class='panel-with-default-header-font-size' %}
       <div id='fac-decision-access-titles' hx-preserve="true">
         {% if selected_access_titles_names %}
           <ul>
@@ -45,7 +45,7 @@
           {% translate 'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving access to the chosen program.' %}
         {% endif %}
       </div>
-    {% endpanel %}
+    {% endcomponent %}
   </div>
 
   <div class="modal-footer">

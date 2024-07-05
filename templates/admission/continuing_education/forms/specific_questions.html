@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 admission i18n %}
+{% load bootstrap3 component_tags admission i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -28,7 +28,7 @@
 {% block form %}
   {% bootstrap_form_errors form %}
 
-  {% panel _('Specific aspects') %}
+  {% component "panel" title=_('Specific aspects') %}
     {% if form.display_residence_permit_question %}
       <p class="alert alert-info text-justify">
         {% blocktranslate trimmed %}
@@ -52,7 +52,7 @@
       </div>
       {% bootstrap_field form.adresse_mail_professionnelle placeholder='' form_group_class='form-group required_field' %}
       {% bootstrap_field form.type_adresse_facturation form_group_class='form-group required_field' %}
-      {% panel _("Billing address") id="billing-address-container" %}
+      {% component "panel" title=_("Billing address") id="billing-address-container" %}
         {% bootstrap_field form.adresse_facturation_destinataire placeholder='' %}
         <div class="row">
           <div class="col-md-4 required_field formatted-field">
@@ -86,11 +86,11 @@
             </div>
           </div>
         </div>
-      {% endpanel %}
+      {% endcomponent %}
     </div>
     {% bootstrap_field form.reponses_questions_specifiques show_label=False error_css_class='' %}
     {% bootstrap_field form.documents_additionnels %}
-  {% endpanel %}
+  {% endcomponent %}
 {% endblock %}
 
 {% block script %}

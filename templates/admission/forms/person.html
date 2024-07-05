@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 i18n static admission %}
+{% load component_tags bootstrap3 i18n static admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -27,7 +27,7 @@
 
 {% block form %}
   {% bootstrap_form_errors form %}
-  {% panel _("Identification") %}
+  {% component "panel" title=_("Identification") %}
     <div class="row">
       <div class="col-md-4">
         {% bootstrap_field form.last_name form_group_class='form-group required_field formatted-field container_last_name' %}
@@ -81,9 +81,9 @@
         {% bootstrap_field_with_tooltip form.language classes="required_field" %}
       </div>
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 
-  {% panel _("Identity document") %}
+  {% component "panel" title=_("Identity document") %}
     <div id="has_national_number_container" class="required_field">
       {% bootstrap_field_with_tooltip form.has_national_number %}
     </div>
@@ -112,15 +112,15 @@
       </div>
     </div>
 
-  {% endpanel %}
+  {% endcomponent %}
 
-  {% panel _("Former UCLouvain student") %}
+  {% component "panel" title=_("Former UCLouvain student") %}
     {% bootstrap_field form.already_registered form_group_class="form-group required_field" %}
     <div id="already_registered">
       {% bootstrap_field form.last_registration_year form_group_class="form-group required_field" %}
       {% bootstrap_field form.last_registration_id form_group_class="form-group" %}
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 {% endblock %}
 
 {% block script %}

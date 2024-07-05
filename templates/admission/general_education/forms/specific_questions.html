@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 admission i18n %}
+{% load component_tags bootstrap3 admission i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -29,7 +29,7 @@
   {% bootstrap_form_errors form %}
 
   {% if view.is_general and view.display_visa_question %}
-    {% panel _('Visa') %}
+    {% component "panel" title=_('Visa') %}
       <p>
         {% blocktranslate trimmed %}
           On the basis of the information you have provided, you will need to apply for a student visa if your
@@ -45,17 +45,17 @@
           {% bootstrap_field form.poste_diplomatique %}
         </div>
       </div>
-    {% endpanel %}
+    {% endcomponent %}
   {% endif %}
 
   {% if view.display_pool_questions %}
     {% if form.est_non_resident_au_sens_decret %}
-      {% panel _("Enrolment in limited enrolment bachelor's course") %}
+      {% component "panel" title=_("Enrolment in limited enrolment bachelor's course") %}
         {% bootstrap_field form.est_non_resident_au_sens_decret form_group_class="form-group required_field" %}
-      {% endpanel %}
+      {% endcomponent %}
     {% endif %}
 
-    {% panel _("Change of enrolment and course change") id="panel-modification-reorientation" %}
+    {% component "panel" title=_("Change of enrolment and course change") id="panel-modification-reorientation" %}
       {% bootstrap_field form.est_bachelier_belge form_group_class="form-group required_field" %}
 
       <div id="belgian-bachelor-children">
@@ -74,14 +74,14 @@
         </div>
 
       </div>
-    {% endpanel %}
+    {% endcomponent %}
 
   {% endif %}
 
-  {% panel _('Specific aspects') %}
+  {% component "panel" title=_('Specific aspects') %}
     {% bootstrap_field form.reponses_questions_specifiques show_label=False error_css_class='' %}
     {% bootstrap_field form.documents_additionnels %}
-  {% endpanel %}
+  {% endcomponent %}
 
 {% endblock %}
 

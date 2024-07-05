@@ -1,4 +1,4 @@
-{% load admission enums i18n academic_year_display %}
+{% load component_tags admission enums i18n academic_year_display %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -35,7 +35,7 @@
      hx-swap="outerHTML"
      hx-push-url="false"
 >
-  {% panel _("Proposition features") edit_link_button=edit_choix_formation_url %}
+  {% component "panel" title=_("Proposition features") edit_link_button=edit_choix_formation_url %}
     {% field_data _("Proposition type") admission.type|enum_display:'TypeDemande' %}
     {% field_data _("Academic year") admission.annee_calculee|get_short_academic_year %}
     <dl>
@@ -55,5 +55,5 @@
       {% field_data _("Cycle pursuit") admission.poursuite_de_cycle|enum_display:'PoursuiteDeCycle' %}
       {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' %}</div>{% endif %}
     {% endif %}
-  {% endpanel %}
+  {% endcomponent %}
 </div>

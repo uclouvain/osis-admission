@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document statici18n strings %}
+{% load component_tags i18n static admission bootstrap3 enums osis_document statici18n strings %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -211,9 +211,9 @@
               <dd class="mb-15">{% trans "Unavailable" %}</dd>
             </dl>
 
-            {% panel _("Parcours") %}
+            {% component "panel" title=_("Parcours") %}
             {% include "admission/general_education/includes/checklist/parcours.html" with prefix="financabilite" default_tab="financabilite" show_actions=can_update_curriculum %}
-            {% endpanel %}
+            {% endcomponent %}
           </div>
         </div>
 
@@ -317,9 +317,9 @@
           {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
           {% bootstrap_form comment_forms.parcours_anterieur %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
-          {% panel _("Previous experience") %}
+          {% component "panel" title=_("Previous experience") %}
             {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' show_actions=can_update_curriculum %}
-          {% endpanel %}
+          {% endcomponent %}
           <div class="info-part">
             <strong>
               {% translate 'Financeability' %}
@@ -407,9 +407,9 @@
 
           <div class="info-part">
             {% if resume_proposition.identification.est_concerne_par_visa %}
-              {% panel _("Visa") edit_link_button=specific_questions_url|add:next_url %}
+              {% component "panel" title=_("Visa") edit_link_button=specific_questions_url|add:next_url %}
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
-              {% endpanel %}
+              {% endcomponent %}
             {% endif %}
             {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Specific questions') %}
           </div>

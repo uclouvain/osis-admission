@@ -1,4 +1,4 @@
-{% load i18n admission enums %}
+{% load component_tags i18n admission enums %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -36,7 +36,7 @@
   {% endif %}
 {% endwith %}
 
-{% panel _("Legal domicile") %}
+{% component "panel" title=_("Legal domicile") %}
 
     <div style="display:flex; flex-direction: row;">
         <div class="original-person-data" style="flex: 1;">
@@ -79,11 +79,11 @@
 
     </div>
 
-{% endpanel %}
+{% endcomponent %}
 
 {% if coordonnees.adresse_correspondance %}
   {% trans "Postal address" context "admission" as contact_address_label %}
-  {% panel contact_address_label %}
+  {% component "panel" title=contact_address_label %}
     <div class="row">
       <div class="col-md-4">{% field_data _("Street") coordonnees.adresse_correspondance.rue %}</div>
       {% trans "Number" context "address" as address_number_label %}
@@ -95,10 +95,10 @@
       <div class="col-md-4">{% field_data _("Postcode") coordonnees.adresse_correspondance.code_postal %}</div>
       <div class="col-md-4">{% field_data _("City") coordonnees.adresse_correspondance.ville %}</div>
     </div>
-  {% endpanel %}
+  {% endcomponent %}
 {% endif %}
 
-{% panel _("Contact") %}
+{% component "panel" title=_("Contact") %}
     <div style="display:flex; flex-direction: row;">
         <div class="original-person-data" style="flex: 1;">
 
@@ -133,4 +133,4 @@
         {% endif %}
 
     </div>
-{% endpanel %}
+{% endcomponent %}

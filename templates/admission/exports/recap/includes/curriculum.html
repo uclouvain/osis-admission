@@ -1,4 +1,4 @@
-{% load i18n admission %}
+{% load component_tags i18n admission %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -25,7 +25,7 @@
 {% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
 
 {% if display_equivalence and not hide_files or display_curriculum and not hide_files or specific_questions_to_display %}
-  {% panel _('Specific aspects') %}
+  {% component "panel" title=_('Specific aspects') %}
     {% if display_equivalence %}
       {% field_data _("Copy of equivalency decision issued by the French Community of Belgium making your bachelor's diploma (bac+5) equivalent to the academic rank of a corresponding master's degree.") proposition.equivalence_diplome %}
     {% endif %}
@@ -33,5 +33,5 @@
       {% field_data _('Curriculum') proposition.curriculum %}
     {% endif %}
     {% multiple_field_data specific_questions title='' %}
-  {% endpanel %}
+  {% endcomponent %}
 {% endif %}

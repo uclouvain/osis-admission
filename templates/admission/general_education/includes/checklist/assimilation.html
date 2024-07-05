@@ -1,4 +1,4 @@
-{% load i18n enums admission %}
+{% load component_tags i18n enums admission %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -45,13 +45,13 @@
   {% endif %}
 
   {% if in_panel %}
-    {% panel _("Belgian student status") edit_link_button=contextual_comptabilite_url %}
+    {% component "panel" title=_("Belgian student status") edit_link_button=contextual_comptabilite_url %}
       {% if resume_proposition.identification.pays_nationalite_europeen is False %}
         {{ chosen_assimilation }}
       {% else %}
         {% translate 'Not concerned' context 'checklist' %}
       {% endif %}
-    {% endpanel %}
+    {% endcomponent %}
   {% else %}
     {% if resume_proposition.identification.pays_nationalite_europeen is False and comptabilite.type_situation_assimilation and comptabilite.type_situation_assimilation != 'AUCUNE_ASSIMILATION' %}
       {% display _("Belgian student status") ''|edit_button:contextual_comptabilite_url as button %}

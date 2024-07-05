@@ -1,4 +1,4 @@
-{% load i18n admission enums %}
+{% load component_tags i18n admission enums %}
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -24,12 +24,12 @@
 {% endcomment %}
 {% if connaissances_langues %}
   {% for langue in connaissances_langues %}
-    {% panel langue.nom_langue %}
+    {% component "panel" title=langue.nom_langue %}
       {% field_data _("Listening comprehension") langue.comprehension_orale %}
       {% field_data _("Speaking ability") langue.capacite_orale %}
       {% field_data _("Writing ability") langue.capacite_ecriture %}
       {% field_data _("Certificate of language knowledge") langue.certificat %}
-    {% endpanel %}
+    {% endcomponent %}
   {% endfor %}
 {% else %}
   <p>{% trans "No knowledge of languages provided." %}</p>

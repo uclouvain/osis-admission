@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 i18n static admission %}
+{% load component_tags bootstrap3 i18n static admission %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -30,7 +30,7 @@
     {% bootstrap_form_errors residential %}
     {% bootstrap_form_errors contact %}
 
-    {% panel _("Legal domicile") %}
+    {% component "panel" title=_("Legal domicile") %}
         <div class="row">
             <div class="col-md-4 required_field formatted-field">{% bootstrap_field residential.street %}</div>
             <div class="col-md-4 required_field">{% bootstrap_field residential.street_number placeholder="" %}</div>
@@ -48,10 +48,10 @@
             </div>
         </div>
         <div>{% bootstrap_field main_form.show_contact %}</div>
-    {% endpanel %}
+    {% endcomponent %}
 
     {% translate "Postal address" context "admission" as contact_address_label %}
-    {% panel contact_address_label id="contact_address" %}
+    {% component "panel" title=contact_address_label id="contact_address" %}
         <div class="row">
             <div class="col-md-4 required_field formatted-field">{% bootstrap_field contact.street %}</div>
             <div class="col-md-4 required_field">{% bootstrap_field contact.street_number placeholder="" %}</div>
@@ -68,9 +68,9 @@
                 <div class="col-md-4 required_field">{% bootstrap_field contact.be_city placeholder="" %}</div>
             </div>
         </div>
-    {% endpanel %}
+    {% endcomponent %}
 
-    {% panel _("Contact") %}
+    {% component "panel" title=_("Contact") %}
         <div class="row">
             <div class="col-md-6 required_field">{% bootstrap_field main_form.phone_mobile %}</div>
             <div class="col-md-6">{% bootstrap_field main_form.private_email placeholder="" %}</div>
@@ -78,7 +78,7 @@
         <div class="row">
             <div class="col-md-6">{% bootstrap_field main_form.emergency_contact_phone %}</div>
         </div>
-    {% endpanel %}
+    {% endcomponent %}
 {% endblock %}
 
 {% block script %}

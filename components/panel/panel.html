@@ -1,0 +1,62 @@
+{% load admission component_tags %}
+
+{% comment "License" %}
+ * OSIS stands for Open Student Information System. It's an application
+ * designed to manage the core business of higher education institutions,
+ * such as universities, faculties, institutes and professional schools.
+ * The core business involves the administration of students, teachers,
+ * courses, programs and so on.
+ *
+ * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * A copy of this license - GNU General Public License - is available
+ * at the root of the source code of this program.  If not,
+ * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{# FIXME Uncomment after upgrade to django_components >= 0.77 #}
+{# <div {% html_attrs attributes class="panel panel-default" %}>#}
+<div class="panel panel-default {{ additional_class }}" {% if id %}id="{{ id }}"{% endif %}>
+  <div class="panel-heading">
+    {% if edit_link_button %}
+      <a
+          class="btn btn-default pull-right btn-sm"
+          {% if edit_link_button == 'JS_BUTTON' %}
+          tabindex="0"
+          {% else %}
+          href="{{ edit_link_button }}"
+          {% if edit_link_button_in_new_tab %}
+          target="_blank"
+          {% endif %}
+          {% endif %}
+      >
+        <i class="fas fa-{% if edit_link_button == 'JS_BUTTON' or 'update' in edit_link_button or 'edit' in edit_link_button %}edit{% else %}eye{% endif %}"></i>
+      </a>
+    {% endif %}
+    <h{{ title_level }} class="panel-title">
+        {{ title }}
+    </h{{ title_level }}>
+  </div>
+  <div class="panel-body">
+      {% slot "body" default required %}{% endslot %}
+  </div>
+  {# FIXME Uncomment after upgrade to django_components >= 0.77 #}
+  {#  {% if component_vars.is_filled.footer %}#}
+  {% if_filled "footer" %}
+  <div class="panel-footer clearfix">
+    {% slot "footer" %}{% endslot %}
+  </div>
+  {% endif_filled %}
+  {# FIXME Uncomment after upgrade to django_components >= 0.77 #}
+  {#  {% endif %}#}
+</div>

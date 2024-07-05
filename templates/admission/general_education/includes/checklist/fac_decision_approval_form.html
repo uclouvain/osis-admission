@@ -1,4 +1,4 @@
-{% load i18n bootstrap3 admission static %}
+{% load component_tags i18n bootstrap3 admission static %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -59,7 +59,7 @@
       {% bootstrap_field_with_tooltip fac_decision_approval_form.other_training_accepted_by_fac label=fac_decision_approval_form.other_training_accepted_by_fac.label|label_with_user_icon %}
     </div>
 
-    {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to') additional_class='panel-with-default-header-font-size' %}
+    {% component "panel" title=_('Diploma(s) or non-academic activity(ies) giving access to') additional_class='panel-with-default-header-font-size' %}
       <div id='fac-decision-access-titles' hx-preserve="true">
         {% if selected_access_titles_names %}
           <ul>
@@ -71,7 +71,7 @@
           {% translate 'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving access to the chosen program.' %}
         {% endif %}
       </div>
-    {% endpanel %}
+    {% endcomponent %}
 
     {% bootstrap_field fac_decision_approval_form.with_additional_approval_conditions label=fac_decision_approval_form.with_additional_approval_conditions.label|label_with_user_icon %}
     <div

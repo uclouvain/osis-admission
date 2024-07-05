@@ -1,4 +1,4 @@
-{% load admission bootstrap3 i18n %}
+{% load component_tags admission bootstrap3 i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,7 +25,7 @@
 {% endcomment %}
 
 <div id="choix-formation-form">
-  {% panel _("Proposition features") %}
+  {% component "panel" title=_("Proposition features") %}
     <form
         hx-post="{% url 'admission:general-education:choix-formation-update' uuid=view.kwargs.uuid %}"
         hx-target="#choix-formation-form"
@@ -45,7 +45,7 @@
       {% bootstrap_button save_label button_type="submit" button_class='btn-primary pull-right' %}
       <a class="btn btn-secondary pull-right" hx-swap="outerHTML" hx-target="#choix-formation-form" hx-push-url="false" hx-get="{% url 'admission:general-education:choix-formation-detail' uuid=view.kwargs.uuid %}">{% trans "Cancel" %}</a>
     </form>
-  {% endpanel %}
+  {% endcomponent %}
   {{ form.media }}
   <script>
       $('#id_annee_academique').change(function() {
