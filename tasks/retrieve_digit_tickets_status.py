@@ -90,6 +90,7 @@ def run(request=None):
                 logger.info(f"[DigIT Ticket edit candidate global id]")
 
             send_pictures_to_card_app.run.delay(global_id=digit_matricule)
+            logger.info(f"[DigIT Ticket edit candidate global id]")
 
     # Handle response when task is ran as a cmd from admin panel
     if request:
