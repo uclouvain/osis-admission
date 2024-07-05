@@ -32,6 +32,7 @@ import requests
 import waffle
 from django.conf import settings
 from django.db.models import QuerySet, Q
+from django.utils.datetime_safe import date
 
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
@@ -94,7 +95,14 @@ class DigitRepository(IDigitRepository):
 
         person = merge_person if merge_person and _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
-        ticket_response = _request_person_ticket_creation(person, noma, addresses)
+
+        submitted_admission = candidate.baseadmission_set.all().filter(submitted_at__isnull=False).first()
+        if not submitted_admission:
+            logger.info(f"DIGIT submit ticket canceled: no admission submitted for the candidate")
+            return
+
+        program_type = submitted_admission.training.education_group_type.name
+        ticket_response = _request_person_ticket_creation(person, noma, addresses, program_type)
 
         logger.info(f"DIGIT Response: {ticket_response}")
 
@@ -124,6 +132,7 @@ class DigitRepository(IDigitRepository):
 
         person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
+
         ticket_response = _request_person_ticket_validation(person, addresses)
 
         PersonMergeProposal.objects.update_or_create(
@@ -303,17 +312,17 @@ def _retrieve_person_ticket_status(request_id: int):
     ).json()
 
 
-def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet):
+def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet, program_type: str):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"requestId": "1", "status": "CREATED"}
     else:
-        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, noma, addresses))}")
+        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, noma, addresses, program_type))}")
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, noma, addresses)),
+            data=json.dumps(_get_ticket_data(person, noma, addresses, program_type)),
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
         )
         return response.json()
@@ -335,7 +344,7 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet):
         return response.json()
 
 
-def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
+def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str):
     noma = person.last_registration_id if person.last_registration_id else noma
     if person.birth_date:
         birth_date = person.birth_date.strftime('%Y-%m-%d')
@@ -343,6 +352,10 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
         birth_date = f"{person.birth_year}-00-00"
     else:
         birth_date = None
+
+    start_date_limit_idm = date(date.today().year, 6, 1)
+    start_date_idm = date.today().strftime('%Y-%m-%d') if date.today() > start_date_limit_idm else start_date_limit_idm
+
     return {
         "provider": {
             "source": "ETU",
@@ -372,6 +385,12 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
             }
             for address in addresses
         ],
+        "activities": [
+            {
+                "idmId": _get_idm_number(program_type),
+                "startDate": start_date_idm,
+            }
+        ],
         "physicalPerson": True,
     }
 
@@ -398,3 +417,33 @@ def _get_status_and_type_demande(candidate):
         if admission.type_demande == TypeDemande.INSCRIPTION.name:
             return status, TypeDemande.INSCRIPTION.name
     return status, TypeDemande.ADMISSION.name
+
+
+def _get_idm_number(program_type):
+    return {
+        "BACHELOR": 47,
+        "MASTER_M1": 48,
+        "MASTER_M4": 48,
+        "MASTER_M5": 48,
+        "MASTER_MA_120": 48,
+        "MASTER_MD_120": 48,
+        "MASTER_MS_120": 48,
+        "MASTER_MA_180_240": 48,
+        "MASTER_MD_180_240": 48,
+        "MASTER_MS_180_240": 48,
+        "AGGREGATION": 49,
+        "MASTER_MC": 51,
+        "FORMATION_PHD": 52,
+        "PHD": 52,
+        "CERTIFICATE": 54,
+        "CAPAES": 55,
+        "RESEARCH_CERTIFICATE": 57,
+        "ISOLATED_CLASS": 58,
+        "LANGUAGE_CLASS": 59,
+        "JUNIOR_YEAR": 60,
+        "CERTIFICATE_OF_PARTICIPATION": 61,
+        "CERTIFICATE_OF_SUCCESS": 61,
+        "CERTIFICATE_OF_HOLDING_CREDITS": 61,
+        "UNIVERSITY_FIRST_CYCLE_CERTIFICATE": 61,
+        "UNIVERSITY_SECOND_CYCLE_CERTIFICATE": 61
+    }[program_type]
