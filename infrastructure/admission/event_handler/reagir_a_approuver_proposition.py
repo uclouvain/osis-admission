@@ -40,10 +40,6 @@ def reagir_a_approuver_proposition(
     digit_repository = DigitRepository()
     compteur_noma = CompteurAnnuelPourNomaRepository()
 
-    noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=event.annee).compteur,
-        annee=event.annee,
-    )
     # send digit creation ticket if not sent yet
     if not digit_repository.has_digit_creation_ticket(global_id=event.matricule):
         noma = digit_repository.get_registration_id_sent_to_digit(global_id=event.matricule)
