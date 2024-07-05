@@ -28,6 +28,7 @@ from typing import Any, Union
 from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent, \
     InscriptionApprouveeParSicEvent
 
+
 def reagir_a_approuver_proposition(
     msg_bus: Any,
     event: Union['InscriptionApprouveeParSicEvent', 'AdmissionApprouveeParSicEvent'],
