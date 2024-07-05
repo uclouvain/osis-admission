@@ -23,13 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import contextlib
 from typing import Any
 
 from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand, \
     SoumettreTicketPersonneCommand
-from ddd.logic.comptabilite.commands import CreationClientCommand, PasserEcritureComptableFraisDossierAdmissionCommand
-from ddd.logic.comptabilite.domain.validator.exceptions import ClientDejaExistant
 
 
 def recherche_et_validation_digit(

@@ -33,23 +33,16 @@ def reagir_a_approuver_proposition(
     msg_bus: Any,
     event: Union['InscriptionApprouveeParSicEvent', 'AdmissionApprouveeParSicEvent'],
 ) -> None:
-    from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
+    from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
     from admission.infrastructure.admission.repository.digit import DigitRepository
-    from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import \
-        CompteurAnnuelPourNomaRepository
 
+    # This logic must be moved to SoumettreTicketPersonCommand
     digit_repository = DigitRepository()
-    compteur_noma = CompteurAnnuelPourNomaRepository()
-
-    # send digit creation ticket if not sent yet
     if not digit_repository.has_digit_creation_ticket(global_id=event.matricule):
-        noma = digit_repository.get_registration_id_sent_to_digit(global_id=event.matricule)
-        if noma is None:
-            noma = NomaGenerateurService.generer_noma(
-                compteur=compteur_noma.get_compteur(annee=event.annee).compteur,
+        msg_bus.invoke(
+            SoumettreTicketPersonneCommand(
+                global_id=event.matricule,
                 annee=event.annee,
+                noma=digit_repository.get_registration_id_sent_to_digit(global_id=event.matricule)
             )
-        digit_repository.submit_person_ticket(
-            global_id=event.matricule,
-            noma=noma
         )
