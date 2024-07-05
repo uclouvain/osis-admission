@@ -102,7 +102,13 @@ class DigitRepository(IDigitRepository):
             return
 
         program_type = submitted_admission.training.education_group_type.name
-        ticket_response = _request_person_ticket_creation(person, noma, addresses, program_type)
+
+        sap_number = cls._get_sap_number(candidate)
+        if sap_number:
+            logger.info(f"DIGIT retrieve SAP client number: {sap_number}")
+            return
+
+        ticket_response = _request_person_ticket_creation(person, noma, addresses, program_type, sap_number)
 
         logger.info(f"DIGIT Response: {ticket_response}")
 
@@ -133,7 +139,19 @@ class DigitRepository(IDigitRepository):
         person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
 
-        ticket_response = _request_person_ticket_validation(person, addresses)
+        submitted_admission = candidate.baseadmission_set.all().filter(submitted_at__isnull=False).first()
+        if not submitted_admission:
+            logger.info(f"DIGIT validation canceled: no admission submitted for the candidate")
+            return
+
+        program_type = submitted_admission.training.education_group_type.name
+
+        sap_number = cls._get_sap_number(candidate)
+        if sap_number:
+            logger.info(f"DIGIT retrieve SAP client number: {sap_number}")
+            return
+
+        ticket_response = _request_person_ticket_validation(person, addresses, program_type, sap_number)
 
         PersonMergeProposal.objects.update_or_create(
             original_person=candidate,
@@ -149,6 +167,10 @@ class DigitRepository(IDigitRepository):
             valid=ticket_response['valid'],
             errors=ticket_response['errors'],
         )
+
+    @classmethod
+    def _get_sap_number(cls, candidate):
+        return candidate.sapclient_set.first().client_number if candidate.sapclient_set.first() else None
 
     @classmethod
     def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
@@ -312,39 +334,43 @@ def _retrieve_person_ticket_status(request_id: int):
     ).json()
 
 
-def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet, program_type: str):
+def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet, program_type: str, sap_number: str):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"requestId": "1", "status": "CREATED"}
     else:
-        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, noma, addresses, program_type))}")
+        logger.info(
+            f"DIGIT sent data: {json.dumps(_get_ticket_data(person, noma, addresses, program_type, sap_number))}"
+        )
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, noma, addresses, program_type)),
+            data=json.dumps(_get_ticket_data(person, noma, addresses, program_type, sap_number)),
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
         )
         return response.json()
 
 
-def _request_person_ticket_validation(person: Person, addresses: QuerySet):
+def _request_person_ticket_validation(person: Person, addresses: QuerySet, program_type: str, sap_number: str):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"errors": [], "valid": True}
     else:
-        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses))}")
+        logger.info(
+            f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, program_type, sap_number))}"
+        )
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, '0', addresses)),
+            data=json.dumps(_get_ticket_data(person, '0', addresses, program_type, sap_number)),
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
         )
         return response.json()
 
 
-def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str):
+def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str, sap_number: str):
     noma = person.last_registration_id if person.last_registration_id else noma
     if person.birth_date:
         birth_date = person.birth_date.strftime('%Y-%m-%d')
@@ -356,7 +382,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
     start_date_limit_idm = date(date.today().year, 6, 1)
     start_date_idm = date.today().strftime('%Y-%m-%d') if date.today() > start_date_limit_idm else start_date_limit_idm
 
-    return {
+    ticket_data = {
         "provider": {
             "source": "ETU",
             "sourceId": "".join(filter(str.isdigit, noma)),
@@ -393,6 +419,15 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
         ],
         "physicalPerson": True,
     }
+
+    if sap_number:
+        ticket_data["applicationAccounts"] = {
+            "source": "CLIETU",
+            "sourceId": sap_number,
+            "actif": True,
+        }
+
+    return ticket_data
 
 
 def _is_valid_merge_person(person):

@@ -233,8 +233,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
                 person_merge_proposal.status = PersonMergeStatus.MERGED.name
                 person_merge_proposal.save()
 
-                # delete both unused person models after merge
-                Person.objects.filter(id=person_merge_proposal.original_person.id).delete()
+                # delete person_to_merge after merge
                 person_to_merge.delete()
 
     @classmethod

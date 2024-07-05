@@ -73,7 +73,7 @@ def run(request=None):
             )
             logger.info(f"[DigIT Ticket noma - matricule] NOMA: {ticket.noma} - MATR: {digit_matricule}")
 
-            if digit_matricule == ticket.matricule:
+            if Person.objects.filter(global_id=digit_matricule).exists():
                 message_bus_instance.invoke(
                     command=FusionnerCandidatAvecPersonneExistanteCommand(
                         candidate_global_id=digit_matricule,
