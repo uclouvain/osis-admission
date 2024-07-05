@@ -210,7 +210,6 @@ class RecupererExperienceNonAcademiqueQuery(interface.QueryRequest):
 class SoumettreTicketPersonneCommand(interface.CommandRequest):
     global_id: str
     annee: int
-    noma: Optional[str] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

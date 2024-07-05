@@ -34,8 +34,14 @@ def soumettre_ticket_creation_personne(
     digit_repository: 'IDigitRepository',
     compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> any:
-    noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=cmd.annee).compteur,
-        annee=cmd.annee,
-    ) if not cmd.noma else cmd.noma
+    # TODO: Encapsulate to a domain service
+    if digit_repository.has_digit_creation_ticket(global_id=cmd.global_id):
+        return
+
+    noma = digit_repository.get_registration_id_sent_to_digit(global_id=cmd.global_id)
+    if not noma:
+        NomaGenerateurService.generer_noma(
+            compteur=compteur_noma.get_compteur(annee=cmd.annee).compteur,
+            annee=cmd.annee,
+        )
     return digit_repository.submit_person_ticket(global_id=cmd.global_id, noma=noma)

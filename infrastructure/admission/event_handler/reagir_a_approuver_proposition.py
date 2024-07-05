@@ -34,15 +34,9 @@ def reagir_a_approuver_proposition(
     event: Union['InscriptionApprouveeParSicEvent', 'AdmissionApprouveeParSicEvent'],
 ) -> None:
     from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
-    from admission.infrastructure.admission.repository.digit import DigitRepository
-
-    # This logic must be moved to SoumettreTicketPersonCommand
-    digit_repository = DigitRepository()
-    if not digit_repository.has_digit_creation_ticket(global_id=event.matricule):
-        msg_bus.invoke(
-            SoumettreTicketPersonneCommand(
-                global_id=event.matricule,
-                annee=event.annee,
-                noma=digit_repository.get_registration_id_sent_to_digit(global_id=event.matricule)
-            )
+    msg_bus.invoke(
+        SoumettreTicketPersonneCommand(
+            global_id=event.matricule,
+            annee=event.annee,
         )
+    )
