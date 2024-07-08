@@ -92,7 +92,6 @@ class ContinuingEducationPropositionStatusMixinTestCase(TestCase):
             ChoixStatutPropositionContinue.ANNULEE.name,
             ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name,
             ChoixStatutPropositionContinue.CLOTUREE.name,
-            ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name,
         ]
 
         for status in statuses:

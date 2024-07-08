@@ -98,6 +98,10 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
             training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
             candidate=factory.SubFactory(CompletePersonForIUFCFactory),
         )
+        submitted = factory.Trait(
+            submitted_at=factory.Faker('date_time'),
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

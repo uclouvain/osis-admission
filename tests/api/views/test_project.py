@@ -359,7 +359,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             supervision_group=self.promoter.process,
         )
         self.client.force_authenticate(user=self.promoter_user)
-        with self.assertNumQueriesLessThan(12, verbose=True):
+        with self.assertNumQueriesLessThan(12):
             response = self.client.get(resolve_url("admission_api_v1:supervised_propositions"), format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 

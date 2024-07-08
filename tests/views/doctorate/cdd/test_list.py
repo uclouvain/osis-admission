@@ -247,7 +247,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'cdds': [ENTITY_CDE],
             'taille_page': 10,
         }
-        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES, verbose=True):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
@@ -265,7 +265,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'cdds': [ENTITY_CDE],
             'taille_page': 10,
         }
-        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES, verbose=True):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)

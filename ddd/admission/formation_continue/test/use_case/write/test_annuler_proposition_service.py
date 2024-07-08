@@ -58,7 +58,7 @@ class AnnulerPropositionTestCase(SimpleTestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition_id, proposition.entity_id)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.ANNULEE)
         self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_BLOCAGE)
         self.assertDictEqual(proposition.checklist_actuelle.decision.extra, {'blocage': 'canceled'})
         self.assertEqual(proposition.motif_d_annulation, "foo")

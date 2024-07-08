@@ -1356,9 +1356,6 @@ msgstr ""
 msgid "Cancelled application"
 msgstr ""
 
-msgid "Cancelled application by a manager"
-msgstr ""
-
 msgid "Candidate"
 msgstr ""
 
