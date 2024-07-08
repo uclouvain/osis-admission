@@ -25,41 +25,57 @@
 # ##############################################################################
 import logging
 
-import waffle
 from django.conf import settings
+from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.test import RequestFactory
 
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand
 from backoffice.celery import app
 from base.models.person import Person
-from django.test import Client
-
-from base.models.person_merge_proposal import PersonMergeProposal
+from osis_common.ddd.interface import BusinessException
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
 @app.task
-def run(request=None):
-    if not waffle.switch_is_active('fusion-digit'):
-        logger.info("fusion-digit switch not active")
-        return
+def run(request=None, global_ids=None):
+    candidates = Person.objects.prefetch_related('baseadmission_set').filter(~Q(baseadmissions=None))
+    if global_ids:
+        candidates = candidates.filter(global_id__in=global_ids)
 
-    candidates = Person.objects.filter(~Q(baseadmissions=None))
-
+    errors = []
     for candidate in candidates:
+        if not candidate.baseadmission_set.all():
+            errors.append(f"{candidate} - Candidate has no admission")
+
         for admission in candidate.baseadmission_set.all():
             if admission.determined_academic_year:
-                if not hasattr(candidate, 'personmergeproposal'):
-                    logger.info(f'[DigIT] retrieve info from digit for {candidate}')
-                    url = f'/admissions/services/digit/search-account/{admission.uuid}'
-                    Client().post(url)
+                logger.info(f'[DigIT] retrieve info from digit for {candidate}')
+                from infrastructure.messages_bus import message_bus_instance
+                message_bus_instance.invoke(RechercherCompteExistantCommand(
+                    matricule=candidate.global_id,
+                    nom=candidate.last_name,
+                    prenom=candidate.first_name,
+                    date_naissance=str(candidate.birth_date) if candidate.birth_date else "",
+                    autres_prenoms=candidate.middle_name,
+                    niss=candidate.national_number,
+                    genre=candidate.sex,
+                ))
 
                 logger.info(f'[DigIT] send creation ticket for {candidate}')
-                url = f'/admissions/services/digit/request-digit-person-creation/{admission.uuid}'
-                Client().post(url)
+                try:
+                    message_bus_instance.invoke(SoumettreTicketPersonneCommand(
+                        global_id=candidate.global_id,
+                        annee=admission.determined_academic_year.year,
+                    ))
+                except BusinessException as e:
+                    errors.append(str(e.message))
+            else:
+                errors.append(f"{candidate} - Candidate admission has not determined academic year")
 
     # Handle response when task is ran as a cmd from admin panel
     if request:
+        for error in errors:
+            messages.add_message(request, messages.ERROR, error)
         return redirect(request.META.get('HTTP_REFERER'))

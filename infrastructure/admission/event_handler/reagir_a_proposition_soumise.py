@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import Any
 
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand, \
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, ValiderTicketPersonneCommand, \
     SoumettreTicketPersonneCommand
 
 
@@ -33,7 +33,7 @@ def recherche_et_validation_digit(
     msg_bus: Any,
     event,
 ) -> None:
-    msg_bus.invoke(RechercherCompteExistantQuery(
+    msg_bus.invoke(RechercherCompteExistantCommand(
         matricule=event.matricule,
         nom=event.nom,
         prenom=event.prenom,

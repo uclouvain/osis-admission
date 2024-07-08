@@ -26,7 +26,7 @@
 import logging
 
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -45,16 +45,15 @@ from django.views.generic import FormView
 from django.views.generic.edit import ProcessFormView
 
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand, \
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
-from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from base.models.person import Person
-from base.models.person_creation_ticket import PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.views.common import display_error_messages, display_success_messages
 
 from django.utils.translation import gettext_lazy as _
 
+from osis_common.ddd.interface import BusinessException
 from osis_role.contrib.views import PermissionRequiredMixin
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -68,50 +67,39 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
 
     def post(self, request, *args, **kwargs):
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
-
-        try:
-            merge_proposal = PersonMergeProposal.objects.get(original_person=candidate)
-        except PersonMergeProposal.DoesNotExist:
-            merge_proposal = None
-
-        if merge_proposal and merge_proposal.registration_id_sent_to_digit:
-            noma = merge_proposal.registration_id_sent_to_digit
-        elif candidate.last_registration_id:
-            noma = candidate.last_registration_id
-        else:
-            noma = None
+        response = redirect(request.META['HTTP_REFERER']) if request.META.get('HTTP_REFERER') else HttpResponse(
+            status=200
+        )
 
         if not self.base_admission.determined_academic_year:
             logger.info("[Digit] Envoi ticket Digit annulé - Pas d'année académique déterminée pour générer un NOMA")
             return redirect(request.META['HTTP_REFERER'])
-
-        response = self.create_digit_person(
-            global_id=candidate.global_id,
-            year=self.base_admission.determined_academic_year.year,
-            noma=noma,
-        )
-        if response and response['status'] == PersonTicketCreationStatus.CREATED.name:
-            display_success_messages(request, "Ticket de création de compte envoyé avec succès dans DigIT")
-        else:
+        try:
+            self.create_digit_person(
+                global_id=candidate.global_id,
+                year=self.base_admission.determined_academic_year.year,
+            )
+        except BusinessException as e:
             display_error_messages(request, "Une erreur est survenue lors de l'envoi dans DigIT")
+            return response
 
-        return redirect(request.META['HTTP_REFERER']) if request.META.get('HTTP_REFERER') else HttpResponse(status=200)
+        display_success_messages(request, "Ticket de création de compte envoyé avec succès dans DigIT")
+
+        return response
 
     @property
     def base_admission(self):
         return BaseAdmission.objects.get(uuid=self.kwargs['uuid'])
 
     @staticmethod
-    def create_digit_person(global_id: str, year: int, noma: str = None):
+    def create_digit_person(global_id: str, year: int):
         from infrastructure.messages_bus import message_bus_instance
-        if global_id[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
-            return message_bus_instance.invoke(
-                SoumettreTicketPersonneCommand(
-                    global_id=global_id,
-                    annee=year,
-                    noma=noma,
-                )
+        message_bus_instance.invoke(
+            SoumettreTicketPersonneCommand(
+                global_id=global_id,
+                annee=year,
             )
+        )
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -180,7 +168,7 @@ def search_digit_account(
     from infrastructure.messages_bus import message_bus_instance
 
     return message_bus_instance.invoke(
-        RechercherCompteExistantQuery(
+        RechercherCompteExistantCommand(
             matricule=global_id,
             nom=last_name,
             prenom=first_name,

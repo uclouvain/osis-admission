@@ -26,7 +26,7 @@
 from django.conf import settings
 from django.conf.urls import url
 
-from admission.tasks import retrieve_digit_tickets_status, bulk_create_digit_persons_tickets
+from admission.tasks import retrieve_digit_tickets_status
 from osis_common.utils.file_router import FileRouter
 
 app_name = 'admission'
@@ -38,13 +38,7 @@ urlpatterns += [
         'retrieve_digit_person_ticket_status',
         retrieve_digit_tickets_status.run,
         name="retrieve_digit_person_ticket_status"
-    ),
-    url(
-        'bulk_create_digit_persons_tickets',
-        bulk_create_digit_persons_tickets.run,
-        name="bulk_create_digit_persons_tickets"
-    ),
-
+    )
 ]
 
 if settings.DEBUG:

@@ -23,21 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.commands import RecupererNumeroSAPCommand
+from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 
-from admission.ddd.admission.commands import RechercherCompteExistantCommand
-from admission.ddd.admission.domain.service.i_digit import IDigitService
 
-
-def rechercher_compte_existant(
-    cmd: 'RechercherCompteExistantCommand',
-    digit_service: 'IDigitService',
+def recuperer_numero_sap(
+        cmd: 'RecupererNumeroSAPCommand',
+        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
 ):
-    return digit_service.rechercher_compte_existant(
-        matricule=cmd.matricule,
-        nom=cmd.nom,
-        prenom=cmd.prenom,
-        autres_prenoms=cmd.autres_prenoms,
-        date_naissance=cmd.date_naissance,
-        genre=cmd.genre,
-        niss=cmd.niss,
+    return proposition_fusion_personne_repository.recuperer_numero_sap(
+        candidate_global_id=cmd.candidate_global_id,
+        digit_global_id=cmd.digit_global_id,
     )

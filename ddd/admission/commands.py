@@ -134,7 +134,7 @@ class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest)
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RechercherCompteExistantQuery(interface.QueryRequest):
+class RechercherCompteExistantCommand(interface.QueryRequest):
     matricule: str
     nom: str
     prenom: str

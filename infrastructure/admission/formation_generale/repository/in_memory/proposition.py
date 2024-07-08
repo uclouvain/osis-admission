@@ -113,6 +113,10 @@ class PropositionInMemoryRepository(
         return propositions
 
     @classmethod
+    def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
+        return next((p for p in cls.entities if p.matricule_candidat == matricule_candidat), None)
+
+    @classmethod
     def search(
         cls,
         entity_ids: Optional[List['PropositionIdentity']] = None,

@@ -27,6 +27,8 @@ import datetime
 import json
 import logging
 import re
+from types import SimpleNamespace
+from typing import Optional
 
 import requests
 import waffle
@@ -58,7 +60,7 @@ class DigitService(IDigitService):
             date_naissance: str,
             niss: str
     ):
-        if not waffle.switch_is_active('fusion-digit') or matricule[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
+        if not cls.fusion_digit_est_active() or not cls.correspond_a_compte_temporaire(matricule):
             return []
 
         original_person = Person.objects.get(global_id=matricule)
@@ -115,6 +117,22 @@ class DigitService(IDigitService):
         )
 
         return similarity_data
+
+    @classmethod
+    def fusion_digit_est_active(cls):
+        return waffle.switch_is_active('fusion-digit')
+
+    @classmethod
+    def correspond_a_compte_temporaire(cls, matricule_candidat: str) -> bool:
+        return matricule_candidat[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
+
+    @classmethod
+    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> Optional[SimpleNamespace]:
+        try:
+            proposition_fusion = PersonMergeProposal.objects.get(original_person__global_id=matricule_candidat)
+            return SimpleNamespace(statut=proposition_fusion.status)
+        except PersonMergeProposal.DoesNotExist:
+            return None
 
 
 def _get_status_from_digit_response(similarity_data):

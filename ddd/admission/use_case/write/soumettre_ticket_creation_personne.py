@@ -24,6 +24,10 @@
 #
 # ##############################################################################
 from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
+from admission.ddd.admission.domain.service.i_client_comptabilite_translator import IClientComptabiliteTranslator
+from admission.ddd.admission.domain.service.i_digit import IDigitService
+from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
 from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
@@ -32,16 +36,27 @@ from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma im
 def soumettre_ticket_creation_personne(
     cmd: 'SoumettreTicketPersonneCommand',
     digit_repository: 'IDigitRepository',
+    digit_service: 'IDigitService',
     compteur_noma: 'ICompteurAnnuelPourNomaRepository',
-) -> any:
-    # TODO: Encapsulate to a domain service
-    if digit_repository.has_digit_creation_ticket(global_id=cmd.global_id):
-        return
+    proposition_repository: 'IPropositionRepository',
+    formation_translator: 'IFormationGeneraleTranslator',
+    client_comptabilite_translator: 'IClientComptabiliteTranslator'
+):
+    proposition = proposition_repository.get_first_submitted_proposition(matricule_candidat=cmd.global_id)
+
+    digit_service.verifier_peut_soumettre_ticket_creation(proposition, digit_repository)
+
+    formation = formation_translator.get(entity_id=proposition.formation_id)
+
+    sap_number = client_comptabilite_translator.get_client_number(matricule_candidat=cmd.global_id)
 
     noma = digit_repository.get_registration_id_sent_to_digit(global_id=cmd.global_id)
     if not noma:
-        NomaGenerateurService.generer_noma(
+        noma = NomaGenerateurService.generer_noma(
             compteur=compteur_noma.get_compteur(annee=cmd.annee).compteur,
             annee=cmd.annee,
         )
-    return digit_repository.submit_person_ticket(global_id=cmd.global_id, noma=noma)
+    extra_ticket_data = {'program_type': formation.type.name, 'sap_number': sap_number}
+    return digit_repository.submit_person_ticket(
+        global_id=cmd.global_id, noma=noma, extra_ticket_data=extra_ticket_data
+    )

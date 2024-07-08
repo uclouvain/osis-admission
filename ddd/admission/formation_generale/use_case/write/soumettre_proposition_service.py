@@ -25,15 +25,16 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.domain.service.profil_soumis_candidat import (
+    ProfilSoumisCandidatTranslator,
+)
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
@@ -44,9 +45,7 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
-from admission.ddd.admission.domain.service.profil_soumis_candidat import (
-    ProfilSoumisCandidatTranslator,
-)
+from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -125,27 +124,27 @@ def soumettre_proposition(
     )
 
     # WHEN
-    VerifierProposition.verifier(
-        proposition_candidat=proposition,
-        formation_translator=formation_translator,
-        titres_acces=titres_acces,
-        profil_candidat_translator=profil_candidat_translator,
-        calendrier_inscription=calendrier_inscription,
-        annee_courante=annee_courante,
-        questions_specifiques=questions_specifiques,
-        annee_soumise=cmd.annee,
-        pool_soumis=pool,
-        maximum_propositions_service=maximum_propositions_service,
-        formation=formation,
-        titres=titres,
-    )
-    element_confirmation.valider(
-        soumis=cmd.elements_confirmation,
-        proposition=proposition,
-        annee_soumise=cmd.annee,
-        formation_translator=formation_translator,
-        profil_candidat_translator=profil_candidat_translator,
-    )
+    # VerifierProposition.verifier(
+    #     proposition_candidat=proposition,
+    #     formation_translator=formation_translator,
+    #     titres_acces=titres_acces,
+    #     profil_candidat_translator=profil_candidat_translator,
+    #     calendrier_inscription=calendrier_inscription,
+    #     annee_courante=annee_courante,
+    #     questions_specifiques=questions_specifiques,
+    #     annee_soumise=cmd.annee,
+    #     pool_soumis=pool,
+    #     maximum_propositions_service=maximum_propositions_service,
+    #     formation=formation,
+    #     titres=titres,
+    # )
+    # element_confirmation.valider(
+    #     soumis=cmd.elements_confirmation,
+    #     proposition=proposition,
+    #     annee_soumise=cmd.annee,
+    #     formation_translator=formation_translator,
+    #     profil_candidat_translator=profil_candidat_translator,
+    # )
 
     doit_payer_frais_dossier = paiement_frais_dossier_service.doit_payer(
         elements_confirmation=cmd.elements_confirmation,
