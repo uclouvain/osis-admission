@@ -111,7 +111,8 @@ class IDigitService(interface.DomainService):
             proposition_fusion = cls.recuperer_proposition_fusion(proposition.matricule_candidat)
             if proposition_fusion:
                 if proposition_fusion.statut not in [
-                    PersonMergeStatus.MERGED.name, PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
+                    PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.MERGED.name,
+                    PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
                 ]:
                     raise PropositionFusionEnCoursDeTraitementException(
                         merge_status=proposition_fusion.statut,
