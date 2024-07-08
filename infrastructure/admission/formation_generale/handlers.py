@@ -206,6 +206,7 @@ COMMAND_HANDLERS = {
         maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),

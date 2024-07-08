@@ -61,6 +61,7 @@ from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAc
 
 
 def soumettre_proposition(
+    msg_bus: any,
     cmd: 'SoumettrePropositionCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
@@ -124,27 +125,27 @@ def soumettre_proposition(
     )
 
     # WHEN
-    # VerifierProposition.verifier(
-    #     proposition_candidat=proposition,
-    #     formation_translator=formation_translator,
-    #     titres_acces=titres_acces,
-    #     profil_candidat_translator=profil_candidat_translator,
-    #     calendrier_inscription=calendrier_inscription,
-    #     annee_courante=annee_courante,
-    #     questions_specifiques=questions_specifiques,
-    #     annee_soumise=cmd.annee,
-    #     pool_soumis=pool,
-    #     maximum_propositions_service=maximum_propositions_service,
-    #     formation=formation,
-    #     titres=titres,
-    # )
-    # element_confirmation.valider(
-    #     soumis=cmd.elements_confirmation,
-    #     proposition=proposition,
-    #     annee_soumise=cmd.annee,
-    #     formation_translator=formation_translator,
-    #     profil_candidat_translator=profil_candidat_translator,
-    # )
+    VerifierProposition.verifier(
+        proposition_candidat=proposition,
+        formation_translator=formation_translator,
+        titres_acces=titres_acces,
+        profil_candidat_translator=profil_candidat_translator,
+        calendrier_inscription=calendrier_inscription,
+        annee_courante=annee_courante,
+        questions_specifiques=questions_specifiques,
+        annee_soumise=cmd.annee,
+        pool_soumis=pool,
+        maximum_propositions_service=maximum_propositions_service,
+        formation=formation,
+        titres=titres,
+    )
+    element_confirmation.valider(
+        soumis=cmd.elements_confirmation,
+        proposition=proposition,
+        annee_soumise=cmd.annee,
+        formation_translator=formation_translator,
+        profil_candidat_translator=profil_candidat_translator,
+    )
 
     doit_payer_frais_dossier = paiement_frais_dossier_service.doit_payer(
         elements_confirmation=cmd.elements_confirmation,
@@ -192,8 +193,7 @@ def soumettre_proposition(
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 
-    from infrastructure.messages_bus import message_bus_instance
-    message_bus_instance.publish(
+    msg_bus.publish(
         PropositionSoumiseEvent(
             entity_id=proposition.entity_id,
             matricule=proposition.matricule_candidat,

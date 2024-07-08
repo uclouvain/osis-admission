@@ -146,13 +146,12 @@ from infrastructure.shared_kernel.campus.repository.in_memory.campus import Uclo
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
-from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
-    CompteurAnnuelPourNomaInMemoryRepository,
-)
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
-
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
+    CompteurAnnuelPourNomaInMemoryRepository,
+)
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -235,6 +234,7 @@ COMMAND_HANDLERS = {
         maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
