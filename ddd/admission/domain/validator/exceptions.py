@@ -231,3 +231,62 @@ class ExperienceNonTrouveeException(BusinessException):
 
     def __init__(self, **kwargs):
         super().__init__(self.message, **kwargs)
+
+
+class FusionDigitDesactiveeException(BusinessException):
+    status_code = "FUSION-DIGIT-1"
+    message = _("Fusion digit flag is inactive")
+
+    def __init__(self, **kwargs):
+        super().__init__(self.message, **kwargs)
+
+
+class ADejaTicketCreationEnAttenteException(BusinessException):
+    status_code = "FUSION-DIGIT-2"
+
+    def __init__(self, matricule_candidat, **kwargs):
+        message = _("[%(matricule_candidat)s] Candidate has already a pending creation ticket") % {
+            "matricule_candidat": matricule_candidat
+        }
+        super().__init__(message, **kwargs)
+
+
+class NeCorrespondPasACompteTemporaireException(BusinessException):
+    status_code = "FUSION-DIGIT-3"
+
+    def __init__(self, matricule_candidat, **kwargs):
+        message = _("[%(matricule_candidat)s] Candidate matricule is not a temporary account matricule") % {
+            "matricule_candidat": matricule_candidat
+        }
+        super().__init__(message, **kwargs)
+
+
+class NotInAccountCreationPeriodException(BusinessException):
+    status_code = "FUSION-DIGIT-4"
+
+    def __init__(self, matricule_candidat, **kwargs):
+        message = _("[%(matricule_candidat)s] Account creation period calendar is closed") % {
+            "matricule_candidat": matricule_candidat
+        }
+        super().__init__(message, **kwargs)
+
+
+class AdmissionDansUnStatutPasAutoriseASInscrireException(BusinessException):
+    status_code = "FUSION-DIGIT-5"
+
+    def __init__(self, matricule_candidat, **kwargs):
+        message = _("[%(matricule_candidat)s] Type is admission and application is not accepted") % {
+            "matricule_candidat": matricule_candidat
+        }
+        super().__init__(message, **kwargs)
+
+
+class PropositionFusionEnCoursDeTraitementException(BusinessException):
+    status_code = "FUSION-DIGIT-6"
+
+    def __init__(self, merge_status, matricule_candidat, **kwargs):
+        message = _("[%(matricule_candidat)s] Candidate has pending merge proposal: status %(merge_status)s") % {
+            "merge_status": merge_status,
+            "matricule_candidat": matricule_candidat,
+        }
+        super().__init__(message, **kwargs)

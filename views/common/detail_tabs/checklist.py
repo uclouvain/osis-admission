@@ -28,6 +28,7 @@ import datetime
 from django.contrib import messages
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from osis_comment.models import CommentEntry
 from rest_framework import serializers, status
@@ -36,11 +37,8 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from django.utils.translation import gettext_lazy as _
-
 from admission.ddd.admission.commands import (
     ValiderTicketPersonneCommand,
-    RechercherCompteExistantQuery,
     GetPropositionFusionQuery, SoumettreTicketPersonneCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -56,7 +54,7 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_FAC_FOR_IUFC,
 )
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
-from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.models.person_merge_proposal import PersonMergeStatus
 
 __all__ = [
     'ChangeStatusView',
@@ -103,7 +101,6 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
                 SoumettreTicketPersonneCommand(
                     global_id=admission.candidate.global_id,
                     annee=admission.determined_academic_year,
-                    noma=proposition_fusion.registration_id_sent_to_digit,
                 )
             )
 

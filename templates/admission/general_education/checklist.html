@@ -144,18 +144,8 @@
             </div>
         {% endif %}
 
-        {% has_perm "admission.merge_candidate_with_known_person" permission_object as peut_fusionner %}
-
         {% if digit_ticket %}
             {% digit_ticket_status_msg digit_ticket %}
-        {% else %}
-            <form id="create-digit-person-form" method="POST" action="{% url 'admission:services:digit:request-digit-person-creation' uuid=uuid %}">
-                {% csrf_token %}
-                <button id="create-person-form-btn" type="submit" class="btn btn-primary pull-right"
-                {% if not peut_fusionner %} disabled {% endif %}>
-                    Créer personne dans DigIT
-                </button>
-            </form>
         {% endif %}
 
           <div class="form-group btn-group status-group" role="group">

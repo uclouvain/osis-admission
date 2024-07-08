@@ -134,7 +134,7 @@ class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest)
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RechercherCompteExistantQuery(interface.QueryRequest):
+class RechercherCompteExistantCommand(interface.QueryRequest):
     matricule: str
     nom: str
     prenom: str
@@ -210,7 +210,6 @@ class RecupererExperienceNonAcademiqueQuery(interface.QueryRequest):
 class SoumettreTicketPersonneCommand(interface.CommandRequest):
     global_id: str
     annee: int
-    noma: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -29,7 +29,6 @@ from unittest.mock import patch
 
 import freezegun
 import mock
-from django.core.cache import cache
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -73,6 +72,13 @@ class TestSoumettrePropositionGenerale(TestCase):
                     end_date=datetime.date(annee + 1, 9, 30),
                 )
             )
+
+        # Mock publish
+        patcher = mock.patch(
+            'infrastructure.utils.MessageBus.publish',
+        )
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     @freezegun.freeze_time('2023-11-01')
     @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)

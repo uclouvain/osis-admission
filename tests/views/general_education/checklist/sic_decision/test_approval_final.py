@@ -26,6 +26,7 @@
 import datetime
 
 import freezegun
+import mock
 from django.conf import settings
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
@@ -142,6 +143,13 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             'admission:general-education:sic-decision-approval-final',
             uuid=self.general_admission.uuid,
         )
+
+        # Mock publish
+        patcher = mock.patch(
+            'infrastructure.utils.MessageBus.publish',
+        )
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_submit_approval_final_decision_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
