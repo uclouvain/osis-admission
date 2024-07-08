@@ -1462,6 +1462,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
             reference='1234',
             annee_calculee=2023,
+            type_demande=TypeDemande.ADMISSION.name,
             pot_calcule=None,
             date_fin_pot=None,
             creee_le=datetime.datetime(2023, 1, 1),
