@@ -112,7 +112,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
             message_bus_instance.invoke(
                 SoumettreTicketPersonneCommand(
                     global_id=admission.candidate.global_id,
-                    annee=admission.determined_academic_year,
+                    annee=admission.determined_academic_year.year,
                 )
             )
 
