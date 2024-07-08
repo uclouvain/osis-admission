@@ -23,6 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.utils.translation import gettext_lazy as _
+
+from admission.forms import REQUIRED_FIELD_CLASS
+from admission.forms.specific_question import ConfigurableFormMixin
+from base.forms.utils.file_field import MaxOneFileUploadField
 
 
 class ByContextAdmissionFormMixin:
@@ -48,3 +53,55 @@ class ByContextAdmissionFormMixin:
         if field and self.fields[field].disabled:
             return
         super().add_error(field, error)
+
+
+class GlobalCurriculumForm(ConfigurableFormMixin):
+    configurable_form_field_name = 'reponses_questions_specifiques'
+
+    curriculum = MaxOneFileUploadField(
+        label=_('Detailed curriculum vitae, dated and signed'),
+        required=False,
+    )
+    equivalence_diplome = MaxOneFileUploadField(
+        label=_(
+            "Copy of equivalency decision issued by the French Community of Belgium making your bachelor's "
+            "diploma (bac+5) equivalent to the academic rank of a corresponding master's degree."
+        ),
+        help_text=_(
+            'You can find more information on the French Community webpage '
+            '<a href="https://equisup.cfwb.be/" target="_blank">https://equisup.cfwb.be/</a>'
+        ),
+        required=False,
+    )
+
+    def __init__(
+        self,
+        display_equivalence: bool,
+        display_curriculum: bool,
+        require_equivalence: bool,
+        require_curriculum: bool,
+        *args,
+        **kwargs
+    ):
+        super().__init__(*args, **kwargs)
+
+        if not display_equivalence:
+            del self.fields['equivalence_diplome']
+
+        elif require_equivalence:
+            self.fields['equivalence_diplome'].widget.attrs['class'] = REQUIRED_FIELD_CLASS
+
+        if not display_curriculum:
+            del self.fields['curriculum']
+
+        elif require_curriculum:
+            self.fields['curriculum'].widget.attrs['class'] = REQUIRED_FIELD_CLASS
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        cleaned_data.setdefault('curriculum', [])
+        cleaned_data.setdefault('equivalence_diplome', [])
+        cleaned_data.setdefault('reponses_questions_specifiques', {})
+
+        return cleaned_data

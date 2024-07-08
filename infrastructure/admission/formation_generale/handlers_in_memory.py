@@ -51,17 +51,14 @@ from admission.ddd.admission.formation_generale.use_case.write.retyper_document_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
+    specifier_derogation_financabilite,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_informations_acceptation_proposition_par_sic_service import (
-    specifier_informations_acceptation_proposition_par_sic,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_motifs_refus_proposition_par_sic_service import (
-    specifier_motifs_refus_proposition_par_sic,
 )
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
@@ -133,6 +130,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.repository.in_memory.digit import DigitInMemoryRepository
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -142,11 +140,19 @@ from admission.infrastructure.admission.repository.in_memory.titre_acces_selecti
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import (
     EmailDestinataireInMemoryRepository,
 )
+from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import (
+    CompteurAnnuelPourNomaInMemoryRepository,
+)
+from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
+    ExperienceParcoursInterneInMemoryTranslator,
+)
+
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -173,6 +179,10 @@ _reference_translator = ReferenceInMemoryTranslator()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _campus_repository = UclouvainCampusInMemoryRepository()
 _taches_techniques = TachesTechniquesInMemory()
+_digit_repository = DigitInMemoryRepository()
+_compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
+_experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
+_financabilite_fetcher = FinancabiliteInMemoryFetcher()
 
 
 COMMAND_HANDLERS = {
@@ -239,6 +249,7 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardiveInMemory(),
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_global,
+        financabilite_fetcher=_financabilite_fetcher,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -495,6 +506,7 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     ApprouverInscriptionTardiveParFaculteCommand: lambda msg_bus, cmd: approuver_inscription_tardive_par_faculte(
         cmd,
@@ -502,6 +514,7 @@ COMMAND_HANDLERS = {
         historique=_historique_formation_generale,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
@@ -542,11 +555,13 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
         lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
@@ -568,6 +583,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(
             cmd,
             titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
         )
     ),
     SpecifierFinancabiliteResultatCalculCommand: lambda msg_bus, cmd: specifier_financabilite_resultat_calcul(
@@ -648,6 +664,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -655,12 +673,15 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
+            notification=_notification,
             profil_candidat_translator=_profil_candidat_translator,
             comptabilite_translator=_comptabilite_translator,
             question_specifique_translator=_question_specific_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -682,6 +703,21 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_informations_acceptation_inscription_par_sic(
             cmd,
             proposition_repository=_proposition_repository,
+        )
+    ),
+    SpecifierDerogationFinancabiliteCommand: (
+        lambda msg_bus, cmd: specifier_derogation_financabilite(
+            cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique_formation_generale,
+        )
+    ),
+    NotifierCandidatDerogationFinancabiliteCommand: (
+        lambda msg_bus, cmd: notifier_candidat_derogation_financabilite(
+            cmd,
+            proposition_repository=_proposition_repository,
+            notification=_notification,
+            historique=_historique_formation_generale,
         )
     ),
 }

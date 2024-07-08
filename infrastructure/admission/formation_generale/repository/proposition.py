@@ -69,6 +69,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
     BesoinDeDerogation,
+    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -93,6 +94,8 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.models.student import Student
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
 from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from epc.models.enums.condition_acces import ConditionAcces
@@ -181,6 +184,20 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             with suppress(Person.DoesNotExist):
                 financabilite_regle_etabli_par_person = Person.objects.get(uuid=entity.financabilite_regle_etabli_par)
 
+        financabilite_derogation_premiere_notification_par_person = None
+        if entity.financabilite_derogation_premiere_notification_par:
+            with suppress(Person.DoesNotExist):
+                financabilite_derogation_premiere_notification_par_person = Person.objects.get(
+                    global_id=entity.financabilite_derogation_premiere_notification_par
+                )
+
+        financabilite_derogation_derniere_notification_par_person = None
+        if entity.financabilite_derogation_derniere_notification_par:
+            with suppress(Person.DoesNotExist):
+                financabilite_derogation_derniere_notification_par_person = Person.objects.get(
+                    global_id=entity.financabilite_derogation_derniere_notification_par
+                )
+
         scholarships_uuids = list(
             scholarship.uuid
             for scholarship in [
@@ -242,10 +259,30 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     or {},
                 },
                 'cycle_pursuit': entity.poursuite_de_cycle.name,
-                'financability_computed_rule': entity.financabilite_regle_calcule,
+                'financability_computed_rule': entity.financabilite_regle_calcule.name
+                if entity.financabilite_regle_calcule
+                else '',
+                'financability_computed_rule_situation': entity.financabilite_regle_calcule_situation.name
+                if entity.financabilite_regle_calcule_situation
+                else '',
                 'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
-                'financability_rule': entity.financabilite_regle,
+                'financability_rule': entity.financabilite_regle.name if entity.financabilite_regle else '',
                 'financability_rule_established_by': financabilite_regle_etabli_par_person,
+                'financability_dispensation_status': entity.financabilite_derogation_statut.name
+                if entity.financabilite_derogation_statut
+                else '',
+                'financability_dispensation_first_notification_on': (
+                    entity.financabilite_derogation_premiere_notification_le
+                ),
+                'financability_dispensation_first_notification_by': (
+                    financabilite_derogation_premiere_notification_par_person
+                ),
+                'financability_dispensation_last_notification_on': (
+                    entity.financabilite_derogation_derniere_notification_le
+                ),
+                'financability_dispensation_last_notification_by': (
+                    financabilite_derogation_derniere_notification_par_person
+                ),
                 'last_update_author': last_update_author_person,
                 'fac_approval_certificate': entity.certificat_approbation_fac,
                 'fac_refusal_certificate': entity.certificat_refus_fac,
@@ -452,12 +489,40 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             type_de_refus=admission.refusal_type,
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
-            financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule=EtatFinancabilite[admission.financability_computed_rule]
+            if admission.financability_computed_rule
+            else '',
+            financabilite_regle_calcule_situation=SituationFinancabilite[
+                admission.financability_computed_rule_situation
+            ]
+            if admission.financability_computed_rule_situation
+            else '',
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
-            financabilite_regle=admission.financability_rule,
+            financabilite_regle=SituationFinancabilite[admission.financability_rule]
+            if admission.financability_rule
+            else '',
             financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
             if admission.financability_rule_established_by
             else None,
+            financabilite_derogation_statut=DerogationFinancement[admission.financability_dispensation_status]
+            if admission.financability_dispensation_status
+            else '',
+            financabilite_derogation_premiere_notification_le=(
+                admission.financability_dispensation_first_notification_on
+            ),
+            financabilite_derogation_premiere_notification_par=(
+                admission.financability_dispensation_first_notification_by.global_id
+                if admission.financability_dispensation_first_notification_by
+                else None
+            ),
+            financabilite_derogation_derniere_notification_le=(
+                admission.financability_dispensation_last_notification_on
+            ),
+            financabilite_derogation_derniere_notification_par=(
+                admission.financability_dispensation_last_notification_by.global_id
+                if admission.financability_dispensation_last_notification_by
+                else None
+            ),
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,
@@ -637,11 +702,29 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
             financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule_situation=admission.financability_computed_rule_situation,
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
             financabilite_regle=admission.financability_rule,
             financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
             if admission.financability_rule_established_by
             else None,
+            financabilite_derogation_statut=admission.financability_dispensation_status,
+            financabilite_derogation_premiere_notification_le=(
+                admission.financability_dispensation_first_notification_on
+            ),
+            financabilite_derogation_premiere_notification_par=(
+                admission.financability_dispensation_first_notification_by.global_id
+                if admission.financability_dispensation_first_notification_by
+                else None
+            ),
+            financabilite_derogation_derniere_notification_le=(
+                admission.financability_dispensation_last_notification_on
+            ),
+            financabilite_derogation_derniere_notification_par=(
+                admission.financability_dispensation_last_notification_by.global_id
+                if admission.financability_dispensation_last_notification_by
+                else None
+            ),
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,

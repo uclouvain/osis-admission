@@ -215,6 +215,12 @@ class PropositionInMemoryRepository(
                 curriculum=['file1.pdf'],
                 est_confirmee=True,
             ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-FINANCABILITE'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="ABCD2MC", annee=2024),
+                curriculum=['file1.pdf'],
+            ),
         ]
 
     @classmethod
@@ -287,9 +293,25 @@ class PropositionInMemoryRepository(
             documents_additionnels=proposition.documents_additionnels,
             poste_diplomatique=poste_diplomatique,
             financabilite_regle_calcule=proposition.financabilite_regle_calcule,
+            financabilite_regle_calcule_situation=proposition.financabilite_regle_calcule_situation,
             financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
-            financabilite_regle=proposition.financabilite_regle,
+            financabilite_regle=proposition.financabilite_regle.name if proposition.financabilite_regle else '',
             financabilite_regle_etabli_par=proposition.financabilite_regle_etabli_par,
+            financabilite_derogation_statut=proposition.financabilite_derogation_statut.name
+            if proposition.financabilite_derogation_statut
+            else '',
+            financabilite_derogation_premiere_notification_le=(
+                proposition.financabilite_derogation_premiere_notification_le
+            ),
+            financabilite_derogation_premiere_notification_par=(
+                proposition.financabilite_derogation_premiere_notification_par
+            ),
+            financabilite_derogation_derniere_notification_le=(
+                proposition.financabilite_derogation_derniere_notification_le
+            ),
+            financabilite_derogation_derniere_notification_par=(
+                proposition.financabilite_derogation_derniere_notification_par
+            ),
             doit_fournir_visa_etudes=proposition.doit_fournir_visa_etudes,
             visa_etudes_d=proposition.visa_etudes_d,
             certificat_autorisation_signe=proposition.certificat_autorisation_signe,

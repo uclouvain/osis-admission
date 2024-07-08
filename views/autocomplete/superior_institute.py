@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ class SuperiorInstituteAutocomplete(autocomplete.Select2QuerySetView):
             organization_uuid=F('entity__organization__uuid'),
             organization_acronym=F('entity__organization__acronym'),
             organization_community=F('entity__organization__community'),
+            organization_establishment_type=F('entity__organization__establishment_type'),
             name=F('entity__organization__name'),
             city=F('entityversionaddress__city'),
             street=F('entityversionaddress__street'),
@@ -102,6 +103,7 @@ class SuperiorInstituteAutocomplete(autocomplete.Select2QuerySetView):
                 'id': self.get_result_value(result),
                 'text': self.get_result_label(result),
                 'community': result.organization_community,
+                'establishment_type': result.organization_establishment_type,
             }
             for result in context['object_list']
         ]

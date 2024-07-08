@@ -50,6 +50,7 @@ def modifier_choix_formation(
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         motivations=cmd.motivations,
         moyens_decouverte_formation=cmd.moyens_decouverte_formation,
+        autre_moyen_decouverte_formation=cmd.autre_moyen_decouverte_formation,
         marque_d_interet=cmd.marque_d_interet,
     )
 

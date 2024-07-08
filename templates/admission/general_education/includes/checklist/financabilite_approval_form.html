@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <form
-    hx-post="{% url view.base_namespace|add:':financability-approval' uuid=view.kwargs.uuid %}"
+    hx-post="{% url view.base_namespace|add:':financability-approval-set-rule' uuid=view.kwargs.uuid %}"
     hx-target="this"
     hx-swap="outerHTML"
     style="overflow: auto;"
@@ -39,6 +39,7 @@
       {% blocktrans trimmed with date=original_admission.financability_computed_rule_on result=original_admission.financability_computed_rule|financability_enum_display %}
         Financeabilty algorithm proposition on the {{ date }} : {{ result }}
       {% endblocktrans %}
+      {% if original_admission.financability_computed_rule_situation %} - {{ original_admission.financability_computed_rule_situation|financability_enum_display }}{% endif %}
     {% endif %}
     </em></p>
 

@@ -100,6 +100,7 @@
         id="tabs-content"
         class="tab-content"
     >
+
       {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url=next_base_url|add:'assimilation' %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
           <div class="form-group btn-group status-group" role="group">
@@ -129,6 +130,34 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
+
+        {% search_account_digit_result_msg original_admission %}
+
+        {% if proposition_fusion.validation.errors %}
+            <div class="alert alert-danger">
+              <strong>Erreurs lors de la validation DigIT</strong>
+              {% for error in proposition_fusion.validation.errors %}
+              <li>
+                    {{ error.errorCode|digit_error_description }}
+              </li>
+              {% endfor %}
+            </div>
+        {% endif %}
+
+        {% has_perm "admission.merge_candidate_with_known_person" permission_object as peut_fusionner %}
+
+        {% if digit_ticket %}
+            {% digit_ticket_status_msg digit_ticket %}
+        {% else %}
+            <form id="create-digit-person-form" method="POST" action="{% url 'admission:services:digit:request-digit-person-creation' uuid=uuid %}">
+                {% csrf_token %}
+                <button id="create-person-form-btn" type="submit" class="btn btn-primary pull-right"
+                {% if not peut_fusionner %} disabled {% endif %}>
+                    Créer personne dans DigIT
+                </button>
+            </form>
+        {% endif %}
+
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' %}
@@ -150,6 +179,12 @@
         <div role="tabpanel" class="tab-pane" id="financabilite">
 
           {% include "admission/general_education/includes/checklist/financabilite.html" %}
+          
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_non_concerne_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_abandon_du_candidat_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_refus_de_derogation_modal.html" %}
+          {% include "admission/general_education/includes/checklist/financabilite_derogation_accord_de_derogation_modal.html" %}
 
           <div class="info-part">
             <dl>
@@ -277,7 +312,7 @@
           </div>
         </div>
       {% endwith %}
-      {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur %}
+      {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur next_url=next_base_url|add:'parcours_anterieur' %}
         <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
           {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
           {% bootstrap_form comment_forms.parcours_anterieur %}
@@ -295,9 +330,9 @@
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
             <div class="mt-1">
               {% if can_update_curriculum %}
-                {% url 'admission:general-education:update:curriculum:global' view.kwargs.uuid as global_curriculum_update_url %}
+                {% url 'admission:general-education:update:curriculum' view.kwargs.uuid as global_curriculum_update_url %}
               {% endif %}
-              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url %}
+              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url|add:next_url %}
             </div>
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
@@ -349,10 +384,10 @@
             {% endwith %}
           </div>
         {% endfor %}
-        
+
         {% include 'admission/general_education/includes/checklist/previous_experience_send_email_to_checkers_modal.html' %}
         {% include 'admission/general_education/includes/checklist/previous_experience_send_email_to_candidate_modal.html' %}
-        
+
       {% endwith %}
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation next_url=next_base_url|add:'specificites_formation' %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
@@ -484,7 +519,7 @@
       </div>
     </div>
   </div>
-  
+
   <table style="display:none;">
     {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='fac-decision-additional-approval-conditions-form' form=fac_decision_free_approval_condition_formset.empty_form id='empty-fac-approval-form' %}
     {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='sic-decision-additional-approval-conditions-form' form=sic_decision_free_approval_condition_formset.empty_form id='empty-sic-approval-form' %}
@@ -843,6 +878,10 @@
 
               if (elt.classList.contains('checklist-state-button')) {
                   {# Click on checklist state button #}
+                  if(!event.originalEvent.detail.successful){
+                    location.reload();
+                  }
+
                   const buttonToSelect = event.originalEvent.detail.successful ? elt : previousSelectedButton;
                   buttonToSelect.disabled = true;
                   buttonToSelect.classList.remove('btn-default');
@@ -999,7 +1038,23 @@
               $(this).prop('action', `${$(this).prop('action')}?next={{ request.path }}&next_hash_url=${nextURLHash}`);
           });
 
-      })(jQuery);
+          // Update computed rule on financabilite tab show
+          $('#list-group-link-financabilite').on('show.bs.tab', function() {
+              htmx.trigger('#financabilite-computed-rule', 'financabiliteComputeRule');
+          });
+
+      })(jQuery)
+
+        $('#merge-experience-form').on('submit', (e) => {
+            e.preventDefault();
+            htmx.ajax('GET', e.target.action, {
+                source: '#merge-experience-btn',
+                target: '#form-ajax-modal',
+                indicator: '#htmx-overlay',
+                swap: 'innerHTML',
+            }).then(() => $('#form-ajax-modal').modal('show'));
+        })
+    </script>
   </script>
 {% endblock script %}
 
@@ -1013,6 +1068,7 @@
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
+  <link href="{% static 'osis_profile/css/parcours.css' %}" rel="stylesheet" >
   <style>
     #three-pane-checklist {
       display: flex;
@@ -1342,5 +1398,17 @@
       min-width: 0 !important;
     }
 
+    {# Customize the experience authentication message (history entry) #}
+    .experience-authentication-message {
+      white-space: pre-line;
+      min-height: 1.5em;
+      height: 1.5em;
+      display: block !important;
+      overflow-y: hidden;
+    }
+
+    .experience-authentication-message.collapse.in {
+      height: auto;
+    }
   </style>
 {% endblock style %}

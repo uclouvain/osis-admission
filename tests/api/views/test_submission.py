@@ -63,7 +63,8 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.faculty_decision import (
     FreeAdditionalApprovalConditionFactory,
 )
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory, \
+    AdmissionFormItemFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -82,6 +83,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from reference.tests.factories.country import CountryFactory
@@ -93,6 +95,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
+        AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL)
 
         # Validation errors
         cls.candidate_errors = IncompletePersonForBachelorFactory(
@@ -195,6 +198,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(ret['pot_calcule'], AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name)
         self.assertIsNotNone(ret['date_fin_pot'])
 
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_verification_ok_valuate_experiences(self):
         educational_experience = self.second_candidate_ok.educationalexperience_set.first()
         professional_experience = self.second_candidate_ok.professionalexperience_set.first()
@@ -272,6 +276,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             admission.detailed_status,
         )
 
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_verification_contingent_est_interdite(self):
         admission = GeneralEducationAdmissionFactory(
             is_non_resident=True,
@@ -292,6 +297,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             admission.detailed_status,
         )
 
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
@@ -390,6 +396,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertNotIn('juillet 1980', notifications[0].payload)
 
     @freezegun.freeze_time("1980-10-22")
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_submission_with_late_enrollment(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
@@ -413,6 +420,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIn('inscription tardive', notifications[0].payload)
 
     @freezegun.freeze_time("1980-11-25")
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_submission_ok_hors_delai(self):
         ProfessionalExperienceFactory(
             person=self.candidate_ok,
@@ -647,10 +655,9 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
-                'justificatifs': IElementsConfirmation.JUSTIFICATIFS
-                % {'by_service': _("by the University Institute for Continuing Education (IUFC)")},
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the faculty")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
-                % {'to_service': _("the University Institute of Continuing Education")},
+                % {'to_service': _("the faculty")},
                 'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }

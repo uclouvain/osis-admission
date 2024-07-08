@@ -312,6 +312,113 @@ fieldset.custom-fieldset > legend {
   white-space: pre-wrap;
 }
 
+.panel-default-badge-success{
+    color: #fff !important;
+    background-color: #28a745 !important;
+}
+
+.panel-default-badge-primary{
+    color: #fff !important;
+    background-color: #337ab7 !important;
+}
+
+
+.merge-panel-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+#select2-match-container {
+  line-height: 28px !important;
+  padding-left: 8px !important;
+}
+
+.flex-merge-input {
+  display: flex;
+  align-items: center;
+}
+
+.btn-merge {
+  display: none;
+}
+
+.btn-merge-all {
+  height: 30px;
+  width: 30px;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  padding: 0;
+}
+
+.flex-merge-input:hover .btn-merge {
+  display: block !important;
+}
+
+select#match + .select2-container {
+  min-width: unset !important;
+}
+
+.original-data {
+  padding-right: 0 !important;
+}
+
+.original-data-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 0;
+}
+
+.original-data-heading .panel-title{
+  flex: 5;
+  line-height: 2;
+}
+
+.original-data-heading .merge-btn-container {
+  padding-right: 5px;
+}
+
+.input-field-data {
+  flex: 5;
+}
+
+.merge-btn-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.fusion-data-heading .panel-title {
+  line-height: 2;
+  padding-left: 15px;
+}
+
+.digit-data-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 0 !important;
+}
+
+.digit-data-heading .panel-title {
+  flex: 5;
+  line-height: 2;
+}
+
+.digit-data {
+  padding-left: 0 !important;
+}
+
+.digit-data-heading .merge-btn-container {
+  padding-left: 5px;
+}
+
+#proposal-form .help-block {
+  display: none;
+}
+
 @media (min-width: 992px) {
   .admission-modal-lg {
     width: 90%;
@@ -379,4 +486,17 @@ a.no-link {
 
 .fit-content {
   width: fit-content;
+}
+
+.fusion-data{
+  pointer-events: none;
+}
+
+.fusion-data #id_identification_type{
+  pointer-events: all !important;
+}
+
+.admission-collapse-button[aria-expanded="false"] i.fa-chevron-up,
+.admission-collapse-button[aria-expanded="true"] i.fa-chevron-down {
+  display: none;
 }

@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 
+from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -50,8 +51,12 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import VerifierProposition
+from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
+from ddd.logic.financabilite.domain.service.financabilite import Financabilite
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -71,10 +76,12 @@ def soumettre_proposition(
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
+    financabilite_fetcher: 'IFinancabiliteFetcher',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+
     annee_courante = (
         GetCurrentAcademicYear()
         .get_starting_academic_year(
@@ -101,6 +108,21 @@ def soumettre_proposition(
         profil_candidat_translator,
     )
     pool = AcademicCalendarTypes[cmd.pool]
+
+    identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+
+    parcours = financabilite_fetcher.recuperer_donnees_parcours_via_matricule_fgs(
+        matricule_fgs=proposition.matricule_candidat,
+        annee=formation.entity_id.annee,
+    )
+    formation_dto = financabilite_fetcher.recuperer_informations_formation(
+        sigle_formation=formation.entity_id.sigle,
+        annee=formation.entity_id.annee,
+    )
+    etat_financabilite_2023 = financabilite_fetcher.recuperer_etat_financabilite_2023(
+        matricule_fgs=proposition.matricule_candidat,
+        sigle_formation=formation.entity_id.sigle,
+    )
 
     # WHEN
     VerifierProposition.verifier(
@@ -137,6 +159,13 @@ def soumettre_proposition(
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
+    financabilite = Financabilite(
+        parcours=parcours,
+        formation=formation_dto,
+        est_en_reorientation=proposition.est_reorientation_inscription_externe,
+        etat_financabilite_2023=etat_financabilite_2023,
+    ).determiner()
+
     proposition.soumettre(
         formation_id=formation_id,
         pool=pool,
@@ -146,6 +175,12 @@ def soumettre_proposition(
         profil_candidat_soumis=profil_candidat_soumis,
         doit_payer_frais_dossier=doit_payer_frais_dossier,
     )
+
+    proposition.specifier_financabilite_resultat_calcul(
+        financabilite_regle_calcule=EtatFinancabilite[financabilite.etat],
+        financabilite_regle_calcule_situation=SituationFinancabilite[financabilite.situation],
+    )
+
     Checklist.initialiser(
         proposition=proposition,
         formation=formation,
@@ -154,7 +189,23 @@ def soumettre_proposition(
         annee_courante=annee_courante,
     )
     proposition_repository.save(proposition)
+
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
+
+    from infrastructure.messages_bus import message_bus_instance
+    message_bus_instance.publish(
+        PropositionSoumiseEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+            nom=identification.nom,
+            prenom=identification.prenom,
+            autres_prenoms=identification.autres_prenoms,
+            date_naissance=str(identification.date_naissance),
+            genre=identification.genre,
+            niss=identification.numero_registre_national_belge,
+            annee=proposition.annee_calculee,
+        )
+    )
 
     return proposition_id

@@ -24,13 +24,22 @@
 #
 # ##############################################################################
 from django.conf import settings
+from django.conf.urls import url
 
+from admission.tasks import retrieve_digit_tickets_status
 from osis_common.utils.file_router import FileRouter
 
 app_name = 'admission'
 
 file_router = FileRouter()
 urlpatterns = file_router('admission/views')
+urlpatterns += [
+    url(
+        'retrieve_digit_person_ticket_status',
+        retrieve_digit_tickets_status.run,
+        name="retrieve_digit_person_ticket_status"
+    )
+]
 
 if settings.DEBUG:
     import logging

@@ -1330,6 +1330,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             documents_additionnels=[],
             motivations='My motivation',
             moyens_decouverte_formation=[],
+            autre_moyen_decouverte_formation='',
+            adresses_emails_gestionnaires_formation=[],
             documents_demandes={},
             marque_d_interet=False,
             aide_a_la_formation=False,
@@ -1431,6 +1433,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             documents_additionnels=[],
             poste_diplomatique=None,
             financabilite_regle_calcule="",
+            financabilite_regle_calcule_situation='',
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
             financabilite_regle_etabli_par="",
@@ -1441,6 +1444,11 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             visa_etudes_d=['uuid-visa-etudes-d'],
             certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
             type=TypeDemande.ADMISSION.name,
+            financabilite_derogation_statut='',
+            financabilite_derogation_premiere_notification_le=None,
+            financabilite_derogation_premiere_notification_par='',
+            financabilite_derogation_derniere_notification_le=None,
+            financabilite_derogation_derniere_notification_par='',
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',

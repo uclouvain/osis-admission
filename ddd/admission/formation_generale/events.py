@@ -23,6 +23,7 @@
 #
 ##############################################################################
 from decimal import Decimal
+from typing import Optional
 
 import attr
 
@@ -36,3 +37,16 @@ class FraisDossierPayeEvent(Event):
     numero_dossier: str
     montant: Decimal
     matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class PropositionSoumiseEvent(Event):
+    entity_id: 'PropositionIdentity'
+    matricule: str
+    nom: str
+    prenom: str
+    autres_prenoms: Optional[str]
+    date_naissance: str
+    genre: str
+    niss: Optional[str]
+    annee: Optional[str]

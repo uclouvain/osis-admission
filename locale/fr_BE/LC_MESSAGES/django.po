@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-22 18:08+0100\n"
+"POT-Creation-Date: 2024-06-28 11:14+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -212,6 +212,38 @@ msgstr ""
 "vous sûr de vouloir supprimer ce template d'email personnalisé ? Cette "
 "action est irréversible.</p>"
 
+#, python-brace-format
+msgid "<p>Contact person for setting up your annual programme: {contact}</p>"
+msgstr ""
+"<p>Personne de contact pour la composition du programme annuel : {contact}</"
+"p>"
+
+#, python-brace-format
+msgid "<p>Course duration: 1 year</p>"
+msgid_plural "<p>Course duration: {years} years</p>"
+msgstr[0] "<p>Durée des études : 1 an.</p>"
+msgstr[1] "<p>Durée des études : {years} ans.</p>"
+
+#, python-brace-format
+msgid ""
+"<p>Depending on your previous experience, your faculty will supplement your "
+"annual programme with additional classes (for more information: <a "
+"href=\"{link}\">{link}</a>).</p>"
+msgstr ""
+"<p>Au vu de votre parcours antérieur, votre faculté complétera votre "
+"programme annuel par des compléments de formation (enseignements "
+"supplémentaires) (pour plus d’informations : <a href=\"{link}\">{link}</a>)."
+"</p>"
+
+#, python-brace-format
+msgid ""
+"<p>We also wish to inform you that the additional documents below should be "
+"sent as soon as possible to <a href=\"mailto:{mail}\">{mail}</a>:</p>"
+msgstr ""
+"<p>Par ailleurs, nous profitons de ce courrier pour vous signaler que les "
+"documents complémentaires ci-dessous sont à nous fournir dès que possible à "
+"l’adresse <a href=\"mailto:{mail}\">{mail}</a> :</p>"
+
 msgid ""
 "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
 "strong>"
@@ -316,20 +348,23 @@ msgid "A translation of your secondary school diploma by a sworn translator"
 msgstr ""
 "Une traduction de votre diplôme d'études secondaires par un traducteur juré"
 
+msgid "ABANDON_DU_CANDIDAT"
+msgstr "Abandon du·de la candidat·e"
+
 msgid "ACCEPTED"
 msgstr "Accepté"
 
 msgid "ACCEPTEE"
 msgstr "Acceptée"
 
+msgid "ACCORD_DE_DEROGATION_FACULTAIRE"
+msgstr "Accord de dérogation facultaire"
+
 msgid "ACCORD_DIRECTION"
 msgstr "Accord dérogation direction"
 
 msgid "ACKNOWLEDGED"
 msgstr "Réceptionné"
-
-msgid "ACQUIS_75_POURCENTS_CREDITS"
-msgstr "Acquis 75 pourcents crédits du PAE de l'année précédente"
 
 msgid "ADMISSIBLE"
 msgstr "Recevable"
@@ -352,9 +387,6 @@ msgstr "Autre"
 msgid "AVIS_DIRECTION_DEMANDE"
 msgstr "Avis direction demandé"
 
-msgid "A_CLARIFIER"
-msgstr "À clarifier"
-
 msgid "Absence of debt"
 msgstr "Absence de dettes"
 
@@ -366,6 +398,9 @@ msgstr "Règlement général des études"
 
 msgid "Academic course"
 msgstr "Formation académique"
+
+msgid "Academic courses"
+msgstr "Formations académiques"
 
 msgid "Academic experience"
 msgstr "Expérience académique"
@@ -404,6 +439,9 @@ msgstr "Acceptée"
 
 msgid "Access condition:"
 msgstr "Condition d'accès :"
+
+msgid "Access experience details"
+msgstr "Accéder aux détails de l'expérience"
 
 msgid "Access title"
 msgstr "Titre d'accès"
@@ -506,6 +544,10 @@ msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
 msgid "Add a new member"
 msgstr "Ajouter un nouveau membre."
 
+msgctxt "admission"
+msgid "Add a non-academic activity"
+msgstr "Ajouter une activité non-académique"
+
 msgid "Add a paper"
 msgstr "Ajouter une épreuve"
 
@@ -535,6 +577,10 @@ msgstr "Ajouter un séminaire"
 
 msgid "Add a service"
 msgstr "Ajouter un service"
+
+msgctxt "admission"
+msgid "Add an academic course"
+msgstr "Ajouter une formation académique"
 
 msgid "Add an activity"
 msgstr "Ajouter une activité"
@@ -598,6 +644,13 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
+
+msgid ""
+"Admission is not yet valid for searching UCLouvain account. The following "
+"fields are required: "
+msgstr ""
+"L'admission n'est pas encore valide pour rechercher une correspondance "
+"UCLouvain. Les champs suivants sont requis: "
 
 #, python-format
 msgid ""
@@ -1051,11 +1104,11 @@ msgstr "Autorisation"
 msgid "Authorization to validate"
 msgstr "Autorisation à valider"
 
-msgid "Authorize"
-msgstr "Autoriser"
-
 msgid "Authors"
 msgstr "Auteurs et autrices"
+
+msgid "Available information (Digit)"
+msgstr "Information connue (Digit)"
 
 msgid "Awaiting approval"
 msgstr "En révision"
@@ -1077,6 +1130,9 @@ msgstr "Bachelier"
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
+
+msgid "Back to overview"
+msgstr "Revenir à la vue d'ensemble"
 
 msgctxt "admission"
 msgid "Back to page"
@@ -1155,11 +1211,19 @@ msgstr ""
 "d’admission soit acceptée). En cas d’annulation, les modalités dépendent des "
 "Facultés."
 
+msgctxt "ways_hear_about_training"
+msgid "By someone who has already taken this course in a previous edition"
+msgstr ""
+"Par quelqu’un ayant déjà suivi cette formation dans une édition précédente"
+
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
 
 msgid "CA members"
 msgstr "Membres du comité d'accompagnement"
+
+msgid "CANDIDAT_NOTIFIE"
+msgstr "Candidat·e notifié·e"
 
 msgid "CDD"
 msgstr "CDD"
@@ -1188,9 +1252,6 @@ msgstr "CDD :"
 msgid "CDDs"
 msgstr "CDDs"
 
-msgid "CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS"
-msgstr "120 crédits non encore acquis"
-
 msgid "CEP"
 msgstr "CEP"
 
@@ -1206,15 +1267,6 @@ msgstr "Décision de la bourse de la CFWB"
 
 msgid "CHEMISTRY"
 msgstr "Chimie"
-
-msgid "CINQ_G_1ERE_INSCRIPTION_MEME_CYCLE"
-msgstr "5G 1ère inscription au même cycle"
-
-msgid "CINQ_G_2EME_INSCRIPTION_AVEC_REORIENTATION"
-msgstr "5G 2ème inscription avec réorientation"
-
-msgid "CINQ_G_2EME_INSCRIPTION_MEME_CYCLE"
-msgstr "5G 2ème inscription au même cycle"
 
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr "Carte CIRE, séjour illimité ou d'étranger"
@@ -1428,6 +1480,9 @@ msgctxt "gender"
 msgid "Candidate"
 msgstr "Candidat·e"
 
+msgid "Candidate information"
+msgstr "Information du candidat"
+
 msgid "Candidate nationality"
 msgstr "Nationalité du candidat"
 
@@ -1436,6 +1491,9 @@ msgstr "Candidat non trouvé."
 
 msgid "Candidate of the admission"
 msgstr "Candidat de la proposition"
+
+msgid "Candidate withdrawal"
+msgstr "Abandon du candidat"
 
 msgid "Candidate's country of nationality"
 msgstr "Pays de la nationalité du candidat"
@@ -1455,6 +1513,11 @@ msgid "Cannot delete the experience because it is used in another context."
 msgstr ""
 "Impossible de supprimer l'expérience parce qu'elle est utilisée dans un "
 "autre contexte."
+
+msgid ""
+"Cannot discard merge because at least one known person has the same national "
+"number"
+msgstr "Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le même numéro de registre national"
 
 msgid "Canvas"
 msgstr "Canvas"
@@ -1616,6 +1679,9 @@ msgstr "Nationalité"
 msgid "City"
 msgstr "Ville"
 
+msgid "Civil state"
+msgstr "État civil"
+
 msgid "Civil status"
 msgstr "État civil"
 
@@ -1647,6 +1713,9 @@ msgstr "Commentaire"
 
 msgid "Comment about dispensation"
 msgstr "Commentaire sur la dérogation"
+
+msgid "Comment about financability dispensation"
+msgstr "Commentaire sur la dérogation à la financabilité"
 
 msgid "Comment about jury"
 msgstr "Commentaire sur le jury"
@@ -1813,6 +1882,9 @@ msgstr "Coordonnées"
 msgid "Contact language"
 msgstr "Langue de contact"
 
+msgid "Contact link"
+msgstr "Lien de contact"
+
 msgid "Contact person for the design of the annual program"
 msgstr "Personne de contact pour la composition du programme annuel"
 
@@ -1827,10 +1899,6 @@ msgstr "Formation continue"
 
 msgid "Continuing education admission"
 msgstr "Admission en formation continue"
-
-msgctxt "ways_hear_about_training"
-msgid "Continuing education website"
-msgstr "Par le site de la formation continue"
 
 msgid "Continuing enrolment applications"
 msgstr "Demandes d'inscription en formation continue"
@@ -2044,6 +2112,9 @@ msgid "Country of birth"
 msgstr "Pays de naissance"
 
 msgid "Country of citizenship"
+msgstr "Pays de nationalité"
+
+msgid "Country of citizenship name"
 msgstr "Pays de nationalité"
 
 msgctxt "admission"
@@ -2284,13 +2355,13 @@ msgid "Decision of the faculty"
 msgstr "Décision de la faculté"
 
 msgid "Declared assimilated"
-msgstr "Déclaré(e) assimilé(e)"
+msgstr "Déclaré·e assimilé·e"
 
 msgid "Declared assimilated or not"
-msgstr "Déclaré(e) assimilé(e) ou non"
+msgstr "Déclaré·e assimilé·e ou non"
 
 msgid "Declared not assimilated"
-msgstr "Déclaré(e) non assimilé(e)"
+msgstr "Déclaré·e non assimilé·e"
 
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
@@ -2420,6 +2491,15 @@ msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 msgid "Disabled"
 msgstr "Désactivé"
 
+msgid "Discard fusion"
+msgstr "Rejeter la fusion"
+
+msgid "Dispensation"
+msgstr "Dérogation"
+
+msgid "Dispensation granted"
+msgstr "Dérogation accordée"
+
 msgid "Dispensation needed"
 msgstr "Besoin dérogation"
 
@@ -2466,9 +2546,6 @@ msgstr "Avez-vous obtenu un diplôme de fin d'études secondaires ?"
 
 msgid "Do you have an international scholarship?"
 msgstr "Bénéficiez-vous d'une bourse internationale ?"
-
-msgid "Do you want to authorize this inscription type admission now?"
-msgstr "Voulez-vous autoriser cette demande de type inscription maintenant ?"
 
 msgid "Do you want to continue?"
 msgstr "Souhaitez-vous continuer ?"
@@ -2667,6 +2744,9 @@ msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
 
+msgid "Educational experience"
+msgstr "Expériences académiques"
+
 msgid "Educational experiences"
 msgstr "Expériences académiques"
 
@@ -2715,6 +2795,13 @@ msgstr ""
 "E-mail envoyé au candidat H(UE+5) lorsque SIC approuve une proposition."
 
 msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed."
+msgstr ""
+"E-mail envoyé au candidat pour l'informer qu'une dérogation à la "
+"financabilité est nécessaire."
+
+msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
 msgstr ""
@@ -2744,6 +2831,9 @@ msgstr ""
 
 msgid "Email sent to the candidate when IUFC validate the application."
 msgstr "E-mail envoyé au candidat lorsque l'IUFC valide une proposition."
+
+msgid "Email sent to the candidate when SIC approves an inscription."
+msgstr "E-mail envoyé au candidat lorsque SIC approuve une inscription."
 
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
@@ -2929,6 +3019,9 @@ msgstr "Date (prévue) de délivrance du diplôme (document signé)"
 msgid "Experience knowledge valorisation"
 msgstr "Valorisation des acquis d'expérience"
 
+msgid "Experience merge proposal"
+msgstr "Proposition de fusion du parcours antérieur"
+
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
 
@@ -3010,6 +3103,9 @@ msgstr "Sur Facebook"
 msgid "Faculty"
 msgstr "Faculté"
 
+msgid "Faculty comment about financability dispensation"
+msgstr "Commentaire facultaire sur la dérogation à la finançabilité"
+
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
 
@@ -3024,6 +3120,15 @@ msgstr "Commentaire de la Faculté pour le SIC :"
 
 msgid "Faculty decision:"
 msgstr "Décision facultaire :"
+
+msgid "Faculty dispensation approval"
+msgstr "Accord de dérogation facultaire"
+
+msgid "Faculty dispensation notification"
+msgstr "Notification de dérogation facultaire"
+
+msgid "Faculty dispensation refusal"
+msgstr "Refus de dérogation facultaire"
 
 msgid "Faculty process"
 msgstr "Traitement facultaire"
@@ -3064,14 +3169,39 @@ msgstr "Règle calculé de financabilité"
 msgid "Financability computed rule on"
 msgstr "Règle calculé de financabilité le"
 
+msgid "Financability computed rule situation"
+msgstr "Situation calculée de financabilité"
+
+msgid "Financability dispensation"
+msgstr "Dérogation à la financabilité"
+
+msgid "Financability dispensation first notification by"
+msgstr "Première notification à la dérogation à la financabilité par"
+
+msgid "Financability dispensation first notification on"
+msgstr "Première notification à la dérogation à la financabilité le"
+
+msgid "Financability dispensation last notification by"
+msgstr "Dernière notification à la dérogation à la financabilité par"
+
+msgid "Financability dispensation last notification on"
+msgstr "Dernière notification à la dérogation à la financabilité le"
+
+msgid "Financability dispensation needed"
+msgstr "Besoin de dérogation à la financabilité"
+
+msgid "Financability dispensation status"
+msgstr "Statut de dérogation à la financabilité"
+
 msgid "Financability rule"
 msgstr "Règle de financabilité"
 
 msgid "Financability rule established by"
 msgstr "Règle de financabilité établi par"
 
-msgid "Financable"
-msgstr "Finançable"
+#, python-format
+msgid "Financable - %(rule)s (Established by %(established_by)s)"
+msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
 
 msgid "Financeability"
 msgstr "Financabilité"
@@ -3089,8 +3219,16 @@ msgstr "Proposition de l'algorithme de financabilité le %(date)s : %(result)s"
 msgid "Financeable"
 msgstr "Financable"
 
+#, python-format
+msgid "Financeable - %(rule)s (Established by %(established_by)s)"
+msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
+
 msgid "Financing rule"
 msgstr "Règle de financement"
+
+#, python-format
+msgid "First mail sent to the candidate on %(date)s by %(sender)s."
+msgstr "Premier mail envoyé au/à la candidat·e le %(date)s par %(sender)s."
 
 msgid "First name"
 msgstr "Prénom"
@@ -3184,6 +3322,9 @@ msgstr ""
 "\"TYPE_SELECTION\".<br>Exemple complet : <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
 
+msgid "For the attention of"
+msgstr "A l'attention de"
+
 #, python-format
 msgid ""
 "For the jury president, %(manager_first_name)s %(manager_last_name)s on "
@@ -3228,10 +3369,6 @@ msgstr "La formation n'est pas disponible pour cette année."
 
 msgid "Former UCLouvain student"
 msgstr "Ancien·ne étudiant·e UCLouvain"
-
-msgctxt "ways_hear_about_training"
-msgid "Former students"
-msgstr "Par des anciens étudiants"
 
 msgid "Fraudster"
 msgstr "Fraudeur"
@@ -3281,10 +3418,6 @@ msgstr "Valeur en français"
 msgid "French values"
 msgstr "Valeurs en français"
 
-msgctxt "ways_hear_about_training"
-msgid "Friends"
-msgstr "Par des amis"
-
 msgid "From"
 msgstr "De"
 
@@ -3306,6 +3439,9 @@ msgstr "Financement"
 
 msgid "Funding type"
 msgstr "Type de financement"
+
+msgid "Fusion proposal"
+msgstr "Proposition de fusion"
 
 msgid "GEOGRAPHY"
 msgstr "Géographie"
@@ -3363,8 +3499,11 @@ msgstr ""
 msgid "Global"
 msgstr "Global"
 
-msgid "Global FAC/CDD comments"
-msgstr "Commentaires globaux FAC/CDD"
+msgid "Global FAC comments"
+msgstr "Commentaires globaux FAC"
+
+msgid "Global IUFC comments"
+msgstr "Commentaires globaux IUFC"
 
 msgid "Global SIC comments"
 msgstr "Commentaires globaux SIC"
@@ -3430,6 +3569,9 @@ msgstr "Cacher le menu de la checklist"
 msgid "Hide the states of the checklist"
 msgstr "Cacher les états de la checklist"
 
+msgid "High school graduation year"
+msgstr "Année d'obtention du diplôme d'études secondaires"
+
 msgctxt "tab"
 msgid "History"
 msgstr "Historique"
@@ -3455,11 +3597,25 @@ msgstr "Composition de ménage ou acte de mariage"
 msgid "Household composition, or copy of your birth certificate"
 msgstr "Composition de ménage, ou copie de votre acte de naissance"
 
-msgid "How did the candidate find out about this course?"
-msgstr "Comment le candidat a connu l'existence de cette formation ?"
+msgid "How did the candidate hear about this course?"
+msgstr ""
+"Par quel canal de communication le candidat a connu l'existence de cette "
+"formation ?"
 
 msgid "How did you hear about this course?"
-msgstr "Comment avez-vous connu l'existence de cette formation ?"
+msgstr ""
+"Par quel canal de communication avez-vous connu l'existence de cette "
+"formation ?"
+
+msgid "How else did the candidate hear about this course?"
+msgstr ""
+"Par quel autre canal de communication le candidat a connu l'existence de "
+"cette formation ?"
+
+msgid "How else did you hear about this course?"
+msgstr ""
+"Par quel autre canal de communication avez-vous connu l'existence de cette "
+"formation ?"
 
 msgid "I am a long-term resident in the European Union outside Belgium"
 msgstr "Je suis résident·e de longue durée en Union Européenne hors Belgique "
@@ -3699,14 +3855,11 @@ msgstr ""
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
 
-msgid "INDISPONIBLE"
-msgstr "Indisponible"
-
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
 
 msgid "INITIAL_NON_CONCERNE"
-msgstr "Initial non concerné(e)"
+msgstr "Initial non concerné·e"
 
 msgid "INSCRIPTION"
 msgstr "Inscription"
@@ -3728,6 +3881,12 @@ msgstr "En cours"
 
 msgid "IUFC comment for the Faculty"
 msgstr "Commentaire de l'IUFC pour la Faculté"
+
+msgid "Id card expiry date"
+msgstr "Date de fin de validité de la carte d'identité"
+
+msgid "Id card number"
+msgstr "Numéro de carte d'identité"
 
 msgid "Identification"
 msgstr "Identification"
@@ -3910,7 +4069,7 @@ msgid "Include or exclude the checklist filters"
 msgstr "Inclure ou exclure les filtres de la checklist"
 
 msgid "Incomplete field"
-msgstr "Non renseigné(e)"
+msgstr "Non renseigné·e"
 
 msgid ""
 "Information about a potential cotutelle are to be inputted in the \"Doctoral "
@@ -3985,6 +4144,12 @@ msgstr "Commentaire interne"
 
 msgid "Internal comment:"
 msgstr "Commentaire interne :"
+
+msgid "Internal experience"
+msgstr "Expérience interne"
+
+msgid "Internal experiences to choose as access titles"
+msgstr "Les expériences internes à choisir comme des titres d'accès"
 
 msgid "Internal label"
 msgstr "Label interne"
@@ -4113,6 +4278,10 @@ msgstr "Dernière email envoyé le"
 msgid "Last hour views:"
 msgstr "Vues de la dernière heure :"
 
+#, python-format
+msgid "Last mail sent to the candidate on %(date)s by %(sender)s."
+msgstr "Dernier mail envoyé au/à la candidat·e le %(date)s par %(sender)s."
+
 msgid "Last modif."
 msgstr "Dernière modif."
 
@@ -4133,6 +4302,9 @@ msgstr "Nom / Prénom / E-mail / NOMA"
 
 msgid "Last name / First name / Global id"
 msgstr "Nom / Prénom / Identifiant global"
+
+msgid "Last registration id"
+msgstr "Dernier NOMA connu"
 
 msgid "Last update author"
 msgstr "Auteur de la dernière mise à jour"
@@ -4405,6 +4577,10 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat suite à l'approbation ou au refus d'un membre du "
 "groupe de supervision"
+
+#, python-format
+msgid "Mail sent to the candidate on %(date)s by %(sender)s."
+msgstr "Mail envoyé au/à la candidat·e le %(date)s par %(sender)s."
 
 msgid ""
 "Mail sent to the candidate to confirm supervision group signature requests "
@@ -4685,6 +4861,19 @@ msgstr "Affiliations"
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
 
+msgctxt "admission"
+msgid "Merge"
+msgstr "Fusionner"
+
+msgid "Merge all non-empty data from digit match to merge form"
+msgstr "Fusionner toutes les données valides provenant de la correspondance"
+
+msgid "Merge all non-empty data from original to merge form"
+msgstr "Fusionner toutes les données valides provenant de l'original"
+
+msgid "Merge with existing entry"
+msgstr "Fusionner avec l'entrée existante"
+
 msgid "Merging of each document field of a continuing proposition into one PDF"
 msgstr "Fusion de chaque champ document d'une proposition continue en un PDF"
 
@@ -4735,6 +4924,9 @@ msgstr ""
 "Formule 2 (La défense et la soutenance sont organisées le même jour, et "
 "soumises à une condition de recevabilité)"
 
+msgid "Middle name"
+msgstr "Autres prénoms"
+
 msgid "Missing"
 msgstr "Manquants"
 
@@ -4752,9 +4944,6 @@ msgstr "Date modif."
 
 msgid "Modification of the secondary studies"
 msgstr "Modification des études secondaires"
-
-msgid "Modification of the specificities of the curriculum"
-msgstr "Modification des spécificités du curriculum"
 
 msgid "Modification requested"
 msgstr "Modification demandée"
@@ -4838,10 +5027,7 @@ msgid "NOMA"
 msgstr "NOMA"
 
 msgid "NON_CONCERNE"
-msgstr "Non concerné(e)"
-
-msgid "NON_FINANCABLE"
-msgstr "Non finançable"
+msgstr "Non concerné·e"
 
 msgid "NON_SOUMISE"
 msgstr "Non soumise"
@@ -4878,6 +5064,9 @@ msgstr "Nom du gestionnaire qui envois l'email"
 
 msgid "Name of the working list"
 msgstr "Nom de la liste de travail"
+
+msgid "National number"
+msgstr "Numéro de registre national belge (NISS)"
 
 msgid "Nationality"
 msgstr "Nationalité"
@@ -4976,8 +5165,14 @@ msgstr "Non."
 msgid "Noma"
 msgstr "Noma"
 
+msgid "Noma of the candidate"
+msgstr "Noma du candidat"
+
 msgid "Non doctor reason"
 msgstr "Justification"
+
+msgid "Non-academic activities"
+msgstr "Activités non-académiques"
 
 msgid "Non-academic activity"
 msgstr "Activité non-académique"
@@ -5023,11 +5218,18 @@ msgstr "Non concerné·e"
 msgid "Not financeable"
 msgstr "Non-finançable"
 
+#, python-format
+msgid "Not financeable - %(rule)s (Established by %(established_by)s)"
+msgstr "Non finançable - %(rule)s (Établi par %(established_by)s)"
+
 msgid "Not free"
 msgstr "Non libre"
 
 msgid "Not fundable"
 msgstr "Non-finançable"
+
+msgid "Not specified"
+msgstr "Non précisée"
 
 msgctxt "admission-header"
 msgid "Not specified"
@@ -5274,12 +5476,6 @@ msgstr "PDF récapitulatif de la proposition"
 msgid "PHYSICS"
 msgstr "Physique"
 
-msgid "PREMIERE_INSCRIPTION_MEME_CYCLE"
-msgstr "1ère inscription au même cycle"
-
-msgid "PREMIERE_REORIENTATION_SUR_5_ANS"
-msgstr "Première réorientation sur 5 ans"
-
 msgid "PRESIDENT"
 msgstr "PRESIDENT"
 
@@ -5307,6 +5503,21 @@ msgstr "Taille de la page"
 
 msgid "Paid"
 msgstr "Payé"
+
+msgid "Paragraph including the person to contact"
+msgstr "Paragraphe incluant la personne à contacter"
+
+msgid "Paragraph including the planned years"
+msgstr "Paragraphe incluant les années planifiées"
+
+msgid "Paragraph including the prerequisite courses"
+msgstr "Paragraphe à propos des compléments"
+
+msgid "Paragraph including the prerequisite courses detail"
+msgstr "Paragraphe à propos des compléments en détail"
+
+msgid "Paragraph including the required documents"
+msgstr "Paragraphe incluant les documents requis."
 
 msgid "Parcours"
 msgstr "Parcours"
@@ -5370,6 +5581,9 @@ msgstr "Méthode de paiement"
 
 msgid "Pending application fee"
 msgstr "Frais de dossier en attente"
+
+msgid "Period"
+msgstr "Période"
 
 msgid "Permanent residence card of a family member of a European Union citizen"
 msgstr ""
@@ -5450,11 +5664,20 @@ msgstr "Veuillez définir le régime linguistique ou précisez un autre régime.
 msgid "Please complete this field: {}"
 msgstr "Merci de spécifier une valeur pour le champ suivant : {}"
 
+msgid "Please confirm the change to \"Not concerned\"."
+msgstr "Veuillez confirmer le passage à 'Non-concerné·e'."
+
 msgid "Please confirm the change to this new state."
 msgstr "Veuillez confirmer le passage à ce nouvel état."
 
 msgid "Please confirm the change to this new status."
 msgstr "Merci de confirmer le changement vers ce nouveau statut."
+
+msgid "Please confirm the faculty dispensation approval."
+msgstr "Veuillez confirmer l'accord de dérogation facultaire."
+
+msgid "Please confirm the withdrawal of the candidate."
+msgstr "Veuillez confirmer l'abandon du·de la candidat·e."
 
 msgid "Please enter your work email address"
 msgstr "Veuillez encoder votre adresse e-mail-professionnelle"
@@ -5661,6 +5884,9 @@ msgstr "Expérience précédente de recherche"
 msgid "Private"
 msgstr "Privé"
 
+msgid "Private email"
+msgstr "Email privé"
+
 msgid "Processing by Fac"
 msgstr "Traitement en Fac"
 
@@ -5672,6 +5898,9 @@ msgstr "Professionnel"
 
 msgid "Professional email"
 msgstr "Adresse e-mail professionnelle"
+
+msgid "Professional experience"
+msgstr "Expérience professionnelle"
 
 msgid "Professional experiences"
 msgstr "Expériences professionnelles"
@@ -5843,6 +6072,9 @@ msgstr "Refusée"
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
 
+msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
+msgstr "Refus 95 générique - irrecevabilité"
+
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr "Refus article 95 Jury"
 
@@ -5863,6 +6095,9 @@ msgstr "Refus BAC HUE académique"
 
 msgid "REFUS_COMPLEMENT_TARDIF"
 msgstr "Refus complément tardif"
+
+msgid "REFUS_DE_DEROGATION_FACULTAIRE"
+msgstr "Refus de dérogation facultaire"
 
 msgid "REFUS_DIRECTION"
 msgstr "Refus dérogation direction"
@@ -5931,9 +6166,6 @@ msgstr ""
 
 msgid "Recipient"
 msgstr "Destinataire"
-
-msgid "Recompute"
-msgstr "Recalculer"
 
 msgctxt "F"
 msgid "Rector"
@@ -6058,6 +6290,9 @@ msgctxt "jury member"
 msgid "Remove"
 msgstr "Retirer"
 
+msgid "Remove experience"
+msgstr "Supprimer l'expérience"
+
 msgctxt "jury member"
 msgid "Remove?"
 msgstr "Retirer ?"
@@ -6123,6 +6358,9 @@ msgstr "Bourse de recherche"
 msgid "Research seminar"
 msgstr "Séminaire de recherche"
 
+msgid "Resend"
+msgstr "Renvoyer"
+
 msgid "Reset"
 msgstr "Réinitialiser"
 
@@ -6171,6 +6409,9 @@ msgstr "Épreuve de confirmation à représenter"
 
 msgid "Retaking of the test"
 msgstr "Confirmation à représenter"
+
+msgid "Retrieve from DigIT"
+msgstr "Récupérer depuis DigIT"
 
 msgid "Retype"
 msgstr "Retyper"
@@ -6259,9 +6500,6 @@ msgstr "Rôle: Direction SIC"
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Bourse de recherche"
 
-msgid "SECONDE_INSCRIPTION_MEME_CYCLE"
-msgstr "2ème inscription au même cycle"
-
 msgid "SECRETAIRE"
 msgstr "SECRETAIRE"
 
@@ -6308,24 +6546,6 @@ msgstr "Statistiques"
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Confirmation soumise"
 
-msgid "SUR_2_ANS_45_CREDITS_11BA"
-msgstr "Sur 2 ans, 45 crédits et 1/2 crédits inscrits 11BA sauf 1ère année"
-
-msgid "SUR_2_ANS_45_CREDITS_MEME_CYCLE"
-msgstr "Sur 2 ans, 45 crédits et 1/2 crédits inscrits même cycle"
-
-msgid "SUR_2_ANS_MOITIE_CREDITS"
-msgstr "Sur 2 ans, 1/2 crédits inscrits même cycle car allègement"
-
-msgid "SUR_3_ANS_45_CREDITS_11BA"
-msgstr "Sur 3 ans, 45 crédits et 1/2 crédits inscrits 11BA sauf 1ère année"
-
-msgid "SUR_3_ANS_45_CREDITS_MEME_CYCLE"
-msgstr "Sur 3 ans, 45 crédits et 1/2 crédits inscrits même cycle"
-
-msgid "SUR_3_ANS_MOITIE_CREDITS"
-msgstr "Sur 3 ans, 1/2 crédits inscrits même cycle car allègement"
-
 msgid "SYST_REUSSITE"
 msgstr "Système réussite"
 
@@ -6347,6 +6567,9 @@ msgstr "Enregistrer et transmettre en SIC"
 
 msgid "Save and view result"
 msgstr "Enregistrer et voir le résultat"
+
+msgid "Save fusion proposal"
+msgstr "Enregistrer la proposition de fusion"
 
 msgid "Scholarship"
 msgstr "Boursier"
@@ -6406,9 +6629,6 @@ msgstr "Secrétaire"
 
 msgid "Sector"
 msgstr "Secteur"
-
-msgid "Select a document"
-msgstr "Sélectionner un document"
 
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
@@ -6536,6 +6756,9 @@ msgstr "Autorisation d'inscription signée"
 msgid "Sir"
 msgstr "Monsieur"
 
+msgid "Sir, Madam"
+msgstr "Madame, Monsieur"
+
 msgid "Solidarity student"
 msgstr "Étudiant solidaire"
 
@@ -6626,8 +6849,11 @@ msgstr "Question spécifique"
 msgid "Specific questions"
 msgstr "Questions spécifiques"
 
+msgid "Specificities"
+msgstr "Spécificités"
+
 msgid "Specified"
-msgstr "Renseigné(e)"
+msgstr "Renseigné·e"
 
 msgid "Specify if other"
 msgstr "Si autre, précisez"
@@ -6787,9 +7013,6 @@ msgstr "Pour validation"
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
 
-msgid "TROISIEME_INSCRIPTION_PREMIER_CYCLE_AVEC_REORIENTATION"
-msgstr "3ème inscription au 1er cycle avec réorientation"
-
 msgid "Tab"
 msgstr "Onglet"
 
@@ -6847,6 +7070,19 @@ msgstr ""
 "La formation doctorale doit être complétée avant de soumettre les modalités "
 "de défense et la proposition de jury"
 
+msgid ""
+"The 'Dispensation granted' status is reserved to enrolment application whith "
+"financability dispensation status set to 'Faculty dispensation granted'."
+msgstr ""
+"Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
+"inscription dont la situation de dérogation à la finançabilité est 'accord "
+"de dérogation facultaire'."
+
+msgid "The 'Dispensation needed' status is reserved to enrolment application."
+msgstr ""
+"Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
+"inscription."
+
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
 "La <strong>formation complémentaire</strong> a été réalisée : oui / non."
@@ -6882,6 +7118,12 @@ msgstr "Le numéro de registre national belge doit être composé de 11 chiffres
 
 msgid "The CA members"
 msgstr "Les membres du comité d’accompagnement"
+
+msgid "The CV does not yet contain any academic course."
+msgstr "Le CV ne contient pas encore de formation académique."
+
+msgid "The CV does not yet contain any non-academic activity."
+msgstr "Le CV ne contient pas encore d'activité non-académique."
 
 msgid "The IBAN account number is valid"
 msgstr "Le numéro de compte IBAN est valide"
@@ -7197,6 +7439,10 @@ msgid ""
 msgstr ""
 "La demande de type inscription a été autorisée le %(date)s par %(author)s."
 
+msgid "The internal experiences chosen as access titles of this admission."
+msgstr ""
+"Les expériences internes choisies comme titres d'accès pour cette admission."
+
 msgid "The jury is not in progress"
 msgstr "Le jury n'est pas en cours"
 
@@ -7363,6 +7609,13 @@ msgstr "La date de début doit être antérieure ou égale à la date de fin"
 #, python-format
 msgid "The status has been changed to %(status)s."
 msgstr "Le statut a bien été modifié pour : %(status)s."
+
+msgid ""
+"The status of the checklist for the financability must be \"Not concerned\" "
+"or \"Financable\" or \"Dispensation granted\"."
+msgstr ""
+"L'élément de la checklist \"finançabilité\" doit être à l'état \"non-"
+"concerné\" ou \"finançable\" ou \"dérogation accordée\""
 
 #, python-brace-format
 msgid ""
@@ -7800,6 +8053,9 @@ msgstr "Type de communication"
 msgid "Type of paper"
 msgstr "Type d'épreuve"
 
+msgid "Type of the application"
+msgstr "Type de l'application"
+
 msgid "Type of training"
 msgstr "Type de formation"
 
@@ -7821,6 +8077,10 @@ msgstr "Documents UCLouvain libres FAC"
 
 msgid "UCLouvain SIC free documents"
 msgstr "Documents UCLouvain libres SIC"
+
+msgctxt "ways_hear_about_training"
+msgid "UCLouvain continuing education website"
+msgstr "Par le site de la formation continue UCLouvain"
 
 msgid "UCLouvain logo"
 msgstr "Logo de l'UCLouvain"
@@ -7846,18 +8106,40 @@ msgstr "UE"
 msgid "UUID"
 msgstr "UUID"
 
+msgid ""
+"Unable to validate the admission because an error occured while searching "
+"for existing person in DIGIT"
+msgstr ""
+"Impossible de valider le dossier d'admission car une erreur s'est produite "
+"lors de la recherche de compte existant dans DIGIT"
+
+msgid ""
+"Unable to validate the admission because of a potential person duplicates "
+"exists."
+msgstr ""
+"Impossible de valider le dossier d'admission car il existe au moins un "
+"doublon potentiel de personne."
+
+msgid "Unable to validate the admission because of an invalid DIGIT ticket."
+msgstr ""
+"Impossible de valider le dossier d'admission car il existe des erreurs "
+"rendant invalide le ticket envoyé à DIGIT."
+
 msgid "Unavailable"
 msgstr "Non disponible"
 
 msgid "Undecided"
 msgstr "Non décidé"
 
+msgid "Undo"
+msgstr "Défaire"
+
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
 
 msgctxt "document"
 msgid "Unknown"
-msgstr "Inconnu(e)"
+msgstr "Inconnu·e"
 
 msgid "Unknown PDF type."
 msgstr "Type de PDF inconnu."
@@ -7958,6 +8240,9 @@ msgstr "Diplômes ou expériences valorisées :"
 msgid "Values"
 msgstr "Valeurs"
 
+msgid "Verify"
+msgstr "Vérifier"
+
 msgid "Viewed at"
 msgstr "Vue le"
 
@@ -7997,6 +8282,13 @@ msgstr "En attente de signature"
 
 msgid "Wallonie Bruxelles International (WBI)"
 msgstr "Wallonie Bruxelles International (WBI)"
+
+msgid ""
+"Warning, the financability verdict selected is different from the "
+"proposition from the financability algorithm."
+msgstr ""
+"Attention, le verdict de finançabilité qui a été sélectionné diffère de la "
+"proposition émise par l’algorithme de finançabilité."
 
 msgid ""
 "We congratulate you on your successful completion of the paper and wish you "
@@ -8059,6 +8351,9 @@ msgstr ""
 msgid "Whole view"
 msgstr "Vue complète"
 
+msgid "Will be automatically retrieved from candidate"
+msgstr "Sera automatiquement récupéré du parcours fourni par le candidat"
+
 msgid "With academic year"
 msgstr "Avec une année académique"
 
@@ -8072,8 +8367,8 @@ msgid "Without free documents"
 msgstr "Sans les documents libres"
 
 msgctxt "ways_hear_about_training"
-msgid "Word of mouth"
-msgstr "Par le bouche à oreille"
+msgid "Word of mouth (family, friends, colleagues, ...)"
+msgstr "Par le bouche à oreille (famille, amis, collègues, ...)"
 
 msgid "Work contract"
 msgstr "Type de contrat de travail"
@@ -8233,7 +8528,7 @@ msgid "Yes, only in Tournai (E12)"
 msgstr "Oui, sur Tournai uniquement (12 EUR)"
 
 msgid "Yes,No,Incomplete field"
-msgstr "Oui,Non,Non renseigné(e)"
+msgstr "Oui,Non,Non renseigné·e"
 
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
@@ -8279,6 +8574,15 @@ msgid ""
 msgstr ""
 "Vous avez la possibilité d'ajouter tout document que vous jugez pertinent "
 "pour votre dossier (justificatifs, preuve de niveau de langue, ...)."
+
+msgid ""
+"You can find more information on the French Community webpage <a "
+"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
+"</a>"
+msgstr ""
+"Vous trouverez davantage d'information sur la page de la Communauté "
+"française <a href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://"
+"equisup.cfwb.be/</a>"
 
 msgid ""
 "You can not cancel this application, it is in the \"Validated\" state. "
@@ -8575,6 +8879,11 @@ msgstr "Votre note a bien été ajoutée."
 msgid "Your participation in the event"
 msgstr "Votre participation à l'événement"
 
+msgid ""
+"Your past experiences does not ensure the expected garanties for success"
+msgstr ""
+"Votre parcours antérieur n'offre pas les garanties attendues de réussite."
+
 msgid "Your previous NOMA (matriculation number)"
 msgstr "Votre ancien NOMA (numéro de matricule)"
 
@@ -8607,8 +8916,8 @@ msgstr "Transfert bancaire"
 msgid "by the Enrolment Office"
 msgstr "par le Service des Inscriptions de l'UCLouvain"
 
-msgid "by the University Institute for Continuing Education (IUFC)"
-msgstr "par l'Institut Universitaire de Formation Continue (IUFC)"
+msgid "by the faculty"
+msgstr "par la faculté"
 
 msgctxt "payment"
 msgid "canceled"
@@ -8686,11 +8995,15 @@ msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
 msgid "the UCLouvain Registration Service"
 msgstr "au Service des Inscriptions de l'UCLouvain"
 
-msgid "the University Institute of Continuing Education"
-msgstr "à l'Institut Universitaire de Formation Continue (IUFC)"
+msgid "the faculty"
+msgstr "la faculté"
 
 msgid "the person concerned"
 msgstr "la personne concernée"
+
+msgctxt "admission-date"
+msgid "to"
+msgstr "à"
 
 msgid "to the UCLouvain Registration Service"
 msgstr "au Service des Inscriptions de l'UCLouvain"
@@ -8700,6 +9013,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes,no"
+msgstr "oui,non"
 
 msgid "yes,no,"
 msgstr "oui,non,"

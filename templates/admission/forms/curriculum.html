@@ -26,50 +26,53 @@
 {% endcomment %}
 
 {% block actions-group %}
+
+  {% if is_continuing %}
+    {{ block.super }}
+  {% endif %}
+
 {% endblock %}
 
-{% block tab_content %}
+{% block form %}
+  {% include 'admission/includes/common_curriculum.html' %}
+
   <div class="panel panel-default">
     <div class="panel-heading flex-content-no-wrap">
-      <div class="panel-title">{% translate "Modification of the specificities of the curriculum" %}</div>
-      <a
-        class="prevent-quitting-link"
-        href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur"
-      >
-        <i class="fa fa-stream"></i>
-        {% translate "Back to checklist" %}
-      </a>
-
+      <div class="panel-title">{% translate "Specificities" %}</div>
     </div>
     <div class="panel-body">
-
-      {% if form.specific_question_answers.field.fields %}
-
+      {% if form.reponses_questions_specifiques.field.fields or form.curriculum or form.equivalence_diplome  %}
         {% bootstrap_form_errors form %}
 
-        <form id="admission-form" method="post" action="">
-          {% csrf_token %}
+        {% if form.curriculum %}
+          {% bootstrap_field form.curriculum %}
+        {% endif %}
 
-          {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
+        {% if form.equivalence_diplome %}
+          {% bootstrap_field form.equivalence_diplome %}
+        {% endif %}
 
-          <div class="text-right">
-            <button class="btn btn-primary" type="submit" form="admission-form">
-              <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-              {% translate 'Save' context 'admission' %}
-            </button>
-          </div>
-        </form>
+        {% bootstrap_field form.reponses_questions_specifiques show_label=False error_css_class='' %}
 
       {% else %}
-
         <p>
           {% translate 'No specific question available for this dossier.' %}
         </p>
-
       {% endif %}
     </div>
   </div>
 
+{% endblock %}
+
+{% block extra_content %}
+  {# Add confirmation modals #}
+  {% for educational_experience in curriculum.experiences_academiques %}
+    {% include 'admission/includes/curriculum_experience_confirm_modals.html' with experience=educational_experience %}
+  {% endfor %}
+
+  {% for professional_experience in curriculum.experiences_non_academiques %}
+    {% include 'admission/includes/curriculum_experience_confirm_modals.html' with experience=professional_experience %}
+  {% endfor %}
 {% endblock %}
 
 {% block script %}
@@ -79,4 +82,22 @@
           document.dispatchEvent(new Event('refreshFormInitial'));
       });
   </script>
+{% endblock %}
+
+{% block style %}
+  {{ block.super }}
+  <style>
+      .action-container {
+          text-align: right;
+          width: 150px;
+      }
+
+      .action-container > div {
+          display: inline-block;
+      }
+
+      .modal {
+          text-align: initial;
+      }
+  </style>
 {% endblock %}

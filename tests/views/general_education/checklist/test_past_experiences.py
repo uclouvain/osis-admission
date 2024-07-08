@@ -27,6 +27,7 @@
 import datetime
 import uuid
 from unittest.mock import patch
+from uuid import UUID
 
 import freezegun
 from django.conf import settings
@@ -79,7 +80,13 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
+from base.tests.factories.student import StudentFactory
 from epc.models.enums.condition_acces import ConditionAcces
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -1449,3 +1456,61 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
         self.assertTrue(self.general_admission.are_secondary_studies_access_title)
+
+    def test_specify_an_internal_experience_as_access_title(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        self.general_admission.internal_access_titles.clear()
+
+        student = StudentFactory(person=self.general_admission.candidate)
+
+        pce_a = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DISTINCTION.name,
+            sigle_formation="SF1",
+        )
+        pce_a_uuid = str(UUID(int=pce_a.pk))
+        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_year=self.academic_years[0],
+        )
+
+        # Select a known experience as access title
+        response = self.client.post(
+            f'{self.url}?experience_uuid={pce_a_uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name}',
+            **self.default_headers,
+            data={
+                'access-title': 'on',
+            },
+        )
+
+        selected_access_titles_names = response.context.get('selected_access_titles_names')
+
+        self.assertIsNotNone(selected_access_titles_names)
+        self.assertEqual(len(selected_access_titles_names), 1)
+
+        self.assertEqual(selected_access_titles_names[0], f'{pce_a_pae_a.programme.offer.title} (2021-2022) - UCL')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
+
+        internal_access_titles = self.general_admission.internal_access_titles.all()
+
+        self.assertEqual(len(internal_access_titles), 1)
+        self.assertEqual(internal_access_titles[0].pk, pce_a.pk)
+
+        # Unselect the experience
+        response = self.client.post(
+            f'{self.url}?experience_uuid={pce_a_uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name}',
+            **self.default_headers,
+            data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
+
+        self.assertFalse(self.general_admission.internal_access_titles.exists())

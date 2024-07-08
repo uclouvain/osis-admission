@@ -127,6 +127,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterCurriculumCommand(interface.CommandRequest):
     uuid_proposition: str
+    auteur_modification: str
 
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
@@ -509,9 +510,9 @@ class RecupererTitresAccesSelectionnablesPropositionQuery(interface.QueryRequest
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
     uuid_proposition: str
-    gestionnaire: str
     financabilite_regle_calcule: str
-    financabilite_regle_calcule_le: datetime.datetime
+    financabilite_regle_calcule_situation: str
+    gestionnaire: Optional[str] = ''
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -520,6 +521,23 @@ class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
     financabilite_regle: str
     etabli_par: str
     gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierDerogationFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    statut: str
+    gestionnaire: str
+    refus_uuids_motifs: List[str] = attr.Factory(list)
+    refus_autres_motifs: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -623,6 +641,8 @@ class ApprouverAdmissionParSicCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverInscriptionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
+    objet_message: str
+    corps_message: str
     auteur: str
 
 

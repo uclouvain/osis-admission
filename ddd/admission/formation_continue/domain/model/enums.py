@@ -63,15 +63,17 @@ class ChoixTypeAdresseFacturation(ChoiceEnum):
 
 class ChoixMoyensDecouverteFormation(ChoiceEnum):
     SITE_WEB_UCLOUVAIN = pgettext_lazy("ways_hear_about_training", "UCLouvain website")
-    SITE_FORMATION_CONTINUE = pgettext_lazy("ways_hear_about_training", "Continuing education website")
+    SITE_FORMATION_CONTINUE = pgettext_lazy("ways_hear_about_training", "UCLouvain continuing education website")
     PRESSE = pgettext_lazy("ways_hear_about_training", "In the press")
     FACEBOOK = pgettext_lazy("ways_hear_about_training", "Facebook")
     LINKEDIN = pgettext_lazy("ways_hear_about_training", "Linkedin")
     COURRIER_PERSONNALISE = pgettext_lazy("ways_hear_about_training", "Personalised mail")
     EMAILING = pgettext_lazy("ways_hear_about_training", "Email")
-    BOUCHE_A_OREILLE = pgettext_lazy("ways_hear_about_training", "Word of mouth")
-    AMIS = pgettext_lazy("ways_hear_about_training", "Friends")
-    ANCIENS_ETUDIANTS = pgettext_lazy("ways_hear_about_training", "Former students")
+    BOUCHE_A_OREILLE = pgettext_lazy("ways_hear_about_training", "Word of mouth (family, friends, colleagues, ...)")
+    ANCIENS_ETUDIANTS = pgettext_lazy(
+        "ways_hear_about_training",
+        "By someone who has already taken this course in a previous edition",
+    )
     MOOCS = pgettext_lazy("ways_hear_about_training", "MOOCs")
     AUTRE = pgettext_lazy("ways_hear_about_training", "Other")
 
@@ -79,6 +81,10 @@ class ChoixMoyensDecouverteFormation(ChoiceEnum):
 STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {
     ChoixStatutPropositionContinue.EN_BROUILLON.name,
     ChoixStatutPropositionContinue.ANNULEE.name,
+}
+
+STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE_OU_ANNULEE = STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE | {
+    ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name,
 }
 
 STATUTS_PROPOSITION_CONTINUE_SOUMISE = (

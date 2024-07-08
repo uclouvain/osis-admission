@@ -28,6 +28,8 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import freezegun
+import mock
+from django.core.cache import cache
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -45,7 +47,10 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.financabilite.dtos.parcours import ParcoursDTO, ParcoursAcademiqueInterneDTO, \
+    ParcoursAcademiqueExterneDTO
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
@@ -57,8 +62,10 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.academic_year_repository = AcademicYearInMemoryRepository()
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.candidat = self.candidat_translator.profil_candidats[1]
+        self.financabilite_fetcher = FinancabiliteInMemoryFetcher()
+        self.addCleanup(self.financabilite_fetcher.reset)
 
-        for annee in range(2016, 2023):
+        for annee in range(2016, 2026):
             self.academic_year_repository.save(
                 AcademicYear(
                     entity_id=AcademicYearIdentity(year=annee),
@@ -67,17 +74,25 @@ class TestSoumettrePropositionGenerale(TestCase):
                 )
             )
 
-    @freezegun.freeze_time('2020-11-01')
+    @freezegun.freeze_time('2023-11-01')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
             FormationGeneraleInMemoryTranslator(),
         )
+        self.financabilite_fetcher.save(ParcoursDTO(
+            matricule_fgs='0000000001',
+            parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+            parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+            annee_diplome_etudes_secondaires=2015,
+            nombre_tentative_de_passer_concours_pass_et_las=0,
+        ))
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
-                uuid_proposition="uuid-MASTER-SCI",
+                uuid_proposition="uuid-BACHELIER-FINANCABILITE",
                 pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
-                annee=2021,
+                annee=2024,
                 elements_confirmation=elements_confirmation,
             ),
         )
@@ -90,22 +105,35 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)
         self.assertEqual(updated_proposition.est_inscription_tardive, False)
 
-    @freezegun.freeze_time('22/10/2020')
+    @freezegun.freeze_time('22/10/2024')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_tardive(self):
         with patch.multiple(
             self.candidat,
-            annee_derniere_inscription_ucl=2019,
+            annee_derniere_inscription_ucl=2023,
             noma_derniere_inscription_ucl='00000001',
             pays_nationalite="AR",
         ):
             proposition = PropositionFactory(
                 est_bachelier_en_reorientation=True,
-                formation_id__sigle="BACHELIER-ECO",
-                formation_id__annee=2020,
+                formation_id__sigle="ABCD2MC",
+                formation_id__annee=2024,
+                curriculum=['file1.pdf'],
                 matricule_candidat=self.candidat.matricule,
+                bourse_double_diplome_id=None,
+                bourse_internationale_id=None,
+                bourse_erasmus_mundus_id=None,
             )
 
             self.proposition_repository.save(proposition)
+
+            self.financabilite_fetcher.save(ParcoursDTO(
+                matricule_fgs=proposition.matricule_candidat,
+                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                annee_diplome_etudes_secondaires=2015,
+                nombre_tentative_de_passer_concours_pass_et_las=0,
+            ))
 
             elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
                 self.proposition_repository.get(proposition.entity_id),
@@ -117,7 +145,7 @@ class TestSoumettrePropositionGenerale(TestCase):
                 SoumettrePropositionCommand(
                     uuid_proposition=proposition.entity_id.uuid,
                     pool=AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
-                    annee=2020,
+                    annee=2024,
                     elements_confirmation=elements_confirmation,
                 ),
             )
@@ -125,22 +153,35 @@ class TestSoumettrePropositionGenerale(TestCase):
             proposition = self.proposition_repository.get(entity_id=proposition_id)
             self.assertEqual(proposition.est_inscription_tardive, True)
 
-    @freezegun.freeze_time('22/09/2020')
+    @freezegun.freeze_time('22/09/2024')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_non_tardive_avant_limite(self):
         with patch.multiple(
             self.candidat,
-            annee_derniere_inscription_ucl=2019,
+            annee_derniere_inscription_ucl=2023,
             noma_derniere_inscription_ucl='00000001',
             pays_nationalite="AR",
         ):
             proposition = PropositionFactory(
                 est_bachelier_en_reorientation=True,
-                formation_id__sigle="BACHELIER-ECO",
-                formation_id__annee=2020,
+                formation_id__sigle="ABCD2MC",
+                formation_id__annee=2024,
                 matricule_candidat=self.candidat.matricule,
+                curriculum=['file1.pdf'],
+                bourse_double_diplome_id=None,
+                bourse_internationale_id=None,
+                bourse_erasmus_mundus_id=None,
             )
 
             self.proposition_repository.save(proposition)
+
+            self.financabilite_fetcher.save(ParcoursDTO(
+                matricule_fgs=proposition.matricule_candidat,
+                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                annee_diplome_etudes_secondaires=2015,
+                nombre_tentative_de_passer_concours_pass_et_las=0,
+            ))
 
             elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
                 self.proposition_repository.get(proposition.entity_id),
@@ -152,7 +193,7 @@ class TestSoumettrePropositionGenerale(TestCase):
                 SoumettrePropositionCommand(
                     uuid_proposition=proposition.entity_id.uuid,
                     pool=AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
-                    annee=2020,
+                    annee=2024,
                     elements_confirmation=elements_confirmation,
                 ),
             )
@@ -160,17 +201,25 @@ class TestSoumettrePropositionGenerale(TestCase):
             proposition = self.proposition_repository.get(entity_id=proposition_id)
             self.assertEqual(proposition.est_inscription_tardive, False)
 
-    @freezegun.freeze_time('22/10/2020')
+    @freezegun.freeze_time('22/10/2024')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_non_tardive_pot_sans_possibilite_inscription_tardive(self):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
             FormationGeneraleInMemoryTranslator(),
         )
+        self.financabilite_fetcher.save(ParcoursDTO(
+            matricule_fgs='0000000001',
+            parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+            parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+            annee_diplome_etudes_secondaires=2015,
+            nombre_tentative_de_passer_concours_pass_et_las=0,
+        ))
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
-                uuid_proposition="uuid-MASTER-SCI",
+                uuid_proposition="uuid-BACHELIER-FINANCABILITE",
                 pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
-                annee=2020,
+                annee=2024,
                 elements_confirmation=elements_confirmation,
             ),
         )

@@ -288,6 +288,7 @@ class Notification(INotification):
             common_tokens[
                 'training_enrollment_campus_email'
             ] = admission.training.enrollment_campus.sic_enrollment_email
+            common_tokens['application_type'] = admission.get_type_demande_display().lower()
 
             email_message = generate_email(
                 ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
@@ -530,3 +531,24 @@ class Notification(INotification):
             EmailNotificationHandler.create(email_message, person=admission.candidate)
 
             return email_message
+
+    @classmethod
+    def notifier_candidat_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message

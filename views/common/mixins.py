@@ -39,6 +39,7 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.contrib.models.base import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetPropositionCommand,
     GetCotutelleCommand,
@@ -50,6 +51,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, Co
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
+from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
@@ -61,6 +63,8 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
+
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
@@ -73,7 +77,7 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions 
 )
 from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
 from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
-from admission.templatetags.admission import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -141,13 +145,17 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
 
     @cached_property
-    def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO]:
+    def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO, PropositionContinueDTO]:
         cmd = {
             CONTEXT_DOCTORATE: GetPropositionCommand(uuid_proposition=self.admission_uuid),
             CONTEXT_CONTINUING: RecupererPropositionQuery(uuid_proposition=self.admission_uuid),
             CONTEXT_GENERAL: RecupererPropositionGestionnaireQuery(uuid_proposition=self.admission_uuid),
         }[self.current_context]
         return message_bus_instance.invoke(cmd)
+
+    @cached_property
+    def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
+        return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))
 
     @cached_property
     def dossier(self) -> 'DemandeDTO':
@@ -209,6 +217,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             )
         )
 
+    @cached_property
+    def selected_access_titles(self):
+        return message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
@@ -235,7 +252,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 raise Http404(e.message)
         elif self.is_general:
             context['admission'] = self.proposition
-            context['access_title_country'] = access_title_country(self.selectable_access_titles.values())
+            context['access_title_country'] = access_title_country(self.selected_access_titles.values())
         elif self.is_continuing:
             context['admission'] = self.proposition
             context['is_continuing'] = True

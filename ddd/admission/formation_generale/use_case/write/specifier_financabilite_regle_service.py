@@ -29,6 +29,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 
 
 def specifier_financabilite_regle(
@@ -40,7 +41,11 @@ def specifier_financabilite_regle(
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     # THEN
-    proposition.specifier_financabilite_regle(cmd.financabilite_regle, cmd.etabli_par, cmd.gestionnaire)
+    proposition.specifier_financabilite_regle(
+        SituationFinancabilite[cmd.financabilite_regle],
+        cmd.etabli_par,
+        cmd.gestionnaire,
+    )
     proposition_repository.save(proposition)
 
     return proposition_id

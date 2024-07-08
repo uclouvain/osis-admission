@@ -261,6 +261,7 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
 
 class DoctoratCompleterCurriculumCommandSerializer(DTOSerializer):
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
+    auteur_modification = None
 
     class Meta:
         source = doctorate_commands.CompleterCurriculumCommand
@@ -272,6 +273,7 @@ class DoctoratCompleterCurriculumCommandSerializer(DTOSerializer):
 
 class ContinuingEducationCompleterCurriculumCommandSerializer(DTOSerializer):
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
+    auteur_modification = None
 
     class Meta:
         source = continuing_commands.CompleterCurriculumCommand
@@ -284,6 +286,7 @@ class ContinuingEducationCompleterCurriculumCommandSerializer(DTOSerializer):
 
 class GeneralEducationCompleterCurriculumCommandSerializer(DTOSerializer):
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
+    auteur_modification = None
 
     class Meta:
         source = general_commands.CompleterCurriculumCommand

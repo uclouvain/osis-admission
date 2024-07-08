@@ -56,6 +56,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabi
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
@@ -70,6 +71,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -294,7 +296,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def _get_non_academic_experiences_dtos(
         cls,
-        experiences_non_academiques: List[ProfessionalExperience],
+        experiences_non_academiques: QuerySet[ProfessionalExperience],
     ) -> List[ExperienceNonAcademiqueDTO]:
         return [
             ExperienceNonAcademiqueDTO(
@@ -339,6 +341,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         has_default_language: bool,
         uuid_proposition: str,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+        uuid_experience: str = '',
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
 
@@ -357,24 +360,29 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .order_by('-academic_year__year')
         )
 
-        if experiences_cv_recuperees in EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES:
-            educational_experience_years = educational_experience_years.annotate(
-                valuated_from_admissions=ArrayAgg(
-                    'educational_experience__valuated_from_admission__uuid',
-                    filter=Q(educational_experience__valuated_from_admission__isnull=False),
-                ),
+        educational_experience_years = educational_experience_years.annotate(
+            valuated_from_admissions=ArrayAgg(
+                'educational_experience__valuated_from_admission__uuid',
+                filter=Q(educational_experience__valuated_from_admission__isnull=False),
+            ),
+        )
+
+        if experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES:
+            educational_experience_years = educational_experience_years.alias(
+                nb_valuated_admissions=ArrayLength('valuated_from_admissions'),
+            ).filter(nb_valuated_admissions__gt=0)
+        elif experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION:
+            educational_experience_years = educational_experience_years.filter(
+                educational_experience__educational_valuated_experiences__baseadmission_id=uuid.UUID(
+                    str(uuid_proposition)
+                )
             )
 
-            if experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES:
-                educational_experience_years = educational_experience_years.alias(
-                    nb_valuated_admissions=ArrayLength('valuated_from_admissions'),
-                ).filter(nb_valuated_admissions__gt=0)
-            elif experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION:
-                educational_experience_years = educational_experience_years.filter(
-                    educational_experience__educational_valuated_experiences__baseadmission_id=uuid.UUID(
-                        str(uuid_proposition)
-                    )
-                )
+        if uuid_experience:
+            educational_experience_years = educational_experience_years.filter(
+                educational_experience__uuid=uuid_experience,
+            )
+
         educational_experience_years = educational_experience_years.annotate(
             injecte_par_admission=Exists(
                 AdmissionEPCInjection.objects.filter(
@@ -481,6 +489,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
+
         person = (
             Person.objects.select_related(
                 'country_of_citizenship',
@@ -533,7 +542,18 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_secondary_studies_valuation_annotations(cls):
+        be_institute_address = ''
+
         return dict(
+            belgian_highschool_diploma_institute_address=Concat(
+                F('belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress__street'),
+                Value(' '),
+                F('belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress__street_number'),
+                Value(', '),
+                F('belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress__postal_code'),
+                Value(' '),
+                F('belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress__city'),
+            ),
             is_valuated_by_epc=ExpressionWrapper(
                 Q(belgianhighschooldiploma__external_id__isnull=False)
                 | Q(foreignhighschooldiploma__external_id__isnull=False),
@@ -576,33 +596,111 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
-        minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
-
-        academic_experiences_dtos = cls._get_academic_experiences_dtos(
-            matricule,
-            cls.has_default_language(),
-            uuid_proposition,
-        )
-
-        non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
+    def get_experiences_non_academiques(
+        cls,
+        matricule: str,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+        uuid_experience: str = '',
+    ) -> List[ExperienceNonAcademiqueDTO]:
+        non_academic_experiences: QuerySet[ProfessionalExperience] = ProfessionalExperience.objects.filter(
             person__global_id=matricule,
         ).annotate(
+            valuated_from_admissions=ArrayAgg(
+                'valuated_from_admission__uuid',
+                filter=Q(valuated_from_admission__isnull=False),
+            ),
             injecte_par_admission=Exists(
                 AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
             ),
             injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
         )
 
-        non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
+        if experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES:
+            non_academic_experiences = non_academic_experiences.alias(
+                nb_valuated_admissions=ArrayLength('valuated_from_admissions'),
+            ).filter(nb_valuated_admissions__gt=0)
+        elif experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION:
+            non_academic_experiences = non_academic_experiences.filter(
+                professional_valuated_experiences__baseadmission_id=uuid.UUID(str(uuid_proposition))
+            )
 
-        return CurriculumAdmissionDTO(
-            experiences_academiques=academic_experiences_dtos,
-            annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
-            annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
-            experiences_non_academiques=non_academic_experiences_dtos,
-            annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
+        if uuid_experience:
+            non_academic_experiences = non_academic_experiences.filter(uuid=uuid_experience)[:1]
+
+        return cls._get_non_academic_experiences_dtos(non_academic_experiences)
+
+    @classmethod
+    def get_curriculum(
+        cls,
+        matricule: str,
+        annee_courante: int,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+    ) -> Optional['CurriculumAdmissionDTO']:
+
+        try:
+            minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
+
+            academic_experiences_dtos = cls._get_academic_experiences_dtos(
+                matricule,
+                cls.has_default_language(),
+                uuid_proposition,
+                experiences_cv_recuperees=experiences_cv_recuperees,
+            )
+
+            non_academic_experiences_dtos = cls.get_experiences_non_academiques(
+                matricule=matricule,
+                uuid_proposition=uuid_proposition,
+                experiences_cv_recuperees=experiences_cv_recuperees,
+            )
+
+            return CurriculumAdmissionDTO(
+                experiences_academiques=academic_experiences_dtos,
+                annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
+                annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
+                experiences_non_academiques=non_academic_experiences_dtos,
+                annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
+            )
+        except Person.DoesNotExist:
+            return None
+
+    @classmethod
+    def get_experience_academique(
+        cls,
+        matricule: str,
+        uuid_proposition: str,
+        uuid_experience: str,
+    ) -> 'ExperienceAcademiqueDTO':
+        experiences = cls._get_academic_experiences_dtos(
+            matricule,
+            cls.has_default_language(),
+            uuid_proposition,
+            uuid_experience=uuid_experience,
         )
+
+        if not experiences:
+            raise ExperienceNonTrouveeException
+
+        return experiences[0]
+
+    @classmethod
+    def get_experience_non_academique(
+        cls,
+        matricule: str,
+        uuid_proposition: str,
+        uuid_experience: str,
+    ) -> 'ExperienceNonAcademiqueDTO':
+        experiences = cls.get_experiences_non_academiques(
+            matricule,
+            uuid_proposition=uuid_proposition,
+            uuid_experience=uuid_experience,
+        )
+
+        if not experiences:
+            raise ExperienceNonTrouveeException
+
+        return experiences[0]
 
     @classmethod
     def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':
@@ -760,23 +858,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
 
-        be_institute_address = 'belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress'
-
         queryset = (
             Person.objects.prefetch_related(
-                Prefetch(
-                    'professionalexperience_set',
-                    queryset=ProfessionalExperience.objects.all()
-                    .order_by('-start_date', '-end_date')
-                    .annotate(
-                        injecte_par_admission=Exists(
-                            AdmissionEPCInjection.objects.filter(
-                                admission__uuid=OuterRef('valuated_from_admission__uuid')
-                            )
-                        ),
-                        injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
-                    ),
-                ),
                 Prefetch(
                     'personaddress_set',
                     queryset=PersonAddress.objects.filter(
@@ -803,15 +886,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                         type_experience=ExperienceType.HIGH_SCHOOL.name,
                         person_id=OuterRef('pk'),
                     )
-                ),
-                belgian_highschool_diploma_institute_address=Concat(
-                    F(f'{be_institute_address}__street'),
-                    Value(' '),
-                    F(f'{be_institute_address}__street_number'),
-                    Value(', '),
-                    F(f'{be_institute_address}__postal_code'),
-                    Value(' '),
-                    F(f'{be_institute_address}__city'),
                 ),
                 **cls.get_secondary_studies_valuation_annotations(),
             )
@@ -845,25 +919,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
         coordonnees_dto = cls._get_coordonnees_dto(candidate=candidate, has_default_language=has_default_language)
 
-        professional_experiences = candidate.professionalexperience_set.all()
-
-        if experiences_cv_recuperees in EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES:
-            professional_experiences = professional_experiences.annotate(
-                valuated_from_admissions=ArrayAgg(
-                    'valuated_from_admission__uuid',
-                    filter=Q(valuated_from_admission__isnull=False),
-                ),
-            )
-
-            if experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES:
-                professional_experiences = professional_experiences.alias(
-                    nb_valuated_admissions=ArrayLength('valuated_from_admissions'),
-                ).filter(nb_valuated_admissions__gt=0)
-            elif experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION:
-                professional_experiences = professional_experiences.filter(
-                    professional_valuated_experiences__baseadmission_id=uuid.UUID(str(uuid_proposition))
-                )
-
         curriculum_dto = CurriculumAdmissionDTO(
             annee_derniere_inscription_ucl=last_registration_year,
             annee_diplome_etudes_secondaires=graduated_from_high_school_year,
@@ -873,7 +928,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 uuid_proposition,
                 experiences_cv_recuperees,
             ),
-            experiences_non_academiques=cls._get_non_academic_experiences_dtos(professional_experiences),
+            experiences_non_academiques=cls.get_experiences_non_academiques(
+                matricule=matricule,
+                uuid_proposition=uuid_proposition,
+                experiences_cv_recuperees=experiences_cv_recuperees,
+            ),
             annee_minimum_a_remplir=cls.get_annee_minimale_a_completer_cv(
                 annee_courante=annee_courante,
                 annee_diplome_etudes_secondaires=graduated_from_high_school_year,

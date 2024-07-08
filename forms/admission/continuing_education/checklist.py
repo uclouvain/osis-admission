@@ -35,7 +35,7 @@ from django.utils.translation import (
 
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMotifRefus, ChoixMotifAttente
-from admission.forms import CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT
+from admission.forms import CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT, AdmissionHTMLCharField
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -43,7 +43,6 @@ class StudentReportForm(forms.ModelForm):
     class Meta:
         model = ContinuingEducationAdmission
         fields = [
-            'interested_mark',
             'edition',
             'in_payement_order',
             'reduced_rights',
@@ -58,7 +57,6 @@ class StudentReportForm(forms.ModelForm):
             'tff_label',
         ]
         widgets = {
-            'interested_mark': forms.CheckboxInput(),
             'in_payement_order': forms.CheckboxInput(),
             'reduced_rights': forms.CheckboxInput(),
             'pay_by_training_cheque': forms.CheckboxInput(),
@@ -201,7 +199,7 @@ class DecisionHoldForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(
             attrs={
@@ -250,7 +248,7 @@ class DecisionCancelForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(
             attrs={
@@ -275,7 +273,7 @@ class DecisionValidationForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the candidate'),
         widget=forms.Textarea(
             attrs={
@@ -305,7 +303,7 @@ class SendToFacForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )
-    body = forms.CharField(
+    body = AdmissionHTMLCharField(
         label=_('Message for the faculty'),
         widget=forms.Textarea(
             attrs={

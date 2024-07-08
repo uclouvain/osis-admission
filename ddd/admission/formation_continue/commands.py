@@ -52,6 +52,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     matricule_candidat: str
     motivations: str
     moyens_decouverte_formation: List[str]
+    autre_moyen_decouverte_formation: Optional[str] = ''
     marque_d_interet: Optional[bool] = None
 
 
@@ -79,6 +80,7 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
 
     motivations: str
     moyens_decouverte_formation: List[str]
+    autre_moyen_decouverte_formation: Optional[str] = ''
 
     marque_d_interet: Optional[bool] = None
     reponses_questions_specifiques: Dict = attr.Factory(dict)
@@ -105,6 +107,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterCurriculumCommand(interface.CommandRequest):
     uuid_proposition: str
+    auteur_modification: str
 
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
@@ -336,6 +339,7 @@ class ModifierChoixFormationParGestionnaireCommand:
     reponses_questions_specifiques: Dict
     motivations: str
     moyens_decouverte_formation: List[str]
+    autre_moyen_decouverte_formation: Optional[str]
     marque_d_interet: Optional[bool]
 
 

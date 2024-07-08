@@ -38,6 +38,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
@@ -71,7 +72,7 @@ class TestSpecifierFinancabiliteRegle(TestCase):
 
         self.command = SpecifierFinancabiliteRegleCommand(
             uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-            financabilite_regle='SECONDE_INSCRIPTION_MEME_CYCLE',
+            financabilite_regle=SituationFinancabilite.REPRISE_APRES_5_ANS.name,
             etabli_par='uuid-GESTIONNAIRE',
             gestionnaire='0123456789',
         )
@@ -85,6 +86,26 @@ class TestSpecifierFinancabiliteRegle(TestCase):
         self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
 
         # Proposition mise à jour
-        self.assertEqual(proposition.financabilite_regle, 'SECONDE_INSCRIPTION_MEME_CYCLE')
+        self.assertEqual(proposition.financabilite_regle, SituationFinancabilite.REPRISE_APRES_5_ANS)
         self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
         self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.GEST_REUSSITE)
+
+    def test_should_specifier_regle_non_financable_etre_ok(self):
+        command = SpecifierFinancabiliteRegleCommand(
+            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+            financabilite_regle=SituationFinancabilite.N_A_PAS_VALIDE_60_CREDITS_BLOC_1.name,
+            etabli_par='uuid-GESTIONNAIRE',
+            gestionnaire='0123456789',
+        )
+
+        proposition_id = self.message_bus.invoke(command)
+
+        proposition = self.proposition_repository.get(proposition_id)
+
+        # Résultat de la commande
+        self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
+
+        # Proposition mise à jour
+        self.assertEqual(proposition.financabilite_regle, SituationFinancabilite.N_A_PAS_VALIDE_60_CREDITS_BLOC_1)
+        self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
+        self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.GEST_BLOCAGE)

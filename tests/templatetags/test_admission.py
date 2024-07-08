@@ -46,7 +46,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixMoyensDecouverteFormation,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
@@ -89,6 +92,7 @@ from admission.templatetags.admission import (
     candidate_language,
     experience_valuation_url,
     checklist_experience_action_links_context,
+    format_ways_to_find_out_about_the_course,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -99,6 +103,7 @@ from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import EvaluationSystem, CURRICULUM_ACTIVITY_LABEL
+from osis_profile.tests.factories.curriculum import ExperienceParcoursInterneDTOFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -915,6 +920,32 @@ class DisplayTagTestCase(TestCase):
             f'/osis_profile/0123456/parcours_externe/edit/etudes_secondaires',
         )
 
+    def test_checklist_experience_action_links_context_with_an_internal_experience(self):
+        proposition_uuid = uuid.uuid4()
+
+        experience = ExperienceParcoursInterneDTOFactory(annees=[])
+
+        kwargs = {
+            'context': {
+                'request': MagicMock(path='mypath'),
+                'admission': MagicMock(noma_candidat='0123456'),
+                'view': MagicMock(base_namespace='admission:general-education', kwargs={'uuid': proposition_uuid}),
+            },
+            'prefix': 'prefix',
+            'experience': experience,
+            'current_year': 2020,
+            'parcours_tab_id': 'tabID',
+        }
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['prefix'], 'prefix')
+        self.assertEqual(context['update_url'], '')
+        self.assertEqual(context['delete_url'], '')
+        self.assertEqual(context['duplicate_url'], '')
+        self.assertEqual(context['experience_uuid'], str(experience.uuid))
+        self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
     def test_experience_valuation_url_with_an_educational_experience(self):
         proposition_uuid = uuid.uuid4()
         experience = ExperienceAcademiqueDTOFactory()
@@ -1165,6 +1196,48 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertEqual(
             candidate_language(settings.LANGUAGE_CODE_EN),
             f' <strong>(langue de contact </strong><span class="label label-admission-primary">EN</span>)',
+        )
+
+    def test_format_ways_to_find_out_about_the_course(self):
+        self.assertEqual(
+            format_ways_to_find_out_about_the_course(
+                MagicMock(
+                    moyens_decouverte_formation=[
+                        ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.name,
+                        ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.name,
+                    ],
+                    autre_moyen_decouverte_formation='Other way',
+                )
+            ),
+            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n'
+            f'\t<li>{ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.value}</li>',
+        )
+
+        self.assertEqual(
+            format_ways_to_find_out_about_the_course(
+                MagicMock(
+                    moyens_decouverte_formation=[
+                        ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.name,
+                        ChoixMoyensDecouverteFormation.AUTRE.name,
+                    ],
+                    autre_moyen_decouverte_formation='Other way',
+                )
+            ),
+            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n' f'\t<li>Other way</li>',
+        )
+
+        self.assertEqual(
+            format_ways_to_find_out_about_the_course(
+                MagicMock(
+                    moyens_decouverte_formation=[
+                        ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.name,
+                        ChoixMoyensDecouverteFormation.AUTRE.name,
+                    ],
+                    autre_moyen_decouverte_formation='',
+                )
+            ),
+            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n'
+            f'\t<li>{ChoixMoyensDecouverteFormation.AUTRE.value}</li>',
         )
 
 

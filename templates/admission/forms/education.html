@@ -26,12 +26,16 @@
 {% endcomment %}
 
 {% block actions-group %}
+  {% if is_continuing %}
+    {{ block.super }}
+  {% endif %}
 {% endblock %}
 
-{% block tab_content %}
+{% block form %}
   <div class="panel panel-default">
     <div class="panel-heading flex-content-no-wrap">
       <div class="panel-title">{% translate "Modification of the secondary studies" %}</div>
+      {% if is_general %}
       <a
         class="prevent-quitting-link"
         {% if next_url %}
@@ -43,40 +47,28 @@
         <i class="fa fa-stream"></i>
         {% translate "Back to checklist" %}
       </a>
-
+      {% endif %}
     </div>
     <div class="panel-body">
 
       {% bootstrap_form_errors form %}
 
-      <form id="admission-form" method="post" action="">
-        {% csrf_token %}
-
-        {% panel _('Secondary studies') %}
-          <div class="row">
-            <div class="col-md-12 required_field">
-              {% bootstrap_field_with_tooltip form.graduated_from_high_school %}
-            </div>
-          </div>
-          <div class="row">
-            <div id="graduation-year-container" class="col-md-12 required_field">
-              {% bootstrap_field form.graduated_from_high_school_year %}
-            </div>
-          </div>
-        {% endpanel %}
-
-        {% if form.specific_question_answers.field.fields %}
-          {% panel _('Specific aspects') %}
-            {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
-          {% endpanel %}
-        {% endif %}
-        <div class="text-right">
-          <button class="btn btn-primary" type="submit" form="admission-form">
-            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-            {% translate 'Save' context 'admission' %}
-          </button>
+      <div class="row">
+        <div class="col-md-12 required_field">
+          {% bootstrap_field_with_tooltip form.graduated_from_high_school %}
         </div>
-      </form>
+      </div>
+      <div class="row">
+        <div id="graduation-year-container" class="col-md-12 required_field">
+          {% bootstrap_field form.graduated_from_high_school_year %}
+        </div>
+      </div>
+
+      {% if form.specific_question_answers.field.fields %}
+        {% panel _('Specific aspects') %}
+          {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
+        {% endpanel %}
+      {% endif %}
     </div>
   </div>
 {% endblock %}

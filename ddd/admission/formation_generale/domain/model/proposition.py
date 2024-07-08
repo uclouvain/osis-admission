@@ -68,11 +68,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     PoursuiteDeCycle,
-    RegleCalculeResultatAvecFinancable,
-    RegleDeFinancement,
     DecisionFacultaireEnum,
     BesoinDeDerogation,
     TypeDeRefus,
+    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -97,6 +96,9 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite, SITUATION_FINANCABILITE_PAR_ETAT
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -149,10 +151,17 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
-    financabilite_regle_calcule: RegleCalculeResultatAvecFinancable = ''
+    financabilite_regle_calcule: EtatFinancabilite = ''
+    financabilite_regle_calcule_situation: SituationFinancabilite = ''
     financabilite_regle_calcule_le: Optional[datetime.datetime] = None
-    financabilite_regle: RegleDeFinancement = ''
+    financabilite_regle: SituationFinancabilite = ''
     financabilite_regle_etabli_par: str = ''
+
+    financabilite_derogation_statut: DerogationFinancement = ''
+    financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
+    financabilite_derogation_premiere_notification_par: str = ''
+    financabilite_derogation_derniere_notification_le: Optional[datetime.datetime] = None
+    financabilite_derogation_derniere_notification_par: str = ''
 
     documents_additionnels: List[str] = attr.Factory(list)
 
@@ -500,11 +509,12 @@ class Proposition(interface.RootEntity):
         curriculum: List[str],
         equivalence_diplome: List[str],
         reponses_questions_specifiques: Dict,
+        auteur_modification: str,
     ):
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques
-        self.auteur_derniere_modification = self.matricule_candidat
+        self.auteur_derniere_modification = auteur_modification
 
     def completer_comptabilite(
         self,
@@ -688,6 +698,7 @@ class Proposition(interface.RootEntity):
         millesime_condition_acces: Optional[int],
         avec_complements_formation: Optional[bool],
         titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
         nouveau_millesime_condition_acces = millesime_condition_acces
         nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
@@ -697,6 +708,7 @@ class Proposition(interface.RootEntity):
             # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
             titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
                 proposition_identity=self.entity_id,
+                experience_parcours_interne_translator=experience_parcours_interne_translator,
                 seulement_selectionnes=True,
             )
 
@@ -777,17 +789,18 @@ class Proposition(interface.RootEntity):
 
     def specifier_financabilite_resultat_calcul(
         self,
-        financabilite_regle_calcule: RegleCalculeResultatAvecFinancable,
-        financabilite_regle_calcule_le: datetime.datetime,
-        auteur_modification: str,
+        financabilite_regle_calcule: EtatFinancabilite,
+        financabilite_regle_calcule_situation: SituationFinancabilite,
+        auteur_modification: Optional[str] = '',
     ):
         self.financabilite_regle_calcule = financabilite_regle_calcule
-        self.financabilite_regle_calcule_le = financabilite_regle_calcule_le
+        self.financabilite_regle_calcule_situation = financabilite_regle_calcule_situation
+        self.financabilite_regle_calcule_le = now()
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_financabilite_regle(
         self,
-        financabilite_regle: RegleCalculeResultatAvecFinancable,
+        financabilite_regle: SituationFinancabilite,
         etabli_par: str,
         auteur_modification: str,
     ):
@@ -795,14 +808,41 @@ class Proposition(interface.RootEntity):
         self.financabilite_regle_etabli_par = etabli_par
         self.auteur_derniere_modification = auteur_modification
 
-        self.checklist_actuelle.financabilite = StatutChecklist(
-            statut=ChoixStatutChecklist.GEST_REUSSITE,
-            libelle=__('Approval'),
-            extra={},
-        )
+        if financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]:
+            self.checklist_actuelle.financabilite = StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_REUSSITE,
+                libelle=__('Approval'),
+                extra={'reussite': 'financable'},
+            )
+        elif financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]:
+            self.checklist_actuelle.financabilite = StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_BLOCAGE,
+                libelle=__('Not financeable'),
+                extra={'to_be_completed': '0'},
+            )
 
-    def specifier_besoin_de_derogation(self, besoin_de_derogation: str, auteur_modification: str):
-        self.besoin_de_derogation = BesoinDeDerogation[besoin_de_derogation] if besoin_de_derogation else ''
+    def specifier_derogation_financabilite(
+        self,
+        statut: DerogationFinancement,
+        refus_uuids_motifs: Optional[List[str]],
+        refus_autres_motifs: Optional[List[str]],
+    ):
+        self.financabilite_derogation_statut = statut
+        if statut == DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE:
+            self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in refus_uuids_motifs]
+            self.autres_motifs_refus = refus_autres_motifs
+
+    def notifier_candidat_derogation_financabilite(self, gestionnaire: str):
+        self.financabilite_derogation_statut = DerogationFinancement.CANDIDAT_NOTIFIE
+        if not self.financabilite_derogation_premiere_notification_le:
+            self.financabilite_derogation_premiere_notification_le = now()
+            self.financabilite_derogation_premiere_notification_par = gestionnaire
+        else:
+            self.financabilite_derogation_derniere_notification_le = now()
+            self.financabilite_derogation_derniere_notification_par = gestionnaire
+
+    def specifier_besoin_de_derogation(self, besoin_de_derogation: BesoinDeDerogation, auteur_modification: str):
+        self.besoin_de_derogation = besoin_de_derogation
         self.auteur_derniere_modification = auteur_modification
 
     def _specifier_informations_de_base_acceptation_par_sic(

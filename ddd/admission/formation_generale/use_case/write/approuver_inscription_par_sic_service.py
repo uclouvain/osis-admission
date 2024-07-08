@@ -35,19 +35,25 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
+from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
 
 def approuver_inscription_par_sic(
     cmd: ApprouverInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    notification: 'INotification',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
+    digit: 'IDigitRepository',
+    compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -86,8 +92,25 @@ def approuver_inscription_par_sic(
     # THEN
     proposition_repository.save(entity=proposition)
 
+    noma = NomaGenerateurService.generer_noma(
+        compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
+        annee=proposition.formation_id.annee,
+    )
+
+    # use event publication to trigger submit ticket in digit
+    digit.submit_person_ticket(
+        global_id=proposition.matricule_candidat,
+        noma=noma,
+    )
+
+    message = notification.accepter_proposition_par_sic(
+        proposition=proposition,
+        objet_message=cmd.objet_message,
+        corps_message=cmd.corps_message,
+    )
     historique.historiser_acceptation_sic(
         proposition=proposition,
+        message=message,
         gestionnaire=cmd.auteur,
     )
 

@@ -84,8 +84,10 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.change_admission_coordinates': is_part_of_education_group & continuing.in_manager_status,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
+            'admission.change_admission_secondary_studies': is_part_of_education_group & continuing.in_manager_status,
             'admission.view_admission_languages': is_part_of_education_group,
             'admission.view_admission_curriculum': is_part_of_education_group,
+            'admission.change_admission_curriculum': is_part_of_education_group & continuing.in_manager_status,
             # Project
             'admission.view_admission_project': is_part_of_education_group,
             'admission.view_admission_cotutelle': is_part_of_education_group,
@@ -131,7 +133,9 @@ class ProgramManager(EducationGroupRoleModel):
             & general.in_fac_status,
             'admission.checklist_select_access_title': is_part_of_education_group & general.in_fac_status,
             'admission.checklist_change_fac_comment': is_part_of_education_group,
+            'admission.checklist_financability_dispensation_fac': is_part_of_education_group,
             'admission.continuing_checklist_change_fac_comment': is_part_of_education_group,
+            'admission.checklist_change_comment': is_part_of_education_group & continuing.is_continuing,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
             # Exports
             'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,
