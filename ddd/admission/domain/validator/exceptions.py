@@ -285,7 +285,7 @@ class PropositionFusionEnCoursDeTraitementException(BusinessException):
     status_code = "FUSION-DIGIT-6"
 
     def __init__(self, merge_status, matricule_candidat, **kwargs):
-        message = _("[%(matricule_candidat)s] Candidate has pending merge proposal: status {merge_status}") % {
+        message = _("[%(matricule_candidat)s] Candidate has pending merge proposal: status %(merge_status)s") % {
             "merge_status": merge_status,
             "matricule_candidat": matricule_candidat,
         }
