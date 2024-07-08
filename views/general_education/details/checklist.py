@@ -2117,14 +2117,6 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
 
         admission = self.get_permission_object()
 
-        context['financabilite_compute_rule_needed'] = (
-            admission.checklist['current']['financabilite']['statut'] not in {
-                ChoixStatutChecklist.GEST_REUSSITE.name,
-            } and not (
-                admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
-                and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
-            )
-        )
         context['financabilite_show_verdict_different_alert'] = (
             (
                 admission.checklist['current']['financabilite']['statut'] in {
@@ -2215,13 +2207,7 @@ class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteCon
 
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()
-        if admission.checklist['current']['financabilite']['statut'] not in {
-            ChoixStatutChecklist.GEST_REUSSITE.name,
-        } and not (
-            admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
-            and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
-        ):
-            admission.update_financability_computed_rule(author=self.request.user.person)
+        admission.update_financability_computed_rule(author=self.request.user.person)
         return self.render_to_response(self.get_context_data())
 
 
