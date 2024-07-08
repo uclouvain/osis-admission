@@ -33,6 +33,7 @@ from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand, \
     RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand
 from backoffice.celery import app
+from base.models.person import Person
 from base.tasks import send_pictures_to_card_app
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -61,15 +62,18 @@ def run(request=None):
         logger.info(f"[DigIT Ticket] {ticket.nom}, {ticket.prenom}")
         logger.info(f"[DigIT Ticket status] {status}")
 
-        if status in ["DONE", "DONE_WITH_WARNINGS"]:
+        person = Person.objects.get(global_id=ticket.matricule)
+        noma = person.personmergeproposal.registration_id_sent_to_digit
+
+        if status in ["DONE", "DONE_WITH_WARNINGS"] and noma:
             digit_matricule = message_bus_instance.invoke(
                 command=RecupererMatriculeDigitQuery(
-                    noma=ticket.noma,
+                    noma=noma,
                 )
             )
             logger.info(f"[DigIT Ticket noma - matricule] NOMA: {ticket.noma} - MATR: {digit_matricule}")
 
-            if digit_matricule == ticket.matricule:
+            if Person.objects.filter(global_id=digit_matricule).exists():
                 message_bus_instance.invoke(
                     command=FusionnerCandidatAvecPersonneExistanteCommand(
                         candidate_global_id=digit_matricule,
@@ -86,6 +90,7 @@ def run(request=None):
                 logger.info(f"[DigIT Ticket edit candidate global id]")
 
             send_pictures_to_card_app.run.delay(global_id=digit_matricule)
+            logger.info(f"[DigIT Ticket edit candidate global id]")
 
     # Handle response when task is ran as a cmd from admin panel
     if request:

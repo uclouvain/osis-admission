@@ -30,7 +30,7 @@ import waffle
 from django.conf import settings
 
 from admission.ddd.admission.commands import RetrieveListePropositionFusionEnErreurQuery, \
-    RechercherCompteExistantQuery
+    RechercherCompteExistantCommand
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from backoffice.celery import app
 
@@ -56,7 +56,7 @@ def run():
 
     for proposition in propositions_en_erreur:
         message_bus_instance.invoke(
-            command=RechercherCompteExistantQuery(
+            command=RechercherCompteExistantCommand(
                 matricule=proposition.matricule,
                 nom=proposition.last_name,
                 prenom=proposition.first_name,

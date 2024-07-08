@@ -67,6 +67,7 @@ class WorkingListAutocompleteTestCase(TestCase):
             ],
             admission_type=TypeDemande.INSCRIPTION.name,
             order=1,
+            quarantine=True,
         )
 
         cls.working_list_without_checklist_filters = WorkingListFactory(
@@ -78,6 +79,7 @@ class WorkingListAutocompleteTestCase(TestCase):
                 ChoixStatutPropositionGenerale.CONFIRMEE.name,
             ],
             order=0,
+            quarantine=False,
         )
 
         cls.user = User.objects.create_user(
@@ -104,6 +106,7 @@ class WorkingListAutocompleteTestCase(TestCase):
         self.assertEqual(results[0]['checklist_filters'], [[] for tab_name in OngletsChecklist.get_names()])
         self.assertEqual(results[0]['admission_statuses'], [ChoixStatutPropositionGenerale.CONFIRMEE.name])
         self.assertEqual(results[0]['admission_type'], '')
+        self.assertEqual(results[0]['quarantine'], False)
 
         self.assertEqual(results[1]['id'], self.working_list_with_checklist_filters.id)
         self.assertEqual(results[1]['text'], 'Ma liste 2')
@@ -123,6 +126,7 @@ class WorkingListAutocompleteTestCase(TestCase):
             ],
         )
         self.assertEqual(results[1]['admission_type'], TypeDemande.INSCRIPTION.name)
+        self.assertEqual(results[1]['quarantine'], True)
 
     def test_filter_working_lists_by_name_in_fr(self):
         self.client.force_login(user=self.user)

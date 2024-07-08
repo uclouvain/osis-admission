@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-28 11:14+0200\n"
+"POT-Creation-Date: 2024-07-08 15:52+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1517,7 +1517,9 @@ msgstr ""
 msgid ""
 "Cannot discard merge because at least one known person has the same national "
 "number"
-msgstr "Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le même numéro de registre national"
+msgstr ""
+"Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le "
+"même numéro de registre national"
 
 msgid "Canvas"
 msgstr "Canvas"
@@ -3439,6 +3441,9 @@ msgstr "Financement"
 
 msgid "Funding type"
 msgstr "Type de financement"
+
+msgid "Fusion digit flag is inactive"
+msgstr "Flag fusion digit inactif"
 
 msgid "Fusion proposal"
 msgstr "Proposition de fusion"
@@ -6677,8 +6682,14 @@ msgstr "Envoyer un e-mail à la Faculté"
 msgid "Send an information email"
 msgstr "Envoyer un e-mail d'information"
 
+msgid "Send selected candidate to digit"
+msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
+
 msgid "Send the message"
 msgstr "Envoyer le message"
+
+msgid "Send to DigIT"
+msgstr "Envoyer à DigIT"
 
 msgid "Send to SIC"
 msgstr "Envoyer en SIC"
@@ -8892,6 +8903,39 @@ msgstr "Votre adresse e-mail professionnelle"
 
 msgid "Your training does not cover the useful prerequisites in mathematics."
 msgstr "Votre formation ne couvre pas les prérequis utiles en mathématiques."
+
+#, python-format
+msgid "[%(matricule_candidat)s] Account creation period calendar is closed"
+msgstr "[%(matricule_candidat)s] Période de création de compte fermée"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has already a pending creation ticket"
+msgstr ""
+"[%(matricule_candidat)s] Le candidat a déjà un ticket de création en attente"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has pending merge proposal: status "
+"%(merge_status)s"
+msgstr ""
+"[%(matricule_candidat)s] Le candidat a une proposition de fusion en attente: "
+"statut %(merge_status)s"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate matricule is not a temporary account "
+"matricule"
+msgstr ""
+"[%(matricule_candidat)s] Le matricule du candidat n'est pas lié à un compte "
+"temporaire"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Type is admission and application is not accepted"
+msgstr ""
+"[%(matricule_candidat)s] Le type de demande est admission et n'est pas "
+"autorisée à s'inscrire"
 
 msgid "academic year"
 msgstr "année académique"

@@ -37,15 +37,14 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.emplacement_document import EmplacementDocumentService
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
+from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
-from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
 
 def approuver_admission_par_sic(
+    message_bus,
     cmd: ApprouverAdmissionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
@@ -58,13 +57,12 @@ def approuver_admission_par_sic(
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
-    digit: 'IDigitRepository',
-    compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
+    identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
     annee_courante = (
         GetCurrentAcademicYear()
@@ -116,17 +114,6 @@ def approuver_admission_par_sic(
         emplacement_document_repository=emplacement_document_repository,
         auteur=cmd.auteur,
     )
-
-    noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
-        annee=proposition.formation_id.annee
-    )
-
-    digit.submit_person_ticket(
-        global_id=proposition.matricule_candidat,
-        noma=noma
-    )
-
     message = notification.accepter_proposition_par_sic(
         proposition=proposition,
         objet_message=cmd.objet_message,
@@ -138,4 +125,17 @@ def approuver_admission_par_sic(
         gestionnaire=cmd.auteur,
     )
 
+    message_bus.publish(
+        AdmissionApprouveeParSicEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+            nom=identification.nom,
+            prenom=identification.prenom,
+            autres_prenoms=identification.autres_prenoms,
+            date_naissance=str(identification.date_naissance),
+            genre=identification.genre,
+            niss=identification.numero_registre_national_belge,
+            annee=proposition.annee_calculee,
+        )
+    )
     return proposition.entity_id

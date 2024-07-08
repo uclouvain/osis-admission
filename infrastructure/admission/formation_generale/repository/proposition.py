@@ -93,7 +93,6 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
-from base.models.student import Student
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
@@ -123,6 +122,29 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         # Return dtos
         return [cls._load_dto(proposition) for proposition in qs]
+
+    @classmethod
+    def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
+        try:
+            return cls._load(
+                GeneralEducationAdmissionProxy.objects.prefetch_related(
+                    'additional_approval_conditions',
+                    'freeadditionalapprovalcondition_set',
+                    'prerequisite_courses',
+                    'refusal_reasons',
+                )
+                .select_related(
+                    'other_training_accepted_by_fac__academic_year',
+                    'admission_requirement_year',
+                    'last_update_author',
+                )
+                .filter(
+                    submitted_at__isnull=False,
+                    candidate__global_id=matricule_candidat,
+                ).order_by('submitted_at').first()
+            )
+        except GeneralEducationAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException
 
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:

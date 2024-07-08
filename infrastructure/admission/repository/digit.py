@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 import json
 import logging
 from datetime import datetime
@@ -32,13 +33,12 @@ import requests
 import waffle
 from django.conf import settings
 from django.db.models import QuerySet, Q
+from django.utils.datetime_safe import date
 
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
-from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_AUTORISEE
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.templatetags.admission import format_matricule
 from base.models.enums.person_address_type import PersonAddressType
@@ -51,49 +51,25 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 class DigitRepository(IDigitRepository):
     @classmethod
-    def submit_person_ticket(cls, global_id: str, noma: str):
-        if not waffle.switch_is_active('fusion-digit'):
-            logger.info(f"DIGIT submit ticket canceled: fusion-digit is inactive")
-            return
-
-        if global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
-            logger.info(f"DIGIT submit ticket canceled: matr {global_id[0]} is not a temporary account matricule")
-            return
-
-        # replace with date from academic calendar
-        if datetime.today() < datetime(datetime.today().year, 6, 1):
-            logger.info(
-                f"DIGIT submit ticket canceled: creation ticket in digit should be done after "
-                f"{datetime(datetime.today().year, 6, 1)}"
-            )
-            return
-
+    def submit_person_ticket(cls, global_id: str, noma: str, extra_ticket_data: dict = None):
         candidate = Person.objects.get(global_id=global_id)
-        status, type_demande = _get_status_and_type_demande(candidate)
-
-        if type_demande == TypeDemande.ADMISSION and status not in STATUTS_TOUTE_PROPOSITION_AUTORISEE:
-            logger.info(f"DIGIT submit ticket canceled: type is admission and application is not accepted")
-            return
+        if extra_ticket_data is None:
+            extra_ticket_data = {}
 
         # get proposal merge person if any is linked
         merge_person = None
-        proposition = PersonMergeProposal.objects.filter(original_person=candidate, proposal_merge_person__isnull=False)
-        if proposition.exists():
-            merge_person = proposition.get().proposal_merge_person
-            if proposition.status not in [
-                PersonMergeStatus.MERGED.name, PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
-            ]:
-                logger.info(f"DIGIT submit ticket canceled: merge status is {proposition.status} and prevents sending ticket")
-                return
-
+        with contextlib.suppress(PersonMergeProposal.DoesNotExist):
+            proposition_fusion = PersonMergeProposal.objects.get(original_person=candidate)
+            merge_person = proposition_fusion.proposal_merge_person
             if noma:
-                proposition.registration_id_sent_to_digit = candidate.last_registration_id if candidate.last_registration_id else noma
-                proposition.save()
+                proposition_fusion.registration_id_sent_to_digit = noma
+                proposition_fusion.save()
 
+        person = merge_person if merge_person and _is_valid_merge_person(merge_person) else candidate
 
-        person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
-        ticket_response = _request_person_ticket_creation(person, noma, addresses)
+
+        ticket_response = _request_person_ticket_creation(person, noma, addresses, extra_ticket_data)
 
         logger.info(f"DIGIT Response: {ticket_response}")
 
@@ -105,8 +81,6 @@ class DigitRepository(IDigitRepository):
                     'status': ticket_response['status'],
                 }
             )
-
-        return ticket_response
 
     @classmethod
     def validate_person_ticket(cls, global_id: str):
@@ -123,7 +97,20 @@ class DigitRepository(IDigitRepository):
 
         person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
-        ticket_response = _request_person_ticket_validation(person, addresses)
+
+        submitted_admission = candidate.baseadmission_set.all().filter(submitted_at__isnull=False).first()
+        if not submitted_admission:
+            logger.info(f"DIGIT validation canceled: no admission submitted for the candidate")
+            return
+
+        program_type = submitted_admission.training.education_group_type.name
+
+        sap_number = cls._get_sap_number(candidate)
+        if sap_number:
+            logger.info(f"DIGIT retrieve SAP client number: {sap_number}")
+            return
+
+        ticket_response = _request_person_ticket_validation(person, addresses, program_type, sap_number)
 
         PersonMergeProposal.objects.update_or_create(
             original_person=candidate,
@@ -139,6 +126,10 @@ class DigitRepository(IDigitRepository):
             valid=ticket_response['valid'],
             errors=ticket_response['errors'],
         )
+
+    @classmethod
+    def _get_sap_number(cls, candidate):
+        return candidate.sapclient_set.first().client_number if candidate.sapclient_set.first() else None
 
     @classmethod
     def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
@@ -259,6 +250,24 @@ class DigitRepository(IDigitRepository):
         candidate.external_id = f"osis.person_{digit_global_id}"
         candidate.save()
 
+    @classmethod
+    def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
+        candidate = Person.objects.get(global_id=global_id)
+        if hasattr(candidate, 'personmergeproposal'):
+            return candidate.personmergeproposal.registration_id_sent_to_digit or None
+        else:
+            return None
+
+    @classmethod
+    def has_pending_digit_creation_ticket(cls, global_id: str) -> bool:
+        candidate = Person.objects.prefetch_related('personticketcreation_set').get(global_id=global_id)
+        return any(t for t in candidate.personticketcreation_set.all() if t.status in [
+            PersonTicketCreationStatus.CREATED.name,
+            PersonTicketCreationStatus.DONE.name,
+            PersonTicketCreationStatus.DONE_WITH_WARNINGS.name,
+            PersonTicketCreationStatus.IN_PROGRESS.name,
+        ])
+
 
 def _retrieve_person_ticket_status(request_id: int):
     if settings.MOCK_DIGIT_SERVICE_CALL:
@@ -286,39 +295,44 @@ def _retrieve_person_ticket_status(request_id: int):
     ).json()
 
 
-def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet):
+def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet, extra_ticket_data: dict):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"requestId": "1", "status": "CREATED"}
     else:
-        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, noma, addresses))}")
+        ticket_data = json.dumps(_get_ticket_data(person, noma, addresses, **extra_ticket_data))
+        logger.info(
+            f"DIGIT sent data: {ticket_data}"
+        )
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, noma, addresses)),
+            data=ticket_data,
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
         )
         return response.json()
 
 
-def _request_person_ticket_validation(person: Person, addresses: QuerySet):
+def _request_person_ticket_validation(person: Person, addresses: QuerySet, program_type: str, sap_number: str):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"errors": [], "valid": True}
     else:
-        logger.info(f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses))}")
+        logger.info(
+            f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, program_type, sap_number))}"
+        )
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, '0', addresses)),
+            data=json.dumps(_get_ticket_data(person, '0', addresses, program_type, sap_number)),
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
         )
         return response.json()
 
 
-def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
+def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str, sap_number: str):
     noma = person.last_registration_id if person.last_registration_id else noma
     if person.birth_date:
         birth_date = person.birth_date.strftime('%Y-%m-%d')
@@ -326,7 +340,11 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
         birth_date = f"{person.birth_year}-00-00"
     else:
         birth_date = None
-    return {
+
+    start_date_limit_idm = date(date.today().year, 6, 1)
+    start_date_idm = date.today().strftime('%Y-%m-%d') if date.today() > start_date_limit_idm else start_date_limit_idm
+
+    ticket_data = {
         "provider": {
             "source": "ETU",
             "sourceId": "".join(filter(str.isdigit, noma)),
@@ -355,8 +373,24 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet):
             }
             for address in addresses
         ],
+        "activities": [
+            {
+                "idmId": _get_idm_number(program_type),
+                "startDate": start_date_idm,
+                "stopDate": "9999-12-31",
+            }
+        ],
         "physicalPerson": True,
     }
+
+    if sap_number:
+        ticket_data["applicationAccounts"] = {
+            "source": "CLIETU",
+            "sourceId": sap_number,
+            "actif": True,
+        }
+
+    return ticket_data
 
 
 def _is_valid_merge_person(person):
@@ -368,16 +402,31 @@ def _is_valid_merge_person(person):
     ])
 
 
-def _get_status_and_type_demande(candidate):
-    # get all admissions listed for the candidate to check admission/registration condition (it sucks)
-    status = None
-    for admission in candidate.baseadmission_set.all():
-        if hasattr(admission, 'generaleducationadmission'):
-            status = admission.generaleducationadmission.status
-        elif hasattr(admission, 'doctorateadmission'):
-            status = admission.doctorateadmission.status
-        elif hasattr(admission, 'continuingeducationadmission'):
-            status = admission.continuingeducationadmission.status
-        if admission.type_demande == TypeDemande.INSCRIPTION.name:
-            return status, TypeDemande.INSCRIPTION.name
-    return status, TypeDemande.ADMISSION.name
+def _get_idm_number(program_type):
+    return {
+        "BACHELOR": 47,
+        "MASTER_M1": 48,
+        "MASTER_M4": 48,
+        "MASTER_M5": 48,
+        "MASTER_MA_120": 48,
+        "MASTER_MD_120": 48,
+        "MASTER_MS_120": 48,
+        "MASTER_MA_180_240": 48,
+        "MASTER_MD_180_240": 48,
+        "MASTER_MS_180_240": 48,
+        "AGGREGATION": 49,
+        "MASTER_MC": 51,
+        "FORMATION_PHD": 52,
+        "PHD": 52,
+        "CERTIFICATE": 54,
+        "CAPAES": 55,
+        "RESEARCH_CERTIFICATE": 57,
+        "ISOLATED_CLASS": 58,
+        "LANGUAGE_CLASS": 59,
+        "JUNIOR_YEAR": 60,
+        "CERTIFICATE_OF_PARTICIPATION": 61,
+        "CERTIFICATE_OF_SUCCESS": 61,
+        "CERTIFICATE_OF_HOLDING_CREDITS": 61,
+        "UNIVERSITY_FIRST_CYCLE_CERTIFICATE": 61,
+        "UNIVERSITY_SECOND_CYCLE_CERTIFICATE": 61
+    }[program_type]

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,21 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Any, Union
 
-from admission.ddd.admission.commands import RechercherCompteExistantCommand
-from admission.ddd.admission.domain.service.i_digit import IDigitService
+from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent, \
+    InscriptionApprouveeParSicEvent
 
 
-def rechercher_compte_existant(
-    cmd: 'RechercherCompteExistantCommand',
-    digit_service: 'IDigitService',
-):
-    return digit_service.rechercher_compte_existant(
-        matricule=cmd.matricule,
-        nom=cmd.nom,
-        prenom=cmd.prenom,
-        autres_prenoms=cmd.autres_prenoms,
-        date_naissance=cmd.date_naissance,
-        genre=cmd.genre,
-        niss=cmd.niss,
+def reagir_a_approuver_proposition(
+    msg_bus: Any,
+    event: Union['InscriptionApprouveeParSicEvent', 'AdmissionApprouveeParSicEvent'],
+) -> None:
+    from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
+    msg_bus.invoke(
+        SoumettreTicketPersonneCommand(
+            global_id=event.matricule,
+            annee=event.annee,
+        )
     )
