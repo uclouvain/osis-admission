@@ -1170,7 +1170,8 @@ class FinancabiliteApprovalForm(forms.ModelForm):
         self.fields['financability_rule'].choices = EMPTY_CHOICE + tuple(
             choice
             for choice in self.fields['financability_rule'].choices
-            if SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]
+            if choice[0] in SituationFinancabilite.get_names()
+            and SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]
         )
         self.initial['financability_rule'] = ''
 
@@ -1187,7 +1188,8 @@ class FinancabiliteNotFinanceableForm(forms.ModelForm):
         self.fields['financability_rule'].choices = EMPTY_CHOICE + tuple(
             choice
             for choice in self.fields['financability_rule'].choices
-            if SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]
+            if choice[0] in SituationFinancabilite.get_names()
+            and SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]
         )
         self.initial['financability_rule'] = ''
 
