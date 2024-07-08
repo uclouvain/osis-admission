@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 import datetime
 
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
@@ -58,6 +59,7 @@ from ddd.logic.financabilite.domain.model.enums.situation import SituationFinanc
 from ddd.logic.financabilite.domain.service.financabilite import Financabilite
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from osis_common.ddd.interface import BusinessException
 
 
 def soumettre_proposition(
@@ -193,18 +195,19 @@ def soumettre_proposition(
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 
-    msg_bus.publish(
-        PropositionSoumiseEvent(
-            entity_id=proposition.entity_id,
-            matricule=proposition.matricule_candidat,
-            nom=identification.nom,
-            prenom=identification.prenom,
-            autres_prenoms=identification.autres_prenoms,
-            date_naissance=str(identification.date_naissance),
-            genre=identification.genre,
-            niss=identification.numero_registre_national_belge,
-            annee=proposition.annee_calculee,
+    with contextlib.suppress(BusinessException):
+        msg_bus.publish(
+            PropositionSoumiseEvent(
+                entity_id=proposition.entity_id,
+                matricule=proposition.matricule_candidat,
+                nom=identification.nom,
+                prenom=identification.prenom,
+                autres_prenoms=identification.autres_prenoms,
+                date_naissance=str(identification.date_naissance),
+                genre=identification.genre,
+                niss=identification.numero_registre_national_belge,
+                annee=proposition.annee_calculee,
+            )
         )
-    )
 
     return proposition_id

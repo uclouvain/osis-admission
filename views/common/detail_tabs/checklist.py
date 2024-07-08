@@ -39,7 +39,7 @@ from rest_framework.views import APIView
 
 from admission.ddd.admission.commands import (
     ValiderTicketPersonneCommand,
-    GetPropositionFusionQuery, SoumettreTicketPersonneCommand,
+    GetPropositionFusionQuery, SoumettreTicketPersonneCommand, RechercherCompteExistantCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -81,10 +81,22 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
 
     if admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
         validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
-        proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
 
         if validation.valid is False:
             raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))
+
+        message_bus_instance.invoke(RechercherCompteExistantCommand(
+            matricule=admission.candidate.global_id,
+            nom=admission.candidate.last_name,
+            prenom=admission.candidate.first_name,
+            autres_prenoms=admission.candidate.middle_name,
+            date_naissance=str(admission.candidate.birth_date) if admission.candidate.birth_date else "",
+            genre=admission.candidate.sex,
+            niss=admission.candidate.national_number,
+        ))
+        proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(
+            global_id=admission.candidate.global_id
+        ))
 
         if proposition_fusion:
             if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
@@ -100,7 +112,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
             message_bus_instance.invoke(
                 SoumettreTicketPersonneCommand(
                     global_id=admission.candidate.global_id,
-                    annee=admission.determined_academic_year,
+                    annee=admission.determined_academic_year.year,
                 )
             )
 
