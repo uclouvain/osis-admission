@@ -46,6 +46,7 @@ def lister_demandes(
         sigles_formations=cmd.sigles_formations,
         inscription_requise=cmd.inscription_requise,
         paye=cmd.paye,
+        marque_d_interet=cmd.marque_d_interet,
         demandeur=cmd.demandeur,
         champ_tri=cmd.champ_tri,
         tri_inverse=cmd.tri_inverse,

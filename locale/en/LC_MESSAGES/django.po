@@ -6098,6 +6098,9 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Send to DigIT"
+msgstr ""
+
 msgid "Send to SIC"
 msgstr ""
 
@@ -6288,9 +6291,6 @@ msgid "Status of the doctoral training"
 msgstr ""
 
 msgid "Status:"
-msgstr ""
-
-msgid "Statut"
 msgstr ""
 
 msgid "Street"
@@ -8130,6 +8130,9 @@ msgid "ucl"
 msgstr "UCLouvain"
 
 msgid "use"
+msgstr ""
+
+msgid "yes"
 msgstr ""
 
 msgid "yes,no"
