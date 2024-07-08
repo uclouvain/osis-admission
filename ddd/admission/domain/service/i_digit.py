@@ -76,7 +76,6 @@ class IDigitService(interface.DomainService):
     ) -> str:
         raise NotImplementedError
 
-
     @classmethod
     def verifier_peut_soumettre_ticket_creation(
             cls,

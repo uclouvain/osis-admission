@@ -701,7 +701,7 @@ COMMAND_HANDLERS = {
         digit_service=DigitService(),
         compteur_noma=CompteurAnnuelPourNomaRepository(),
         proposition_repository=PropositionRepository(),
-        formation_translator= FormationGeneraleTranslator(),
+        formation_translator=FormationGeneraleTranslator(),
         client_comptabilite_translator=ClientComptabiliteTranslator(),
     ),
     GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(

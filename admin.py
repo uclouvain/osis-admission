@@ -875,7 +875,9 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
         admission = BaseAdmission.objects.filter(candidate=person).first()
         has_person_merge_proposal = PersonMergeProposal.objects.filter(original_person=person).exists()
         if admission and has_person_merge_proposal:
-            url = reverse(viewname='admission:services:digit:request-digit-person-creation', kwargs={'uuid': admission.uuid})
+            url = reverse(
+                viewname='admission:services:digit:request-digit-person-creation', kwargs={'uuid': admission.uuid}
+            )
             return mark_safe(
                 f'<a class="button" '
                 f'onclick="fetch(\'{url}\', {{ method: \'POST\' }}).then('
