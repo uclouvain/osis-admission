@@ -28,7 +28,6 @@ import datetime
 from django.contrib import messages
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from osis_comment.models import CommentEntry
 from rest_framework import serializers, status
@@ -39,7 +38,7 @@ from rest_framework.views import APIView
 
 from admission.ddd.admission.commands import (
     ValiderTicketPersonneCommand,
-    GetPropositionFusionQuery, SoumettreTicketPersonneCommand,
+    SoumettreTicketPersonneCommand, RechercherCompteExistantCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -54,7 +53,6 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_FAC_FOR_IUFC,
 )
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
-from base.models.person_merge_proposal import PersonMergeStatus
 
 __all__ = [
     'ChangeStatusView',
@@ -62,6 +60,8 @@ __all__ = [
 ]
 
 __namespace__ = False
+
+from osis_common.ddd.interface import BusinessException
 
 COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
 
@@ -76,33 +76,26 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     """Change the status of the admission of a specific tab"""
     update_fields = ['checklist', 'last_update_author', 'modified_at']
 
-    # use an intermediary status for DIGIT VALIDATION
-    from infrastructure.messages_bus import message_bus_instance
-
     if admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
-        validation = message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
-        proposition_fusion = message_bus_instance.invoke(GetPropositionFusionQuery(global_id=admission.candidate.global_id))
+        # TODO : add intermediary status to support async process (waiting for digit response)
 
-        if validation.valid is False:
-            raise Exception(_("Unable to validate the admission because of an invalid DIGIT ticket."))
-
-        if proposition_fusion:
-            if proposition_fusion.status == PersonMergeStatus.MATCH_FOUND.name:
-                raise Exception(_("Unable to validate the admission because of a potential person duplicates exists."))
-            if proposition_fusion.status == PersonMergeStatus.ERROR.name:
-                raise Exception(
-                    _(
-                        "Unable to validate the admission because an error occured while searching for existing "
-                        "person in DIGIT"
-                    )
-                )
-
-            message_bus_instance.invoke(
-                SoumettreTicketPersonneCommand(
-                    global_id=admission.candidate.global_id,
-                    annee=admission.determined_academic_year,
-                )
+        from infrastructure.messages_bus import message_bus_instance
+        message_bus_instance.invoke(RechercherCompteExistantCommand(
+            matricule=admission.candidate.global_id,
+            nom=admission.candidate.last_name,
+            prenom=admission.candidate.first_name,
+            autres_prenoms=admission.candidate.middle_name,
+            date_naissance=str(admission.candidate.birth_date) if admission.candidate.birth_date else "",
+            genre=admission.candidate.sex,
+            niss=admission.candidate.national_number,
+        ))
+        message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
+        message_bus_instance.invoke(
+            SoumettreTicketPersonneCommand(
+                global_id=admission.candidate.global_id,
+                annee=admission.determined_academic_year.year,
             )
+        )
 
     admission.last_update_author = author
     admission.modified_at = datetime.datetime.today()
@@ -155,6 +148,9 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
                 admission=admission,
                 author=self.request.user.person,
             )
+        except BusinessException as e:
+            messages.error(request, str(e.message))
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             messages.error(request, str(e))
             return Response(status=status.HTTP_400_BAD_REQUEST)

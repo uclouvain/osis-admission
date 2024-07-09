@@ -35,6 +35,8 @@ from django.conf import settings
 from django.db.models import QuerySet, Q
 from django.utils.datetime_safe import date
 
+from admission.ddd.admission.domain.validator.exceptions import ValidationTicketCreationDigitEchoueeException, \
+    CreationTicketDigitEchoueeException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
@@ -71,9 +73,9 @@ class DigitRepository(IDigitRepository):
 
         ticket_response = _request_person_ticket_creation(person, noma, addresses, extra_ticket_data)
 
-        logger.info(f"DIGIT Response: {ticket_response}")
+        logger.info(f"DIGIT creation ticket Response: {ticket_response}")
 
-        if ticket_response:
+        if ticket_response and ticket_response['status'] == 'CREATED':
             PersonTicketCreation.objects.update_or_create(
                 person=candidate,
                 defaults={
@@ -82,12 +84,18 @@ class DigitRepository(IDigitRepository):
                 }
             )
 
+        if ticket_response['status'] == 500:
+            raise CreationTicketDigitEchoueeException()
+
     @classmethod
-    def validate_person_ticket(cls, global_id: str):
+    def validate_person_ticket(cls, global_id: str, extra_ticket_data: dict = None):
         if not waffle.switch_is_active('fusion-digit') or global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
             return ValidationTicketResponseDTO(valid=True, errors=[])
 
         candidate = Person.objects.get(global_id=global_id)
+
+        if extra_ticket_data is None:
+            extra_ticket_data = {}
 
         # get proposal merge person if any is linked
         merge_person = None
@@ -98,19 +106,7 @@ class DigitRepository(IDigitRepository):
         person = merge_person if _is_valid_merge_person(merge_person) else candidate
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
 
-        submitted_admission = candidate.baseadmission_set.all().filter(submitted_at__isnull=False).first()
-        if not submitted_admission:
-            logger.info(f"DIGIT validation canceled: no admission submitted for the candidate")
-            return
-
-        program_type = submitted_admission.training.education_group_type.name
-
-        sap_number = cls._get_sap_number(candidate)
-        if sap_number:
-            logger.info(f"DIGIT retrieve SAP client number: {sap_number}")
-            return
-
-        ticket_response = _request_person_ticket_validation(person, addresses, program_type, sap_number)
+        ticket_response = _request_person_ticket_validation(person, addresses, extra_ticket_data)
 
         PersonMergeProposal.objects.update_or_create(
             original_person=candidate,
@@ -120,16 +116,11 @@ class DigitRepository(IDigitRepository):
             }
         )
 
-        logger.info(f"DIGIT Response: {ticket_response}")
+        logger.info(f"DIGIT validation Response: {ticket_response}")
 
-        return ValidationTicketResponseDTO(
-            valid=ticket_response['valid'],
-            errors=ticket_response['errors'],
-        )
+        if ticket_response.get('status') == 500:
+            raise ValidationTicketCreationDigitEchoueeException()
 
-    @classmethod
-    def _get_sap_number(cls, candidate):
-        return candidate.sapclient_set.first().client_number if candidate.sapclient_set.first() else None
 
     @classmethod
     def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
@@ -314,25 +305,25 @@ def _request_person_ticket_creation(person: Person, noma: str, addresses: QueryS
         return response.json()
 
 
-def _request_person_ticket_validation(person: Person, addresses: QuerySet, program_type: str, sap_number: str):
+def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra_ticket_data: dict):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"errors": [], "valid": True}
     else:
         logger.info(
-            f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, program_type, sap_number))}"
+            f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data))}"
         )
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': settings.ESB_AUTHORIZATION,
             },
-            data=json.dumps(_get_ticket_data(person, '0', addresses, program_type, sap_number)),
+            data=json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data)),
             url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
         )
         return response.json()
 
 
-def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str, sap_number: str):
+def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str = None, sap_number: str = None):
     noma = person.last_registration_id if person.last_registration_id else noma
     if person.birth_date:
         birth_date = person.birth_date.strftime('%Y-%m-%d')
@@ -373,15 +364,17 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
             }
             for address in addresses
         ],
-        "activities": [
+        "physicalPerson": True,
+    }
+
+    if program_type:
+        ticket_data["activities"] = [
             {
                 "idmId": _get_idm_number(program_type),
                 "startDate": start_date_idm,
                 "stopDate": "9999-12-31",
             }
-        ],
-        "physicalPerson": True,
-    }
+        ]
 
     if sap_number:
         ticket_data["applicationAccounts"] = {

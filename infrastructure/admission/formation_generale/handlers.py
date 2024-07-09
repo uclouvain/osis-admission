@@ -723,6 +723,9 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: valider_ticket_creation_personne(
             cmd,
             digit_repository=DigitRepository(),
+            proposition_repository=PropositionRepository(),
+            formation_translator=FormationGeneraleTranslator(),
+            client_comptabilite_translator=ClientComptabiliteTranslator(),
         )
     ),
     FusionnerCandidatAvecPersonneExistanteCommand: (

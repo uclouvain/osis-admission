@@ -281,7 +281,7 @@ class AdmissionDansUnStatutPasAutoriseASInscrireException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class PropositionFusionEnCoursDeTraitementException(BusinessException):
+class PropositionFusionATraiterException(BusinessException):
     status_code = "FUSION-DIGIT-6"
 
     def __init__(self, merge_status, matricule_candidat, **kwargs):
@@ -290,3 +290,19 @@ class PropositionFusionEnCoursDeTraitementException(BusinessException):
             "matricule_candidat": matricule_candidat,
         }
         super().__init__(message, **kwargs)
+
+
+class ValidationTicketCreationDigitEchoueeException(BusinessException):
+    status_code = "FUSION-DIGIT-7"
+    message = _("An error occured during digit ticket creation validation")
+
+    def __init__(self, **kwargs):
+        super().__init__(self.message, **kwargs)
+
+
+class CreationTicketDigitEchoueeException(BusinessException):
+    status_code = "FUSION-DIGIT-8"
+    message = _("An error occured during digit ticket creation")
+
+    def __init__(self, **kwargs):
+        super().__init__(self.message, **kwargs)
