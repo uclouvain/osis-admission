@@ -24,11 +24,21 @@
 #
 # ##############################################################################
 from admission.ddd.admission.commands import ValiderTicketPersonneCommand
+from admission.ddd.admission.domain.service.i_client_comptabilite_translator import IClientComptabiliteTranslator
+from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 
 
 def valider_ticket_creation_personne(
     cmd: 'ValiderTicketPersonneCommand',
     digit_repository: 'IDigitRepository',
+    proposition_repository: 'IPropositionRepository',
+    formation_translator: 'IFormationGeneraleTranslator',
+    client_comptabilite_translator: 'IClientComptabiliteTranslator',
 ) -> any:
-    return digit_repository.validate_person_ticket(global_id=cmd.global_id)
+    proposition = proposition_repository.get_first_submitted_proposition(matricule_candidat=cmd.global_id)
+    formation = formation_translator.get(entity_id=proposition.formation_id)
+    sap_number = client_comptabilite_translator.get_client_number(matricule_candidat=cmd.global_id)
+    extra_ticket_data = {'program_type': formation.type.name, 'sap_number': sap_number}
+    return digit_repository.validate_person_ticket(global_id=cmd.global_id, extra_ticket_data=extra_ticket_data)

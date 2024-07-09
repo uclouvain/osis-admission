@@ -125,26 +125,23 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
-        try:
-            return cls._load(
-                GeneralEducationAdmissionProxy.objects.prefetch_related(
-                    'additional_approval_conditions',
-                    'freeadditionalapprovalcondition_set',
-                    'prerequisite_courses',
-                    'refusal_reasons',
-                )
-                .select_related(
-                    'other_training_accepted_by_fac__academic_year',
-                    'admission_requirement_year',
-                    'last_update_author',
-                )
-                .filter(
-                    submitted_at__isnull=False,
-                    candidate__global_id=matricule_candidat,
-                ).order_by('submitted_at').first()
-            )
-        except GeneralEducationAdmission.DoesNotExist:
-            raise PropositionNonTrouveeException
+        first_submitted_proposition = GeneralEducationAdmissionProxy.objects.prefetch_related(
+            'additional_approval_conditions',
+            'freeadditionalapprovalcondition_set',
+            'prerequisite_courses',
+            'refusal_reasons',
+        ).select_related(
+            'other_training_accepted_by_fac__academic_year',
+            'admission_requirement_year',
+            'last_update_author',
+        ).filter(
+            submitted_at__isnull=False,
+            candidate__global_id=matricule_candidat,
+        ).order_by('submitted_at').first()
+
+        if first_submitted_proposition:
+            return cls._load(first_submitted_proposition)
+        raise PropositionNonTrouveeException
 
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:

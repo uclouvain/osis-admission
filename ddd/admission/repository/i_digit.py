@@ -35,7 +35,7 @@ class IDigitRepository:
         raise NotImplementedError
 
     @classmethod
-    def validate_person_ticket(cls, global_id: str):
+    def validate_person_ticket(cls, global_id: str, extra_ticket_data: dict = None):
         raise NotImplementedError
 
     @classmethod

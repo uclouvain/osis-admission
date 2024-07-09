@@ -23,12 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
+
 from django.urls import reverse
 from django.views.generic import UpdateView
 
 from admission.ddd.admission.commands import ValiderTicketPersonneCommand
 from admission.forms.admission.person import AdmissionPersonForm
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from osis_common.ddd.interface import BusinessException
 from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
 
@@ -75,6 +78,7 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateVi
         form_valid = super().form_valid(form)
 
         from infrastructure.messages_bus import message_bus_instance
-        message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=self.admission.candidate.global_id))
+        with contextlib.suppress(BusinessException):
+            message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=self.admission.candidate.global_id))
 
         return form_valid
