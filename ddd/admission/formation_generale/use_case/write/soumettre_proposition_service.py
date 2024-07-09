@@ -25,15 +25,16 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.domain.service.profil_soumis_candidat import (
+    ProfilSoumisCandidatTranslator,
+)
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
@@ -44,9 +45,7 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
-from admission.ddd.admission.domain.service.profil_soumis_candidat import (
-    ProfilSoumisCandidatTranslator,
-)
+from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -62,6 +61,7 @@ from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAc
 
 
 def soumettre_proposition(
+    msg_bus: any,
     cmd: 'SoumettrePropositionCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
@@ -193,8 +193,7 @@ def soumettre_proposition(
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 
-    from infrastructure.messages_bus import message_bus_instance
-    message_bus_instance.publish(
+    msg_bus.publish(
         PropositionSoumiseEvent(
             entity_id=proposition.entity_id,
             matricule=proposition.matricule_candidat,

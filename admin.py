@@ -34,15 +34,14 @@ from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
+from django.template import TemplateDoesNotExist
+from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
-
-from base.models.student import Student
-from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
@@ -88,14 +87,18 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc import InjectionEPCAdmission
+from admission.tasks import bulk_create_digit_persons_tickets
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeProposal
+from base.models.student import Student
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
+from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -827,7 +830,19 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
 
 
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
-    list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit')
+    list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit', 'send_to_digit')
+    actions = ['send_selected_to_digit']
+
+    def __init__(self, model, admin_site):
+        template_path = 'admin/send_digit_person_ticket.html'
+        try:
+            get_template(template_path)
+            self.change_list_template = template_path
+        except TemplateDoesNotExist:
+            pass
+
+        super().__init__(model, admin_site)
+
 
     @admin.display(description=_('Identifier'))
     def global_id(self, obj):
@@ -854,6 +869,30 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
         else:
             return mark_safe(f'<button class="button" disabled>{_("Retrieve from DigIT")}</button>')
 
+    @admin.display(description=_('Send to DigIT'))
+    def send_to_digit(self, obj):
+        person = obj.person
+        admission = BaseAdmission.objects.filter(candidate=person).first()
+        has_person_merge_proposal = PersonMergeProposal.objects.filter(original_person=person).exists()
+        if admission and has_person_merge_proposal:
+            url = reverse(
+                viewname='admission:services:digit:request-digit-person-creation', kwargs={'uuid': admission.uuid}
+            )
+            return mark_safe(
+                f'<a class="button" '
+                f'onclick="fetch(\'{url}\', {{ method: \'POST\' }}).then('
+                f'response => {{alert(\'Successfully sent data to digit for '
+                f'{person.last_name.upper()}, {person.first_name.capitalize()}:'
+                f' saved in Person ticket creations\')}})"'
+                f'>{_("Send to DigIT")}</a>'
+            )
+        else:
+            return mark_safe(f'<button class="button" disabled>{_("Send to DigIT")}</button>')
+
+    @admin.action(description=_('Send selected candidate to digit'))
+    def send_selected_to_digit(self, request, queryset):
+        global_ids = queryset.values_list('person__global_id', flat=True)
+        bulk_create_digit_persons_tickets.run(request=request, global_ids=global_ids)
 
 class TypeField(forms.CheckboxSelectMultiple):
     def format_value(self, value):

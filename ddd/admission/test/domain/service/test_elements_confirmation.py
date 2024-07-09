@@ -28,6 +28,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import freezegun
+import mock
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoratQuery,
@@ -71,6 +72,14 @@ class ElementsConfirmationTestCase(TestCase):
     def setUpClass(cls):
         ProfilCandidatInMemoryTranslator.reset()
         FinancabiliteInMemoryFetcher.reset()
+
+    def setUp(self):
+        # Mock publish
+        patcher = mock.patch(
+            'infrastructure.utils.MessageBus.publish',
+        )
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_recuperer_elements_confirmation_doctorat(self):
         elements = message_bus_in_memory_instance.invoke(

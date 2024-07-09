@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,22 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import ValiderTicketPersonneCommand
+from typing import Optional
+
 from admission.ddd.admission.domain.service.i_client_comptabilite_translator import IClientComptabiliteTranslator
-from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_digit import IDigitRepository
 
 
-def valider_ticket_creation_personne(
-    cmd: 'ValiderTicketPersonneCommand',
-    digit_repository: 'IDigitRepository',
-    proposition_repository: 'IPropositionRepository',
-    formation_translator: 'IFormationGeneraleTranslator',
-    client_comptabilite_translator: 'IClientComptabiliteTranslator',
-) -> any:
-    proposition = proposition_repository.get_first_submitted_proposition(matricule_candidat=cmd.global_id)
-    formation = formation_translator.get(entity_id=proposition.formation_id)
-    sap_number = client_comptabilite_translator.get_client_number(matricule_candidat=cmd.global_id)
-    extra_ticket_data = {'program_type': formation.type.name, 'sap_number': sap_number}
-    return digit_repository.validate_person_ticket(global_id=cmd.global_id, extra_ticket_data=extra_ticket_data)
+class ClientComptabiliteInMemoryTranslator(IClientComptabiliteTranslator):
+    @classmethod
+    def get_client_number(cls, matricule_candidat: str) -> Optional[str]:
+        return "11111111"

@@ -49,3 +49,6 @@ class MessageBusCommands(AbstractMessageBusCommands):
         **admission_handlers.COMMAND_HANDLERS,
         **role_handlers.COMMAND_HANDLERS,
     }
+    event_handlers = [
+        admission_handlers.EVENT_HANDLERS
+    ]

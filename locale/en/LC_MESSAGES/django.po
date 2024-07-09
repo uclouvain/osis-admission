@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-28 11:14+0200\n"
+"POT-Creation-Date: 2024-07-09 12:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -644,6 +644,12 @@ msgid "An approval mail has been sent to the candidate."
 msgstr ""
 
 msgid "An education type"
+msgstr ""
+
+msgid "An error occured during digit ticket creation"
+msgstr ""
+
+msgid "An error occured during digit ticket creation validation"
 msgstr ""
 
 msgid "An external member must have a country."
@@ -3174,6 +3180,9 @@ msgid "Funding"
 msgstr ""
 
 msgid "Funding type"
+msgstr ""
+
+msgid "Fusion digit flag is inactive"
 msgstr ""
 
 msgid "Fusion proposal"
@@ -6095,7 +6104,13 @@ msgstr ""
 msgid "Send an information email"
 msgstr ""
 
+msgid "Send selected candidate to digit"
+msgstr ""
+
 msgid "Send the message"
+msgstr ""
+
+msgid "Send to DigIT"
 msgstr ""
 
 msgid "Send to SIC"
@@ -7338,19 +7353,6 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
-msgid ""
-"Unable to validate the admission because an error occured while searching "
-"for existing person in DIGIT"
-msgstr ""
-
-msgid ""
-"Unable to validate the admission because of a potential person duplicates "
-"exists."
-msgstr ""
-
-msgid "Unable to validate the admission because of an invalid DIGIT ticket."
-msgstr ""
-
 msgid "Unavailable"
 msgstr ""
 
@@ -8009,6 +8011,32 @@ msgid "Your professional email address"
 msgstr ""
 
 msgid "Your training does not cover the useful prerequisites in mathematics."
+msgstr ""
+
+#, python-format
+msgid "[%(matricule_candidat)s] Account creation period calendar is closed"
+msgstr ""
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has already a pending creation ticket"
+msgstr ""
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has pending merge proposal: status "
+"%(merge_status)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate matricule is not a temporary account "
+"matricule"
+msgstr ""
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Type is admission and application is not accepted"
 msgstr ""
 
 msgid "academic year"

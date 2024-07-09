@@ -59,6 +59,7 @@ class WorkingListAutocomplete(autocomplete.Select2QuerySetView):
                 ],
                 'admission_statuses': result.admission_statuses,
                 'admission_type': result.admission_type,
+                'quarantine': result.quarantine,
             }
             for result in context['object_list']
         ]
