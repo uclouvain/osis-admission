@@ -31,7 +31,6 @@ from types import SimpleNamespace
 from typing import Optional
 
 import requests
-import waffle
 from django.conf import settings
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
@@ -60,7 +59,7 @@ class DigitService(IDigitService):
             date_naissance: str,
             niss: str
     ):
-        if not cls.fusion_digit_est_active() or not cls.correspond_a_compte_temporaire(matricule):
+        if not cls.correspond_a_compte_temporaire(matricule):
             return []
 
         original_person = Person.objects.get(global_id=matricule)
@@ -118,9 +117,6 @@ class DigitService(IDigitService):
 
         return similarity_data
 
-    @classmethod
-    def fusion_digit_est_active(cls):
-        return waffle.switch_is_active('fusion-digit')
 
     @classmethod
     def correspond_a_compte_temporaire(cls, matricule_candidat: str) -> bool:
