@@ -6098,6 +6098,9 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Send to DigIT"
+msgstr ""
+
 msgid "Send to SIC"
 msgstr ""
 
