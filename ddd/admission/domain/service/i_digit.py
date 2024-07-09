@@ -31,8 +31,8 @@ from typing import Optional
 from django.conf import settings
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.domain.validator.exceptions import FusionDigitDesactiveeException, \
-    ADejaTicketCreationEnAttenteException, NeCorrespondPasACompteTemporaireException, \
+from admission.ddd.admission.domain.validator.exceptions import ADejaTicketCreationEnAttenteException, \
+    NeCorrespondPasACompteTemporaireException, \
     NotInAccountCreationPeriodException, \
     AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -46,11 +46,6 @@ from osis_common.ddd.interface import BusinessException
 
 
 class IDigitService(interface.DomainService):
-
-    @classmethod
-    @abstractmethod
-    def fusion_digit_est_active(cls) -> bool:
-        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -85,9 +80,6 @@ class IDigitService(interface.DomainService):
         logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
         try:
-            if not cls.fusion_digit_est_active():
-                raise FusionDigitDesactiveeException()
-
             if digit_repository.has_pending_digit_creation_ticket(global_id=proposition.matricule_candidat):
                 raise ADejaTicketCreationEnAttenteException(matricule_candidat=proposition.matricule_candidat)
 
