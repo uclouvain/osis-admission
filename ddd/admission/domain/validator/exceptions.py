@@ -233,14 +233,6 @@ class ExperienceNonTrouveeException(BusinessException):
         super().__init__(self.message, **kwargs)
 
 
-class FusionDigitDesactiveeException(BusinessException):
-    status_code = "FUSION-DIGIT-1"
-    message = _("Fusion digit flag is inactive")
-
-    def __init__(self, **kwargs):
-        super().__init__(self.message, **kwargs)
-
-
 class ADejaTicketCreationEnAttenteException(BusinessException):
     status_code = "FUSION-DIGIT-2"
 
