@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import mock
 from django.shortcuts import resolve_url
 from rest_framework.test import APITestCase
 
@@ -67,6 +68,14 @@ class ChangeStatusViewTestCase(APITestCase):
             training=self.training,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
+
+        # Mock invoke
+        patcher = mock.patch(
+            'infrastructure.utils.MessageBusInMemory.invoke',
+        )
+        self.mock_invoke = patcher.start()
+        self.addCleanup(patcher.stop)
+
 
     def test_change_checklist_status(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -34,7 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.domain.validator.exceptions import FusionDigitDesactiveeException, \
     ADejaTicketCreationEnAttenteException, NeCorrespondPasACompteTemporaireException, \
     NotInAccountCreationPeriodException, \
-    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionEnCoursDeTraitementException
+    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -111,9 +111,10 @@ class IDigitService(interface.DomainService):
             proposition_fusion = cls.recuperer_proposition_fusion(proposition.matricule_candidat)
             if proposition_fusion:
                 if proposition_fusion.statut not in [
-                    PersonMergeStatus.MERGED.name, PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
+                    PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.MERGED.name,
+                    PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
                 ]:
-                    raise PropositionFusionEnCoursDeTraitementException(
+                    raise PropositionFusionATraiterException(
                         merge_status=proposition_fusion.statut,
                         matricule_candidat=proposition.matricule_candidat
                     )
