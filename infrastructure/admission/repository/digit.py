@@ -377,11 +377,11 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
         ]
 
     if sap_number:
-        ticket_data["applicationAccounts"] = {
+        ticket_data["applicationAccounts"] = [{
             "source": "CLIETU",
             "sourceId": sap_number,
             "actif": True,
-        }
+        }]
 
     return ticket_data
 
