@@ -281,7 +281,7 @@ class AdmissionDansUnStatutPasAutoriseASInscrireException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class PropositionFusionEnCoursDeTraitementException(BusinessException):
+class PropositionFusionATraiterException(BusinessException):
     status_code = "FUSION-DIGIT-6"
 
     def __init__(self, merge_status, matricule_candidat, **kwargs):
