@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-08 15:52+0200\n"
+"POT-Creation-Date: 2024-07-09 12:23+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -728,6 +728,12 @@ msgstr "Un courrier d'autorisation a été envoyé au candidat."
 
 msgid "An education type"
 msgstr "Un type de formation"
+
+msgid "An error occured during digit ticket creation"
+msgstr "Une erreur est survenue lors de la création de ticket DigIT"
+
+msgid "An error occured during digit ticket creation validation"
+msgstr "Une erreur est survenue lors de la validation du ticket de création dans DigIT"
 
 msgid "An external member must have a country."
 msgstr "Un membre externe doit avoir un pays."
@@ -8116,25 +8122,6 @@ msgstr "UE"
 
 msgid "UUID"
 msgstr "UUID"
-
-msgid ""
-"Unable to validate the admission because an error occured while searching "
-"for existing person in DIGIT"
-msgstr ""
-"Impossible de valider le dossier d'admission car une erreur s'est produite "
-"lors de la recherche de compte existant dans DIGIT"
-
-msgid ""
-"Unable to validate the admission because of a potential person duplicates "
-"exists."
-msgstr ""
-"Impossible de valider le dossier d'admission car il existe au moins un "
-"doublon potentiel de personne."
-
-msgid "Unable to validate the admission because of an invalid DIGIT ticket."
-msgstr ""
-"Impossible de valider le dossier d'admission car il existe des erreurs "
-"rendant invalide le ticket envoyé à DIGIT."
 
 msgid "Unavailable"
 msgstr "Non disponible"

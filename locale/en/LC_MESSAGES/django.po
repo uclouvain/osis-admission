@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-08 15:52+0200\n"
+"POT-Creation-Date: 2024-07-09 12:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -644,6 +644,12 @@ msgid "An approval mail has been sent to the candidate."
 msgstr ""
 
 msgid "An education type"
+msgstr ""
+
+msgid "An error occured during digit ticket creation"
+msgstr ""
+
+msgid "An error occured during digit ticket creation validation"
 msgstr ""
 
 msgid "An external member must have a country."
@@ -7345,19 +7351,6 @@ msgid "UE"
 msgstr ""
 
 msgid "UUID"
-msgstr ""
-
-msgid ""
-"Unable to validate the admission because an error occured while searching "
-"for existing person in DIGIT"
-msgstr ""
-
-msgid ""
-"Unable to validate the admission because of a potential person duplicates "
-"exists."
-msgstr ""
-
-msgid "Unable to validate the admission because of an invalid DIGIT ticket."
 msgstr ""
 
 msgid "Unavailable"
