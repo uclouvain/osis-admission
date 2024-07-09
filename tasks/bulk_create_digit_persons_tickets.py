@@ -29,6 +29,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import redirect
+from waffle.testutils import override_switch
 
 from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand
 from backoffice.celery import app
@@ -39,6 +40,7 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
 @app.task
+@override_switch('fusion-digit', active=True)
 def run(request=None, global_ids=None):
     candidates = Person.objects.prefetch_related('baseadmission_set').filter(~Q(baseadmissions=None))
     if global_ids:
