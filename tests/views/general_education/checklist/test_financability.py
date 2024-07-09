@@ -73,6 +73,8 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            financability_rule=SituationFinancabilite.PLUS_FINANCABLE.name,
+            financability_rule_established_by=CompletePersonFactory(),
         )
         cls.default_headers = {'HTTP_HX-Request': 'true'}
         cls.url = resolve_url(
@@ -96,6 +98,8 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
             self.general_admission.checklist['current']['financabilite']['statut'],
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
+        self.assertEqual(self.general_admission.financability_rule, '')
+        self.assertIsNone(self.general_admission.financability_rule_established_by)
 
 
 @freezegun.freeze_time('2022-01-01')
