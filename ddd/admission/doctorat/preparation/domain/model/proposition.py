@@ -441,7 +441,7 @@ class Proposition(interface.RootEntity):
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
     ):
-        self.statut = ChoixStatutPropositionDoctorale.CONFIRMEE
+        self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
         self.type_demande = type_demande
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
