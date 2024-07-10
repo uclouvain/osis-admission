@@ -190,8 +190,11 @@
         {% endif %}
         <div
             id="financabilite-computed-rule"
+            {% has_perm 'admission.change_checklist' as can_compute_rule %}
+            {% if can_compute_rule %}
             hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}"
             hx-trigger="financabiliteComputeRule"
+            {% endif %}
         >
           {% include "admission/general_education/includes/checklist/financabilite_computed_rule.html" %}
         </div>
