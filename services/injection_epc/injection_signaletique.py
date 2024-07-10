@@ -38,6 +38,7 @@ from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAs
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.models.person_merge_proposal import PersonMergeProposal
 from osis_common.queue.queue_sender import send_message, logger
 from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
@@ -72,21 +73,25 @@ class InjectionEPCSignaletique:
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
         candidat = admission.candidate  # Person
-        comptabilite = getattr(admission, 'accounting', None) # type: Accounting
+        comptabilite = getattr(admission, 'accounting', None)  # type: Accounting
         adresses = candidat.personaddress_set.select_related('country')
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         return {
             'dossier_uuid': str(admission.uuid),
             'signaletique': cls._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
-            'inscription_annee_academique': cls._get_inscription_annee_academique(admission=admission),
+            'inscription_annee_academique': cls._get_inscription_annee_academique(
+                admission=admission,
+                comptabilite=comptabilite,
+            ),
         }
 
     @classmethod
     def _get_signaletique(cls, candidat: Person, adresse_domicile: PersonAddress) -> Dict:
         documents = InjectionEPCCurriculum._recuperer_documents(candidat)
-        etudiant = candidat.student_set.first()
+        fusion = PersonMergeProposal.objects.filter(original_person=candidat).first()
         return {
-            'noma': etudiant.registration_id if etudiant else '',
+            'noma': fusion.registration_id_sent_to_digit if fusion else '',
+            'email': candidat.email,
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
             'prenom_suivant': candidat.middle_name,

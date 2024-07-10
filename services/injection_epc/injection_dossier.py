@@ -159,7 +159,7 @@ class InjectionEPCAdmission:
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
         candidat = admission.candidate  # Person
-        comptabilite = getattr(admission, 'accounting', None) # type: Accounting
+        comptabilite = getattr(admission, 'accounting', None)  # type: Accounting
         adresses = candidat.personaddress_set.select_related('country')
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         return {
