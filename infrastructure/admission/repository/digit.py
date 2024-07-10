@@ -342,7 +342,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
             "actif": True,
         },
         "person": {
-            "matricule": person.global_id,
+            "matricule": "",
             "lastName": person.last_name,
             "firstName": person.first_name,
             "birthDate": birth_date,
