@@ -186,7 +186,7 @@ class InjectionEPCSignaletique:
         try:
             connect = pika.BlockingConnection(rabbit_settings)
             channel = connect.channel()
-            queue_name = settings.QUEUES.get('QUEUES_NAME').get('ADMISSION_TO_EPC')
+            queue_name = settings.QUEUES.get('QUEUES_NAME').get('SIGNALETIQUE_TO_EPC_REQUEST')
             send_message(queue_name, donnees, connect, channel)
             # change something in admission object ? epc_injection_status ? = sended
             # history ?
@@ -202,7 +202,6 @@ class InjectionEPCSignaletique:
                 f"avec reference {admission_reference}"
             )
             raise InjectionSignaletiqueVersEPCException(reference=admission_reference) from e
-
 
 class InjectionSignaletiqueVersEPCException(Exception):
     def __init__(self, reference: str, **kwargs):
