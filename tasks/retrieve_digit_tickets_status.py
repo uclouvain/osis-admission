@@ -28,6 +28,7 @@ import logging
 import waffle
 from django.conf import settings
 from django.shortcuts import redirect
+from waffle.testutils import override_switch
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand, \
@@ -95,3 +96,8 @@ def run(request=None):
     # Handle response when task is ran as a cmd from admin panel
     if request:
         return redirect(request.META.get('HTTP_REFERER'))
+
+
+@override_switch('fusion-digit', active=True)
+def force_run(request=None):
+    return run(request=request)

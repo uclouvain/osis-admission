@@ -36,7 +36,7 @@ urlpatterns = file_router('admission/views')
 urlpatterns += [
     url(
         'retrieve_digit_person_ticket_status',
-        retrieve_digit_tickets_status.run,
+        retrieve_digit_tickets_status.force_run,
         name="retrieve_digit_person_ticket_status"
     )
 ]
