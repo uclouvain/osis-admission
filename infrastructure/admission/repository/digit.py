@@ -342,7 +342,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
             "actif": True,
         },
         "person": {
-            "matricule": person.global_id,
+            "matricule": "",
             "lastName": person.last_name,
             "firstName": person.first_name,
             "birthDate": birth_date,
@@ -379,11 +379,17 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
     if sap_number:
         ticket_data["applicationAccounts"] = [{
             "source": "CLIETU",
-            "sourceId": sap_number,
+            "sourceId": _format_sap_number_for_digit(sap_number),
             "actif": True,
         }]
 
     return ticket_data
+
+
+def _format_sap_number_for_digit(sap_number: str) -> str:
+    if len(sap_number) == 10 and sap_number.startswith("00"):
+        sap_number = sap_number[2:]
+    return sap_number
 
 
 def _is_valid_merge_person(person):
