@@ -645,6 +645,9 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
 
+msgid "Admission has been sent to EPC."
+msgstr "L'admission a été envoyé en EPC."
+
 msgid ""
 "Admission is not yet valid for searching UCLouvain account. The following "
 "fields are required: "
@@ -6702,6 +6705,9 @@ msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
+
+msgid "Sent to EPC"
+msgstr "Envoyée en EPC"
 
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."

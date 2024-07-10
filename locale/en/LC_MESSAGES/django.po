@@ -570,6 +570,9 @@ msgstr ""
 msgid "Admission form items"
 msgstr ""
 
+msgid "Admission has been sent to EPC."
+msgstr ""
+
 msgid ""
 "Admission is not yet valid for searching UCLouvain account. The following "
 "fields are required: "
@@ -6117,6 +6120,9 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid "Sent to EPC"
 msgstr ""
 
 msgid "Sentence indicating the late enrolment (if applicable)."
