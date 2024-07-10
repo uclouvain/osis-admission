@@ -733,7 +733,9 @@ msgid "An error occured during digit ticket creation"
 msgstr "Une erreur est survenue lors de la création de ticket DigIT"
 
 msgid "An error occured during digit ticket creation validation"
-msgstr "Une erreur est survenue lors de la validation du ticket de création dans DigIT"
+msgstr ""
+"Une erreur est survenue lors de la validation du ticket de création dans "
+"DigIT"
 
 msgid "An external member must have a country."
 msgstr "Un membre externe doit avoir un pays."
@@ -3396,9 +3398,6 @@ msgstr "Condition complémentaire d'acceptation libre"
 msgid "Free additional approval conditions"
 msgstr "Conditions complémentaires d'acceptation libres"
 
-msgid "Free additional conditions"
-msgstr "Conditions complémentaires libres"
-
 msgid "Free and requestable by FAC"
 msgstr "Libre et réclamable par FAC"
 
@@ -3447,9 +3446,6 @@ msgstr "Financement"
 
 msgid "Funding type"
 msgstr "Type de financement"
-
-msgid "Fusion digit flag is inactive"
-msgstr "Flag fusion digit inactif"
 
 msgid "Fusion proposal"
 msgstr "Proposition de fusion"
@@ -5390,6 +5386,9 @@ msgstr "Autre"
 msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr "Autre"
+
+msgid "Other additional conditions"
+msgstr "Autres conditions complémentaires"
 
 msgid "Other address"
 msgstr "Une autre adresse"
