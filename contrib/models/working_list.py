@@ -48,7 +48,7 @@ class WorkingList(OrderedModel):
         blank=True,
     )
 
-    quarantine = models.NullBooleanField()
+    quarantine = models.BooleanField(null=True)
 
     checklist_filters = models.JSONField(
         default=dict,

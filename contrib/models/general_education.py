@@ -171,6 +171,7 @@ class GeneralEducationAdmission(BaseAdmission):
         choices=SituationFinancabilite.choices(),
         max_length=100,
         default='',
+        blank=True,
     )
     financability_rule_established_by = models.ForeignKey(
         'base.Person',
@@ -186,6 +187,7 @@ class GeneralEducationAdmission(BaseAdmission):
         choices=DerogationFinancement.choices(),
         max_length=100,
         default='',
+        blank=True,
     )
     financability_dispensation_first_notification_on = models.DateTimeField(
         verbose_name=_('Financability dispensation first notification on'),
