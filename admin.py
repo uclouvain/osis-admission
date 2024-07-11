@@ -85,7 +85,7 @@ from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
-from admission.services.injection_epc import InjectionEPCAdmission
+from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.tasks import bulk_create_digit_persons_tickets
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
@@ -600,8 +600,8 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
 
 class EPCInjectionAdmin(admin.ModelAdmin):
     search_fields = ['admission']
-    list_display = ['admission', 'status', 'last_epc_response']
-    list_filter = ['status']
+    list_display = ['admission', 'type', 'status', 'last_epc_response']
+    list_filter = ['status', 'type']
     formfield_overrides = {
         models.JSONField: {'widget': JSONEditorWidget},
     }
