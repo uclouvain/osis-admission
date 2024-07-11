@@ -603,17 +603,21 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
         uuid_experience: str = '',
     ) -> List[ExperienceNonAcademiqueDTO]:
-        non_academic_experiences: QuerySet[ProfessionalExperience] = ProfessionalExperience.objects.filter(
-            person__global_id=matricule,
-        ).annotate(
-            valuated_from_admissions=ArrayAgg(
-                'valuated_from_admission__uuid',
-                filter=Q(valuated_from_admission__isnull=False),
-            ),
-            injecte_par_admission=Exists(
-                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
-            ),
-            injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+        non_academic_experiences: QuerySet[ProfessionalExperience] = (
+            ProfessionalExperience.objects.filter(
+                person__global_id=matricule,
+            )
+            .annotate(
+                valuated_from_admissions=ArrayAgg(
+                    'valuated_from_admission__uuid',
+                    filter=Q(valuated_from_admission__isnull=False),
+                ),
+                injecte_par_admission=Exists(
+                    AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+                ),
+                injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+            )
+            .order_by('-start_date', '-end_date')
         )
 
         if experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES:

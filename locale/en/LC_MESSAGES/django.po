@@ -3182,9 +3182,6 @@ msgstr ""
 msgid "Funding type"
 msgstr ""
 
-msgid "Fusion digit flag is inactive"
-msgstr ""
-
 msgid "Fusion proposal"
 msgstr ""
 
@@ -5839,9 +5836,6 @@ msgstr ""
 msgid "Retaking of the test"
 msgstr ""
 
-msgid "Retrieve from DigIT"
-msgstr ""
-
 msgid "Retype"
 msgstr ""
 
@@ -6108,9 +6102,6 @@ msgid "Send selected candidate to digit"
 msgstr ""
 
 msgid "Send the message"
-msgstr ""
-
-msgid "Send to DigIT"
 msgstr ""
 
 msgid "Send to SIC"
