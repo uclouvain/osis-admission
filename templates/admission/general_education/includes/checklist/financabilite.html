@@ -187,10 +187,8 @@
         {% endif %}
         <div
             id="financabilite-computed-rule"
-            {% if financabilite_compute_rule_needed %}
             hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}"
             hx-trigger="financabiliteComputeRule"
-            {% endif %}
         >
           {% include "admission/general_education/includes/checklist/financabilite_computed_rule.html" %}
         </div>
