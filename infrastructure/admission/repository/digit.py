@@ -50,6 +50,8 @@ from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeSt
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
+ADDRESS_TYPE_LEGAL = "LEG"
+
 
 class DigitRepository(IDigitRepository):
     @classmethod
@@ -354,7 +356,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
         },
         "addresses": [
             {
-                "addressType": "LEG",
+                "addressType": ADDRESS_TYPE_LEGAL,
                 "country": address.country.iso_code,
                 "postalCode": address.postal_code,
                 "locality": address.city,
