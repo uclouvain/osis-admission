@@ -43,6 +43,7 @@ from admission.api.views.person import (
     PersonViewSet,
     GeneralPersonView,
     ContinuingPersonView,
+    IdentificationDTOView,
 )
 from admission.api.views.continuing_education import RetrieveContinuingEducationSpecificInformationView
 from admission.api.views.project import *
