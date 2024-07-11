@@ -103,6 +103,8 @@
       {% bootstrap_form comment_forms.financabilite__derogation %}
 
       <script>
+        $('input[name=financabilite_derogation-dispensation_status][value=CANDIDAT_NOTIFIE]').parent().append(' <i class="fa fa-solid fa-envelope"></i>');
+
         {% has_perm 'admission.checklist_financability_dispensation' as checklist_financability_dispensation_perm %}
         {% if not checklist_financability_dispensation_perm %}
             $('input[name=financabilite_derogation-dispensation_status][value=NON_CONCERNE]').prop('disabled', true);
