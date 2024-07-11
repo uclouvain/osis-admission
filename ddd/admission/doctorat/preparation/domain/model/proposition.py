@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -72,6 +72,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 )
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -90,6 +91,7 @@ class Proposition(interface.RootEntity):
     reference: int
     projet: 'DetailProjet'
     annee_calculee: Optional[int] = None
+    type_demande: 'TypeDemande' = TypeDemande.ADMISSION
     pot_calcule: Optional[AcademicCalendarTypes] = None
     justification: Optional[str] = ''
     statut: ChoixStatutPropositionDoctorale = ChoixStatutPropositionDoctorale.EN_BROUILLON
@@ -435,10 +437,12 @@ class Proposition(interface.RootEntity):
     def finaliser(
         self,
         formation_id: FormationIdentity,
+        type_demande: 'TypeDemande',
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
     ):
         self.statut = ChoixStatutPropositionDoctorale.CONFIRMEE
+        self.type_demande = type_demande
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
         self.pot_calcule = pool

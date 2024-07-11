@@ -348,6 +348,7 @@ class InjectionEPCAdmission:
         double_diplome = getattr(admission, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission, 'international_scholarship', None)
         type_erasmus = getattr(admission, 'erasmus_mundus_scholarship', None)
+        annee_condition_acces = getattr(admission, 'admission_requirement_year', None)
         return {
             'num_offre': num_offre,
             'validite': validite,
@@ -357,6 +358,7 @@ class InjectionEPCAdmission:
                 else None
             ),
             'condition_acces': getattr(admission, 'admission_requirement', None),
+            'annee_condition_acces': annee_condition_acces.year if annee_condition_acces else None,
             'double_diplome': str(double_diplome.uuid) if double_diplome else None,
             'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
             'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,

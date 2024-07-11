@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import re
-from datetime import datetime
 
 from django.forms import model_to_dict
 from django.http import HttpResponse
@@ -37,9 +36,10 @@ __all__ = [
 
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
-    RechercherParcoursAnterieurQuery, ValiderTicketPersonneCommand
+    ValiderTicketPersonneCommand
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
 from admission.templatetags.admission import format_matricule
+from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.utils.htmx import HtmxPermissionRequiredMixin
@@ -47,7 +47,7 @@ from base.views.common import display_success_messages
 from osis_common.utils.htmx import HtmxMixin
 
 
-class SearchAccountView(HtmxMixin, FormView, HtmxPermissionRequiredMixin):
+class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
 
     name = "search_account"
 
@@ -169,6 +169,9 @@ class SearchAccountView(HtmxMixin, FormView, HtmxPermissionRequiredMixin):
             ):
                 return False
         return True
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
 
 def _only_digits(input_string):

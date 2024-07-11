@@ -31,6 +31,7 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 
 from admission.ddd.admission.doctorat.preparation.commands import DeterminerAnneeAcademiqueEtPotQuery as DoctorateCmd
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery as ContinuingCmd
 from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery as GeneralCmd
@@ -83,11 +84,13 @@ class DebugView(LoadDossierViewMixin, TemplateView):
             logger.addHandler(handler)
             from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 
+            formation = self.proposition.doctorat if self.is_doctorate else self.proposition.formation
+
             financabilite = message_bus_instance.invoke(
                 DeterminerSiCandidatEstFinancableQuery(
                     matricule_fgs=self.proposition.matricule_candidat,
-                    sigle_formation=self.proposition.formation.sigle,
-                    annee=self.proposition.formation.annee,
+                    sigle_formation=formation.sigle,
+                    annee=formation.annee,
                     est_en_reorientation=False,
                 )
             )

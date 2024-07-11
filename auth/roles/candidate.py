@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
@@ -169,6 +170,9 @@ _CANDIDATE_RULESET = {
 
 class Candidate(RoleModel):
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['person'], name='unique_candidate'),
+        ]
         verbose_name = _("Role: Candidate")
         verbose_name_plural = _("Role: Candidates")
         group_name = "candidates"

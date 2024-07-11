@@ -101,7 +101,7 @@ def run(request=None):
             ).order_by('submitted_at').first()
             InjectionEPCSignaletique().injecter(admission=demande)
             send_pictures_to_card_app.run.delay(global_id=digit_matricule)
-            logger.info(f"[DigIT Ticket edit candidate global id]")
+            logger.info(f"[Send picture to card]")
 
     # Handle response when task is ran as a cmd from admin panel
     if request:

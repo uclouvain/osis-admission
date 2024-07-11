@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-09 12:23+0200\n"
+"POT-Creation-Date: 2024-07-11 15:58+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -733,7 +733,9 @@ msgid "An error occured during digit ticket creation"
 msgstr "Une erreur est survenue lors de la création de ticket DigIT"
 
 msgid "An error occured during digit ticket creation validation"
-msgstr "Une erreur est survenue lors de la validation du ticket de création dans DigIT"
+msgstr ""
+"Une erreur est survenue lors de la validation du ticket de création dans "
+"DigIT"
 
 msgid "An external member must have a country."
 msgstr "Un membre externe doit avoir un pays."
@@ -2533,7 +2535,7 @@ msgid "Dissertation title"
 msgstr "Titre du mémoire"
 
 msgid "Do not reorder values, and keep the same count"
-msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
+msgstr "Ne pas réordonner les valeurs, et garder le même nombre"
 
 #, python-format
 msgid ""
@@ -2646,6 +2648,9 @@ msgstr "Documents spécifiques aux études contingentées"
 
 msgid "Does not have a doctor title"
 msgstr "N'est pas porteur du titre de docteur"
+
+msgid "Done (DigIT)"
+msgstr "Done (DigIT)"
 
 msgid "Done in"
 msgstr "Fait à"
@@ -3447,9 +3452,6 @@ msgstr "Financement"
 
 msgid "Funding type"
 msgstr "Type de financement"
-
-msgid "Fusion digit flag is inactive"
-msgstr "Flag fusion digit inactif"
 
 msgid "Fusion proposal"
 msgstr "Proposition de fusion"
@@ -6421,9 +6423,6 @@ msgstr "Épreuve de confirmation à représenter"
 msgid "Retaking of the test"
 msgstr "Confirmation à représenter"
 
-msgid "Retrieve from DigIT"
-msgstr "Récupérer depuis DigIT"
-
 msgid "Retype"
 msgstr "Retyper"
 
@@ -6694,9 +6693,6 @@ msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
 msgid "Send the message"
 msgstr "Envoyer le message"
 
-msgid "Send to DigIT"
-msgstr "Envoyer à DigIT"
-
 msgid "Send to SIC"
 msgstr "Envoyer en SIC"
 
@@ -6708,6 +6704,9 @@ msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
+
+msgid "Sent to digit"
+msgstr "Envoyer à DigIT"
 
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
@@ -6909,9 +6908,6 @@ msgstr "État d’avancement de la formation doctorale"
 msgid "Status:"
 msgstr "État :"
 
-msgid "Statut"
-msgstr "Statut"
-
 msgid "Street"
 msgstr "Rue"
 
@@ -7064,6 +7060,9 @@ msgstr "Agrégation et CAPAES"
 msgctxt "admission"
 msgid "Telephone (mobile)"
 msgstr "Téléphone (GSM/mobile)"
+
+msgid "Template title"
+msgstr "Intitulé du template"
 
 msgid ""
 "Temporary protection is granted for a period of one year, which can be "
@@ -9044,6 +9043,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes"
+msgstr "oui"
 
 msgid "yes,no"
 msgstr "oui,non"
