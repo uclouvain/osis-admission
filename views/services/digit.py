@@ -43,6 +43,7 @@ from django.views.generic.edit import ProcessFormView
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import RechercherCompteExistantCommand, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
+from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.views.common import display_error_messages, display_success_messages
@@ -55,7 +56,7 @@ from osis_role.contrib.views import PermissionRequiredMixin
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
-class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
+class RequestDigitAccountCreationView(PermissionRequiredMixin, ProcessFormView):
 
     urlpatterns = {'request-digit-person-creation': 'request-digit-person-creation/<uuid:uuid>'}
     permission_required = "admission.merge_candidate_with_known_person"
@@ -96,8 +97,11 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
             )
         )
 
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
-class SearchDigitAccountView(FormView, PermissionRequiredMixin):
+
+class SearchDigitAccountView(PermissionRequiredMixin, FormView):
 
     name = "search-account"
 
@@ -149,6 +153,9 @@ class SearchDigitAccountView(FormView, PermissionRequiredMixin):
         except PersonMergeProposal.DoesNotExist:
             return None
 
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
 
 def search_digit_account(
         global_id: str,
@@ -174,7 +181,7 @@ def search_digit_account(
     )
 
 
-class UndoMergeAccountView(FormView, PermissionRequiredMixin):
+class UndoMergeAccountView(PermissionRequiredMixin, FormView):
 
     name = 'undo-merge'
     urlpatterns = {'undo-merge': 'undo-merge/<uuid:uuid>'}
@@ -193,8 +200,11 @@ class UndoMergeAccountView(FormView, PermissionRequiredMixin):
 
         return redirect(request.META['HTTP_REFERER'])
 
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
-class DiscardMergeAccountView(FormView, PermissionRequiredMixin):
+
+class DiscardMergeAccountView(PermissionRequiredMixin, FormView):
 
     name = 'discard-merge'
     urlpatterns = {'discard-merge': 'discard-merge/<uuid:uuid>'}
@@ -213,3 +223,6 @@ class DiscardMergeAccountView(FormView, PermissionRequiredMixin):
         )
 
         return HttpResponse(status=200, headers={'HX-Refresh': 'true'})
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
