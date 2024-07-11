@@ -354,7 +354,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
         },
         "addresses": [
             {
-                "addressType": "RES",
+                "addressType": "LEG",
                 "country": address.country.iso_code,
                 "postalCode": address.postal_code,
                 "locality": address.city,
