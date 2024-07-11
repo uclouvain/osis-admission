@@ -76,6 +76,7 @@ __all__ = [
     "GeneralEducationPropositionIdentityWithStatusSerializer",
 ]
 
+from reference.api.serializers.language import RelatedLanguageField
 
 PROPOSITION_ERROR_SCHEMA = {
     "type": "array",
@@ -693,10 +694,7 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
         choices=ChoixDoctoratDejaRealise.choices(),
         default=ChoixDoctoratDejaRealise.NO.name,
     )
-    langue_redaction_these = serializers.ChoiceField(
-        choices=ChoixLangueRedactionThese.choices(),
-        default=ChoixLangueRedactionThese.UNDECIDED.name,
-    )
+    langue_redaction_these = RelatedLanguageField(required=False)
     institut_these = RelatedInstituteField(required=False)
 
     class Meta:
