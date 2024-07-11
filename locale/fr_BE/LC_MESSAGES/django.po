@@ -6909,9 +6909,6 @@ msgstr "État d’avancement de la formation doctorale"
 msgid "Status:"
 msgstr "État :"
 
-msgid "Statut"
-msgstr "Statut"
-
 msgid "Street"
 msgstr "Rue"
 
@@ -9044,6 +9041,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes"
+msgstr "oui"
 
 msgid "yes,no"
 msgstr "oui,non"

@@ -6305,9 +6305,6 @@ msgstr ""
 msgid "Status:"
 msgstr ""
 
-msgid "Statut"
-msgstr ""
-
 msgid "Street"
 msgstr ""
 
@@ -8158,6 +8155,9 @@ msgid "ucl"
 msgstr "UCLouvain"
 
 msgid "use"
+msgstr ""
+
+msgid "yes"
 msgstr ""
 
 msgid "yes,no"
