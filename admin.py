@@ -34,8 +34,6 @@ from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
-from django.template import TemplateDoesNotExist
-from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from django_json_widget.widgets import JSONEditorWidget
@@ -840,18 +838,6 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
 
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
     list_display = ('person', 'global_id', 'view_on_portal')
-    actions = ['send_selected_to_digit']
-
-    def __init__(self, model, admin_site):
-        template_path = 'admin/send_digit_person_ticket.html'
-        try:
-            get_template(template_path)
-            self.change_list_template = template_path
-        except TemplateDoesNotExist:
-            pass
-
-        super().__init__(model, admin_site)
-
 
     @admin.display(description=_('Identifier'))
     def global_id(self, obj):
@@ -861,6 +847,31 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
     def view_on_portal(self, obj):
         url = f"{settings.OSIS_PORTAL_URL}admin/auth/user/?q={obj.person.global_id}"
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Search on portal")}</a>')
+
+
+class CandidateAdmin(FrontOfficeRoleModelAdmin):
+    actions = ['send_selected_to_digit']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.list_display += ('person_ticket_sent_to_digit', 'person_ticket_done_in_digit')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('person__personticketcreation_set')
+
+    def person_digit_creation_ticket(self, obj):
+        return obj.person.personticketcreation_set.all().first()
+
+    @admin.display(description=_('Sent to digit'), boolean=True)
+    def person_ticket_sent_to_digit(self, obj):
+        return bool(self.person_digit_creation_ticket(obj))
+
+    @admin.display(description=_('Done (DigIT)'), boolean=True)
+    def person_ticket_done_in_digit(self, obj):
+        ticket = self.person_digit_creation_ticket(obj)
+        if ticket:
+            return self.person_digit_creation_ticket(obj).status in ["DONE", "DONE_WITH_WARNINGS"]
+        return False
 
     @admin.action(description=_('Send selected candidate to digit'))
     def send_selected_to_digit(self, request, queryset):
@@ -969,7 +980,7 @@ admin.site.register(CategorizedFreeDocument, CategorizedFreeDocumentAdmin)
 admin.site.register(WorkingList, WorkingListAdmin)
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
-admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
+admin.site.register(Candidate, CandidateAdmin)
 
 admin.site.register(CddConfigurator, CddConfiguratorAdmin)
 
