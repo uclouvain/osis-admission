@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-09 12:23+0200\n"
+"POT-Creation-Date: 2024-07-11 15:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2436,6 +2436,9 @@ msgstr ""
 msgid "Does not have a doctor title"
 msgstr ""
 
+msgid "Done (DigIT)"
+msgstr ""
+
 msgid "Done in"
 msgstr ""
 
@@ -3180,9 +3183,6 @@ msgid "Funding"
 msgstr ""
 
 msgid "Funding type"
-msgstr ""
-
-msgid "Fusion digit flag is inactive"
 msgstr ""
 
 msgid "Fusion proposal"
@@ -5839,9 +5839,6 @@ msgstr ""
 msgid "Retaking of the test"
 msgstr ""
 
-msgid "Retrieve from DigIT"
-msgstr ""
-
 msgid "Retype"
 msgstr ""
 
@@ -6110,9 +6107,6 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
-msgid "Send to DigIT"
-msgstr ""
-
 msgid "Send to SIC"
 msgstr ""
 
@@ -6123,6 +6117,9 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid "Sent to digit"
 msgstr ""
 
 msgid "Sentence indicating the late enrolment (if applicable)."
