@@ -241,6 +241,12 @@ class DigitRepository(IDigitRepository):
         candidate = Person.objects.get(global_id=candidate_global_id)
         candidate.global_id = digit_global_id
         candidate.external_id = f"osis.person_{digit_global_id}"
+        # delete user to enable new connection from temporary account
+        if candidate.user:
+            # Delete related UserGroup instances first
+            candidate.user.usergroup_set.all().delete()
+            candidate.user.delete()
+        candidate.user = None
         candidate.save()
 
     @classmethod
