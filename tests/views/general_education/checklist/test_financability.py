@@ -137,6 +137,7 @@ class FinancabiliteApprovalSetRuleViewTestCase(TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get("HX-Refresh"))
         self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
 
         # Check that the admission has been updated
@@ -257,6 +258,7 @@ class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get("HX-Refresh"))
         self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
 
         # Check that the admission has been updated

@@ -26,29 +26,29 @@
 import contextlib
 from typing import Any
 
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, ValiderTicketPersonneCommand, \
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, ValiderTicketPersonneCommand, \
     SoumettreTicketPersonneCommand
-from ddd.logic.comptabilite.commands import CreationClientCommand, PasserEcritureComptableFraisDossierAdmissionCommand
-from ddd.logic.comptabilite.domain.validator.exceptions import ClientDejaExistant
+from osis_common.ddd.interface import BusinessException
 
 
 def recherche_et_validation_digit(
     msg_bus: Any,
     event,
 ) -> None:
-    msg_bus.invoke(RechercherCompteExistantQuery(
-        matricule=event.matricule,
-        nom=event.nom,
-        prenom=event.prenom,
-        autres_prenoms=event.autres_prenoms,
-        date_naissance=event.date_naissance,
-        genre=event.genre,
-        niss=event.niss,
-    ))
-    msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
-    msg_bus.invoke(
-        SoumettreTicketPersonneCommand(
-            global_id=event.matricule,
-            annee=event.annee,
+    with contextlib.suppress(BusinessException):
+        msg_bus.invoke(RechercherCompteExistantCommand(
+            matricule=event.matricule,
+            nom=event.nom,
+            prenom=event.prenom,
+            autres_prenoms=event.autres_prenoms,
+            date_naissance=event.date_naissance,
+            genre=event.genre,
+            niss=event.niss,
+        ))
+        msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
+        msg_bus.invoke(
+            SoumettreTicketPersonneCommand(
+                global_id=event.matricule,
+                annee=event.annee,
+            )
         )
-    )

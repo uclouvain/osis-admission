@@ -695,6 +695,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                 'sigles_formations': [self.admission.training.acronym],
                 'inscription_requise': True,
                 'paye': False,
+                'marque_d_interet': True,
                 'demandeur': str(self.sic_management_user.person.uuid),
             }
         )
@@ -710,8 +711,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 13)
-        self.assertEqual(len(values), 13)
+        self.assertEqual(len(names), 14)
+        self.assertEqual(len(values), 14)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -721,12 +722,13 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(names[4], _('Edition'))
         self.assertEqual(names[5], _('Application numero'))
         self.assertEqual(names[6], _('Last name / First name / Email / NOMA'))
-        self.assertEqual(names[7], _('Statut'))
+        self.assertEqual(names[7], _('Application status'))
         self.assertEqual(names[8], _('Faculty'))
         self.assertEqual(names[9], _('Course type'))
         self.assertEqual(names[10], pgettext('admission', 'Course'))
         self.assertEqual(names[11], _('Registration required'))
         self.assertEqual(names[12], _('Paid'))
+        self.assertEqual(names[13], _('Interested mark'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '3 Janvier 2023')
@@ -745,3 +747,4 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(values[10], f"['{self.admission.training.acronym}']")
         self.assertEqual(values[11], 'oui')
         self.assertEqual(values[12], 'non')
+        self.assertEqual(values[13], 'oui')

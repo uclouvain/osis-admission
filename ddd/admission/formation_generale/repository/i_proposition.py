@@ -68,6 +68,11 @@ class IPropositionRepository(IGlobalPropositionRepository):
 
     @classmethod
     @abc.abstractmethod
+    def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:  # type: ignore[override]
         raise NotImplementedError
 

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class NameMailTemplateForm(forms.Form):
-    name = forms.CharField(label=_("Name"), max_length=255)
+    name = forms.CharField(label=_("Template title"), max_length=255)
     cdd = forms.ChoiceField(label=_('CDD'))
 
     def __init__(self, cdds=None, *args, **kwargs) -> None:

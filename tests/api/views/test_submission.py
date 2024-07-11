@@ -92,6 +92,14 @@ from reference.tests.factories.country import CountryFactory
 @freezegun.freeze_time("1980-02-25")
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
+    def setUp(self):
+        # Mock publish
+        patcher = mock.patch(
+            'infrastructure.utils.MessageBus.publish',
+        )
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
     @classmethod
     def setUpTestData(cls):
         AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
@@ -166,6 +174,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 % {'to_service': _("to the UCLouvain Registration Service")},
             },
         }
+
 
     def test_general_proposition_verification_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)

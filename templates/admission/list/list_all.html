@@ -92,6 +92,7 @@
           const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
           const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
           const toggleChecklistFiltersButton = $('#toggle-checklist-filters');
+          const quarantineInput = $('#id_quarantaine');
           let selectWorkListInProgress = false;
 
           {# Toggle the checklist filters #}
@@ -109,7 +110,7 @@
 
           toggleChecklistFiltersButton.val(checklistFiltersInputs.filter(':checked').length > 0 ? 'off' : 'on').trigger('click');
 
-          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
+          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"], #id_quarantaine').on('change', function () {
               {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
               if (selectWorkListInProgress) return;
               $('#id_liste_travail').val('').trigger('change');
@@ -122,6 +123,11 @@
 
               stateInput.val(data.admission_statuses).trigger('change');
               typeInput.val([data.admission_type]).trigger('change');
+              quarantineInput.val({
+                true: 'True',
+                false: 'False',
+                null: '',
+              }[data.quarantine]).trigger('change');
               if (!data.checklist_filters_mode) {
                   filterModeInputs.filter(':checked').prop('checked', false).trigger('change');
                   filterModeInputs.parents('label').removeClass('active');

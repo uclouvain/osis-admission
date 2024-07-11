@@ -39,6 +39,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -172,6 +173,14 @@ class PredicatesTestCase(TestCase):
                 status in valid_statuses,
             )
 
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            status=ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name
+        )
+        self.assertFalse(general.in_fac_status(continuing_admission.candidate.user, continuing_admission))
+
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name)
+        self.assertFalse(general.in_fac_status(doctorate_admission.candidate.user, doctorate_admission))
+
     def test_in_fac_document_request_status(self):
         admission = GeneralEducationAdmissionFactory()
 
@@ -186,6 +195,26 @@ class PredicatesTestCase(TestCase):
                 status in valid_statuses,
             )
 
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            status=ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
+        )
+        self.assertFalse(
+            general.in_fac_document_request_status(
+                continuing_admission.candidate.user,
+                continuing_admission,
+            )
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+        )
+        self.assertFalse(
+            general.in_fac_document_request_status(
+                doctorate_admission.candidate.user,
+                doctorate_admission,
+            )
+        )
+
     def test_in_sic_document_request_status(self):
         admission = GeneralEducationAdmissionFactory()
 
@@ -199,6 +228,16 @@ class PredicatesTestCase(TestCase):
                 general.in_sic_document_request_status(admission.candidate.user, admission),
                 status in valid_statuses,
             )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+        )
+        self.assertFalse(
+            general.in_sic_document_request_status(
+                doctorate_admission.candidate.user,
+                doctorate_admission,
+            )
+        )
 
     def test_in_fac_status_extended(self):
         admission = GeneralEducationAdmissionFactory()
@@ -215,6 +254,14 @@ class PredicatesTestCase(TestCase):
                 general.in_fac_status_extended(admission.candidate.user, admission),
                 status in valid_statuses,
             )
+
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            status=ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
+        )
+        self.assertFalse(general.in_fac_status_extended(continuing_admission.candidate.user, continuing_admission))
+
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name)
+        self.assertFalse(general.in_fac_status_extended(doctorate_admission.candidate.user, doctorate_admission))
 
     def test_in_sic_status(self):
         admission = GeneralEducationAdmissionFactory()
@@ -236,6 +283,12 @@ class PredicatesTestCase(TestCase):
                 status in valid_statuses,
             )
 
+        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertFalse(general.in_sic_status(continuing_admission.candidate.user, continuing_admission))
+
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+        self.assertFalse(general.in_sic_status(doctorate_admission.candidate.user, doctorate_admission))
+
     def test_not_cancelled(self):
         admission = GeneralEducationAdmissionFactory()
 
@@ -245,6 +298,12 @@ class PredicatesTestCase(TestCase):
                 general.not_cancelled(admission.candidate.user, admission),
                 status != ChoixStatutPropositionGenerale.ANNULEE.name,
             )
+
+        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertFalse(general.not_cancelled(continuing_admission.candidate.user, continuing_admission))
+
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+        self.assertFalse(general.not_cancelled(doctorate_admission.candidate.user, doctorate_admission))
 
     def test_in_sic_status_extended(self):
         admission = GeneralEducationAdmissionFactory()
@@ -268,6 +327,12 @@ class PredicatesTestCase(TestCase):
                 status in valid_statuses,
             )
 
+        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertFalse(general.in_sic_status_extended(continuing_admission.candidate.user, continuing_admission))
+
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+        self.assertFalse(general.in_sic_status_extended(doctorate_admission.candidate.user, doctorate_admission))
+
     def test_is_submitted(self):
         admission = GeneralEducationAdmissionFactory()
 
@@ -279,7 +344,13 @@ class PredicatesTestCase(TestCase):
                 status,
             )
 
-    def not_in_general_statuses_predicate_message_in_english(self):
+        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertFalse(general.is_submitted(continuing_admission.candidate.user, continuing_admission))
+
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+        self.assertFalse(general.is_submitted(doctorate_admission.candidate.user, doctorate_admission))
+
+    def test_not_in_general_statuses_predicate_message_in_english(self):
         with translation.override(settings.LANGUAGE_CODE_EN):
             result = not_in_general_statuses_predicate_message(
                 statuses=[
@@ -293,7 +364,7 @@ class PredicatesTestCase(TestCase):
                 'Application confirmed, To be completed for the Enrolment Office (SIC).',
             )
 
-    def not_in_general_statuses_predicate_message_in_french(self):
+    def test_not_in_general_statuses_predicate_message_in_french(self):
         with translation.override(settings.LANGUAGE_CODE_FR):
             result = not_in_general_statuses_predicate_message(
                 statuses=[
@@ -304,7 +375,7 @@ class PredicatesTestCase(TestCase):
             self.assertEqual(
                 result,
                 'Le statut global de la demande doit être l\'un des suivants pour pouvoir réaliser cette action : '
-                'Demande confirmée (par étudiant), A compléter (par étudiant) pour SIC.',
+                'Demande confirmée, A compléter pour SIC.',
             )
 
     def test_is_general(self):
@@ -316,3 +387,30 @@ class PredicatesTestCase(TestCase):
 
         general_admission = GeneralEducationAdmissionFactory()
         self.assertTrue(general.is_general(general_admission.candidate.user, general_admission))
+
+    def test_can_send_to_fac_faculty_decision(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission.status = status
+            self.assertEqual(
+                general.can_send_to_fac_faculty_decision(admission.candidate.user, admission),
+                status in STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+                status,
+            )
+
+        continuing_admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertFalse(
+            general.can_send_to_fac_faculty_decision(
+                continuing_admission.candidate.user,
+                continuing_admission,
+            )
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+        self.assertFalse(
+            general.can_send_to_fac_faculty_decision(
+                doctorate_admission.candidate.user,
+                doctorate_admission,
+            )
+        )

@@ -28,11 +28,17 @@ import logging
 import waffle
 from django.conf import settings
 from django.shortcuts import redirect
+from waffle.testutils import override_switch
 
-from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand, \
-    RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand
+from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.commands import (
+    RetrieveListeTicketsEnAttenteQuery,
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand,
+    RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand,
+)
+from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from backoffice.celery import app
+from base.models.person import Person
 from base.tasks import send_pictures_to_card_app
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -61,15 +67,18 @@ def run(request=None):
         logger.info(f"[DigIT Ticket] {ticket.nom}, {ticket.prenom}")
         logger.info(f"[DigIT Ticket status] {status}")
 
-        if status in ["DONE", "DONE_WITH_WARNINGS"]:
+        person = Person.objects.get(global_id=ticket.matricule)
+        noma = person.personmergeproposal.registration_id_sent_to_digit
+
+        if status in ["DONE", "DONE_WITH_WARNINGS"] and noma:
             digit_matricule = message_bus_instance.invoke(
                 command=RecupererMatriculeDigitQuery(
-                    noma=ticket.noma,
+                    noma=noma,
                 )
             )
             logger.info(f"[DigIT Ticket noma - matricule] NOMA: {ticket.noma} - MATR: {digit_matricule}")
 
-            if digit_matricule == ticket.matricule:
+            if Person.objects.filter(global_id=digit_matricule).exists():
                 message_bus_instance.invoke(
                     command=FusionnerCandidatAvecPersonneExistanteCommand(
                         candidate_global_id=digit_matricule,
@@ -85,8 +94,20 @@ def run(request=None):
                 )
                 logger.info(f"[DigIT Ticket edit candidate global id]")
 
+            logger.info("[DigIT Signaletique injection into EPC]")
+            demande = BaseAdmission.objects.filter(
+                submitted_at__isnull=False,
+                candidate__global_id=digit_matricule,
+            ).order_by('submitted_at').first()
+            InjectionEPCSignaletique().injecter(admission=demande)
             send_pictures_to_card_app.run.delay(global_id=digit_matricule)
+            logger.info(f"[DigIT Ticket edit candidate global id]")
 
     # Handle response when task is ran as a cmd from admin panel
     if request:
         return redirect(request.META.get('HTTP_REFERER'))
+
+
+@override_switch('fusion-digit', active=True)
+def force_run(request=None):
+    return run(request=request)

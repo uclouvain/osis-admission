@@ -46,6 +46,7 @@ class IListerDemandesService(interface.DomainService):
         sigles_formations: Optional[List] = None,
         inscription_requise: Optional[bool] = None,
         paye: Optional[bool] = None,
+        marque_d_interet: Optional[bool] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,

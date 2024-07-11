@@ -23,22 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import ABCMeta
 from typing import List, Optional
 
-from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
-from osis_common.ddd import interface
 
 
 class IDigitRepository:
     @classmethod
-    def submit_person_ticket(cls, global_id: str, noma: str):
+    def submit_person_ticket(cls, global_id: str, noma: str, extra_ticket_data: dict = None):
         raise NotImplementedError
 
     @classmethod
-    def validate_person_ticket(cls, global_id: str):
+    def validate_person_ticket(cls, global_id: str, extra_ticket_data: dict = None):
         raise NotImplementedError
 
     @classmethod
@@ -63,4 +60,12 @@ class IDigitRepository:
 
     @classmethod
     def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
+        raise NotImplementedError
+
+    @classmethod
+    def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
+        raise NotImplementedError
+
+    @classmethod
+    def has_pending_digit_creation_ticket(cls, global_id: str) -> bool:
         raise NotImplementedError
