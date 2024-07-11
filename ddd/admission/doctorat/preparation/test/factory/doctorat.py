@@ -73,6 +73,7 @@ class _DoctoratFactory(factory.Factory):
     )
     intitule = factory.Faker('sentence')
     sigle = factory.Faker('word')
+    type = TrainingType.PHD
 
 
 class _DoctoratDTOFactory(factory.Factory):

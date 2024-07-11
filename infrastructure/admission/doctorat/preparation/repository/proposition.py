@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 )
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
 )
@@ -101,6 +102,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         type_admission=ChoixTypeAdmission[admission.type],
         formation_id=FormationIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
         annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+        type_demande=TypeDemande[admission.type_demande],
         pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
         matricule_candidat=admission.candidate.global_id,
         reference=admission.reference,
@@ -204,6 +206,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'determined_academic_year': (
                     entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
                 ),
+                'type_demande': entity.type_demande.name,
                 'determined_pool': entity.pot_calcule and entity.pot_calcule.name,
                 'financing_type': entity.financement.type and entity.financement.type.name or '',
                 'financing_work_contract': entity.financement.type_contrat_travail,
@@ -408,6 +411,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 campus_inscription=admission.doctorate.enrollment_campus.name,
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+            type_demande=admission.type_demande,
             pot_calcule=admission.determined_pool or '',
             date_fin_pot=admission.pool_end_date,  # from annotation
             matricule_candidat=admission.candidate.global_id,

@@ -33,7 +33,7 @@ from admission.auth.predicates.common import (
     is_part_of_education_group,
     is_debug,
 )
-from admission.auth.predicates import general, continuing
+from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -106,32 +106,33 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
             'admission.view_documents_management': is_part_of_education_group
-            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.not_cancelled)),
+            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted),
             'admission.edit_documents': is_part_of_education_group
-            & ((general.is_general & general.is_submitted) | (continuing.is_continuing & continuing.not_cancelled)),
+            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted),
             'admission.request_documents': is_part_of_education_group
-            & (
-                (general.is_general & general.in_fac_status)
-                | (continuing.is_continuing & continuing.can_request_documents)
-            ),
+            & (general.in_fac_status | continuing.can_request_documents | doctorate.in_fac_status),
             'admission.cancel_document_request': is_part_of_education_group
             & (
-                (general.is_general & general.in_fac_document_request_status)
-                | (continuing.is_continuing & continuing.in_document_request_status)
+                general.in_fac_document_request_status
+                | continuing.in_document_request_status
+                | doctorate.in_fac_document_request_status
             ),
             'admission.generate_in_progress_analysis_folder': is_part_of_education_group
             & continuing.is_continuing
             & continuing.in_progress,
-            'admission.view_checklist': is_part_of_education_group & (general.is_submitted | continuing.is_submitted),
+            'admission.view_checklist': is_part_of_education_group
+            & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.change_checklist': is_part_of_education_group
             & continuing.is_continuing
             & continuing.is_submitted,
-            'admission.checklist_change_faculty_decision': is_part_of_education_group & general.in_fac_status,
+            'admission.checklist_change_faculty_decision': is_part_of_education_group
+            & (general.in_fac_status | doctorate.in_fac_status),
             'admission.checklist_faculty_decision_transfer_to_sic_with_decision': is_part_of_education_group
-            & general.in_fac_status,
+            & (general.in_fac_status | doctorate.in_fac_status),
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_part_of_education_group
-            & general.in_fac_status,
-            'admission.checklist_select_access_title': is_part_of_education_group & general.in_fac_status,
+            & (general.in_fac_status | doctorate.in_fac_status),
+            'admission.checklist_select_access_title': is_part_of_education_group
+            & (general.in_fac_status | doctorate.in_fac_status),
             'admission.checklist_change_fac_comment': is_part_of_education_group,
             'admission.checklist_financability_dispensation_fac': is_part_of_education_group,
             'admission.continuing_checklist_change_fac_comment': is_part_of_education_group,

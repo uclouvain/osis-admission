@@ -59,6 +59,7 @@ class ListerDemandesService(IListerDemandesService):
         sigles_formations: Optional[List] = None,
         inscription_requise: Optional[bool] = None,
         paye: Optional[bool] = None,
+        marque_d_interet: Optional[bool] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
@@ -116,6 +117,9 @@ class ListerDemandesService(IListerDemandesService):
 
         if paye is not None:
             qs = qs.filter(in_payement_order=paye)
+
+        if marque_d_interet:
+            qs = qs.filter(interested_mark=marque_d_interet)
 
         if facultes:
             related_entities = get_entities_with_descendants_ids(facultes)
