@@ -37,10 +37,6 @@ __all__ = [
     "DiscardMergeAccountView",
 ]
 
-from django.utils.decorators import method_decorator
-
-from django.views.decorators.csrf import csrf_exempt
-
 from django.views.generic import FormView
 from django.views.generic.edit import ProcessFormView
 
@@ -59,7 +55,6 @@ from osis_role.contrib.views import PermissionRequiredMixin
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
 
     urlpatterns = {'request-digit-person-creation': 'request-digit-person-creation/<uuid:uuid>'}
@@ -102,7 +97,6 @@ class RequestDigitAccountCreationView(ProcessFormView, PermissionRequiredMixin):
         )
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class SearchDigitAccountView(FormView, PermissionRequiredMixin):
 
     name = "search-account"

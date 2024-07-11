@@ -36,7 +36,6 @@ from django.db import models
 from django.shortcuts import resolve_url
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from django_json_widget.widgets import JSONEditorWidget
@@ -94,7 +93,6 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeProposal
 from base.models.student import Student
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
@@ -830,7 +828,7 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
 
 
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
-    list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit', 'send_to_digit')
+    list_display = ('person', 'global_id', 'view_on_portal')
     actions = ['send_selected_to_digit']
 
     def __init__(self, model, admin_site):
@@ -853,46 +851,11 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
         url = f"{settings.OSIS_PORTAL_URL}admin/auth/user/?q={obj.person.global_id}"
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Search on portal")}</a>')
 
-    @admin.display(description=_('Retrieve from DigIT'))
-    def retrieve_from_digit(self, obj):
-        admission = BaseAdmission.objects.filter(candidate=obj.person).first()
-        if admission:
-            url = reverse(viewname='admission:services:digit:search-account', kwargs={'uuid': admission.uuid})
-            return mark_safe(
-                f'<a class="button" '
-                f'onclick="fetch(\'{url}\', {{ method: \'POST\' }}).then('
-                f'response => {{alert(\'Successfully retrieved data from digit for '
-                f'{obj.person.last_name.upper()}, {obj.person.first_name.capitalize()}:'
-                f' saved in Person merge proposals\')}})"'
-                f'>{_("Retrieve from DigIT")}</a>'
-            )
-        else:
-            return mark_safe(f'<button class="button" disabled>{_("Retrieve from DigIT")}</button>')
-
-    @admin.display(description=_('Send to DigIT'))
-    def send_to_digit(self, obj):
-        person = obj.person
-        admission = BaseAdmission.objects.filter(candidate=person).first()
-        has_person_merge_proposal = PersonMergeProposal.objects.filter(original_person=person).exists()
-        if admission and has_person_merge_proposal:
-            url = reverse(
-                viewname='admission:services:digit:request-digit-person-creation', kwargs={'uuid': admission.uuid}
-            )
-            return mark_safe(
-                f'<a class="button" '
-                f'onclick="fetch(\'{url}\', {{ method: \'POST\' }}).then('
-                f'response => {{alert(\'Successfully sent data to digit for '
-                f'{person.last_name.upper()}, {person.first_name.capitalize()}:'
-                f' saved in Person ticket creations\')}})"'
-                f'>{_("Send to DigIT")}</a>'
-            )
-        else:
-            return mark_safe(f'<button class="button" disabled>{_("Send to DigIT")}</button>')
-
     @admin.action(description=_('Send selected candidate to digit'))
     def send_selected_to_digit(self, request, queryset):
         global_ids = queryset.values_list('person__global_id', flat=True)
         bulk_create_digit_persons_tickets.run(request=request, global_ids=global_ids)
+
 
 class TypeField(forms.CheckboxSelectMultiple):
     def format_value(self, value):
