@@ -146,11 +146,11 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    thesis_language = models.CharField(
-        max_length=255,
-        choices=ChoixLangueRedactionThese.choices(),
+    thesis_language = models.ForeignKey(
+        'reference.Language',
+        on_delete=models.PROTECT,
         verbose_name=_("Thesis language"),
-        default=ChoixLangueRedactionThese.UNDECIDED.name,
+        null=True,
         blank=True,
     )
     thesis_institute = models.ForeignKey(

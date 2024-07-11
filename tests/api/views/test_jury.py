@@ -36,6 +36,7 @@ from admission.tests.factories.supervision import CaMemberFactory, PromoterFacto
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.language import FrenchLanguageFactory
 
 
 class JuryApiTestCase(APITestCase):
@@ -51,7 +52,7 @@ class JuryApiTestCase(APITestCase):
             'titre_propose': 'titre api',
             'formule_defense': 'DEUX_TEMPS',
             'date_indicative': '2023-12-25',
-            'langue_redaction': 'FRENCH',
+            'langue_redaction': FrenchLanguageFactory().pk,
             'langue_soutenance': 'FRENCH',
             'commentaire': 'commentaire',
         }
