@@ -168,7 +168,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
         digit_results = person_merge_proposal.similarity_result
         for result in digit_results:
             # ne peut pas refuser fusion si NISS identiques
-            if result['person']['nationalRegister'] and candidate['national_number'] and (
+            if result['person']['nationalRegister'] and candidate.national_number and (
                     result['person']['nationalRegister'] == cls._only_digits(candidate.national_number)
             ):
                 return False
@@ -233,8 +233,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
                 person_merge_proposal.status = PersonMergeStatus.MERGED.name
                 person_merge_proposal.save()
 
-                # delete both unused person models after merge
-                Person.objects.filter(id=person_merge_proposal.original_person.id).delete()
+                # delete person_to_merge after merge
                 person_to_merge.delete()
 
     @classmethod

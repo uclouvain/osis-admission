@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-28 11:14+0200\n"
+"POT-Creation-Date: 2024-07-09 12:23+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -728,6 +728,12 @@ msgstr "Un courrier d'autorisation a été envoyé au candidat."
 
 msgid "An education type"
 msgstr "Un type de formation"
+
+msgid "An error occured during digit ticket creation"
+msgstr "Une erreur est survenue lors de la création de ticket DigIT"
+
+msgid "An error occured during digit ticket creation validation"
+msgstr "Une erreur est survenue lors de la validation du ticket de création dans DigIT"
 
 msgid "An external member must have a country."
 msgstr "Un membre externe doit avoir un pays."
@@ -1517,7 +1523,9 @@ msgstr ""
 msgid ""
 "Cannot discard merge because at least one known person has the same national "
 "number"
-msgstr "Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le même numéro de registre national"
+msgstr ""
+"Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le "
+"même numéro de registre national"
 
 msgid "Canvas"
 msgstr "Canvas"
@@ -2525,7 +2533,7 @@ msgid "Dissertation title"
 msgstr "Titre du mémoire"
 
 msgid "Do not reorder values, and keep the same count"
-msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
+msgstr "Ne pas réordonner les valeurs, et garder le même nombre"
 
 #, python-format
 msgid ""
@@ -3439,6 +3447,9 @@ msgstr "Financement"
 
 msgid "Funding type"
 msgstr "Type de financement"
+
+msgid "Fusion digit flag is inactive"
+msgstr "Flag fusion digit inactif"
 
 msgid "Fusion proposal"
 msgstr "Proposition de fusion"
@@ -6677,8 +6688,14 @@ msgstr "Envoyer un e-mail à la Faculté"
 msgid "Send an information email"
 msgstr "Envoyer un e-mail d'information"
 
+msgid "Send selected candidate to digit"
+msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
+
 msgid "Send the message"
 msgstr "Envoyer le message"
+
+msgid "Send to DigIT"
+msgstr "Envoyer à DigIT"
 
 msgid "Send to SIC"
 msgstr "Envoyer en SIC"
@@ -6892,9 +6909,6 @@ msgstr "État d’avancement de la formation doctorale"
 msgid "Status:"
 msgstr "État :"
 
-msgid "Statut"
-msgstr "Statut"
-
 msgid "Street"
 msgstr "Rue"
 
@@ -7047,6 +7061,9 @@ msgstr "Agrégation et CAPAES"
 msgctxt "admission"
 msgid "Telephone (mobile)"
 msgstr "Téléphone (GSM/mobile)"
+
+msgid "Template title"
+msgstr "Intitulé du template"
 
 msgid ""
 "Temporary protection is granted for a period of one year, which can be "
@@ -8106,25 +8123,6 @@ msgstr "UE"
 msgid "UUID"
 msgstr "UUID"
 
-msgid ""
-"Unable to validate the admission because an error occured while searching "
-"for existing person in DIGIT"
-msgstr ""
-"Impossible de valider le dossier d'admission car une erreur s'est produite "
-"lors de la recherche de compte existant dans DIGIT"
-
-msgid ""
-"Unable to validate the admission because of a potential person duplicates "
-"exists."
-msgstr ""
-"Impossible de valider le dossier d'admission car il existe au moins un "
-"doublon potentiel de personne."
-
-msgid "Unable to validate the admission because of an invalid DIGIT ticket."
-msgstr ""
-"Impossible de valider le dossier d'admission car il existe des erreurs "
-"rendant invalide le ticket envoyé à DIGIT."
-
 msgid "Unavailable"
 msgstr "Non disponible"
 
@@ -8893,6 +8891,39 @@ msgstr "Votre adresse e-mail professionnelle"
 msgid "Your training does not cover the useful prerequisites in mathematics."
 msgstr "Votre formation ne couvre pas les prérequis utiles en mathématiques."
 
+#, python-format
+msgid "[%(matricule_candidat)s] Account creation period calendar is closed"
+msgstr "[%(matricule_candidat)s] Période de création de compte fermée"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has already a pending creation ticket"
+msgstr ""
+"[%(matricule_candidat)s] Le candidat a déjà un ticket de création en attente"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has pending merge proposal: status "
+"%(merge_status)s"
+msgstr ""
+"[%(matricule_candidat)s] Le candidat a une proposition de fusion en attente: "
+"statut %(merge_status)s"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate matricule is not a temporary account "
+"matricule"
+msgstr ""
+"[%(matricule_candidat)s] Le matricule du candidat n'est pas lié à un compte "
+"temporaire"
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Type is admission and application is not accepted"
+msgstr ""
+"[%(matricule_candidat)s] Le type de demande est admission et n'est pas "
+"autorisée à s'inscrire"
+
 msgid "academic year"
 msgstr "année académique"
 
@@ -9013,6 +9044,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes"
+msgstr "oui"
 
 msgid "yes,no"
 msgstr "oui,non"

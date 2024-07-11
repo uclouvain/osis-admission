@@ -24,12 +24,12 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.commands import RechercherCompteExistantQuery
+from admission.ddd.admission.commands import RechercherCompteExistantCommand
 from admission.ddd.admission.domain.service.i_digit import IDigitService
 
 
 def rechercher_compte_existant(
-    cmd: 'RechercherCompteExistantQuery',
+    cmd: 'RechercherCompteExistantCommand',
     digit_service: 'IDigitService',
 ):
     return digit_service.rechercher_compte_existant(

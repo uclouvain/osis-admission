@@ -23,8 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from functools import partial
+
+import waffle
+
 from admission.ddd.admission.commands import (
-    RechercherCompteExistantQuery,
+    RechercherCompteExistantCommand,
     InitialiserPropositionFusionPersonneCommand,
     DefairePropositionFusionCommand,
     RechercherParcoursAnterieurQuery,
@@ -106,6 +110,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.domain.service.client_comptabilite_translator import \
+    ClientComptabiliteTranslator
 from admission.infrastructure.admission.domain.service.digit import DigitService
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
@@ -151,8 +157,18 @@ from infrastructure.financabilite.domain.service.financabilite import Financabil
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
-from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
+from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
+
+
+def _call_if_digit_switch_active(callable_fn):
+    if waffle.switch_is_active('fusion-digit'):
+        return callable_fn()
+    else:
+        import logging
+        from django.conf import settings
+        logger = logging.getLogger(settings.DEFAULT_LOGGER)
+        logger.info(f'Fusion digit switch not active - unable to call {callable_fn.func.__name__}')
 
 
 COMMAND_HANDLERS = {
@@ -205,6 +221,7 @@ COMMAND_HANDLERS = {
         maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
@@ -521,9 +538,8 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
         )
     ),
-    RechercherCompteExistantQuery: lambda msg_bus, cmd: rechercher_compte_existant(
-        cmd,
-        digit_service=DigitService(),
+    RechercherCompteExistantCommand: lambda msg_bus, cmd: _call_if_digit_switch_active(
+        partial(rechercher_compte_existant, cmd, digit_service=DigitService())
     ),
     InitialiserPropositionFusionPersonneCommand: lambda msg_bus, cmd: initialiser_proposition_fusion_personne(
         cmd,
@@ -638,7 +654,8 @@ COMMAND_HANDLERS = {
     ),
     ApprouverAdmissionParSicCommand: (
         lambda msg_bus, cmd: approuver_admission_par_sic(
-            cmd,
+            message_bus=msg_bus,
+            cmd=cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
@@ -650,13 +667,12 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
-            digit=DigitRepository(),
-            compteur_noma=CompteurAnnuelPourNomaRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
         lambda msg_bus, cmd: approuver_inscription_par_sic(
-            cmd,
+            message_bus=msg_bus,
+            cmd=cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
@@ -666,8 +682,6 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
-            digit=DigitRepository(),
-            compteur_noma=CompteurAnnuelPourNomaRepository(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -696,10 +710,17 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
     ),
-    SoumettreTicketPersonneCommand: lambda msg_bus, cmd: soumettre_ticket_creation_personne(
-        cmd,
-        digit_repository=DigitRepository(),
-        compteur_noma=CompteurAnnuelPourNomaRepository(),
+    SoumettreTicketPersonneCommand: lambda msg_bus, cmd: _call_if_digit_switch_active(
+        partial(
+            soumettre_ticket_creation_personne,
+            cmd,
+            digit_repository=DigitRepository(),
+            digit_service=DigitService(),
+            compteur_noma=CompteurAnnuelPourNomaRepository(),
+            proposition_repository=PropositionRepository(),
+            formation_translator=FormationGeneraleTranslator(),
+            client_comptabilite_translator=ClientComptabiliteTranslator(),
+        )
     ),
     GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(
         cmd,
@@ -715,10 +736,14 @@ COMMAND_HANDLERS = {
             digit_repository=DigitRepository(),
         )
     ),
-    ValiderTicketPersonneCommand: (
-        lambda msg_bus, cmd: valider_ticket_creation_personne(
+    ValiderTicketPersonneCommand: lambda msg_bus, cmd: _call_if_digit_switch_active(
+        partial(
+            valider_ticket_creation_personne,
             cmd,
             digit_repository=DigitRepository(),
+            proposition_repository=PropositionRepository(),
+            formation_translator=FormationGeneraleTranslator(),
+            client_comptabilite_translator=ClientComptabiliteTranslator(),
         )
     ),
     FusionnerCandidatAvecPersonneExistanteCommand: (

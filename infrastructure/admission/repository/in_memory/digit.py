@@ -61,3 +61,11 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
     @classmethod
     def retrieve_list_error_merge_proposals(cls) -> List[PropositionFusionPersonneDTO]:
         raise []
+
+    @classmethod
+    def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
+        return None
+
+    @classmethod
+    def has_digit_creation_ticket(cls, global_id: str) -> bool:
+        return False

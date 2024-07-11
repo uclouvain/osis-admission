@@ -324,7 +324,6 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             key: str(base_fields[key].label) if key in base_fields else key for key in formatted_filters
         }
 
-        mapping_filter_key_name['etats'] = _('Status')
         mapping_filter_key_name['facultes'] = _('Faculty')
         mapping_filter_key_name['matricule_candidat'] = _('Last name / First name / Email / NOMA')
 
@@ -350,8 +349,13 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             mapping_filter_key_value['edition'] = [ChoixEdition.get_value(status_key) for status_key in edition]
 
         # Format boolean values
+        # > "Yes" / "No" / ""
         for filter_name in ['inscription_requise', 'paye']:
             formatted_filters[filter_name] = yesno(formatted_filters[filter_name], _('yes,no,'))
+
+        # > "Yes" / ""
+        for filter_name in ['marque_d_interet']:
+            formatted_filters[filter_name] = _('yes') if formatted_filters[filter_name] else ''
 
         trainings_types = formatted_filters.get('types_formation')
         if trainings_types:

@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
+from admission.auth.predicates import not_in_doctorate_statuses_predicate_message
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -35,6 +36,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
     ChoixTypeAdmission,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
@@ -159,3 +166,74 @@ def is_doctorate(self, user: User, obj: DoctorateAdmission):
     from admission.constants import CONTEXT_DOCTORATE
 
     return obj.get_admission_context() == CONTEXT_DOCTORATE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
+def is_submitted(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
+def not_cancelled(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status != ChoixStatutPropositionDoctorale.ANNULEE.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC))
+def in_fac_status(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS)
+)
+def in_fac_status_extended(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS
+
+
+@predicate(bind=True)
+@predicate_failed_msg(not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC))
+def in_sic_status(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_doctorate_statuses_predicate_message({ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name})
+)
+def in_sic_document_request_status(self, user: User, obj: DoctorateAdmission):
+    return (
+        isinstance(obj, DoctorateAdmission) and obj.status == ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_doctorate_statuses_predicate_message({ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name})
+)
+def in_fac_document_request_status(self, user: User, obj: DoctorateAdmission):
+    return (
+        isinstance(obj, DoctorateAdmission) and obj.status == ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS)
+)
+def in_sic_status_extended(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION)
+)
+def can_send_to_fac_faculty_decision(self, user: User, obj: DoctorateAdmission):
+    return (
+        isinstance(obj, DoctorateAdmission)
+        and obj.status in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION
+    )
