@@ -51,6 +51,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
@@ -239,6 +240,7 @@ class PropositionInMemoryRepository(
                 campus_inscription=doctorat.campus_inscription,
             ),
             annee_calculee=proposition.annee_calculee,
+            type_demande=TypeDemande.ADMISSION.name,
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
             date_fin_pot=None,
             matricule_candidat=proposition.matricule_candidat,

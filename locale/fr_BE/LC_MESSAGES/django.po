@@ -2535,7 +2535,7 @@ msgid "Dissertation title"
 msgstr "Titre du mémoire"
 
 msgid "Do not reorder values, and keep the same count"
-msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
+msgstr "Ne pas réordonner les valeurs, et garder le même nombre"
 
 #, python-format
 msgid ""
@@ -6908,9 +6908,6 @@ msgstr "État d’avancement de la formation doctorale"
 msgid "Status:"
 msgstr "État :"
 
-msgid "Statut"
-msgstr "Statut"
-
 msgid "Street"
 msgstr "Rue"
 
@@ -7063,6 +7060,9 @@ msgstr "Agrégation et CAPAES"
 msgctxt "admission"
 msgid "Telephone (mobile)"
 msgstr "Téléphone (GSM/mobile)"
+
+msgid "Template title"
+msgstr "Intitulé du template"
 
 msgid ""
 "Temporary protection is granted for a period of one year, which can be "
@@ -9043,6 +9043,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes"
+msgstr "oui"
 
 msgid "yes,no"
 msgstr "oui,non"

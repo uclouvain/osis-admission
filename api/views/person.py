@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 from functools import partial
 
 from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
@@ -35,7 +35,9 @@ from admission.api.views.mixins import (
     PersonRelatedMixin,
     GeneralEducationPersonRelatedMixin,
     ContinuingEducationPersonRelatedMixin,
+    PersonRelatedSchema,
 )
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from osis_role.contrib.views import APIPermissionRequiredMixin
 from reference.services.belgian_niss_validator import BelgianNISSException
@@ -95,3 +97,29 @@ class ContinuingPersonView(ContinuingEducationPersonRelatedMixin, BasePersonView
         'GET': 'admission.view_continuingeducationadmission_person',
         'PUT': 'admission.change_continuingeducationadmission_person',
     }
+
+
+class IdentificationDTOSchema(PersonRelatedSchema):
+    operation_id_base = '_identification_dto'
+    serializer_mapping = {
+        'GET': (
+            None,
+            serializers.IdentificationDTOSerializer,
+        ),
+    }
+
+
+class IdentificationDTOView(APIPermissionRequiredMixin, RetrieveAPIView):
+    name = "person_identification"
+    permission_classes = [
+        DoesNotHaveSubmittedPropositions,
+    ]
+    serializer_class = serializers.IdentificationDTOSerializer
+    schema = IdentificationDTOSchema()
+    filter_backends = []
+    pagination_class = None
+
+    def get_object(self):
+        return ProfilCandidatTranslator.get_identification(
+            matricule=self.request.user.person.global_id,
+        )

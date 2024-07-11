@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -91,7 +91,18 @@ def soumettre_proposition(
             Onglets.ETUDES_SECONDAIRES.name,
         ],
     )
+    formation = doctorat_translator.get(proposition.formation_id.sigle, proposition.formation_id.annee)
     formation_id = FormationIdentityBuilder.build(sigle=proposition.formation_id.sigle, annee=cmd.annee)
+    titres = titres_acces.recuperer_titres_access(
+        proposition.matricule_candidat,
+        formation.type,
+    )
+    type_demande = VerifierProposition.determiner_type_demande(
+        proposition,
+        titres,
+        calendrier_inscription,
+        profil_candidat_translator,
+    )
 
     # WHEN
     VerifierProposition().verifier(
@@ -127,7 +138,12 @@ def soumettre_proposition(
     )
 
     # THEN
-    proposition.finaliser(formation_id, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
+    proposition.finaliser(
+        formation_id=formation_id,
+        type_demande=type_demande,
+        pool=AcademicCalendarTypes[cmd.pool],
+        elements_confirmation=cmd.elements_confirmation,
+    )
     proposition_repository.save(proposition)
     demande_repository.save(demande)
     historique.historiser_soumission(proposition)

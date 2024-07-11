@@ -203,6 +203,7 @@ class InjectionEPCSignaletique:
             )
             raise InjectionSignaletiqueVersEPCException(reference=admission_reference) from e
 
+
 class InjectionSignaletiqueVersEPCException(Exception):
     def __init__(self, reference: str, **kwargs):
         self.message = (

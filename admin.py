@@ -234,6 +234,17 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
     ]
     actions = ['trigger_payment_hook']
 
+    readonly_fields = AdmissionAdminMixin.readonly_fields + [
+        'financability_computed_rule',
+        'financability_computed_rule_situation',
+        'financability_computed_rule_on',
+        'financability_rule_established_by',
+        'financability_dispensation_first_notification_on',
+        'financability_dispensation_first_notification_by',
+        'financability_dispensation_last_notification_on',
+        'financability_dispensation_last_notification_by',
+    ]
+
     @staticmethod
     def view_on_site(obj):
         return resolve_url(f'admission:general-education', uuid=obj.uuid)
