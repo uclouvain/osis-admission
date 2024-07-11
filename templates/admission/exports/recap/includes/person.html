@@ -78,10 +78,13 @@
 
     <div class="proposition-fusion-data" style="flex:1;">
 
+    {% has_perm "admission.merge_candidate_with_known_person" permission_object as peut_fusionner %}
+
         <div class="alert alert-warning">
             <form id="undo-merge-proposal" method="POST" action="{% url 'admission:services:digit:undo-merge' uuid=uuid %}">
                 {% csrf_token %}
-                <button id="undo-merge-proposal-btn" type="submit" class="btn btn-xs btn-warning pull-right">
+                <button id="undo-merge-proposal-btn" type="submit" class="btn btn-xs btn-warning pull-right"
+                {% if not peut_fusionner %} disabled {% endif %}>
                     {% trans 'Undo' %}
                 </button>
                 Proposition de fusion avec personne déjà connue

@@ -25,8 +25,10 @@
 # ##############################################################################
 
 from django.views.generic import TemplateView
+
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.templatetags.admission import format_matricule
+from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal
 from base.utils.htmx import HtmxPermissionRequiredMixin
@@ -114,3 +116,6 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
             exp.uuid for exp in
             (self.known_experience.experiences_non_academiques + self.known_experience.experiences_academiques)
         ]
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['admission_uuid'])
