@@ -35,6 +35,7 @@ from django.utils.translation import gettext_lazy
 from rest_framework import status
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
+from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
@@ -155,6 +156,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # The admission has been injected
         admission_injection = AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
         )
 
         response = self.client.get(self.form_url)
@@ -859,6 +861,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # The admission has been injected
         admission_injection = AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
         )
 
         response = self.client.get(self.form_url)
