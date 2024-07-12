@@ -33,6 +33,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
 )
+from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 UUID = str
@@ -458,3 +459,25 @@ class ReclamerDocumentsAuCandidatCommand(interface.CommandRequest):
     corps_message: str
     auteur: str
     type_gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ListerDemandesQuery(SortedQueryRequest):
+    annee_academique: Optional[int] = None
+    numero: Optional[int] = None
+    matricule_candidat: Optional[str] = ''
+    nationalite: Optional[str] = ''
+    etats: Optional[List[str]] = None
+    type: Optional[str] = ''
+    cdds: Optional[List[str]] = None
+    commission_proximite: Optional[str] = ''
+    sigles_formations: Optional[List[str]] = None
+    matricule_promoteur: Optional[str] = ''
+    type_financement: Optional[str] = ''
+    bourse_recherche: Optional[str] = ''
+    cotutelle: Optional[bool] = None
+    date_soumission_debut: Optional[datetime.datetime] = None
+    date_soumission_fin: Optional[datetime.datetime] = None
+    mode_filtres_etats_checklist: Optional[str] = ''
+    filtres_etats_checklist: Optional[Dict[str, List[str]]] = None
+    demandeur: Optional[str] = ''

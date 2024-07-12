@@ -23,19 +23,52 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_demandes_service import lister_demandes
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .lister_propositions_supervisees_service import lister_propositions_supervisees
-from .rechercher_doctorats_service import rechercher_doctorats
-from .recuperer_comptabilite_service import recuperer_comptabilite
-from .recuperer_cotutelle_service import recuperer_cotutelle
-from .recuperer_documents_proposition_service import recuperer_documents_proposition
-from .recuperer_documents_reclames_proposition_service import recuperer_documents_reclames_proposition
-from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
-from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
-from .recuperer_proposition_service import recuperer_proposition
-from .recuperer_resume_proposition_service import recuperer_resume_proposition
-from .verifier_curriculum_service import verifier_curriculum
-from .verifier_projet_service import verifier_projet
-from .verifier_proposition_service import verifier_proposition
+import datetime
+from typing import Optional
+
+import attr
+
+from osis_common.ddd import interface
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DemandeRechercheDTO(interface.DTO):
+    uuid: str
+    numero_demande: str
+    etat_demande: str
+
+    nom_candidat: str
+    prenom_candidat: str
+    sigle_formation: str
+    code_formation: str
+    intitule_formation: str
+
+    decision_fac: str
+    decision_sic: str
+
+    date_confirmation: Optional[datetime.datetime]
+
+    derniere_modification_le: datetime.datetime
+    type_admission: str
+
+    cotutelle: Optional[bool]
+
+    code_pays_nationalite_candidat: str = ''
+    nom_pays_nationalite_candidat: str = ''
+
+    code_bourse: str = ''
+
+    prenom_auteur_derniere_modification: str = ''
+    nom_auteur_derniere_modification: str = ''
+
+    @property
+    def formation(self) -> str:
+        return f'{self.sigle_formation} - {self.intitule_formation}'
+
+    @property
+    def candidat(self) -> str:
+        return f'{self.nom_candidat}, {self.prenom_candidat}'
+
+    @property
+    def derniere_modification_par(self) -> str:
+        return f'{self.nom_auteur_derniere_modification}, {self.prenom_auteur_derniere_modification[:1]}'

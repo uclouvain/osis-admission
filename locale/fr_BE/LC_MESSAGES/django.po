@@ -630,9 +630,6 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
-msgid "Admission date"
-msgstr "Date admission"
-
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -679,6 +676,10 @@ msgstr "Accès aux professions réglementées"
 
 msgid "Admission type"
 msgstr "Type de l'admission"
+
+msgctxt "doctorate-filter"
+msgid "Admission type"
+msgstr "Type d'admission"
 
 msgid "Admissions"
 msgstr "Admissions"
@@ -1257,12 +1258,10 @@ msgstr "Commentaire du gestionnaire CDD"
 msgid "CDD opinion"
 msgstr "Avis de la CDD"
 
-msgid "CDD status"
-msgstr "Statut CDD"
-
 msgid "CDD:"
 msgstr "CDD :"
 
+msgctxt "admission"
 msgid "CDDs"
 msgstr "CDDs"
 
@@ -2194,6 +2193,10 @@ msgctxt "admission"
 msgid "Course units"
 msgstr "Cours"
 
+msgctxt "admission"
+msgid "Courses"
+msgstr "Formations"
+
 msgid "Courses taken"
 msgstr "Cours suivis"
 
@@ -2589,6 +2592,9 @@ msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 msgid "Doctor"
 msgstr "Docteur"
 
+msgid "Doctoral commissions"
+msgstr "Commissions doctorales"
+
 msgid "Doctoral student:"
 msgstr "Doctorant :"
 
@@ -2672,9 +2678,6 @@ msgstr "Fait à"
 msgid "Dossier"
 msgstr "Dossier"
 
-msgid "Dossier confirmation"
-msgstr "Confirmation dossier"
-
 msgid "Dossier not found."
 msgstr "Dossier non trouvé."
 
@@ -2686,6 +2689,13 @@ msgstr "Numéro de dossier :"
 
 msgid "Dossier status"
 msgstr "Statut dossier"
+
+msgctxt "doctorate-header-list"
+msgid "Dossier status"
+msgstr "État de la demande"
+
+msgid "Dossier submission date"
+msgstr "Date de soumission du dossier"
 
 msgid "Double degree:"
 msgstr "Bourse double diplomation:"
@@ -3122,6 +3132,9 @@ msgstr "Formation FWB équivalente"
 
 msgid "Fac approval"
 msgstr "Accord fac"
+
+msgid "Fac decision"
+msgstr "Décision fac."
 
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
@@ -4327,6 +4340,9 @@ msgstr "Dernière modif. (auteur)"
 
 msgid "Last name"
 msgstr "Nom"
+
+msgid "Last name / First name"
+msgstr "Nom / Prénom"
 
 msgid "Last name / First name / Email"
 msgstr "Nom / Prénom / E-mail"
@@ -5885,8 +5901,8 @@ msgstr "Code postal"
 msgid "Poster"
 msgstr "Poster"
 
-msgid "Pre-admission date"
-msgstr "Date de pré-admission"
+msgid "Pre-admission"
+msgstr "Pré-admission"
 
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
@@ -6583,8 +6599,8 @@ msgstr "Autorisation SIC"
 msgid "SIC comment for the faculty"
 msgstr "Commentaire de SIC pour la Faculté"
 
-msgid "SIC status"
-msgstr "Statut SIC"
+msgid "SIC decision"
+msgstr "Décision SIC"
 
 msgid "SIC:"
 msgstr "SIC :"
@@ -6630,6 +6646,10 @@ msgid "Scholarship"
 msgstr "Boursier"
 
 msgctxt "admission model"
+msgid "Scholarship"
+msgstr "Bourse"
+
+msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr "Bourse"
 
@@ -7003,6 +7023,10 @@ msgstr "Sujet"
 msgid "Submission date"
 msgstr "Date de soumission"
 
+msgctxt "doctorate-header-list"
+msgid "Submission date"
+msgstr "Date soumission"
+
 msgid "Submission date:"
 msgstr "Date de soumission :"
 
@@ -7022,8 +7046,14 @@ msgstr "Soumis pour publication"
 msgid "Submitted for publication"
 msgstr "Soumis pour publication"
 
+msgid "Submitted from"
+msgstr "Soumise à partir du"
+
 msgid "Submitted profile"
 msgstr "Profil soumis"
+
+msgid "Submitted until"
+msgstr "Soumise jusqu'au"
 
 msgid ""
 "Subsidiary protection status is granted to a foreign national who cannot be "
@@ -7057,6 +7087,10 @@ msgstr "Groupe de supervision non trouvé."
 
 msgid "Supervisor"
 msgstr "Promoteur"
+
+msgctxt "gender"
+msgid "Supervisor"
+msgstr "Promoteur·trice"
 
 msgid "Supervisor not found."
 msgstr "Promoteur non trouvé."
@@ -8454,9 +8488,6 @@ msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail"
-
-msgid "Work contract type"
-msgstr "Type de contrat de travail"
 
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
