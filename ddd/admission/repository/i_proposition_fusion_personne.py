@@ -23,12 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import ABCMeta
 from typing import List, Optional
 
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from osis_common.ddd import interface
 
 
 class IPropositionPersonneFusionRepository:
@@ -72,5 +70,10 @@ class IPropositionPersonneFusionRepository:
         raise NotImplementedError
 
     @classmethod
-    def fusionner(cls, candidate_global_id: str) -> 'PropositionFusionPersonneIdentity':
+    def fusionner(cls, candidate_global_id: str, ticket_uuid: str) -> 'PropositionFusionPersonneIdentity':
+        raise NotImplementedError
+
+
+    @classmethod
+    def verifier_eligible_fusion(cls, ticket_uuid: str):
         raise NotImplementedError
