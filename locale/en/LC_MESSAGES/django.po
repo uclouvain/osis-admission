@@ -7117,6 +7117,11 @@ msgstr ""
 msgid "The text size must be one of the following values: %(values)s."
 msgstr ""
 
+msgid ""
+"The transition to this status is not possible while the application is in "
+"quarantine."
+msgstr ""
+
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr ""

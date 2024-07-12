@@ -32,7 +32,7 @@ from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
 from django.forms.formsets import formset_factory
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import resolve_url, redirect
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
@@ -1500,6 +1500,11 @@ class SicApprovalFinalDecisionView(
     template_name = 'admission/general_education/includes/checklist/sic_decision_approval_final_form.html'
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_final_form.html'
     permission_required = 'admission.checklist_change_sic_decision'
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.admission.is_in_quarantine:
+            return HttpResponseForbidden()
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
         return self.sic_decision_approval_final_form
