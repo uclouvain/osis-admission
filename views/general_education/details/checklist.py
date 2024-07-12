@@ -2119,10 +2119,12 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
 
         context['financabilite_show_verdict_different_alert'] = (
             (
-                admission.checklist['current']['financabilite']['statut'] in {
+                admission.checklist['current']['financabilite']['statut']
+                in {
                     ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
                     ChoixStatutChecklist.GEST_REUSSITE.name,
-                } or (
+                }
+                or (
                     admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
                     and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
                 )
@@ -2845,8 +2847,9 @@ class ChecklistView(
                 context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
                     authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
                 )
-                context['authentication_forms'][experience_uuid] = SinglePastExperienceAuthenticationForm(
-                    experience_checklist_info,
+                context['authentication_forms'].setdefault(
+                    experience_uuid,
+                    SinglePastExperienceAuthenticationForm(experience_checklist_info),
                 )
                 context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
                 context['checklist_tabs'][tab_identifier] = truncatechars(current_experience.titre_formate, 50)
