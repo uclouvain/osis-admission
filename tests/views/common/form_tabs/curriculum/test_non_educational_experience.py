@@ -40,6 +40,7 @@ from admission.contrib.models import EPCInjection as AdmissionEPCInjection, Cont
 from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
+from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -196,6 +197,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         # The admission has been injected
         admission_injection = AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
         )
 
         response = self.client.get(self.general_form_url)
@@ -633,6 +635,7 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
         # The admission has been injected
         admission_injection = AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
         )
 
         valuation = AdmissionProfessionalValuatedExperiencesFactory(
