@@ -3401,9 +3401,6 @@ msgstr "Condition complémentaire d'acceptation libre"
 msgid "Free additional approval conditions"
 msgstr "Conditions complémentaires d'acceptation libres"
 
-msgid "Free additional conditions"
-msgstr "Conditions complémentaires libres"
-
 msgid "Free and requestable by FAC"
 msgstr "Libre et réclamable par FAC"
 
@@ -5392,6 +5389,9 @@ msgstr "Autre"
 msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr "Autre"
+
+msgid "Other additional conditions"
+msgstr "Autres conditions complémentaires"
 
 msgid "Other address"
 msgstr "Une autre adresse"

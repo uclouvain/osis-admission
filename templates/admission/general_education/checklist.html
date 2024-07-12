@@ -927,6 +927,17 @@
               htmxErrorsMessages.classList.add('show');
           });
 
+          // SIC & Faculty decisions
+          function toggleOtherApprovalConditions() {
+              if ($(this).val() === 'on') {
+                $(this).val('off');
+                $(this).siblings('.other-approval-conditions').addClass('hidden');
+              } else {
+                $(this).val('on');
+                $(this).siblings('.other-approval-conditions').removeClass('hidden');
+              }
+          }
+
           // Faculty decision
           const facultyDecisionContainer = $('#decision_facultaire');
 
@@ -955,6 +966,8 @@
               }
           });
 
+          facultyDecisionContainer.on('click', 'button[name="hide-other-approval-conditions"]', toggleOtherApprovalConditions);
+
           {# Access title events #}
           $('.parcours').on('formValidation', function(event) {
               {# As the list of the past experiences appears in different places, when we select an experience in one #}
@@ -973,6 +986,8 @@
 
           // SIC decision
           const sicDecisionContainer = $('#decision_sic');
+
+          sicDecisionContainer.on('click', 'button[name="hide-other-approval-conditions"]', toggleOtherApprovalConditions);
 
           sicDecisionContainer.on('change', 'input[name="sic-decision-approval-with_additional_approval_conditions"]', function(event){
               const container = $('#sic-decision-additional-approval-conditions-container');
@@ -1304,6 +1319,18 @@
 
     .approval-conditions-fields .form-group {
       margin-bottom: 0;
+    }
+    
+    button[name="hide-other-approval-conditions"] {
+      background-color: transparent;
+    }
+    
+    button[name="hide-other-approval-conditions"][value="on"] > i.fa-square-chevron-down, button[name="hide-other-approval-conditions"][value="off"] > i.fa-square-chevron-up {
+      display: none;
+    }
+
+    button[name="hide-other-approval-conditions"][value="on"] > i.fa-square-chevron-up, button[name="hide-other-approval-conditions"][value="off"] > i.fa-square-chevron-down {
+      display: initial;
     }
 
     .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {
