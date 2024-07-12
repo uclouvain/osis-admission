@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.conf import settings
+from django.http import HttpResponseForbidden
 from django.views.generic import TemplateView, FormView
 from osis_history.utilities import add_history_entry
 from osis_mail_template.utils import transform_html_to_text
@@ -206,6 +207,11 @@ class ValidationFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxP
     htmx_template_name = 'admission/continuing_education/includes/checklist/decision_validation_form.html'
     permission_required = 'admission.change_checklist_iufc'
     form_class = DecisionValidationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.admission.is_in_quarantine:
+            return HttpResponseForbidden()
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
         return self.decision_validation_form
