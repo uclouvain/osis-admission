@@ -34,4 +34,5 @@ def modifier_matricule_candidat(
     return digit_repository.modifier_matricule_candidat(
         candidate_global_id=cmd.candidate_global_id,
         digit_global_id=cmd.digit_global_id,
+        ticket_uuid=cmd.ticket_uuid,
     )

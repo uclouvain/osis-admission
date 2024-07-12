@@ -32,12 +32,14 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class StatutTicketPersonneDTO(interface.DTO):
+    uuid: str
     request_id: int
     matricule: str
     noma: str
     nom: str
     prenom: str
     statut: str
+    type_fusion: str
     errors: List[dict]
 
     def __str__(self):

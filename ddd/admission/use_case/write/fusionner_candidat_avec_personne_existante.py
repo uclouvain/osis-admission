@@ -33,4 +33,5 @@ def fusionner_candidat_avec_personne_existante(
 ):
     return proposition_fusion_personne_repository.fusionner(
         candidate_global_id=cmd.candidate_global_id,
+        ticket_uuid=cmd.ticket_uuid,
     )
