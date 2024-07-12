@@ -36,7 +36,7 @@ from django.db.models import QuerySet, Q
 from django.utils.datetime_safe import date
 
 from admission.ddd.admission.domain.validator.exceptions import ValidationTicketCreationDigitEchoueeException, \
-    CreationTicketDigitEchoueeException
+    TicketDigitATraiterAvantException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
@@ -45,7 +45,8 @@ from admission.infrastructure.admission.domain.service.digit import TEMPORARY_AC
 from admission.templatetags.admission import format_matricule
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
-from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
+from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus, \
+    PersonTicketCreationMergeType
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -77,17 +78,21 @@ class DigitRepository(IDigitRepository):
 
         logger.info(f"DIGIT creation ticket Response: {ticket_response}")
 
-        if ticket_response and ticket_response['status'] == 'CREATED':
-            PersonTicketCreation.objects.update_or_create(
-                person=candidate,
-                defaults={
-                    'request_id': ticket_response['requestId'],
-                    'status': ticket_response['status'],
-                }
-            )
+        if ticket_response and ticket_response['status'] == PersonTicketCreationStatus.CREATED.name:
+            request_id = ticket_response['requestId']
+            status = ticket_response['status']
+        else:
+            request_id = None
+            status = PersonTicketCreationStatus.ERROR.name
 
-        if ticket_response['status'] == 500:
-            raise CreationTicketDigitEchoueeException()
+        person_ticket = PersonTicketCreation.objects.create(
+            person=candidate,
+            request_id=request_id,
+            status=status,
+            errors=ticket_response if status == PersonTicketCreationStatus.ERROR.name else {},
+        )
+
+        return person_ticket.uuid
 
     @classmethod
     def validate_person_ticket(cls, global_id: str, extra_ticket_data: dict = None):
@@ -144,20 +149,18 @@ class DigitRepository(IDigitRepository):
             return None
 
     @classmethod
-    def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
+    def retrieve_person_ticket_status_from_digit(cls, ticket_uuid: str) -> Optional[str]:
         if not waffle.switch_is_active('fusion-digit'):
             return None
 
-        if PersonTicketCreation.objects.filter(person__global_id=global_id).exists():
-            stored_ticket = PersonTicketCreation.objects.get(person__global_id=global_id)
+        with contextlib.suppress(PersonTicketCreation.DoesNotExist):
+            stored_ticket = PersonTicketCreation.objects.get(uuid=ticket_uuid)
             remote_ticket = _retrieve_person_ticket_status(stored_ticket.request_id)
             if remote_ticket:
                 stored_ticket.status = remote_ticket['status']
                 stored_ticket.errors = remote_ticket['errors'] if 'errors' in remote_ticket.keys() else []
                 stored_ticket.save()
             return remote_ticket['status']
-        else:
-            return None
 
     @classmethod
     def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
@@ -167,22 +170,24 @@ class DigitRepository(IDigitRepository):
         tickets = PersonTicketCreation.objects.filter(
             ~Q(
                 status__in=[
-                    PersonTicketCreationStatus.DONE.value,
-                    PersonTicketCreationStatus.DONE_WITH_WARNINGS.value,
+                    PersonTicketCreationStatus.DONE.name,
+                    PersonTicketCreationStatus.DONE_WITH_WARNINGS.name,
                 ]
             )
         ).select_related('person').values(
-            'request_id', 'person__last_registration_id', 'person__last_name', 'person__first_name',
-            'person__global_id', 'status', 'errors'
-        )
+            'uuid', 'request_id', 'person__last_registration_id', 'person__last_name', 'person__first_name',
+            'person__global_id', 'status', 'errors', 'merge_type'
+        ).order_by('created_at')
         return [
             StatutTicketPersonneDTO(
+                uuid=str(ticket['uuid']),
                 request_id=ticket['request_id'],
                 matricule=ticket['person__global_id'],
                 noma=ticket['person__last_registration_id'],
                 nom=ticket['person__last_name'],
                 prenom=ticket['person__first_name'],
                 statut=ticket['status'],
+                type_fusion=ticket['merge_type'],
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket['errors']],
             ) for ticket in tickets
         ]
@@ -237,8 +242,22 @@ class DigitRepository(IDigitRepository):
             return format_matricule(matricule)
 
     @classmethod
-    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
-        candidate = Person.objects.get(global_id=candidate_global_id)
+    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str, ticket_uuid: str):
+        candidate = Person.objects.prefetch_related('personticketcreation_set').get(global_id=candidate_global_id)
+        person_tickets = candidate.personticketcreation_set.all()
+
+        ticket = next((t for t in person_tickets if str(t.uuid) == ticket_uuid), None)
+        if not ticket:
+            raise PersonTicketCreation.DoesNotExist
+
+        if any(
+                p for p in person_tickets if p.created_at < ticket.created_at and p.status not in [
+                    PersonTicketCreationStatus.DONE.name,
+                    PersonTicketCreationStatus.DONE_WITH_WARNINGS.name
+                ]
+        ):
+            raise TicketDigitATraiterAvantException()
+
         candidate.global_id = digit_global_id
         candidate.external_id = f"osis.person_{digit_global_id}"
         # delete user to enable new connection from temporary account
@@ -248,6 +267,9 @@ class DigitRepository(IDigitRepository):
             candidate.user.delete()
         candidate.user = None
         candidate.save()
+
+        ticket.merge_type = PersonTicketCreationMergeType.MERGED_WITH_CANDIDATE.name
+        ticket.save()
 
     @classmethod
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:

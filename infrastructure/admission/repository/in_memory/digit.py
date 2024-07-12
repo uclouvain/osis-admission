@@ -51,7 +51,7 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
         return cls.statut_ticket
 
     @classmethod
-    def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
+    def retrieve_person_ticket_status_from_digit(cls, ticket_uuid: str) -> Optional[str]:
         return cls.statut_ticket.statut
 
     @classmethod

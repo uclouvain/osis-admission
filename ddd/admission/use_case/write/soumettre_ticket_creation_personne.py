@@ -41,10 +41,10 @@ def soumettre_ticket_creation_personne(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
     client_comptabilite_translator: 'IClientComptabiliteTranslator'
-):
+) -> str:
     proposition = proposition_repository.get_first_submitted_proposition(matricule_candidat=cmd.global_id)
 
-    digit_service.verifier_peut_soumettre_ticket_creation(proposition, digit_repository)
+    digit_service.verifier_peut_soumettre_ticket_creation(proposition)
 
     formation = formation_translator.get(entity_id=proposition.formation_id)
 
