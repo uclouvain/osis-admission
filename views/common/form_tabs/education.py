@@ -30,6 +30,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
+from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
@@ -111,7 +112,10 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
 
     @property
     def can_be_updated(self):
-        admission_injections = AdmissionEPCInjection.objects.filter(admission__candidate_id=self.person.pk)
+        admission_injections = AdmissionEPCInjection.objects.filter(
+            admission__candidate_id=self.person.pk,
+            type=EPCInjectionType.DEMANDE.name,
+        )
         cv_injections = CurriculumEPCInjection.objects.filter(
             person_id=self.person.pk,
             type_experience=ExperienceType.HIGH_SCHOOL.name,

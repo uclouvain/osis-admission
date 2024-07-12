@@ -45,6 +45,7 @@ from admission.contrib.models.base import (
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
+from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
@@ -105,7 +106,10 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                 filter=Q(valuated_from_admission__isnull=False),
             ),
             'admission_injection': Exists(
-                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+                AdmissionEPCInjection.objects.filter(
+                    admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                    type=EPCInjectionType.DEMANDE.name,
+                )
             ),
             'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
         }
@@ -182,7 +186,10 @@ class CurriculumNonEducationalExperienceFormView(
                 filter=Q(valuated_from_admission__isnull=False),
             ),
             'admission_injection': Exists(
-                AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+                AdmissionEPCInjection.objects.filter(
+                    admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                    type=EPCInjectionType.DEMANDE.name,
+                )
             ),
             'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
         }
@@ -263,7 +270,10 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
                     filter=Q(valuated_from_admission__isnull=False),
                 ),
                 admission_injection=Exists(
-                    AdmissionEPCInjection.objects.filter(admission__uuid=OuterRef('valuated_from_admission__uuid'))
+                    AdmissionEPCInjection.objects.filter(
+                        admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                        type=EPCInjectionType.DEMANDE.name,
+                    )
                 ),
                 cv_injection=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=self.experience_id)),
             )
