@@ -733,7 +733,9 @@ msgid "An error occured during digit ticket creation"
 msgstr "Une erreur est survenue lors de la création de ticket DigIT"
 
 msgid "An error occured during digit ticket creation validation"
-msgstr "Une erreur est survenue lors de la validation du ticket de création dans DigIT"
+msgstr ""
+"Une erreur est survenue lors de la validation du ticket de création dans "
+"DigIT"
 
 msgid "An external member must have a country."
 msgstr "Un membre externe doit avoir un pays."
@@ -3447,9 +3449,6 @@ msgstr "Financement"
 
 msgid "Funding type"
 msgstr "Type de financement"
-
-msgid "Fusion digit flag is inactive"
-msgstr "Flag fusion digit inactif"
 
 msgid "Fusion proposal"
 msgstr "Proposition de fusion"
@@ -6421,9 +6420,6 @@ msgstr "Épreuve de confirmation à représenter"
 msgid "Retaking of the test"
 msgstr "Confirmation à représenter"
 
-msgid "Retrieve from DigIT"
-msgstr "Récupérer depuis DigIT"
-
 msgid "Retype"
 msgstr "Retyper"
 
@@ -6693,9 +6689,6 @@ msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
 
 msgid "Send the message"
 msgstr "Envoyer le message"
-
-msgid "Send to DigIT"
-msgstr "Envoyer à DigIT"
 
 msgid "Send to SIC"
 msgstr "Envoyer en SIC"
@@ -7651,6 +7644,13 @@ msgstr ""
 #, python-format
 msgid "The text size must be one of the following values: %(values)s."
 msgstr "La taille du texte doit être une des valeurs suivantes : %(values)s."
+
+msgid ""
+"The transition to this status is not possible while the application is in "
+"quarantine."
+msgstr ""
+"Le passage à cet état n’est pas possible tant que la demande est en "
+"quarantaine."
 
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
@@ -9080,3 +9080,12 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
+
+#~ msgid "Fusion digit flag is inactive"
+#~ msgstr "Flag fusion digit inactif"
+
+#~ msgid "Retrieve from DigIT"
+#~ msgstr "Récupérer depuis DigIT"
+
+#~ msgid "Send to DigIT"
+#~ msgstr "Envoyer à DigIT"
