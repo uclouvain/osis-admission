@@ -70,7 +70,7 @@ def run(request=None):
         logger.info(f"[DigIT Ticket] {ticket.nom}, {ticket.prenom}")
         logger.info(f"[DigIT Ticket status] {status}")
 
-        if Person.objects.exists(global_id=ticket.matricule):
+        if Person.objects.filter(global_id=ticket.matricule).exists():
             # cas d'une creation suivie d'une fusion et d'un nouveau ticket de mise à jour
             logger.info(f"[DigIT Ticket] Only send signaletique to EPC because already traited")
             _injecter_signaletique_a_epc(matricule=ticket.matricule)
