@@ -292,9 +292,17 @@ class ValidationTicketCreationDigitEchoueeException(BusinessException):
         super().__init__(self.message, **kwargs)
 
 
-class CreationTicketDigitEchoueeException(BusinessException):
+class TicketDigitATraiterAvantException(BusinessException):
     status_code = "FUSION-DIGIT-8"
-    message = _("An error occured during digit ticket creation")
+    message = _("There exists some digit tickets to treat before")
+
+    def __init__(self, **kwargs):
+        super().__init__(self.message, **kwargs)
+
+
+class PasDePropositionDeFusionEligibleException(BusinessException):
+    status_code = "FUSION-DIGIT-9"
+    message = _("No merge proposal eligible for this ticket")
 
     def __init__(self, **kwargs):
         super().__init__(self.message, **kwargs)

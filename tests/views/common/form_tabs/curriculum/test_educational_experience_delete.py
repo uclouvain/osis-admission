@@ -37,6 +37,7 @@ from rest_framework import status
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
+from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
@@ -200,6 +201,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         # The admission has been injected
         admission_injection = AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
         )
 
         valuation = AdmissionEducationalValuatedExperiencesFactory(

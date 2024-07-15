@@ -34,7 +34,7 @@ from admission.ddd.admission.commands import RetrieveListePropositionFusionEnErr
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from backoffice.celery import app
 
-logger = logging.getLogger(settings.DEFAULT_LOGGER)
+logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
 
 @app.task
