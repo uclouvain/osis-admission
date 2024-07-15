@@ -39,7 +39,7 @@ class IDigitRepository:
         raise NotImplementedError
 
     @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
+    def get_last_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         raise NotImplementedError
 
     @classmethod

@@ -139,12 +139,17 @@ class DigitRepository(IDigitRepository):
 
 
     @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
+    def get_last_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         if not waffle.switch_is_active('fusion-digit'):
             return None
 
-        try:
-            ticket = PersonTicketCreation.objects.select_related('person').get(person__global_id=global_id)
+        ticket = PersonTicketCreation.objects.order_by(
+            '-created_at'
+        ).select_related('person').filter(
+            person__global_id=global_id
+        ).first()
+
+        if ticket:
             return StatutTicketPersonneDTO(
                 uuid=str(ticket.uuid),
                 request_id=ticket.request_id,
@@ -156,8 +161,7 @@ class DigitRepository(IDigitRepository):
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket.errors],
                 type_fusion=ticket.merge_type,
             )
-        except PersonTicketCreation.DoesNotExist:
-            return None
+
 
     @classmethod
     def retrieve_person_ticket_status_from_digit(cls, ticket_uuid: str) -> Optional[str]:
