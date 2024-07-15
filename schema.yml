@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.102
+  version: 1.0.103
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5054,6 +5054,32 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - diplomatic-post
+  /candidate/{noma}/application_fees_payment_method:
+    get:
+      operationId: retrievePaymentMethod
+      description: Get the payment method of the application fees
+      parameters:
+      - name: noma
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethod'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - candidate
   /curriculum/educational:
     post:
       operationId: createEducationalExperience
@@ -10772,6 +10798,15 @@ components:
         name:
           type: string
           readOnly: true
+    PaymentMethod:
+      type: object
+      properties:
+        method:
+          enum:
+          - BANCONTACT
+          - CREDIT_CARD
+          - BANK_TRANSFER
+          type: string
     InitierPropositionCommand:
       type: object
       properties:
