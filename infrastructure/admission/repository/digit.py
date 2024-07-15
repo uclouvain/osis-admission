@@ -150,7 +150,7 @@ class DigitRepository(IDigitRepository):
                 request_id=ticket.request_id,
                 matricule=ticket.person.global_id,
                 nom=ticket.person.last_name,
-                noma=ticket.person.last_registration_id,
+                noma=ticket.person.personmergeproposal.registration_id_sent_to_digit,
                 prenom=ticket.person.first_name,
                 statut=ticket.status,
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket.errors],
@@ -186,15 +186,22 @@ class DigitRepository(IDigitRepository):
                 ]
             )
         ).select_related('person').values(
-            'uuid', 'request_id', 'person__last_registration_id', 'person__last_name', 'person__first_name',
-            'person__global_id', 'status', 'errors', 'merge_type'
+            'uuid',
+            'request_id',
+            'person__personmergeproposal__registration_id_sent_to_digit',
+            'person__last_name',
+            'person__first_name',
+            'person__global_id',
+            'status',
+            'errors',
+            'merge_type',
         ).order_by('created_at')
         return [
             StatutTicketPersonneDTO(
                 uuid=str(ticket['uuid']),
                 request_id=ticket['request_id'],
                 matricule=ticket['person__global_id'],
-                noma=ticket['person__last_registration_id'],
+                noma=ticket['person__personmergeproposal__registration_id_sent_to_digit'],
                 nom=ticket['person__last_name'],
                 prenom=ticket['person__first_name'],
                 statut=ticket['status'],
