@@ -3133,9 +3133,6 @@ msgstr ""
 msgid "Free additional approval conditions"
 msgstr ""
 
-msgid "Free additional conditions"
-msgstr ""
-
 msgid "Free and requestable by FAC"
 msgstr ""
 
@@ -4873,6 +4870,9 @@ msgstr ""
 
 msgctxt "ways_hear_about_training"
 msgid "Other"
+msgstr ""
+
+msgid "Other additional conditions"
 msgstr ""
 
 msgid "Other address"
