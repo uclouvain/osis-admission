@@ -281,7 +281,7 @@ class DigitRepository(IDigitRepository):
 
         # Check if person is already know in OSIS side
         student = find_student_by_discriminating(qs=Student.objects.filter(person=candidate))
-        if student is not None:
+        if student is not None and student.registration_id:
             return student.registration_id
 
         # Check if already a personmergeproposal with generated noma
