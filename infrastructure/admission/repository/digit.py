@@ -70,12 +70,12 @@ class DigitRepository(IDigitRepository):
             merge_person = proposition_fusion.proposal_merge_person
         except PersonMergeProposal.DoesNotExist:
             proposition_fusion, _ = PersonMergeProposal.objects.update_or_create(
-                status=PersonMergeStatus.NO_MATCH.name,
                 original_person=candidate,
-                proposal_merge_person=None,
-                last_similarity_result_update=datetime.now(),
                 defaults={
-                    "registration_id_sent_to_digit": noma
+                    "registration_id_sent_to_digit": noma,
+                    "status": PersonMergeStatus.NO_MATCH.name,
+                    "proposal_merge_person": None,
+                    "last_similarity_result_update": datetime.now(),
                 }
             )
             merge_person = None
