@@ -40,6 +40,7 @@ from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.program_manager import ProgramManagerFactory
+from reference.tests.factories.language import FrenchLanguageFactory
 
 
 class DoctorateAdmissionJuryFormViewTestCase(TestCase):
@@ -102,6 +103,7 @@ class DoctorateAdmissionJuryFormViewTestCase(TestCase):
 
     def test_post_jury_preparation_detail_cdd_user(self):
         url = reverse(self.update_path, args=[self.admission.uuid])
+        language = FrenchLanguageFactory()
 
         response = self.client.post(
             url,
@@ -109,7 +111,7 @@ class DoctorateAdmissionJuryFormViewTestCase(TestCase):
                 'titre_propose': 'Nouveau titre',
                 'formule_defense': FormuleDefense.FORMULE_2.name,
                 'date_indicative': '01/01/2023',
-                'langue_redaction': ChoixLangueRedactionThese.FRENCH.name,
+                'langue_redaction': language.pk,
                 'langue_soutenance': ChoixLangueRedactionThese.ENGLISH.name,
                 'commentaire': 'Nouveau commentaire',
             },
@@ -123,6 +125,6 @@ class DoctorateAdmissionJuryFormViewTestCase(TestCase):
         self.assertEqual(updated_admission.thesis_proposed_title, 'Nouveau titre')
         self.assertEqual(updated_admission.defense_method, FormuleDefense.FORMULE_2.name)
         self.assertEqual(updated_admission.defense_indicative_date, datetime.date(2023, 1, 1))
-        self.assertEqual(updated_admission.thesis_language, ChoixLangueRedactionThese.FRENCH.name)
+        self.assertEqual(updated_admission.thesis_language, language)
         self.assertEqual(updated_admission.defense_language, ChoixLangueRedactionThese.ENGLISH.name)
         self.assertEqual(updated_admission.comment_about_jury, 'Nouveau commentaire')

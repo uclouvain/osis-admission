@@ -268,11 +268,7 @@ class Proposition(interface.RootEntity):
         self.projet = DetailProjet(
             titre=titre or '',
             resume=resume or '',
-            langue_redaction_these=(
-                ChoixLangueRedactionThese[langue_redaction_these]
-                if langue_redaction_these
-                else ChoixLangueRedactionThese.UNDECIDED
-            ),
+            langue_redaction_these=langue_redaction_these,
             institut_these=InstitutIdentity(uuid.UUID(institut_these)) if institut_these else None,
             lieu_these=lieu_these or '',
             documents=documents or [],

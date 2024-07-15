@@ -86,6 +86,7 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
+from reference.models.language import Language
 
 
 def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
@@ -110,7 +111,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             titre=admission.project_title,
             resume=admission.project_abstract,
             documents=admission.project_document,
-            langue_redaction_these=ChoixLangueRedactionThese[admission.thesis_language],
+            langue_redaction_these=admission.thesis_language.code if admission.thesis_language else '',
             institut_these=InstitutIdentity(admission.thesis_institute.uuid) if admission.thesis_institute_id else None,
             lieu_these=admission.thesis_location,
             graphe_gantt=admission.gantt_graph,
@@ -221,7 +222,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'dedicated_time': entity.financement.temps_consacre,
                 'project_title': entity.projet.titre,
                 'project_abstract': entity.projet.resume,
-                'thesis_language': entity.projet.langue_redaction_these.name,
+                'thesis_language': (
+                    Language.objects.get(code=entity.projet.langue_redaction_these)
+                    if entity.projet.langue_redaction_these
+                    else None
+                ),
                 'thesis_institute': (
                     EntityVersion.objects.get(uuid=entity.projet.institut_these.uuid)
                     if entity.projet.institut_these
@@ -442,7 +447,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             proposition_programme_doctoral=admission.program_proposition,
             projet_formation_complementaire=admission.additional_training_project,
             lettres_recommandation=admission.recommendation_letters,
-            langue_redaction_these=admission.thesis_language,
+            langue_redaction_these=admission.thesis_language.code if admission.thesis_language else '',
             institut_these=admission.thesis_institute and admission.thesis_institute.uuid,
             nom_institut_these=admission.thesis_institute and admission.thesis_institute.title or '',
             sigle_institut_these=admission.thesis_institute and admission.thesis_institute.acronym or '',
