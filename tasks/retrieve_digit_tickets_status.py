@@ -100,13 +100,16 @@ def _process_response_ticket(message_bus_instance, ticket):
     logger.info(f"[DigIT Ticket noma - matricule] NOMA: {noma} - MATR: {digit_matricule}")
 
     if Person.objects.filter(global_id=digit_matricule).exists():
-        message_bus_instance.invoke(
-            command=FusionnerCandidatAvecPersonneExistanteCommand(
-                candidate_global_id=digit_matricule,
-                ticket_uuid=ticket.uuid,
+        try:
+            message_bus_instance.invoke(
+                command=FusionnerCandidatAvecPersonneExistanteCommand(
+                    candidate_global_id=digit_matricule,
+                    ticket_uuid=ticket.uuid,
+                )
             )
-        )
-        logger.info(f"[DigIT Ticket merge with existing person]")
+            logger.info(f"[DigIT Ticket merge with existing person]")
+        except PasDePropositionDeFusionEligibleException:
+            logger.info(f"[DigIT] Pas de proposition de fusion éligible. Fusion ignorée")
     else:
         message_bus_instance.invoke(
             command=ModifierMatriculeCandidatCommand(
