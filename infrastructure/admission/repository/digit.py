@@ -63,17 +63,24 @@ class DigitRepository(IDigitRepository):
         if extra_ticket_data is None:
             extra_ticket_data = {}
 
-        # get proposal merge person if any is linked
-        merge_person = None
-        with contextlib.suppress(PersonMergeProposal.DoesNotExist):
+        try:
             proposition_fusion = PersonMergeProposal.objects.get(original_person=candidate)
+            proposition_fusion.registration_id_sent_to_digit = noma
+            proposition_fusion.save()
             merge_person = proposition_fusion.proposal_merge_person
-            if noma:
-                proposition_fusion.registration_id_sent_to_digit = noma
-                proposition_fusion.save()
+        except PersonMergeProposal.DoesNotExist:
+            proposition_fusion, _ = PersonMergeProposal.objects.update_or_create(
+                original_person=candidate,
+                defaults={
+                    "registration_id_sent_to_digit": noma,
+                    "status": PersonMergeStatus.NO_MATCH.name,
+                    "proposal_merge_person": None,
+                    "last_similarity_result_update": datetime.now(),
+                }
+            )
+            merge_person = None
 
         person = merge_person if merge_person and _is_valid_merge_person(merge_person) else candidate
-
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
 
         ticket_response = _request_person_ticket_creation(person, noma, addresses, extra_ticket_data)
@@ -279,15 +286,14 @@ class DigitRepository(IDigitRepository):
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
         candidate = Person.objects.get(global_id=global_id)
 
+        # Check if already a personmergeproposal with generated noma
+        if hasattr(candidate, 'personmergeproposal') and candidate.personmergeproposal.registration_id_sent_to_digit:
+            return candidate.personmergeproposal.registration_id_sent_to_digit
+
         # Check if person is already know in OSIS side
         student = find_student_by_discriminating(qs=Student.objects.filter(person=candidate))
         if student is not None and student.registration_id:
             return student.registration_id
-
-        # Check if already a personmergeproposal with generated noma
-        if hasattr(candidate, 'personmergeproposal'):
-            return candidate.personmergeproposal.registration_id_sent_to_digit or None
-        return None
 
     @classmethod
     def has_pending_digit_creation_ticket(cls, global_id: str) -> bool:
