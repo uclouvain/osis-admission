@@ -123,8 +123,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_checklist': is_part_of_education_group
             & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.change_checklist': is_part_of_education_group
-            & continuing.is_continuing
-            & continuing.is_submitted,
+            & ((continuing.is_continuing & continuing.is_submitted) | (general.is_general & general.is_submitted)),
             'admission.checklist_change_faculty_decision': is_part_of_education_group
             & (general.in_fac_status | doctorate.in_fac_status),
             'admission.checklist_faculty_decision_transfer_to_sic_with_decision': is_part_of_education_group

@@ -646,9 +646,6 @@ msgstr ""
 msgid "An education type"
 msgstr ""
 
-msgid "An error occured during digit ticket creation"
-msgstr ""
-
 msgid "An error occured during digit ticket creation validation"
 msgstr ""
 
@@ -2974,6 +2971,9 @@ msgstr ""
 msgid "Financability rule established by"
 msgstr ""
 
+msgid "Financability rule established on"
+msgstr ""
+
 #, python-format
 msgid "Financable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
@@ -2995,7 +2995,9 @@ msgid "Financeable"
 msgstr ""
 
 #, python-format
-msgid "Financeable - %(rule)s (Established by %(established_by)s)"
+msgid ""
+"Financeable - %(rule)s (Established by %(established_by)s the "
+"%(established_on)s)"
 msgstr ""
 
 msgid "Financing rule"

@@ -99,8 +99,10 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite, \
-    SITUATION_FINANCABILITE_PAR_ETAT
+from ddd.logic.financabilite.domain.model.enums.situation import (
+    SituationFinancabilite,
+    SITUATION_FINANCABILITE_PAR_ETAT,
+)
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
 from osis_document.utils import is_uuid
@@ -1205,7 +1207,10 @@ class FinancabiliteDispensationForm(forms.Form):
         super().__init__(*args, **kwargs)
         if not is_central_manager and not is_program_manager:
             self.fields['dispensation_status'].disabled = True
-        elif not is_central_manager and self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name:
+        elif not is_central_manager and (
+            self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name
+            or not self.initial.get('dispensation_status')
+        ):
             self.fields['dispensation_status'].disabled = True
 
 
