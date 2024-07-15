@@ -43,11 +43,13 @@ from admission.ddd.admission.dtos.validation_ticket_response import ValidationTi
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.templatetags.admission import format_matricule
+from base.business.student import find_student_by_discriminating
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus, \
     PersonTicketCreationMergeType
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.models.student import Student
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
@@ -137,6 +139,7 @@ class DigitRepository(IDigitRepository):
         try:
             ticket = PersonTicketCreation.objects.select_related('person').get(person__global_id=global_id)
             return StatutTicketPersonneDTO(
+                uuid=str(ticket.uuid),
                 request_id=ticket.request_id,
                 matricule=ticket.person.global_id,
                 nom=ticket.person.last_name,
@@ -144,6 +147,7 @@ class DigitRepository(IDigitRepository):
                 prenom=ticket.person.first_name,
                 statut=ticket.status,
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket.errors],
+                type_fusion=ticket.merge_type,
             )
         except PersonTicketCreation.DoesNotExist:
             return None
@@ -274,10 +278,16 @@ class DigitRepository(IDigitRepository):
     @classmethod
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
         candidate = Person.objects.get(global_id=global_id)
+
+        # Check if person is already know in OSIS side
+        student = find_student_by_discriminating(qs=Student.objects.filter(person=candidate))
+        if student is not None and student.registration_id:
+            return student.registration_id
+
+        # Check if already a personmergeproposal with generated noma
         if hasattr(candidate, 'personmergeproposal'):
             return candidate.personmergeproposal.registration_id_sent_to_digit or None
-        else:
-            return None
+        return None
 
     @classmethod
     def has_pending_digit_creation_ticket(cls, global_id: str) -> bool:
