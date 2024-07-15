@@ -43,6 +43,7 @@ from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPers
 from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from backoffice.celery import app
 from base.models.person import Person
+from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.tasks import send_pictures_to_card_app
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
@@ -71,8 +72,8 @@ def run(request=None):
         logger.info(f"[DigIT Ticket status] {status}")
 
         if not Person.objects.filter(global_id=ticket.matricule).exists():
-            # cas d'une creation suivie d'une fusion et d'un nouveau ticket de mise à jour
             logger.info(f"[DigIT Ticket] Only send signaletique to EPC because already traited")
+            PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(status=PersonTicketCreationStatus.CREATED.name)
             continue
 
         if status in ["DONE", "DONE_WITH_WARNINGS"]:
