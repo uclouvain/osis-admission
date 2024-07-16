@@ -2375,6 +2375,12 @@ msgstr ""
 msgid "Doctoral student:"
 msgstr ""
 
+msgid "Doctorate Ethics Regulations"
+msgstr ""
+
+msgid "Doctorate Regulations"
+msgstr ""
+
 msgid "Doctorate admission"
 msgstr ""
 
@@ -3422,6 +3428,11 @@ msgstr ""
 msgid "I authorise"
 msgstr ""
 
+msgid ""
+"I confirm that I have read the PhD regulations on research ethics and "
+"certify that my project complies with these regulations."
+msgstr ""
+
 msgid "I do not authorize"
 msgstr ""
 
@@ -3491,6 +3502,12 @@ msgid ""
 msgstr ""
 
 msgid "I hereby declare that"
+msgstr ""
+
+msgid ""
+"I hereby declare that I have read and understood the regulations of the "
+"General PhD Committee and the specific requirements of the PhD Field "
+"Committee, to which I adhere."
 msgstr ""
 
 #, python-format
@@ -4151,10 +4168,6 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Mail sent to the CDD to inform them that a new application has been submitted"
-msgstr ""
-
-msgid ""
 "Mail sent to the applicant following approval or rejection by a member of "
 "the supervisory group"
 msgstr ""
@@ -4274,11 +4287,6 @@ msgstr ""
 msgid ""
 "Mail sent to the member of the supervision panel when deleted by the "
 "candidate"
-msgstr ""
-
-msgid ""
-"Mail sent to the members of the supervision panel to inform them that the "
-"application has been submitted to UCLouvain by the applicant"
 msgstr ""
 
 msgid "Main institute"
