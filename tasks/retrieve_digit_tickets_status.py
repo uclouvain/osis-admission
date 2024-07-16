@@ -43,6 +43,7 @@ from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPers
 from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from backoffice.celery import app
 from base.models.person import Person
+from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.tasks import send_pictures_to_card_app
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
@@ -70,10 +71,9 @@ def run(request=None):
         logger.info(f"[DigIT Ticket] {ticket.nom}, {ticket.prenom}")
         logger.info(f"[DigIT Ticket status] {status}")
 
-        if Person.objects.exists(global_id=ticket.matricule):
-            # cas d'une creation suivie d'une fusion et d'un nouveau ticket de mise à jour
+        if not Person.objects.filter(global_id=ticket.matricule).exists():
             logger.info(f"[DigIT Ticket] Only send signaletique to EPC because already traited")
-            _injecter_signaletique_a_epc(matricule=ticket.matricule)
+            PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(status=PersonTicketCreationStatus.CREATED.name)
             continue
 
         if status in ["DONE", "DONE_WITH_WARNINGS"]:
@@ -100,13 +100,16 @@ def _process_response_ticket(message_bus_instance, ticket):
     logger.info(f"[DigIT Ticket noma - matricule] NOMA: {noma} - MATR: {digit_matricule}")
 
     if Person.objects.filter(global_id=digit_matricule).exists():
-        message_bus_instance.invoke(
-            command=FusionnerCandidatAvecPersonneExistanteCommand(
-                candidate_global_id=digit_matricule,
-                ticket_uuid=ticket.uuid,
+        try:
+            message_bus_instance.invoke(
+                command=FusionnerCandidatAvecPersonneExistanteCommand(
+                    candidate_global_id=digit_matricule,
+                    ticket_uuid=ticket.uuid,
+                )
             )
-        )
-        logger.info(f"[DigIT Ticket merge with existing person]")
+            logger.info(f"[DigIT Ticket merge with existing person]")
+        except PasDePropositionDeFusionEligibleException:
+            logger.info(f"[DigIT] Pas de proposition de fusion éligible. Fusion ignorée")
     else:
         message_bus_instance.invoke(
             command=ModifierMatriculeCandidatCommand(

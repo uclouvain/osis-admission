@@ -38,7 +38,7 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand,
+    FusionnerCandidatAvecPersonneExistanteCommand, RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
@@ -76,6 +76,8 @@ from admission.ddd.admission.use_case.read import (
 )
 from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
+from admission.ddd.admission.use_case.read.recuperer_propositions_en_erreur_service import \
+    recuperer_propositions_en_erreur
 from admission.ddd.admission.use_case.read.recuperer_statut_ticket_personne import recuperer_statut_ticket_personne
 from admission.ddd.admission.use_case.read.recuperer_tickets_en_attente import recuperer_tickets_en_attente
 from admission.ddd.admission.use_case.write import (
@@ -729,6 +731,10 @@ COMMAND_HANDLERS = {
     RetrieveListeTicketsEnAttenteQuery: lambda msg_bus, cmd: recuperer_tickets_en_attente(
         cmd,
         digit_repository=DigitRepository(),
+    ),
+    RetrieveListePropositionFusionEnErreurQuery: lambda msg_bus, query: recuperer_propositions_en_erreur(
+      query,
+      digit_repository=DigitRepository(),
     ),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: (
         lambda msg_bus, cmd: recuperer_statut_ticket_personne_de_digit(
