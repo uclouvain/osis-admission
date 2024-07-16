@@ -75,6 +75,7 @@ from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeStatus
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
@@ -541,6 +542,19 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     @cached_property
     def admission_context(self):
         return self.get_admission_context()
+
+    @cached_property
+    def is_in_quarantine(self):
+        quarantine_status = {
+            PersonMergeStatus.MATCH_FOUND.name,
+            PersonMergeStatus.PENDING.name,
+            PersonMergeStatus.ERROR.name,
+            PersonMergeStatus.IN_PROGRESS.name,
+        }
+        try:
+            return self.candidate.personmergeproposal.status in quarantine_status
+        except Person.personmergeproposal.RelatedObjectDoesNotExist:
+            return False
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):
