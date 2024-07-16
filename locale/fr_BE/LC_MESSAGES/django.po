@@ -3226,6 +3226,9 @@ msgstr "Règle de financabilité"
 msgid "Financability rule established by"
 msgstr "Règle de financabilité établi par"
 
+msgid "Financability rule established on"
+msgstr "Règle de financabilité établi le"
+
 #, python-format
 msgid "Financable - %(rule)s (Established by %(established_by)s)"
 msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
@@ -3247,8 +3250,11 @@ msgid "Financeable"
 msgstr "Financable"
 
 #, python-format
-msgid "Financeable - %(rule)s (Established by %(established_by)s)"
-msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
+msgid ""
+"Financeable - %(rule)s (Established by %(established_by)s the "
+"%(established_on)s)"
+msgstr ""
+"Finançable - %(rule)s (Établi par %(established_by)s le %(established_on)s)"
 
 msgid "Financing rule"
 msgstr "Règle de financement"
