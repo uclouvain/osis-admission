@@ -448,11 +448,6 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
         # Get the accessible sub tabs depending on the user permissions
         valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
 
-        # Checklist is available for submitted admissions only
-        if Tab('checklist') in valid_sub_tabs:
-            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE | STATUTS_PROPOSITION_CONTINUE_SOUMISE:
-                valid_sub_tabs.remove(Tab('checklist'))
-
         # Add dynamic badge for comments
         if parent_tab == Tab('comments'):
             from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL

@@ -105,6 +105,7 @@ UPDATE_ACTIONS_BY_TAB = {
     'course-enrollment': '',
     # Management
     'documents': 'admission.view_documents_management',
+    'checklist': 'admission.view_checklist',
     # Jury
     'jury-preparation': 'admission.change_admission_jury',
     'jury': 'admission.change_admission_jury',

@@ -53,7 +53,7 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     available_documents_by_context = {
         'doctorate': False,
         'general-education': True,
-        'continuing-education': False,
+        'continuing-education': True,
     }
     submitted_status_by_context = {
         'doctorate': set(),
@@ -66,7 +66,6 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
         self.permission_required = 'admission.view_checklist'
         return (
             self.available_checklist_by_context[self.current_context]
-            and self.admission.status in self.submitted_status_by_context[self.current_context]
             and super().has_permission()
         )
 

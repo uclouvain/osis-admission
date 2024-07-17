@@ -523,7 +523,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         admission = ContinuingEducationAdmissionFactory(
             candidate=candidate,
             residence_permit=['file-uuid'],
-            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            submitted=True,
         )
 
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap

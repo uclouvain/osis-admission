@@ -1478,9 +1478,6 @@ msgstr "Annulée"
 msgid "Cancelled application"
 msgstr "Demande annulée"
 
-msgid "Cancelled application by a manager"
-msgstr "Demande annulée par un gestionnaire"
-
 msgid "Candidate"
 msgstr "Candidat"
 
