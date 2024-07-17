@@ -5,8 +5,12 @@ from django.db import migrations
 
 def create_academic_calendar(apps, schema_editor):
     from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
+    from django.utils import timezone
+
     AcademicYear = apps.get_model('base', 'AcademicYear')
-    current_academic_year = AcademicYear.objects.current()
+    current_academic_year = AcademicYear.objects.filter(
+        start_date__lte=timezone.now(), end_date__gte=timezone.now()
+    ).last()
     if current_academic_year is not None:
         AdmissionDigitTicketSubmissionCalendar.ensure_consistency_until_n_plus_6()
 
