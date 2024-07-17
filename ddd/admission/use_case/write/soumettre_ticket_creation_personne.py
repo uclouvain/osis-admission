@@ -26,6 +26,8 @@
 from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
 from admission.ddd.admission.domain.service.i_client_comptabilite_translator import IClientComptabiliteTranslator
 from admission.ddd.admission.domain.service.i_digit import IDigitService
+from admission.ddd.admission.domain.service.i_periode_soumission_ticket_digit import \
+    IPeriodeSoumissionTicketDigitTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_digit import IDigitRepository
@@ -40,12 +42,11 @@ def soumettre_ticket_creation_personne(
     compteur_noma: 'ICompteurAnnuelPourNomaRepository',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
-    client_comptabilite_translator: 'IClientComptabiliteTranslator'
+    client_comptabilite_translator: 'IClientComptabiliteTranslator',
+    periode_soumission_ticket_digit_translator: 'IPeriodeSoumissionTicketDigitTranslator'
 ) -> str:
     proposition = proposition_repository.get_first_submitted_proposition(matricule_candidat=cmd.global_id)
-
-    digit_service.verifier_peut_soumettre_ticket_creation(proposition)
-
+    digit_service.verifier_peut_soumettre_ticket_creation(proposition, periode_soumission_ticket_digit_translator)
     formation = formation_translator.get(entity_id=proposition.formation_id)
 
     sap_number = client_comptabilite_translator.get_client_number(matricule_candidat=cmd.global_id)

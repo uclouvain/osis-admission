@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,16 +22,16 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from typing import List
+##############################################################################
+from datetime import datetime
 
-from admission.ddd.admission.commands import RetrieveListePropositionFusionEnErreurQuery
-from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from admission.ddd.admission.repository.i_digit import IDigitRepository
+import attr
+
+from osis_common.ddd import interface
 
 
-def recuperer_propositions_en_erreur(
-    query: 'RetrieveListePropositionFusionEnErreurQuery',
-    digit_repository: 'IDigitRepository',
-) -> List[PropositionFusionPersonneDTO]:
-    return digit_repository.retrieve_list_error_merge_proposals()
+@attr.dataclass(frozen=True, slots=True)
+class PeriodeSoumissionTicketDigit(interface.ValueObject):
+    annee: int
+    date_debut: datetime.date
+    date_fin: datetime.date

@@ -47,9 +47,20 @@ def admission_pdf_archive(task_uuid, language=None):
     admission_task = AdmissionTask.objects.select_related('task', 'admission__candidate').get(task__uuid=task_uuid)
 
     admission: DoctorateAdmission = PropositionProxy.objects.annotate(
-        student_registration_id=models.Subquery(
-            Student.objects.filter(person_id=models.OuterRef('candidate_id')).values('registration_id')[:1],
+        # Duplicate with annotate_with_student_registration_id (cf. admission/contrib/models/base.py)
+        # TODO: Try to merge logic
+        person_merge_proposal_noma=models.F('candidate__personmergeproposal__registration_id_sent_to_digit'),
+        existing_student_noma=models.Subquery(
+            Student.objects.filter(person_id=models.OuterRef('candidate_id'), ).values(
+                'registration_id'
+            )[:1]
         ),
+    ).annotate(
+        student_registration_id=models.Case(
+            models.When(person_merge_proposal_noma__isnull=False, then='person_merge_proposal_noma'),
+            models.When(existing_student_noma__isnull=False, then='existing_student_noma'),
+            default=models.Value('')
+        )
     ).get(uuid=admission_task.admission.uuid)
     addresses = {
         address.label: address

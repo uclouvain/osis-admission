@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,16 +22,17 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
+##############################################################################
+import abc
 from typing import List
 
-from admission.ddd.admission.commands import RetrieveListePropositionFusionEnErreurQuery
-from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from admission.ddd.admission.repository.i_digit import IDigitRepository
+from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import PeriodeSoumissionTicketDigit
+from osis_common.ddd import interface
 
 
-def recuperer_propositions_en_erreur(
-    query: 'RetrieveListePropositionFusionEnErreurQuery',
-    digit_repository: 'IDigitRepository',
-) -> List[PropositionFusionPersonneDTO]:
-    return digit_repository.retrieve_list_error_merge_proposals()
+class IPeriodeSoumissionTicketDigitTranslator(interface.DomainService):
+
+    @classmethod
+    @abc.abstractmethod
+    def get_periodes_actives(cls) -> List['PeriodeSoumissionTicketDigit']:
+        raise NotImplementedError

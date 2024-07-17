@@ -408,14 +408,20 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
     @classmethod
     def load_dto_from_model(cls, admission: BaseAdmission, language_is_french: bool) -> DemandeRechercheDTO:
+        if hasattr(admission.candidate, 'personmergeproposal') and \
+            admission.candidate.personmergeproposal.registration_id_sent_to_digit:
+            noma_candidat = admission.candidate.personmergeproposal.registration_id_sent_to_digit
+        elif admission.candidate.student_set.exists():
+            noma_candidat = admission.candidate.student_set.first().registration_id
+        else:
+            noma_candidat = ""
+
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
-            noma_candidat=admission.candidate.student_set.first().registration_id
-            if admission.candidate.student_set.exists()
-            else '',
+            noma_candidat=noma_candidat,
             plusieurs_demandes=admission.has_several_admissions_in_progress,  # From annotation
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
