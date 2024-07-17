@@ -204,20 +204,30 @@ class ListerToutesDemandes(IListerToutesDemandes):
             qs = qs.filter(generaleducationadmission__double_degree_scholarship_id=bourse_double_diplomation)
 
         if quarantaine in [True, False]:
+            # Validation de la quarantaine queryset
             if quarantaine:
                 qs = qs.filter(
                     Q(candidate__personmergeproposal__isnull=False)
-                    & ~Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name)
-                    & ~Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name)
-                    & ~Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
+                    &
+                    Q(
+                        ~Q(candidate__personmergeproposal__status__in=[
+                            PersonMergeStatus.NO_MATCH.name,
+                            PersonMergeStatus.MERGED.name,
+                            PersonMergeStatus.REFUSED.name
+                        ]) |
+                         # Cas validation ticket Digit en erreur
+                         ~Q(candidate__personmergeproposal__validation__valid=True)
+                    )
                 )
             else:
                 qs = qs.filter(
                     Q(candidate__personmergeproposal__isnull=True)
                     | Q(candidate__personmergeproposal__status__isnull=True)
-                    | Q(candidate__personmergeproposal__status=PersonMergeStatus.NO_MATCH.name)
-                    | Q(candidate__personmergeproposal__status=PersonMergeStatus.MERGED.name)
-                    | Q(candidate__personmergeproposal__status=PersonMergeStatus.REFUSED.name)
+                    | Q(candidate__personmergeproposal__status__in=[
+                        PersonMergeStatus.NO_MATCH.name,
+                        PersonMergeStatus.MERGED.name,
+                        PersonMergeStatus.REFUSED.name
+                    ])
                 )
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
