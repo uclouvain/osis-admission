@@ -121,6 +121,8 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
 )
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import \
+    PeriodeSoumissionTicketDigitTranslator
 from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
@@ -722,6 +724,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             formation_translator=FormationGeneraleTranslator(),
             client_comptabilite_translator=ClientComptabiliteTranslator(),
+            periode_soumission_ticket_digit_translator=PeriodeSoumissionTicketDigitTranslator(),
         )
     ),
     GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(

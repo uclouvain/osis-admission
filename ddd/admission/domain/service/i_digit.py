@@ -79,7 +79,6 @@ class IDigitService(interface.DomainService):
         logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
         try:
-            # replace with date from academic calendar
             periodes_soumission_ticket_digit = periode_soumission_ticket_digit_translator.get_periodes_actives()
             if proposition.annee_calculee not in [p.annee for p in periodes_soumission_ticket_digit]:
                 raise NotInAccountCreationPeriodException(matricule_candidat=proposition.matricule_candidat)
