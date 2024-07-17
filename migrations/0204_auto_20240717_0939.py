@@ -5,7 +5,10 @@ from django.db import migrations
 
 def create_academic_calendar(apps, schema_editor):
     from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
-    AdmissionDigitTicketSubmissionCalendar.ensure_consistency_until_n_plus_6()
+    AcademicYear = apps.get_model('base', 'AcademicYear')
+    current_academic_year = AcademicYear.objects.current()
+    if current_academic_year is not None:
+        AdmissionDigitTicketSubmissionCalendar.ensure_consistency_until_n_plus_6()
 
 
 class Migration(migrations.Migration):
