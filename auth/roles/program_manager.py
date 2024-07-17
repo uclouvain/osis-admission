@@ -106,7 +106,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
             'admission.view_documents_management': is_part_of_education_group
-            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted),
+            & (general.is_submitted | continuing.is_submitted_or_not_cancelled | doctorate.is_submitted),
             'admission.edit_documents': is_part_of_education_group
             & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted),
             'admission.request_documents': is_part_of_education_group

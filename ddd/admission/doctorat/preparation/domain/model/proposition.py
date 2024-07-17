@@ -45,6 +45,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -90,6 +91,7 @@ class Proposition(interface.RootEntity):
     matricule_candidat: str
     reference: int
     projet: 'DetailProjet'
+    auteur_derniere_modification: str = ''
     annee_calculee: Optional[int] = None
     type_demande: 'TypeDemande' = TypeDemande.ADMISSION
     pot_calcule: Optional[AcademicCalendarTypes] = None
@@ -113,6 +115,7 @@ class Proposition(interface.RootEntity):
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     curriculum: List[str] = attr.Factory(list)
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
+    documents_demandes: Dict = attr.Factory(dict)
 
     @property
     def sigle_formation(self):
@@ -268,11 +271,7 @@ class Proposition(interface.RootEntity):
         self.projet = DetailProjet(
             titre=titre or '',
             resume=resume or '',
-            langue_redaction_these=(
-                ChoixLangueRedactionThese[langue_redaction_these]
-                if langue_redaction_these
-                else ChoixLangueRedactionThese.UNDECIDED
-            ),
+            langue_redaction_these=langue_redaction_these,
             institut_these=InstitutIdentity(uuid.UUID(institut_these)) if institut_these else None,
             lieu_these=lieu_these or '',
             documents=documents or [],
@@ -478,3 +477,24 @@ class Proposition(interface.RootEntity):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.reponses_questions_specifiques = reponses_questions_specifiques
+
+    def reclamer_documents(self, auteur_modification: str, type_gestionnaire: str):
+        self.statut = {
+            TypeGestionnaire.FAC.name: ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC,
+            TypeGestionnaire.SIC.name: ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC,
+        }[type_gestionnaire]
+        self.auteur_derniere_modification = auteur_modification
+
+    def annuler_reclamation_documents(self, auteur_modification: str, type_gestionnaire: str):
+        self.statut = {
+            TypeGestionnaire.FAC.name: ChoixStatutPropositionDoctorale.TRAITEMENT_FAC,
+            TypeGestionnaire.SIC.name: ChoixStatutPropositionDoctorale.CONFIRMEE,
+        }[type_gestionnaire]
+        self.auteur_derniere_modification = auteur_modification
+
+    def completer_documents_par_candidat(self):
+        self.statut = {
+            ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC,
+            ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC,
+        }.get(self.statut)
+        self.auteur_derniere_modification = self.matricule_candidat

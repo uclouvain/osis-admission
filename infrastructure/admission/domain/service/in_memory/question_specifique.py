@@ -90,6 +90,14 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             onglet=Onglets.ETUDES_SECONDAIRES,
             formation=FormationIdentity(sigle='SC3DP', annee=2020),
         ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='36de0c3d-3c06-4c93-8eb4-c8648f04f142'),
+            type=TypeItemFormulaire.DOCUMENT,
+            requis=False,
+            configuration={},
+            onglet=Onglets.DOCUMENTS,
+            proposition=PropositionIdentity(uuid='uuid-SC3DP-promoteur-membre'),
+        ),
     ]
 
     _general_entities = [

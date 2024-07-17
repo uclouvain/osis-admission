@@ -78,6 +78,9 @@ _CANDIDATE_RULESET = {
     'approve_proposition_by_pdf': common.is_admission_request_author & doctorate.signing_in_progress,
     'resend_external_invitation': common.is_admission_request_author & doctorate.signing_in_progress,
     'submit_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    # A candidate can edit some tabs after the proposition has been submitted
+    'view_admission_documents': common.is_admission_request_author & doctorate.is_invited_to_complete,
+    'change_admission_documents': common.is_admission_request_author & doctorate.is_invited_to_complete,
     # Once the candidate is enrolling, he can
     'view_admission_confirmation': author_and_enrolled,
     'view_doctoral_training': author_and_enrolled & ~doctorate.is_pre_admission,

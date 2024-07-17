@@ -360,7 +360,7 @@ class Proposition(interface.RootEntity):
             checklist_statut=self.checklist_actuelle.decision,
         ).validate()
 
-        self.statut = ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE
+        self.statut = ChoixStatutPropositionContinue.ANNULEE
         self.checklist_actuelle.decision = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             libelle=__('Canceled'),

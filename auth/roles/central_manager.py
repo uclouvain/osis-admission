@@ -107,9 +107,9 @@ class CentralManager(EntityRoleModel):
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
             'admission.view_documents_management': is_entity_manager
-            & (general.not_cancelled | continuing.not_cancelled | doctorate.not_cancelled),
+            & (general.not_cancelled | continuing.is_submitted_or_not_cancelled | doctorate.not_cancelled),
             'admission.edit_documents': is_entity_manager
-            & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
+            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted),
             'admission.request_documents': is_entity_manager
             & (general.in_sic_status | continuing.can_request_documents | doctorate.in_sic_status),
             'admission.cancel_document_request': is_entity_manager

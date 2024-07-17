@@ -46,6 +46,8 @@ from admission.tests.factories.roles import ProgramManagerRoleFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from osis_notification.models import EmailNotification
 
+from reference.tests.factories.language import FrenchLanguageFactory
+
 
 class RequestSignaturesApiTestCase(APITestCase):
     @classmethod
@@ -53,12 +55,13 @@ class RequestSignaturesApiTestCase(APITestCase):
         cls.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = cls.patcher.start()
         patched.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        cls.language_fr = FrenchLanguageFactory()
         cls.admission = DoctorateAdmissionFactory(
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
-            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
+            thesis_language=cls.language_fr,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
@@ -118,7 +121,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
-            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
+            thesis_language=self.language_fr,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
@@ -145,7 +148,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
-            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
+            thesis_language=self.language_fr,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
