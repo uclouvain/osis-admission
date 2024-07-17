@@ -46,6 +46,6 @@ class AdmissionDigitTicketSubmissionCalendar(AcademicEventCalendarHelper):
                 defaults={
                     "title": "Soumission des tickets à DigIT pour les dossiers admissions & inscriptions",
                     "start_date": datetime.date(ac_year.year, 6, 1),
-                    "end_date": datetime.date(ac_year.year, 6, 15),
+                    "end_date": datetime.date(ac_year.year + 1, 5, 31),
                 }
             )
