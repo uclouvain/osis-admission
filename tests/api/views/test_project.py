@@ -52,7 +52,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AbsenceDeDetteNonCompleteeException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
-    PromoteurManquantException,
+    PromoteurManquantException, AbsenceDeDetteNonCompleteeDoctoratException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -1107,7 +1107,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         # No academic experience -> the absence of debt certificate is not required
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Experience in a french speaking community institute -> the absence of debt certificate is required
         experience = EducationalExperienceFactory(
@@ -1126,14 +1126,14 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
 
         response = self.client.post(url, self.submitted_data)
-        self.assertInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Experience in UCL -> the absence of debt certificate is not required
         experience.institute.acronym = "UCL"
         experience.institute.save()
 
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Experience in a german speaking community institute -> the absence of debt certificate is not required
         experience.institute.acronym = "INSTITUTE"
@@ -1141,7 +1141,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience.institute.save()
 
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Too old experience in a french speaking community institute -> the absence of debt certificate is not required
         experience.institute.community = CommunityEnum.FRENCH_SPEAKING.name
@@ -1151,7 +1151,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience_year.save()
 
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
     @mock.patch(
         'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',

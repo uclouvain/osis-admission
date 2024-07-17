@@ -6240,9 +6240,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Absence of debt' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Belgian student status' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Belgian student status' block."
 msgstr ""
 
 msgid ""
@@ -6250,9 +6256,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Memberships' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Reduced tuition fee' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Reduced tuition fee' block."
 msgstr ""
 
 msgid ""
@@ -6260,9 +6272,16 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields related to the bank account are missing."
+msgstr ""
+
 msgid ""
 "Some fields related to the bank account number in IBAN format are missing in "
 "the 'Additional information > Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields related to the bank account number in IBAN format are missing."
 msgstr ""
 
 msgid ""
@@ -7907,6 +7926,9 @@ msgstr ""
 msgid ""
 "You haven't answered to the question about your bank account in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "You haven't answered to the question about your bank account."
 msgstr ""
 
 msgid "You haven't yet submitted your application."
