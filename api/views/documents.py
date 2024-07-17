@@ -41,10 +41,12 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.exceptions import DocumentPostProcessingException
 from admission.utils import (
     get_cached_general_education_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
+    get_cached_admission_perm_obj,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from infrastructure.messages_bus import message_bus_instance
@@ -213,3 +215,18 @@ class ContinuingRequestedDocumentListView(RequestedDocumentListView):
 
     def get_permission_object(self):
         return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
+
+
+class DoctorateRequestedDocumentListView(RequestedDocumentListView):
+    name = "doctorate_documents"
+    permission_mapping = {
+        'GET': 'admission.view_admission_documents',
+        'POST': 'admission.change_admission_documents',
+    }
+    schema = RequestedDocumentsListSchema(operation_id_base='_doctorate_documents')
+
+    get_documents_command = doctorate_education_commands.RecupererDocumentsReclamesPropositionQuery
+    complete_documents_commands = doctorate_education_commands.CompleterEmplacementsDocumentsParCandidatCommand
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])

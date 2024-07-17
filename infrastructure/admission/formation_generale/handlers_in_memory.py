@@ -25,11 +25,18 @@
 ##############################################################################
 from mock.mock import Mock
 
-from admission.ddd.admission.commands import SoumettreTicketPersonneCommand, RechercherCompteExistantCommand, \
-    GetStatutTicketPersonneQuery, RetrieveListeTicketsEnAttenteQuery, \
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, ValiderTicketPersonneCommand, \
-    FusionnerCandidatAvecPersonneExistanteCommand, RetrieveListePropositionFusionEnErreurQuery
+from admission.ddd.admission.commands import (
+    SoumettreTicketPersonneCommand,
+    RechercherCompteExistantCommand,
+    GetStatutTicketPersonneQuery,
+    RetrieveListeTicketsEnAttenteQuery,
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
+    ValiderTicketPersonneCommand,
+    FusionnerCandidatAvecPersonneExistanteCommand,
+    RetrieveListePropositionFusionEnErreurQuery,
+)
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
@@ -391,6 +398,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=_emplacement_document_repository,
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(

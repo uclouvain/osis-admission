@@ -50,16 +50,15 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.constants import (
     IMAGE_MIME_TYPES,
     ORDERED_CAMPUSES_UUIDS,
-    CONTEXT_ADMISSION,
     CONTEXT_DOCTORATE,
     CONTEXT_GENERAL,
     CONTEXT_CONTINUING,
+    CONTEXT_DOCTORATE_AFTER_ENROLMENT,
 )
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
-    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -79,6 +78,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
 )
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
@@ -92,7 +92,6 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
     PropositionDTO as PropositionGeneraleDTO,
 )
-from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -109,8 +108,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import get_access_conditions_url, get_experience_urls
-from base.models.enums.civil_state import CivilState
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
@@ -305,14 +304,23 @@ class Tab:
 
 
 TAB_TREES = {
-    CONTEXT_ADMISSION: {
-        Tab('personal', _('Personal data'), 'user'): [
-            Tab('person', _('Identification')),
-            Tab('coordonnees', _('Contact details')),
+    CONTEXT_DOCTORATE: {
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
+        ],
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
+        ],
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
         ],
         # TODO Education choice
         Tab('experience', _('Previous experience'), 'list-alt'): [
-            Tab('education', _('Secondary studies')),
             Tab('curriculum', _('Curriculum')),
             Tab('languages', _('Knowledge of languages')),
         ],
@@ -321,32 +329,47 @@ TAB_TREES = {
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
-        # TODO Specific aspects
-        # TODO Completion
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('accounting', _('Accounting')),
+        ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('history-all', _('All history')),
-            Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
-            Tab('internal-note', _('Internal notes'), 'note-sticky'),
             Tab('debug', _('Debug'), 'bug'),
+        ],
+    },
+    # TODO doctorate refactorization
+    CONTEXT_DOCTORATE_AFTER_ENROLMENT: {
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
         ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
             Tab('comments', pgettext('tab', 'Comments'), 'comments')
         ],
-        # TODO Documents
-    },
-    CONTEXT_DOCTORATE: {
-        Tab('person', _('Personal data'), 'user'): [
-            Tab('person', _('Personal data'), 'user'),
-            Tab('coordonnees', _('Contact details')),
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
         ],
-        Tab('education', _('Previous experience'), 'list-alt'): [
-            Tab('education', _('Previous experience'), 'list-alt'),
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
+        ],
+        # TODO Education choice
+        Tab('experience', _('Previous experience'), 'list-alt'): [
+            Tab('curriculum', _('Curriculum')),
+            Tab('languages', _('Knowledge of languages')),
+        ],
+        Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
+            Tab('project', _('Research project')),
+            Tab('cotutelle', _('Cotutelle')),
+            Tab('supervision', _('Supervision')),
         ],
         Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
             Tab('project', pgettext('tab', 'Research project')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
+        ],
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('accounting', _('Accounting')),
         ],
         Tab('confirmation', pgettext('tab', 'Confirmation'), 'award'): [
             Tab('confirmation', _('Confirmation exam')),
@@ -362,15 +385,9 @@ TAB_TREES = {
             Tab('jury', _('Jury composition')),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('history-all', _('All history')),
-            Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
             Tab('debug', _('Debug'), 'bug'),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
-        ],
-        # TODO Documents
     },
     CONTEXT_GENERAL: {
         Tab('checklist', _('Checklist'), 'list-check'): [
@@ -515,8 +532,9 @@ def current_subtabs(context):
 
 def get_current_context(admission: Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]):
     if isinstance(admission, DoctorateAdmission):
-        if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
-            return CONTEXT_ADMISSION
+        # TODO doctorate refactorization
+        if admission.status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
+            return CONTEXT_DOCTORATE_AFTER_ENROLMENT
         return CONTEXT_DOCTORATE
     elif isinstance(admission, GeneralEducationAdmission):
         return CONTEXT_GENERAL

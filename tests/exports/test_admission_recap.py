@@ -1512,6 +1512,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             type_admission='',
             type_contrat_travail='',
             type_financement='',
+            langue_contact_candidat=settings.LANGUAGE_CODE_FR,
+            documents_demandes={},
+            documents_libres_sic_uclouvain=[],
+            documents_libres_fac_uclouvain=[],
         )
         cls.continuing_context = _ResumePropositionDTO(
             identification=identification_dto,

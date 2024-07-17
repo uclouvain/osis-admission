@@ -339,6 +339,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_complementary_training',
             'retrieve_course_enrollment',
             'retrieve_jury_preparation',
+            'retrieve_documents',
+            'update_documents',
         ]
 
         self.assertActionLinks(proposition['links'], allowed_actions, forbidden_actions)
@@ -567,6 +569,8 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'retrieve_course_enrollment',
             'retrieve_jury_preparation',
             'list_jury_members',
+            'retrieve_documents',
+            'update_documents',
         ]
         self.assertActionLinks(response.data['links'], allowed_actions, forbidden_actions)
 

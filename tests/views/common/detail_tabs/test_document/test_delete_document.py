@@ -354,3 +354,216 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
                 **self.default_headers,
             )
             self.assertEqual(response.status_code, 204)
+
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_doctorate_sic_manager_deletes_a_document(self, frozen_time):
+        self.init_documents(for_sic=True, admission=self.doctorate_admission)
+
+        base_url = 'admission:doctorate:document:delete'
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        # Unknown document
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier='unknown',
+            ),
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        for identifier in [
+            # A SIC manager cannot delete FAC documents
+            self.fac_free_non_requestable_internal_document,
+            self.fac_free_requestable_candidate_document_with_default_file,
+            self.fac_free_requestable_document,
+            # A manager cannot delete a system document
+            f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
+        ]:
+            response = self.client.delete(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 403)
+
+        # A SIC manager can delete SIC documents
+        # Internal document
+        frozen_time.move_to('2022-01-03')
+        self.doctorate_admission.last_update_author = None
+        self.doctorate_admission.save(update_fields=['last_update_author'])
+        self.doctorate_admission.refresh_from_db()
+        document_uuid = uuid.UUID(self.sic_free_non_requestable_internal_document.split('.')[-1])
+        self.assertIn(document_uuid, self.doctorate_admission.uclouvain_sic_documents)
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier=self.sic_free_non_requestable_internal_document,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.doctorate_admission.refresh_from_db()
+        self.assertNotIn(document_uuid, self.doctorate_admission.uclouvain_sic_documents)
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+        # Requestable document
+        specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
+        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        frozen_time.move_to('2022-01-04')
+        self.doctorate_admission.last_update_author = None
+        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+
+        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
+
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier=self.sic_free_requestable_document,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.doctorate_admission.refresh_from_db()
+        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
+        self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+        # Non free document
+        self.doctorate_admission.curriculum = [uuid.uuid4()]
+        frozen_time.move_to('2022-01-05')
+        self.doctorate_admission.last_update_author = None
+        self.doctorate_admission.save(update_fields=['curriculum', 'last_update_author'])
+
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 204)
+
+        self.doctorate_admission.refresh_from_db()
+        self.assertEqual(self.doctorate_admission.curriculum, [])
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_doctorate_fac_manager_deletes_a_document(self, frozen_time):
+        self.init_documents(for_fac=True, admission=self.doctorate_admission)
+
+        base_url = 'admission:doctorate:document:delete'
+
+        self.client.force_login(user=self.doctorate_fac_manager_user)
+
+        # Unknown document
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier='unknown',
+            ),
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        for identifier in [
+            # A FAC manager cannot delete SIC documents
+            self.sic_free_non_requestable_internal_document,
+            self.sic_free_requestable_candidate_document_with_default_file,
+            self.sic_free_requestable_document,
+            # A manager cannot delete a system document
+            f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
+        ]:
+            response = self.client.delete(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 403)
+
+        # A FAC manager can delete FAC documents
+        # Internal document
+        frozen_time.move_to('2022-01-03')
+        self.doctorate_admission.last_update_author = None
+        self.doctorate_admission.save(update_fields=['last_update_author'])
+        self.doctorate_admission.refresh_from_db()
+        document_uuid = uuid.UUID(self.fac_free_non_requestable_internal_document.split('.')[-1])
+        self.assertIn(document_uuid, self.doctorate_admission.uclouvain_fac_documents)
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier=self.fac_free_non_requestable_internal_document,
+            ),
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.doctorate_admission.refresh_from_db()
+        self.assertNotIn(document_uuid, self.doctorate_admission.uclouvain_fac_documents)
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.doctorate_fac_manager_user.person)
+
+        # Requestable document
+        specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
+        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        frozen_time.move_to('2022-01-04')
+        self.doctorate_admission.last_update_author = None
+        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+
+        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
+
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier=self.fac_free_requestable_document,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.doctorate_admission.refresh_from_db()
+        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
+        self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.doctorate_fac_manager_user.person)
+
+        # Non free document
+        response = self.client.delete(
+            resolve_url(
+                base_url,
+                uuid=self.doctorate_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 403)

@@ -82,6 +82,7 @@ class PropositionDTO(interface.DTO):
     prenom_candidat: str
     nom_candidat: str
     nationalite_candidat: str
+    langue_contact_candidat: str
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     soumise_le: Optional[datetime.datetime]
@@ -90,6 +91,9 @@ class PropositionDTO(interface.DTO):
     curriculum: List[str]
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+    documents_demandes: Dict
+    documents_libres_fac_uclouvain: List[str]
+    documents_libres_sic_uclouvain: List[str]
 
     @property
     def est_non_soumise(self):
