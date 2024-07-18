@@ -408,8 +408,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
     @classmethod
     def load_dto_from_model(cls, admission: BaseAdmission, language_is_french: bool) -> DemandeRechercheDTO:
-        if hasattr(admission.candidate, 'personmergeproposal') and \
-            admission.candidate.personmergeproposal.registration_id_sent_to_digit:
+        if (
+            hasattr(admission.candidate, 'personmergeproposal')
+            and admission.candidate.personmergeproposal.registration_id_sent_to_digit
+        ):
             noma_candidat = admission.candidate.personmergeproposal.registration_id_sent_to_digit
         elif admission.candidate.student_set.exists():
             noma_candidat = admission.candidate.student_set.first().registration_id
@@ -460,4 +462,5 @@ class ListerToutesDemandes(IListerToutesDemandes):
             est_premiere_annee=admission.est_premiere_annee,
             poursuite_de_cycle=admission.cycle_pursuit,
             annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year else None,
+            adresse_email_candidat=admission.candidate.private_email,
         )
