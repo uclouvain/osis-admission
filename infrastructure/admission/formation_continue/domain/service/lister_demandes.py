@@ -59,6 +59,7 @@ class ListerDemandesService(IListerDemandesService):
         sigles_formations: Optional[List] = None,
         inscription_requise: Optional[bool] = None,
         paye: Optional[bool] = None,
+        marque_d_interet: Optional[bool] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
@@ -116,6 +117,9 @@ class ListerDemandesService(IListerDemandesService):
 
         if paye is not None:
             qs = qs.filter(in_payement_order=paye)
+
+        if marque_d_interet:
+            qs = qs.filter(interested_mark=marque_d_interet)
 
         if facultes:
             related_entities = get_entities_with_descendants_ids(facultes)
@@ -187,14 +191,20 @@ class ListerDemandesService(IListerDemandesService):
         admission: ContinuingEducationAdmission,
         translated_fields_names: Dict[str, str],
     ) -> DemandeRechercheDTO:
+        if hasattr(admission.candidate, 'personmergeproposal') and \
+                admission.candidate.personmergeproposal.registration_id_sent_to_digit:
+            noma_candidat = admission.candidate.personmergeproposal.registration_id_sent_to_digit
+        elif admission.candidate.student_set.exists():
+            noma_candidat = admission.candidate.student_set.first().registration_id
+        else:
+            noma_candidat = ""
+
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
-            noma_candidat=admission.candidate.student_set.first().registration_id
-            if admission.candidate.student_set.exists()
-            else '',
+            noma_candidat=noma_candidat,
             courriel_candidat=admission.candidate.email,
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,

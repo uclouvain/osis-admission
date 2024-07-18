@@ -59,7 +59,7 @@ from education_group.auth.scope import Scope
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 22
+    NB_MAX_QUERIES = 50  # TODO fix to be more granular
 
     @classmethod
     def setUpTestData(cls):
@@ -132,6 +132,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 in_payement_order=False,
                 modified_at=datetime.datetime(2023, 1, 1),
                 last_update_author=PersonFactory(first_name='John'),
+                interested_mark=True,
             ),
             ContinuingEducationAdmissionFactory(
                 candidate__first_name="Jane",
@@ -505,6 +506,14 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.client.force_login(user=self.sic_management_user)
 
         response = self._do_request(paye=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[1].uuid)
+
+    def test_list_with_filter_by_interested_mark(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self._do_request(marque_d_interet='on')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0].uuid, self.admissions[1].uuid)

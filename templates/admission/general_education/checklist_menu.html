@@ -42,13 +42,6 @@
             {% if checklist_additional_icons and checklist_additional_icons|get_item_or_none:checklist_item_name %}
               {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name additional_icon=checklist_additional_icons|get_item:checklist_item_name title=checklist_additional_icons_title|get_item:checklist_item_name %}
             {% endif %}
-            {% with original_admission.candidate.personmergeproposal.status as merge_status %}
-                {% if checklist_item_name == 'donnees_personnelles' %}
-                    {% if merge_status == 'MATCH_FOUND' or merge_status == 'PENDING' %}
-                        <i class="fas fa-warning text-warning"></i>
-                    {% endif %}
-                {% endif %}
-            {% endwith %}
           </a>
         </div>
         {% if current.enfants %}

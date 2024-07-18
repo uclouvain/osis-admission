@@ -31,7 +31,7 @@ from admission.ddd.admission.repository.i_digit import IDigitRepository
 
 
 def recuperer_propositions_en_erreur(
-    cmd: 'RetrieveListePropositionFusionEnErreurQuery',
+    query: 'RetrieveListePropositionFusionEnErreurQuery',
     digit_repository: 'IDigitRepository',
 ) -> List[PropositionFusionPersonneDTO]:
     return digit_repository.retrieve_list_error_merge_proposals()

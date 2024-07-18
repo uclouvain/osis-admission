@@ -142,11 +142,18 @@ class BaseAdmissionQuerySet(models.QuerySet):
 
     def annotate_with_student_registration_id(self):
         return self.annotate(
-            student_registration_id=models.Subquery(
+            person_merge_proposal_noma=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
+            existing_student_noma=models.Subquery(
                 Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
                     'registration_id'
                 )[:1]
             ),
+        ).annotate(
+            student_registration_id=Case(
+                When(person_merge_proposal_noma__isnull=False, then='person_merge_proposal_noma'),
+                When(existing_student_noma__isnull=False, then='existing_student_noma'),
+                default=Value('')
+            )
         )
 
     def annotate_training_management_faculty(self):

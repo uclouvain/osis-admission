@@ -328,6 +328,7 @@ class ListerDemandesQuery(SortedQueryRequest):
     inscription_requise: Optional[bool] = None
     paye: Optional[bool] = None
     demandeur: Optional[str] = ''
+    marque_d_interet: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

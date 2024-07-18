@@ -39,6 +39,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     DerogationFinancement,
 )
+from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
@@ -131,12 +132,15 @@ class FinancabiliteApprovalSetRuleViewTestCase(TestCase):
 
         response = self.client.post(
             self.url,
-            data={'financabilite-approval-financability_rule': SituationFinancabilite.ACQUIS_100_POURCENT_EN_N_MOINS_1.name},
+            data={
+                'financabilite-approval-financability_rule': SituationFinancabilite.ACQUIS_100_POURCENT_EN_N_MOINS_1.name
+            },
             **self.default_headers,
         )
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get("HX-Refresh"))
         self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
 
         # Check that the admission has been updated
@@ -257,6 +261,7 @@ class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get("HX-Refresh"))
         self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
 
         # Check that the admission has been updated
@@ -424,6 +429,40 @@ class FinancabiliteDerogationViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.financability_dispensation_status,
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
+        )
+
+    def test_refus_post_with_other_reasons(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        refusal_reason = RefusalReasonFactory()
+        self.general_admission.refusal_reasons.set([refusal_reason])
+
+        url = resolve_url(
+            'admission:general-education:financability-derogation-refus',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={'financability-dispensation-refusal-reasons': [str(refusal_reason.uuid), 'Autre']},
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.financability_dispensation_status,
+            DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
+        )
+        self.assertQuerysetEqual(
+            self.general_admission.refusal_reasons.all(),
+            [refusal_reason],
+        )
+        self.assertListEqual(
+            self.general_admission.other_refusal_reasons,
+            ['Autre'],
         )
 
     def test_accord_post(self):

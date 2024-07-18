@@ -39,11 +39,11 @@ class IDigitRepository:
         raise NotImplementedError
 
     @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
+    def get_last_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         raise NotImplementedError
 
     @classmethod
-    def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
+    def retrieve_person_ticket_status_from_digit(cls, ticket_uuid: str) -> Optional[str]:
         raise NotImplementedError
 
     @classmethod
@@ -59,7 +59,7 @@ class IDigitRepository:
         raise NotImplementedError
 
     @classmethod
-    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str):
+    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str, ticket_uuid: str):
         raise NotImplementedError
 
     @classmethod

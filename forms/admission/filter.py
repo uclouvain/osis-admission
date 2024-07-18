@@ -25,10 +25,7 @@
 # ##############################################################################
 import re
 
-from dal import forward
 from django import forms
-from django.conf import settings
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy, get_language
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
@@ -36,7 +33,7 @@ from admission.contrib.models import Scholarship
 from admission.contrib.models.working_list import WorkingList
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
@@ -53,15 +50,12 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
 from base.forms.utils import autocomplete
 from base.forms.widgets import Select2MultipleCheckboxesWidget
-from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
-from education_group.contrib.models import EducationGroupRoleModel
 from education_group.forms.fields import MainCampusChoiceField
-from osis_role.contrib.models import EntityRoleModel
 
 REGEX_REFERENCE = r'\d{4}\.\d{4}$'
 
@@ -279,7 +273,7 @@ class AllAdmissionsFilterForm(CommonAdmissionFilterForm):
             (True, _('Yes')),
             (False, _('No')),
         ),
-        widget=forms.Select(attrs={"class": "form-control"})
+        widget=forms.Select(attrs={"class": "form-control"}),
     )
 
     liste_travail = WorkingListField(
@@ -394,6 +388,11 @@ class ContinuingAdmissionsFilterForm(CommonAdmissionFilterForm):
         ),
     )
 
+    marque_d_interet = forms.BooleanField(
+        label=_('Interested mark'),
+        required=False,
+    )
+
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -401,7 +400,6 @@ class ContinuingAdmissionsFilterForm(CommonAdmissionFilterForm):
             AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT
         )
 
-        self.fields['etats'].label = _('Status')
         self.fields['entites'].label = _('Faculty')
         self.fields['matricule_candidat'].label = _('Last name / First name / Email / NOMA')
 

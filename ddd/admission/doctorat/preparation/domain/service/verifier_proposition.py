@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 from functools import partial
 from typing import List
 
+from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
@@ -36,6 +37,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -123,3 +125,20 @@ class VerifierProposition(interface.DomainService):
                 matricule=proposition_candidat.matricule_candidat,
             ),
         )
+
+    @classmethod
+    def determiner_type_demande(
+        cls,
+        proposition: 'Proposition',
+        titres: 'Titres',
+        calendrier_inscription: 'ICalendrierInscription',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ) -> 'TypeDemande':
+        # (Nationalité UE+5)
+        #   ET (tous les diplômes belges (y compris secondaires si déclaré dans le détail)) = inscription
+        est_ue_plus_5 = calendrier_inscription.est_ue_plus_5(
+            profil_candidat_translator.get_identification(proposition.matricule_candidat),
+            situation_assimilation=None,  # ne pas prendre en compte le critère d'assimilation
+        )
+        diplomes_tous_belge = set(titres.get_valid_conditions()) <= set(DIPLOMES_ACCES_BELGE)
+        return TypeDemande.INSCRIPTION if est_ue_plus_5 and diplomes_tous_belge else TypeDemande.ADMISSION
