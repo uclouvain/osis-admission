@@ -1260,9 +1260,6 @@ msgstr "Avis de la CDD"
 msgid "CDD status"
 msgstr "Statut CDD"
 
-msgid "CDD:"
-msgstr "CDD :"
-
 msgid "CDDs"
 msgstr "CDDs"
 
@@ -2589,9 +2586,6 @@ msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 msgid "Doctor"
 msgstr "Docteur"
 
-msgid "Doctoral student:"
-msgstr "Doctorant :"
-
 msgid "Doctorate admission"
 msgstr "Admission en doctorat"
 
@@ -3112,6 +3106,9 @@ msgstr "FWB - Crédits acquis"
 
 msgid "FWB - Registered credits"
 msgstr "FWB - Crédits inscrits"
+
+msgid "FWB Cotutelle"
+msgstr "Cotutelle FWB"
 
 msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
@@ -6585,9 +6582,6 @@ msgstr "Commentaire de SIC pour la Faculté"
 
 msgid "SIC status"
 msgstr "Statut SIC"
-
-msgid "SIC:"
-msgstr "SIC :"
 
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"

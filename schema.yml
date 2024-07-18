@@ -6067,6 +6067,8 @@ components:
                 properties:
                   sigle:
                     type: string
+                  code:
+                    type: string
                   annee:
                     type: integer
                   intitule:
@@ -6081,6 +6083,7 @@ components:
                     type: string
                 required:
                 - sigle
+                - code
                 - annee
                 - intitule
                 - sigle_entite_gestion
@@ -6576,6 +6579,8 @@ components:
           properties:
             sigle:
               type: string
+            code:
+              type: string
             annee:
               type: integer
             intitule:
@@ -6590,6 +6595,7 @@ components:
               type: string
           required:
           - sigle
+          - code
           - annee
           - intitule
           - sigle_entite_gestion
@@ -7385,6 +7391,8 @@ components:
           properties:
             sigle:
               type: string
+            code:
+              type: string
             annee:
               type: integer
             intitule:
@@ -7399,6 +7407,7 @@ components:
               type: string
           required:
           - sigle
+          - code
           - annee
           - intitule
           - sigle_entite_gestion
@@ -8228,6 +8237,8 @@ components:
               properties:
                 sigle:
                   type: string
+                code:
+                  type: string
                 annee:
                   type: integer
                 intitule:
@@ -8242,6 +8253,7 @@ components:
                   type: string
               required:
               - sigle
+              - code
               - annee
               - intitule
               - sigle_entite_gestion
