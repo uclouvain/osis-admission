@@ -31,6 +31,8 @@ from typing import Optional
 from django.conf import settings
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.domain.service.i_periode_soumission_ticket_digit import \
+    IPeriodeSoumissionTicketDigitTranslator
 from admission.ddd.admission.domain.validator.exceptions import NotInAccountCreationPeriodException, \
     AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -70,15 +72,15 @@ class IDigitService(interface.DomainService):
 
     @classmethod
     def verifier_peut_soumettre_ticket_creation(
-            cls,
-            proposition: Proposition,
+        cls,
+        proposition: Proposition,
+        periode_soumission_ticket_digit_translator: 'IPeriodeSoumissionTicketDigitTranslator'
     ):
         logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
         try:
-            # replace with date from academic calendar
-            open_year = 2024
-            if not proposition.annee_calculee == open_year:
+            periodes_soumission_ticket_digit = periode_soumission_ticket_digit_translator.get_periodes_actives()
+            if proposition.annee_calculee not in [p.annee for p in periodes_soumission_ticket_digit]:
                 raise NotInAccountCreationPeriodException(matricule_candidat=proposition.matricule_candidat)
 
             if proposition.type_demande == TypeDemande.ADMISSION and proposition.statut not in {

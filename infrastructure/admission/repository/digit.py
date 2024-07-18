@@ -43,11 +43,13 @@ from admission.ddd.admission.dtos.validation_ticket_response import ValidationTi
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.templatetags.admission import format_matricule
+from base.business.student import find_student_by_discriminating
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus, \
     PersonTicketCreationMergeType
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.models.student import Student
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
@@ -61,17 +63,24 @@ class DigitRepository(IDigitRepository):
         if extra_ticket_data is None:
             extra_ticket_data = {}
 
-        # get proposal merge person if any is linked
-        merge_person = None
-        with contextlib.suppress(PersonMergeProposal.DoesNotExist):
+        try:
             proposition_fusion = PersonMergeProposal.objects.get(original_person=candidate)
+            proposition_fusion.registration_id_sent_to_digit = noma
+            proposition_fusion.save()
             merge_person = proposition_fusion.proposal_merge_person
-            if noma:
-                proposition_fusion.registration_id_sent_to_digit = noma
-                proposition_fusion.save()
+        except PersonMergeProposal.DoesNotExist:
+            proposition_fusion, _ = PersonMergeProposal.objects.update_or_create(
+                original_person=candidate,
+                defaults={
+                    "registration_id_sent_to_digit": noma,
+                    "status": PersonMergeStatus.NO_MATCH.name,
+                    "proposal_merge_person": None,
+                    "last_similarity_result_update": datetime.now(),
+                }
+            )
+            merge_person = None
 
         person = merge_person if merge_person and _is_valid_merge_person(merge_person) else candidate
-
         addresses = candidate.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
 
         ticket_response = _request_person_ticket_creation(person, noma, addresses, extra_ticket_data)
@@ -130,23 +139,29 @@ class DigitRepository(IDigitRepository):
 
 
     @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
+    def get_last_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         if not waffle.switch_is_active('fusion-digit'):
             return None
 
-        try:
-            ticket = PersonTicketCreation.objects.select_related('person').get(person__global_id=global_id)
+        ticket = PersonTicketCreation.objects.order_by(
+            '-created_at'
+        ).select_related('person').filter(
+            person__global_id=global_id
+        ).first()
+
+        if ticket:
             return StatutTicketPersonneDTO(
+                uuid=str(ticket.uuid),
                 request_id=ticket.request_id,
                 matricule=ticket.person.global_id,
                 nom=ticket.person.last_name,
-                noma=ticket.person.last_registration_id,
+                noma=ticket.person.personmergeproposal.registration_id_sent_to_digit,
                 prenom=ticket.person.first_name,
                 statut=ticket.status,
                 errors=[{'msg': error['msg'], 'code': error['errorCode']['errorCode']} for error in ticket.errors],
+                type_fusion=ticket.merge_type,
             )
-        except PersonTicketCreation.DoesNotExist:
-            return None
+
 
     @classmethod
     def retrieve_person_ticket_status_from_digit(cls, ticket_uuid: str) -> Optional[str]:
@@ -175,15 +190,22 @@ class DigitRepository(IDigitRepository):
                 ]
             )
         ).select_related('person').values(
-            'uuid', 'request_id', 'person__last_registration_id', 'person__last_name', 'person__first_name',
-            'person__global_id', 'status', 'errors', 'merge_type'
+            'uuid',
+            'request_id',
+            'person__personmergeproposal__registration_id_sent_to_digit',
+            'person__last_name',
+            'person__first_name',
+            'person__global_id',
+            'status',
+            'errors',
+            'merge_type',
         ).order_by('created_at')
         return [
             StatutTicketPersonneDTO(
                 uuid=str(ticket['uuid']),
                 request_id=ticket['request_id'],
                 matricule=ticket['person__global_id'],
-                noma=ticket['person__last_registration_id'],
+                noma=ticket['person__personmergeproposal__registration_id_sent_to_digit'],
                 nom=ticket['person__last_name'],
                 prenom=ticket['person__first_name'],
                 statut=ticket['status'],
@@ -274,10 +296,15 @@ class DigitRepository(IDigitRepository):
     @classmethod
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
         candidate = Person.objects.get(global_id=global_id)
-        if hasattr(candidate, 'personmergeproposal'):
-            return candidate.personmergeproposal.registration_id_sent_to_digit or None
-        else:
-            return None
+
+        # Check if already a personmergeproposal with generated noma
+        if hasattr(candidate, 'personmergeproposal') and candidate.personmergeproposal.registration_id_sent_to_digit:
+            return candidate.personmergeproposal.registration_id_sent_to_digit
+
+        # Check if person is already know in OSIS side
+        student = find_student_by_discriminating(qs=Student.objects.filter(person=candidate))
+        if student is not None and student.registration_id:
+            return student.registration_id
 
     @classmethod
     def has_pending_digit_creation_ticket(cls, global_id: str) -> bool:
@@ -339,18 +366,22 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"errors": [], "valid": True}
     else:
-        logger.info(
-            f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data))}"
-        )
-        response = requests.post(
-            headers={
-                'Content-Type': 'application/json',
-                'Authorization': settings.ESB_AUTHORIZATION,
-            },
-            data=json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data)),
-            url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
-        )
-        return response.json()
+        try:
+            logger.info(
+                f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data))}"
+            )
+            response = requests.post(
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': settings.ESB_AUTHORIZATION,
+                },
+                data=json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data)),
+                url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
+            )
+            return response.json()
+        except Exception:
+            logger.info("An error occured when try to call DigIT endpoint valider le ticket.")
+            return {"errors": [{"errorCode": "OSIS_CAN_NOT_REACH_DIGIT"}], "valid": False}
 
 
 def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str = None, sap_number: str = None):

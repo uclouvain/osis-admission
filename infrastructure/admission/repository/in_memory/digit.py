@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from typing import Optional, List
 
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
@@ -40,6 +41,8 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
         prenom='firstname',
         statut='CREATED',
         errors=[],
+        type_fusion="MEGE",
+        uuid="43f8dc86-5a77-4852-a0a0-1efc994cf843",
     )
 
     @classmethod
@@ -47,7 +50,7 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
         pass
 
     @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
+    def get_last_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         return cls.statut_ticket
 
     @classmethod
