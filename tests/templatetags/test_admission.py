@@ -312,7 +312,7 @@ class AdmissionTabsTestCase(TestCase):
             ),
         }
         result = current_subtabs(context)
-        self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('confirmation', '')])
+        self.assertEqual(result['subtabs'], TAB_TREES['doctorate-after-enrolment'][Tab('confirmation', '')])
 
 
 class AdmissionPanelTagTestCase(TestCase):

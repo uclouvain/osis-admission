@@ -41,6 +41,7 @@ from admission.ddd.admission.commands import (
     FusionnerCandidatAvecPersonneExistanteCommand, RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
     recuperer_pdf_temporaire_decision_sic,
@@ -112,8 +113,9 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
-from admission.infrastructure.admission.domain.service.client_comptabilite_translator import \
-    ClientComptabiliteTranslator
+from admission.infrastructure.admission.domain.service.client_comptabilite_translator import (
+    ClientComptabiliteTranslator,
+)
 from admission.infrastructure.admission.domain.service.digit import DigitService
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
@@ -171,6 +173,7 @@ def _call_if_digit_switch_active(callable_fn):
     else:
         import logging
         from django.conf import settings
+
         logger = logging.getLogger(settings.DEFAULT_LOGGER)
         logger.info(f'Fusion digit switch not active - unable to call {callable_fn.func.__name__}')
 
@@ -376,6 +379,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=EmplacementDocumentRepository(),
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(

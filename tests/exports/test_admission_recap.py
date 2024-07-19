@@ -523,7 +523,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         admission = ContinuingEducationAdmissionFactory(
             candidate=candidate,
             residence_permit=['file-uuid'],
-            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            submitted=True,
         )
 
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
@@ -1512,6 +1512,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             type_admission='',
             type_contrat_travail='',
             type_financement='',
+            langue_contact_candidat=settings.LANGUAGE_CODE_FR,
+            documents_demandes={},
+            documents_libres_sic_uclouvain=[],
+            documents_libres_fac_uclouvain=[],
         )
         cls.continuing_context = _ResumePropositionDTO(
             identification=identification_dto,

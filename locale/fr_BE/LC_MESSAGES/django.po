@@ -627,6 +627,9 @@ msgstr "Export des demandes d'admission"
 msgid "Admission conditions not met."
 msgstr "Conditions d'accès non remplies."
 
+msgid "Admission context"
+msgstr "Contexte d'admission"
+
 msgid "Admission date"
 msgstr "Date admission"
 
@@ -644,6 +647,9 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
+
+msgid "Admission has been sent to EPC."
+msgstr "L'admission a été envoyé en EPC."
 
 msgid ""
 "Admission is not yet valid for searching UCLouvain account. The following "
@@ -1478,9 +1484,6 @@ msgstr "Annulée"
 msgid "Cancelled application"
 msgstr "Demande annulée"
 
-msgid "Cancelled application by a manager"
-msgstr "Demande annulée par un gestionnaire"
-
 msgid "Candidate"
 msgstr "Candidat"
 
@@ -1661,6 +1664,9 @@ msgstr "Filtres de la checklist"
 
 msgid "Checklist filters mode"
 msgstr "Le mode des filtres de la checklist"
+
+msgid "Checklist tab"
+msgstr "Onglet de checklist"
 
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
@@ -1904,6 +1910,10 @@ msgstr "Personne de contact pour la composition du programme annuel (PAE)"
 msgid "Context"
 msgstr "Contexte"
 
+msgid "Continuing education"
+msgstr "Formation continue"
+
+msgctxt "admission context"
 msgid "Continuing education"
 msgstr "Formation continue"
 
@@ -2592,6 +2602,10 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr "Candidat.e doctorant.e"
 
+msgctxt "admission context"
+msgid "Doctorate education"
+msgstr "Formation doctorale"
+
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
@@ -3075,6 +3089,9 @@ msgstr "Modification / réorientation externe"
 msgid "External reorientation/modification"
 msgstr "Réorientation/modification externe"
 
+msgid "FAC"
+msgstr "FAC"
+
 msgid "FNRS"
 msgstr "FNRS"
 
@@ -3476,6 +3493,10 @@ msgstr "Général"
 
 msgid "General data"
 msgstr "Données générales"
+
+msgctxt "admission context"
+msgid "General education"
+msgstr "Formation générale"
 
 msgid "General education admission"
 msgstr "Admission en formation générale"
@@ -4625,6 +4646,13 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for doctorate education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que tous les documents réclamés "
+"ont été reçus pour sa demande en formation doctorale"
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que tous les documents réclamés "
@@ -4672,6 +4700,14 @@ msgstr ""
 "E-mail envoyé au candidat pour l'informer que certains documents réclamés "
 "ont été reçus et que d'autres sont encore manquants pour sa demande en "
 "formation continue"
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for doctorate education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que certains documents réclamés "
+"ont été reçus et que d'autres sont encore manquants pour sa demande en "
+"formation doctorale"
 
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
@@ -6532,6 +6568,9 @@ msgstr ""
 "Types d'activité pour la catégorie Service institutionnel, didactique et "
 "d'expertise scientifique"
 
+msgid "SIC"
+msgstr "SIC"
+
 msgid "SIC Approval"
 msgstr "Autorisation SIC"
 
@@ -6707,6 +6746,9 @@ msgstr "Expéditeur"
 
 msgid "Sent to digit"
 msgstr "Envoyer à DigIT"
+
+msgid "Sent to EPC"
+msgstr "Envoyée en EPC"
 
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
@@ -7234,6 +7276,9 @@ msgstr "Le candidat doit se présenter en SIC"
 
 msgid "The certificate of achievement is being generated."
 msgstr "L'attestation de réussite est en cours de génération."
+
+msgid "The checklist tab is not valid for this admission context."
+msgstr "Cet onglet de checklist n'est pas valide pour ce contexte d'admission."
 
 msgid ""
 "The closing of the application has important consequences (canceling the "

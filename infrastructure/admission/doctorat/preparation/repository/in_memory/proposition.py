@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -64,6 +64,7 @@ class _Candidat:
     prenom: str
     nom: str
     nationalite: str
+    langue_contact: str
 
 
 @dataclass
@@ -114,13 +115,19 @@ class PropositionInMemoryRepository(
         ),
     }
     candidats = {
-        "0123456789": _Candidat("Jean", "Dupont", "France"),
-        "0000000001": _Candidat("Michel", "Durand", "Belgique"),
-        "candidat": _Candidat("Pierre", "Dupond", "Belgique"),
+        "0123456789": _Candidat("Jean", "Dupont", "France", "FR"),
+        "0000000001": _Candidat("Michel", "Durand", "Belgique", "FR"),
+        "candidat": _Candidat("Pierre", "Dupond", "Belgique", "FR"),
     }
     instituts = {
         '06de0c3d-3c06-4c93-8eb4-c8648f04f140': _Institut("Institut de l'enseignement supérieur", "IES"),
         '06de0c3d-3c06-4c93-8eb4-c8648f04f141': _Institut("Institut du sport", "IS"),
+    }
+    documents_libres_sic_uclouvain = {
+        'uuid-CERTIFICATE-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f142'],
+    }
+    documents_libres_fac_uclouvain = {
+        'uuid-CERTIFICATE-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f143'],
     }
     entities: List['Proposition'] = []
 
@@ -281,6 +288,7 @@ class PropositionInMemoryRepository(
             nom_candidat=candidat.nom,
             prenom_candidat=candidat.prenom,
             nationalite_candidat=candidat.nationalite,
+            langue_contact_candidat=candidat.langue_contact,
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
@@ -288,4 +296,7 @@ class PropositionInMemoryRepository(
             elements_confirmation=proposition.elements_confirmation,
             pdf_recapitulatif=['recap.pdf'],
             soumise_le=None,
+            documents_demandes=proposition.documents_demandes,
+            documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
+            documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
         )

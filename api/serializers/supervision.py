@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -60,6 +60,8 @@ __all__ = [
     'TutorSerializer',
 ]
 
+from .project import DoctoratePropositionStatusMixin
+
 
 class SupervisionDTOSerializer(DTOSerializer):
     cotutelle = None
@@ -68,11 +70,12 @@ class SupervisionDTOSerializer(DTOSerializer):
         source = GroupeDeSupervisionDTO
 
 
-class ExternalDoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class ExternalDoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositionStatusMixin, DTOSerializer):
     links = None
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
+    documents_demandes = None
 
     class Meta:
         source = PropositionDTO

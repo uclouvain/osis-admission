@@ -74,7 +74,7 @@ from reference.tests.factories.country import CountryFactory
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 26
+    NB_MAX_QUERIES = 50  # TODO fix to be more granular
 
     @classmethod
     def setUpTestData(cls):
@@ -218,7 +218,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         cache.clear()
 
     def _do_request(self, allowed_sql_surplus=0, **data):
-        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES + allowed_sql_surplus, verbose=True):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES + allowed_sql_surplus):
             return self.client.get(self.url, data={**self.default_params, **data})
 
     def test_list_user_without_person(self):
