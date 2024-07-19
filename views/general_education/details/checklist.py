@@ -2258,9 +2258,9 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
             author=self.request.user.person,
         )
 
-        if status == 'GEST_BLOCAGE' and extra.get('to_be_completed') == '0':
-            admission.financability_rule_established_by = request.user.person
-            admission.save(update_fields=['financability_rule_established_by'])
+        admission.financability_rule = ''
+        admission.financability_rule_established_by = None
+        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
 
         return HttpResponseClientRefresh()
 
