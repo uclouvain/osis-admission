@@ -49,6 +49,7 @@ from admission.constants import (
     CONTEXT_GENERAL,
     CONTEXT_CONTINUING,
 )
+from admission.contrib.models.epc_injection import EPCInjectionStatus
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.contrib.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -547,6 +548,10 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     @cached_property
     def admission_context(self):
         return self.get_admission_context()
+
+    @cached_property
+    def sent_to_epc(self):
+        return any(injection.status == EPCInjectionStatus.OK.name for injection in self.epc_injection.all())
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):
