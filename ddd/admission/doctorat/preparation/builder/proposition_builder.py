@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ from typing import Optional, Union
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import projet_non_rempli
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -43,7 +44,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
 from osis_common.ddd import interface
 
 
@@ -60,12 +60,14 @@ class PropositionBuilder(interface.RootEntityBuilder):
     def initier_proposition(
         cls,
         cmd: 'InitierPropositionCommand',
-        doctorat_id: 'FormationIdentity',
+        doctorat: 'Doctorat',
         proposition_repository: 'IPropositionRepository',
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
             justification=cmd.justification,
+            commission_proximite=cmd.commission_proximite,
+            doctorat=doctorat,
         ).validate()
         commission_proximite: Optional[
             Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]
@@ -83,8 +85,9 @@ class PropositionBuilder(interface.RootEntityBuilder):
             statut=ChoixStatutPropositionDoctorale.EN_BROUILLON,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
-            formation_id=doctorat_id,
+            formation_id=doctorat.entity_id,
             matricule_candidat=cmd.matricule_candidat,
             commission_proximite=commission_proximite,
             projet=projet_non_rempli,
+            auteur_derniere_modification=cmd.matricule_candidat,
         )

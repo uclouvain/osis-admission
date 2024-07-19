@@ -463,3 +463,15 @@ class ReclamerDocumentsAuCandidatCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    auteur: str
+
+    type_admission: str
+    commission_proximite: str
+    justification: str
+
+    reponses_questions_specifiques: Dict
