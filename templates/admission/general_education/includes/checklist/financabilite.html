@@ -99,7 +99,9 @@
     {% endif %}
 
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' %}
+      <form autocomplete="off">
       {% bootstrap_form financability_dispensation_form %}
+      </form>
 
       {% bootstrap_form comment_forms.financabilite__derogation %}
 
@@ -190,8 +192,11 @@
         {% endif %}
         <div
             id="financabilite-computed-rule"
+            {% has_perm 'admission.change_checklist' as can_compute_rule %}
+            {% if financabilite_compute_rule_needed and can_compute_rule %}
             hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}"
             hx-trigger="financabiliteComputeRule"
+            {% endif %}
         >
           {% include "admission/general_education/includes/checklist/financabilite_computed_rule.html" %}
         </div>
