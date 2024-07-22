@@ -1668,8 +1668,8 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
         return super().get(request, *args, **kwargs)
 
 
-def get_internal_experiences(noma: str) -> List[ExperienceParcoursInterneDTO]:
-    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(noma=noma))
+def get_internal_experiences(matricule_candidat: str) -> List[ExperienceParcoursInterneDTO]:
+    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(matricule=matricule_candidat))
 
 
 class ApplicationFeesView(
@@ -1865,9 +1865,9 @@ class PastExperiencesAccessTitleView(
                 title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name
                 for title in access_titles.values()
             ):
-                student = Student.objects.filter(person=self.admission.candidate).only('registration_id').first()
-                if student:
-                    internal_experiences = get_internal_experiences(noma=student.registration_id)
+                internal_experiences = get_internal_experiences(
+                    matricule_candidat=command_result.proposition.matricule_candidat,
+                )
 
             context['selected_access_titles_names'] = get_access_titles_names(
                 access_titles=access_titles,
@@ -2258,9 +2258,9 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
             author=self.request.user.person,
         )
 
-        if status == 'GEST_BLOCAGE' and extra.get('to_be_completed') == '0':
-            admission.financability_rule_established_by = request.user.person
-            admission.save(update_fields=['financability_rule_established_by'])
+        admission.financability_rule = ''
+        admission.financability_rule_established_by = None
+        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
 
         return HttpResponseClientRefresh()
 
@@ -2625,7 +2625,7 @@ class ChecklistView(
 
     @cached_property
     def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
-        return get_internal_experiences(noma=self.proposition.noma_candidat)
+        return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
