@@ -176,4 +176,9 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def create_accounting(self, create, extracted, **kwargs):
-        AccountingFactory(admission_id=self.pk)
+        AccountingFactory(
+            admission_id=self.pk,
+            french_community_study_allowance_application=None,
+            sport_affiliation='',
+            is_staff_child=None,
+        )
