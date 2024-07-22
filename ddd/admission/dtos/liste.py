@@ -65,6 +65,7 @@ class DemandeRechercheDTO(interface.DTO):
     poursuite_de_cycle: str
     annee_formation: int
     annee_calculee: Optional[int]
+    adresse_email_candidat: Optional[str]
 
     @property
     def annee_demande(self):

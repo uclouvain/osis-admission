@@ -42,6 +42,7 @@ from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.formation_generale.domain.model.enums import DROITS_INSCRIPTION_MONTANT_VALEURS
+from admission.infrastructure.utils import CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE
 from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.sap_client_creation_source import SAPClientCreationSource
@@ -213,14 +214,16 @@ class InjectionEPCAdmission:
             _, type_document, uuid_question = parties_type_document[1]
         elif len(parties_type_document) == 3:
             # type_document_compose = ONGLET.uuid.TYPE_DOCUMENT
-            _, uuid_experience, type_document = parties_type_document[-1]
+            _, uuid_experience, type_document = parties_type_document
         else:
             # type_document_compose = ONGLET.uuid.annee.TYPE_DOCUMENT (Annuel)
             _, uuid_experience, annee, type_document = parties_type_document
-        if uuid_experience:
+        if uuid_experience and type_document not in CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE:
             uuid_experience = EducationalExperienceYear.objects.filter(
                 educational_experience__uuid=uuid_experience,
             ).latest('academic_year__year').uuid
+        elif uuid_experience:
+            uuid_experience = ProfessionalExperience.objects.get(uuid=uuid_experience).uuid
         return annee, type_document, str(uuid_experience)
 
     @staticmethod
@@ -348,7 +351,8 @@ class InjectionEPCAdmission:
         double_diplome = getattr(admission, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission, 'international_scholarship', None)
         type_erasmus = getattr(admission, 'erasmus_mundus_scholarship', None)
-        annee_condition_acces = getattr(admission, 'admission_requirement_year', None)
+        admission_generale = getattr(admission, 'generaleducationadmission', None)
+        annee_condition_acces = admission_generale.admission_requirement_year.year if admission_generale else None
         return {
             'num_offre': num_offre,
             'validite': validite,
@@ -357,8 +361,8 @@ class InjectionEPCAdmission:
                 if groupe_de_supervision
                 else None
             ),
-            'condition_acces': getattr(admission, 'admission_requirement', None),
-            'annee_condition_acces': annee_condition_acces.year if annee_condition_acces else None,
+            'condition_acces': admission_generale.admission_requirement if admission_generale else None,
+            'annee_condition_acces': annee_condition_acces,
             'double_diplome': str(double_diplome.uuid) if double_diplome else None,
             'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
             'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,

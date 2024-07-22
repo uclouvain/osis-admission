@@ -90,15 +90,28 @@ class DigitService(IDigitService):
         if MOCK_DIGIT_SERVICE_CALL:
             similarity_data = _mock_search_digit_account_return_response()
         else:
-            response = requests.post(
-                headers={
-                    'Content-Type': 'application/json',
-                    'Authorization': settings.ESB_AUTHORIZATION,
-                },
-                data=json.dumps(data),
-                url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
-            )
-            similarity_data = response.json()
+            try:
+                response = requests.post(
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Authorization': settings.ESB_AUTHORIZATION,
+                    },
+                    data=json.dumps(data),
+                    url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
+                )
+                similarity_data = response.json()
+            except Exception:
+                logger.info("An error occured when try to call DigIT endpoint recherche_compte_existant. "
+                            "Set PersonMergeProposal to ERROR")
+                PersonMergeProposal.objects.update_or_create(
+                    original_person=original_person,
+                    defaults={
+                        "status": PersonMergeStatus.ERROR.name,
+                        "similarity_result": {},
+                        "last_similarity_result_update": datetime.datetime.now(),
+                    }
+                )
+                return {}
 
         logger.info(f"DIGIT Response: {similarity_data}")
 

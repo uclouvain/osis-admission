@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-11 15:58+0200\n"
+"POT-Creation-Date: 2024-07-17 10:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -552,6 +552,9 @@ msgstr ""
 msgid "Admission conditions not met."
 msgstr ""
 
+msgid "Admission context"
+msgstr ""
+
 msgid "Admission date"
 msgstr ""
 
@@ -568,6 +571,9 @@ msgid "Admission form item instantiations"
 msgstr ""
 
 msgid "Admission form items"
+msgstr ""
+
+msgid "Admission has been sent to EPC."
 msgstr ""
 
 msgid ""
@@ -646,7 +652,7 @@ msgstr ""
 msgid "An education type"
 msgstr ""
 
-msgid "An error occured during digit ticket creation"
+msgid "An error occured during digit ticket creation : {}"
 msgstr ""
 
 msgid "An error occured during digit ticket creation validation"
@@ -1356,9 +1362,6 @@ msgstr ""
 msgid "Cancelled application"
 msgstr ""
 
-msgid "Cancelled application by a manager"
-msgstr ""
-
 msgid "Candidate"
 msgstr ""
 
@@ -1519,6 +1522,9 @@ msgid "Checklist filters"
 msgstr ""
 
 msgid "Checklist filters mode"
+msgstr ""
+
+msgid "Checklist tab"
 msgstr ""
 
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
@@ -1758,6 +1764,10 @@ msgstr ""
 msgid "Context"
 msgstr ""
 
+msgid "Continuing education"
+msgstr ""
+
+msgctxt "admission context"
 msgid "Continuing education"
 msgstr ""
 
@@ -2385,6 +2395,10 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr ""
 
+msgctxt "admission context"
+msgid "Doctorate education"
+msgstr ""
+
 msgid "Doctorate enrolment applications"
 msgstr ""
 
@@ -2539,9 +2553,6 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Education"
-msgstr ""
-
-msgid "Educational experience"
 msgstr ""
 
 msgid "Educational experiences"
@@ -2838,6 +2849,9 @@ msgid "External reorientation / modification"
 msgstr ""
 
 msgid "External reorientation/modification"
+msgstr ""
+
+msgid "FAC"
 msgstr ""
 
 msgid "FNRS"
@@ -3210,6 +3224,10 @@ msgid "General"
 msgstr ""
 
 msgid "General data"
+msgstr ""
+
+msgctxt "admission context"
+msgid "General education"
 msgstr ""
 
 msgid "General education admission"
@@ -4187,6 +4205,11 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for doctorate education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 
@@ -4218,6 +4241,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
 "been received and some are still missing for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for doctorate education"
 msgstr ""
 
 msgid ""
@@ -4644,6 +4672,9 @@ msgid "No knowledge of languages provided."
 msgstr ""
 
 msgid "No longer designate the document as to be requested"
+msgstr ""
+
+msgid "No merge proposal eligible for this ticket"
 msgstr ""
 
 msgid "No one invited"
@@ -5339,6 +5370,9 @@ msgstr ""
 msgid "Private email"
 msgstr ""
 
+msgid "Private email address"
+msgstr ""
+
 msgid "Processing by Fac"
 msgstr ""
 
@@ -5349,9 +5383,6 @@ msgid "Professional"
 msgstr ""
 
 msgid "Professional email"
-msgstr ""
-
-msgid "Professional experience"
 msgstr ""
 
 msgid "Professional experiences"
@@ -5946,6 +5977,9 @@ msgstr "Services"
 msgid "SERVICE types"
 msgstr ""
 
+msgid "SIC"
+msgstr ""
+
 msgid "SIC Approval"
 msgstr ""
 
@@ -6120,6 +6154,9 @@ msgid "Sender"
 msgstr ""
 
 msgid "Sent to digit"
+msgstr ""
+
+msgid "Sent to EPC"
 msgstr ""
 
 msgid "Sentence indicating the late enrolment (if applicable)."
@@ -6581,6 +6618,9 @@ msgstr ""
 msgid "The certificate of achievement is being generated."
 msgstr ""
 
+msgid "The checklist tab is not valid for this admission context."
+msgstr ""
+
 msgid ""
 "The closing of the application has important consequences (canceling the "
 "requested documents, status reset, etc). Do you confirm the closing?"
@@ -6972,6 +7012,9 @@ msgstr ""
 "There can be no more supervisory panel members in the supervision group."
 
 msgid "There can be no more promoters in the supervision group."
+msgstr ""
+
+msgid "There exists some digit tickets to treat before"
 msgstr ""
 
 msgid ""

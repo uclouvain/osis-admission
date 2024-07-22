@@ -60,7 +60,7 @@ class ChecklistViewTestCase(TestCase):
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            submitted=True,
         )
         cls.candidate = cls.continuing_admission.candidate
 

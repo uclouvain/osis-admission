@@ -199,7 +199,6 @@ class GeneralOtherAdmissionsListViewTestCase(TestCase):
         # Invalid status -> don't retrieve it
         for status in [
             ChoixStatutPropositionContinue.ANNULEE.name,
-            ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name,
             ChoixStatutPropositionContinue.EN_BROUILLON.name,
         ]:
             other_admission.status = status

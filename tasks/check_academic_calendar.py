@@ -1,4 +1,5 @@
 from admission.calendar.admission_calendar import *
+from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 from backoffice.celery import app as celery_app
 
 
@@ -18,4 +19,5 @@ def run() -> dict:  # pragma: no cover
     AdmissionPoolHue5ForeignResidencyCalendar.ensure_consistency_until_n_plus_6()
     AdmissionPoolNonResidentQuotaCalendar.ensure_consistency_until_n_plus_6()
     AdmissionAccessConditionsUrl.ensure_consistency_until_n_plus_6()
+    AdmissionDigitTicketSubmissionCalendar.ensure_consistency_until_n_plus_6()
     return {}

@@ -78,7 +78,7 @@ class RecupererDocumentsReclamesPropositionTestCase(SimpleTestCase):
     def test_recuperer_documents_reclames_proposition(self):
         documents = self.message_bus.invoke(self.cmd)
 
-        self.assertTrue(len(documents), 2)
+        self.assertEqual(len(documents), 2)
 
         # Document non libre faisant l'objet d'une relance
         carte_identite: Optional[EmplacementDocumentDTO] = next(

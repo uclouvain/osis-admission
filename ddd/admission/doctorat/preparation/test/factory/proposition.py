@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,6 +61,11 @@ from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
@@ -182,6 +187,32 @@ class _PropositionFactory(factory.Factory):
         '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
     }
     curriculum = ['file_token.pdf']
+    documents_demandes = factory.lazy_attribute(
+        lambda _: {
+            'CURRICULUM.CURRICULUM': {
+                'last_actor': '00321234',
+                'reason': 'Le document est à mettre à jour.',
+                'type': TypeEmplacementDocument.NON_LIBRE.name,
+                'last_action_at': '2023-01-02T00:00:00',
+                'status': StatutEmplacementDocument.RECLAME.name,
+                'requested_at': '2023-01-02T00:00:00',
+                'deadline_at': '2023-01-19',
+                'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+            'LIBRE_CANDIDAT.36de0c3d-3c06-4c93-8eb4-c8648f04f142': {
+                'last_actor': '00987890',
+                'reason': 'Ce nouveau document pourrait être intéressant.',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                'last_action_at': '2023-01-03T00:00:00',
+                'status': StatutEmplacementDocument.RECLAME.name,
+                'requested_at': '2023-01-03T00:00:00',
+                'deadline_at': '2023-01-19',
+                'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+            },
+        }
+    )
 
 
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
