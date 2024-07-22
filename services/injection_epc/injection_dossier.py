@@ -256,12 +256,9 @@ class InjectionEPCAdmission:
 
     @classmethod
     def _get_etudes_secondaires(cls, candidat: Person, admission: BaseAdmission) -> Tuple[Dict, Dict]:
-        diplome_pertinent = admission.valuated_secondary_studies_person
-        if diplome_pertinent:
-            _, etudes_secondaires = InjectionEPCCurriculum._get_etudes_secondaires(personne=candidat)
-            _, alternative = InjectionEPCCurriculum._get_alternative_etudes_secondaires(personne=candidat)
-            return etudes_secondaires or None, alternative or None
-        return None, None
+        _, etudes_secondaires = InjectionEPCCurriculum._get_etudes_secondaires(personne=candidat)
+        _, alternative = InjectionEPCCurriculum._get_alternative_etudes_secondaires(personne=candidat)
+        return etudes_secondaires or None, alternative or None
 
     @classmethod
     def _get_curriculum_academique(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
@@ -310,15 +307,7 @@ class InjectionEPCAdmission:
         ).order_by('start_date')  # type: QuerySet[ProfessionalExperience]
 
         return [
-            {
-                'osis_uuid': str(experience_pro.uuid),
-                'type_occupation': experience_pro.type,
-                'debut': experience_pro.start_date.strftime("%d/%m/%Y"),
-                'fin': experience_pro.end_date.strftime("%d/%m/%Y"),
-                'intitule_autre_activite': experience_pro.activity,
-                'etablissement_autre': experience_pro.institute_name,
-                'documents': InjectionEPCCurriculum._recuperer_documents(experience_pro),
-            }
+            InjectionEPCCurriculum._build_curriculum_autre_activite(experience_pro)
             for experience_pro in experiences_professionnelles
         ]
 
