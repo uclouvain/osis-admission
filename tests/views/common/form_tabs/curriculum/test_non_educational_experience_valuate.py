@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -33,7 +33,9 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
+from admission.contrib.models.base import (
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -41,17 +43,17 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
-from osis_profile.models import EducationalExperience
+from osis_profile.models import ProfessionalExperience
 
 
 @freezegun.freeze_time('2022-01-01')
-class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
+class CurriculumNonEducationalExperienceValuateViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create data
@@ -64,9 +66,8 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         )
 
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
-            training__management_entity=entity,
-            training__academic_year=cls.academic_years[0],
             candidate=cls.general_admission.candidate,
+            training__management_entity=entity,
             submitted=True,
         )
 
@@ -81,18 +82,18 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
 
     def setUp(self):
         # Create data
-        self.experience: EducationalExperience = EducationalExperienceFactory(
+        self.experience: ProfessionalExperience = ProfessionalExperienceFactory(
             person=self.general_admission.candidate,
         )
 
-        # Targeted url
+        # Targeted urls
         self.valuate_url = resolve_url(
-            'admission:general-education:update:curriculum:educational_valuate',
+            'admission:general-education:update:curriculum:non_educational_valuate',
             uuid=self.general_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
         self.doctorate_valuate_url = resolve_url(
-            'admission:doctorate:update:curriculum:educational_valuate',
+            'admission:doctorate:update:curriculum:non_educational_valuate',
             uuid=self.doctorate_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
@@ -127,7 +128,7 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
 
         response = self.client.post(
             resolve_url(
-                'admission:general-education:update:curriculum:educational_valuate',
+                'admission:general-education:update:curriculum:non_educational_valuate',
                 uuid=self.general_admission.uuid,
                 experience_uuid=uuid.uuid4(),
             ),
@@ -145,8 +146,8 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         # Check that the experience has been valuated
-        valuation = AdmissionEducationalValuatedExperiences.objects.filter(
-            educationalexperience_id=self.experience.uuid,
+        valuation = AdmissionProfessionalValuatedExperiences.objects.filter(
+            professionalexperience_id=self.experience.uuid,
             baseadmission=self.general_admission,
         ).first()
         self.assertIsNotNone(valuation)
@@ -176,8 +177,8 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         response = self.client.post(self.valuate_url)
 
         # Check that the experience has been valuated
-        valuation = AdmissionEducationalValuatedExperiences.objects.filter(
-            educationalexperience_id=self.experience.uuid,
+        valuation = AdmissionProfessionalValuatedExperiences.objects.filter(
+            professionalexperience_id=self.experience.uuid,
             baseadmission=self.general_admission,
         ).first()
         self.assertIsNotNone(valuation)

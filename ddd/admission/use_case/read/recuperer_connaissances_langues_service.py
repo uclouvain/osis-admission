@@ -23,16 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
 
-from django.views.generic import TemplateView
-
-from admission.views.common.mixins import LoadDossierViewMixin
-
-__all__ = [
-    "DoctorateAdmissionCurriculumFormView",
-]
+from admission.ddd.admission.commands import RecupererConnaissancesLanguesQuery
+from admission.ddd.admission.doctorat.preparation.dtos import ConnaissanceLangueDTO
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 
 
-class DoctorateAdmissionCurriculumFormView(LoadDossierViewMixin, TemplateView):
-    template_name = 'admission/doctorate/forms/curriculum.html'
-    permission_required = 'admission.change_admission_curriculum'
+def recuperer_connaissances_langues(
+    cmd: RecupererConnaissancesLanguesQuery,
+    profil_candidat_translator: IProfilCandidatTranslator,
+) -> List[ConnaissanceLangueDTO]:
+    return profil_candidat_translator.get_connaissances_langues(
+        matricule=cmd.matricule_candidat,
+    )
