@@ -146,11 +146,11 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    thesis_language = models.CharField(
-        max_length=255,
-        choices=ChoixLangueRedactionThese.choices(),
+    thesis_language = models.ForeignKey(
+        'reference.Language',
+        on_delete=models.PROTECT,
         verbose_name=_("Thesis language"),
-        default=ChoixLangueRedactionThese.UNDECIDED.name,
+        null=True,
         blank=True,
     )
     thesis_institute = models.ForeignKey(
@@ -462,6 +462,15 @@ class DoctorateAdmission(BaseAdmission):
 
         self.save(update_fields=update_fields)
 
+    def update_requested_documents(self):
+        """Update the requested documents depending on the admission data."""
+        from admission.ddd.admission.doctorat.preparation.commands import (
+            RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
+        )
+        from infrastructure.messages_bus import message_bus_instance
+
+        message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
+
 
 class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
@@ -485,6 +494,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "thesis_institute",
                 "accounting",
                 "international_scholarship",
+                "last_update_author",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),

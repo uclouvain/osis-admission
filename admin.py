@@ -964,10 +964,12 @@ class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
     list_display = [
         'short_label_fr',
         'checklist_tab',
+        'admission_context',
     ]
     list_filter = [
-        ("checklist_tab", admin.EmptyFieldListFilter),
-        "checklist_tab",
+        ('checklist_tab', admin.EmptyFieldListFilter),
+        'checklist_tab',
+        'admission_context',
     ]
     search_fields = [
         'short_label_en',

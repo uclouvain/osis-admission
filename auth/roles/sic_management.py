@@ -28,7 +28,7 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates.common import is_entity_manager
+from admission.auth.predicates.common import is_entity_manager, is_sent_to_epc
 from admission.auth.roles.central_manager import CentralManager
 from osis_role.contrib.models import EntityRoleModel
 
@@ -51,12 +51,12 @@ class SicManagement(EntityRoleModel):
         ruleset = {
             **CentralManager.rule_set(),
             # Listings
-            'admission.checklist_change_sic_decision': rules.always_allow,
+            'admission.checklist_change_sic_decision': rules.always_allow & ~is_sent_to_epc,
             'admission.view_enrolment_applications': rules.always_allow,
             'admission.view_doctorate_enrolment_applications': rules.always_allow,
             'admission.view_continuing_enrolment_applications': rules.always_allow,
             'admission.validate_registration': is_entity_manager,
             # Fusion
-            'admission.merge_candidate_with_known_person': is_entity_manager,
+            'admission.merge_candidate_with_known_person': is_entity_manager & ~is_sent_to_epc,
         }
         return RuleSet(ruleset)

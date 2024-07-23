@@ -67,10 +67,12 @@ class FilterTestCase(TestCase):
             DoctorateAdmissionFactory(
                 training__management_entity=first_doctoral_commission,
                 training__academic_year=academic_years[0],
+                determined_academic_year=academic_years[0],
             ),
             DoctorateAdmissionFactory(
                 training__management_entity=first_doctoral_commission,
                 training__academic_year=academic_years[0],
+                determined_academic_year=academic_years[0],
             ),
         ]
 
@@ -86,10 +88,12 @@ class FilterTestCase(TestCase):
             DoctorateAdmissionFactory(
                 training__management_entity=second_doctoral_commission,
                 training__academic_year=academic_years[1],
+                determined_academic_year=academic_years[1],
             ),
             DoctorateAdmissionFactory(
                 training__management_entity=second_doctoral_commission,
                 training__academic_year=academic_years[1],
+                determined_academic_year=academic_years[1],
             ),
         ]
 
@@ -105,6 +109,7 @@ class FilterTestCase(TestCase):
                 training__management_entity=second_doctoral_commission,
                 training__academic_year=academic_years[1],
                 training__acronym=SIGLE_SCIENCES,
+                determined_academic_year=academic_years[1],
             ),
         ]
 

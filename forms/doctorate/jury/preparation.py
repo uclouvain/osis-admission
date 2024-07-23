@@ -23,11 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixLangueRedactionThese
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
+from admission.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from base.forms.utils.datefield import CustomDateInput
 
 
@@ -53,11 +55,15 @@ class JuryPreparationForm(forms.Form):
         required=False,
         widget=CustomDateInput(),
     )
-    langue_redaction = forms.ChoiceField(
+    langue_redaction = forms.CharField(
         label=_("Thesis language"),
-        choices=ChoixLangueRedactionThese.choices(),
-        initial=ChoixLangueRedactionThese.UNDECIDED.name,
         required=True,
+        widget=autocomplete.ListSelect2(
+            url="admission:autocomplete:language",
+            attrs={
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+            },
+        ),
     )
     langue_soutenance = forms.ChoiceField(
         label=_("Defense language"),

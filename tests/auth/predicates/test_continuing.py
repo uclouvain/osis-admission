@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 from unittest import mock
 
 from django.test import TestCase
@@ -45,6 +45,9 @@ class PredicatesTestCase(TestCase):
             return_value={'perm_name': 'dummy-perm'},
         )
         self.predicate_context_patcher.start()
+        self.admission.status = ChoixStatutPropositionContinue.EN_BROUILLON.name
+        self.admission.submitted_at = None
+        self.admission.save(update_fields=['status', 'submitted_at'])
         self.addCleanup(self.predicate_context_patcher.stop)
 
     @classmethod
@@ -72,20 +75,15 @@ class PredicatesTestCase(TestCase):
         )
 
     def test_is_submitted(self):
-        self._test_admission_statuses(
-            predicate=continuing.is_submitted,
-            admission=self.admission,
-            valid_statuses={
-                ChoixStatutPropositionContinue.CONFIRMEE.name,
-                ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
-                ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
-                ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name,
-                ChoixStatutPropositionContinue.EN_ATTENTE.name,
-                ChoixStatutPropositionContinue.INSCRIPTION_REFUSEE.name,
-                ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name,
-                ChoixStatutPropositionContinue.CLOTUREE.name,
-            },
-        )
+        self.admission.submitted_at = None
+        self.admission.save(update_fields=['submitted_at'])
+
+        self.assertFalse(continuing.is_submitted(self.admission.candidate.user, self.admission))
+
+        self.admission.submitted_at = datetime.datetime.now()
+        self.admission.save(update_fields=['submitted_at'])
+
+        self.assertTrue(continuing.is_submitted(self.admission.candidate.user, self.admission))
 
         self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
         self.general_admission.save(update_fields=['status'])
@@ -114,6 +112,52 @@ class PredicatesTestCase(TestCase):
         self.doctorate_admission.save(update_fields=['status'])
 
         self.assertFalse(continuing.not_cancelled(self.doctorate_admission.candidate.user, self.doctorate_admission))
+
+    def test_is_submitted_or_not_cancelled(self):
+        # Not submitted
+        self.admission.submitted_at = None
+        self.admission.save(update_fields=['submitted_at'])
+
+        self._test_admission_statuses(
+            predicate=continuing.is_submitted_or_not_cancelled,
+            admission=self.admission,
+            valid_statuses=set(ChoixStatutPropositionContinue.get_names())
+            - {ChoixStatutPropositionContinue.ANNULEE.name},
+        )
+
+        # Submitted
+        self.admission.submitted_at = datetime.datetime.now()
+        self.admission.save(update_fields=['submitted_at'])
+
+        self._test_admission_statuses(
+            predicate=continuing.is_submitted_or_not_cancelled,
+            admission=self.admission,
+            valid_statuses=set(ChoixStatutPropositionContinue.get_names()),
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            submitted_at=None,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        self.assertFalse(
+            continuing.is_submitted_or_not_cancelled(
+                doctorate_admission.candidate.user,
+                doctorate_admission,
+            )
+        )
+
+        general_admission = GeneralEducationAdmissionFactory(
+            submitted_at=None,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        self.assertFalse(
+            continuing.is_submitted_or_not_cancelled(
+                general_admission.candidate.user,
+                general_admission,
+            )
+        )
 
     def test_is_continuing(self):
         doctorate_admission = DoctorateAdmissionFactory()
@@ -169,7 +213,6 @@ class PredicatesTestCase(TestCase):
                 ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
                 ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name,
                 ChoixStatutPropositionContinue.CLOTUREE.name,
-                ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name,
             },
         )
 

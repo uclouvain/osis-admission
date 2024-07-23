@@ -181,6 +181,11 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
         editable=False,
     )
+    financability_rule_established_on = models.DateTimeField(
+        verbose_name=_('Financability rule established on'),
+        null=True,
+        editable=False,
+    )
 
     financability_dispensation_status = models.CharField(
         verbose_name=_('Financability dispensation status'),

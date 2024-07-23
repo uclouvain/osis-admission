@@ -30,6 +30,7 @@ from typing import List, Optional, Union
 
 import attr
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import OngletsChecklist as OngletsChecklistDoctorat
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
@@ -71,6 +72,7 @@ class EmplacementDocument(interface.Entity):
         Union[
             OngletsChecklistContinue,
             OngletsChecklistGenerale,
+            OngletsChecklistDoctorat,
         ]
     ] = None
 
