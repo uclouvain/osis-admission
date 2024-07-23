@@ -36,6 +36,7 @@ from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.documents import (
     GeneralRequestedDocumentListView,
     ContinuingRequestedDocumentListView,
+    DoctorateRequestedDocumentListView,
 )
 from admission.api.views.jury import *
 from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet

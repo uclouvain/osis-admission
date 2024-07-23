@@ -38,9 +38,10 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand,
+    FusionnerCandidatAvecPersonneExistanteCommand, RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
     recuperer_pdf_temporaire_decision_sic,
@@ -76,6 +77,8 @@ from admission.ddd.admission.use_case.read import (
 )
 from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
+from admission.ddd.admission.use_case.read.recuperer_propositions_en_erreur_service import \
+    recuperer_propositions_en_erreur
 from admission.ddd.admission.use_case.read.recuperer_statut_ticket_personne import recuperer_statut_ticket_personne
 from admission.ddd.admission.use_case.read.recuperer_tickets_en_attente import recuperer_tickets_en_attente
 from admission.ddd.admission.use_case.write import (
@@ -110,8 +113,9 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
-from admission.infrastructure.admission.domain.service.client_comptabilite_translator import \
-    ClientComptabiliteTranslator
+from admission.infrastructure.admission.domain.service.client_comptabilite_translator import (
+    ClientComptabiliteTranslator,
+)
 from admission.infrastructure.admission.domain.service.digit import DigitService
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
@@ -119,6 +123,8 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
 )
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import \
+    PeriodeSoumissionTicketDigitTranslator
 from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
@@ -167,6 +173,7 @@ def _call_if_digit_switch_active(callable_fn):
     else:
         import logging
         from django.conf import settings
+
         logger = logging.getLogger(settings.DEFAULT_LOGGER)
         logger.info(f'Fusion digit switch not active - unable to call {callable_fn.func.__name__}')
 
@@ -372,6 +379,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=EmplacementDocumentRepository(),
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(
@@ -720,6 +728,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             formation_translator=FormationGeneraleTranslator(),
             client_comptabilite_translator=ClientComptabiliteTranslator(),
+            periode_soumission_ticket_digit_translator=PeriodeSoumissionTicketDigitTranslator(),
         )
     ),
     GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(
@@ -729,6 +738,10 @@ COMMAND_HANDLERS = {
     RetrieveListeTicketsEnAttenteQuery: lambda msg_bus, cmd: recuperer_tickets_en_attente(
         cmd,
         digit_repository=DigitRepository(),
+    ),
+    RetrieveListePropositionFusionEnErreurQuery: lambda msg_bus, query: recuperer_propositions_en_erreur(
+      query,
+      digit_repository=DigitRepository(),
     ),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: (
         lambda msg_bus, cmd: recuperer_statut_ticket_personne_de_digit(

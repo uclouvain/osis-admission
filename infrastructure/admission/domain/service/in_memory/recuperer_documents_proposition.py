@@ -60,6 +60,11 @@ class EmplacementsDocumentsPropositionInMemoryTranslator(IEmplacementsDocumentsP
             'author': '00321234',
             'uploaded_at': '2023-01-03T00:00:00',
         },
+        'file_token.pdf': {
+            'mimetype': PDF_MIME_TYPE,
+            'author': '',
+            'uploaded_at': '2023-01-01T00:00:00',
+        },
     }
 
     @classmethod

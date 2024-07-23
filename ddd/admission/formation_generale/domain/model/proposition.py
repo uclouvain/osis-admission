@@ -97,7 +97,10 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite, SITUATION_FINANCABILITE_PAR_ETAT
+from ddd.logic.financabilite.domain.model.enums.situation import (
+    SituationFinancabilite,
+    SITUATION_FINANCABILITE_PAR_ETAT,
+)
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
@@ -156,6 +159,7 @@ class Proposition(interface.RootEntity):
     financabilite_regle_calcule_le: Optional[datetime.datetime] = None
     financabilite_regle: SituationFinancabilite = ''
     financabilite_regle_etabli_par: str = ''
+    financabilite_regle_etabli_le: Optional[datetime.datetime] = None
 
     financabilite_derogation_statut: DerogationFinancement = ''
     financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
@@ -806,6 +810,7 @@ class Proposition(interface.RootEntity):
     ):
         self.financabilite_regle = financabilite_regle
         self.financabilite_regle_etabli_par = etabli_par
+        self.financabilite_regle_etabli_le = now()
         self.auteur_derniere_modification = auteur_modification
 
         if financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]:
@@ -1028,8 +1033,6 @@ class Proposition(interface.RootEntity):
                 avec_conditions_complementaires=self.avec_conditions_complementaires,
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
-                avec_complements_formation=self.avec_complements_formation,
-                complements_formation=self.complements_formation,
                 documents_dto=documents_dto,
             ).validate()
 

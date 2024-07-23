@@ -86,7 +86,7 @@ class ChecklistViewTestCase(TestCase):
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            submitted=True,
         )
         cls.candidate = cls.continuing_admission.candidate
 
@@ -367,7 +367,7 @@ class ChecklistViewTestCase(TestCase):
             self.continuing_admission.checklist['current']['decision']['extra'],
             {'blocage': 'canceled'},
         )
-        self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name)
+        self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE.name)
         self.assertEqual(self.continuing_admission.cancel_reason, 'foobar')
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
@@ -944,7 +944,7 @@ class ChecklistViewTestCase(TestCase):
             self.continuing_admission.checklist['current']['decision']['extra'],
             {'blocage': 'canceled'},
         )
-        self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name)
+        self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE.name)
         self.assertEqual(self.continuing_admission.cancel_reason, 'foobar')
         self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 

@@ -118,6 +118,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             date_confirmation=proposition.soumise_le,
             est_premiere_annee=None,
             poursuite_de_cycle='',
+            adresse_email_candidat='',
         )
 
     @classmethod
@@ -148,6 +149,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             date_confirmation=proposition.soumise_le,
             est_premiere_annee=None,
             poursuite_de_cycle='',
+            adresse_email_candidat='',
         )
 
     @classmethod
@@ -178,4 +180,5 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_premiere_annee=None,
             poursuite_de_cycle='',
             annee_calculee=proposition.annee_calculee,
+            adresse_email_candidat='',
         )

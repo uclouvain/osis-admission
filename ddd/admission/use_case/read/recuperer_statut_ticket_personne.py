@@ -34,4 +34,4 @@ def recuperer_statut_ticket_personne(
     cmd: 'GetStatutTicketPersonneQuery',
     digit_repository: 'IDigitRepository',
 ) -> Optional[StatutTicketPersonneDTO]:
-    return digit_repository.get_person_ticket_status(global_id=cmd.global_id)
+    return digit_repository.get_last_person_ticket_status(global_id=cmd.global_id)

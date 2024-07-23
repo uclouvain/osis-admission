@@ -51,6 +51,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, Co
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
@@ -139,6 +140,14 @@ class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMix
     @cached_property
     def is_fac(self):
         return person_is_fac_cdd(self.request.user.person)
+
+    @cached_property
+    def manager_type(self):
+        if self.is_sic:
+            return TypeGestionnaire.SIC.name
+
+        if self.is_fac:
+            return TypeGestionnaire.FAC.name
 
 
 class LoadDossierViewMixin(AdmissionViewMixin):

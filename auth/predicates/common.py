@@ -30,6 +30,7 @@ from waffle import switch_is_active
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.epc_injection import EPCInjectionStatus
 from osis_role.errors import predicate_failed_msg
 
 
@@ -126,3 +127,9 @@ def has_education_group_of_types(*education_group_types):
         return set(education_group_types) & getattr(user, cache_key)
 
     return fn
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("Admission has been sent to EPC."))
+def is_sent_to_epc(self, user: User, obj: BaseAdmission):
+    return obj.sent_to_epc
