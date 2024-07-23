@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -65,3 +65,4 @@ class TestSoumettrePropositionContinue(TestCase):
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionContinue.CONFIRMEE)
+        self.assertEqual(updated_proposition.auteur_derniere_modification, proposition.matricule_candidat)
