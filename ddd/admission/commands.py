@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from typing import Optional, List, Dict
 
 import attr

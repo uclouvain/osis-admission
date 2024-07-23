@@ -188,16 +188,11 @@ class TestApprouverInscriptionParSic(TestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
         self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
-    def test_should_lever_exception_si_complements_formation_non_specifiees(self):
+    def test_should_etre_ok_si_complements_formation_non_specifies(self):
         self.proposition.avec_complements_formation = True
         self.proposition.complements_formation = []
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                InformationsAcceptationFacultaireNonSpecifieesException,
-            )
+        result = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        self.assertEqual(result, self.proposition.entity_id)
 
     def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):
         self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_EN_COURS

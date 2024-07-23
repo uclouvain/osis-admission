@@ -51,7 +51,13 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
-    def historiser_demande_complements(cls, proposition: PropositionAdmission, acteur: str, message: EmailMessage):
+    def historiser_demande_complements(
+        cls,
+        proposition: Proposition,
+        acteur: str,
+        message: EmailMessage,
+        type_gestionnaire: str = '',
+    ):
         pass
 
     @classmethod

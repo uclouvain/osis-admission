@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,15 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
     ReinitialiserEmplacementsDocumentsNonLibresPropositionService,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_generale.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
 )
@@ -42,7 +41,6 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
@@ -58,17 +56,9 @@ def recalculer_emplacements_documents_non_libres_proposition(
     # GIVEN
     proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
-    annee_courante = (
-        GetCurrentAcademicYear()
-        .get_starting_academic_year(
-            datetime.date.today(),
-            academic_year_repository,
-        )
-        .year
-    )
     resume_dto = ResumeProposition.get_resume(
         profil_candidat_translator=profil_candidat_translator,
-        annee_courante=annee_courante,
+        academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,

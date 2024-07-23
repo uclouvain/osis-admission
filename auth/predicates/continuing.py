@@ -56,7 +56,7 @@ def in_progress(self, user: User, obj: ContinuingEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: ContinuingEducationAdmission):
-    return isinstance(obj, ContinuingEducationAdmission) and obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE
+    return isinstance(obj, ContinuingEducationAdmission) and bool(obj.submitted_at)
 
 
 @predicate(bind=True)
@@ -74,6 +74,14 @@ def in_manager_status(self, user: User, obj: ContinuingEducationAdmission):
 @predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
 def not_cancelled(self, user: User, obj: ContinuingEducationAdmission):
     return isinstance(obj, ContinuingEducationAdmission) and obj.status != ChoixStatutPropositionContinue.ANNULEE.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
+def is_submitted_or_not_cancelled(self, user: User, obj: ContinuingEducationAdmission):
+    return isinstance(obj, ContinuingEducationAdmission) and (
+        obj.status != ChoixStatutPropositionContinue.ANNULEE.name or bool(obj.submitted_at)
+    )
 
 
 @predicate(bind=True)

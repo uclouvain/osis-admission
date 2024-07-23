@@ -552,6 +552,9 @@ msgstr ""
 msgid "Admission conditions not met."
 msgstr ""
 
+msgid "Admission context"
+msgstr ""
+
 msgid "Admission date"
 msgstr ""
 
@@ -568,6 +571,9 @@ msgid "Admission form item instantiations"
 msgstr ""
 
 msgid "Admission form items"
+msgstr ""
+
+msgid "Admission has been sent to EPC."
 msgstr ""
 
 msgid ""
@@ -1356,9 +1362,6 @@ msgstr ""
 msgid "Cancelled application"
 msgstr ""
 
-msgid "Cancelled application by a manager"
-msgstr ""
-
 msgid "Candidate"
 msgstr ""
 
@@ -1519,6 +1522,9 @@ msgid "Checklist filters"
 msgstr ""
 
 msgid "Checklist filters mode"
+msgstr ""
+
+msgid "Checklist tab"
 msgstr ""
 
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
@@ -1758,6 +1764,10 @@ msgstr ""
 msgid "Context"
 msgstr ""
 
+msgid "Continuing education"
+msgstr ""
+
+msgctxt "admission context"
 msgid "Continuing education"
 msgstr ""
 
@@ -2385,6 +2395,10 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr ""
 
+msgctxt "admission context"
+msgid "Doctorate education"
+msgstr ""
+
 msgid "Doctorate enrolment applications"
 msgstr ""
 
@@ -2837,6 +2851,9 @@ msgstr ""
 msgid "External reorientation/modification"
 msgstr ""
 
+msgid "FAC"
+msgstr ""
+
 msgid "FNRS"
 msgstr ""
 
@@ -2971,6 +2988,9 @@ msgstr ""
 msgid "Financability rule established by"
 msgstr ""
 
+msgid "Financability rule established on"
+msgstr ""
+
 #, python-format
 msgid "Financable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
@@ -2992,7 +3012,9 @@ msgid "Financeable"
 msgstr ""
 
 #, python-format
-msgid "Financeable - %(rule)s (Established by %(established_by)s)"
+msgid ""
+"Financeable - %(rule)s (Established by %(established_by)s the "
+"%(established_on)s)"
 msgstr ""
 
 msgid "Financing rule"
@@ -3207,6 +3229,10 @@ msgid "General"
 msgstr ""
 
 msgid "General data"
+msgstr ""
+
+msgctxt "admission context"
+msgid "General education"
 msgstr ""
 
 msgid "General education admission"
@@ -4184,6 +4210,11 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for doctorate education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 
@@ -4215,6 +4246,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
 "been received and some are still missing for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for doctorate education"
 msgstr ""
 
 msgid ""
@@ -5946,6 +5982,9 @@ msgstr "Services"
 msgid "SERVICE types"
 msgstr ""
 
+msgid "SIC"
+msgstr ""
+
 msgid "SIC Approval"
 msgstr ""
 
@@ -6122,6 +6161,9 @@ msgstr ""
 msgid "Sent to digit"
 msgstr ""
 
+msgid "Sent to EPC"
+msgstr ""
+
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr ""
 
@@ -6198,9 +6240,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Absence of debt' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Belgian student status' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Belgian student status' block."
 msgstr ""
 
 msgid ""
@@ -6208,9 +6256,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Memberships' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Reduced tuition fee' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Reduced tuition fee' block."
 msgstr ""
 
 msgid ""
@@ -6218,9 +6272,16 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields related to the bank account are missing."
+msgstr ""
+
 msgid ""
 "Some fields related to the bank account number in IBAN format are missing in "
 "the 'Additional information > Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields related to the bank account number in IBAN format are missing."
 msgstr ""
 
 msgid ""
@@ -6579,6 +6640,9 @@ msgid "The candidate must report to SIC"
 msgstr ""
 
 msgid "The certificate of achievement is being generated."
+msgstr ""
+
+msgid "The checklist tab is not valid for this admission context."
 msgstr ""
 
 msgid ""
@@ -7862,6 +7926,9 @@ msgstr ""
 msgid ""
 "You haven't answered to the question about your bank account in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "You haven't answered to the question about your bank account."
 msgstr ""
 
 msgid "You haven't yet submitted your application."
