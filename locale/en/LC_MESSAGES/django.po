@@ -466,6 +466,9 @@ msgstr ""
 msgid "Add a custom mail template for <em>%(description)s</em>"
 msgstr ""
 
+msgid "Add a language"
+msgstr ""
+
 msgid "Add a new member"
 msgstr ""
 
@@ -737,6 +740,16 @@ msgid ""
 msgstr ""
 
 msgid "Another admission has been submitted."
+msgstr ""
+
+msgid ""
+"Answer according to the European Framework of Reference for Languages (CEFR) "
+"classification. Detailed explanations of this framework can be found at <a "
+"href=\"https://www.coe.int/en/web/common-european-framework-reference-"
+"languages/table-1-cefr-3.3-common-reference-levels-global-scale\" "
+"target=\"_blank\"> https://www.coe.int/en/web/common-european-framework-"
+"reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale </"
+"a>"
 msgstr ""
 
 msgid "Application"
@@ -3613,6 +3626,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"If applicable, upload a language proficiency certificate in the format "
+"required by the specific provisions of your PhD committee."
+msgstr ""
+
+msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
 "defense preparation below before submitting the jury proposition."
 msgstr ""
@@ -4386,6 +4404,10 @@ msgstr ""
 msgid ""
 "Mandatory fields are missing in the specific questions of the 'Previous "
 "experience > Secondary studies' tab"
+msgstr ""
+
+#, python-format
+msgid "Mandatory languages are missing (%(languages)s)."
 msgstr ""
 
 msgid "Mandatory languages are missing."
@@ -5773,6 +5795,10 @@ msgid "Remind the applicant"
 msgstr ""
 
 msgctxt "jury member"
+msgid "Remove"
+msgstr ""
+
+msgctxt "language-knowledge"
 msgid "Remove"
 msgstr ""
 
@@ -7193,6 +7219,9 @@ msgstr ""
 msgid ""
 "This is a temporary title and it will be modifiable later depending on the "
 "jury analysis."
+msgstr ""
+
+msgid "This language is set more than once."
 msgstr ""
 
 msgid "This page is currently under construction."

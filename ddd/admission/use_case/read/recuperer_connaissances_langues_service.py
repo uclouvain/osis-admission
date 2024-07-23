@@ -23,40 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from dal import autocomplete
-from django.conf import settings
-from django.utils.functional import cached_property
-from django.utils.translation import get_language
+from typing import List
 
-from reference.models.language import Language
-
-
-__all__ = [
-    'LanguageAutocomplete',
-]
+from admission.ddd.admission.commands import RecupererConnaissancesLanguesQuery
+from admission.ddd.admission.doctorat.preparation.dtos import ConnaissanceLangueDTO
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 
 
-class LanguageAutocomplete(autocomplete.Select2QuerySetView):
-    urlpatterns = 'language'
-
-    @cached_property
-    def name_field(self):
-        return 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
-
-    @cached_property
-    def id_field(self):
-        return self.forwarded.get('id_field', 'code')
-
-    def get_queryset(self):
-        queryset = Language.objects.all()
-
-        if self.q:
-            queryset = queryset.filter(**{f'{self.name_field}__unaccent__icontains': self.q})
-
-        return queryset.order_by(self.name_field)
-
-    def get_result_label(self, result):
-        return getattr(result, self.name_field)
-
-    def get_result_value(self, result):
-        return getattr(result, self.id_field)
+def recuperer_connaissances_langues(
+    cmd: RecupererConnaissancesLanguesQuery,
+    profil_candidat_translator: IProfilCandidatTranslator,
+) -> List[ConnaissanceLangueDTO]:
+    return profil_candidat_translator.get_connaissances_langues(
+        matricule=cmd.matricule_candidat,
+    )
