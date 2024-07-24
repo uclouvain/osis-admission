@@ -23,10 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest.mock import patch
 
 import freezegun
 from django.shortcuts import resolve_url
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework import status
 
 from admission.contrib.models import DoctorateAdmission
@@ -43,6 +44,7 @@ from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time('2022-01-01')
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class AdmissionCurriculumGlobalFormViewForDoctorateTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -82,6 +84,31 @@ class AdmissionCurriculumGlobalFormViewForDoctorateTestCase(TestCase):
             },
             submitted=True,
         )
+
+        # Mock documents
+        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_remote_metadata",
+            return_value={"name": "myfile", "mimetype": "application/pdf", "size": 1},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.confirm_remote_upload",
+            side_effect=lambda token, *args, **kwargs: token,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch(
+            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, value, __: value,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
         # Urls
         self.form_url = resolve_url(self.base_url, uuid=self.doctorate_admission.uuid)

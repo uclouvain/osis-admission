@@ -35,7 +35,7 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
+from admission.contrib.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.contrib.models.general_education import GeneralEducationAdmission
@@ -45,6 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -91,10 +92,20 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=cls.academic_years[0],
+            candidate=cls.general_admission.candidate,
+            submitted=True,
+        )
+
         # Create users
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.general_admission.training.education_group,
+        ).person.user
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
         ).person.user
         cls.first_cycle_diploma = DiplomaTitleFactory(
             cycle=Cycle.FIRST_CYCLE.name,
@@ -138,10 +149,15 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             with_complement=True,
             reduction=Reduction.A150.name,
         )
-        # Targeted url
+        # Targeted urls
         self.delete_url = resolve_url(
             'admission:general-education:update:curriculum:educational_delete',
             uuid=self.general_admission.uuid,
+            experience_uuid=self.experience.uuid,
+        )
+        self.doctorate_delete_url = resolve_url(
+            'admission:doctorate:update:curriculum:educational_delete',
+            uuid=self.doctorate_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
 
@@ -308,4 +324,21 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             self.general_admission.requested_documents,
         )
 
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_delete_experience_from_doctorate_curriculum_is_not_allowed_for_fac_users(self):
+        self.client.force_login(self.doctorate_program_manager_user)
+        response = self.client.delete(self.doctorate_delete_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.delete(self.doctorate_delete_url)
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=resolve_url('admission:doctorate:curriculum', uuid=self.doctorate_admission.uuid),
+        )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)

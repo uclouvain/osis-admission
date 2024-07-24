@@ -80,6 +80,7 @@ class CurriculumGlobalDetailsViewForDoctorateTestCase(TestCase):
         self.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training__management_entity=self.entity,
             training__academic_year=self.academic_years[1],
+            curriculum=[],
         )
 
         self.fac_manager_user = ProgramManagerRoleFactory(
