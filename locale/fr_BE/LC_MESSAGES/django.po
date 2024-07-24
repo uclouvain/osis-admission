@@ -6401,11 +6401,7 @@ msgstr "Lien de parenté"
 msgid "Remind the applicant"
 msgstr "Rappeler au candidat"
 
-msgctxt "jury member"
-msgid "Remove"
-msgstr "Retirer"
-
-msgctxt "language-knowledge"
+msgctxt "admission"
 msgid "Remove"
 msgstr "Retirer"
 

@@ -5794,11 +5794,7 @@ msgstr ""
 msgid "Remind the applicant"
 msgstr ""
 
-msgctxt "jury member"
-msgid "Remove"
-msgstr ""
-
-msgctxt "language-knowledge"
+msgctxt "admission"
 msgid "Remove"
 msgstr ""
 
