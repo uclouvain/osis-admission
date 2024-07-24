@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.104
+  version: 1.0.105
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -7493,6 +7493,11 @@ components:
         temps_consacre:
           type: integer
           nullable: true
+        est_lie_fnrs_fria_fresh_csc:
+          type: boolean
+          nullable: true
+        commentaire_financement:
+          type: string
         titre_projet:
           type: string
           maxLength: 255
@@ -7531,6 +7536,15 @@ components:
         lieu_these:
           type: string
           maxLength: 255
+        projet_doctoral_deja_commence:
+          type: boolean
+          nullable: true
+        projet_doctoral_institution:
+          type: string
+        projet_doctoral_date_debut:
+          type: string
+          format: date
+          nullable: true
         doctorat_deja_realise:
           type: string
         institution:
@@ -7740,6 +7754,13 @@ components:
         institution:
           type: string
           maxLength: 255
+        autre_institution:
+          type: boolean
+          nullable: true
+        autre_institution_nom:
+          type: string
+        autre_institution_adresse:
+          type: string
         demande_ouverture:
           type: array
           items:
@@ -11183,8 +11204,6 @@ components:
       properties:
         uuid:
           type: string
-        type_admission:
-          $ref: '#/components/schemas/ChoixTypeAdmission'
         justification:
           type: string
         commission_proximite:
@@ -11218,6 +11237,11 @@ components:
         temps_consacre:
           type: integer
           nullable: true
+        est_lie_fnrs_fria_fresh_csc:
+          type: boolean
+          nullable: true
+        commentaire_financement:
+          type: string
         titre_projet:
           type: string
         resume_projet:
@@ -11250,6 +11274,15 @@ components:
           nullable: true
         lieu_these:
           type: string
+        projet_doctoral_deja_commence:
+          type: boolean
+          nullable: true
+        projet_doctoral_institution:
+          type: string
+        projet_doctoral_date_debut:
+          type: string
+          format: date
+          nullable: true
         doctorat_deja_realise:
           $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
           default: 'NO'
@@ -11265,7 +11298,6 @@ components:
           type: string
       required:
       - uuid
-      - type_admission
       - commission_proximite
       - bourse_preuve
       - documents_projet
@@ -11322,6 +11354,10 @@ components:
           type: boolean
           nullable: true
         institution:
+          type: string
+        autre_institution_nom:
+          type: string
+        autre_institution_adresse:
           type: string
         demande_ouverture:
           type: array

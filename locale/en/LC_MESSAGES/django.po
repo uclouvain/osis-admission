@@ -3017,6 +3017,9 @@ msgid ""
 "%(established_on)s)"
 msgstr ""
 
+msgid "Financing comment"
+msgstr ""
+
 msgid "Financing rule"
 msgstr ""
 
@@ -3294,6 +3297,9 @@ msgstr ""
 msgid ""
 "Has this diploma been recognised as equivalent by the French Community of "
 "Belgium?"
+msgstr ""
+
+msgid "Has your PhD project already started?"
 msgstr ""
 
 msgid ""
@@ -3845,6 +3851,10 @@ msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr ""
 
 msgid "Is non-resident (as defined in decree)"
+msgstr ""
+
+msgid ""
+"Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
 
 msgid "It is not possible to go from the \"validated\" status to this status."
@@ -4950,6 +4960,12 @@ msgstr ""
 msgid "Other institute (if necessary)"
 msgstr ""
 
+msgid "Other institution address"
+msgstr ""
+
+msgid "Other institution name"
+msgstr ""
+
 msgid "Other international scholarship"
 msgstr ""
 
@@ -5145,6 +5161,9 @@ msgid "PhD project"
 msgstr ""
 
 msgid "PhD proposal"
+msgstr ""
+
+msgid "PhD research experience"
 msgstr ""
 
 msgid "PhD research project"
@@ -5364,9 +5383,6 @@ msgid "Previous experiences"
 msgstr ""
 
 msgid "Previous notes"
-msgstr ""
-
-msgid "Previous research experience"
 msgstr ""
 
 msgid "Private"
@@ -6158,10 +6174,10 @@ msgstr ""
 msgid "Sender"
 msgstr ""
 
-msgid "Sent to digit"
+msgid "Sent to EPC"
 msgstr ""
 
-msgid "Sent to EPC"
+msgid "Sent to digit"
 msgstr ""
 
 msgid "Sentence indicating the late enrolment (if applicable)."
@@ -7656,6 +7672,9 @@ msgstr ""
 msgid "Work contract type"
 msgstr ""
 
+msgid "Work start date"
+msgstr ""
+
 msgid "Working contract type"
 msgstr ""
 
@@ -7938,11 +7957,6 @@ msgstr ""
 msgid "You indicated that you will obtain it in %(year)s."
 msgstr ""
 
-msgid "You must add at least one CA member in order to request signatures."
-msgstr ""
-"You must add at least one supervisory panel member in order to request "
-"signatures."
-
 msgid ""
 "You must add at least one UCLouvain supervisor in order to request "
 "signatures."
@@ -7951,6 +7965,11 @@ msgstr ""
 msgid ""
 "You must add at least one external supervisor in order to request signatures."
 msgstr ""
+
+msgid "You must add at least two CA member in order to request signatures."
+msgstr ""
+"You must add at least two supervisory panel member in order to request "
+"signatures."
 
 msgid "You must answer the question about external enrollment change."
 msgstr ""
