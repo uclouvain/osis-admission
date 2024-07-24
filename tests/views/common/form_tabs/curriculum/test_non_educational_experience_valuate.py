@@ -208,6 +208,6 @@ class CurriculumNonEducationalExperienceValuateViewTestCase(TestCase):
         admission_url = resolve_url('admission')
         expected_url = f'{admission_url}#custom_hash'
 
-        response = self.client.post(f'{self.valuate_url}?next={admission_url}&next_hash_url=custom_hash')
+        response = self.client.post(f'{self.doctorate_valuate_url}?next={admission_url}&next_hash_url=custom_hash')
 
         self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)

@@ -247,6 +247,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             context['specific_questions'] = self.specific_questions
 
         if self.is_doctorate:
+            context['is_doctorate'] = True
             try:
                 context['admission'] = self.proposition
                 # TODO doctorate refactorization
