@@ -451,9 +451,6 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
     conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
-    avec_complements_formation: Optional[bool]
-    complements_formation: Optional[List[ComplementFormationIdentity]]
-
     documents_dto: List[EmplacementDocumentDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -475,8 +472,6 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 avec_conditions_complementaires=self.avec_conditions_complementaires,
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
-                avec_complements_formation=self.avec_complements_formation,
-                complements_formation=self.complements_formation,
             ),
             ShouldParcoursAnterieurEtreSuffisant(
                 statut=self.checklist.parcours_anterieur,

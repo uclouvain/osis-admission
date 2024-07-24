@@ -26,7 +26,7 @@
 
 import json
 import uuid
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import pika
 from django.conf import settings
@@ -57,16 +57,12 @@ from base.models.enums.sap_client_creation_source import SAPClientCreationSource
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from osis_common.queue.queue_sender import send_message, logger
-from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
-    BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma,
     EducationalExperience,
     EducationalExperienceYear,
     ProfessionalExperience,
-    HighSchoolDiplomaAlternative,
 )
-from osis_profile.services.injection_epc import InjectionEPCCurriculum, TYPE_DIPLOME_MAP
+from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 DOCUMENT_MAPPING = {
     "ACTE_DE_TUTELLE": "TUTORSHIP_ACT",
@@ -207,6 +203,7 @@ class InjectionEPCAdmission:
         comptabilite = getattr(admission, "accounting", None)  # type: Accounting
         adresses = candidat.personaddress_set.select_related("country")
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
+        etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -214,9 +211,12 @@ class InjectionEPCAdmission:
                 adresse_domicile=adresse_domicile,
             ),
             "comptabilite": cls._get_comptabilite(candidat=candidat, comptabilite=comptabilite),
-            "etudes_secondaires": cls._get_etudes_secondaires(candidat=candidat, admission=admission),
+            "etudes_secondaires": etudes_secondaires,
             "curriculum_academique": cls._get_curriculum_academique(candidat=candidat, admission=admission),
-            "curriculum_autres": cls._get_curriculum_autres_activites(candidat=candidat, admission=admission),
+            "curriculum_autres": (
+                cls._get_curriculum_autres_activites(candidat=candidat, admission=admission)
+                + ([alternative] if alternative else [])
+            ),
             "inscription_annee_academique": InjectionEPCSignaletique._get_inscription_annee_academique(
                 admission=admission,
                 comptabilite=comptabilite,
@@ -315,35 +315,10 @@ class InjectionEPCAdmission:
         return {}
 
     @classmethod
-    def _get_etudes_secondaires(cls, candidat: Person, admission: BaseAdmission) -> Dict:
-        diplome_belge = getattr(candidat, 'belgianhighschooldiploma', None)  # type: BelgianHighSchoolDiploma
-        diplome_etranger = getattr(candidat, 'foreignhighschooldiploma', None)  # type: ForeignHighSchoolDiploma
-        alternative = getattr(candidat, 'highschooldiplomaalternative', None)  # type: HighSchoolDiplomaAlternative
-        connaissances_en_langues = candidat.languages_knowledge.all()
-        diplome_pertinent = admission.valuated_secondary_studies_person
-        if (diplome_pertinent and (diplome_belge or diplome_etranger)) or alternative or connaissances_en_langues:
-            diplome = diplome_belge or diplome_etranger
-            documents = (InjectionEPCCurriculum._recuperer_documents(diplome) if diplome else []) + (
-                InjectionEPCCurriculum._recuperer_documents(alternative) if alternative else []
-            ) + [{
-                'documents': [str(file) for langue in connaissances_en_langues for file in langue.certificate],
-                'type': 'LANGUAGE_CERTIFICATE',
-            }]
-            type_etude = diplome_belge.educational_type if diplome_belge else diplome_etranger.foreign_diploma_type
-            return {
-                "osis_uuid": str(diplome.uuid) if diplome else "",
-                "type_etude": TYPE_DIPLOME_MAP.get(type_etude),
-                "annee_fin": diplome.academic_graduation_year.year if diplome else "",
-                "code_ecole": diplome_belge.institute.code if diplome_belge and diplome_belge.institute else None,
-                "nom_ecole": (
-                    diplome_belge.other_institute_name
-                    if diplome_belge and diplome_belge.other_institute_name
-                    else None
-                ),
-                "code_pays": diplome_etranger.country.iso_code if diplome_etranger else BE_ISO_CODE,
-                "documents": documents,
-            }
-        return {}
+    def _get_etudes_secondaires(cls, candidat: Person, admission: BaseAdmission) -> Tuple[Dict, Dict]:
+        _, etudes_secondaires = InjectionEPCCurriculum._get_etudes_secondaires(personne=candidat)
+        _, alternative = InjectionEPCCurriculum._get_alternative_etudes_secondaires(personne=candidat)
+        return etudes_secondaires or None, alternative or None
 
     @classmethod
     def _get_curriculum_academique(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
@@ -393,26 +368,19 @@ class InjectionEPCAdmission:
         ).order_by('start_date')  # type: QuerySet[ProfessionalExperience]
 
         return [
-            {
-                "osis_uuid": str(experience_pro.uuid),
-                "type_occupation": experience_pro.type,
-                "debut": experience_pro.start_date.strftime("%d/%m/%Y"),
-                "fin": experience_pro.end_date.strftime("%d/%m/%Y"),
-                "intitule_autre_activite": experience_pro.activity,
-                "etablissement_autre": experience_pro.institute_name,
-                "documents": InjectionEPCCurriculum._recuperer_documents(experience_pro),
-            }
+            InjectionEPCCurriculum._build_curriculum_autre_activite(experience_pro)
             for experience_pro in experiences_professionnelles
         ]
 
     @staticmethod
     def _get_inscription_offre(admission: BaseAdmission) -> Dict:
-        validite, num_offre = admission.training.external_id.split("_")[4:6]
-        groupe_de_supervision = getattr(admission, "supervision_group", None)
-        double_diplome = getattr(admission, "double_degree_scholarship", None)
-        type_demande_bourse = getattr(admission, "international_scholarship", None)
-        type_erasmus = getattr(admission, "erasmus_mundus_scholarship", None)
-        annee_condition_acces = getattr(admission, "admission_requirement_year", None)
+        validite, num_offre = admission.training.external_id.split('_')[4:6]
+        groupe_de_supervision = getattr(admission, 'supervision_group', None)
+        double_diplome = getattr(admission, 'double_degree_scholarship', None)
+        type_demande_bourse = getattr(admission, 'international_scholarship', None)
+        type_erasmus = getattr(admission, 'erasmus_mundus_scholarship', None)
+        admission_generale = getattr(admission, 'generaleducationadmission', None)
+        annee_condition_acces = admission_generale.admission_requirement_year.year if admission_generale else None
         return {
             "num_offre": num_offre,
             "validite": validite,
@@ -421,12 +389,12 @@ class InjectionEPCAdmission:
                 if groupe_de_supervision
                 else None
             ),
-            "condition_acces": getattr(admission, "admission_requirement", None),
-            "annee_condition_acces": annee_condition_acces.year if annee_condition_acces else None,
-            "double_diplome": str(double_diplome.uuid) if double_diplome else None,
-            "type_demande_bourse": str(type_demande_bourse.uuid) if type_demande_bourse else None,
-            "type_erasmus": str(type_erasmus.uuid) if type_erasmus else None,
-            "complement_de_formation": AdmissionPrerequisiteCourses.objects.filter(admission_id=admission.id).exists(),
+            'condition_acces': admission_generale.admission_requirement if admission_generale else None,
+            'annee_condition_acces': annee_condition_acces,
+            'double_diplome': str(double_diplome.uuid) if double_diplome else None,
+            'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
+            'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,
+            'complement_de_formation': AdmissionPrerequisiteCourses.objects.filter(admission_id=admission.id).exists(),
         }
 
     @staticmethod

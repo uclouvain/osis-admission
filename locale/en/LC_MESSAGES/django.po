@@ -158,8 +158,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a href="
-"\"%(add_url)s\">add a course</a>"
+"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a "
+"href=\"%(add_url)s\">add a course</a>"
 msgstr ""
 
 #, python-format
@@ -181,8 +181,8 @@ msgstr[1] ""
 #, python-brace-format
 msgid ""
 "<p>Depending on your previous experience, your faculty will supplement your "
-"annual programme with additional classes (for more information: <a href="
-"\"{link}\">{link}</a>).</p>"
+"annual programme with additional classes (for more information: <a "
+"href=\"{link}\">{link}</a>).</p>"
 msgstr ""
 
 #, python-brace-format
@@ -552,6 +552,9 @@ msgstr ""
 msgid "Admission conditions not met."
 msgstr ""
 
+msgid "Admission context"
+msgstr ""
+
 msgid "Admission date"
 msgstr ""
 
@@ -568,6 +571,9 @@ msgid "Admission form item instantiations"
 msgstr ""
 
 msgid "Admission form items"
+msgstr ""
+
+msgid "Admission has been sent to EPC."
 msgstr ""
 
 msgid ""
@@ -1356,9 +1362,6 @@ msgstr ""
 msgid "Cancelled application"
 msgstr ""
 
-msgid "Cancelled application by a manager"
-msgstr ""
-
 msgid "Candidate"
 msgstr ""
 
@@ -1519,6 +1522,9 @@ msgid "Checklist filters"
 msgstr ""
 
 msgid "Checklist filters mode"
+msgstr ""
+
+msgid "Checklist tab"
 msgstr ""
 
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
@@ -1758,6 +1764,10 @@ msgstr ""
 msgid "Context"
 msgstr ""
 
+msgid "Continuing education"
+msgstr ""
+
+msgctxt "admission context"
 msgid "Continuing education"
 msgstr ""
 
@@ -2385,6 +2395,10 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr ""
 
+msgctxt "admission context"
+msgid "Doctorate education"
+msgstr ""
+
 msgid "Doctorate enrolment applications"
 msgstr ""
 
@@ -2837,6 +2851,9 @@ msgstr ""
 msgid "External reorientation/modification"
 msgstr ""
 
+msgid "FAC"
+msgstr ""
+
 msgid "FNRS"
 msgstr ""
 
@@ -2971,6 +2988,9 @@ msgstr ""
 msgid "Financability rule established by"
 msgstr ""
 
+msgid "Financability rule established on"
+msgstr ""
+
 #, python-format
 msgid "Financable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
@@ -2992,7 +3012,9 @@ msgid "Financeable"
 msgstr ""
 
 #, python-format
-msgid "Financeable - %(rule)s (Established by %(established_by)s)"
+msgid ""
+"Financeable - %(rule)s (Established by %(established_by)s the "
+"%(established_on)s)"
 msgstr ""
 
 msgid "Financing rule"
@@ -3055,17 +3077,18 @@ msgid ""
 "used here.<br>Full example: <code>{\"CLASSE_CSS\": \"bg-info\"}</code>."
 "<br><br>For a text field, it is possible to specify if the user can enter a "
 "short (\"COURT\", by default) or a long (\"LONG\") text by using the "
-"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": \"LONG"
-"\"}</code>.<br><br>For a file field, it is possible to specify the maximum "
-"number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
+"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": "
+"\"LONG\"}</code>.<br><br>For a file field, it is possible to specify the "
+"maximum number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
 "(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
-"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
-"\": 3}</code>.<br><br>For a selection field, it is possible to specify if "
-"the selection is realised through a list (\"LISTE\", by default), checkboxes "
-"(\"CASES_A_COCHER\") or radio buttons (\"BOUTONS_RADIOS\") by using the "
-"\"TYPE_SELECTION\" property. The list and the radios buttons allow to select "
-"only one value whereas the checkboxes allow to select several values."
-"<br>Full example: <code>{\"TYPE_SELECTION\": \"CASES_A_COCHER\"}</code>."
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], "
+"\"NOMBRE_MAX_DOCUMENTS\": 3}</code>.<br><br>For a selection field, it is "
+"possible to specify if the selection is realised through a list (\"LISTE\", "
+"by default), checkboxes (\"CASES_A_COCHER\") or radio buttons "
+"(\"BOUTONS_RADIOS\") by using the \"TYPE_SELECTION\" property. The list and "
+"the radios buttons allow to select only one value whereas the checkboxes "
+"allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
+"\"CASES_A_COCHER\"}</code>."
 msgstr ""
 
 msgid "For the attention of"
@@ -3206,6 +3229,10 @@ msgid "General"
 msgstr ""
 
 msgid "General data"
+msgstr ""
+
+msgctxt "admission context"
+msgid "General education"
 msgstr ""
 
 msgid "General education admission"
@@ -3613,8 +3640,8 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees.html"
-"\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
+"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
 "reglementees.html</a>, I declare that, if the courses listed therein concern "
 "me, I have received the information relating to their requirements for "
 "admission or continuation and to the specific rules or restrictions of "
@@ -3663,8 +3690,8 @@ msgstr ""
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a href="
-"\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between 1 June and 30 September %(year)s to <a "
+"href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
 msgid "In payement order"
@@ -4183,6 +4210,11 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for doctorate education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 
@@ -4214,6 +4246,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
 "been received and some are still missing for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for doctorate education"
 msgstr ""
 
 msgid ""
@@ -5338,6 +5375,9 @@ msgstr ""
 msgid "Private email"
 msgstr ""
 
+msgid "Private email address"
+msgstr ""
+
 msgid "Processing by Fac"
 msgstr ""
 
@@ -5942,6 +5982,9 @@ msgstr "Services"
 msgid "SERVICE types"
 msgstr ""
 
+msgid "SIC"
+msgstr ""
+
 msgid "SIC Approval"
 msgstr ""
 
@@ -6118,6 +6161,9 @@ msgstr ""
 msgid "Sent to digit"
 msgstr ""
 
+msgid "Sent to EPC"
+msgstr ""
+
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr ""
 
@@ -6194,9 +6240,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Absence of debt' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Belgian student status' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Belgian student status' block."
 msgstr ""
 
 msgid ""
@@ -6204,9 +6256,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Memberships' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Reduced tuition fee' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Reduced tuition fee' block."
 msgstr ""
 
 msgid ""
@@ -6214,9 +6272,16 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields related to the bank account are missing."
+msgstr ""
+
 msgid ""
 "Some fields related to the bank account number in IBAN format are missing in "
 "the 'Additional information > Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields related to the bank account number in IBAN format are missing."
 msgstr ""
 
 msgid ""
@@ -6575,6 +6640,9 @@ msgid "The candidate must report to SIC"
 msgstr ""
 
 msgid "The certificate of achievement is being generated."
+msgstr ""
+
+msgid "The checklist tab is not valid for this admission context."
 msgstr ""
 
 msgid ""
@@ -7103,8 +7171,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/study/accomodation"
-"\">www.uclouvain.be/en/study/accomodation</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
+"accomodation\">www.uclouvain.be/en/study/accomodation</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7651,8 +7719,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Would you like to switch courses this academic year at UCLouvain? (<a href="
-"\"%(url)s\" target=\"_blank\">Informations</a>)"
+"Would you like to switch courses this academic year at UCLouvain? (<a "
+"href=\"%(url)s\" target=\"_blank\">Informations</a>)"
 msgstr ""
 
 msgid "Writing ability"
@@ -7760,8 +7828,9 @@ msgid ""
 msgstr ""
 
 msgid ""
-"You can find more information on the French Community webpage <a href="
-"\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/</a>"
+"You can find more information on the French Community webpage <a "
+"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
+"</a>"
 msgstr ""
 
 msgid ""
@@ -7857,6 +7926,9 @@ msgstr ""
 msgid ""
 "You haven't answered to the question about your bank account in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "You haven't answered to the question about your bank account."
 msgstr ""
 
 msgid "You haven't yet submitted your application."

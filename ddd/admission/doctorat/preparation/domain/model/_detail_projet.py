@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ from typing import List, Optional
 import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixLangueRedactionThese
 from osis_common.ddd import interface
 
 
@@ -36,7 +35,7 @@ from osis_common.ddd import interface
 class DetailProjet(interface.ValueObject):
     titre: str = ''
     resume: str = ''
-    langue_redaction_these: ChoixLangueRedactionThese = ChoixLangueRedactionThese.UNDECIDED
+    langue_redaction_these: str = ''
     institut_these: Optional[InstitutIdentity] = None
     lieu_these: str = ''
     documents: List[str] = attr.Factory(list)

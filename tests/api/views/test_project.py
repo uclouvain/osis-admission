@@ -52,7 +52,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AbsenceDeDetteNonCompleteeException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
-    PromoteurManquantException,
+    PromoteurManquantException, AbsenceDeDetteNonCompleteeDoctoratException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -83,6 +83,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.language import FrenchLanguageFactory
 
 
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
@@ -338,6 +339,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_complementary_training',
             'retrieve_course_enrollment',
             'retrieve_jury_preparation',
+            'retrieve_documents',
+            'update_documents',
         ]
 
         self.assertActionLinks(proposition['links'], allowed_actions, forbidden_actions)
@@ -358,7 +361,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             supervision_group=self.promoter.process,
         )
         self.client.force_authenticate(user=self.promoter_user)
-        with self.assertNumQueriesLessThan(12, verbose=True):
+        with self.assertNumQueriesLessThan(12):
             response = self.client.get(resolve_url("admission_api_v1:supervised_propositions"), format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
@@ -566,6 +569,8 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'retrieve_course_enrollment',
             'retrieve_jury_preparation',
             'list_jury_members',
+            'retrieve_documents',
+            'update_documents',
         ]
         self.assertActionLinks(response.data['links'], allowed_actions, forbidden_actions)
 
@@ -676,7 +681,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
-            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
+            thesis_language=FrenchLanguageFactory(),
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
@@ -858,6 +863,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         AdmissionAcademicCalendarFactory.produce_all_required()
+        language_fr = FrenchLanguageFactory()
 
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         # Create candidates
@@ -895,15 +901,18 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             candidate=cls.first_candidate,
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=cls.first_invited_promoter.actor_ptr.process,
+            thesis_language=language_fr,
         )
         cls.first_admission_without_invitation = DoctorateAdmissionFactory(
             candidate=cls.first_candidate,
             supervision_group=cls.first_not_invited_promoter.actor_ptr.process,
+            thesis_language=language_fr,
         )
         cls.second_admission = DoctorateAdmissionFactory(
             candidate=cls.second_candidate,
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=cls.second_invited_promoter.actor_ptr.process,
+            thesis_language=language_fr,
         )
         # Create other users
         cls.no_role_user = PersonFactory(first_name="Joe").user
@@ -1098,7 +1107,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         # No academic experience -> the absence of debt certificate is not required
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Experience in a french speaking community institute -> the absence of debt certificate is required
         experience = EducationalExperienceFactory(
@@ -1117,14 +1126,14 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
 
         response = self.client.post(url, self.submitted_data)
-        self.assertInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Experience in UCL -> the absence of debt certificate is not required
         experience.institute.acronym = "UCL"
         experience.institute.save()
 
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Experience in a german speaking community institute -> the absence of debt certificate is not required
         experience.institute.acronym = "INSTITUTE"
@@ -1132,7 +1141,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience.institute.save()
 
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
         # Too old experience in a french speaking community institute -> the absence of debt certificate is not required
         experience.institute.community = CommunityEnum.FRENCH_SPEAKING.name
@@ -1142,7 +1151,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience_year.save()
 
         response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
+        self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
 
     @mock.patch(
         'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',

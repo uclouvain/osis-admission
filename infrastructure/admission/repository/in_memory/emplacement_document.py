@@ -222,6 +222,42 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                 dernier_acteur='0123456789',
                 document_soumis_par='',
             ),
+            EmplacementDocument(
+                entity_id=EmplacementDocumentIdentity(
+                    identifiant='ID1-FD',
+                    proposition_id=PropositionIdentity(uuid='uuid-SC3DP-promoteur-membre'),
+                ),
+                uuids_documents=[],
+                type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
+                statut=StatutEmplacementDocument.A_RECLAMER,
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
+                justification_gestionnaire='Ma raison 1',
+                requis_automatiquement=False,
+                libelle='Example',
+                reclame_le=None,
+                a_echeance_le=None,
+                derniere_action_le=datetime.datetime(2023, 1, 1),
+                dernier_acteur='0123456789',
+                document_soumis_par='',
+            ),
+            EmplacementDocument(
+                entity_id=EmplacementDocumentIdentity(
+                    identifiant='LIBRE_CANDIDAT.36de0c3d-3c06-4c93-8eb4-c8648f04f142',
+                    proposition_id=PropositionIdentity(uuid='uuid-SC3DP-promoteur-membre'),
+                ),
+                uuids_documents=[],
+                type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
+                statut=StatutEmplacementDocument.A_RECLAMER,
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
+                justification_gestionnaire='Ma raison 2',
+                requis_automatiquement=False,
+                libelle='Example',
+                reclame_le=None,
+                a_echeance_le=None,
+                derniere_action_le=datetime.datetime(2023, 1, 1),
+                dernier_acteur='0123456789',
+                document_soumis_par='',
+            ),
         ]
 
     @classmethod
