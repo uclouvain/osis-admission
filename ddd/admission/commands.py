@@ -257,3 +257,8 @@ class ModifierMatriculeCandidatCommand(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererEtudesSecondairesQuery(interface.QueryRequest):
     matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererConnaissancesLanguesQuery(interface.QueryRequest):
+    matricule_candidat: str

@@ -58,6 +58,7 @@ class TestCompleterCurriculumService(SimpleTestCase):
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.reponses_questions_specifiques, self.cmd.reponses_questions_specifiques)
         self.assertEqual(proposition.curriculum, self.cmd.curriculum)
+        self.assertEqual(proposition.auteur_derniere_modification, self.cmd.auteur_modification)
 
     def test_should_vider_curriculum(self):
         cmd = attr.evolve(self.cmd, curriculum=[], reponses_questions_specifiques={})
@@ -66,6 +67,7 @@ class TestCompleterCurriculumService(SimpleTestCase):
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.reponses_questions_specifiques, {})
         self.assertEqual(proposition.curriculum, [])
+        self.assertEqual(proposition.auteur_derniere_modification, self.cmd.auteur_modification)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')

@@ -29,10 +29,11 @@ from unittest.mock import patch
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -112,6 +113,23 @@ class CurriculumEducationalExperienceDetailViewTestCase(TestCase):
             education_group=cls.general_admission.training.education_group,
         ).person.user
 
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=cls.entity,
+            training__academic_year=academic_years[0],
+            submitted=True,
+            candidate=cls.candidate,
+        )
+
+        cls.doctorate_url = resolve_url(
+            'admission:doctorate:curriculum:educational',
+            uuid=cls.doctorate_admission.uuid,
+            experience_uuid=cls.educational_experience.uuid,
+        )
+
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+
     def setUp(self):
         # Mock documents
         patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
@@ -169,3 +187,27 @@ class CurriculumEducationalExperienceDetailViewTestCase(TestCase):
             )
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_doctorate_with_program_manager(self):
+        self.client.force_login(user=self.doctorate_program_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_doctorate_with_sic_manager(self):
+        self.client.force_login(user=self.sic_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)
+
+        experience = response.context['experience']
+
+        self.assertIsInstance(experience, ExperienceAcademiqueDTO)
+        self.assertEqual(experience.uuid, self.educational_experience.uuid)
+
+        self.assertEqual(
+            response.context['edit_url'],
+            resolve_url(
+                'admission:doctorate:update:curriculum:educational',
+                uuid=self.doctorate_admission.uuid,
+                experience_uuid=self.educational_experience.uuid,
+            ),
+        )

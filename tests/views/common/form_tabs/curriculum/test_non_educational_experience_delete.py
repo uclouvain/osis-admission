@@ -1,42 +1,42 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
 import datetime
 import uuid
-from unittest import mock
 
 import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
+from admission.contrib.models.base import (
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
@@ -48,39 +48,28 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
-    EducationalExperienceYearFactory,
-    AdmissionEducationalValuatedExperiencesFactory,
+    ProfessionalExperienceFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
 )
-from admission.tests.factories.faculty_decision import FreeAdditionalApprovalConditionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from base.forms.utils.file_field import PDF_MIME_TYPE
-from base.models.enums.community import CommunityEnum
-from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.organization import OrganizationFactory
-from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import Reduction
+from osis_profile.models import ProfessionalExperience
+from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
-from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
-from reference.tests.factories.diploma_title import DiplomaTitleFactory
-from reference.tests.factories.language import LanguageFactory
 
 
 @freezegun.freeze_time('2022-01-01')
-class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
+class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create data
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
-        cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
         EntityVersionFactory(entity=first_doctoral_commission)
-        cls.french = LanguageFactory(code='FR')
 
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
@@ -108,79 +97,37 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.doctorate_admission.training.education_group,
         ).person.user
-        cls.first_cycle_diploma = DiplomaTitleFactory(
-            cycle=Cycle.FIRST_CYCLE.name,
-        )
-        cls.second_cycle_diploma = DiplomaTitleFactory(
-            cycle=Cycle.SECOND_CYCLE.name,
-        )
-        cls.first_institute = OrganizationFactory(
-            community=CommunityEnum.FRENCH_SPEAKING.name,
-            establishment_type=EstablishmentTypeEnum.UNIVERSITY.name,
-        )
-        cls.second_institute = OrganizationFactory(
-            community=CommunityEnum.FRENCH_SPEAKING.name,
-            establishment_type=EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
-        )
+        cls.file_uuid = uuid.uuid4()
 
     def setUp(self):
         # Create data
-        self.experience: EducationalExperience = EducationalExperienceFactory(
+        self.experience: ProfessionalExperience = ProfessionalExperienceFactory(
             person=self.general_admission.candidate,
-            country=self.be_country,
-            program=self.first_cycle_diploma,
-            fwb_equivalent_program=self.first_cycle_diploma,
-            institute=self.first_institute,
-            linguistic_regime=self.french,
-            education_name='Computer science',
-            institute_name='University of Louvain',
-            institute_address='Rue de Louvain, 1000 Bruxelles',
-            expected_graduation_date=datetime.date(2024, 1, 1),
+            start_date=datetime.date(2020, 1, 1),
+            end_date=datetime.date(2021, 12, 31),
+            type=ActivityType.WORK.name,
+            role='Function',
+            sector=ActivitySector.PRIVATE.name,
+            institute_name='Institute',
+            certificate=[self.file_uuid],
+            activity='Activity',
         )
-        self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
-            educational_experience=self.experience,
-            academic_year=self.academic_years[0],
-            with_block_1=True,
-            reduction='',
-            is_102_change_of_course=True,
-        )
-        self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
-            educational_experience=self.experience,
-            academic_year=self.academic_years[2],
-            with_complement=True,
-            reduction=Reduction.A150.name,
-        )
+
         # Targeted urls
         self.delete_url = resolve_url(
-            'admission:general-education:update:curriculum:educational_delete',
+            'admission:general-education:update:curriculum:non_educational_delete',
             uuid=self.general_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
         self.doctorate_delete_url = resolve_url(
-            'admission:doctorate:update:curriculum:educational_delete',
+            'admission:doctorate:update:curriculum:non_educational_delete',
             uuid=self.doctorate_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
 
-        # Mock osis document api
-        patcher = mock.patch("osis_document.api.utils.get_remote_token", side_effect=lambda value, **kwargs: value)
-        patcher.start()
-        self.addCleanup(patcher.stop)
-        patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
-        patched = patcher.start()
-        patched.side_effect = lambda _, value, __: value
-        self.addCleanup(patcher.stop)
-
     def test_delete_experience_from_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.delete(self.delete_url)
-
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_experience_from_curriculum_is_allowed_for_sic_users(self):
@@ -221,8 +168,8 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             type=EPCInjectionType.DEMANDE.name,
         )
 
-        valuation = AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission=self.general_admission, educationalexperience=self.experience
+        valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.general_admission, professionalexperience=self.experience
         )
 
         response = self.client.get(self.delete_url)
@@ -249,7 +196,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         response = self.client.delete(
             resolve_url(
-                'admission:general-education:update:curriculum:educational_delete',
+                'admission:general-education:update:curriculum:non_educational_delete',
                 uuid=self.general_admission.uuid,
                 experience_uuid=uuid.uuid4(),
             ),
@@ -257,36 +204,13 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_delete_experience_used_as_approval_condition_is_not_allowed(self):
-        self.client.force_login(self.sic_manager_user)
-
-        approval_condition = FreeAdditionalApprovalConditionFactory(
-            admission=self.general_admission,
-            related_experience=self.experience,
-            name_fr='Condition de test',
-            name_en='Test condition',
-        )
-
-        response = self.client.delete(self.delete_url, follow=True)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        messages = [m.message for m in response.context['messages']]
-        self.assertIn(
-            gettext(
-                'Cannot delete the experience because it is used as additional condition for the '
-                'proposition {admission}.'.format(admission=approval_condition.admission)
-            ),
-            messages,
-        )
-
     def test_delete_known_experience(self):
         self.client.force_login(self.sic_manager_user)
 
         # Simulate a valuated experience
-        AdmissionEducationalValuatedExperiences.objects.create(
+        AdmissionProfessionalValuatedExperiences.objects.create(
             baseadmission_id=self.general_admission.uuid,
-            educationalexperience_id=self.experience.uuid,
+            professionalexperience_id=self.experience.uuid,
         )
 
         self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
@@ -297,17 +221,11 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         response = self.client.delete(self.delete_url)
 
-        self.assertFalse(EducationalExperience.objects.filter(uuid=self.experience.uuid).exists())
+        self.assertFalse(ProfessionalExperience.objects.filter(uuid=self.experience.uuid).exists())
 
         self.assertFalse(
-            EducationalExperienceYear.objects.filter(
-                educational_experience__uuid=self.experience.uuid,
-            ).exists()
-        )
-
-        self.assertFalse(
-            AdmissionEducationalValuatedExperiences.objects.filter(
-                educationalexperience_id=self.experience.uuid
+            AdmissionProfessionalValuatedExperiences.objects.filter(
+                professionalexperience_id=self.experience.uuid
             ).exists()
         )
 
@@ -317,7 +235,6 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
             [],
         )
-
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertIn(
@@ -336,7 +253,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
         response = self.client.post(
             resolve_url(
-                'admission:doctorate:update:curriculum:educational_delete',
+                'admission:doctorate:update:curriculum:non_educational_delete',
                 uuid=other_admission.uuid,
                 experience_uuid=self.experience.uuid,
             ),

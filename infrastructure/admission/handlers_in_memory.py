@@ -35,8 +35,9 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import\
-    EmailDestinataireInMemoryRepository
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory import (
+    EmailDestinataireInMemoryRepository,
+)
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
@@ -60,6 +61,10 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
     ),
     RecupererExperienceNonAcademiqueQuery: lambda msg_bus, query: recuperer_experience_non_academique(
+        query,
+        profil_candidat_translator=_profil_candidat_translator,
+    ),
+    RecupererConnaissancesLanguesQuery: lambda msg_bus, query: recuperer_connaissances_langues(
         query,
         profil_candidat_translator=_profil_candidat_translator,
     ),

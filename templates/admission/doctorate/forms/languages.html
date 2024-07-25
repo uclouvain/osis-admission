@@ -1,5 +1,5 @@
-{% extends "admission/doctorate/forms/tab_layout.html" %}
-{% load i18n static admission %}
+{% extends "admission/doctorate/tab_layout.html" %}
+{% load i18n static admission bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,3 +24,80 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% block form %}
+  <p class="well">
+    {% blocktrans trimmed %}
+      Answer according to the European Framework of Reference for Languages (CEFR) classification.
+      Detailed explanations of this framework can be found at
+      <a href="https://www.coe.int/en/web/common-european-framework-reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale" target="_blank">
+        https://www.coe.int/en/web/common-european-framework-reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale
+      </a>
+    {% endblocktrans %}
+  </p>
+
+  {% bootstrap_formset_errors formset %}
+  {{ formset.management_form }}
+
+  {% for language_form in formset %}
+    <div class="form-container {% if language_form.is_required %} required_panel{% endif %}">
+      {% panel language_form.instance_language|default:_("Add a language") %}
+        {% if language_form.instance.pk %}{{ language_form.DELETE }}{% endif %}
+        {% bootstrap_field language_form.id %}
+        {% bootstrap_field language_form.language %}
+        {% bootstrap_field language_form.listening_comprehension %}
+        {% bootstrap_field language_form.speaking_ability %}
+        {% bootstrap_field language_form.writing_ability %}
+        {% bootstrap_field_with_tooltip language_form.certificate %}
+      {% endpanel %}
+    </div>
+  {% endfor %}
+{% endblock %}
+
+{% block style %}
+  {{ block.super }}
+
+  <style>
+    label {
+      display: block;
+    }
+
+    .slider.slider-horizontal {
+      width: 95% !important;
+      margin: 0 15px;
+    }
+
+    #admission-form {
+      margin-bottom: 1em;
+    }
+  </style>
+{% endblock %}
+
+
+{% block script %}
+  {{ block.super }}
+  <script type="text/javascript">
+  $(function () {
+    $('.form-container').formset({
+      formTemplate: '{{empty_form|escapejs}}',  // The jQuery selection cloned to generate new form instances
+      addText: '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> {% translate 'Add a language' %}',       // Text for the add link
+      deleteText: '<span class="glyphicon glyphicon-minus" aria-hidden="true"></span> {% translate 'Remove' context 'admission' %}',         // Text for the delete link
+      deleteContainerClass: 'panel-body',       // Container CSS class for the delete link
+      addCssClass: 'btn btn-success btn-block', // CSS class applied to the add link
+      deleteCssClass: 'btn btn-danger btn-sm delete-language-btn',  // CSS class applied to the delete link
+      added: function (form) {                    // Function called each time a new form is added
+        $('input[data-provide=slider]', form).bootstrapSlider();
+      },
+    });
+
+    // Hide the delete buttons related to the mandatory languages
+    $('.form-container.required_panel .delete-language-btn').remove();
+
+    // Django needs to know how many forms are in the formset, even the hidden ones
+    $('#admission-form').on('formdata', function(event) {
+      const formData = event.originalEvent.formData;
+      formData.set('form-TOTAL_FORMS', $('.form-container').length);
+    });
+  })
+  </script>
+{% endblock %}

@@ -76,16 +76,23 @@ COMMAND_HANDLERS = {
         query,
         profil_candidat_translator=ProfilCandidatTranslator(),
     ),
+    RecupererConnaissancesLanguesQuery: lambda msg_bus, query: recuperer_connaissances_langues(
+        query,
+        profil_candidat_translator=ProfilCandidatTranslator(),
+    ),
 }
 
 EVENT_HANDLERS = {}
 
 if 'admission' in settings.INSTALLED_APPS:
     from admission.ddd.admission.formation_generale.events import (
-        PropositionSoumiseEvent, InscriptionApprouveeParSicEvent, AdmissionApprouveeParSicEvent
+        PropositionSoumiseEvent,
+        InscriptionApprouveeParSicEvent,
+        AdmissionApprouveeParSicEvent,
     )
-    from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import \
-        reagir_a_approuver_proposition
+    from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import (
+        reagir_a_approuver_proposition,
+    )
 
     EVENT_HANDLERS = {
         **EVENT_HANDLERS,

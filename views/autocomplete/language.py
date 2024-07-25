@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,10 @@ class LanguageAutocomplete(autocomplete.Select2QuerySetView):
     def name_field(self):
         return 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
 
+    @cached_property
+    def id_field(self):
+        return self.forwarded.get('id_field', 'code')
+
     def get_queryset(self):
         queryset = Language.objects.all()
 
@@ -55,4 +59,4 @@ class LanguageAutocomplete(autocomplete.Select2QuerySetView):
         return getattr(result, self.name_field)
 
     def get_result_value(self, result):
-        return getattr(result, 'code')
+        return getattr(result, self.id_field)

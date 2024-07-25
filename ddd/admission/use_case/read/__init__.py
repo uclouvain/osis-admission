@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from .lister_demandes_service import lister_demandes
+from .recuperer_connaissances_langues_service import recuperer_connaissances_langues
 from .recuperer_etudes_secondaires_service import recuperer_etudes_secondaires
 from .recuperer_experience_academique_service import recuperer_experience_academique
 from .recuperer_experience_non_academique_service import recuperer_experience_non_academique

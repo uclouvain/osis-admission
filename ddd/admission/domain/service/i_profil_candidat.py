@@ -29,6 +29,7 @@ from typing import Dict, List, Optional
 
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
+    ConnaissanceLangueDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
@@ -67,6 +68,11 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get_langues_connues(cls, matricule: str) -> List[str]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_connaissances_langues(cls, matricule: str) -> List[ConnaissanceLangueDTO]:
         raise NotImplementedError
 
     @classmethod

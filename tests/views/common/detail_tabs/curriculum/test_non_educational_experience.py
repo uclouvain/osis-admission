@@ -30,9 +30,11 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.test import override_settings
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
@@ -80,6 +82,23 @@ class CurriculumNonEducationalExperienceDetailViewTestCase(TestCase):
         cls.continuing_url = resolve_url(
             'admission:continuing-education:curriculum:non_educational',
             uuid=cls.continuing_admission.uuid,
+            experience_uuid=cls.experience.uuid,
+        )
+
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=cls.entity,
+            training__academic_year=academic_years[0],
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            candidate=cls.candidate,
+        )
+
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+
+        cls.doctorate_url = resolve_url(
+            'admission:doctorate:curriculum:non_educational',
+            uuid=cls.doctorate_admission.uuid,
             experience_uuid=cls.experience.uuid,
         )
 
@@ -155,3 +174,25 @@ class CurriculumNonEducationalExperienceDetailViewTestCase(TestCase):
             )
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_doctorate_with_program_manager(self):
+        self.client.force_login(user=self.doctorate_program_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_doctorate_with_sic_manager(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(self.doctorate_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        experience = response.context['experience']
+
+        self.assertIsInstance(experience, ExperienceNonAcademiqueDTO)
+        self.assertEqual(experience.uuid, self.experience.uuid)
+        self.assertEqual(
+            response.context['edit_url'],
+            f'/admissions/doctorate/{self.doctorate_admission.uuid}/update/curriculum/non_educational/'
+            f'{self.experience.uuid}',
+        )

@@ -26,7 +26,9 @@
 
 from django.views.generic import TemplateView
 
+from admission.ddd.admission.commands import RecupererConnaissancesLanguesQuery
 from admission.views.common.mixins import LoadDossierViewMixin
+from infrastructure.messages_bus import message_bus_instance
 
 __all__ = ['DoctorateAdmissionLanguagesDetailView']
 
@@ -34,3 +36,10 @@ __all__ = ['DoctorateAdmissionLanguagesDetailView']
 class DoctorateAdmissionLanguagesDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/languages.html'
     permission_required = 'admission.view_admission_languages'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['connaissances_langues'] = message_bus_instance.invoke(
+            RecupererConnaissancesLanguesQuery(matricule_candidat=self.proposition.matricule_candidat),
+        )
+        return context

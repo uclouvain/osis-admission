@@ -155,7 +155,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.is_continuing:
+        if self.is_continuing or self.is_doctorate:
             context_data['next_url'] = self.get_success_url()
             context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
         else:
@@ -247,7 +247,7 @@ class CurriculumNonEducationalExperienceFormView(
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.is_continuing:
+        if self.is_continuing or self.is_doctorate:
             context_data['next_url'] = self.get_success_url()
             context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
         else:
@@ -257,7 +257,7 @@ class CurriculumNonEducationalExperienceFormView(
 
 
 class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperienceMixin):
-    permission_required = 'admission.change_admission_curriculum'
+    permission_required = 'admission.delete_admission_curriculum'
     template_name = 'admission/empty_template.html'
 
     def get_queryset(self):

@@ -565,6 +565,7 @@ class DisplayTagTestCase(TestCase):
             ),
             'experience': experience,
             'can_update_curriculum': True,
+            'can_delete_curriculum': True,
         }
 
         template_params = experience_details_template(**kwargs)
@@ -604,6 +605,14 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['is_belgian_experience'], True)
         self.assertEqual(template_params['translation_required'], False)
         self.assertEqual(template_params['evaluation_system_with_credits'], True)
+
+        # Without the right to delete an experience
+        kwargs['can_delete_curriculum'] = False
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(template_params['delete_link_button'], '')
+
+        kwargs['can_delete_curriculum'] = True
 
         # With a valuated experience
         kwargs['experience'] = ExperienceAcademiqueDTOFactory(
@@ -654,6 +663,7 @@ class DisplayTagTestCase(TestCase):
             ),
             'experience': experience,
             'can_update_curriculum': True,
+            'can_delete_curriculum': True,
         }
 
         template_params = experience_details_template(**kwargs)
@@ -690,6 +700,14 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['experience'], experience)
         self.assertEqual(template_params['with_single_header_buttons'], True)
         self.assertEqual(template_params['CURRICULUM_ACTIVITY_LABEL'], CURRICULUM_ACTIVITY_LABEL)
+
+        # Without the right to delete an experience
+        kwargs['can_delete_curriculum'] = False
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(template_params['delete_link_button'], '')
+
+        kwargs['can_delete_curriculum'] = True
 
         # With a valuated experience
         kwargs['experience'] = ExperienceNonAcademiqueDTOFactory(identifiant_externe='EPC-1')
@@ -765,7 +783,10 @@ class DisplayTagTestCase(TestCase):
 
         self.assertEqual(template_params['edit_link_button'], '')
 
-    def test_checklist_experience_action_links_context_with_an_educational_experience(self):
+    @patch('admission.templatetags.admission.has_perm')
+    def test_checklist_experience_action_links_context_with_an_educational_experience(self, mock_has_perm):
+        mock_has_perm.return_value = True
+
         proposition_uuid = uuid.uuid4()
 
         experience = ExperienceAcademiqueDTOFactory(
@@ -805,6 +826,13 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(context['experience_uuid'], str(experience.uuid))
         self.assertEqual(context['edit_link_button_in_new_tab'], False)
 
+        mock_has_perm.return_value = False
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['delete_url'], '')
+
+        mock_has_perm.return_value = True
+
         # With a valuated experience
         experience = ExperienceAcademiqueDTOFactory(
             annees=[AnneeExperienceAcademiqueDTOFactory(uuid=uuid.uuid4(), annee=2020)],
@@ -822,7 +850,10 @@ class DisplayTagTestCase(TestCase):
         )
         self.assertEqual(context['delete_url'], '')
 
-    def test_checklist_experience_action_links_context_with_a_non_educational_experience(self):
+    @patch('admission.templatetags.admission.has_perm')
+    def test_checklist_experience_action_links_context_with_a_non_educational_experience(self, mock_has_perm):
+        mock_has_perm.return_value = True
+
         proposition_uuid = uuid.uuid4()
 
         experience = ExperienceNonAcademiqueDTOFactory(
@@ -861,6 +892,13 @@ class DisplayTagTestCase(TestCase):
         )
         self.assertEqual(context['experience_uuid'], str(experience.uuid))
         self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
+        mock_has_perm.return_value = False
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['delete_url'], '')
+
+        mock_has_perm.return_value = True
 
         # With a valuated experience
         experience = ExperienceNonAcademiqueDTOFactory(
