@@ -2500,6 +2500,9 @@ msgstr ""
 msgid "Duplication of an experience"
 msgstr ""
 
+msgid "Dynamic questions"
+msgstr ""
+
 msgid "ECONOMY"
 msgstr ""
 
@@ -6158,10 +6161,10 @@ msgstr ""
 msgid "Sender"
 msgstr ""
 
-msgid "Sent to digit"
+msgid "Sent to EPC"
 msgstr ""
 
-msgid "Sent to EPC"
+msgid "Sent to digit"
 msgstr ""
 
 msgid "Sentence indicating the late enrolment (if applicable)."

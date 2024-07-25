@@ -31,6 +31,7 @@ from unittest import mock
 
 import freezegun
 import mock
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
@@ -54,6 +55,14 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.form_item import (
+    MessageAdmissionFormItemFactory,
+    TextAdmissionFormItemFactory,
+    DocumentAdmissionFormItemFactory,
+    CheckboxSelectionAdmissionFormItemFactory,
+    RadioButtonSelectionAdmissionFormItemFactory,
+    AdmissionFormItemInstantiationFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from admission.tests.factories.scholarship import (
@@ -61,7 +70,12 @@ from admission.tests.factories.scholarship import (
     DoubleDegreeScholarshipFactory,
     ErasmusMundusScholarshipFactory,
 )
-from admission.views.excel_exports import AdmissionListExcelExportView, ContinuingAdmissionListExcelExportView
+from admission.views.excel_exports import (
+    AdmissionListExcelExportView,
+    ContinuingAdmissionListExcelExportView,
+    SPECIFIC_QUESTION_SEPARATOR,
+    SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT,
+)
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
@@ -158,6 +172,64 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             .root_group.main_teaching_campus.name
         )
 
+        cls.message_form_item = AdmissionFormItemInstantiationFactory(
+            form_item=MessageAdmissionFormItemFactory(
+                internal_label='Q1',
+            ),
+            academic_year=cls.admission.determined_academic_year,
+        ).form_item
+        cls.message_form_item_uuid = str(cls.message_form_item.uuid)
+
+        cls.text_form_item = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                internal_label='Q2',
+            ),
+            academic_year=cls.admission.determined_academic_year,
+        ).form_item
+        cls.text_form_item_uuid = str(cls.text_form_item.uuid)
+
+        cls.inactive_text_form_item = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                internal_label='Q3',
+                active=False,
+            ),
+            academic_year=cls.admission.determined_academic_year,
+        ).form_item
+        cls.inactive_text_form_item_uuid = str(cls.inactive_text_form_item.uuid)
+
+        cls.document_form_item = AdmissionFormItemInstantiationFactory(
+            form_item=DocumentAdmissionFormItemFactory(
+                internal_label='Q4',
+            ),
+            academic_year=cls.admission.determined_academic_year,
+        ).form_item
+        cls.document_form_item_uuid = str(cls.document_form_item.uuid)
+
+        cls.checkbox_form_item = AdmissionFormItemInstantiationFactory(
+            form_item=CheckboxSelectionAdmissionFormItemFactory(
+                internal_label='Q5',
+            ),
+            academic_year=cls.admission.determined_academic_year,
+        ).form_item
+        cls.checkbox_form_item_uuid = str(cls.checkbox_form_item.uuid)
+
+        cls.radio_button_form_item = AdmissionFormItemInstantiationFactory(
+            form_item=RadioButtonSelectionAdmissionFormItemFactory(
+                internal_label='Q6',
+                values=[
+                    {
+                        'key': '1',
+                        'en': f'One{SPECIFIC_QUESTION_SEPARATOR}A',
+                        'fr-be': f'Un{SPECIFIC_QUESTION_SEPARATOR}A',
+                    },
+                    {'key': '2', 'en': 'Two', 'fr-be': 'Deux'},
+                    {'key': '3', 'en': 'Three', 'fr-be': 'Trois'},
+                ],
+            ),
+            academic_year=cls.admission.determined_academic_year,
+        ).form_item
+        cls.radio_button_form_item_uuid = str(cls.radio_button_form_item.uuid)
+
         cls.result = _DemandeRechercheDTO(
             uuid=cls.admission.uuid,
             numero_demande=f'M-ABCDEF22-{cls.lite_reference}',
@@ -200,6 +272,12 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             if cls.admission.determined_academic_year
             else None,
             adresse_email_candidat=cls.admission.candidate.private_email,
+            reponses_questions_specifiques={
+                cls.text_form_item_uuid: 'Answer 1',
+                cls.inactive_text_form_item_uuid: 'Answer 2',
+                cls.checkbox_form_item_uuid: ['1', '2'],
+                cls.radio_button_form_item_uuid: '3',
+            },
         )
 
         cls.default_params = {
@@ -317,6 +395,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
     def test_export_content(self):
         view = AdmissionListExcelExportView()
+        view.initialize_specific_questions()
         header = view.get_header()
         row_data = view.get_row_data(self.result)
         self.assertEqual(len(header), len(row_data))
@@ -334,6 +413,12 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(row_data[10], _('candidate'))
         self.assertEqual(row_data[11], '2023/01/01, 00:00:00')
         self.assertEqual(row_data[12], '2023/01/02, 00:00:00')
+        self.assertEqual(row_data[13], self.result.adresse_email_candidat)
+        answers_to_specific_questions = row_data[14].split(SPECIFIC_QUESTION_SEPARATOR)
+        self.assertCountEqual(
+            answers_to_specific_questions,
+            ['Q2=Answer 1', 'Q5=Un,Deux', 'Q6=Trois'],
+        )
 
         with mock.patch.object(self.result, 'date_confirmation', None):
             row_data = view.get_row_data(self.result)
@@ -342,6 +427,49 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         with mock.patch.object(self.result, 'plusieurs_demandes', True):
             row_data = view.get_row_data(self.result)
             self.assertEqual(row_data[4], 'oui')
+
+    def test_export_content_with_invalid_specific_select_question_answer(self):
+        view = AdmissionListExcelExportView()
+        view.initialize_specific_questions()
+        view.language = settings.LANGUAGE_CODE_FR
+
+        with mock.patch.object(
+            self.result,
+            'reponses_questions_specifiques',
+            {
+                self.checkbox_form_item_uuid: ['1', '8'],
+                self.radio_button_form_item_uuid: '8',
+            },
+        ):
+            row_data = view.get_row_data(self.result)
+            answers_to_specific_questions = row_data[14].split(SPECIFIC_QUESTION_SEPARATOR)
+            self.assertCountEqual(
+                answers_to_specific_questions,
+                ['Q5=Un', 'Q6='],
+            )
+
+    def test_export_content_with_specific_questions_answers_containing_the_separator(self):
+        view = AdmissionListExcelExportView()
+        view.initialize_specific_questions()
+        view.language = settings.LANGUAGE_CODE_EN
+
+        with mock.patch.object(
+            self.result,
+            'reponses_questions_specifiques',
+            {
+                self.text_form_item_uuid: f'A{SPECIFIC_QUESTION_SEPARATOR}B',
+                self.radio_button_form_item_uuid: '1',
+            },
+        ):
+            row_data = view.get_row_data(self.result)
+            answers_to_specific_questions = row_data[14].split(SPECIFIC_QUESTION_SEPARATOR)
+            self.assertCountEqual(
+                answers_to_specific_questions,
+                [
+                    f'Q2=A{SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT}B',
+                    f'Q6=One{SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT}A',
+                ],
+            )
 
     def test_export_configuration(self):
         candidate = PersonFactory()

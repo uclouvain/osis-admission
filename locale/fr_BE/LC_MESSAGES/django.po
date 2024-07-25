@@ -2716,6 +2716,9 @@ msgstr "Dupliquer l'expérience"
 msgid "Duplication of an experience"
 msgstr "Duplication d'une expérience"
 
+msgid "Dynamic questions"
+msgstr "Questions dynamiques"
+
 msgid "ECONOMY"
 msgstr "Economie"
 
@@ -6750,11 +6753,11 @@ msgstr "Envoyer en faculté"
 msgid "Sender"
 msgstr "Expéditeur"
 
-msgid "Sent to digit"
-msgstr "Envoyer à DigIT"
-
 msgid "Sent to EPC"
 msgstr "Envoyée en EPC"
+
+msgid "Sent to digit"
+msgstr "Envoyer à DigIT"
 
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
@@ -6837,8 +6840,7 @@ msgstr ""
 "l'onglet 'Informations complémentaires > Comptabilité'."
 
 msgid "Some fields are missing in the 'Absence of debt' block."
-msgstr ""
-"Des champs ne sont pas complétés dans la partie 'Absence de dettes'."
+msgstr "Des champs ne sont pas complétés dans la partie 'Absence de dettes'."
 
 msgid ""
 "Some fields are missing in the 'Belgian student status' block in the "
@@ -6848,8 +6850,7 @@ msgstr ""
 "'Informations complémentaires > Comptabilité'."
 
 msgid "Some fields are missing in the 'Belgian student status' block."
-msgstr ""
-"Des champs ne sont pas complétés dans la partie 'Assimilation'."
+msgstr "Des champs ne sont pas complétés dans la partie 'Assimilation'."
 
 msgid ""
 "Some fields are missing in the 'Memberships' block in the 'Additional "

@@ -203,6 +203,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 if cls.admissions[0].determined_academic_year
                 else None,
                 adresse_email_candidat=cls.admissions[0].candidate.private_email,
+                reponses_questions_specifiques={},
             ),
         ]
 
