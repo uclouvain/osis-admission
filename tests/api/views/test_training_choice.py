@@ -142,6 +142,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.type, self.create_data["type_admission"])
         self.assertEqual(admission.comment, self.create_data["justification"])
+        self.assertEqual(admission.last_update_author, self.candidate)
 
         response = self.client.get(self.list_url, format="json")
         self.assertEqual(response.json()['doctorate_propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)

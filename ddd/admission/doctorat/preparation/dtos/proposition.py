@@ -129,3 +129,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     @property
     def candidat_a_nationalite_hors_ue_5(self):
         return self.nationalite_ue_candidat is False and self.nationalite_candidat_code_iso not in PLUS_5_ISO_CODES
+
+    @property
+    def formation(self):
+        return self.doctorat

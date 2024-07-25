@@ -319,6 +319,9 @@ TAB_TREES = {
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
+        Tab('doctorate-education', _('Course choice'), 'person-chalkboard'): [
+            Tab('training-choice', _('Course choice')),
+        ],
         # TODO Education choice
         Tab('experience', _('Previous experience'), 'list-alt'): [
             Tab('curriculum', _('Curriculum')),
@@ -877,6 +880,12 @@ def get_item(dictionary, value):
 def get_item_or_none(dictionary, value):
     """Returns the value of a key in a dictionary if it exists else None"""
     return dictionary.get(value)
+
+
+@register.filter
+def get_bound_field(form, field_name):
+    """Returns the bound field of a form"""
+    return form[field_name]
 
 
 @register.simple_tag
@@ -1772,7 +1781,7 @@ def digit_error_description(error_code):
         "RSTARTDATE0002": "La date de début est d'un format incorrect",
         "RSTOPDATE0001": "La date de début est null",
         "RSTOPDATE0002": "La date de début est d'un format incorrect",
-        "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible"
+        "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible",
     }
 
     return error_mapping[error_code]

@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from ._should_commission_proximite_etre_valide import ShouldCommissionProximiteEtreValide
 from ._should_comptabilite_etre_completee import ShouldAffiliationsEtreCompletees
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
 from ._should_curriculum_etre_complete import (
@@ -80,4 +80,5 @@ __all__ = [
     "ShouldAffiliationsEtreCompletees",
     "ShouldMembreEtreInterneOuExterne",
     "ShouldSignaturesPasEtreEnvoyees",
+    "ShouldCommissionProximiteEtreValide",
 ]

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,10 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
+
+from unittest import TestCase
 
 import attr
-from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import projet_non_rempli
@@ -54,7 +54,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
 )
 from admission.ddd.admission.domain.service.i_maximum_propositions import MAXIMUM_PROPOSITIONS_EN_COURS
-from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -99,6 +98,7 @@ class TestInitierPropositionService(TestCase):
         self.assertEqual(self.cmd.annee_formation, proposition.formation_id.annee)
         self.assertEqual(self.cmd.matricule_candidat, proposition.matricule_candidat)
         self.assertEqual(ChoixStatutPropositionDoctorale.EN_BROUILLON, proposition.statut)
+        self.assertEqual(self.cmd.matricule_candidat, proposition.auteur_derniere_modification)
 
     def test_should_initier_financement(self):
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -153,8 +153,9 @@ class TestInitierPropositionService(TestCase):
 
     def test_should_pas_initier_commission_proximite_CLSM_vide(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_CLSM)
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_initier_commission_proximite_cdss_invalide(self):
         cmd = attr.evolve(
@@ -162,13 +163,15 @@ class TestInitierPropositionService(TestCase):
             sigle_formation=self.doctorat_non_CDSS,
             commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
         )
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_initier_commission_proximite_cde_invalide(self):
         cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDSS.ECLI.name)
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_initier_commission_proximite_CDSS_vide_et_non_CDSS(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_non_CDSS)
@@ -178,28 +181,33 @@ class TestInitierPropositionService(TestCase):
 
     def test_should_pas_initier_commission_proximite_CDE_vide_et_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite='')
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_initier_commission_proximite_CDSS_vide_et_CDSS(self):
         cmd = attr.evolve(self.cmd, sigle_formation='ESP3DP', commission_proximite='')
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_initier_si_commission_proximite_CDE_et_non_CDE(self):
         cmd = attr.evolve(self.cmd, sigle_formation=self.doctorat_non_CDE)
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_initier_si_commission_proximite_CDSS_et_non_CDSS(self):
         cmd = attr.evolve(self.cmd, commission_proximite='ECLI', sigle_formation=self.doctorat_non_CDSS)
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_initier_si_sous_domaine_absent_et_doctorat_sciences(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_science)
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_empecher_si_maximum_propositions_autorisees(self):
         cmd = attr.evolve(self.cmd, matricule_candidat="0123456789")
