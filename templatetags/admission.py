@@ -332,7 +332,7 @@ TAB_TREES = {
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
-        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+        Tab('additional-information', _('Accounting'), 'puzzle-piece'): [
             Tab('accounting', _('Accounting')),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
