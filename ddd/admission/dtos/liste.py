@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict, Union
 
 import attr
 
@@ -69,6 +69,7 @@ class DemandeRechercheDTO(interface.DTO):
     annee_formation: int
     annee_calculee: Optional[int]
     adresse_email_candidat: Optional[str]
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
 
     @property
     def annee_demande(self):

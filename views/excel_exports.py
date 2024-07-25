@@ -27,7 +27,7 @@
 import ast
 import datetime
 import uuid
-from typing import Dict
+from typing import Dict, Union
 
 from django.conf import settings
 from django.contrib import messages
@@ -40,8 +40,12 @@ from django.utils.html import format_html
 from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy, pgettext, get_language
 from django.views import View
+from osis_async.models import AsyncTask
+from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
+from osis_export.models import Export
+from osis_export.models.enums.types import ExportTypes
 
-from admission.models import Scholarship
+from admission.models import Scholarship, AdmissionFormItem
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -52,11 +56,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
-from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
 )
@@ -80,10 +87,6 @@ from base.models.campus import Campus
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from infrastructure.messages_bus import message_bus_instance
-from osis_async.models import AsyncTask
-from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
-from osis_export.models import Export
-from osis_export.models.enums.types import ExportTypes
 
 __all__ = [
     'AdmissionListExcelExportView',
@@ -95,6 +98,8 @@ from reference.models.country import Country
 
 FULL_DATE_FORMAT = '%Y/%m/%d, %H:%M:%S'
 SHORT_DATE_FORMAT = '%Y/%m/%d'
+SPECIFIC_QUESTION_SEPARATOR = '|'
+SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT = '#'
 
 
 class BaseAdmissionExcelExportView(
@@ -115,6 +120,33 @@ class BaseAdmissionExcelExportView(
     with_legend_worksheet = True
     with_parameters_worksheet = True
     description = gettext_lazy('Admissions')
+    with_specific_questions = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.specific_questions: Dict[str, AdmissionFormItem] = {}
+        self.language = settings.LANGUAGE_CODE
+
+    def generate_file(self, person, filters, **kwargs):
+        # Get the person language
+        if person.language:
+            self.language = person.language
+
+        # Load the specific questions if needed
+        if self.with_specific_questions:
+            self.initialize_specific_questions()
+
+        return super().generate_file(person, filters, **kwargs)
+
+    def initialize_specific_questions(self):
+        """Initialize the specific questions."""
+        self.specific_questions = {
+            str(form_item.uuid): form_item
+            for form_item in AdmissionFormItem.objects.filter(
+                type__in=[TypeItemFormulaire.SELECTION.name, TypeItemFormulaire.TEXTE.name],
+                active=True,
+            )
+        }
 
     def get_filters(self):
         """Get filters as a dict of key/value pairs corresponding to the command params"""
@@ -129,6 +161,60 @@ class BaseAdmissionExcelExportView(
         filters = ast.literal_eval(kwargs.get('filters'))
         self.process_filters_before_command(filters)
         return message_bus_instance.invoke(self.command(**filters))
+
+    def get_row_data_specific_questions_answers(
+        self,
+        proposition_dto: Union[
+            TouteDemandeRechercheDTO,
+        ],
+    ):
+        """
+        Get the answers of the specific questions of the proposition based on a list of configurations.
+        :param proposition_dto: The DTO of the proposition.
+        :return: The concatenation of the answers of the specific questions.
+        """
+        specific_questions_answers = []
+
+        for specific_question_uuid, specific_question_answer in proposition_dto.reponses_questions_specifiques.items():
+            form_item = self.specific_questions.get(specific_question_uuid)
+
+            if form_item:
+                if not specific_question_answer:
+                    answer = ''
+
+                elif form_item.type == TypeItemFormulaire.SELECTION.name:
+                    # Create a dict mapping the keys of the options to the corresponding labels in the user's language
+                    if not hasattr(form_item, '_current_values'):
+                        setattr(
+                            form_item,
+                            '_current_values',
+                            {
+                                option.get('key'): option.get(self.language, '').replace(
+                                    SPECIFIC_QUESTION_SEPARATOR,
+                                    SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT,
+                                )
+                                for option in form_item.values
+                            },
+                        )
+                    current_values = getattr(form_item, '_current_values')
+
+                    # Concatenate the labels of the selected options
+                    answer = (
+                        ','.join([current_values[key] for key in specific_question_answer if key in current_values])
+                        if isinstance(specific_question_answer, list)
+                        else current_values.get(specific_question_answer, '')
+                    )
+
+                else:
+                    answer = specific_question_answer
+
+                    # Replace the separator in case the answer already contains it
+                    if isinstance(answer, str):
+                        answer = answer.replace(SPECIFIC_QUESTION_SEPARATOR, SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT)
+
+                specific_questions_answers.append(f'{form_item.internal_label}={answer}')
+
+        return SPECIFIC_QUESTION_SEPARATOR.join(specific_questions_answers)
 
     def get(self, request):
         # Get filters
@@ -190,6 +276,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     permission_required = 'admission.view_enrolment_applications'
     redirect_url_name = 'admission:all-list'
     urlpatterns = 'all-admissions-list'
+    with_specific_questions = True
 
     def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
         formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
@@ -303,6 +390,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Modification date'),
             _('Confirmation date'),
             _('Private email address'),
+            _('Dynamic questions'),
         ]
 
     def get_row_data(self, row: TouteDemandeRechercheDTO):
@@ -321,6 +409,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             row.derniere_modification_le.strftime(FULL_DATE_FORMAT),
             row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',
             row.adresse_email_candidat,
+            self.get_row_data_specific_questions_answers(row),
         ]
 
     def get_filters(self):
