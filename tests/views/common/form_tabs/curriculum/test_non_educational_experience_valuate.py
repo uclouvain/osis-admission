@@ -37,6 +37,7 @@ from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
 from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
@@ -196,11 +197,24 @@ class CurriculumNonEducationalExperienceValuateViewTestCase(TestCase):
         self.assertNotEqual(new_saved_experience_checklist[0], default_experience_checklist)
         self.assertEqual(new_saved_experience_checklist[0], saved_experience_checklist[0])
 
-    def test_valuate_experience_from_doctorate_curriculum_is_not_allowed_for_fac_users(self):
+    def test_valuate_experience_from_doctorate_curriculum_is_allowed_for_fac_users(self):
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
         self.client.force_login(self.doctorate_program_manager_user)
-        response = self.client.post(self.doctorate_valuate_url)
+        response = self.client.post(
+            resolve_url(
+                'admission:doctorate:update:curriculum:non_educational_valuate',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            )
+            + '?next='
+            + resolve_url('admission'),
+        )
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
     def test_valuate_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

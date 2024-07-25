@@ -37,6 +37,7 @@ from rest_framework import status
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -167,11 +168,22 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             uuid=self.doctorate_admission.uuid,
         )
 
-    def test_update_curriculum_is_not_allowed_for_fac_users(self):
+    def test_update_curriculum_is_allowed_for_fac_users(self):
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
         self.client.force_login(self.program_manager_user)
-        response = self.client.get(self.form_url)
+        response = self.client.get(
+            resolve_url(
+                'admission:doctorate:update:curriculum:educational',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            )
+        )
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

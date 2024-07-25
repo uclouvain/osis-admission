@@ -38,6 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
@@ -128,9 +129,14 @@ class DoctorateAdmissionLanguagesFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Program manager
+        other_admission = DoctorateAdmissionFactory(
+            training=self.admission.training,
+            candidate=self.admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
         self.client.force_login(user=self.program_manager_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse('admission:doctorate:update:languages', args=[other_admission.uuid]))
+        self.assertEqual(response.status_code, 200)
 
     def test_form_initialization(self):
         self.client.force_login(user=self.sic_user)

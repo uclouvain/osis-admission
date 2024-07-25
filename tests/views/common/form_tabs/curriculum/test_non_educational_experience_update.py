@@ -25,7 +25,6 @@
 # ##############################################################################
 
 import datetime
-import itertools
 import uuid
 from unittest import mock
 
@@ -46,7 +45,7 @@ from admission.contrib.models.base import (
 )
 from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.contrib.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
@@ -54,7 +53,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -66,7 +64,6 @@ from admission.tests.factories.roles import SicManagementRoleFactory, ProgramMan
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
 from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
@@ -118,7 +115,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             education_group=cls.continuing_admission.training.education_group,
         ).person.user
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.continuing_admission.training.education_group,
+            education_group=cls.doctorate_admission.training.education_group,
         ).person.user
 
         cls.file_uuid = uuid.uuid4()
@@ -570,10 +567,21 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.continuing_admission.last_update_author, self.sic_manager_user.person)
 
-    def test_doctorate_update_curriculum_is_not_allowed_for_fac_users(self):
+    def test_doctorate_update_curriculum_is_allowed_for_fac_users(self):
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
         self.client.force_login(self.doctorate_program_manager_user)
-        response = self.client.get(self.doctorate_form_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.post(
+            resolve_url(
+                'admission:doctorate:update:curriculum:non_educational',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            ),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_doctorate_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

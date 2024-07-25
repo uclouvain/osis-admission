@@ -32,6 +32,7 @@ from rest_framework import status
 
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import Onglets
 from admission.forms import REQUIRED_FIELD_CLASS
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -114,11 +115,14 @@ class AdmissionCurriculumGlobalFormViewForDoctorateTestCase(TestCase):
         self.form_url = resolve_url(self.base_url, uuid=self.doctorate_admission.uuid)
         self.details_url = resolve_url(self.base_details_url, uuid=self.doctorate_admission.uuid)
 
-    def test_update_global_curriculum_is_not_allowed_for_fac_users(self):
+    def test_update_global_curriculum_is_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.doctorate_admission.save()
         response = self.client.get(self.form_url)
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_education_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

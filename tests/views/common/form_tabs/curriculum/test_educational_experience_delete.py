@@ -40,6 +40,7 @@ from admission.contrib.models.base import AdmissionEducationalValuatedExperience
 from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -328,8 +329,18 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
     def test_delete_experience_from_doctorate_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.doctorate_program_manager_user)
-        response = self.client.delete(self.doctorate_delete_url)
-
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        response = self.client.post(
+            resolve_url(
+                'admission:doctorate:update:curriculum:educational_delete',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            ),
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):

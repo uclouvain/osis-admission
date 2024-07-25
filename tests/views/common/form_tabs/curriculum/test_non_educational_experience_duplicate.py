@@ -41,6 +41,7 @@ from admission.contrib.models.base import (
 )
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
@@ -346,10 +347,22 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
             .get('enfants', []),
         )
 
-    def test_duplicate_experience_from_doctorate_curriculum_is_not_allowed_for_fac_users(self):
+    def test_duplicate_experience_from_doctorate_curriculum_is_allowed_for_fac_users(self):
         self.client.force_login(self.doctorate_program_manager_user)
-        response = self.client.post(self.doctorate_duplicate_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        response = self.client.post(
+            resolve_url(
+                'admission:doctorate:update:curriculum:non_educational_duplicate',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            ),
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
     def test_duplicate_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

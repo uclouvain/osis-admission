@@ -257,7 +257,7 @@ class CurriculumNonEducationalExperienceFormView(
 
 
 class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperienceMixin):
-    permission_required = 'admission.change_admission_curriculum'
+    permission_required = 'admission.delete_admission_curriculum'
     template_name = 'admission/empty_template.html'
 
     def get_queryset(self):
