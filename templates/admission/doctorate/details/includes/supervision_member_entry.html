@@ -1,0 +1,73 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<div class="signature-item flex-container">
+  <div style="flex: 1;">
+    <div>
+      <strong>
+        {% if member.est_docteur %}{% trans "Dr" %} {% endif %}
+        {{ member.prenom }} {{ member.nom }}
+      </strong>
+      ({{ member.email }})
+      {% if member.institution %} - {{ member.institution }} {% endif %}
+      {% if member.ville %} - {{ member.ville }} {% endif %}
+      {% if member.pays %}({{ member.pays }}){% endif %}
+    </div>
+    <em>
+      {% if signature.date %}
+        {% blocktrans with state=signature.statut|enum_display:'ChoixEtatSignature' date=signature.date trimmed %}
+          {{ state }} on {{ date }}
+        {% endblocktrans %}
+      {% else %}
+        {{ signature.statut|enum_display:'ChoixEtatSignature' }}
+      {% endif %}
+      {% if member.uuid == supervision.promoteur_reference %}
+        - {% trans "Lead supervisor" %}
+      {% endif %}
+    </em>
+  </div>
+
+  {% if signature.motif_refus and signature.statut == 'DECLINED' %}
+    <blockquote><strong>{% trans "Grounds for denied" %}</strong>
+      {{ signature.motif_refus|linebreaks }}</blockquote>
+  {% endif %}
+
+  {% if signature.commentaire_externe %}
+    <blockquote><strong>{% trans "Comment to the candidate:" %}</strong>
+      {{ signature.commentaire_externe|linebreaks }}</blockquote>
+  {% endif %}
+
+  {% if member.matricule == user.person.global_id and signature.commentaire_interne %}
+    <blockquote><strong>{% trans "Internal comment:" %}</strong>
+      {{ signature.commentaire_interne|linebreaks }}</blockquote>
+  {% endif %}
+</div>
+
+{% if signature.pdf and signature.statut == 'APPROVED' %}
+  {% field_data _("Approbation by pdf") signature.pdf %}
+{% endif %}
+
+{% if not forloop.last %}
+  <hr />
+{% endif %}

@@ -26,11 +26,21 @@
 
 from django.views.generic import TemplateView
 
+from admission.ddd.admission.doctorat.preparation.commands import GetGroupeDeSupervisionCommand
 from admission.views.common.mixins import LoadDossierViewMixin
 
 __all__ = ["DoctorateAdmissionSupervisionDetailView"]
+
+from infrastructure.messages_bus import message_bus_instance
 
 
 class DoctorateAdmissionSupervisionDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/supervision.html'
     permission_required = 'admission.view_admission_supervision'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['groupe_supervision'] = message_bus_instance.invoke(
+            GetGroupeDeSupervisionCommand(uuid_proposition=self.admission_uuid)
+        )
+        return context
