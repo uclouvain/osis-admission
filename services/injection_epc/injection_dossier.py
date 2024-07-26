@@ -33,16 +33,16 @@ from django.conf import settings
 from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
 from unidecode import unidecode
 
-from admission.contrib.models import Accounting, EPCInjection, AdmissionFormItem
-from admission.contrib.models.base import (
+from admission.models import Accounting, EPCInjection, AdmissionFormItem
+from admission.models.base import (
     BaseAdmission,
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
-from admission.contrib.models.enums.actor_type import ActorType
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
+from admission.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.enums.actor_type import ActorType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
 )

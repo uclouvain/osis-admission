@@ -33,7 +33,7 @@ from rest_framework.settings import api_settings
 from admission.api.schema import ChoicesEnumSchema
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.domain.validator.exceptions import (
     ModificationInscriptionExterneNonConfirmeeException,
     ReorientationInscriptionExterneNonConfirmeeException,

@@ -29,7 +29,7 @@ from django.utils.timezone import now
 from osis_async.models.enums import TaskState
 from osis_async.utils import update_task
 
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 from admission.exports.admission_archive import admission_pdf_archive
 from admission.exports.admission_canvas import admission_pdf_canvas
 from admission.exports.admission_confirmation_success_attestation import admission_confirmation_success_attestation

@@ -29,11 +29,11 @@ from typing import Dict
 import pika
 from django.conf import settings
 
-from admission.contrib.models import Accounting, EPCInjection
-from admission.contrib.models.base import (
+from admission.models import Accounting, EPCInjection
+from admission.models.base import (
     BaseAdmission,
 )
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person

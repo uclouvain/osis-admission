@@ -30,7 +30,7 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.contrib.models import Scholarship, DiplomaticPost
+from admission.models import Scholarship, DiplomaticPost
 from base.models.campus import Campus
 from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesQuery, GetCampusQuery
 from infrastructure.messages_bus import message_bus_instance

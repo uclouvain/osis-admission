@@ -27,8 +27,8 @@ from typing import List
 
 from django.utils.translation import get_language
 
-from admission.contrib.models import AdmissionFormItemInstantiation
-from admission.contrib.models.base import BaseAdmission
+from admission.models import AdmissionFormItemInstantiation
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
 from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
 from admission.ddd.admission.domain.validator.exceptions import PropositionNonTrouveeException

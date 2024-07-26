@@ -26,8 +26,8 @@
 
 import factory
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
+from admission.models import GeneralEducationAdmission
+from admission.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,

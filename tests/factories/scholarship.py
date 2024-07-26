@@ -27,7 +27,7 @@
 import factory
 from factory.fuzzy import FuzzyText
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 
 

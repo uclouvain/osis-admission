@@ -29,7 +29,7 @@ from django.utils.translation import gettext_lazy as _, override
 from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.commands import EnvoyerMessageDoctorantCommand
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
 from admission.infrastructure.parcours_doctoral.domain.service.notification import (

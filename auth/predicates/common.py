@@ -28,9 +28,9 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 from waffle import switch_is_active
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionStatus
+from admission.models import DoctorateAdmission
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus
 from osis_role.errors import predicate_failed_msg
 
 

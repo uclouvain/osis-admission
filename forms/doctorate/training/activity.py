@@ -30,9 +30,9 @@ import dal.forward
 from django import forms
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.doctoral_training import Activity
+from admission.models import DoctorateAdmission
+from admission.models.cdd_config import CddConfiguration
+from admission.models.doctoral_training import Activity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,

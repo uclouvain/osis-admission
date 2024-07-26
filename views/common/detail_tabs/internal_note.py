@@ -27,7 +27,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
 
-from admission.contrib.models.doctorate import InternalNote
+from admission.models.doctorate import InternalNote
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 
 __all__ = ["InternalNoteView"]

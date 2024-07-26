@@ -29,7 +29,7 @@ from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase, Client
 
-from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.enums import (
     CritereItemFormulaireNationaliteCandidat,
     CritereItemFormulaireNationaliteDiplome,

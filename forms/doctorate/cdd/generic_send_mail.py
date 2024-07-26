@@ -27,7 +27,7 @@ from ckeditor.fields import RichTextFormField
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 
 
 class SelectCddEmailTemplateForm(forms.Form):

@@ -34,7 +34,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import get_language
 
-from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
+from admission.models.online_payment import PaymentStatus, PaymentMethod
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 

@@ -32,8 +32,8 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )

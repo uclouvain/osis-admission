@@ -36,10 +36,10 @@ from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.constants import CONTEXT_CONTINUING
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.contrib.models.epc_injection import EPCInjectionType
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
+from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande

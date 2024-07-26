@@ -29,7 +29,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.api.serializers.payment_method import PaymentMethodSerializer
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models.online_payment import PaymentStatus
 from admission.tests.factories.payment import OnlinePaymentFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory

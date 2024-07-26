@@ -33,7 +33,7 @@ from django.db import transaction
 from django.utils.text import slugify
 from osis_document.enums import PostProcessingType
 
-from admission.contrib.models import (
+from admission.models import (
     AdmissionTask,
     ContinuingEducationAdmission,
     DoctorateAdmission,

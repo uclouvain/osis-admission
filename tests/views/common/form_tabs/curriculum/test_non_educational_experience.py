@@ -36,12 +36,12 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
-from admission.contrib.models.base import (
+from admission.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
+from admission.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.contrib.models.epc_injection import EPCInjectionType
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande

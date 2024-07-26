@@ -29,8 +29,8 @@ from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import AdmissionTask, DoctorateAdmission, SupervisionActor
-from admission.contrib.models.doctorate import PropositionProxy
+from admission.models import AdmissionTask, DoctorateAdmission, SupervisionActor
+from admission.models.doctorate import PropositionProxy
 from admission.exceptions import MergePDFException
 from admission.exports.utils import admission_generate_pdf
 from base.models.enums.person_address_type import PersonAddressType

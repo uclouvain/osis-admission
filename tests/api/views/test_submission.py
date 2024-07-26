@@ -39,7 +39,7 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,

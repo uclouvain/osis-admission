@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import Optional
 
-from admission.contrib.models import DiplomaticPost
+from admission.models import DiplomaticPost
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 
 from admission.ddd.admission.domain.service.i_poste_diplomatique import IPosteDiplomatiqueTranslator

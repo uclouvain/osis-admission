@@ -30,8 +30,8 @@ from decimal import Decimal
 from django.conf import settings
 from django.db.models import QuerySet
 
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.online_payment import OnlinePayment, PaymentStatus
+from admission.models.base import BaseAdmission
+from admission.models.online_payment import OnlinePayment, PaymentStatus
 from admission.services.mollie import MollieService, PaiementMollie, FetchMolliePaymentException
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)

@@ -30,7 +30,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.test import override_settings
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory

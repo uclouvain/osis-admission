@@ -31,7 +31,7 @@ from decimal import Decimal
 from typing import Optional
 
 
-from admission.contrib.models.online_payment import PaymentMethod, PaymentStatus
+from admission.models.online_payment import PaymentMethod, PaymentStatus
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 
 

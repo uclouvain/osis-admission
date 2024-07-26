@@ -231,7 +231,7 @@ class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class PropositionProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: 'ChoixTypeAdmission'
     projet: 'DetailProjet'
     financement: 'Financement'

@@ -26,7 +26,7 @@
 
 import factory
 
-from admission.contrib.models.doctorate import InternalNote
+from admission.models.doctorate import InternalNote
 
 
 class InternalNoteFactory(factory.django.DjangoModelFactory):

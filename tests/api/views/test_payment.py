@@ -38,8 +38,8 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.online_payment import OnlinePayment, PaymentStatus, PaymentMethod
+from admission.models import GeneralEducationAdmission
+from admission.models.online_payment import OnlinePayment, PaymentStatus, PaymentMethod
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,

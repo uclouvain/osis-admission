@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from admission.contrib.models import (
+from admission.models import (
     AdmissionTask,
     GeneralEducationAdmission,
     ContinuingEducationAdmission,

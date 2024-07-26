@@ -29,7 +29,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,

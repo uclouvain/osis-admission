@@ -40,7 +40,7 @@ __all__ = [
 from django.views.generic import FormView
 from django.views.generic.edit import ProcessFormView
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.commands import RechercherCompteExistantCommand, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
 from admission.utils import get_cached_general_education_admission_perm_obj

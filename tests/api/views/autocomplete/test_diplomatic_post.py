@@ -27,7 +27,7 @@ from django.test import override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import DiplomaticPost
+from admission.models import DiplomaticPost
 from admission.ddd import FR_ISO_CODE, EN_ISO_CODE
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from base.tests.factories.person import PersonFactory
