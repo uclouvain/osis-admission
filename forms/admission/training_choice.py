@@ -32,7 +32,6 @@ from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models import Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     COMMISSIONS_CDE_CLSM,
     COMMISSIONS_CDSS,
@@ -60,6 +59,7 @@ from admission.forms.specific_question import ConfigurableFormMixin
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import Scholarship
 from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
 from base.forms.utils import FIELD_REQUIRED_MESSAGE, EMPTY_CHOICE
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField

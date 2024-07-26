@@ -26,7 +26,7 @@
 
 from rest_framework.serializers import ModelSerializer
 
-from admission.contrib.models.online_payment import OnlinePayment
+from admission.models.online_payment import OnlinePayment
 
 
 class PaymentMethodSerializer(ModelSerializer):

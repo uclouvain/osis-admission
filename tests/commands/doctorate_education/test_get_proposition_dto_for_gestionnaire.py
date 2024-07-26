@@ -31,7 +31,6 @@ import freezegun
 from django.test import TestCase, override_settings
 from osis_history.models import HistoryEntry
 
-from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -39,6 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.dtos.bourse import BourseDTO
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.scholarship import DoctorateScholarshipFactory
 from base.tests.factories.entity import EntityFactory

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import datetime
 
 from django.test import TestCase
 
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     ConfirmerRepassageCommand,
@@ -68,7 +68,7 @@ class TestConfirmerRepassage(TestCase):
         doctorat_id = self.message_bus.invoke(ConfirmerRepassageCommand(uuid='c2', **self.parametres_commande_defaut))
 
         doctorat = self.message_bus.invoke(
-            RecupererDoctoratQuery(doctorat_uuid=doctorat_id.uuid),
+            RecupererAdmissionDoctoratQuery(doctorat_uuid=doctorat_id.uuid),
         )
 
         self.assertEqual(doctorat.statut, ChoixStatutDoctorat.CONFIRMATION_TO_BE_REPEATED.name)

@@ -34,13 +34,6 @@ from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.contrib.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-    EPCInjection,
-)
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -54,6 +47,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission, EPCInjection
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory

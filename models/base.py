@@ -41,7 +41,6 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (
@@ -50,9 +49,6 @@ from admission.constants import (
     CONTEXT_GENERAL,
     CONTEXT_CONTINUING,
 )
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.form_item import ConfigurableModelFormItemField
-from admission.contrib.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
 )
@@ -68,6 +64,9 @@ from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSI
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.form_item import ConfigurableModelFormItemField
+from admission.models.functions import ToChar
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
@@ -80,6 +79,7 @@ from base.models.person_merge_proposal import PersonMergeStatus
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
+from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion

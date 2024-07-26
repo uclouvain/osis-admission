@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,17 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.parcours_doctoral.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
-from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
-from admission.ddd.parcours_doctoral.repository.i_doctorat import IDoctoratRepository
+
+from base.models.utils.utils import ChoiceEnum
+
+from django.utils.translation import gettext_lazy as _
 
 
-def recuperer_doctorat(
-    cmd: 'RecupererDoctoratQuery',
-    doctorat_repository: 'IDoctoratRepository',
-) -> DoctoratDTO:
-    # GIVEN
-    doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
-    # THEN
-    return doctorat_repository.get_dto(doctorat_id)
+class ActorType(ChoiceEnum):
+    PROMOTER = _("Supervisor")
+    CA_MEMBER = _("CA Member")

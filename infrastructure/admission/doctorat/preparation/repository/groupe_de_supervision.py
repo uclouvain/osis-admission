@@ -29,13 +29,12 @@ from typing import List, Optional, Union
 from django.db.models import F, Prefetch
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language, gettext_lazy as _
+from osis_signature.models import Actor, Process, StateHistory
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
-from admission.contrib.models import DoctorateAdmission, SupervisionActor
-from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
@@ -58,9 +57,10 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.models import DoctorateAdmission, SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
-from osis_signature.models import Actor, Process, StateHistory
 from reference.models.country import Country
 
 

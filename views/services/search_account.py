@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,13 +32,9 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.views.generic import FormView
 
-__all__ = [
-    "SearchAccountView",
-]
-
-from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
+from admission.models.base import BaseAdmission
 from admission.templatetags.admission import format_matricule
 from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
@@ -46,6 +42,10 @@ from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeSt
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.views.common import display_success_messages
 from osis_common.utils.htmx import HtmxMixin
+
+__all__ = [
+    "SearchAccountView",
+]
 
 
 class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
@@ -66,9 +66,21 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
     @property
     def candidate(self):
         return Person.objects.values(
-            'first_name', 'middle_name', 'last_name', 'national_number', 'sex', 'birth_date',
-            'email', 'civil_state', 'birth_place', 'country_of_citizenship__name', 'id_card_number',
-            'passport_number', 'id_card_expiry_date', 'passport_expiry_date', 'global_id'
+            'first_name',
+            'middle_name',
+            'last_name',
+            'national_number',
+            'sex',
+            'birth_date',
+            'email',
+            'civil_state',
+            'birth_place',
+            'country_of_citizenship__name',
+            'id_card_number',
+            'passport_number',
+            'id_card_expiry_date',
+            'passport_expiry_date',
+            'global_id',
         ).get(baseadmissions__uuid=self.kwargs['uuid'])
 
     @property
@@ -83,8 +95,11 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
         return self.proposal_merge.proposal_merge_person if self.proposal_merge else None
 
     def get_initial(self):
-        return model_to_dict(self.merge_person) \
-            if self.proposal_merge and self.proposal_merge.status == PersonMergeStatus.PENDING.name else {}
+        return (
+            model_to_dict(self.merge_person)
+            if self.proposal_merge and self.proposal_merge.status == PersonMergeStatus.PENDING.name
+            else {}
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -110,6 +125,7 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
 
     def form_valid(self, form):
         from infrastructure.messages_bus import message_bus_instance
+
         display_success_messages(self.request, messages_to_display="La proposition de fusion a été créée avec succès")
         message_bus_instance.invoke(
             InitialiserPropositionFusionPersonneCommand(
@@ -154,10 +170,10 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
         return self.request.POST.getlist('high_school_graduation_year')
 
     def get_success_url(self):
-        return reverse(
-            'admission:general-education:checklist',
-            kwargs={'uuid': self.kwargs['uuid']}
-        ) + "#donnees_personnelles"
+        return (
+            reverse('admission:general-education:checklist', kwargs={'uuid': self.kwargs['uuid']})
+            + "#donnees_personnelles"
+        )
 
     def peut_refuser_fusion(self):
         # pas le temps pour faire ça en DDD
@@ -165,8 +181,10 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
         digit_results = self.proposal_merge.similarity_result
         for result in digit_results:
             # ne peut pas refuser fusion si NISS identiques
-            if result['person']['nationalRegister'] and candidate['national_number'] and (
-                    result['person']['nationalRegister'] == _only_digits(candidate['national_number'])
+            if (
+                result['person']['nationalRegister']
+                and candidate['national_number']
+                and (result['person']['nationalRegister'] == _only_digits(candidate['national_number']))
             ):
                 return False
         return True

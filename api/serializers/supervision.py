@@ -26,7 +26,7 @@
 
 from rest_framework import serializers
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.commands import (
     DesignerPromoteurReferenceCommand,
     IdentifierMembreCACommand,

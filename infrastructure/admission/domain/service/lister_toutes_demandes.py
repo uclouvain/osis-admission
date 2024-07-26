@@ -44,9 +44,6 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -60,6 +57,9 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ConfigurationStatutChecklist,
 )
 from admission.infrastructure.utils import get_entities_with_descendants_ids
+from admission.models import AdmissionViewer
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
