@@ -38,7 +38,7 @@ from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
+from admission.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,

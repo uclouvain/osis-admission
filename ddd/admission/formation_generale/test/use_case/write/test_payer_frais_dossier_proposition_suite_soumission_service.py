@@ -28,7 +28,7 @@ from unittest import TestCase, mock
 
 import freezegun
 
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteSoumissionCommand,
 )

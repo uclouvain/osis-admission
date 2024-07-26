@@ -44,8 +44,8 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
+from admission.models import AdmissionViewer
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist

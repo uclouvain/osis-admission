@@ -41,7 +41,7 @@ from base.ddd.utils.business_validator import execute_functions_and_aggregate_ex
 from osis_common.ddd import interface
 
 
-class VerifierProjetDoctoral(interface.DomainService):
+class VerifierPropositionProjetDoctoral(interface.DomainService):
     @classmethod
     def verifier(
         cls,

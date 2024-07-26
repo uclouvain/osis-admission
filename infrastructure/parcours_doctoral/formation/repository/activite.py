@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List, Mapping, Optional
 
-from admission.contrib.models.doctoral_training import Activity
+from admission.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.builder.doctorat_identity import DoctoratIdentityBuilder
 from admission.ddd.parcours_doctoral.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
 from admission.ddd.parcours_doctoral.formation.domain.model.activite import Activite, ActiviteIdentity

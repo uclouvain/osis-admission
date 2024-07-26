@@ -32,14 +32,14 @@ from django.conf import settings
 from django.db import transaction
 from django.utils.dateparse import parse_datetime, parse_date
 
-from admission.contrib.models import (
+from admission.models import (
     AdmissionFormItem,
     AdmissionFormItemInstantiation,
     GeneralEducationAdmission,
     DoctorateAdmission,
     ContinuingEducationAdmission,
 )
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import (

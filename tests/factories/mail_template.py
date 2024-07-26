@@ -26,7 +26,7 @@
 
 import factory
 
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 
 
 class CddMailTemplateFactory(factory.django.DjangoModelFactory):

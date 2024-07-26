@@ -37,7 +37,7 @@ from django.utils.translation import get_language, gettext_lazy as _
 from django.views import generic
 
 from admission.auth.roles.cdd_configurator import CddConfigurator
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 from admission.forms.cdd_mail_template import NameMailTemplateForm
 from osis_mail_template.forms import MailTemplateConfigureForm
 from osis_mail_template.models import MailTemplate
@@ -73,7 +73,7 @@ class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         from osis_mail_template import templates
-        from admission.contrib.models.cdd_mail_template import ALLOWED_CUSTOM_IDENTIFIERS
+        from admission.models.cdd_mail_template import ALLOWED_CUSTOM_IDENTIFIERS
 
         kwargs['descriptions'] = {
             identifier: templates.get_description(identifier) for identifier in ALLOWED_CUSTOM_IDENTIFIERS

@@ -37,8 +37,8 @@ from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.contrib.models.base import REFERENCE_SEQ_NAME
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,

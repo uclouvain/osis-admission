@@ -33,7 +33,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_302_FOUND, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
-from admission.contrib.models import ConfirmationPaper
+from admission.models import ConfirmationPaper
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeContratTravail,

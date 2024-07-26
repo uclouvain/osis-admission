@@ -25,7 +25,7 @@
 ##############################################################################
 from typing import List
 
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
 from admission.ddd.admission.formation_generale.test.factory.paiement import Paiement, PaiementFactory

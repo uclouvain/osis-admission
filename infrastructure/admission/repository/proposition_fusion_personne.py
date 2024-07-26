@@ -31,7 +31,7 @@ from django.apps import apps
 from django.conf import settings
 from django.db.models import Model, ForeignKey
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.domain.validator.exceptions import TicketDigitATraiterAvantException, \
     PasDePropositionDeFusionEligibleException

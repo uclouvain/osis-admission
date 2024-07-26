@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models import DoctorateAdmission, Accounting
+from admission.models import DoctorateAdmission, Accounting
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
     comptabilite_non_remplie,

@@ -32,7 +32,7 @@ from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMoyensDecouverteFormation

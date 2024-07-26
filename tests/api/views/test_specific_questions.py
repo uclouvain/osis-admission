@@ -34,7 +34,7 @@ from django.utils.translation import gettext
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import EN_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.enums import CritereItemFormulaireNationaliteDiplome

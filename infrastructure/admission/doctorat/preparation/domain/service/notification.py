@@ -34,10 +34,10 @@ from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
 from osis_mail_template.utils import transform_html_to_text
 
-from admission.contrib.models import AdmissionTask, SupervisionActor
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.doctorate import PropositionProxy
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import AdmissionTask, SupervisionActor
+from admission.models.base import BaseAdmission
+from admission.models.doctorate import PropositionProxy
+from admission.models.enums.actor_type import ActorType
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature

@@ -28,8 +28,8 @@ from typing import List, Optional
 from django.db.models import Exists, OuterRef
 from django.utils.translation import get_language, gettext_lazy as _
 
-from admission.contrib.models import SupervisionActor
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MembreCANonTrouveException

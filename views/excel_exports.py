@@ -38,7 +38,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy, pgettext
 from django.views import View
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO

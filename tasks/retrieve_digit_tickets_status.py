@@ -32,7 +32,7 @@ from django.db import transaction
 from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand,

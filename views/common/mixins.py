@@ -36,9 +36,9 @@ from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
-from admission.contrib.models.base import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
+from admission.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.models.base import AdmissionViewer
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetPropositionCommand,
@@ -66,7 +66,7 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
@@ -172,7 +172,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @cached_property
     def doctorate(self) -> 'DoctoratDTO':
-        return message_bus_instance.invoke(RecupererDoctoratQuery(doctorat_uuid=self.admission_uuid))
+        return message_bus_instance.invoke(RecupererAdmissionDoctoratQuery(doctorat_uuid=self.admission_uuid))
 
     @cached_property
     def last_confirmation_paper(self) -> EpreuveConfirmationDTO:

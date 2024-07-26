@@ -32,7 +32,7 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import translation
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets, TypeItemFormulaire
 from admission.ddd.admission.formation_generale.commands import RecupererQuestionsSpecifiquesQuery
