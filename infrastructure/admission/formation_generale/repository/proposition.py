@@ -37,9 +37,6 @@ from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
-from admission.contrib.models.checklist import RefusalReason, FreeAdditionalApprovalCondition
-from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -88,6 +85,9 @@ from admission.infrastructure.admission.domain.service.poste_diplomatique import
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
+from admission.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
+from admission.models.checklist import RefusalReason, FreeAdditionalApprovalCondition
+from admission.models.general_education import GeneralEducationAdmission
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear

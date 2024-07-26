@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,9 +31,9 @@ from django.shortcuts import resolve_url
 from django.utils.functional import lazy
 from django.utils.translation import get_language
 
-from admission.contrib.models import SupervisionActor
-from admission.contrib.models.doctorate import DoctorateAdmission, DoctorateProxy
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import SupervisionActor
+from admission.models.doctorate import DoctorateAdmission, DoctorateProxy
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
 from admission.ddd.parcours_doctoral.domain.service.i_notification import INotification
 from osis_mail_template.utils import transform_html_to_text

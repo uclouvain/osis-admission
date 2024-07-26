@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,9 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur imp
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.verifier_projet_doctoral import VerifierProjetDoctoral
+from admission.ddd.admission.doctorat.preparation.domain.service.verifier_projet_doctoral import (
+    VerifierPropositionProjetDoctoral,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -56,7 +58,7 @@ def verifier_projet(
     )
 
     # WHEN
-    VerifierProjetDoctoral.verifier(
+    VerifierPropositionProjetDoctoral.verifier(
         proposition_candidat,
         groupe_de_supervision,
         questions_specifiques,

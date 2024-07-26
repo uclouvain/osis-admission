@@ -58,7 +58,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     ModifierTypeAdmissionValidatorList,
-    ProjetDoctoralValidatorList,
+    PropositionProjetDoctoralValidatorList,
 )
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -458,7 +458,7 @@ class Proposition(interface.RootEntity):
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
-        ProjetDoctoralValidatorList(
+        PropositionProjetDoctoralValidatorList(
             self.type_admission,
             self.projet,
             self.financement,

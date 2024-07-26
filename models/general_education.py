@@ -30,10 +30,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
@@ -51,6 +49,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     TypeDeRefus,
     DerogationFinancement,
 )
+from admission.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -59,6 +58,7 @@ from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
+from osis_document.contrib import FileField
 
 
 class GeneralEducationAdmission(BaseAdmission):

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ from django.test import override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import DiplomaticPost
+from admission.models import DiplomaticPost
 from admission.ddd import FR_ISO_CODE, EN_ISO_CODE
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from base.tests.factories.person import PersonFactory

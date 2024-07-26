@@ -27,7 +27,7 @@ from dal import autocomplete
 from dal.views import BaseQuerySetView
 from django.utils.translation import get_language
 
-from admission.contrib.models.working_list import WorkingList
+from admission.models.working_list import WorkingList
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 
 __all__ = [

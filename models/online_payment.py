@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 from django.db import models
 from django.utils.translation import gettext_noop, gettext_lazy, pgettext_lazy
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from base.models.utils.utils import ChoiceEnum
 
 

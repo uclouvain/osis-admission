@@ -30,8 +30,6 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models import EntityProxy, Scholarship
-from admission.contrib.models.working_list import WorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -60,6 +58,8 @@ from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import EntityProxy, Scholarship
+from admission.models.working_list import WorkingList
 from base.forms.utils import autocomplete
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear

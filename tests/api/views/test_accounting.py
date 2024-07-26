@@ -35,7 +35,7 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import Accounting
+from admission.models import Accounting
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,

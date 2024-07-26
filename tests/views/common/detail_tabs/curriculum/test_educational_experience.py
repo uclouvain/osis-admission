@@ -28,11 +28,12 @@ from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from django.test import override_settings
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
@@ -48,8 +49,6 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from reference.tests.factories.country import CountryFactory
-from django.test import override_settings
-
 from reference.tests.factories.language import LanguageFactory
 
 

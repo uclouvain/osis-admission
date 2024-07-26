@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-import admission.contrib.models.cdd_config
+import admission.models.cdd_config
 
 
 class Migration(migrations.Migration):
@@ -15,26 +15,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cddconfiguration',
             name='communication_types',
-            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_communication_types, verbose_name='COMMUNICATION types'),
+            field=admission.models.cdd_config.TranslatedMultilineField(default=admission.models.cdd_config.default_communication_types, verbose_name='COMMUNICATION types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='conference_publication_types',
-            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_conference_publication_types, verbose_name='CONFERENCE PUBLICATION types'),
+            field=admission.models.cdd_config.TranslatedMultilineField(default=admission.models.cdd_config.default_conference_publication_types, verbose_name='CONFERENCE PUBLICATION types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='conference_types',
-            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_conference_types, verbose_name='CONFERENCE types'),
+            field=admission.models.cdd_config.TranslatedMultilineField(default=admission.models.cdd_config.default_conference_types, verbose_name='CONFERENCE types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='publication_types',
-            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_publication_types, verbose_name='PUBLICATION types'),
+            field=admission.models.cdd_config.TranslatedMultilineField(default=admission.models.cdd_config.default_publication_types, verbose_name='PUBLICATION types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='residency_types',
-            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_residency_types, verbose_name='RESIDENCY types'),
+            field=admission.models.cdd_config.TranslatedMultilineField(default=admission.models.cdd_config.default_residency_types, verbose_name='RESIDENCY types'),
         ),
     ]

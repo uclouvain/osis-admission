@@ -4,7 +4,7 @@ from django.db import migrations, models
 from django.db.backends.postgresql.schema import DatabaseSchemaEditor
 from django.db.models import F
 
-from admission.contrib.models.base import REFERENCE_SEQ_NAME
+from admission.models.base import REFERENCE_SEQ_NAME
 
 
 OLD_REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'

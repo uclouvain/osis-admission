@@ -31,7 +31,7 @@ from typing import List
 from django.conf import settings
 from django.db import transaction
 
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjection, EPCInjectionStatus
+from admission.models.epc_injection import EPCInjectionType, EPCInjection, EPCInjectionStatus
 from backoffice.celery import app as celery_app
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)

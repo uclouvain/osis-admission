@@ -29,16 +29,18 @@ from typing import List
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
 from django.shortcuts import resolve_url
-from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
+from osis_async.models import AsyncTask
+from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
+from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
+from osis_notification.contrib.notification import WebNotification, EmailNotification
+from osis_signature.enums import SignatureState
+from osis_signature.models import Actor
+from osis_signature.utils import get_signing_token
 
-from admission.contrib.models import AdmissionTask, SupervisionActor
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.doctorate import PropositionProxy
-from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
@@ -70,6 +72,10 @@ from admission.mail_templates.document import (
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
 )
+from admission.models import AdmissionTask, SupervisionActor
+from admission.models.base import BaseAdmission
+from admission.models.doctorate import PropositionProxy
+from admission.models.enums.actor_type import ActorType
 from admission.utils import (
     get_admission_cdd_managers,
     get_salutation_prefix,
@@ -77,14 +83,6 @@ from admission.utils import (
     get_backoffice_admission_url,
 )
 from base.models.person import Person
-from osis_async.models import AsyncTask
-from osis_mail_template import generate_email
-from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
-from osis_notification.contrib.notification import WebNotification, EmailNotification
-from osis_signature.enums import SignatureState
-from osis_signature.models import Actor
-from osis_signature.utils import get_signing_token
-
 from base.utils.utils import format_academic_year
 
 

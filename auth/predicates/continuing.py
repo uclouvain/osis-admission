@@ -29,7 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
 from admission.auth.predicates import not_in_continuing_statuses_predicate_message
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE,

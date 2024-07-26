@@ -31,7 +31,6 @@ from django.db.models import Q
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 
-from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixStatutPropositionDoctorale,
@@ -39,6 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 from admission.infrastructure.utils import get_entities_with_descendants_ids
+from admission.models import DoctorateAdmission
 from admission.views import PaginatedList
 
 

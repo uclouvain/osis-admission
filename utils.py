@@ -24,12 +24,11 @@
 #
 # ##############################################################################
 import itertools
-import json
 import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Union, Iterable, List, Optional
+from typing import Dict, Union, Iterable, List
 
 import weasyprint
 from django.conf import settings
@@ -48,7 +47,6 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_GENERAL, CONTEXT_DOCTORATE
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
@@ -61,12 +59,12 @@ from admission.ddd.admission.formation_generale.commands import VerifierCurricul
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
-    AnneeInscriptionFormationTranslator,
 )
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
 )
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions

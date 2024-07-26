@@ -26,10 +26,10 @@
 from django.utils.functional import cached_property
 from django.views.generic import RedirectView
 
-from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_SOUMISE
 from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_SOUMISE
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
+from admission.models.base import BaseAdmission
 from admission.views.common.detail_tabs.documents import DocumentView
 from admission.views.common.detail_tabs.person import AdmissionPersonDetailView
 from admission.views.common.mixins import AdmissionViewMixin

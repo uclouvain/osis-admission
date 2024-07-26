@@ -3,7 +3,7 @@
 from django.db import migrations
 from django.db.backends.postgresql.schema import DatabaseSchemaEditor
 
-from admission.contrib.models.base import REFERENCE_SEQ_NAME
+from admission.models.base import REFERENCE_SEQ_NAME
 
 
 def create_reference_sequence(apps, schema_editor: DatabaseSchemaEditor):

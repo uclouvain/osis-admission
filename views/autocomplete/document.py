@@ -31,7 +31,6 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
-from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
@@ -40,6 +39,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.models.base import BaseAdmission
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False

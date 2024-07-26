@@ -23,8 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, Dict
-
 from rest_framework import serializers
 
 from admission.api.serializers.fields import (
@@ -36,13 +34,11 @@ from admission.api.serializers.fields import (
     RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
@@ -53,8 +49,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import ChoixS
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
+from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
+from reference.api.serializers.language import RelatedLanguageField
 
 __all__ = [
     "PropositionCreatePermissionsSerializer",
@@ -77,7 +75,6 @@ __all__ = [
     "GeneralEducationPropositionIdentityWithStatusSerializer",
 ]
 
-from reference.api.serializers.language import RelatedLanguageField
 
 PROPOSITION_ERROR_SCHEMA = {
     "type": "array",

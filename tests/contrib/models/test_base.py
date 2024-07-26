@@ -28,8 +28,8 @@ import datetime
 from django.db import IntegrityError
 from django.test import TestCase
 
-from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import admission_directory_path, BaseAdmission
+from admission.models import AdmissionViewer
+from admission.models.base import admission_directory_path, BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory

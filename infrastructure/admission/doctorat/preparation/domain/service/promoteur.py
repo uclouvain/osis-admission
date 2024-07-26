@@ -27,12 +27,12 @@ from typing import List, Optional
 
 from django.utils.translation import get_language, gettext_lazy as _
 
-from admission.contrib.models import SupervisionActor
-from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PromoteurNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
+from admission.models import SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from base.auth.roles.tutor import Tutor
 
 

@@ -38,18 +38,18 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
-from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.forms.admission.curriculum import (
     CurriculumAcademicExperienceAdmissionForm,
 )
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.base import (
+    BaseAdmission,
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
+from admission.models.checklist import FreeAdditionalApprovalCondition
+from admission.models.epc_injection import EPCInjectionType
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE

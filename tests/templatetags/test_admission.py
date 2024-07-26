@@ -41,7 +41,7 @@ from django.utils.translation import gettext as _, pgettext
 from django.views import View
 
 from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
-from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
+from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation

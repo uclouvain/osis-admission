@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from admission.ddd.admission.doctorat.preparation.commands import RefuserProposi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.avis import Avis
 from admission.ddd.admission.doctorat.preparation.domain.service.deverrouiller_projet_doctoral import (
-    DeverrouillerProjetDoctoral,
+    DeverrouillerPropositionProjetDoctoral,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
@@ -54,7 +54,7 @@ def refuser_proposition(
 
     # WHEN
     groupe_de_supervision.refuser(signataire_id, cmd.commentaire_interne, cmd.commentaire_externe, cmd.motif_refus)
-    DeverrouillerProjetDoctoral().deverrouiller_apres_refus(proposition_candidat, signataire_id)
+    DeverrouillerPropositionProjetDoctoral().deverrouiller_apres_refus(proposition_candidat, signataire_id)
 
     # THEN
     historique.historiser_avis(proposition_candidat, signataire_id, avis)

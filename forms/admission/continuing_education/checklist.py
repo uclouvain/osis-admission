@@ -33,7 +33,7 @@ from django.utils.translation import (
     override,
 )
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMotifRefus, ChoixMotifAttente
 from admission.forms import CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT, AdmissionHTMLCharField
 from base.models.utils.utils import ChoiceEnum

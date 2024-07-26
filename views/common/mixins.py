@@ -37,15 +37,6 @@ from django.views.generic.base import ContextMixin
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
-from admission.contrib.models import (
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-    ContinuingEducationAdmission,
-    EPCInjection,
-)
-from admission.contrib.models.base import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
@@ -73,7 +64,7 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
@@ -85,6 +76,9 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions 
 )
 from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
 from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
+from admission.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission, EPCInjection
+from admission.models.base import AdmissionViewer, BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -180,7 +174,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @cached_property
     def doctorate(self) -> 'DoctoratDTO':
-        return message_bus_instance.invoke(RecupererDoctoratQuery(doctorat_uuid=self.admission_uuid))
+        return message_bus_instance.invoke(RecupererAdmissionDoctoratQuery(doctorat_uuid=self.admission_uuid))
 
     @cached_property
     def last_confirmation_paper(self) -> EpreuveConfirmationDTO:

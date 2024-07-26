@@ -35,8 +35,6 @@ from django.db.models import Q, Model, ForeignKey
 from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
@@ -45,6 +43,8 @@ from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPers
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
+from admission.models import GeneralEducationAdmission
+from admission.models.base import BaseAdmission
 from backoffice.celery import app
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus

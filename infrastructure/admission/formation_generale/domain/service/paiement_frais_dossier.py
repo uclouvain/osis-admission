@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ from typing import List
 
 from django.conf import settings
 
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.online_payment import PaymentStatus, OnlinePayment
+from admission.models.base import BaseAdmission
+from admission.models.online_payment import PaymentStatus, OnlinePayment
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException

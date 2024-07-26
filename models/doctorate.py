@@ -63,8 +63,8 @@ __all__ = [
     "ConfirmationPaper",
 ]
 
-from ...ddd.admission.dtos.conditions import InfosDetermineesDTO
-from ...ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
+from ..ddd.admission.dtos.conditions import InfosDetermineesDTO
+from ..ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
 
 
 class DoctorateAdmission(BaseAdmission):

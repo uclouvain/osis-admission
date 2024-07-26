@@ -29,7 +29,7 @@ from typing import List
 from django.test import TestCase
 from django.urls import reverse
 
-from admission.contrib.models import AdmissionViewer, DoctorateAdmission
+from admission.models import AdmissionViewer, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,

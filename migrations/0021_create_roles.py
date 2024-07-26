@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 
 
 def forward(apps, schema_editor):
