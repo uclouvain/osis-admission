@@ -119,6 +119,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_premiere_annee=None,
             poursuite_de_cycle='',
             adresse_email_candidat='',
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )
 
     @classmethod
@@ -150,6 +151,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_premiere_annee=None,
             poursuite_de_cycle='',
             adresse_email_candidat='',
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )
 
     @classmethod
@@ -181,4 +183,5 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             poursuite_de_cycle='',
             annee_calculee=proposition.annee_calculee,
             adresse_email_candidat='',
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )

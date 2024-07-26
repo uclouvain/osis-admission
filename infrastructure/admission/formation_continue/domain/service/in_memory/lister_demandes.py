@@ -86,4 +86,13 @@ class ListerDemandesInMemory(IListerDemandesService):
             date_confirmation=proposition.soumise_le,
             derniere_modification_le=proposition.modifiee_le,
             derniere_modification_par='',
+            droits_reduits=proposition.droits_reduits,
+            paye_par_cheque_formation=proposition.paye_par_cheque_formation,
+            cep=proposition.cep,
+            etalement_des_paiements=proposition.etalement_des_paiments,
+            etalement_de_la_formation=proposition.etalement_de_la_formation,
+            valorisation_des_acquis_d_experience=proposition.valorisation_des_acquis_d_experience,
+            a_presente_l_epreuve_d_evaluation=proposition.a_presente_l_epreuve_d_evaluation,
+            a_reussi_l_epreuve_d_evaluation=proposition.a_reussi_l_epreuve_d_evaluation,
+            diplome_produit=proposition.diplome_produit,
         )
