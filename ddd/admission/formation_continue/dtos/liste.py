@@ -51,6 +51,15 @@ class DemandeRechercheDTO(interface.DTO):
     date_confirmation: Optional[datetime.datetime]
     derniere_modification_le: datetime.datetime
     derniere_modification_par: str
+    droits_reduits: Optional[bool]
+    paye_par_cheque_formation: Optional[bool]
+    cep: Optional[bool]
+    etalement_des_paiements: Optional[bool]
+    etalement_de_la_formation: Optional[bool]
+    valorisation_des_acquis_d_experience: Optional[bool]
+    a_presente_l_epreuve_d_evaluation: Optional[bool]
+    a_reussi_l_epreuve_d_evaluation: Optional[bool]
+    diplome_produit: Optional[bool]
 
     @property
     def formation(self) -> str:

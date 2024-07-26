@@ -191,8 +191,10 @@ class ListerDemandesService(IListerDemandesService):
         admission: ContinuingEducationAdmission,
         translated_fields_names: Dict[str, str],
     ) -> DemandeRechercheDTO:
-        if hasattr(admission.candidate, 'personmergeproposal') and \
-                admission.candidate.personmergeproposal.registration_id_sent_to_digit:
+        if (
+            hasattr(admission.candidate, 'personmergeproposal')
+            and admission.candidate.personmergeproposal.registration_id_sent_to_digit
+        ):
             noma_candidat = admission.candidate.personmergeproposal.registration_id_sent_to_digit
         elif admission.candidate.student_set.exists():
             noma_candidat = admission.candidate.student_set.first().registration_id
@@ -220,4 +222,13 @@ class ListerDemandesService(IListerDemandesService):
             date_confirmation=admission.submitted_at,
             derniere_modification_le=admission.modified_at,
             derniere_modification_par=admission.last_update_author_name,  # From annotation
+            droits_reduits=admission.reduced_rights,
+            paye_par_cheque_formation=admission.pay_by_training_cheque,
+            cep=admission.cep,
+            etalement_des_paiements=admission.payement_spread,
+            etalement_de_la_formation=admission.training_spread,
+            valorisation_des_acquis_d_experience=admission.experience_knowledge_valorisation,
+            a_presente_l_epreuve_d_evaluation=admission.assessment_test_presented,
+            a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
+            diplome_produit=admission.certificate_provided,
         )
