@@ -8984,6 +8984,14 @@ msgid ""
 msgstr ""
 "[%(matricule_candidat)s] Le candidat a déjà un ticket de création en attente"
 
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax validation"
+msgstr ""
+"[%(matricule_candidat)s] Le candidat a une proposition de fusion avec des erreurs dans la validation syntaxique"
+
+
 #, python-format
 msgid ""
 "[%(matricule_candidat)s] Candidate has pending merge proposal: status "
