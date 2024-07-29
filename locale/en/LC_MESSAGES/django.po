@@ -8091,6 +8091,11 @@ msgstr ""
 
 #, python-format
 msgid ""
+"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax validation"
+msgstr ""
+
+#, python-format
+msgid ""
 "[%(matricule_candidat)s] Candidate has pending merge proposal: status "
 "%(merge_status)s"
 msgstr ""
