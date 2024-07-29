@@ -395,6 +395,15 @@ class InjectionEPCAdmission:
             'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
             'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,
             'complement_de_formation': AdmissionPrerequisiteCourses.objects.filter(admission_id=admission.id).exists(),
+            'etat_financabilite': admission_generale.financability_computed_rule if admission_generale else None,
+            'situation_financabilite': admission_generale.financability_rule if admission_generale else None,
+            'utilisateur_financabilite': (
+                admission_generale.financability_rule_established_by.user.username if admission_generale else None
+            ),
+            'date_financabilite': (
+                admission_generale.financability_rule_established_on.strftime("%d/%m/%Y")
+                if admission_generale else None
+            ),
         }
 
     @staticmethod
@@ -414,10 +423,7 @@ class InjectionEPCAdmission:
             return [
                 {
                     "lieu_dit": adresse.place,
-                    "rue": (
-                        f"{adresse.street}, {adresse.street_number}"
-                        f"{' - ' if adresse.postal_box else ''}{adresse.postal_box}"
-                    ),
+                    "rue": str(adresse),
                     "code_postal": adresse.postal_code,
                     "localite": adresse.city,
                     "pays": adresse.country.iso_code,
