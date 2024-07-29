@@ -34,6 +34,7 @@ import requests
 from django.conf import settings
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
+from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionTrouveeException
 from admission.templatetags.admission import format_matricule
 from base.business.student import find_student_by_discriminating
 from base.models.person import Person
@@ -136,12 +137,15 @@ class DigitService(IDigitService):
         return matricule_candidat[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 
     @classmethod
-    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> Optional[SimpleNamespace]:
+    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> SimpleNamespace:
         try:
             proposition_fusion = PersonMergeProposal.objects.get(original_person__global_id=matricule_candidat)
-            return SimpleNamespace(statut=proposition_fusion.status)
+            return SimpleNamespace(
+                statut=proposition_fusion.status,
+                a_une_syntaxe_valide=proposition_fusion.validation.get('valid', False)
+            )
         except PersonMergeProposal.DoesNotExist:
-            return None
+            raise PasDePropositionDeFusionTrouveeException
 
 
 def _get_status_from_digit_response(similarity_data):
