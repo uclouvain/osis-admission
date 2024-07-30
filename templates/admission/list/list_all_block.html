@@ -58,7 +58,7 @@
     <div class="flex-content-no-wrap">
       <a href="{{ admission_url }}">
         {{ admission.type_demande|enum_display:'TypeDemande' }}<br>
-        {{ admission.numero_demande }}
+        <span class="no-wrap">{{ admission.numero_demande }}</span>
       </a>
       {% if admission.dernieres_vues_par %}
         <span
