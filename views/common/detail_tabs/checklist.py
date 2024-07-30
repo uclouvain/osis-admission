@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 import datetime
 
 from django.contrib import messages
@@ -40,6 +41,8 @@ from admission.ddd.admission.commands import (
     ValiderTicketPersonneCommand,
     SoumettreTicketPersonneCommand, RechercherCompteExistantCommand,
 )
+from admission.ddd.admission.domain.validator.exceptions import NotInAccountCreationPeriodException, \
+    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
@@ -90,12 +93,17 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
             niss=admission.candidate.national_number,
         ))
         message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
-        message_bus_instance.invoke(
-            SoumettreTicketPersonneCommand(
-                global_id=admission.candidate.global_id,
-                annee=admission.determined_academic_year.year,
+        with contextlib.suppress(
+            NotInAccountCreationPeriodException,
+            AdmissionDansUnStatutPasAutoriseASInscrireException,
+            PropositionFusionATraiterException,
+        ):
+            message_bus_instance.invoke(
+                SoumettreTicketPersonneCommand(
+                    global_id=admission.candidate.global_id,
+                    annee=admission.determined_academic_year.year,
+                )
             )
-        )
 
     admission.last_update_author = author
     admission.modified_at = datetime.datetime.today()

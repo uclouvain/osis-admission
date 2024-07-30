@@ -115,15 +115,10 @@ class ShouldSpecifierInformationsAcceptationFacultaireInscription(BusinessValida
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
     conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
-    avec_complements_formation: Optional[bool]
-    complements_formation: Optional[List[ComplementFormationIdentity]]
-
     def validate(self, *args, **kwargs):
         if (
             self.avec_conditions_complementaires
             and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
-            or self.avec_complements_formation
-            and not self.complements_formation
         ):
             raise InformationsAcceptationFacultaireNonSpecifieesException
 

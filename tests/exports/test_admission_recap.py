@@ -1437,6 +1437,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
             financabilite_regle_etabli_par="",
+            financabilite_regle_etabli_le=None,
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_refus_sic=[],

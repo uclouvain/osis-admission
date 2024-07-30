@@ -66,6 +66,7 @@ from base.tests.factories.student import StudentFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.type_duree import TypeDuree
 from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from infrastructure.messages_bus import message_bus_instance
@@ -480,13 +481,15 @@ class GetAccessTitlesViewTestCase(TestCase):
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
-            programme__offer__academic_year=self.academic_years[0],
+            programme__root_group__academic_year=self.academic_years[0],
+            type_duree=TypeDuree.NORMAL.name,
         )
         pce_a_pae_b = InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.INTERUNIVERSITAIRE.name,
             etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
-            programme__offer__academic_year=self.academic_years[1],
+            programme__root_group__academic_year=self.academic_years[1],
+            type_duree=TypeDuree.NORMAL.name,
         )
 
         pce_b = InscriptionProgrammeCycleFactory(
@@ -499,7 +502,8 @@ class GetAccessTitlesViewTestCase(TestCase):
             programme_cycle=pce_b,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
-            programme__offer__academic_year=self.academic_years[1],
+            programme__root_group__academic_year=self.academic_years[1],
+            type_duree=TypeDuree.NORMAL.name,
         )
 
         pce_c = InscriptionProgrammeCycleFactory(
@@ -511,13 +515,15 @@ class GetAccessTitlesViewTestCase(TestCase):
             programme_cycle=pce_c,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
-            programme__offer__academic_year=self.academic_years[0],
+            programme__root_group__academic_year=self.academic_years[0],
+            type_duree=TypeDuree.NORMAL.name,
         )
         pce_c_pae_b = InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_c,
             statut=StatutInscriptionProgrammAnnuel.INTERUNIVERSITAIRE.name,
             etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
-            programme__offer__academic_year=self.academic_years[1],
+            programme__root_group__academic_year=self.academic_years[1],
+            type_duree=TypeDuree.NORMAL.name,
         )
 
         # We retrieve the experience with diploma (or leading to one)

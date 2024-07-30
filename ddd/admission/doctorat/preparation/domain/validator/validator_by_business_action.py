@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,12 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
-    ShouldAbsenceDeDetteEtreCompletee,
-    ShouldIBANCarteBancaireRemboursementEtreCompletee,
-    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldExperiencesAcademiquesEtreCompletees,
-    ShouldTypeCompteBancaireRemboursementEtreComplete,
-    ShouldAssimilationEtreCompletee,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
@@ -308,6 +303,9 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldAffiliationsEtreCompletees(
+                etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+            ),
             ShouldAbsenceDeDetteEtreCompletee(
                 attestation_absence_dette_etablissement=self.comptabilite.attestation_absence_dette_etablissement,
                 a_frequente_recemment_etablissement_communaute_fr=(
@@ -317,9 +315,6 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ShouldAssimilationEtreCompletee(
                 pays_nationalite_ue=self.pays_nationalite_ue,
                 comptabilite=self.comptabilite,
-            ),
-            ShouldAffiliationsEtreCompletees(
-                etudiant_solidaire=self.comptabilite.etudiant_solidaire,
             ),
             ShouldTypeCompteBancaireRemboursementEtreComplete(
                 type_numero_compte=self.comptabilite.type_numero_compte,

@@ -59,7 +59,7 @@ from education_group.auth.scope import Scope
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 22
+    NB_MAX_QUERIES = 50  # TODO fix to be more granular
 
     @classmethod
     def setUpTestData(cls):

@@ -113,16 +113,3 @@ class IPDFGeneration(DomainService):
         temporaire: bool = False,
     ) -> Optional[str]:
         raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def generer_attestation_refus_inscription_sic(
-        cls,
-        proposition_repository: IPropositionRepository,
-        proposition: Proposition,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        campus_repository: IUclouvainCampusRepository,
-        gestionnaire: str,
-        temporaire: bool = False,
-    ) -> Optional[str]:
-        raise NotImplementedError

@@ -85,6 +85,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.type_duree import TypeDuree
 from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
@@ -1474,7 +1475,8 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
-            programme__offer__academic_year=self.academic_years[0],
+            programme__root_group__academic_year=self.academic_years[0],
+            type_duree=TypeDuree.NORMAL.name,
         )
 
         # Select a known experience as access title

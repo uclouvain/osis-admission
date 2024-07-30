@@ -32,7 +32,8 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 from waffle.testutils import override_switch
 
-from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand, \
+    ValiderTicketPersonneCommand
 from backoffice.celery import app
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
@@ -66,6 +67,11 @@ def run(request=None, global_ids=None):
                     niss=candidate.national_number,
                     genre=candidate.sex,
                 ))
+
+                logger.info(f'[DigIT] Validate ticket semantic info from digit for {candidate}')
+                message_bus_instance.invoke(
+                    ValiderTicketPersonneCommand(global_id=candidate.global_id)
+                )
 
                 logger.info(f'[DigIT] send creation ticket for {candidate}')
                 try:

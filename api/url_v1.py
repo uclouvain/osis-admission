@@ -192,4 +192,6 @@ urlpatterns = [
     path('campus', views.ListCampusView),
     path('campus/<uuid:uuid>', views.RetrieveCampusView),
     path('diplomatic-post/<int:code>', views.RetrieveDiplomaticPostView),
+    # Payment method
+    path('candidate/<str:noma>/application_fees_payment_method', views.PaymentMethodAPIView),
 ]

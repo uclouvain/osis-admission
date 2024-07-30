@@ -106,15 +106,3 @@ class PDFGenerationInMemory(IPDFGeneration):
         temporaire: bool = False,
     ) -> Optional[str]:
         pass
-
-    @classmethod
-    def generer_attestation_refus_inscription_sic(
-        cls,
-        proposition_repository: IPropositionRepository,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        campus_repository: IUclouvainCampusRepository,
-        proposition: Proposition,
-        gestionnaire: str,
-        temporaire: bool = False,
-    ) -> Optional[str]:
-        pass

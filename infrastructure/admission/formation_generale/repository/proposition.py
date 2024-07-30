@@ -125,19 +125,25 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
-        first_submitted_proposition = GeneralEducationAdmissionProxy.objects.prefetch_related(
-            'additional_approval_conditions',
-            'freeadditionalapprovalcondition_set',
-            'prerequisite_courses',
-            'refusal_reasons',
-        ).select_related(
-            'other_training_accepted_by_fac__academic_year',
-            'admission_requirement_year',
-            'last_update_author',
-        ).filter(
-            submitted_at__isnull=False,
-            candidate__global_id=matricule_candidat,
-        ).order_by('submitted_at').first()
+        first_submitted_proposition = (
+            GeneralEducationAdmissionProxy.objects.prefetch_related(
+                'additional_approval_conditions',
+                'freeadditionalapprovalcondition_set',
+                'prerequisite_courses',
+                'refusal_reasons',
+            )
+            .select_related(
+                'other_training_accepted_by_fac__academic_year',
+                'admission_requirement_year',
+                'last_update_author',
+            )
+            .filter(
+                submitted_at__isnull=False,
+                candidate__global_id=matricule_candidat,
+            )
+            .order_by('submitted_at')
+            .first()
+        )
 
         if first_submitted_proposition:
             return cls._load(first_submitted_proposition)
@@ -287,6 +293,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
                 'financability_rule': entity.financabilite_regle.name if entity.financabilite_regle else '',
                 'financability_rule_established_by': financabilite_regle_etabli_par_person,
+                'financability_rule_established_on': entity.financabilite_regle_etabli_le,
                 'financability_dispensation_status': entity.financabilite_derogation_statut.name
                 if entity.financabilite_derogation_statut
                 else '',
@@ -523,6 +530,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
             if admission.financability_rule_established_by
             else None,
+            financabilite_regle_etabli_le=admission.financability_rule_established_on,
             financabilite_derogation_statut=DerogationFinancement[admission.financability_dispensation_status]
             if admission.financability_dispensation_status
             else '',
@@ -727,6 +735,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
             if admission.financability_rule_established_by
             else None,
+            financabilite_regle_etabli_le=admission.financability_rule_established_on,
             financabilite_derogation_statut=admission.financability_dispensation_status,
             financabilite_derogation_premiere_notification_le=(
                 admission.financability_dispensation_first_notification_on

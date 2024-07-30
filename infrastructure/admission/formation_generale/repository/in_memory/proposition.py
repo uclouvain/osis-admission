@@ -301,6 +301,7 @@ class PropositionInMemoryRepository(
             financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
             financabilite_regle=proposition.financabilite_regle.name if proposition.financabilite_regle else '',
             financabilite_regle_etabli_par=proposition.financabilite_regle_etabli_par,
+            financabilite_regle_etabli_le=proposition.financabilite_regle_etabli_le,
             financabilite_derogation_statut=proposition.financabilite_derogation_statut.name
             if proposition.financabilite_derogation_statut
             else '',

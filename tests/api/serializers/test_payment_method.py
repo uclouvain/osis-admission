@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,30 +22,28 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from django.db import models
+##############################################################################
+from django.test import TestCase, RequestFactory
+from django.urls import reverse
 
-from base.models.utils.utils import ChoiceEnum
-
-
-class EPCInjectionStatus(ChoiceEnum):
-    OK = "OK"
-    ERROR = "ERROR"
-    PENDING = "PENDING"
+from admission.api.serializers.payment_method import PaymentMethodSerializer
+from admission.tests.factories.payment import OnlinePaymentFactory
+from base.tests.factories.student import StudentFactory
 
 
-class EPCInjectionType(ChoiceEnum):
-    DEMANDE = "Demande"
-    SIGNALETIQUE = "Signalétique"
+class PaymentMethodSerializerTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.student = StudentFactory()
+        cls.payment = OnlinePaymentFactory(admission__candidate__student=cls.student)
+        url = reverse(
+            'admission_api_v1:payment-method-application-fees',
+            kwargs={'noma': cls.student.registration_id}
+        )
+        cls.serializer = PaymentMethodSerializer(cls.payment, context={'request': RequestFactory().get(url), })
 
-
-class EPCInjection(models.Model):
-    admission = models.ForeignKey(
-        'admission.BaseAdmission',
-        on_delete=models.CASCADE,
-        related_name='epc_injection',
-    )
-    type = models.CharField(choices=EPCInjectionType.choices(), null=False, blank=True, default='', max_length=12)
-    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=7)
-    payload = models.JSONField(default=dict, blank=True)
-    epc_responses = models.JSONField(default=list, blank=True)
+    def test_contains_expected_fields(self):
+        expected_fields = [
+            'method',
+        ]
+        self.assertListEqual(list(self.serializer.data.keys()), expected_fields)

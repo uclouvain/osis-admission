@@ -1772,6 +1772,7 @@ def digit_error_description(error_code):
         "RSTARTDATE0002": "La date de début est d'un format incorrect",
         "RSTOPDATE0001": "La date de début est null",
         "RSTOPDATE0002": "La date de début est d'un format incorrect",
+        "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible"
     }
 
     return error_mapping[error_code]

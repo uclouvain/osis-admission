@@ -23,29 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db import models
 
-from base.models.utils.utils import ChoiceEnum
+from rest_framework.serializers import ModelSerializer
 
-
-class EPCInjectionStatus(ChoiceEnum):
-    OK = "OK"
-    ERROR = "ERROR"
-    PENDING = "PENDING"
+from admission.contrib.models.online_payment import OnlinePayment
 
 
-class EPCInjectionType(ChoiceEnum):
-    DEMANDE = "Demande"
-    SIGNALETIQUE = "Signalétique"
+class PaymentMethodSerializer(ModelSerializer):
 
-
-class EPCInjection(models.Model):
-    admission = models.ForeignKey(
-        'admission.BaseAdmission',
-        on_delete=models.CASCADE,
-        related_name='epc_injection',
-    )
-    type = models.CharField(choices=EPCInjectionType.choices(), null=False, blank=True, default='', max_length=12)
-    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=7)
-    payload = models.JSONField(default=dict, blank=True)
-    epc_responses = models.JSONField(default=list, blank=True)
+    class Meta:
+        model = OnlinePayment
+        fields = ['method']

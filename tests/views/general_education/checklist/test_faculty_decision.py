@@ -89,6 +89,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.type_duree import TypeDuree
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
@@ -1032,7 +1033,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
-            programme__offer__academic_year=self.academic_years[0],
+            programme__root_group__academic_year=self.academic_years[0],
+            type_duree=TypeDuree.NORMAL.name,
         )
 
         self.general_admission.internal_access_titles.add(pce_a)

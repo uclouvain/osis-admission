@@ -135,6 +135,9 @@
     </span>
   </div>
   <div id="admission-badges" class="min-width">
+    {% if original_admission.sent_to_epc %}
+      <span class="label label-danger">{% translate 'Sent to EPC' %}</span>
+    {% endif %}
     {% if admission.fraudeur_ares %}
       <span class="label label-danger">{% translate 'Fraudster (ARES)' %}</span>
     {% endif %}

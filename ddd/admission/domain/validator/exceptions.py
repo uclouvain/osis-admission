@@ -306,3 +306,21 @@ class PasDePropositionDeFusionEligibleException(BusinessException):
 
     def __init__(self, **kwargs):
         super().__init__(self.message, **kwargs)
+
+
+class PasDePropositionDeFusionTrouveeException(BusinessException):
+    status_code = "FUSION-DIGIT-10"
+
+    def __init__(self, **kwargs):
+        message = _("Ressource not found.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionDeFusionAvecValidationSyntaxiqueInvalideException(BusinessException):
+    status_code = "FUSION-DIGIT-11"
+
+    def __init__(self, **kwargs):
+        message = _("[%(matricule_candidat)s] Candidate has merge proposal with error in syntax validation") % {
+            "matricule_candidat": matricule_candidat,
+        }
+        super().__init__(message, **kwargs)

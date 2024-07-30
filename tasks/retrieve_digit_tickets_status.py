@@ -60,7 +60,9 @@ def run(request=None):
     logger.info("Starting retrieve digit tickets status task")
 
     # Retrieve list of tickets
-    tickets_pending = message_bus_instance.invoke(command=RetrieveListeTicketsEnAttenteQuery()) # type: List[StatutTicketPersonneDTO]
+    tickets_pending = message_bus_instance.invoke(
+        command=RetrieveListeTicketsEnAttenteQuery()
+    )  # type: List[StatutTicketPersonneDTO]
 
     logger.info("[PENDING DIGIT TICKETS] : " + str(tickets_pending))
 
@@ -126,7 +128,7 @@ def _process_response_ticket(message_bus_instance, ticket):
     logger.info(f"[Send picture to card]")
 
 
-def _injecter_signaletique_a_epc(matricule:str):
+def _injecter_signaletique_a_epc(matricule: str):
     demande = BaseAdmission.objects.filter(
         submitted_at__isnull=False,
         candidate__global_id=matricule,
