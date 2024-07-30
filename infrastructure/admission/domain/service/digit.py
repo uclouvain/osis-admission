@@ -34,6 +34,7 @@ import requests
 from django.conf import settings
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
+from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionTrouveeException
 from admission.templatetags.admission import format_matricule
 from base.business.student import find_student_by_discriminating
 from base.models.person import Person
@@ -90,15 +91,28 @@ class DigitService(IDigitService):
         if MOCK_DIGIT_SERVICE_CALL:
             similarity_data = _mock_search_digit_account_return_response()
         else:
-            response = requests.post(
-                headers={
-                    'Content-Type': 'application/json',
-                    'Authorization': settings.ESB_AUTHORIZATION,
-                },
-                data=json.dumps(data),
-                url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
-            )
-            similarity_data = response.json()
+            try:
+                response = requests.post(
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Authorization': settings.ESB_AUTHORIZATION,
+                    },
+                    data=json.dumps(data),
+                    url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
+                )
+                similarity_data = response.json()
+            except Exception:
+                logger.info("An error occured when try to call DigIT endpoint recherche_compte_existant. "
+                            "Set PersonMergeProposal to ERROR")
+                PersonMergeProposal.objects.update_or_create(
+                    original_person=original_person,
+                    defaults={
+                        "status": PersonMergeStatus.ERROR.name,
+                        "similarity_result": {},
+                        "last_similarity_result_update": datetime.datetime.now(),
+                    }
+                )
+                return {}
 
         logger.info(f"DIGIT Response: {similarity_data}")
 
@@ -123,12 +137,15 @@ class DigitService(IDigitService):
         return matricule_candidat[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 
     @classmethod
-    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> Optional[SimpleNamespace]:
+    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> SimpleNamespace:
         try:
             proposition_fusion = PersonMergeProposal.objects.get(original_person__global_id=matricule_candidat)
-            return SimpleNamespace(statut=proposition_fusion.status)
+            return SimpleNamespace(
+                statut=proposition_fusion.status,
+                a_une_syntaxe_valide=proposition_fusion.validation.get('valid', False)
+            )
         except PersonMergeProposal.DoesNotExist:
-            return None
+            raise PasDePropositionDeFusionTrouveeException
 
 
 def _get_status_from_digit_response(similarity_data):

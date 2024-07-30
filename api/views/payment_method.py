@@ -23,29 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db import models
+from rest_framework import generics
+from rest_framework.exceptions import NotFound
 
-from base.models.utils.utils import ChoiceEnum
-
-
-class EPCInjectionStatus(ChoiceEnum):
-    OK = "OK"
-    ERROR = "ERROR"
-    PENDING = "PENDING"
+from admission.api.serializers.payment_method import PaymentMethodSerializer
+from admission.contrib.models.online_payment import OnlinePayment, PaymentStatus
 
 
-class EPCInjectionType(ChoiceEnum):
-    DEMANDE = "Demande"
-    SIGNALETIQUE = "Signalétique"
+class PaymentMethodAPIView(generics.RetrieveAPIView):
+    """
+       Get the payment method of the application fees
+    """
+    name = 'payment-method-application-fees'
+    filter_backends = []
+    serializer_class = PaymentMethodSerializer
 
-
-class EPCInjection(models.Model):
-    admission = models.ForeignKey(
-        'admission.BaseAdmission',
-        on_delete=models.CASCADE,
-        related_name='epc_injection',
-    )
-    type = models.CharField(choices=EPCInjectionType.choices(), null=False, blank=True, default='', max_length=12)
-    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=7)
-    payload = models.JSONField(default=dict, blank=True)
-    epc_responses = models.JSONField(default=list, blank=True)
+    def get_object(self) -> 'OnlinePayment':
+        try:
+            return OnlinePayment.objects.filter(
+                admission__candidate__student__registration_id=self.kwargs['noma'],
+                status=PaymentStatus.PAID.name,
+            ).values('method').get()
+        except OnlinePayment.DoesNotExist as e:
+            raise NotFound(detail=str(e))

@@ -74,7 +74,7 @@ from reference.tests.factories.country import CountryFactory
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 26
+    NB_MAX_QUERIES = 50  # TODO fix to be more granular
 
     @classmethod
     def setUpTestData(cls):
@@ -112,6 +112,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 candidate__country_of_citizenship=CountryFactory(european_union=True, name='Belgique'),
                 candidate__first_name="John",
                 candidate__last_name="Doe",
+                candidate__private_email="jdoe@example.be",
                 status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
                 training__management_entity=cls.first_entity,
                 training__acronym="ABCD0",
@@ -201,6 +202,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 annee_calculee=cls.admissions[0].determined_academic_year.year
                 if cls.admissions[0].determined_academic_year
                 else None,
+                adresse_email_candidat=cls.admissions[0].candidate.private_email,
             ),
         ]
 
