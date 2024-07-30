@@ -319,7 +319,7 @@ class PasDePropositionDeFusionTrouveeException(BusinessException):
 class PropositionDeFusionAvecValidationSyntaxiqueInvalideException(BusinessException):
     status_code = "FUSION-DIGIT-11"
 
-    def __init__(self, **kwargs):
+    def __init__(self, matricule_candidat, **kwargs):
         message = _("[%(matricule_candidat)s] Candidate has merge proposal with error in syntax validation") % {
             "matricule_candidat": matricule_candidat,
         }
