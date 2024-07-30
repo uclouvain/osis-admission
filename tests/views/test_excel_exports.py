@@ -129,6 +129,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=True, name='Belgique'),
             candidate__first_name="John",
             candidate__last_name="Doe",
+            candidate__private_email="jdoe@example.be",
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             training__management_entity=cls.first_entity,
             training__acronym="ABCD0",
@@ -198,6 +199,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             annee_calculee=cls.admission.determined_academic_year.year
             if cls.admission.determined_academic_year
             else None,
+            adresse_email_candidat=cls.admission.candidate.private_email,
         )
 
         cls.default_params = {

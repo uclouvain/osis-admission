@@ -366,18 +366,22 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"errors": [], "valid": True}
     else:
-        logger.info(
-            f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data))}"
-        )
-        response = requests.post(
-            headers={
-                'Content-Type': 'application/json',
-                'Authorization': settings.ESB_AUTHORIZATION,
-            },
-            data=json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data)),
-            url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
-        )
-        return response.json()
+        try:
+            logger.info(
+                f"DIGIT sent data: {json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data))}"
+            )
+            response = requests.post(
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': settings.ESB_AUTHORIZATION,
+                },
+                data=json.dumps(_get_ticket_data(person, '0', addresses, **extra_ticket_data)),
+                url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
+            )
+            return response.json()
+        except Exception:
+            logger.info("An error occured when try to call DigIT endpoint valider le ticket.")
+            return {"errors": [{"errorCode": "OSIS_CAN_NOT_REACH_DIGIT"}], "valid": False}
 
 
 def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str = None, sap_number: str = None):

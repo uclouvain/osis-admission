@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -222,6 +222,7 @@ class CandidatNonTrouveException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+# TODO Move all exceptions used globally outside of the doctorate context
 class IdentificationNonCompleteeException(BusinessException):
     status_code = "PROPOSITION-25"
 
@@ -481,4 +482,62 @@ class MembreNonExterneException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("The member is not external.")
+        super().__init__(message, **kwargs)
+
+
+class AbsenceDeDetteNonCompleteeDoctoratException(BusinessException):
+    status_code = "DOCTORAT-1"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields are missing in the 'Absence of debt' block.")
+        super().__init__(message, **kwargs)
+
+
+class ReductionDesDroitsInscriptionNonCompleteeDoctoratException(BusinessException):
+    status_code = "DOCTORAT-2"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields are missing in the 'Reduced tuition fee' block.")
+        super().__init__(message, **kwargs)
+
+
+class AssimilationNonCompleteeDoctoratException(BusinessException):
+    status_code = "DOCTORAT-3"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Some fields are missing in the 'Belgian student status' block.",
+        )
+        super().__init__(message, **kwargs)
+
+
+class AffiliationsNonCompleteesDoctoratException(BusinessException):
+    status_code = "DOCTORAT-4"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields are missing in the 'Memberships' block.")
+        super().__init__(message, **kwargs)
+
+
+class CarteBancaireRemboursementIbanNonCompleteDoctoratException(BusinessException):
+    status_code = "DOCTORAT-5"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields related to the bank account number in IBAN format are missing.")
+        super().__init__(message, **kwargs)
+
+
+class CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException(BusinessException):
+    status_code = "DOCTORAT-6"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields related to the bank account are missing.")
+        super().__init__(message, **kwargs)
+
+
+class TypeCompteBancaireRemboursementNonCompleteDoctoratException(BusinessException):
+    status_code = "DOCTORAT-7"
+
+    def __init__(self, **kwargs):
+        message = _("You haven't answered to the question about your bank account.")
         super().__init__(message, **kwargs)

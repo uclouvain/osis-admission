@@ -265,6 +265,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Last modification (author)'),
             _('Modification date'),
             _('Confirmation date'),
+            _('Private email address'),
         ]
 
     def get_row_data(self, row: TouteDemandeRechercheDTO):
@@ -282,6 +283,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('candidate') if row.derniere_modification_par_candidat else row.derniere_modification_par,
             row.derniere_modification_le.strftime(FULL_DATE_FORMAT),
             row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',
+            row.adresse_email_candidat,
         ]
 
     def get_filters(self):

@@ -93,6 +93,7 @@ class PropositionDTO(interface.DTO):
     financabilite_regle_calcule_le: Optional[datetime.datetime]
     financabilite_regle: str
     financabilite_regle_etabli_par: str
+    financabilite_regle_etabli_le: Optional[datetime.datetime]
 
     financabilite_derogation_statut: str
     financabilite_derogation_premiere_notification_le: Optional[datetime.datetime]
