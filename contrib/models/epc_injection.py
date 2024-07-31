@@ -40,6 +40,8 @@ class EPCInjectionType(ChoiceEnum):
 
 
 class EPCInjection(models.Model):
+    last_attempt_date = models.DateTimeField(null=True)
+    last_response_date = models.DateTimeField(null=True)
     admission = models.ForeignKey(
         'admission.BaseAdmission',
         on_delete=models.CASCADE,
