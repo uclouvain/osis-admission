@@ -26,9 +26,11 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
@@ -51,10 +53,19 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.repository.i_proposition import formater_reference
+from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
+    DoctoratInMemoryTranslator,
+)
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
+    GroupeDeSupervisionInMemoryRepository,
+)
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
+from admission.infrastructure.utils import dto_to_dict
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from base.models.enums.education_group_types import TrainingType
 
@@ -88,32 +99,6 @@ class PropositionInMemoryRepository(
     InMemoryGenericRepository,
     IPropositionRepository,
 ):
-    doctorats = {
-        ("SC3DP", 2020): _Doctorat(
-            intitule="Doctorat en sciences",
-            code_secteur="SST",
-            intitule_secteur="Secteur des sciences et technologies",
-            campus="Louvain-la-Neuve",
-            type=TrainingType.PHD.name,
-            campus_inscription="Louvain-la-Neuve",
-        ),
-        ("ECGE3DP", 2020): _Doctorat(
-            intitule="Doctorat en sciences économiques et de gestion",
-            code_secteur="SSH",
-            intitule_secteur="Secteur des sciences humaines",
-            campus="Louvain-la-Neuve",
-            type=TrainingType.PHD.name,
-            campus_inscription="Louvain-la-Neuve",
-        ),
-        ("ESP3DP", 2020): _Doctorat(
-            intitule="Doctorat en sciences de la santé publique",
-            code_secteur="SSS",
-            intitule_secteur="Secteur des sciences de la santé",
-            campus="Mons",
-            type=TrainingType.PHD.name,
-            campus_inscription="Mons",
-        ),
-    }
     candidats = {
         "0123456789": _Candidat("Jean", "Dupont", "France", "FR"),
         "0000000001": _Candidat("Michel", "Durand", "Belgique", "FR"),
@@ -217,7 +202,14 @@ class PropositionInMemoryRepository(
     @classmethod
     def _load_dto(cls, proposition: 'Proposition'):
         candidat = cls.candidats[proposition.matricule_candidat]
-        doctorat = cls.doctorats[(proposition.formation_id.sigle, proposition.formation_id.annee)]
+        doctorat = DoctoratInMemoryTranslator.get_dto(
+            sigle=proposition.formation_id.sigle,
+            annee=proposition.formation_id.annee,
+        )
+        secteur_doctorat = DoctoratInMemoryTranslator.secteurs_par_doctorat.get(proposition.formation_id.sigle, '')
+        intitule_secteur = (
+            DoctoratInMemoryTranslator.intitules_secteurs.get(secteur_doctorat, '') if secteur_doctorat else ''
+        )
         institut = (
             cls.instituts.get(str(proposition.projet.institut_these.uuid))
             if proposition.projet.institut_these
@@ -234,17 +226,12 @@ class PropositionInMemoryRepository(
             reference=formater_reference(
                 reference=proposition.reference,
                 nom_campus_inscription=doctorat.campus_inscription,
-                sigle_entite_gestion=doctorat.code_secteur,
+                sigle_entite_gestion=secteur_doctorat,
                 annee=proposition.formation_id.annee,
             ),
-            doctorat=DoctoratDTO(
+            doctorat=DoctoratInMemoryTranslator.get_dto(
                 sigle=proposition.formation_id.sigle,
                 annee=proposition.formation_id.annee,
-                intitule=doctorat.intitule,
-                sigle_entite_gestion=doctorat.code_secteur,
-                campus=doctorat.campus,
-                type=doctorat.type,
-                campus_inscription=doctorat.campus_inscription,
             ),
             annee_calculee=proposition.annee_calculee,
             type_demande=TypeDemande.ADMISSION.name,
@@ -252,7 +239,7 @@ class PropositionInMemoryRepository(
             date_fin_pot=None,
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
-            code_secteur_formation=doctorat.code_secteur,
+            code_secteur_formation=secteur_doctorat,
             commission_proximite=proposition.commission_proximite and proposition.commission_proximite.name or '',
             type_financement=proposition.financement.type and proposition.financement.type.name or '',
             type_contrat_travail=proposition.financement.type_contrat_travail,
@@ -284,7 +271,7 @@ class PropositionInMemoryRepository(
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
             fiche_archive_signatures_envoyees=proposition.fiche_archive_signatures_envoyees,
-            intitule_secteur_formation=doctorat.intitule_secteur,
+            intitule_secteur_formation=intitule_secteur,
             nom_candidat=candidat.nom,
             prenom_candidat=candidat.prenom,
             nationalite_candidat=candidat.nationalite,
@@ -299,4 +286,35 @@ class PropositionInMemoryRepository(
             documents_demandes=proposition.documents_demandes,
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
+        )
+
+    @classmethod
+    def get_dto_for_gestionnaire(
+        cls,
+        entity_id: 'PropositionIdentity',
+    ) -> 'PropositionGestionnaireDTO':
+        proposition = cls.get(entity_id=entity_id)
+        propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)
+        base_proposition = cls._load_dto(proposition)
+        candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
+
+        return PropositionGestionnaireDTO(
+            **dto_to_dict(base_proposition),
+            date_changement_statut=base_proposition.modifiee_le,
+            genre_candidat=candidat.genre,
+            noma_candidat=candidat.noma_derniere_inscription_ucl,
+            adresse_email_candidat=candidat.email,
+            langue_contact_candidat=candidat.langue_contact,
+            nationalite_candidat=candidat.pays_nationalite,
+            nationalite_candidat_fr=candidat.nom_pays_nationalite,
+            nationalite_candidat_en=candidat.nom_pays_nationalite,
+            nationalite_ue_candidat=candidat.pays_nationalite_europeen,
+            photo_identite_candidat=candidat.photo_identite,
+            candidat_a_plusieurs_demandes=any(
+                other_proposition.statut not in STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+                and other_proposition.uuid != entity_id.uuid
+                for other_proposition in propositions
+            ),
+            cotutelle=GroupeDeSupervisionInMemoryRepository.get_cotutelle_dto(uuid_proposition=entity_id.uuid),
+            profil_soumis_candidat=None,
         )
