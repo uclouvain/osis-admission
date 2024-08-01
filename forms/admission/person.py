@@ -35,6 +35,7 @@ from admission.forms import (
     AdmissionModelForm,
     get_year_choices,
 )
+from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.utils import force_title
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
@@ -300,6 +301,20 @@ class AdmissionPersonForm(AdmissionModelForm):
             self.initial['has_national_number'] = False
 
         self.fields['birth_year'].choices = get_year_choices()
+
+        if self.instance and self.instance.global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
+            self._disable_fields_when_internal_account()
+
+    def _disable_fields_when_internal_account(self):
+        # Cas: Les informations des comptes internes doivent être modifié via une autre procédure
+        fieldname_to_disabled = ['first_name', 'last_name', 'unknown_birth_date', 'birth_date', 'sex', 'birth_country']
+        for fieldname in fieldname_to_disabled:
+            self.fields[fieldname].disabled = True
+
+        fieldname_to_add_helptext = ['first_name', 'last_name', 'birth_date', 'sex', 'birth_country']
+        help_text_modification_internal_account = _("Unable to edit a known person's information")
+        for fieldname in fieldname_to_add_helptext:
+            self.fields[fieldname].help_text = help_text_modification_internal_account
 
     def clean(self):
         data = super().clean()
