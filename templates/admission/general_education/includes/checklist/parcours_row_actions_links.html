@@ -22,6 +22,9 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
+{% if curex_url %}
+    {% include 'admission/general_education/includes/checklist/parcours_externe_button.html' with curex_url=curex_url %}
+{% endif %}
 {% if update_url %}
   <a
     href="{{ update_url }}"
