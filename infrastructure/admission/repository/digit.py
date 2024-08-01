@@ -334,14 +334,29 @@ def _retrieve_person_ticket_status(request_id: int):
                 },
             ],
         }
-    return requests.get(
-        headers={
-            'Content-Type': 'application/json',
-            'Authorization': settings.ESB_AUTHORIZATION,
-        },
-        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_REQUEST_STATUS_URL}/{request_id}"
-    ).json()
-
+    try:
+        response = requests.get(
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': settings.ESB_AUTHORIZATION,
+            },
+            url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_REQUEST_STATUS_URL}/{request_id}"
+        )
+        response_data = response.json()
+        if response_data.get('status') == 500:
+            return {
+                "status": PersonTicketCreationStatus.ERROR.name,
+                "errors": [
+                    {"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': response_data}
+                ]
+            }
+        return response_data
+    except Exception as e:
+        logger.info(f"An error occured when try to call DigIT endpoint retrieve person ticket status. {repr(e)}")
+        return {
+            "status": PersonTicketCreationStatus.ERROR.name,
+            "errors": [{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
+        }
 
 def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet, extra_ticket_data: dict):
     if settings.MOCK_DIGIT_SERVICE_CALL:
