@@ -24,10 +24,12 @@
 #
 # ##############################################################################
 import json
+from datetime import datetime
 from typing import Dict
 
 import pika
 from django.conf import settings
+from django.db import transaction
 
 from admission.contrib.models import Accounting, EPCInjection
 from admission.contrib.models.base import (
@@ -59,14 +61,19 @@ class InjectionEPCSignaletique:
         EPCInjection.objects.get_or_create(
             admission=admission,
             type=EPCInjectionType.SIGNALETIQUE.name,
-            defaults={'payload': donnees, 'status': EPCInjectionStatus.PENDING.name}
+            defaults={
+                'payload': donnees,
+                'status': EPCInjectionStatus.PENDING.name,
+                'last_attempt_date': datetime.now(),
+            }
         )
         logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
         logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
-        self.envoyer_admission_dans_queue(
-            donnees=donnees,
-            admission_uuid=admission.uuid,
-            admission_reference=str(admission)
+        transaction.on_commit(
+            lambda: self.envoyer_signaletique_dans_queue(
+                donnees=donnees,
+                admission_reference=str(admission)
+            )
         )
         return donnees
 
@@ -172,7 +179,7 @@ class InjectionEPCSignaletique:
         }
 
     @staticmethod
-    def envoyer_admission_dans_queue(donnees: Dict, admission_uuid: str, admission_reference: str):
+    def envoyer_signaletique_dans_queue(donnees: Dict, admission_reference: str):
         credentials = pika.PlainCredentials(
             settings.QUEUES.get('QUEUE_USER'),
             settings.QUEUES.get('QUEUE_PASSWORD')
@@ -223,6 +230,7 @@ def signaletique_response_from_epc_callback(donnees):
     epc_injection = EPCInjection.objects.get(admission__uuid=dossier_uuid, type=EPCInjectionType.SIGNALETIQUE.name)
     epc_injection.status = statut
     epc_injection.epc_responses.append(donnees)
+    epc_injection.last_response_date = datetime.now()
     epc_injection.save()
 
     if statut == EPCInjectionStatus.OK.name:
