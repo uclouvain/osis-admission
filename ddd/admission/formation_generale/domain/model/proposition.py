@@ -794,11 +794,14 @@ class Proposition(interface.RootEntity):
     def specifier_financabilite_resultat_calcul(
         self,
         financabilite_regle_calcule: EtatFinancabilite,
-        financabilite_regle_calcule_situation: SituationFinancabilite,
+        financabilite_regle_calcule_situation: str,
         auteur_modification: Optional[str] = '',
     ):
         self.financabilite_regle_calcule = financabilite_regle_calcule
-        self.financabilite_regle_calcule_situation = financabilite_regle_calcule_situation
+        self.financabilite_regle_calcule_situation = (
+            SituationFinancabilite[financabilite_regle_calcule_situation]
+            if financabilite_regle_calcule_situation else ''
+        )
         self.financabilite_regle_calcule_le = now()
         if auteur_modification:
             self.auteur_derniere_modification = auteur_modification

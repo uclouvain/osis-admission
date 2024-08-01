@@ -6749,7 +6749,7 @@ msgid "Sender"
 msgstr "Expéditeur"
 
 msgid "Sent to EPC"
-msgstr "Envoyée en EPC"
+msgstr "Envoyée à EPC"
 
 msgid "Sent to digit"
 msgstr "Envoyer à DigIT"
