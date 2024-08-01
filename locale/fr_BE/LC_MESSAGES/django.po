@@ -6754,7 +6754,7 @@ msgid "Sent to digit"
 msgstr "Envoyer à DigIT"
 
 msgid "Sent to EPC"
-msgstr "Envoyée en EPC"
+msgstr "Envoyée à EPC"
 
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
