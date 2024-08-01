@@ -40,6 +40,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -72,7 +73,6 @@ from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
-    STATUTS_PROPOSITION_CONTINUE_SOUMISE,
     ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
@@ -81,7 +81,6 @@ from admission.ddd.admission.formation_continue.domain.model.statut_checklist im
 from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     ChoixStatutChecklist,
 )
@@ -116,7 +115,6 @@ from ddd.logic.financabilite.domain.model.enums.situation import SituationFinanc
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -1342,6 +1340,13 @@ def experience_details_template(
 
         if with_edit_link_button and can_update_curriculum:
             if not experience.epc_experience:
+                res_context['duplicate_link_button'] = (
+                    reverse(
+                        'admission:general-education:update:curriculum:educational_duplicate',
+                        args=[resume_proposition.proposition.uuid, experience.uuid],
+                    )
+                    + next_url_suffix
+                )
                 res_context['edit_link_button'] = (
                     reverse(
                         'admission:general-education:update:curriculum:educational',
@@ -1358,19 +1363,10 @@ def experience_details_template(
                 )
 
             elif context['admission'].noma_candidat:
-                res_context['edit_link_button'] = resolve_url(
-                    'edit-experience-academique-view',
+                res_context['curex_link_button'] = resolve_url(
+                    'parcours-externe-view',
                     noma=context['admission'].noma_candidat,
-                    experience_uuid=experience.annees[0].uuid,
                 )
-
-            res_context['duplicate_link_button'] = (
-                reverse(
-                    'admission:general-education:update:curriculum:educational_duplicate',
-                    args=[resume_proposition.proposition.uuid, experience.uuid],
-                )
-                + next_url_suffix
-            )
 
         res_context.update(get_educational_experience_context(resume_proposition, experience))
 
@@ -1493,13 +1489,12 @@ def checklist_experience_action_links_context(
         and experience.derniere_annee == current_year
     ):
         if experience.__class__ == ExperienceAcademiqueDTO:
-            result_context['duplicate_url'] = resolve_url(
-                f'{base_namespace}:update:curriculum:educational_duplicate',
-                uuid=proposition_uuid_str,
-                experience_uuid=experience.uuid,
-            )
-
             if not experience.epc_experience:
+                result_context['duplicate_url'] = resolve_url(
+                    f'{base_namespace}:update:curriculum:educational_duplicate',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                )
                 result_context['update_url'] = (
                     resolve_url(
                         f'{base_namespace}:update:curriculum:educational',
@@ -1517,10 +1512,9 @@ def checklist_experience_action_links_context(
                     + next_url_suffix
                 )
             elif context['admission'].noma_candidat:
-                result_context['update_url'] = resolve_url(
-                    'edit-experience-academique-view',
+                result_context['curex_url'] = resolve_url(
+                    'parcours-externe-view',
                     noma=context['admission'].noma_candidat,
-                    experience_uuid=experience.annees[0].uuid,
                 )
 
         elif experience.__class__ == ExperienceNonAcademiqueDTO:
