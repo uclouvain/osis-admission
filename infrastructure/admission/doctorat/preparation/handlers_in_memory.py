@@ -420,4 +420,8 @@ COMMAND_HANDLERS = {
         cmd,
         emplacement_document_repository=_emplacement_document_repository,
     ),
+    RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }

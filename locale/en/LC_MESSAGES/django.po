@@ -1142,9 +1142,6 @@ msgstr ""
 msgid "CDD status"
 msgstr ""
 
-msgid "CDD:"
-msgstr ""
-
 msgid "CDDs"
 msgstr ""
 
@@ -2382,9 +2379,6 @@ msgstr ""
 msgid "Doctor"
 msgstr ""
 
-msgid "Doctoral student:"
-msgstr ""
-
 msgid "Doctorate admission"
 msgstr ""
 
@@ -2873,6 +2867,9 @@ msgid "FWB - Credits earned"
 msgstr ""
 
 msgid "FWB - Registered credits"
+msgstr ""
+
+msgid "FWB Cotutelle"
 msgstr ""
 
 msgctxt "equivalence_type"
@@ -5991,9 +5988,6 @@ msgid "SIC comment for the faculty"
 msgstr ""
 
 msgid "SIC status"
-msgstr ""
-
-msgid "SIC:"
 msgstr ""
 
 msgid "SIGNING_IN_PROGRESS"

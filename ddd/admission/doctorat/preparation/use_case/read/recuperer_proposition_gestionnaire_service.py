@@ -23,18 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import attr
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
-from osis_common.ddd import interface
 
-
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratDTO(interface.DTO):
-    sigle: str
-    code: str
-    annee: int
-    intitule: str
-    sigle_entite_gestion: str
-    campus: str
-    type: str
-    campus_inscription: str
+def recuperer_proposition_gestionnaire(
+    cmd: 'RecupererPropositionGestionnaireQuery',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionDTO':
+    return proposition_repository.get_dto_for_gestionnaire(
+        PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition),
+    )
