@@ -608,7 +608,7 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
 
 class EPCInjectionAdmin(admin.ModelAdmin):
     search_fields = ['admission__reference', 'admission__candidate__global_id', 'admission__candidate__last_name']
-    list_display = ['admission', 'type', 'status', 'last_epc_response', 'last_attempt_date', 'last_response_date']
+    list_display = ['admission', 'type', 'status', 'errors_messages', 'last_attempt_date', 'last_response_date']
     list_filter = ['status', 'type']
     formfield_overrides = {
         models.JSONField: {'widget': JSONEditorWidget},
@@ -619,10 +619,8 @@ class EPCInjectionAdmin(admin.ModelAdmin):
         'reinjecter_la_demande_dans_epc',
     ]
 
-    @admin.display()
-    def last_epc_response(self, obj):
-        if obj.epc_responses:
-            return obj.epc_responses[-1]
+    def errors_messages(self, obj):
+        return obj.html_errors
 
     @admin.action(description="Réinjecter la signalétique dans EPC")
     def reinjecter_la_signaletique_dans_epc(self, request, queryset):
