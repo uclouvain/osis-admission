@@ -46,7 +46,7 @@ from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement,
+    DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
 )
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
@@ -54,11 +54,14 @@ from admission.infrastructure.utils import (
 from admission.services.injection_epc.injection_signaletique import (
     InjectionEPCSignaletique,
 )
+from base.models.education_group_year import EducationGroupYear
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.sap_client_creation_source import SAPClientCreationSource
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from education_group.models.enums.cohort_name import CohortName
 from osis_common.queue.queue_sender import send_message, logger
 from osis_profile.models import (
     EducationalExperience,
@@ -382,9 +385,9 @@ class InjectionEPCAdmission:
             for experience_pro in experiences_professionnelles
         ]
 
-    @staticmethod
-    def _get_inscription_offre(admission: BaseAdmission) -> Dict:
-        validite, num_offre = admission.training.external_id.split('_')[4:6]
+    @classmethod
+    def _get_inscription_offre(cls, admission: BaseAdmission) -> Dict:
+        num_offre, validite = cls.__get_validite_num_offre(admission)
         groupe_de_supervision = getattr(admission, 'supervision_group', None)
         double_diplome = getattr(admission, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission, 'international_scholarship', None)
@@ -422,6 +425,21 @@ class InjectionEPCAdmission:
                 if admission_generale else False
             )
         }
+
+    @staticmethod
+    def __get_validite_num_offre(admission: BaseAdmission) -> Tuple[str, str]:
+        formation = admission.training  # type: EducationGroupYear
+        est_en_bachelier = formation.education_group_type.name == TrainingType.BACHELOR.name
+        est_en_premiere_annee_de_bachelier = (
+            est_en_bachelier and admission.generaleducationadmission.cycle_pursuit != PoursuiteDeCycle.YES.name
+        )
+        if est_en_premiere_annee_de_bachelier:
+            validite, num_offre = formation.cohortyear_set.get(
+                name=CohortName.FIRST_YEAR.name,
+            ).external_id.split('_')[3:5]
+        else:
+            validite, num_offre = formation.external_id.split('_')[4:6]
+        return num_offre, validite
 
     @staticmethod
     def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
