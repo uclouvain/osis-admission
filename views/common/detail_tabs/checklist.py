@@ -99,10 +99,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
             PropositionFusionATraiterException,
         ):
             message_bus_instance.invoke(
-                SoumettreTicketPersonneCommand(
-                    global_id=admission.candidate.global_id,
-                    annee=admission.determined_academic_year.year,
-                )
+                SoumettreTicketPersonneCommand(global_id=admission.candidate.global_id)
             )
 
     admission.last_update_author = author

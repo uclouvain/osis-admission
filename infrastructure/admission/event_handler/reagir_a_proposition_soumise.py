@@ -47,8 +47,5 @@ def recherche_et_validation_digit(
         ))
         msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
         msg_bus.invoke(
-            SoumettreTicketPersonneCommand(
-                global_id=event.matricule,
-                annee=event.annee,
-            )
+            SoumettreTicketPersonneCommand(global_id=event.matricule)
         )

@@ -28,7 +28,6 @@ import json
 import logging
 import re
 from types import SimpleNamespace
-from typing import Optional
 
 import requests
 from django.conf import settings
@@ -48,23 +47,20 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX = ['8', '9']
 
+
 class DigitService(IDigitService):
     @classmethod
     def rechercher_compte_existant(
-            cls,
-            matricule: str,
-            nom: str,
-            prenom: str,
-            autres_prenoms: str,
-            genre: str,
-            date_naissance: str,
-            niss: str
+        cls,
+        matricule: str,
+        nom: str,
+        prenom: str,
+        autres_prenoms: str,
+        genre: str,
+        date_naissance: str,
+        niss: str
     ):
-        if not cls.correspond_a_compte_temporaire(matricule):
-            return []
-
         original_person = Person.objects.get(global_id=matricule)
-
         person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
             original_person=original_person,
             defaults={
@@ -72,8 +68,19 @@ class DigitService(IDigitService):
             },
         )
 
-        if person_merge_proposal.status in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.MERGED.name]:
-            return []
+        if person_merge_proposal.status in [
+            PersonMergeStatus.IN_PROGRESS.name,
+            PersonMergeStatus.MERGED.name
+        ]:
+            # Cas gestionnaire en cours de résolution de fusion OU personne déjà fusionnée par DigIT
+            return None
+
+        if not cls.correspond_a_compte_temporaire(matricule):
+            person_merge_proposal.status = PersonMergeStatus.NO_MATCH.name
+            person_merge_proposal.similarity_result = []
+            person_merge_proposal.last_similarity_result_update = datetime.datetime.now()
+            person_merge_proposal.save()
+            return None
 
         if niss:
             # keep only digits in niss
@@ -83,10 +90,7 @@ class DigitService(IDigitService):
             "lastname": nom, "firstname": prenom, "birthdate": date_naissance,
             "sex": genre, "nationalRegister": niss, "otherFirstName": autres_prenoms,
         }
-        logger.info(
-            f"DIGIT search existing person: "
-            f'{json.dumps(data)}'
-        )
+        logger.info(f"DIGIT search existing person: {json.dumps(data)}")
 
         if MOCK_DIGIT_SERVICE_CALL:
             similarity_data = _mock_search_digit_account_return_response()
@@ -101,25 +105,26 @@ class DigitService(IDigitService):
                     url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
                 )
                 similarity_data = response.json()
-            except Exception:
-                logger.info("An error occured when try to call DigIT endpoint recherche_compte_existant. "
-                            "Set PersonMergeProposal to ERROR")
+                if similarity_data.get('status') == 500:
+                    raise Exception(f"Digit internal server error (payload: {str(similarity_data)})")
+            except Exception as e:
+                logger.info(
+                    f"An error occured when try to call DigIT endpoint recherche_compte_existant. "
+                    f"set PersonMergeProposal to ERROR : {repr(e)}"
+                )
                 PersonMergeProposal.objects.update_or_create(
                     original_person=original_person,
                     defaults={
                         "status": PersonMergeStatus.ERROR.name,
-                        "similarity_result": {},
+                        "similarity_result": [],
                         "last_similarity_result_update": datetime.datetime.now(),
                     }
                 )
-                return {}
+                return None
 
         logger.info(f"DIGIT Response: {similarity_data}")
-
         similarity_data = _clean_data_from_duplicate_registration_ids(similarity_data)
-
         similarity_data = _retrieve_private_email_in_data(similarity_data)
-
         PersonMergeProposal.objects.update_or_create(
             original_person=original_person,
             defaults={
@@ -128,9 +133,6 @@ class DigitService(IDigitService):
                 "last_similarity_result_update": datetime.datetime.now(),
             }
         )
-
-        return similarity_data
-
 
     @classmethod
     def correspond_a_compte_temporaire(cls, matricule_candidat: str) -> bool:
@@ -198,6 +200,7 @@ def _retrieve_private_email_in_data(similarity_data):
         person = get_object_or_none(Person, global_id=global_id)
         result['person']['private_email'] = person.private_email if person and person.private_email else None
     return similarity_data
+
 
 def _mock_search_digit_account_return_response():
     return json.loads(

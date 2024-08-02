@@ -302,7 +302,8 @@ class AdmissionPersonForm(AdmissionModelForm):
 
         self.fields['birth_year'].choices = get_year_choices()
 
-        if self.instance and self.instance.global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
+        if self.instance and self.instance.global_id and \
+                self.instance.global_id[0] not in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX:
             self._disable_fields_when_internal_account()
 
     def _disable_fields_when_internal_account(self):
