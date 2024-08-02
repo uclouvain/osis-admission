@@ -75,10 +75,9 @@ def run(request=None, global_ids=None):
 
                 logger.info(f'[DigIT] send creation ticket for {candidate}')
                 try:
-                    person_ticket_uuid = message_bus_instance.invoke(SoumettreTicketPersonneCommand(
-                        global_id=candidate.global_id,
-                        annee=admission.determined_academic_year.year,
-                    ))
+                    person_ticket_uuid = message_bus_instance.invoke(
+                        SoumettreTicketPersonneCommand(global_id=candidate.global_id)
+                    )
                     person_ticket = PersonTicketCreation.objects.get(uuid=person_ticket_uuid)
                     if person_ticket.status == PersonTicketCreationStatus.ERROR.name:
                         errors.append(_("An error occured during digit ticket creation : {}").format(

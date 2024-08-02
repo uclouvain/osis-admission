@@ -35,8 +35,5 @@ def reagir_a_approuver_proposition(
 ) -> None:
     from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
     msg_bus.invoke(
-        SoumettreTicketPersonneCommand(
-            global_id=event.matricule,
-            annee=event.annee,
-        )
+        SoumettreTicketPersonneCommand(global_id=event.matricule)
     )

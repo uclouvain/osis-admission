@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-30 16:17+0200\n"
+"POT-Creation-Date: 2024-08-02 12:00+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -650,13 +650,6 @@ msgstr "Éléments de formulaire pour admission"
 
 msgid "Admission has been sent to EPC."
 msgstr "L'admission a été envoyé en EPC."
-
-msgid ""
-"Admission is not yet valid for searching UCLouvain account. The following "
-"fields are required: "
-msgstr ""
-"L'admission n'est pas encore valide pour rechercher une correspondance "
-"UCLouvain. Les champs suivants sont requis: "
 
 #, python-format
 msgid ""
@@ -8975,13 +8968,13 @@ msgid ""
 msgstr ""
 "[%(matricule_candidat)s] Le candidat a déjà un ticket de création en attente"
 
-
 #, python-format
 msgid ""
-"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax validation"
+"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
+"validation"
 msgstr ""
-"[%(matricule_candidat)s] Le candidat a une proposition de fusion avec des erreurs dans la validation syntaxique"
-
+"[%(matricule_candidat)s] Le candidat a une proposition de fusion avec des "
+"erreurs dans la validation syntaxique"
 
 #, python-format
 msgid ""
