@@ -114,9 +114,10 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
     @classmethod
     def get(cls, global_id: str) -> Optional[PropositionFusionPersonneDTO]:
         person_merge_proposal = get_object_or_none(
-            PersonMergeProposal, original_person__global_id=global_id
+            PersonMergeProposal,
+            original_person__global_id=global_id,
         )
-        if not person_merge_proposal:
+        if not person_merge_proposal or person_merge_proposal.selected_global_id == '':
             return None
         country = person_merge_proposal.proposal_merge_person.country_of_citizenship \
             if person_merge_proposal.proposal_merge_person else None
