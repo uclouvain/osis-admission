@@ -47,6 +47,10 @@ from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
 from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.forms.admission.curriculum import (
+    CurriculumEducationalExperienceYearAdmissionFormSet,
+    CurriculumAcademicExperienceAdmissionForm,
+)
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
@@ -81,6 +85,8 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     permission_required = 'admission.change_admission_curriculum'
     update_requested_documents = True
     update_admission_author = True
+    base_form_class = CurriculumAcademicExperienceAdmissionForm
+    year_formset_class = CurriculumEducationalExperienceYearAdmissionFormSet
 
     def has_permission(self):
         return super().has_permission() and (

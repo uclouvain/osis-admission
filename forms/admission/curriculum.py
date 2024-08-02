@@ -23,36 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django import forms
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileUploadField
 
 from admission.forms import REQUIRED_FIELD_CLASS
 from admission.forms.specific_question import ConfigurableFormMixin
 from base.forms.utils.file_field import MaxOneFileUploadField
-
-
-class ByContextAdmissionFormMixin:
-    """
-    Hide and disable the fields that are not in the current context.
-    """
-
-    def __init__(self, current_context, fields_by_context, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields_by_context = fields_by_context
-        self.current_context_fields = self.fields_by_context[current_context]
-
-        self.disable_fields_other_contexts()
-
-    def disable_fields_other_contexts(self):
-        """Disable and hide fields specific to other contexts."""
-        for field in self.fields:
-            if field not in self.current_context_fields:
-                self.fields[field].disabled = True
-                self.fields[field].widget = self.fields[field].hidden_widget()
-
-    def add_error(self, field, error):
-        if field and self.fields[field].disabled:
-            return
-        super().add_error(field, error)
+from osis_profile.forms.experience_academique import (
+    CurriculumAcademicExperienceForm,
+    CurriculumEducationalExperienceYearForm, BaseFormSetWithCustomFormIndex,
+)
 
 
 class GlobalCurriculumForm(ConfigurableFormMixin):
@@ -105,3 +86,26 @@ class GlobalCurriculumForm(ConfigurableFormMixin):
         cleaned_data.setdefault('reponses_questions_specifiques', {})
 
         return cleaned_data
+
+
+class CurriculumAcademicExperienceAdmissionForm(CurriculumAcademicExperienceForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if isinstance(field, FileUploadField):
+                field.required = True
+
+
+class CurriculumEducationalExperienceYearAdmissionForm(CurriculumEducationalExperienceYearForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if isinstance(field, FileUploadField):
+                field.required = True
+
+
+CurriculumEducationalExperienceYearAdmissionFormSet = forms.formset_factory(
+    form=CurriculumEducationalExperienceYearAdmissionForm,
+    formset=BaseFormSetWithCustomFormIndex,
+    extra=0,
+)
