@@ -31,7 +31,7 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import OuterRef, Subquery, Prefetch
+from django.db.models import OuterRef, Subquery, Prefetch, Q
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
@@ -136,6 +136,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'other_training_accepted_by_fac__academic_year',
                 'admission_requirement_year',
                 'last_update_author',
+            )
+            .exlude(
+                status__in=[
+                    ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+                    ChoixStatutPropositionGenerale.ANNULEE.name,
+                ]
             )
             .filter(
                 submitted_at__isnull=False,
