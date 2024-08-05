@@ -47,8 +47,13 @@ from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
 from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.forms.admission.curriculum import (
+    CurriculumAcademicExperienceAdmissionForm,
+)
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from osis_profile.forms.experience_academique import CurriculumEducationalExperienceYearFormSet
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
@@ -81,6 +86,8 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     permission_required = 'admission.change_admission_curriculum'
     update_requested_documents = True
     update_admission_author = True
+    base_form = CurriculumAcademicExperienceAdmissionForm
+    year_formset = CurriculumEducationalExperienceYearFormSet
 
     def has_permission(self):
         return super().has_permission() and (
@@ -162,6 +169,23 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             context_data['prevent_quitting_template'] = 'admission/includes/prevent_quitting_button.html'
 
         return context_data
+
+    @staticmethod
+    def clean_file_fields(
+        be_country,
+        credits_are_required,
+        form,
+        transcript_is_required,
+        transcript_translation_is_required,
+        is_fwb_bachelor,
+        is_fwb_master,
+    ):
+        cleaned_data = form.cleaned_data
+        if transcript_is_required and not cleaned_data.get('transcript'):
+            form.add_error('transcript', FIELD_REQUIRED_MESSAGE)
+
+        if transcript_translation_is_required and not cleaned_data.get('transcript_translation'):
+            form.add_error('transcript_translation', FIELD_REQUIRED_MESSAGE)
 
 
 class CurriculumNonEducationalExperienceFormView(
