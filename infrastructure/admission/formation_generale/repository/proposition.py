@@ -137,17 +137,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'admission_requirement_year',
                 'last_update_author',
             )
-            .exlude(
-                status__in=[
-                    ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
-                    ChoixStatutPropositionGenerale.ANNULEE.name,
-                ]
-            )
             .filter(
-                submitted_at__isnull=False,
-                candidate__global_id=matricule_candidat,
-            )
-            .order_by('submitted_at')
+                candidate__global_id=matricule_candidat
+            ).filter(
+                Q(
+                    type_demande=TypeDemande.ADMISSION.name,
+                    status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
+                )
+                | Q(type_demande=TypeDemande.INSCRIPTION.name)
+            ).order_by('created_at')
             .first()
         )
 
