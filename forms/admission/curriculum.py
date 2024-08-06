@@ -109,8 +109,8 @@ class CurriculumAcademicExperienceAdmissionForm(CurriculumAcademicExperienceForm
         country = cleaned_data.get('country')
         be_country = bool(country and country.iso_code == BE_ISO_CODE)
         linguistic_regime = cleaned_data.get('linguistic_regime')
-        if not be_country and linguistic_regime.code not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION:
-            if not cleaned_data.get('graduate_degree_translation'):
+        if not be_country and linguistic_regime and linguistic_regime.code not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION:
+            if obtained_diploma and not cleaned_data.get('graduate_degree_translation'):
                 self.add_error('graduate_degree_translation', FIELD_REQUIRED_MESSAGE)
             if global_transcript and not cleaned_data.get('transcript_translation'):
                 self.add_error('transcript_translation', FIELD_REQUIRED_MESSAGE)
