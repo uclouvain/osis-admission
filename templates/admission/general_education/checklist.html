@@ -64,13 +64,13 @@
     {% can_update_tab 'curriculum' as can_update_curriculum %}
     {% can_update_tab 'education' as can_update_education %}
 
-    {% if can_update_person_tab %}
+    {% if can_update_person_tab and proposition_fusion.status != "IN_PROGRESS" %}
       {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
     {% else %}
       {% url base_namespace|add:":person" view.kwargs.uuid as person_url %}
     {% endif %}
 
-    {% if can_update_coordonnees_tab %}
+    {% if can_update_coordonnees_tab and proposition_fusion.status != "IN_PROGRESS" %}
       {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
     {% else %}
       {% url base_namespace|add:":coordonnees" view.kwargs.uuid as coordonnees_url %}
