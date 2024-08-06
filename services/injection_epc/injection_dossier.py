@@ -357,14 +357,15 @@ class InjectionEPCAdmission:
                 .select_related("academic_year")
                 .order_by("academic_year")
             )  # type: QuerySet[EducationalExperienceYear]
-
+            exp = []
             for experience_educative_annualisee in experiences_educatives_annualisees:
                 data_annuelle = InjectionEPCCurriculum._build_data_annuelle(
                     experience_educative,
                     experience_educative_annualisee,
                 )
-                experiences.append(data_annuelle)
-
+                exp.append(data_annuelle)
+            exp[-1].update({'diplome': experience_educative.obtained_diploma})
+            experiences += exp
         return experiences
 
     @classmethod
