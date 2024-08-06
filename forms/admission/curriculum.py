@@ -27,32 +27,13 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.forms import REQUIRED_FIELD_CLASS
 from admission.forms.specific_question import ConfigurableFormMixin
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import MaxOneFileUploadField
-
-
-class ByContextAdmissionFormMixin:
-    """
-    Hide and disable the fields that are not in the current context.
-    """
-
-    def __init__(self, current_context, fields_by_context, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields_by_context = fields_by_context
-        self.current_context_fields = self.fields_by_context[current_context]
-
-        self.disable_fields_other_contexts()
-
-    def disable_fields_other_contexts(self):
-        """Disable and hide fields specific to other contexts."""
-        for field in self.fields:
-            if field not in self.current_context_fields:
-                self.fields[field].disabled = True
-                self.fields[field].widget = self.fields[field].hidden_widget()
-
-    def add_error(self, field, error):
-        if field and self.fields[field].disabled:
-            return
-        super().add_error(field, error)
+from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from osis_profile.forms.experience_academique import (
+    CurriculumAcademicExperienceForm,
+)
+from osis_profile.models.enums.curriculum import TranscriptType
 
 
 class GlobalCurriculumForm(ConfigurableFormMixin):
@@ -105,3 +86,31 @@ class GlobalCurriculumForm(ConfigurableFormMixin):
         cleaned_data.setdefault('reponses_questions_specifiques', {})
 
         return cleaned_data
+
+
+class CurriculumAcademicExperienceAdmissionForm(CurriculumAcademicExperienceForm):
+    def clean(self):
+        cleaned_data = super().clean()
+        self.clean_files_fields(cleaned_data)
+        return cleaned_data
+
+    def clean_files_fields(self, cleaned_data):
+        obtained_diploma = cleaned_data.get('obtained_diploma')
+        if obtained_diploma:
+            required_fields = ['graduate_degree', 'dissertation_summary']
+            for field in required_fields:
+                if not cleaned_data.get(field):
+                    self.add_error(field, FIELD_REQUIRED_MESSAGE)
+
+        global_transcript = cleaned_data.get('transcript_type') == TranscriptType.ONE_FOR_ALL_YEARS.name
+        if global_transcript and not cleaned_data.get('transcript'):
+            self.add_error('transcript', FIELD_REQUIRED_MESSAGE)
+
+        country = cleaned_data.get('country')
+        be_country = bool(country and country.iso_code == BE_ISO_CODE)
+        linguistic_regime = cleaned_data.get('linguistic_regime')
+        if not be_country and linguistic_regime and linguistic_regime.code not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION:
+            if obtained_diploma and not cleaned_data.get('graduate_degree_translation'):
+                self.add_error('graduate_degree_translation', FIELD_REQUIRED_MESSAGE)
+            if global_transcript and not cleaned_data.get('transcript_translation'):
+                self.add_error('transcript_translation', FIELD_REQUIRED_MESSAGE)
