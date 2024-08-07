@@ -143,3 +143,39 @@ class AnalysisFolderGenerationTestCase(BaseDocumentViewTestCase):
                 'explicit_name': gettext('Analysis folder'),
             },
         )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_doctorate_sic_manager_generates_new_analysis_folder(self):
+        self._mock_folder_generation()
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:doctorate:document:analysis-folder-generation',
+            uuid=self.doctorate_admission.uuid,
+        )
+
+        # Submit a valid form
+        response = self.client.post(url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form'].data, {})
+
+        # Save the file into the admission
+        self.doctorate_admission.refresh_from_db()
+        self.assertNotEqual(self.doctorate_admission.uclouvain_sic_documents, [])
+        self.assertEqual(self.doctorate_admission.uclouvain_fac_documents, [])
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+        # Save the author and the explicit name into the file
+        self.change_remote_metadata_patcher.assert_called_once_with(
+            token='pdf-token',
+            metadata={
+                'author': self.sic_manager_user.person.global_id,
+                'explicit_name': gettext('Analysis folder'),
+            },
+        )

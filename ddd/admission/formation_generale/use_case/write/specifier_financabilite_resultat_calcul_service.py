@@ -44,8 +44,7 @@ def specifier_financabilite_resultat_calcul(
     # THEN
     proposition.specifier_financabilite_resultat_calcul(
         financabilite_regle_calcule=EtatFinancabilite[cmd.financabilite_regle_calcule],
-        financabilite_regle_calcule_situation=SituationFinancabilite[cmd.financabilite_regle_calcule_situation],
-        auteur_modification=cmd.gestionnaire,
+        financabilite_regle_calcule_situation=cmd.financabilite_regle_calcule_situation,
     )
     proposition_repository.save(proposition)
 

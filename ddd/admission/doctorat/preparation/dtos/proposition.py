@@ -29,8 +29,11 @@ from uuid import UUID
 
 import attr
 
+from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
 from admission.ddd.admission.dtos.bourse import BourseDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from osis_common.ddd import interface
+from osis_profile import PLUS_5_ISO_CODES
 from .doctorat import DoctoratDTO
 from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 
@@ -66,7 +69,7 @@ class PropositionDTO(interface.DTO):
     proposition_programme_doctoral: List[str]
     projet_formation_complementaire: List[str]
     lettres_recommandation: List[str]
-    langue_redaction_these: str
+    langue_redaction_these: Optional[str]
     institut_these: Optional[UUID]
     nom_institut_these: str
     sigle_institut_these: str
@@ -82,6 +85,7 @@ class PropositionDTO(interface.DTO):
     prenom_candidat: str
     nom_candidat: str
     nationalite_candidat: str
+    langue_contact_candidat: str
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     soumise_le: Optional[datetime.datetime]
@@ -90,7 +94,38 @@ class PropositionDTO(interface.DTO):
     curriculum: List[str]
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+    documents_demandes: Dict
+    documents_libres_fac_uclouvain: List[str]
+    documents_libres_sic_uclouvain: List[str]
 
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PropositionGestionnaireDTO(PropositionDTO):
+    date_changement_statut: Optional[datetime.datetime]
+
+    genre_candidat: str
+    noma_candidat: str
+    adresse_email_candidat: str
+    nationalite_candidat_fr: str
+    nationalite_candidat_en: str
+    nationalite_candidat_code_iso: str
+    nationalite_ue_candidat: Optional[bool]
+    photo_identite_candidat: List[str]
+
+    candidat_a_plusieurs_demandes: bool
+
+    cotutelle: Optional[CotutelleDTO]
+
+    profil_soumis_candidat: Optional[ProfilCandidatDTO]
+
+    @property
+    def candidat_a_nationalite_ue_5(self):
+        return self.nationalite_ue_candidat is True or self.nationalite_candidat_code_iso in PLUS_5_ISO_CODES
+
+    @property
+    def candidat_a_nationalite_hors_ue_5(self):
+        return self.nationalite_ue_candidat is False and self.nationalite_candidat_code_iso not in PLUS_5_ISO_CODES

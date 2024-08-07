@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from typing import Optional, List, Dict
 
 import attr
@@ -209,7 +208,6 @@ class RecupererExperienceNonAcademiqueQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SoumettreTicketPersonneCommand(interface.CommandRequest):
     global_id: str
-    annee: int
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -224,7 +222,7 @@ class GetStatutTicketPersonneQuery(interface.QueryRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class RetrieveAndStoreStatutTicketPersonneFromDigitCommand(interface.CommandRequest):
-    global_id: str
+    ticket_uuid: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -240,6 +238,7 @@ class RetrieveListePropositionFusionEnErreurQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class FusionnerCandidatAvecPersonneExistanteCommand(interface.CommandRequest):
     candidate_global_id: str
+    ticket_uuid: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -251,6 +250,7 @@ class RecupererMatriculeDigitQuery(interface.QueryRequest):
 class ModifierMatriculeCandidatCommand(interface.QueryRequest):
     digit_global_id: str
     candidate_global_id: str
+    ticket_uuid: str
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -292,9 +292,35 @@ class ValidationTicketCreationDigitEchoueeException(BusinessException):
         super().__init__(self.message, **kwargs)
 
 
-class CreationTicketDigitEchoueeException(BusinessException):
+class TicketDigitATraiterAvantException(BusinessException):
     status_code = "FUSION-DIGIT-8"
-    message = _("An error occured during digit ticket creation")
+    message = _("There exists some digit tickets to treat before")
 
     def __init__(self, **kwargs):
         super().__init__(self.message, **kwargs)
+
+
+class PasDePropositionDeFusionEligibleException(BusinessException):
+    status_code = "FUSION-DIGIT-9"
+    message = _("No merge proposal eligible for this ticket")
+
+    def __init__(self, **kwargs):
+        super().__init__(self.message, **kwargs)
+
+
+class PasDePropositionDeFusionTrouveeException(BusinessException):
+    status_code = "FUSION-DIGIT-10"
+
+    def __init__(self, **kwargs):
+        message = _("Ressource not found.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionDeFusionAvecValidationSyntaxiqueInvalideException(BusinessException):
+    status_code = "FUSION-DIGIT-11"
+
+    def __init__(self, matricule_candidat, **kwargs):
+        message = _("[%(matricule_candidat)s] Candidate has merge proposal with error in syntax validation") % {
+            "matricule_candidat": matricule_candidat,
+        }
+        super().__init__(message, **kwargs)

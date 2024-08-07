@@ -523,7 +523,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         admission = ContinuingEducationAdmissionFactory(
             candidate=candidate,
             residence_permit=['file-uuid'],
-            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            submitted=True,
         )
 
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
@@ -1437,6 +1437,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
             financabilite_regle_etabli_par="",
+            financabilite_regle_etabli_le=None,
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_refus_sic=[],
@@ -1460,6 +1461,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 type=TrainingType.BACHELOR.name,
                 campus_inscription='Mons',
                 sigle_entite_gestion='FFD',
+                code='CFD1',
             ),
             reference='1234',
             annee_calculee=2023,
@@ -1512,6 +1514,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             type_admission='',
             type_contrat_travail='',
             type_financement='',
+            langue_contact_candidat=settings.LANGUAGE_CODE_FR,
+            documents_demandes={},
+            documents_libres_sic_uclouvain=[],
+            documents_libres_fac_uclouvain=[],
         )
         cls.continuing_context = _ResumePropositionDTO(
             identification=identification_dto,

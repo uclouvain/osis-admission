@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-11 15:58+0200\n"
+"POT-Creation-Date: 2024-08-07 12:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -552,6 +552,9 @@ msgstr ""
 msgid "Admission conditions not met."
 msgstr ""
 
+msgid "Admission context"
+msgstr ""
+
 msgid "Admission date"
 msgstr ""
 
@@ -570,9 +573,7 @@ msgstr ""
 msgid "Admission form items"
 msgstr ""
 
-msgid ""
-"Admission is not yet valid for searching UCLouvain account. The following "
-"fields are required: "
+msgid "Admission has been sent to EPC."
 msgstr ""
 
 #, python-format
@@ -646,7 +647,7 @@ msgstr ""
 msgid "An education type"
 msgstr ""
 
-msgid "An error occured during digit ticket creation"
+msgid "An error occured during digit ticket creation : {}"
 msgstr ""
 
 msgid "An error occured during digit ticket creation validation"
@@ -1023,6 +1024,9 @@ msgstr "Biology"
 msgid "Bachelor"
 msgstr ""
 
+msgid "Bachelor's course entrance exam"
+msgstr ""
+
 msgid "Back to checklist"
 msgstr ""
 
@@ -1134,9 +1138,6 @@ msgid "CDD opinion"
 msgstr ""
 
 msgid "CDD status"
-msgstr ""
-
-msgid "CDD:"
 msgstr ""
 
 msgid "CDDs"
@@ -1356,9 +1357,6 @@ msgstr ""
 msgid "Cancelled application"
 msgstr ""
 
-msgid "Cancelled application by a manager"
-msgstr ""
-
 msgid "Candidate"
 msgstr ""
 
@@ -1519,6 +1517,9 @@ msgid "Checklist filters"
 msgstr ""
 
 msgid "Checklist filters mode"
+msgstr ""
+
+msgid "Checklist tab"
 msgstr ""
 
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
@@ -1758,6 +1759,10 @@ msgstr ""
 msgid "Context"
 msgstr ""
 
+msgid "Continuing education"
+msgstr ""
+
+msgctxt "admission context"
 msgid "Continuing education"
 msgstr ""
 
@@ -2375,11 +2380,6 @@ msgstr ""
 msgid "Doctoral student:"
 msgstr ""
 
-msgid "Doctorate Ethics Regulations"
-msgstr ""
-
-msgid "Doctorate Regulations"
-msgstr ""
 
 msgid "Doctorate admission"
 msgstr ""
@@ -2391,7 +2391,17 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr ""
 
+msgctxt "admission context"
+msgid "Doctorate education"
+msgstr ""
+
 msgid "Doctorate enrolment applications"
+msgstr ""
+
+msgid "Doctorate Ethics Regulations"
+msgstr ""
+
+msgid "Doctorate Regulations"
 msgstr ""
 
 msgid "Document"
@@ -2545,9 +2555,6 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Education"
-msgstr ""
-
-msgid "Educational experience"
 msgstr ""
 
 msgid "Educational experiences"
@@ -2846,6 +2853,9 @@ msgstr ""
 msgid "External reorientation/modification"
 msgstr ""
 
+msgid "FAC"
+msgstr ""
+
 msgid "FNRS"
 msgstr ""
 
@@ -2865,6 +2875,9 @@ msgid "FWB - Credits earned"
 msgstr ""
 
 msgid "FWB - Registered credits"
+msgstr ""
+
+msgid "FWB Cotutelle"
 msgstr ""
 
 msgctxt "equivalence_type"
@@ -2980,6 +2993,9 @@ msgstr ""
 msgid "Financability rule established by"
 msgstr ""
 
+msgid "Financability rule established on"
+msgstr ""
+
 #, python-format
 msgid "Financable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
@@ -3001,7 +3017,9 @@ msgid "Financeable"
 msgstr ""
 
 #, python-format
-msgid "Financeable - %(rule)s (Established by %(established_by)s)"
+msgid ""
+"Financeable - %(rule)s (Established by %(established_by)s the "
+"%(established_on)s)"
 msgstr ""
 
 msgid "Financing rule"
@@ -3139,9 +3157,6 @@ msgstr ""
 msgid "Free additional approval conditions"
 msgstr ""
 
-msgid "Free additional conditions"
-msgstr ""
-
 msgid "Free and requestable by FAC"
 msgstr ""
 
@@ -3219,6 +3234,10 @@ msgid "General"
 msgstr ""
 
 msgid "General data"
+msgstr ""
+
+msgctxt "admission context"
+msgid "General education"
 msgstr ""
 
 msgid "General education admission"
@@ -3308,9 +3327,6 @@ msgid "Hide the checklist menu"
 msgstr ""
 
 msgid "Hide the states of the checklist"
-msgstr ""
-
-msgid "High school graduation year"
 msgstr ""
 
 msgctxt "tab"
@@ -4203,6 +4219,11 @@ msgstr ""
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
+"been received for doctorate education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
 "been received for general education"
 msgstr ""
 
@@ -4234,6 +4255,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
 "been received and some are still missing for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for doctorate education"
 msgstr ""
 
 msgid ""
@@ -4602,6 +4628,9 @@ msgstr ""
 msgid "New thesis title (if applicable):"
 msgstr ""
 
+msgid "Next"
+msgstr ""
+
 msgid "No"
 msgstr ""
 
@@ -4616,6 +4645,9 @@ msgid "No French studies"
 msgstr ""
 
 msgid "No PhD found."
+msgstr ""
+
+msgid "No data"
 msgstr ""
 
 msgid "No defense reason"
@@ -4655,6 +4687,9 @@ msgid "No knowledge of languages provided."
 msgstr ""
 
 msgid "No longer designate the document as to be requested"
+msgstr ""
+
+msgid "No merge proposal eligible for this ticket"
 msgstr ""
 
 msgid "No one invited"
@@ -4881,6 +4916,9 @@ msgstr ""
 
 msgctxt "ways_hear_about_training"
 msgid "Other"
+msgstr ""
+
+msgid "Other additional conditions"
 msgstr ""
 
 msgid "Other address"
@@ -5347,6 +5385,9 @@ msgstr ""
 msgid "Private email"
 msgstr ""
 
+msgid "Private email address"
+msgstr ""
+
 msgid "Processing by Fac"
 msgstr ""
 
@@ -5357,9 +5398,6 @@ msgid "Professional"
 msgstr ""
 
 msgid "Professional email"
-msgstr ""
-
-msgid "Professional experience"
 msgstr ""
 
 msgid "Professional experiences"
@@ -5954,6 +5992,9 @@ msgstr "Services"
 msgid "SERVICE types"
 msgstr ""
 
+msgid "SIC"
+msgstr ""
+
 msgid "SIC Approval"
 msgstr ""
 
@@ -5961,9 +6002,6 @@ msgid "SIC comment for the faculty"
 msgstr ""
 
 msgid "SIC status"
-msgstr ""
-
-msgid "SIC:"
 msgstr ""
 
 msgid "SIGNING_IN_PROGRESS"
@@ -6127,6 +6165,9 @@ msgstr ""
 msgid "Sender"
 msgstr ""
 
+msgid "Sent to EPC"
+msgstr ""
+
 msgid "Sent to digit"
 msgstr ""
 
@@ -6206,9 +6247,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Absence of debt' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Belgian student status' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Belgian student status' block."
 msgstr ""
 
 msgid ""
@@ -6216,9 +6263,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Memberships' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Reduced tuition fee' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Reduced tuition fee' block."
 msgstr ""
 
 msgid ""
@@ -6226,9 +6279,16 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields related to the bank account are missing."
+msgstr ""
+
 msgid ""
 "Some fields related to the bank account number in IBAN format are missing in "
 "the 'Additional information > Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields related to the bank account number in IBAN format are missing."
 msgstr ""
 
 msgid ""
@@ -6587,6 +6647,9 @@ msgid "The candidate must report to SIC"
 msgstr ""
 
 msgid "The certificate of achievement is being generated."
+msgstr ""
+
+msgid "The checklist tab is not valid for this admission context."
 msgstr ""
 
 msgid ""
@@ -6980,6 +7043,9 @@ msgstr ""
 "There can be no more supervisory panel members in the supervision group."
 
 msgid "There can be no more promoters in the supervision group."
+msgstr ""
+
+msgid "There exists some digit tickets to treat before"
 msgstr ""
 
 msgid ""
@@ -7869,6 +7935,9 @@ msgid ""
 "'Additional information > Accounting' tab."
 msgstr ""
 
+msgid "You haven't answered to the question about your bank account."
+msgstr ""
+
 msgid "You haven't yet submitted your application."
 msgstr ""
 
@@ -8025,6 +8094,12 @@ msgstr ""
 #, python-format
 msgid ""
 "[%(matricule_candidat)s] Candidate has already a pending creation ticket"
+msgstr ""
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
+"validation"
 msgstr ""
 
 #, python-format

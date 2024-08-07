@@ -39,7 +39,6 @@ class ChoixStatutPropositionContinue(ChoiceEnum):
     COMPLETEE_POUR_FAC = _('Completed for Fac')
     INSCRIPTION_AUTORISEE = _('Application accepted')
     CLOTUREE = _('Closed')
-    ANNULEE_PAR_GESTIONNAIRE = _('Cancelled application by a manager')
 
 
 class ChoixInscriptionATitre(ChoiceEnum):
@@ -81,10 +80,6 @@ class ChoixMoyensDecouverteFormation(ChoiceEnum):
 STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {
     ChoixStatutPropositionContinue.EN_BROUILLON.name,
     ChoixStatutPropositionContinue.ANNULEE.name,
-}
-
-STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE_OU_ANNULEE = STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE | {
-    ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name,
 }
 
 STATUTS_PROPOSITION_CONTINUE_SOUMISE = (

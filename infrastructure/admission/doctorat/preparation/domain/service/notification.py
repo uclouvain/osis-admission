@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
+from typing import List
 
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
@@ -31,10 +33,13 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
+from osis_mail_template.utils import transform_html_to_text
 
 from admission.contrib.models import AdmissionTask, SupervisionActor
+from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.doctorate import PropositionProxy
 from admission.contrib.models.enums.actor_type import ActorType
+from admission.ddd import MAIL_INSCRIPTION_DEFAUT
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
@@ -46,9 +51,13 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_notification 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SignataireNonTrouveException,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
+from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import DoctoratTranslator
+from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     ADMISSION_EMAIL_MEMBER_REMOVED,
@@ -57,15 +66,26 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
 )
-from admission.utils import get_admission_cdd_managers
+from admission.mail_templates.document import (
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE,
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
+)
+from admission.utils import (
+    get_admission_cdd_managers,
+    get_salutation_prefix,
+    get_portal_admission_url,
+    get_backoffice_admission_url,
+)
 from base.models.person import Person
 from osis_async.models import AsyncTask
 from osis_mail_template import generate_email
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
-from osis_notification.contrib.notification import WebNotification
+from osis_notification.contrib.notification import WebNotification, EmailNotification
 from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
+
+from base.utils.utils import format_academic_year
 
 
 class Notification(INotification):
@@ -365,3 +385,81 @@ class Notification(INotification):
     def _lien_invitation_externe(cls, proposition, actor):
         url = settings.ADMISSION_FRONTEND_LINK.format(context='public/doctorate', uuid=proposition.entity_id.uuid)
         return url + f"external-approval/{get_signing_token(actor)}"
+
+    @classmethod
+    def envoyer_message_libre_au_candidat(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(email_message, person=candidate)
+        return email_message
+
+    @classmethod
+    def confirmer_reception_documents_envoyes_par_candidat(
+        cls,
+        proposition: PropositionDTO,
+        liste_documents_reclames: List[EmplacementDocument],
+        liste_documents_dto: List[EmplacementDocumentDTO],
+    ):
+        admission: BaseAdmission = BaseAdmission.objects.select_related(
+            'candidate',
+            'training__enrollment_campus',
+        ).get(uuid=proposition.uuid)
+
+        html_list_by_status = get_requested_documents_html_lists(liste_documents_reclames, liste_documents_dto)
+
+        tokens = {
+            'admission_reference': proposition.reference,
+            'candidate_first_name': proposition.prenom_candidat,
+            'candidate_last_name': proposition.nom_candidat,
+            'salutation': get_salutation_prefix(person=admission.candidate),
+            'training_title': admission.training.title
+            if admission.candidate.language == settings.LANGUAGE_CODE_FR
+            else admission.training.title_english,
+            'training_acronym': proposition.doctorat.sigle,
+            'training_campus': proposition.doctorat.campus,
+            'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
+            'requested_not_submitted_documents': html_list_by_status[StatutEmplacementDocument.A_RECLAMER],
+            'enrolment_service_email': admission.training.enrollment_campus.sic_enrollment_email
+            or MAIL_INSCRIPTION_DEFAUT,
+            'training_year': format_academic_year(proposition.annee_calculee),
+            'admission_link_front': get_portal_admission_url('continuing-education', proposition.uuid),
+            'admission_link_back': get_backoffice_admission_url('continuing-education', proposition.uuid),
+        }
+
+        email_message = generate_email(
+            ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE
+            if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
+            else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
+            admission.candidate.language,
+            tokens,
+            recipients=[admission.candidate.private_email],
+        )
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+        # Create the async task to create the folder analysis containing the submitted documents
+        task = AsyncTask.objects.create(
+            name=_('Folder analysis of the proposition %(reference)s') % {'reference': admission.reference},
+            description=_(
+                'Create the folder analysis of the proposition containing the requested documents that the '
+                'candidate submitted.',
+            ),
+            person=admission.candidate,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.DOCTORATE_FOLDER.name,
+        )

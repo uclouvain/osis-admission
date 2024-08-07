@@ -394,3 +394,179 @@ class DocumentViewTestCase(BaseDocumentViewTestCase):
                 'explicit_name': 'My file name',
             },
         )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_doctorate_sic_manager_uploads_free_and_readonly_internal_document(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:doctorate:document:free-internal-upload',
+            uuid=self.doctorate_admission.uuid,
+        )
+
+        # Retrieve the empty form
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+        # Empty data
+        response = self.client.post(
+            url,
+            data={},
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(
+            MaxOneFileUploadField.default_error_messages['min_files'],
+            response.context['form'].errors.get('file', []),
+        )
+
+        # Too much files
+        response = self.client.post(
+            url,
+            data={
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-file_1': ['file_1-token'],
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            MaxOneFileUploadField.default_error_messages['max_files'],
+            response.context['form'].errors.get('file', []),
+        )
+
+        categorized_document = CategorizedFreeDocumentFactory(
+            checklist_tab='',
+            with_academic_year=True,
+        )
+        # Invalid categorized document because the academic year has not been selected
+        response = self.client.post(
+            url,
+            data={
+                'upload-free-internal-document-form-file_name': 'My file name',
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-document_type': categorized_document.pk,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('academic_year', []))
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'upload-free-internal-document-form-file_name': 'My file name',
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-document_type': categorized_document.pk,
+                'upload-free-internal-document-form-academic_year': '2018-2019',
+            },
+            **self.default_headers,
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form'].data, {})
+
+        # Save the file into the admission
+        self.doctorate_admission.refresh_from_db()
+        self.assertNotEqual(self.doctorate_admission.uclouvain_sic_documents, [])
+        self.assertEqual(self.doctorate_admission.uclouvain_fac_documents, [])
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+        # Save the author and the explicit name into the file
+        self.change_remote_metadata_patcher.assert_called_once_with(
+            token='file_0-token',
+            metadata={
+                'author': self.sic_manager_user.person.global_id,
+                'explicit_name': categorized_document.long_label_fr,
+            },
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_doctorate_fac_manager_uploads_free_and_readonly_internal_document(self):
+        self.doctorate_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.doctorate_admission.save(update_fields=['status'])
+
+        self.client.force_login(user=self.doctorate_fac_manager_user)
+
+        url = resolve_url(
+            'admission:doctorate:document:free-internal-upload',
+            uuid=self.doctorate_admission.uuid,
+        )
+
+        # Retrieve the empty form
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+        # Empty data
+        response = self.client.post(
+            url,
+            data={},
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(
+            MaxOneFileUploadField.default_error_messages['min_files'],
+            response.context['form'].errors.get('file', []),
+        )
+
+        # Too much files
+        response = self.client.post(
+            url,
+            data={
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-file_1': ['file_1-token'],
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            MaxOneFileUploadField.default_error_messages['max_files'],
+            response.context['form'].errors.get('file', []),
+        )
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'upload-free-internal-document-form-file_name': 'My file name',
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+            },
+            **self.default_headers,
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form'].data, {})
+
+        # Save the file into the admission
+        self.doctorate_admission.refresh_from_db()
+        self.assertNotEqual(self.doctorate_admission.uclouvain_fac_documents, [])
+        self.assertEqual(self.doctorate_admission.uclouvain_sic_documents, [])
+
+        # Check last modification data
+        self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.doctorate_admission.last_update_author, self.doctorate_fac_manager_user.person)
+
+        # Save the author and the explicit name into the file
+        self.change_remote_metadata_patcher.assert_called_once_with(
+            token='file_0-token',
+            metadata={
+                'author': self.doctorate_fac_manager_user.person.global_id,
+                'explicit_name': 'My file name',
+            },
+        )

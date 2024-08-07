@@ -41,7 +41,7 @@ from admission.contrib.models.base import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
-    GetPropositionCommand,
+    RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
     GetCotutelleCommand,
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
@@ -51,6 +51,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, Co
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
@@ -140,6 +141,14 @@ class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMix
     def is_fac(self):
         return person_is_fac_cdd(self.request.user.person)
 
+    @cached_property
+    def manager_type(self):
+        if self.is_sic:
+            return TypeGestionnaire.SIC.name
+
+        if self.is_fac:
+            return TypeGestionnaire.FAC.name
+
 
 class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
@@ -147,7 +156,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     @cached_property
     def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO, PropositionContinueDTO]:
         cmd = {
-            CONTEXT_DOCTORATE: GetPropositionCommand(uuid_proposition=self.admission_uuid),
+            CONTEXT_DOCTORATE: RecupererPropositionDoctoraleGestionnaireQuery(uuid_proposition=self.admission_uuid),
             CONTEXT_CONTINUING: RecupererPropositionQuery(uuid_proposition=self.admission_uuid),
             CONTEXT_GENERAL: RecupererPropositionGestionnaireQuery(uuid_proposition=self.admission_uuid),
         }[self.current_context]
@@ -239,15 +248,11 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
         if self.is_doctorate:
             try:
+                context['admission'] = self.proposition
+                # TODO doctorate refactorization
                 if admission_status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
                     context['dossier'] = self.dossier
                     context['doctorate'] = self.doctorate
-                else:
-                    if admission_status == ChoixStatutPropositionDoctorale.CONFIRMEE.name:
-                        context['dossier'] = self.dossier
-
-                    context['admission'] = self.proposition
-
             except (PropositionNonTrouveeException, DemandeNonTrouveeException, DoctoratNonTrouveException) as e:
                 raise Http404(e.message)
         elif self.is_general:

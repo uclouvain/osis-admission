@@ -29,14 +29,17 @@ from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 from waffle.testutils import override_switch
 
-from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand, \
+    ValiderTicketPersonneCommand
 from backoffice.celery import app
 from base.models.person import Person
+from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from osis_common.ddd.interface import BusinessException
 
-logger = logging.getLogger(settings.DEFAULT_LOGGER)
+logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
 
 @app.task
@@ -65,12 +68,21 @@ def run(request=None, global_ids=None):
                     genre=candidate.sex,
                 ))
 
+                logger.info(f'[DigIT] Validate ticket semantic info from digit for {candidate}')
+                message_bus_instance.invoke(
+                    ValiderTicketPersonneCommand(global_id=candidate.global_id)
+                )
+
                 logger.info(f'[DigIT] send creation ticket for {candidate}')
                 try:
-                    message_bus_instance.invoke(SoumettreTicketPersonneCommand(
-                        global_id=candidate.global_id,
-                        annee=admission.determined_academic_year.year,
-                    ))
+                    person_ticket_uuid = message_bus_instance.invoke(
+                        SoumettreTicketPersonneCommand(global_id=candidate.global_id)
+                    )
+                    person_ticket = PersonTicketCreation.objects.get(uuid=person_ticket_uuid)
+                    if person_ticket.status == PersonTicketCreationStatus.ERROR.name:
+                        errors.append(_("An error occured during digit ticket creation : {}").format(
+                            str(person_ticket.errors)
+                        ))
                 except BusinessException as e:
                     errors.append(str(e.message))
             else:

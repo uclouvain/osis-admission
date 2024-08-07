@@ -312,7 +312,7 @@ class AdmissionTabsTestCase(TestCase):
             ),
         }
         result = current_subtabs(context)
-        self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('confirmation', '')])
+        self.assertEqual(result['subtabs'], TAB_TREES['doctorate-after-enrolment'][Tab('confirmation', '')])
 
 
 class AdmissionPanelTagTestCase(TestCase):
@@ -617,10 +617,9 @@ class DisplayTagTestCase(TestCase):
         template_params = experience_details_template(**kwargs)
 
         self.assertEqual(
-            template_params['edit_link_button'],
-            '/osis_profile/{noma}/parcours_externe/edit/experience_academique/{annee_experience_uuid}'.format(
+            template_params['curex_link_button'],
+            '/osis_profile/{noma}/parcours_externe/'.format(
                 noma='0123456',
-                annee_experience_uuid=kwargs['experience'].annees[0].uuid,
             ),
         )
         self.assertEqual(template_params['delete_link_button'], '')
@@ -817,8 +816,8 @@ class DisplayTagTestCase(TestCase):
 
         self.assertEqual(context['edit_link_button_in_new_tab'], True)
         self.assertEqual(
-            context['update_url'],
-            f'/osis_profile/0123456/parcours_externe/edit/experience_academique/{experience.annees[0].uuid}',
+            context['curex_url'],
+            '/osis_profile/0123456/parcours_externe/',
         )
         self.assertEqual(context['delete_url'], '')
 

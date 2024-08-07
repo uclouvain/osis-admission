@@ -25,11 +25,18 @@
 ##############################################################################
 from mock.mock import Mock
 
-from admission.ddd.admission.commands import SoumettreTicketPersonneCommand, RechercherCompteExistantCommand, \
-    GetStatutTicketPersonneQuery, RetrieveListeTicketsEnAttenteQuery, \
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, ValiderTicketPersonneCommand, \
-    FusionnerCandidatAvecPersonneExistanteCommand
+from admission.ddd.admission.commands import (
+    SoumettreTicketPersonneCommand,
+    RechercherCompteExistantCommand,
+    GetStatutTicketPersonneQuery,
+    RetrieveListeTicketsEnAttenteQuery,
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
+    ValiderTicketPersonneCommand,
+    FusionnerCandidatAvecPersonneExistanteCommand,
+    RetrieveListePropositionFusionEnErreurQuery,
+)
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
@@ -60,6 +67,8 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import \
+    specifier_financabilite_non_concernee
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -391,6 +400,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
             cmd,
             emplacement_document_repository=_emplacement_document_repository,
+            classe_enumeration_onglets_checklist=OngletsChecklist,
         )
     ),
     InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(
@@ -600,6 +610,10 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
+    SpecifierFinancabiliteNonConcerneeCommand: lambda msg_bus, cmd: specifier_financabilite_non_concernee(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
     ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
             cmd,
@@ -728,6 +742,7 @@ COMMAND_HANDLERS = {
     RechercherCompteExistantCommand: lambda *args, **kwargs: Mock(),
     GetStatutTicketPersonneQuery: lambda *args, **kwargs: Mock(),
     RetrieveListeTicketsEnAttenteQuery: lambda *args, **kwargs: Mock(),
+    RetrieveListePropositionFusionEnErreurQuery: lambda *args, **kwargs: Mock(),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: lambda *args, **kwargs: Mock(),
     ValiderTicketPersonneCommand: lambda *args, **kwargs: Mock(),
     FusionnerCandidatAvecPersonneExistanteCommand: lambda *args, **kwargs: Mock(),

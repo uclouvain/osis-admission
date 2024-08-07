@@ -48,7 +48,7 @@ def refuser_inscription_par_sic(
     proposition.refuser_par_sic(auteur_modification=cmd.auteur)
 
     # THEN
-    pdf_generation.generer_attestation_refus_inscription_sic(
+    pdf_generation.generer_attestation_refus_sic(
         proposition_repository=proposition_repository,
         profil_candidat_translator=profil_candidat_translator,
         campus_repository=campus_repository,

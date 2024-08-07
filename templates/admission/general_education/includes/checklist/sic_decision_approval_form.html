@@ -108,13 +108,25 @@
     {% bootstrap_field sic_decision_approval_form.with_additional_approval_conditions %}
     <div
         id="sic-decision-additional-approval-conditions-container"
-        class="hidden"
+        class="hidden mb-15"
     >
       {% candidate_language admission.langue_contact_candidat as candidate_language_tag %}
       {% bootstrap_field sic_decision_approval_form.all_additional_approval_conditions label=sic_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|safe form_group_class="form-group required_field" %}
 
-        <strong>{% translate 'Free additional conditions' %}</strong>
-        <table id="sic-decision-additional-approval-conditions-formset" class="table table-bordered">
+        <strong>{% translate 'Other additional conditions' %}</strong>
+        <button
+            type="button"
+            class="btn btn-xs"
+            name="hide-other-approval-conditions"
+            value="{% if sic_decision_free_approval_condition_formset.forms %}on{% else %}off{% endif %}"
+        >
+          <i class="fa fa-solid fa-square-chevron-down"></i>
+          <i class="fa fa-solid fa-square-chevron-up"></i>
+        </button>
+        <table
+          id="sic-decision-additional-approval-conditions-formset"
+          class="table table-bordered other-approval-conditions {% if not sic_decision_free_approval_condition_formset.forms %}hidden{% endif %}"
+        >
           {{ sic_decision_free_approval_condition_formset.management_form }}
           {% for form in sic_decision_free_approval_condition_formset.forms %}
             {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='sic-decision-additional-approval-conditions-form' form=form %}
@@ -129,7 +141,7 @@
         id="sic-decision-additional-trainings-container"
         class="hidden"
     >
-      {% bootstrap_field sic_decision_approval_form.prerequisite_courses form_group_class="form-group required_field" %}
+      {% bootstrap_field sic_decision_approval_form.prerequisite_courses %}
       <div class="form-group">
         <label class="control-label">
           {{ sic_decision_approval_form.prerequisite_courses_fac_comment.field.label }}

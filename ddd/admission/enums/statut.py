@@ -32,7 +32,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
-    STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE_OU_ANNULEE,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -52,7 +51,6 @@ def choix_statuts_toute_proposition_ordonnes():
     # Association entre les statuts déjà présents de formation générale et les statuts spécifiques à placer juste après
     choix_specifiques = {
         ChoixStatutPropositionGenerale.EN_BROUILLON.name: ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
-        ChoixStatutPropositionGenerale.ANNULEE.name: ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE,
         ChoixStatutPropositionGenerale.CONFIRMEE.name: ChoixStatutPropositionContinue.EN_ATTENTE,
     }
 
@@ -87,7 +85,7 @@ STATUTS_TOUTE_PROPOSITION = set(
 STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE = (
     STATUTS_TOUTE_PROPOSITION
     - STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE
-    - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE_OU_ANNULEE
+    - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
     - STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 )
 

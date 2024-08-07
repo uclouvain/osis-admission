@@ -103,6 +103,7 @@ urlpatterns = [
     path('propositions/doctorate/<uuid:uuid>/training_choice', views.DoctorateUpdateAdmissionTypeAPIView),
     path('propositions/doctorate/<uuid:uuid>/<str:tab>/specific-question', views.DoctorateSpecificQuestionListView),
     path('propositions/doctorate/<uuid:uuid>/pdf-recap', views.DoctoratePDFRecapView),
+    path('propositions/doctorate/<uuid:uuid>/documents', views.DoctorateRequestedDocumentListView),
     # Supervision
     path('propositions/doctorate/<uuid:uuid>/supervision', views.SupervisionAPIView),
     path(
@@ -191,4 +192,6 @@ urlpatterns = [
     path('campus', views.ListCampusView),
     path('campus/<uuid:uuid>', views.RetrieveCampusView),
     path('diplomatic-post/<int:code>', views.RetrieveDiplomaticPostView),
+    # Payment method
+    path('candidate/<str:noma>/application_fees_payment_method', views.PaymentMethodAPIView),
 ]

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ from typing import Optional
 from unittest import TestCase
 
 import freezegun
+from mock import ANY
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererDocumentsPropositionQuery,
@@ -44,6 +45,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsIdentification,
     IdentifiantBaseEmplacementDocument,
     DocumentsSysteme,
+    StatutReclamationEmplacementDocument,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -53,6 +55,7 @@ from admission.infrastructure.admission.repository.in_memory.emplacement_documen
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -115,6 +118,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(photo_identite.uuid_proposition, 'uuid-SC3DP-promoteur-membre')
         self.assertEqual(photo_identite.requis_automatiquement, False)
 
+        # Document non libre faisant l'objet d'une relance
         curriculum: Optional[EmplacementDocumentDTO] = next(
             (doc for doc in documents if doc.identifiant == 'CURRICULUM.CURRICULUM'),
             None,
@@ -124,14 +128,28 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(curriculum.libelle_langue_candidat, DocumentsCurriculum['CURRICULUM'])
         self.assertEqual(curriculum.document_uuids, ['file1.pdf'])
         self.assertEqual(curriculum.type, TypeEmplacementDocument.NON_LIBRE.name)
-        self.assertEqual(curriculum.statut, StatutEmplacementDocument.NON_ANALYSE.name)
-        self.assertEqual(curriculum.justification_gestionnaire, '')
+        self.assertEqual(curriculum.statut, StatutEmplacementDocument.RECLAME.name)
+        self.assertEqual(
+            curriculum.statut_reclamation,
+            StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+        )
+        self.assertEqual(curriculum.justification_gestionnaire, 'Le document est à mettre à jour.')
         self.assertEqual(curriculum.document_soumis_par, None)
         self.assertEqual(curriculum.document_soumis_le, datetime.datetime(2023, 1, 1))
-        self.assertEqual(curriculum.reclame_le, None)
-        self.assertEqual(curriculum.dernier_acteur, None)
-        self.assertEqual(curriculum.derniere_action_le, None)
-        self.assertEqual(curriculum.a_echeance_le, None)
+        self.assertEqual(curriculum.reclame_le, datetime.datetime(2023, 1, 2))
+        self.assertEqual(
+            curriculum.dernier_acteur,
+            PersonneConnueUclDTO(
+                matricule='00321234',
+                email=ANY,
+                prenom=ANY,
+                nom=ANY,
+                adresse_professionnelle=ANY,
+                langue=ANY,
+            ),
+        )
+        self.assertEqual(curriculum.derniere_action_le, datetime.datetime(2023, 1, 2))
+        self.assertEqual(curriculum.a_echeance_le, datetime.date(2023, 1, 19))
         self.assertEqual(curriculum.onglet, OngletsDemande.CURRICULUM.name)
         self.assertEqual(curriculum.nom_onglet, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.nom_onglet_langue_candidat, OngletsDemande.CURRICULUM.value)

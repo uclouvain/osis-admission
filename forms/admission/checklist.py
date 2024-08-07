@@ -34,7 +34,7 @@ from dal import forward
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import F
+from django.db.models import F, Q
 from django.utils.safestring import mark_safe
 from django.utils.translation import (
     gettext_lazy as _,
@@ -99,8 +99,10 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite, \
-    SITUATION_FINANCABILITE_PAR_ETAT
+from ddd.logic.financabilite.domain.model.enums.situation import (
+    SituationFinancabilite,
+    SITUATION_FINANCABILITE_PAR_ETAT,
+)
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
 from osis_document.utils import is_uuid
@@ -305,20 +307,6 @@ class FacDecisionRefusalForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        all_reasons = RefusalReason.objects.select_related('category').all().order_by('category__order', 'order')
-        category = getattr(self, 'reasons_category', None)
-        if category:
-            all_reasons = all_reasons.filter(category__name=category)
-
-        choices = get_group_by_choices(
-            queryset=all_reasons,
-            item_category_field='category',
-            item_category_name_field='name',
-            item_identifier_field='uuid',
-            item_name_field='name',
-        )
-
         selected_reasons = self.data.getlist(self.add_prefix('reasons'), self.initial.get('reasons')) or []
 
         self.categorized_reasons = []
@@ -331,6 +319,19 @@ class FacDecisionRefusalForm(forms.Form):
             else:
                 self.other_reasons.append(reason)
                 other_reasons_choices.append([reason, reason])
+
+        all_reasons = RefusalReason.objects.select_related('category').all().order_by('category__order', 'order')
+        category = getattr(self, 'reasons_category', None)
+        if category:
+            all_reasons = all_reasons.filter(Q(category__name=category) | Q(uuid__in=self.categorized_reasons))
+
+        choices = get_group_by_choices(
+            queryset=all_reasons,
+            item_category_field='category',
+            item_category_name_field='name',
+            item_identifier_field='uuid',
+            item_name_field='name',
+        )
 
         choices.append([pgettext('admission', 'Other reasons'), other_reasons_choices])
 
@@ -1205,7 +1206,10 @@ class FinancabiliteDispensationForm(forms.Form):
         super().__init__(*args, **kwargs)
         if not is_central_manager and not is_program_manager:
             self.fields['dispensation_status'].disabled = True
-        elif not is_central_manager and self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name:
+        elif not is_central_manager and (
+            self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name
+            or not self.initial.get('dispensation_status')
+        ):
             self.fields['dispensation_status'].disabled = True
 
 

@@ -40,6 +40,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -50,16 +51,15 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.constants import (
     IMAGE_MIME_TYPES,
     ORDERED_CAMPUSES_UUIDS,
-    CONTEXT_ADMISSION,
     CONTEXT_DOCTORATE,
     CONTEXT_GENERAL,
     CONTEXT_CONTINUING,
+    CONTEXT_DOCTORATE_AFTER_ENROLMENT,
 )
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
-    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -73,15 +73,14 @@ from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
-    STATUTS_PROPOSITION_CONTINUE_SOUMISE,
     ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
 )
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     ChoixStatutChecklist,
 )
@@ -92,7 +91,6 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
     PropositionDTO as PropositionGeneraleDTO,
 )
-from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -109,15 +107,14 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import get_access_conditions_url, get_experience_urls
-from base.models.enums.civil_state import CivilState
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -305,14 +302,23 @@ class Tab:
 
 
 TAB_TREES = {
-    CONTEXT_ADMISSION: {
-        Tab('personal', _('Personal data'), 'user'): [
-            Tab('person', _('Identification')),
-            Tab('coordonnees', _('Contact details')),
+    CONTEXT_DOCTORATE: {
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
+        ],
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
+        ],
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
         ],
         # TODO Education choice
         Tab('experience', _('Previous experience'), 'list-alt'): [
-            Tab('education', _('Secondary studies')),
             Tab('curriculum', _('Curriculum')),
             Tab('languages', _('Knowledge of languages')),
         ],
@@ -321,32 +327,43 @@ TAB_TREES = {
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
-        # TODO Specific aspects
-        # TODO Completion
-        Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('history-all', _('All history')),
-            Tab('history', _('Status changes')),
-            Tab('send-mail', _('Send a mail')),
-            Tab('internal-note', _('Internal notes'), 'note-sticky'),
-            Tab('debug', _('Debug'), 'bug'),
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('accounting', _('Accounting')),
+        ],
+    },
+    # TODO doctorate refactorization
+    CONTEXT_DOCTORATE_AFTER_ENROLMENT: {
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
         ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
             Tab('comments', pgettext('tab', 'Comments'), 'comments')
         ],
-        # TODO Documents
-    },
-    CONTEXT_DOCTORATE: {
-        Tab('person', _('Personal data'), 'user'): [
-            Tab('person', _('Personal data'), 'user'),
-            Tab('coordonnees', _('Contact details')),
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
         ],
-        Tab('education', _('Previous experience'), 'list-alt'): [
-            Tab('education', _('Previous experience'), 'list-alt'),
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
+        ],
+        # TODO Education choice
+        Tab('experience', _('Previous experience'), 'list-alt'): [
+            Tab('curriculum', _('Curriculum')),
+            Tab('languages', _('Knowledge of languages')),
+        ],
+        Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
+            Tab('project', _('Research project')),
+            Tab('cotutelle', _('Cotutelle')),
+            Tab('supervision', _('Supervision')),
         ],
         Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
             Tab('project', pgettext('tab', 'Research project')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
+        ],
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('accounting', _('Accounting')),
         ],
         Tab('confirmation', pgettext('tab', 'Confirmation'), 'award'): [
             Tab('confirmation', _('Confirmation exam')),
@@ -362,15 +379,9 @@ TAB_TREES = {
             Tab('jury', _('Jury composition')),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('history-all', _('All history')),
-            Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
             Tab('debug', _('Debug'), 'bug'),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
-        ],
-        # TODO Documents
     },
     CONTEXT_GENERAL: {
         Tab('checklist', _('Checklist'), 'list-check'): [
@@ -448,11 +459,6 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
         # Get the accessible sub tabs depending on the user permissions
         valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
 
-        # Checklist is available for submitted admissions only
-        if Tab('checklist') in valid_sub_tabs:
-            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE | STATUTS_PROPOSITION_CONTINUE_SOUMISE:
-                valid_sub_tabs.remove(Tab('checklist'))
-
         # Add dynamic badge for comments
         if parent_tab == Tab('comments'):
             from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL
@@ -520,8 +526,9 @@ def current_subtabs(context):
 
 def get_current_context(admission: Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]):
     if isinstance(admission, DoctorateAdmission):
-        if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
-            return CONTEXT_ADMISSION
+        # TODO doctorate refactorization
+        if admission.status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
+            return CONTEXT_DOCTORATE_AFTER_ENROLMENT
         return CONTEXT_DOCTORATE
     elif isinstance(admission, GeneralEducationAdmission):
         return CONTEXT_GENERAL
@@ -1333,6 +1340,13 @@ def experience_details_template(
 
         if with_edit_link_button and can_update_curriculum:
             if not experience.epc_experience:
+                res_context['duplicate_link_button'] = (
+                    reverse(
+                        'admission:general-education:update:curriculum:educational_duplicate',
+                        args=[resume_proposition.proposition.uuid, experience.uuid],
+                    )
+                    + next_url_suffix
+                )
                 res_context['edit_link_button'] = (
                     reverse(
                         'admission:general-education:update:curriculum:educational',
@@ -1349,19 +1363,10 @@ def experience_details_template(
                 )
 
             elif context['admission'].noma_candidat:
-                res_context['edit_link_button'] = resolve_url(
-                    'edit-experience-academique-view',
+                res_context['curex_link_button'] = resolve_url(
+                    'parcours-externe-view',
                     noma=context['admission'].noma_candidat,
-                    experience_uuid=experience.annees[0].uuid,
                 )
-
-            res_context['duplicate_link_button'] = (
-                reverse(
-                    'admission:general-education:update:curriculum:educational_duplicate',
-                    args=[resume_proposition.proposition.uuid, experience.uuid],
-                )
-                + next_url_suffix
-            )
 
         res_context.update(get_educational_experience_context(resume_proposition, experience))
 
@@ -1484,13 +1489,12 @@ def checklist_experience_action_links_context(
         and experience.derniere_annee == current_year
     ):
         if experience.__class__ == ExperienceAcademiqueDTO:
-            result_context['duplicate_url'] = resolve_url(
-                f'{base_namespace}:update:curriculum:educational_duplicate',
-                uuid=proposition_uuid_str,
-                experience_uuid=experience.uuid,
-            )
-
             if not experience.epc_experience:
+                result_context['duplicate_url'] = resolve_url(
+                    f'{base_namespace}:update:curriculum:educational_duplicate',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                )
                 result_context['update_url'] = (
                     resolve_url(
                         f'{base_namespace}:update:curriculum:educational',
@@ -1508,10 +1512,9 @@ def checklist_experience_action_links_context(
                     + next_url_suffix
                 )
             elif context['admission'].noma_candidat:
-                result_context['update_url'] = resolve_url(
-                    'edit-experience-academique-view',
+                result_context['curex_url'] = resolve_url(
+                    'parcours-externe-view',
                     noma=context['admission'].noma_candidat,
-                    experience_uuid=experience.annees[0].uuid,
                 )
 
         elif experience.__class__ == ExperienceNonAcademiqueDTO:
@@ -1759,6 +1762,7 @@ def digit_error_description(error_code):
         "RSTARTDATE0002": "La date de début est d'un format incorrect",
         "RSTOPDATE0001": "La date de début est null",
         "RSTOPDATE0002": "La date de début est d'un format incorrect",
+        "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible"
     }
 
     return error_mapping[error_code]

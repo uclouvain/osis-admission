@@ -33,4 +33,4 @@ def recuperer_statut_ticket_personne_de_digit(
     cmd: 'RetrieveAndStoreStatutTicketPersonneFromDigitCommand',
     digit_repository: 'IDigitRepository',
 ) -> Optional[str]:
-    return digit_repository.retrieve_person_ticket_status_from_digit(global_id=cmd.global_id)
+    return digit_repository.retrieve_person_ticket_status_from_digit(ticket_uuid=cmd.ticket_uuid)

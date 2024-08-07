@@ -33,7 +33,7 @@ from django.db.models import QuerySet
 from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import resolve_url, redirect, render
+from django.shortcuts import resolve_url, redirect
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
 from django.utils import translation, timezone
@@ -44,6 +44,7 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -118,7 +119,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverInscriptionTardiveParFaculteCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
     SpecifierDerogationFinancabiliteCommand,
-    NotifierCandidatDerogationFinancabiliteCommand,
+    NotifierCandidatDerogationFinancabiliteCommand, SpecifierFinancabiliteNonConcerneeCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -208,6 +209,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeStatus
 from base.models.student import Student
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
@@ -216,7 +218,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParco
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -248,6 +249,7 @@ __all__ = [
     'FinancabiliteApprovalSetRuleView',
     'FinancabiliteNotFinanceableSetRuleView',
     'FinancabiliteNotFinanceableView',
+    'FinancabiliteNotConcernedView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
     'SicApprovalDecisionView',
@@ -302,6 +304,20 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             )
             if has_comment:
                 checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
+
+        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
+        if person_merge_proposal and (
+                person_merge_proposal.status not in
+                [
+                    PersonMergeStatus.NO_MATCH.name,
+                    PersonMergeStatus.MERGED.name,
+                    PersonMergeStatus.REFUSED.name
+                ] or not person_merge_proposal.validation.get('valid', True)
+        ):
+            # Cas display warning when quarantaine
+            # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
+            checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
+
 
         if self.proposition.type == TypeDemande.INSCRIPTION.name and self.proposition.est_inscription_tardive:
             checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
@@ -1653,8 +1669,8 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
         return super().get(request, *args, **kwargs)
 
 
-def get_internal_experiences(noma: str) -> List[ExperienceParcoursInterneDTO]:
-    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(noma=noma))
+def get_internal_experiences(matricule_candidat: str) -> List[ExperienceParcoursInterneDTO]:
+    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(matricule=matricule_candidat))
 
 
 class ApplicationFeesView(
@@ -1850,9 +1866,9 @@ class PastExperiencesAccessTitleView(
                 title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name
                 for title in access_titles.values()
             ):
-                student = Student.objects.filter(person=self.admission.candidate).only('registration_id').first()
-                if student:
-                    internal_experiences = get_internal_experiences(noma=student.registration_id)
+                internal_experiences = get_internal_experiences(
+                    matricule_candidat=command_result.proposition.matricule_candidat,
+                )
 
             context['selected_access_titles_names'] = get_access_titles_names(
                 access_titles=access_titles,
@@ -2119,10 +2135,12 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
 
         context['financabilite_show_verdict_different_alert'] = (
             (
-                admission.checklist['current']['financabilite']['statut'] in {
+                admission.checklist['current']['financabilite']['statut']
+                in {
                     ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
                     ChoixStatutChecklist.GEST_REUSSITE.name,
-                } or (
+                }
+                or (
                     admission.checklist['current']['financabilite']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
                     and admission.checklist['current']['financabilite']['extra'].get('to_be_completed') == '0'
                 )
@@ -2241,9 +2259,9 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
             author=self.request.user.person,
         )
 
-        if status == 'GEST_BLOCAGE' and extra.get('to_be_completed') == '0':
-            admission.financability_rule_established_by = request.user.person
-            admission.save(update_fields=['financability_rule_established_by'])
+        admission.financability_rule = ''
+        admission.financability_rule_established_by = None
+        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
 
         return HttpResponseClientRefresh()
 
@@ -2333,6 +2351,23 @@ class FinancabiliteNotFinanceableView(HtmxPermissionRequiredMixin, Financabilite
             )
         )
 
+        return HttpResponseClientRefresh()
+
+
+class FinancabiliteNotConcernedView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, View):
+    urlpatterns = {'financability-not-concerned': 'financability-checklist-not-concerned'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteNonConcerneeCommand(
+                uuid_proposition=self.admission_uuid,
+                etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
         return HttpResponseClientRefresh()
 
 
@@ -2608,7 +2643,7 @@ class ChecklistView(
 
     @cached_property
     def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
-        return get_internal_experiences(noma=self.proposition.noma_candidat)
+        return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
@@ -2845,8 +2880,9 @@ class ChecklistView(
                 context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
                     authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
                 )
-                context['authentication_forms'][experience_uuid] = SinglePastExperienceAuthenticationForm(
-                    experience_checklist_info,
+                context['authentication_forms'].setdefault(
+                    experience_uuid,
+                    SinglePastExperienceAuthenticationForm(experience_checklist_info),
                 )
                 context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
                 context['checklist_tabs'][tab_identifier] = truncatechars(current_experience.titre_formate, 50)
