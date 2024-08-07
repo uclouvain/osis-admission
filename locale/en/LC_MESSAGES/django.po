@@ -560,9 +560,6 @@ msgstr ""
 msgid "Admission context"
 msgstr ""
 
-msgid "Admission date"
-msgstr ""
-
 msgid "Admission export"
 msgstr ""
 
@@ -598,6 +595,10 @@ msgstr ""
 msgid "Admission to regulated professions"
 msgstr ""
 
+msgid "Admission type"
+msgstr ""
+
+msgctxt "doctorate-filter"
 msgid "Admission type"
 msgstr ""
 
@@ -1142,6 +1143,10 @@ msgstr ""
 msgid "CDD opinion"
 msgstr ""
 
+msgid "CDD:"
+msgstr ""
+
+msgctxt "admission"
 msgid "CDD status"
 msgstr ""
 
@@ -1994,6 +1999,10 @@ msgctxt "admission"
 msgid "Course units"
 msgstr ""
 
+msgctxt "admission"
+msgid "Courses"
+msgstr ""
+
 msgid "Courses taken"
 msgstr ""
 
@@ -2382,9 +2391,11 @@ msgstr ""
 msgid "Doctor"
 msgstr ""
 
-msgid "Doctoral student:"
+msgid "Doctoral commissions"
 msgstr ""
 
+msgid "Doctoral student:"
+msgstr ""
 
 msgid "Doctorate admission"
 msgstr ""
@@ -2466,9 +2477,6 @@ msgstr ""
 msgid "Dossier"
 msgstr ""
 
-msgid "Dossier confirmation"
-msgstr ""
-
 msgid "Dossier not found."
 msgstr ""
 
@@ -2479,6 +2487,13 @@ msgid "Dossier reference:"
 msgstr ""
 
 msgid "Dossier status"
+msgstr ""
+
+msgctxt "doctorate-header-list"
+msgid "Dossier status"
+msgstr ""
+
+msgid "Dossier submission date"
 msgstr ""
 
 msgid "Double degree:"
@@ -2893,6 +2908,9 @@ msgid "FWB equivalent course"
 msgstr ""
 
 msgid "Fac approval"
+msgstr ""
+
+msgid "Fac decision"
 msgstr ""
 
 msgctxt "ways_hear_about_training"
@@ -3955,6 +3973,9 @@ msgid "Last modification (author)"
 msgstr ""
 
 msgid "Last name"
+msgstr ""
+
+msgid "Last name / First name"
 msgstr ""
 
 msgid "Last name / First name / Email"
@@ -5351,7 +5372,7 @@ msgstr ""
 msgid "Poster"
 msgstr ""
 
-msgid "Pre-admission date"
+msgid "Pre-admission"
 msgstr ""
 
 msgid "Pre-admission submission date"
@@ -6021,7 +6042,7 @@ msgstr ""
 msgid "SIC comment for the faculty"
 msgstr ""
 
-msgid "SIC status"
+msgid "SIC decision"
 msgstr ""
 
 msgid "SIGNING_IN_PROGRESS"
@@ -6065,6 +6086,10 @@ msgid "Scholarship"
 msgstr ""
 
 msgctxt "admission model"
+msgid "Scholarship"
+msgstr ""
+
+msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr ""
 
@@ -6411,6 +6436,10 @@ msgstr ""
 msgid "Submission date"
 msgstr ""
 
+msgctxt "doctorate-header-list"
+msgid "Submission date"
+msgstr ""
+
 msgid "Submission date:"
 msgstr ""
 
@@ -6430,7 +6459,13 @@ msgstr ""
 msgid "Submitted for publication"
 msgstr ""
 
+msgid "Submitted from"
+msgstr ""
+
 msgid "Submitted profile"
+msgstr ""
+
+msgid "Submitted until"
 msgstr ""
 
 msgid ""
@@ -6459,6 +6494,10 @@ msgstr ""
 msgid "Supervision group not found."
 msgstr ""
 
+msgid "Supervisor"
+msgstr ""
+
+msgctxt "gender"
 msgid "Supervisor"
 msgstr ""
 

@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -27,42 +27,32 @@
 
 {% block form_fields %}
   <div class="row">
+    {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.numero form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.matricule_candidat form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.type form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.etats form_group_class="form-group col-md-3" %}
   </div>
   <div class="row">
+    {% bootstrap_field filter_form.type form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.cdds form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.commission_proximite form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-3" %}
   </div>
   <div class="row">
     {% bootstrap_field filter_form.matricule_promoteur form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.cotutelle form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.type_financement form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.type_contrat_travail form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-3" %}
   </div>
   <div class="row">
+    {% bootstrap_field filter_form.cotutelle form_group_class="form-group col-md-3" %}
     <div class="col-md-3">
       <fieldset class="panel panel-default">
-        <legend>{% trans "Pre-admission date" %}</legend>
-        {% bootstrap_field filter_form.date_pre_admission_debut form_group_class="form-group col-md-6" %}
-        {% bootstrap_field filter_form.date_pre_admission_fin form_group_class="form-group col-md-6" %}
+        <legend>{% translate "Dossier submission date" %}</legend>
+        {% bootstrap_field filter_form.date_soumission_debut form_group_class="form-group col-md-6" %}
+        {% bootstrap_field filter_form.date_soumission_fin form_group_class="form-group col-md-6" %}
       </fieldset>
     </div>
-
-    <div class="col-md-3">
-      <fieldset class="panel panel-default">
-        <legend>{% trans "Admission date" %}</legend>
-        {% bootstrap_field filter_form.date_admission_debut form_group_class="form-group col-md-6" %}
-        {% bootstrap_field filter_form.date_admission_fin form_group_class="form-group col-md-6" %}
-      </fieldset>
-    </div>
-    {% bootstrap_field filter_form.etat_cdd form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.etat_sic form_group_class="form-group col-md-3" %}
   </div>
 {% endblock %}
 
@@ -74,12 +64,20 @@
   <script>
       $(document).ready(function () {
           // Display / hide inputs depending on the values of other inputs
-          $('#id_type_contrat_travail').closest('.form-group').dependsOn({
-              '#id_type_financement': { values: ['WORK_CONTRACT'] },
-          }, { duration: 0, valueOnDisable: '', });
           $('#id_bourse_recherche').closest('.form-group').dependsOn({
               '#id_type_financement': { values: ['SEARCH_SCHOLARSHIP'] },
           }, { duration: 0, valueOnDisable: '', });
+
+          const $reference = $('#id_numero');
+          $reference.mask(getReferenceMask($reference.val()), {
+              translation: {
+                  'S': { pattern: /[a-zA-Z]/, optional: true },
+              },
+              onKeyPress: function (cep, e, field, options) {
+                  $reference.mask(getReferenceMask(cep), options);
+              },
+          });
+
       });
   </script>
 

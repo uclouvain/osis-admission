@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
+from .lister_demandes_service import lister_demandes
 from .lister_propositions_candidat_service import lister_propositions_candidat
 from .lister_propositions_supervisees_service import lister_propositions_supervisees
 from .rechercher_doctorats_service import rechercher_doctorats

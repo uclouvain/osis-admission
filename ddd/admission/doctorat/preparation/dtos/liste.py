@@ -23,23 +23,52 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery
-from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from admission.views.list import BaseAdmissionList
+import datetime
+from typing import Optional
 
-__all__ = [
-    "DoctorateAdmissionList",
-]
+import attr
+
+from osis_common.ddd import interface
 
 
-class DoctorateAdmissionList(BaseAdmissionList):
-    template_name = 'admission/doctorate/cdd/list.html'
-    htmx_template_name = 'admission/doctorate/cdd/list_block.html'
-    permission_required = 'admission.view_doctorate_enrolment_applications'
-    filtering_query_class = ListerDemandesQuery
-    form_class = DoctorateListFilterForm
+@attr.dataclass(frozen=True, slots=True)
+class DemandeRechercheDTO(interface.DTO):
+    uuid: str
+    numero_demande: str
+    etat_demande: str
 
-    def additional_command_kwargs(self):
-        return {
-            'demandeur': self.request.user.person.uuid,
-        }
+    nom_candidat: str
+    prenom_candidat: str
+    sigle_formation: str
+    code_formation: str
+    intitule_formation: str
+
+    decision_fac: str
+    decision_sic: str
+
+    date_confirmation: Optional[datetime.datetime]
+
+    derniere_modification_le: datetime.datetime
+    type_admission: str
+
+    cotutelle: Optional[bool]
+
+    code_pays_nationalite_candidat: str = ''
+    nom_pays_nationalite_candidat: str = ''
+
+    code_bourse: str = ''
+
+    prenom_auteur_derniere_modification: str = ''
+    nom_auteur_derniere_modification: str = ''
+
+    @property
+    def formation(self) -> str:
+        return f'{self.sigle_formation} - {self.intitule_formation}'
+
+    @property
+    def candidat(self) -> str:
+        return f'{self.nom_candidat}, {self.prenom_candidat}'
+
+    @property
+    def derniere_modification_par(self) -> str:
+        return f'{self.nom_auteur_derniere_modification}, {self.prenom_auteur_derniere_modification[:1]}'
