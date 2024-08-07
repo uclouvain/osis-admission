@@ -98,7 +98,7 @@ class InjectionEPCSignaletique:
         fusion = PersonMergeProposal.objects.filter(original_person=candidat).first()
         return {
             'noma': fusion.registration_id_sent_to_digit if fusion else '',
-            'email': candidat.email,
+            'email': candidat.private_email,
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
             'prenom_suivant': candidat.middle_name,
