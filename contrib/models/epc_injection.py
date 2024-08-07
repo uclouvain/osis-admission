@@ -29,7 +29,12 @@ from django.db import models
 from django.utils.html import format_html
 
 from base.models.utils.utils import ChoiceEnum
-from osis_profile.models.epc_injection import TECHNICAL_ERRORS
+from osis_profile.models.epc_injection import TECHNICAL_ERRORS as CUREX_TECHNICAL_ERRORS
+
+TECHNICAL_ERRORS = CUREX_TECHNICAL_ERRORS + [
+    'MISSING_REQUIRED_OBJECT',
+    'INVALID_BIRTHDATE',
+]
 
 
 class EPCInjectionStatus(ChoiceEnum):

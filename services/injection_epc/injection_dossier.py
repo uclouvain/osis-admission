@@ -216,6 +216,7 @@ class InjectionEPCAdmission:
         adresses = candidat.personaddress_set.select_related("country")
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
+        admission_generale = getattr(admission, 'generaleducationadmission', None)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -236,7 +237,9 @@ class InjectionEPCAdmission:
             "inscription_offre": cls._get_inscription_offre(admission=admission),
             "donnees_comptables": cls._get_donnees_comptables(admission=admission),
             "adresses": cls._get_adresses(adresses=adresses),
-            "documents": InjectionEPCCurriculum._recuperer_documents(admission),
+            "documents": (
+                InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else []
+            ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
 
@@ -284,7 +287,7 @@ class InjectionEPCAdmission:
             type_document = parties_type_document[1]
         elif cls.__est_uuid_valide(parties_type_document[-1]):
             # type_document_compose = ONGLET.TYPE_DOCUMENT.uuid (Questions spécifiques)
-            _, type_document, uuid_question = parties_type_document[1]
+            _, type_document, uuid_question = parties_type_document
         elif len(parties_type_document) == 3:
             # type_document_compose = ONGLET.uuid.TYPE_DOCUMENT
             _, uuid_experience, type_document = parties_type_document
@@ -357,14 +360,15 @@ class InjectionEPCAdmission:
                 .select_related("academic_year")
                 .order_by("academic_year")
             )  # type: QuerySet[EducationalExperienceYear]
-
+            exp = []
             for experience_educative_annualisee in experiences_educatives_annualisees:
                 data_annuelle = InjectionEPCCurriculum._build_data_annuelle(
                     experience_educative,
                     experience_educative_annualisee,
                 )
-                experiences.append(data_annuelle)
-
+                exp.append(data_annuelle)
+            exp[-1].update({'diplome': experience_educative.obtained_diploma})
+            experiences += exp
         return experiences
 
     @classmethod

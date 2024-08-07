@@ -523,6 +523,13 @@ class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteNonConcerneeCommand(interface.CommandRequest):
+    uuid_proposition: str
+    etabli_par: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierDerogationFinancabiliteCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str
