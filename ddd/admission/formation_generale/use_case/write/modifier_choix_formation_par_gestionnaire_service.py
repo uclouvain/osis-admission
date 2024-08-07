@@ -62,6 +62,9 @@ def modifier_choix_formation_par_gestionnaire(
     # THEN
     proposition_repository.save(proposition)
     message_bus.publish(
-        FormationDuDossierAdmissionModifieeEvent(entity_id=proposition.entity_id)
+        FormationDuDossierAdmissionModifieeEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
     )
     return proposition.entity_id

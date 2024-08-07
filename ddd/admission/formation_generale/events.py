@@ -74,6 +74,7 @@ class AdmissionApprouveeParSicEvent(Event):
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class FormationDuDossierAdmissionModifieeEvent(Event):
     entity_id: 'PropositionIdentity'
+    matricule: str
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
