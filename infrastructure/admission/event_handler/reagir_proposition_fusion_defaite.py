@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,23 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import DefairePropositionFusionCommand
-from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
+from typing import Any, Union
+
 from admission.ddd.admission.events import PropositionFusionDefaiteEvent
-from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 
 
-def defaire_proposition_fusion_personne(
-    message_bus,
-    cmd: 'DefairePropositionFusionCommand',
-    proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
-) -> PropositionFusionPersonneIdentity:
-    proposition_fusion_personne_identity = proposition_fusion_personne_repository.defaire(global_id=cmd.global_id)
-
-    message_bus.publish(
-        PropositionFusionDefaiteEvent(
-            entity_id=proposition_fusion_personne_identity,
-            matricule=cmd.global_id,
-        )
+def validation_digit(
+    msg_bus: Any,
+    event: Union['PropositionFusionDefaiteEvent'],
+) -> None:
+    from admission.ddd.admission.commands import ValiderTicketPersonneCommand
+    msg_bus.invoke(
+        ValiderTicketPersonneCommand(global_id=event.matricule)
     )
-    return proposition_fusion_personne_identity
