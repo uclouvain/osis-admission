@@ -34,6 +34,7 @@ from admission.auth.predicates.common import (
     is_debug,
     is_entity_manager,
     is_sent_to_epc,
+    pending_digit_ticket_response,
 )
 from admission.auth.predicates import general, continuing, doctorate
 from education_group.auth.scope import Scope
@@ -72,10 +73,12 @@ class CentralManager(EntityRoleModel):
             'admission.appose_sic_notice': is_entity_manager,
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc
+                                                 & ~pending_digit_ticket_response,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc
+                                                      & ~pending_digit_ticket_response,
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc,

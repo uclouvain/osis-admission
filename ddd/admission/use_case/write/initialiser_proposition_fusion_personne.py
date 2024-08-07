@@ -44,6 +44,7 @@ def initialiser_proposition_fusion_personne(
         lieu_naissance=cmd.lieu_naissance,
         email=cmd.email,
         genre=cmd.genre,
+        sex=cmd.sex,
         etat_civil=cmd.etat_civil,
         nationalite=cmd.nationalite,
         numero_national=cmd.numero_national,

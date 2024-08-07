@@ -1,3 +1,7 @@
+
+
+
+
 # ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
@@ -23,16 +27,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 from typing import Any, Union
 
-from admission.ddd.admission.events import PropositionFusionDefaiteEvent
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, ValiderTicketPersonneCommand, \
+    SoumettreTicketPersonneCommand, DefairePropositionFusionCommand
+from admission.ddd.admission.formation_generale.events import DonneesIdentificationCandidatModifiee, \
+    CoordonneesCandidatModifiees
+from osis_common.ddd.interface import BusinessException
 
 
-def validation_digit(
+def process(
     msg_bus: Any,
-    event: Union['PropositionFusionDefaiteEvent'],
+    event: Union[DonneesIdentificationCandidatModifiee, CoordonneesCandidatModifiees],
 ) -> None:
-    from admission.ddd.admission.commands import ValiderTicketPersonneCommand
-    msg_bus.invoke(
-        ValiderTicketPersonneCommand(global_id=event.matricule)
-    )
+    with contextlib.suppress(BusinessException):
+        msg_bus.invoke(DefairePropositionFusionCommand(global_id=event.matricule))
+        msg_bus.invoke(RechercherCompteExistantCommand(matricule=event.matricule))
+        msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
+        msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))

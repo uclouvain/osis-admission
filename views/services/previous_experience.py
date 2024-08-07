@@ -118,7 +118,7 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
     def get_secondary_school_or_alternative_experiences(self):
         secondary_school_or_alternative_experiences = [
             SimpleNamespace(
-                uuid=self.etudes_secondaires_candidat.experience.uuid,
+                uuid=self.etudes_secondaires_candidat.uuid,
                 annees=self.etudes_secondaires_candidat.annee_diplome_etudes_secondaires,
                 nom_formation=self._get_nom_formation_etude_secondaire(self.etudes_secondaires_candidat),
                 nom_institut=self._get_nom_institut_etude_secondaire(self.etudes_secondaires_candidat),
@@ -131,7 +131,7 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
         if self.etudes_secondaires_personne_connue:
             secondary_school_or_alternative_experiences.append(
                 SimpleNamespace(
-                    uuid=self.etudes_secondaires_personne_connue.experience.uuid,
+                    uuid=self.etudes_secondaires_personne_connue.uuid,
                     annees=self.etudes_secondaires_personne_connue.annee_diplome_etudes_secondaires,
                     nom_formation=self._get_nom_formation_etude_secondaire(self.etudes_secondaires_personne_connue),
                     nom_institut=self._get_nom_institut_etude_secondaire(self.etudes_secondaires_personne_connue),
