@@ -15,7 +15,7 @@ def remove_cdd_submission_mail_template(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0201_auto_20240711_1205'),
+        ('admission', '0213_doctoral_project_new_fields'),
     ]
 
     operations = [
