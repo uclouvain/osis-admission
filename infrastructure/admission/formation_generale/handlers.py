@@ -66,6 +66,8 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import \
+    specifier_financabilite_non_concernee
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -601,6 +603,10 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
     ),
     SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    SpecifierFinancabiliteNonConcerneeCommand: lambda msg_bus, cmd: specifier_financabilite_non_concernee(
         cmd,
         proposition_repository=PropositionRepository(),
     ),

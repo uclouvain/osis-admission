@@ -216,6 +216,7 @@ class InjectionEPCAdmission:
         adresses = candidat.personaddress_set.select_related("country")
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
+        admission_generale = getattr(admission, 'generaleducationadmission', None)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -236,7 +237,9 @@ class InjectionEPCAdmission:
             "inscription_offre": cls._get_inscription_offre(admission=admission),
             "donnees_comptables": cls._get_donnees_comptables(admission=admission),
             "adresses": cls._get_adresses(adresses=adresses),
-            "documents": InjectionEPCCurriculum._recuperer_documents(admission),
+            "documents": (
+                InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else []
+            ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
 
