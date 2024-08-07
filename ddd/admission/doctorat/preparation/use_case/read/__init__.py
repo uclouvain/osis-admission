@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
+from .lister_demandes_service import lister_demandes
 from .lister_propositions_candidat_service import lister_propositions_candidat
 from .lister_propositions_supervisees_service import lister_propositions_supervisees
 from .rechercher_doctorats_service import rechercher_doctorats
@@ -33,6 +34,7 @@ from .recuperer_documents_proposition_service import recuperer_documents_proposi
 from .recuperer_documents_reclames_proposition_service import recuperer_documents_reclames_proposition
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
+from .recuperer_proposition_gestionnaire_service import recuperer_proposition_gestionnaire
 from .recuperer_proposition_service import recuperer_proposition
 from .recuperer_resume_proposition_service import recuperer_resume_proposition
 from .verifier_curriculum_service import verifier_curriculum

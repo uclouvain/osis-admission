@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import (
     DoctoratCLSMFactory,
     _DoctoratDTOFactory,
 )
+from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import DoctoratEtendu
 
 
 class DoctoratInMemoryTranslator(IDoctoratTranslator):
@@ -43,7 +44,11 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         DoctoratCDEFactory(
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
-            campus='Mons',
+            campus='Louvain-la-Neuve',
+            campus_inscription='Louvain-la-Neuve',
+            code_secteur='SSH',
+            intitule='Doctorat en sciences économiques et de gestion',
+            intitule_secteur='Secteur des sciences humaines',
         ),
         DoctoratCLSMFactory(
             entity_id__sigle='ECGM3DP',
@@ -58,12 +63,20 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         DoctoratCDSCFactory(
             entity_id__sigle='SC3DP',
             entity_id__annee=2020,
-            campus='Mons',
+            campus='Louvain-la-Neuve',
+            campus_inscription='Louvain-la-Neuve',
+            code_secteur='SST',
+            intitule='Doctorat en sciences',
+            intitule_secteur='Secteur des sciences et technologies',
         ),
         DoctoratCDSSDPFactory(
             entity_id__sigle='ESP3DP',
             entity_id__annee=2020,
-            campus='Louvain-la-Neuve',
+            campus='Mons',
+            campus_inscription='Mons',
+            code_secteur='SSS',
+            intitule='Doctorat en sciences de la santé publique',
+            intitule_secteur='Secteur des sciences de la santé',
         ),
         DoctoratCDSSDPFactory(
             entity_id__sigle='AGRO3DP',
@@ -77,8 +90,18 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         "SSS": ['ESP3DP'],
     }
 
+    secteurs_par_doctorat = {
+        doctorate: sector for sector, doctorates in sector_doctorates_mapping.items() for doctorate in doctorates
+    }
+
+    intitules_secteurs = {
+        'SST': 'Secteur des sciences et technologies',
+        'SSH': 'Secteur des sciences humaines',
+        'SSS': 'Secteur des sciences de la santé',
+    }
+
     @classmethod
-    def get(cls, sigle: str, annee: int) -> 'Doctorat':
+    def get(cls, sigle: str, annee: int) -> 'DoctoratEtendu':
         try:
             return next(doc for doc in cls.doctorats if doc.entity_id.sigle == sigle and doc.entity_id.annee == annee)
         except StopIteration:
@@ -91,6 +114,10 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             sigle=doctorate.entity_id.sigle,
             annee=doctorate.entity_id.annee,
             sigle_entite_gestion=doctorate.entite_ucl_id.code,
+            intitule=doctorate.intitule,
+            campus=doctorate.campus,
+            type=doctorate.type,
+            campus_inscription=doctorate.campus_inscription,
         )
 
     @classmethod

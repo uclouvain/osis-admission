@@ -42,16 +42,25 @@ from osis_async.models.enums import TaskState
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
+from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
+    ChoixCommissionProximiteCDSS,
+    ChoixTypeFinancement,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO as DemandeDoctoraleRechercheDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery
+from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     OngletsChecklist,
 )
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -60,8 +69,14 @@ from admission.tests.factories.scholarship import (
     InternationalScholarshipFactory,
     DoubleDegreeScholarshipFactory,
     ErasmusMundusScholarshipFactory,
+    DoctorateScholarshipFactory,
 )
-from admission.views.excel_exports import AdmissionListExcelExportView, ContinuingAdmissionListExcelExportView
+from admission.tests.factories.supervision import PromoterFactory
+from admission.views.excel_exports import (
+    AdmissionListExcelExportView,
+    ContinuingAdmissionListExcelExportView,
+    DoctorateAdmissionListExcelExportView,
+)
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
@@ -618,7 +633,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         header = view.get_header()
 
         results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
-            ListerDemandesQuery(numero=self.admission.reference)
+            ListerDemandesContinuesQuery(numero=self.admission.reference)
         )
 
         self.assertEqual(len(results), 1)
@@ -651,7 +666,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.admission.save()
 
         results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
-            ListerDemandesQuery(numero=self.admission.reference)
+            ListerDemandesContinuesQuery(numero=self.admission.reference)
         )
 
         self.assertEqual(len(results), 1)
@@ -668,7 +683,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.admission.save()
 
         results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
-            ListerDemandesQuery(numero=self.admission.reference)
+            ListerDemandesContinuesQuery(numero=self.admission.reference)
         )
 
         self.assertEqual(len(results), 1)
@@ -744,9 +759,427 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(values[8], 'ENT')
         self.assertEqual(
             values[9],
-            f"['{TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.value}', '{TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.value}']",
+            f"['{TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.value}', "
+            f"'{TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.value}']",
         )
         self.assertEqual(values[10], f"['{self.admission.training.acronym}']")
         self.assertEqual(values[11], 'oui')
         self.assertEqual(values[12], 'non')
         self.assertEqual(values[13], 'oui')
+
+
+@freezegun.freeze_time('2023-01-03')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
+class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.factory = RequestFactory()
+
+        # Users
+        cls.user = User.objects.create_user(
+            username='john_doe',
+            password='top_secret',
+        )
+
+        cls.sic_management_user = SicManagementRoleFactory().person.user
+        cls.other_sic_manager = SicManagementRoleFactory().person
+
+        # Academic years
+        cls.academic_years = AcademicYearFactory.produce(base_year=2023, number_past=2, number_future=2)
+
+        # Entities
+        faculty_entity = EntityFactory()
+        EntityVersionFactory(
+            entity=faculty_entity,
+            acronym='ABCDEF',
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+        )
+
+        cls.first_entity = EntityFactory()
+        EntityVersionFactory(
+            entity=cls.first_entity,
+            acronym='GHIJK',
+            entity_type=EntityType.SCHOOL.name,
+            parent=faculty_entity,
+        )
+
+        cls.candidate = PersonFactory(
+            first_name="John",
+            last_name="Doe",
+            email='john.doe@example.be',
+        )
+        cls.student = StudentFactory(
+            person=cls.candidate,
+            registration_id='01234567',
+        )
+
+        cls.default_params = {
+            'annee_academique': 2022,
+            'taille_page': 10,
+            'demandeur': str(cls.sic_management_user.person.uuid),
+        }
+
+        # Targeted url
+        cls.url = reverse('admission:excel-exports:doctorate-admissions-list')
+        cls.list_url = reverse('admission:doctorate:cdd:list')
+
+    def test_export_user_without_person(self):
+        self.client.force_login(user=self.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_export_candidate_user(self):
+        self.client.force_login(user=self.candidate.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_export_sic_management_user(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self.client.get(self.url)
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        response = self.client.get(
+            self.url,
+            **{"HTTP_HX-Request": 'true'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_export_with_sic_management_user_without_filters_doesnt_plan_the_export(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self.client.get(self.url)
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNone(task)
+
+        export = Export.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNone(export)
+
+    def test_export_with_sic_management_user_with_filters_plans_the_export(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self.client.get(self.url, data=self.default_params)
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+        self.assertEqual(task.name, _('Admission applications export'))
+        self.assertEqual(task.description, _('Excel export of admission applications'))
+        self.assertEqual(task.state, TaskState.PENDING.name)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+        self.assertEqual(
+            export.called_from_class,
+            'admission.views.excel_exports.DoctorateAdmissionListExcelExportView',
+        )
+        self.assertEqual(export.file_name, 'export-des-demandes-dadmission')
+        self.assertEqual(export.type, ExportTypes.EXCEL.name)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
+
+    def test_export_with_sic_management_user_with_filters_and_asc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': 'numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
+        self.assertEqual(filters.get('tri_inverse'), False)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
+    def test_export_with_sic_management_user_with_filters_and_desc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': '-numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
+        self.assertEqual(filters.get('tri_inverse'), True)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
+    def test_export_content(self):
+        view = DoctorateAdmissionListExcelExportView()
+        header = view.get_header()
+
+        admission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            training__management_entity=self.first_entity,
+            training__acronym="ZEBU0",
+            training__education_group_type__name=TrainingType.PHD.name,
+            submitted_at=datetime.datetime(2023, 1, 1),
+            training__academic_year=self.academic_years[1],
+            determined_academic_year=self.academic_years[2],
+            modified_at=datetime.datetime(2023, 1, 3),
+            last_update_author=self.candidate,
+            cotutelle=None,
+            type=ChoixTypeAdmission.ADMISSION.name,
+        )
+
+        results: List[DemandeDoctoraleRechercheDTO] = message_bus_instance.invoke(
+            ListerDemandesDoctoralesQuery(numero=admission.reference)
+        )
+
+        self.assertEqual(len(results), 1)
+
+        result = results[0]
+
+        row_data = view.get_row_data(result)
+
+        self.assertEqual(len(header), len(row_data))
+
+        self.assertEqual(row_data[0], result.numero_demande)
+        self.assertEqual(row_data[1], f'{result.nom_candidat}, {result.prenom_candidat}')
+        self.assertEqual(row_data[2], result.nom_pays_nationalite_candidat)
+        self.assertEqual(row_data[3], result.code_bourse)
+        self.assertEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
+        self.assertEqual(row_data[5], ChoixStatutPropositionDoctorale.CONFIRMEE.value)
+        self.assertEqual(row_data[6], 'TODO')
+        self.assertEqual(row_data[7], 'TODO')
+        self.assertEqual(row_data[8], '2023/01/01')
+        self.assertEqual(row_data[9], '2023/01/03')
+        self.assertEqual(
+            row_data[10],
+            f'{result.nom_auteur_derniere_modification}, {result.prenom_auteur_derniere_modification[:1]}',
+        )
+        self.assertEqual(row_data[11], 'non')
+        self.assertEqual(row_data[12], '')
+
+        # Check specific values
+        admission.submitted_at = None
+        admission.type = ChoixTypeAdmission.PRE_ADMISSION.name
+        admission.cotutelle = True
+        admission.save(update_fields=['submitted_at', 'type', 'cotutelle'])
+
+        results: List[DemandeDoctoraleRechercheDTO] = message_bus_instance.invoke(
+            ListerDemandesDoctoralesQuery(numero=admission.reference)
+        )
+
+        self.assertEqual(len(results), 1)
+
+        result = results[0]
+
+        row_data = view.get_row_data(result)
+
+        self.assertEqual(len(header), len(row_data))
+
+        self.assertEqual(row_data[8], '')
+        self.assertEqual(row_data[11], 'oui')
+        self.assertEqual(row_data[12], 'oui')
+
+        admission.cotutelle = False
+        admission.save(update_fields=['cotutelle'])
+
+        results: List[DemandeDoctoraleRechercheDTO] = message_bus_instance.invoke(
+            ListerDemandesDoctoralesQuery(numero=admission.reference)
+        )
+
+        self.assertEqual(len(results), 1)
+
+        result = results[0]
+
+        row_data = view.get_row_data(result)
+
+        self.assertEqual(len(header), len(row_data))
+
+        self.assertEqual(row_data[12], 'non')
+
+    def test_export_configuration(self):
+        country = CountryFactory()
+        promoter = PromoterFactory()
+        scholarship = DoctorateScholarshipFactory()
+        admission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            training__management_entity=self.first_entity,
+            training__acronym="ZEBU0",
+            training__education_group_type__name=TrainingType.PHD.name,
+            submitted_at=datetime.datetime(2023, 1, 1),
+            training__academic_year=self.academic_years[1],
+            determined_academic_year=self.academic_years[2],
+            modified_at=datetime.datetime(2023, 1, 3),
+            last_update_author=self.candidate,
+            cotutelle=None,
+            type=ChoixTypeAdmission.ADMISSION.name,
+        )
+
+        filters = str(
+            {
+                'annee_academique': 2022,
+                'numero': admission.reference,
+                'matricule_candidat': admission.candidate.global_id,
+                'nationalite': country.iso_code,
+                'etats': [
+                    ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+                    ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+                ],
+                'type': ChoixTypeAdmission.ADMISSION.name,
+                'cdds': 'GHIJK',
+                'commission_proximite': ChoixCommissionProximiteCDSS.BCM.name,
+                'sigles_formations': ['ZEBU0'],
+                'matricule_promoteur': promoter.person.global_id,
+                'type_financement': ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
+                'bourse_recherche': str(scholarship.uuid),
+                'cotutelle': True,
+                'date_soumission_debut': '2020-01-01',
+                'date_soumission_fin': '2020-01-02',
+                'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
+                'filtres_etats_checklist': {},
+                'demandeur': str(self.sic_management_user.person.uuid),
+            }
+        )
+
+        view = DoctorateAdmissionListExcelExportView()
+        workbook = Workbook()
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_management_user.person,
+            filters=filters,
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+
+        self.assertEqual(len(names), 20)
+        self.assertEqual(len(values), 20)
+
+        # Check the names of the parameters
+        self.assertEqual(names[0], _('Creation date'))
+        self.assertEqual(names[1], pgettext('masculine', 'Created by'))
+        self.assertEqual(names[2], _('Description'))
+        self.assertEqual(names[3], _('Year'))
+        self.assertEqual(names[4], _('Application numero'))
+        self.assertEqual(names[5], _('Last name / First name / Email / NOMA'))
+        self.assertEqual(names[6], _('Nationality'))
+        self.assertEqual(names[7], _('Application status'))
+        self.assertEqual(names[8], pgettext('doctorate-filter', 'Admission type'))
+        self.assertEqual(names[9], _('Doctoral commissions'))
+        self.assertEqual(names[10], _('Proximity commission'))
+        self.assertEqual(names[11], pgettext('admission', 'Courses'))
+        self.assertEqual(names[12], pgettext('gender', 'Supervisor'))
+        self.assertEqual(names[13], _('Funding type'))
+        self.assertEqual(names[14], _('Research scholarship'))
+        self.assertEqual(names[15], _('Cotutelle'))
+        self.assertEqual(names[16], _('Submitted from'))
+        self.assertEqual(names[17], _('Submitted until'))
+        self.assertEqual(names[18], _('Include or exclude the checklist filters'))
+        self.assertEqual(names[19], _('Checklist filters'))
+
+        # Check the values of the parameters
+        self.assertEqual(values[0], '3 Janvier 2023')
+        self.assertEqual(values[1], self.sic_management_user.person.full_name)
+        self.assertEqual(values[2], _('Export') + ' - Admissions')
+        self.assertEqual(values[3], '2022')
+        self.assertEqual(values[4], str(admission.reference))
+        self.assertEqual(values[5], admission.candidate.full_name)
+        self.assertEqual(values[6], country.name)
+        self.assertEqual(
+            values[7],
+            f"['{ChoixStatutPropositionDoctorale.EN_BROUILLON.value}', "
+            f"'{ChoixStatutPropositionDoctorale.CONFIRMEE.value}']",
+        )
+        self.assertEqual(values[8], ChoixTypeAdmission.ADMISSION.value)
+        self.assertEqual(values[9], 'GHIJK')
+        self.assertEqual(values[10], ChoixCommissionProximiteCDSS.BCM.value)
+        self.assertEqual(values[11], "['ZEBU0']")
+        self.assertEqual(values[12], promoter.person.full_name)
+        self.assertEqual(values[13], ChoixTypeFinancement.SEARCH_SCHOLARSHIP.value)
+        self.assertEqual(values[14], scholarship.short_name)
+        self.assertEqual(values[15], 'oui')
+        self.assertEqual(values[16], '2020-01-01')
+        self.assertEqual(values[17], '2020-01-02')
+        self.assertEqual(values[18], ModeFiltrageChecklist.INCLUSION.value)
+        self.assertEqual(values[19], '{}')
+
+        filters = str(
+            {
+                'annee_academique': 2022,
+                'numero': '',
+                'matricule_candidat': '',
+                'nationalite': '',
+                'etats': [],
+                'type': '',
+                'cdds': '',
+                'commission_proximite': '',
+                'sigles_formations': [],
+                'matricule_promoteur': '',
+                'type_financement': '',
+                'bourse_recherche': '',
+                'cotutelle': None,
+                'date_soumission_debut': '',
+                'date_soumission_fin': '',
+                'mode_filtres_etats_checklist': '',
+                'filtres_etats_checklist': {},
+                'demandeur': str(self.sic_management_user.person.uuid),
+            }
+        )
+
+        view = DoctorateAdmissionListExcelExportView()
+        workbook = Workbook()
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_management_user.person,
+            filters=filters,
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+
+        self.assertEqual(len(names), 20)
+        self.assertEqual(len(values), 20)
+
+        # Check the values of the parameters
+        self.assertEqual(values[0], '3 Janvier 2023')
+        self.assertEqual(values[1], self.sic_management_user.person.full_name)
+        self.assertEqual(values[2], _('Export') + ' - Admissions')
+        self.assertEqual(values[3], '2022')
+        self.assertEqual(values[4], '')
+        self.assertEqual(values[5], '')
+        self.assertEqual(values[6], '')
+        self.assertEqual(values[7], '[]')
+        self.assertEqual(values[8], '')
+        self.assertEqual(values[9], '')
+        self.assertEqual(values[10], '')
+        self.assertEqual(values[11], '[]')
+        self.assertEqual(values[12], '')
+        self.assertEqual(values[13], '')
+        self.assertEqual(values[14], '')
+        self.assertEqual(values[15], '')
+        self.assertEqual(values[16], '')
+        self.assertEqual(values[17], '')
+        self.assertEqual(values[18], '')
+        self.assertEqual(values[19], '{}')

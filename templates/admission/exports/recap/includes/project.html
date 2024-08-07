@@ -55,6 +55,8 @@
     {% endif %}
     {% field_data _("Estimated time to complete the PhD (in months)") proposition.duree_prevue|default_if_none:'' %}
     {% field_data allocated_time_label proposition.temps_consacre|default_if_none:'' %}
+    {% field_data _("Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?") proposition.est_lie_fnrs_fria_fresh_csc %}
+    {% field_data _("Comment") proposition.commentaire_financement|linebreaks %}
   {% endif %}
 {% endpanel %}
 
@@ -76,7 +78,12 @@
 
 {% endpanel %}
 
-{% panel _("Previous research experience") %}
+{% panel _("PhD research experience") %}
+  {% field_data _("Has your PhD project already started?") proposition.projet_doctoral_deja_commence %}
+  {% if proposition.projet_doctoral_deja_commence %}
+    {% field_data _("Institution") proposition.projet_doctoral_institution %}
+    {% field_data _("Work start date") proposition.projet_doctoral_date_debut %}
+  {% endif %}
   {% field_data _("Have you previously enrolled for a PhD?") proposition.doctorat_deja_realise|enum_display:'ChoixDoctoratDejaRealise' %}
   {% if proposition.doctorat_deja_realise != "NO" %}
     {% field_data _("Institution") proposition.institution %}

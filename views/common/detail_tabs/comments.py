@@ -33,9 +33,11 @@ from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as ProgramManagerAdmission
 from admission.auth.roles.sic_management import SicManagement
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery, RecupererEtudesSecondairesQuery
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import OngletsChecklist as DoctoratOngletsChecklist
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as ContinueOngletsChecklist
-from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as GeneralOngletsChecklist
 from admission.views.common.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
@@ -77,29 +79,40 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
         context['COMMENT_TAG_FAC'] = f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}'
         context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
 
-        if self.is_general:
+        if self.is_general or self.is_doctorate:
             context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS
-            context['checklist_tags'] = GeneralOngletsChecklist.choices_except(
-                GeneralOngletsChecklist.experiences_parcours_anterieur
+
+            context['checklist_tags'] = (
+                DoctoratOngletsChecklist.choices_except(DoctoratOngletsChecklist.experiences_parcours_anterieur)
+                if self.is_doctorate
+                else GeneralOngletsChecklist.choices_except(GeneralOngletsChecklist.experiences_parcours_anterieur)
             )
 
             # Get the names of every experience
-            proposition_resume: ResumePropositionDTO = message_bus_instance.invoke(
-                RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
+            curriculum: CurriculumAdmissionDTO = message_bus_instance.invoke(
+                RechercherParcoursAnterieurQuery(
+                    global_id=self.proposition.matricule_candidat,
+                    uuid_proposition=self.proposition.uuid,
+                    experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
+                    if self.proposition.est_non_soumise
+                    else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+                )
             )
 
             experiences_names_by_uuid = {}
 
-            for experience in proposition_resume.curriculum.experiences_academiques:
+            for experience in curriculum.experiences_academiques:
                 experiences_names_by_uuid[experience.uuid] = experience.titre_formate
 
-            for experience in proposition_resume.curriculum.experiences_non_academiques:
+            for experience in curriculum.experiences_non_academiques:
                 experiences_names_by_uuid[experience.uuid] = experience.titre_formate
 
-            if proposition_resume.etudes_secondaires:
-                experiences_names_by_uuid[
-                    proposition_resume.etudes_secondaires.uuid
-                ] = proposition_resume.etudes_secondaires.titre_formate
+            if self.is_general:
+                secondary_studies = message_bus_instance.invoke(
+                    RecupererEtudesSecondairesQuery(matricule_candidat=self.proposition.matricule_candidat)
+                )
+                if secondary_studies:
+                    experiences_names_by_uuid[secondary_studies.uuid] = secondary_studies.titre_formate
 
             context['experiences_names_by_uuid'] = experiences_names_by_uuid
 

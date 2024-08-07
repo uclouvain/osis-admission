@@ -136,7 +136,10 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(_GroupeDeSupervisionF
         lambda: [_SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP')]
     )
     signatures_membres_CA = factory.LazyFunction(
-        lambda: [_SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
+        ]
     )
 
 
@@ -151,6 +154,7 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory(_GroupeDeS
     signatures_membres_CA = factory.LazyFunction(
         lambda: [
             _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
         ]
     )
     cotutelle = factory.SubFactory(
@@ -167,7 +171,10 @@ class GroupeDeSupervisionSC3DPCotutelleSansPromoteurExterneFactory(_GroupeDeSupe
         lambda: [_SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP')]
     )
     signatures_membres_CA = factory.LazyFunction(
-        lambda: [_SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
+        ]
     )
     cotutelle = factory.SubFactory(
         _CotutelleFactory,
@@ -186,7 +193,10 @@ class GroupeDeSupervisionSC3DPCotutelleAvecPromoteurExterneFactory(_GroupeDeSupe
         ]
     )
     signatures_membres_CA = factory.LazyFunction(
-        lambda: [_SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
+        ]
     )
     cotutelle = factory.SubFactory(
         _CotutelleFactory,
@@ -202,7 +212,10 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtProjetIncompletFactory(_Gro
         lambda: [_SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP')]
     )
     signatures_membres_CA = factory.LazyFunction(
-        lambda: [_SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
+        ]
     )
     cotutelle = pas_de_cotutelle
 
@@ -213,7 +226,10 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtFinancementIncompletFactory
         lambda: [_SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP')]
     )
     signatures_membres_CA = factory.LazyFunction(
-        lambda: [_SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
+        ]
     )
     cotutelle = pas_de_cotutelle
 
@@ -235,7 +251,10 @@ class GroupeDeSupervisionSC3DPSansPromoteurFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-promoteur')
     signatures_promoteurs: List[SignaturePromoteur] = []
     signatures_membres_CA = factory.LazyFunction(
-        lambda: [_SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP')]
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP'),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2'),
+        ]
     )
 
 
@@ -248,7 +267,7 @@ class GroupeDeSupervisionSC3DPSansMembresCAFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-membre_CA')
     signatures_promoteurs = factory.LazyFunction(
         lambda: [
-            _SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP-unique', etat=ChoixEtatSignature.INVITED)
+            _SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP-unique', etat=ChoixEtatSignature.INVITED),
         ]
     )
     signatures_membres_CA: List[SignatureMembreCA] = []
@@ -266,7 +285,10 @@ class GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory(_
         ]
     )
     signatures_membres_CA = factory.LazyFunction(
-        lambda: [_SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
+        ]
     )
     cotutelle = pas_de_cotutelle
 
@@ -287,6 +309,7 @@ class GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_Gro
     signatures_membres_CA = factory.LazyFunction(
         lambda: [
             _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.APPROVED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.APPROVED),
         ]
     )
     cotutelle = pas_de_cotutelle
@@ -309,6 +332,7 @@ class GroupeDeSupervisionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(_
     signatures_membres_CA = factory.LazyFunction(
         lambda: [
             _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.APPROVED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.APPROVED),
         ]
     )
     cotutelle = pas_de_cotutelle

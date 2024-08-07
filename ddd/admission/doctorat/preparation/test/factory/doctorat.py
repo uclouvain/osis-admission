@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import D
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
@@ -51,6 +52,9 @@ class DoctoratEtendu(Doctorat):
     campus: str
     intitule: str
     sigle: str
+    campus_inscription: str
+    code_secteur: str
+    intitule_secteur: str
 
 
 class _DoctoratFactory(factory.Factory):
@@ -60,19 +64,12 @@ class _DoctoratFactory(factory.Factory):
 
     entity_id = factory.SubFactory(FormationIdentityFactory)
     entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory)
-    campus = factory.Iterator(
-        [
-            "Louvain-la-Neuve",
-            "Mons",
-            "Bruxelles Woluwe",
-            "Namur",
-            "Charleroi",
-            "Tournai",
-            "St-Gilles",
-        ]
-    )
+    campus = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
+    campus_inscription = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
     intitule = factory.Faker('sentence')
+    intitule_secteur = factory.Faker('sentence')
     sigle = factory.Faker('word')
+    code_secteur = factory.Faker('word')
     type = TrainingType.PHD
 
 
@@ -81,29 +78,10 @@ class _DoctoratDTOFactory(factory.Factory):
         model = DoctoratDTO
         abstract = False
 
+    code = factory.Sequence(lambda n: 'CODE%02d' % n)
     intitule = factory.Faker('sentence')
-    campus = factory.Iterator(
-        [
-            "Louvain-la-Neuve",
-            "Mons",
-            "Bruxelles Woluwe",
-            "Namur",
-            "Charleroi",
-            "Tournai",
-            "St-Gilles",
-        ]
-    )
-    campus_inscription = factory.Iterator(
-        [
-            "Louvain-la-Neuve",
-            "Mons",
-            "Bruxelles Woluwe",
-            "Namur",
-            "Charleroi",
-            "Tournai",
-            "St-Gilles",
-        ]
-    )
+    campus = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
+    campus_inscription = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
     type = TrainingType.PHD.name
 
 

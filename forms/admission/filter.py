@@ -65,9 +65,8 @@ class WorkingListField(forms.ModelChoiceField):
         return obj.name.get(get_language())
 
 
-class CommonAdmissionFilterForm(forms.Form):
+class BaseAdmissionFilterForm(forms.Form):
     statuses_choices = []
-    training_types = []
 
     annee_academique = forms.TypedChoiceField(
         label=_('Year'),
@@ -106,24 +105,6 @@ class CommonAdmissionFilterForm(forms.Form):
         ),
     )
 
-    entites = forms.CharField(
-        label=pgettext_lazy('admission', 'Entities'),
-        required=False,
-        widget=autocomplete.TagSelect2(),
-    )
-
-    types_formation = forms.MultipleChoiceField(
-        choices=[],
-        label=_('Course type'),
-        required=False,
-        widget=Select2MultipleCheckboxesWidget(
-            attrs={
-                'data-dropdown-auto-width': True,
-                'data-selection-template': _("{items} types out of {total}"),
-            }
-        ),
-    )
-
     taille_page = forms.TypedChoiceField(
         label=_("Page size"),
         choices=((size, size) for size in PAGINATOR_SIZE_LIST),
@@ -151,7 +132,6 @@ class CommonAdmissionFilterForm(forms.Form):
         self.fields['annee_academique'].choices = get_academic_year_choices()
         self.fields['etats'].choices = self.statuses_choices
         self.fields['etats'].initial = [choice[0] for choice in self.fields['etats'].choices]
-        self.fields['types_formation'].choices = [(key, TrainingType.get_value(key)) for key in self.training_types]
 
         # Initialize the labels of the autocomplete fields
         if load_labels:
@@ -172,6 +152,41 @@ class CommonAdmissionFilterForm(forms.Form):
 
     def clean_page(self):
         return self.cleaned_data.get('page') or self.fields['page'].initial
+
+    class Media:
+        js = [
+            # DependsOn
+            'js/dependsOn.min.js',
+            # Mask
+            'js/jquery.mask.min.js',
+        ]
+
+
+class AdmissionFilterWithEntitiesAndTrainingTypesForm(BaseAdmissionFilterForm):
+    training_types = []
+
+    entites = forms.CharField(
+        label=pgettext_lazy('admission', 'Entities'),
+        required=False,
+        widget=autocomplete.TagSelect2(),
+    )
+
+    types_formation = forms.MultipleChoiceField(
+        choices=[],
+        label=_('Course type'),
+        required=False,
+        widget=Select2MultipleCheckboxesWidget(
+            attrs={
+                'data-dropdown-auto-width': True,
+                'data-selection-template': _("{items} types out of {total}"),
+            }
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['types_formation'].choices = [(key, TrainingType.get_value(key)) for key in self.training_types]
 
     def clean_entites(self):
         entities = self.cleaned_data.get('entites')
@@ -195,16 +210,8 @@ class CommonAdmissionFilterForm(forms.Form):
             return entities
         return []
 
-    class Media:
-        js = [
-            # DependsOn
-            'js/dependsOn.min.js',
-            # Mask
-            'js/jquery.mask.min.js',
-        ]
 
-
-class AllAdmissionsFilterForm(CommonAdmissionFilterForm):
+class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
     statuses_choices = CHOIX_STATUT_TOUTE_PROPOSITION
     training_types = AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.keys()
 
@@ -353,7 +360,7 @@ class AllAdmissionsFilterForm(CommonAdmissionFilterForm):
         return str(bourse_double_diplomation.uuid) if bourse_double_diplomation else ''
 
 
-class ContinuingAdmissionsFilterForm(CommonAdmissionFilterForm):
+class ContinuingAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
     statuses_choices = ChoixStatutPropositionContinue.choices()
     training_types = AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
 

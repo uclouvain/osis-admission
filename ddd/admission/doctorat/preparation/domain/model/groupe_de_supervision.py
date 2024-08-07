@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -236,6 +236,8 @@ class GroupeDeSupervision(interface.RootEntity):
         motivation: Optional[str],
         institution_fwb: Optional[bool],
         institution: Optional[str],
+        autre_institution_nom: Optional[str],
+        autre_institution_adresse: Optional[str],
         demande_ouverture: List[str] = None,
         convention: List[str] = None,
         autres_documents: List[str] = None,
@@ -244,6 +246,8 @@ class GroupeDeSupervision(interface.RootEntity):
             motivation=motivation or '',
             institution_fwb=institution_fwb,
             institution=institution or '',
+            autre_institution_nom=autre_institution_nom or '',
+            autre_institution_adresse=autre_institution_adresse or '',
             demande_ouverture=demande_ouverture or [],
             convention=convention or [],
             autres_documents=autres_documents or [],

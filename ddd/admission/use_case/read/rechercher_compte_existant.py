@@ -32,12 +32,4 @@ def rechercher_compte_existant(
     cmd: 'RechercherCompteExistantCommand',
     digit_service: 'IDigitService',
 ):
-    return digit_service.rechercher_compte_existant(
-        matricule=cmd.matricule,
-        nom=cmd.nom,
-        prenom=cmd.prenom,
-        autres_prenoms=cmd.autres_prenoms,
-        date_naissance=cmd.date_naissance,
-        genre=cmd.genre,
-        niss=cmd.niss,
-    )
+    return digit_service.rechercher_compte_existant(matricule=cmd.matricule)

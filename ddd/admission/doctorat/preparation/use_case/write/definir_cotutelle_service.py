@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@ def definir_cotutelle(
         motivation=cmd.motivation,
         institution_fwb=cmd.institution_fwb,
         institution=cmd.institution,
+        autre_institution_nom=cmd.autre_institution_nom,
+        autre_institution_adresse=cmd.autre_institution_adresse,
         demande_ouverture=cmd.demande_ouverture,
         convention=cmd.convention,
         autres_documents=cmd.autres_documents,

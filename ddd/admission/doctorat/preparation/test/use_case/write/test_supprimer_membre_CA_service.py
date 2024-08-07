@@ -62,7 +62,7 @@ class TestSupprimerMembreCAService(TestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
-        self.assertEqual(len(groupe.signatures_membres_CA), 0)
+        self.assertEqual(len(groupe.signatures_membres_CA), 1)
 
     def test_should_pas_supprimer_personne_si_pas_membre_CA(self):
         cmd = attr.evolve(self.cmd, uuid_membre_ca='pasmembre_CA')

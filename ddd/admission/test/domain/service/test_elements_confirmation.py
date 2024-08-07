@@ -86,7 +86,8 @@ class ElementsConfirmationTestCase(TestCase):
             RecupererElementsConfirmationDoctoratQuery(uuid_proposition="uuid-SC3DP")
         )
         expected = [
-            'reglement_general',
+            'reglement_doctorat',
+            'reglement_doctorat_deontologie',
             'protection_donnees',
             'professions_reglementees',
             'justificatifs',

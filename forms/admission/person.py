@@ -35,6 +35,7 @@ from admission.forms import (
     AdmissionModelForm,
     get_year_choices,
 )
+from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.utils import force_title
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField

@@ -29,9 +29,11 @@
   {% include 'admission/includes/back_to_cv_overview_link.html' %}
 {% endif %}
 
-{% if edit_link_button or duplicate_link_button or delete_link_button %}
+{% if edit_link_button or duplicate_link_button or delete_link_button or curex_link_button %}
   <div class="btn-group btn-group-sm" role="group">
-
+    {% if curex_link_button %}
+        {% include 'admission/general_education/includes/checklist/parcours_externe_button.html' with curex_url=curex_link_button %}
+    {% endif %}
     {% if edit_link_button %}
       <a
           class="btn btn-default"

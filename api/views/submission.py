@@ -222,8 +222,6 @@ class SubmitDoctoralPropositionView(
         proposition_id = message_bus_instance.invoke(cmd)
         valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
-        # TODO To remove when the admission approval by CDD and SIC will be created
-        message_bus_instance.invoke(ApprouverDemandeCddCommand(uuid=str(kwargs["uuid"])))
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

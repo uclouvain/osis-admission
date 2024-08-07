@@ -34,8 +34,6 @@ __all__ = [
     "ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE",
     "ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL",
     "ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING",
-    "ADMISSION_EMAIL_SUBMISSION_CDD",
-    "ADMISSION_EMAIL_SUBMISSION_MEMBER",
 ]
 
 ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE = 'osis-admission-submission-candidate'
@@ -44,7 +42,24 @@ templates.register(
     description=_(
         "Mail sent to the candidate to confirm that his application has been taken into account by UCLouvain"
     ),
-    tokens=admission_common_tokens,
+    tokens=admission_common_tokens
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='admission_reference',
+            description=_('Reference of the admission'),
+            example='L-ESPO24-100.102',
+        ),
+        Token(
+            name='recap_link',
+            description=_("Link to download a copy of the file related to the admission (frontoffice)."),
+            example="https://dev.studies.uclouvain.be/somewhere",
+        ),
+    ],
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
@@ -140,49 +155,6 @@ templates.register(
         ),
     ],
     tag=CONTINUING_ADMISSION_TAG,
-)
-
-ADMISSION_EMAIL_SUBMISSION_CDD = 'osis-admission-submission-cdd'
-templates.register(
-    ADMISSION_EMAIL_SUBMISSION_CDD,
-    description=_("Mail sent to the CDD to inform them that a new application has been submitted"),
-    tokens=admission_common_tokens
-    + [
-        Token(
-            name='actor_first_name',
-            description=_("The first name of the recipient"),
-            example="Jane",
-        ),
-        Token(
-            name='actor_last_name',
-            description=_("The last name of the recipient"),
-            example="Smith",
-        ),
-    ],
-    tag=DOCTORATE_ADMISSION_TAG,
-)
-
-ADMISSION_EMAIL_SUBMISSION_MEMBER = 'osis-admission-submission-member'
-templates.register(
-    ADMISSION_EMAIL_SUBMISSION_MEMBER,
-    description=_(
-        "Mail sent to the members of the supervision panel to inform them "
-        "that the application has been submitted to UCLouvain by the applicant"
-    ),
-    tokens=admission_common_tokens
-    + [
-        Token(
-            name='actor_first_name',
-            description=_("The first name of the recipient"),
-            example="Jane",
-        ),
-        Token(
-            name='actor_last_name',
-            description=_("The last name of the recipient"),
-            example="Smith",
-        ),
-    ],
-    tag=DOCTORATE_ADMISSION_TAG,
 )
 
 ADMISSION_EMAIL_MEMBER_REMOVED = 'osis-admission-member-removed'

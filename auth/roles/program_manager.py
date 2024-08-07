@@ -33,6 +33,7 @@ from admission.auth.predicates.common import (
     is_part_of_education_group,
     is_debug,
     is_sent_to_epc,
+    pending_digit_ticket_response,
 )
 from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -83,11 +84,13 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_person': is_part_of_education_group,
             'admission.change_admission_person': is_part_of_education_group
             & continuing.in_manager_status
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.change_admission_coordinates': is_part_of_education_group
             & continuing.in_manager_status
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
             'admission.change_admission_secondary_studies': is_part_of_education_group
             & continuing.in_manager_status

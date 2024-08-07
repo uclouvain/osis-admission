@@ -133,6 +133,16 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
         null=True,
     )
+    is_fnrs_fria_fresh_csc_linked = models.BooleanField(
+        verbose_name=_("Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"),
+        null=True,
+        blank=True,
+    )
+    financing_comment = models.TextField(
+        verbose_name=_("Financing comment"),
+        default='',
+        blank=True,
+    )
 
     # Projet
     project_title = models.CharField(
@@ -165,6 +175,22 @@ class DoctorateAdmission(BaseAdmission):
         max_length=255,
         verbose_name=_("Thesis location"),
         default='',
+        blank=True,
+    )
+    phd_alread_started = models.BooleanField(
+        verbose_name=_("Has your PhD project already started?"),
+        null=True,
+        blank=True,
+    )
+    phd_alread_started_institute = models.CharField(
+        max_length=255,
+        verbose_name=_("Institution"),
+        default='',
+        blank=True,
+    )
+    work_start_date = models.DateField(
+        verbose_name=_("Work start date"),
+        null=True,
         blank=True,
     )
     project_document = FileField(
@@ -237,6 +263,18 @@ class DoctorateAdmission(BaseAdmission):
     cotutelle_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),
+        default='',
+        blank=True,
+    )
+    cotutelle_other_institution_name = models.CharField(
+        max_length=255,
+        verbose_name=_("Other institution name"),
+        default='',
+        blank=True,
+    )
+    cotutelle_other_institution_address = models.CharField(
+        max_length=255,
+        verbose_name=_("Other institution address"),
         default='',
         blank=True,
     )

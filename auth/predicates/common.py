@@ -31,6 +31,7 @@ from waffle import switch_is_active
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.epc_injection import EPCInjectionStatus
+from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from osis_role.errors import predicate_failed_msg
 
 
@@ -133,3 +134,15 @@ def has_education_group_of_types(*education_group_types):
 @predicate_failed_msg(message=_("Admission has been sent to EPC."))
 def is_sent_to_epc(self, user: User, obj: BaseAdmission):
     return obj.sent_to_epc
+
+
+@predicate(bind=True)
+def pending_digit_ticket_response(self, user: User, obj: BaseAdmission):
+    return PersonTicketCreation.objects.filter(
+        person_id=obj.candidate_id,
+        status__in=[
+           PersonTicketCreationStatus.CREATED.name,
+           PersonTicketCreationStatus.IN_PROGRESS.name,
+           PersonTicketCreationStatus.ERROR.name,
+        ]
+    ).exists()

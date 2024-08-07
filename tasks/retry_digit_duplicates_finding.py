@@ -58,11 +58,5 @@ def run():
         message_bus_instance.invoke(
             command=RechercherCompteExistantCommand(
                 matricule=proposition.matricule,
-                nom=proposition.last_name,
-                prenom=proposition.first_name,
-                date_naissance=proposition.birth_date,
-                autres_prenoms=proposition.other_name,
-                niss=proposition.national_number,
-                genre=proposition.sex,
             )
         )

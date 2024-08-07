@@ -31,6 +31,9 @@ from admission.ddd.admission.doctorat.preparation.business_types import *
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
+from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
+    ExperiencePrecedenteRecherche,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
@@ -235,13 +238,19 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     type_admission: 'ChoixTypeAdmission'
     projet: 'DetailProjet'
     financement: 'Financement'
+    experience_precedente_recherche: 'ExperiencePrecedenteRecherche'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldProjetEtreComplet(self.type_admission, self.projet, self.financement),
+            ShouldProjetEtreComplet(
+                self.type_admission,
+                self.projet,
+                self.financement,
+                self.experience_precedente_recherche,
+            ),
         ]
 
 
@@ -357,7 +366,7 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
+            ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA(self.groupe_de_supervision.signatures_membres_CA),
             ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(self.groupe_de_supervision),
         ]
 

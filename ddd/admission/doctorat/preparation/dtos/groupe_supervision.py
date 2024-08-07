@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -98,6 +98,9 @@ class CotutelleDTO(interface.DTO):
     motivation: Optional[str]
     institution_fwb: Optional[bool]
     institution: Optional[str]
+    autre_institution: Optional[bool]
+    autre_institution_nom: Optional[str]
+    autre_institution_adresse: Optional[str]
     demande_ouverture: List[str]
     convention: List[str]
     autres_documents: List[str]

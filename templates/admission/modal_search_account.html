@@ -1,4 +1,4 @@
-{% load static i18n bootstrap3 admission %}
+{% load static i18n bootstrap3 admission waffle_tags %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -49,10 +49,15 @@
             </div>
         </div>
         <div class="modal-body">
-
             <ul class="nav nav-tabs">
-              <li class="active"><a data-toggle="tab" href="#personal-data">{% trans 'Personal data' %}</a></li>
-              <li><a data-toggle="tab" href="#previous-experience">{% trans 'Previous experience' %}</a></li>
+              <li class="active">
+                  <a data-toggle="tab" href="#personal-data">{% trans 'Personal data' %}</a>
+              </li>
+              <li>
+                  <a id="previousExperienceTabSelector" data-toggle="tab" href="#previous-experience">
+                      {% trans 'Previous experience' %}
+                  </a>
+              </li>
             </ul>
 
             <div class="tab-content">
@@ -85,36 +90,73 @@
                 <i class="fas fa-save" style="margin-right: 3px;"></i>
                 {% trans "Save fusion proposal" %}
             </button>
-            <button type="button" class="btn btn-danger"
-                hx-post="{% url 'admission:services:digit:discard-merge' uuid=uuid %}"
-                hx-trigger="click"
-                hx-include="#proposal-form"
-                hx-indicator="#htmx-overlay"
-                {% if not peut_refuser_fusion %}
-                disabled data-toggle="tooltip" title="{% trans 'Cannot discard merge because at least one known person has the same national number' %}"
-                {% endif %}
-            >
-                 <i class="fas fa-ban" style="margin-right: 3px;"></i>
-                {% trans "Discard fusion" %}
-            </button>
-            <button type="button" class="btn btn-primary"
-                hx-post="{{ request.get_full_path }}"
-                hx-target="#form-ajax-modal"
-                hx-trigger="click"
-                hx-include="#matricule-form, #proposal-form, #curex-form"
-                hx-vals='{"action": "MERGE"}'
-                hx-indicator="#htmx-overlay"
-                hx-swap="innerHTML"
-            >
-                <i class="fas fa-merge" style="margin-right: 3px;"></i>
-                {% trans "Merge" context "admission" %}
-            </button>
-        </div>
 
+            <div id="personalDataAdditionalBtnFooter" class="d-inline">
+                 <!-- Only displayed on personal-data tab !-->
+                 <button type="button"
+                         class="btn btn-primary"
+                         onclick="document.getElementById('previousExperienceTabSelector').click();">
+                     {% trans "Next" %}
+                 </button>
+            </div>
+
+            <div id="previousExperienceAdditionalBtnFooter" class="d-none">
+                <!-- Only displayed on previous-experience tab !-->
+                <button type="button" class="btn btn-danger"
+                    hx-post="{% url 'admission:services:digit:discard-merge' uuid=uuid %}"
+                    hx-trigger="click"
+                    hx-include="#proposal-form"
+                    hx-indicator="#htmx-overlay"
+                    {% if not peut_refuser_fusion %}
+                        disabled
+                        data-toggle="tooltip"
+                        data-container="#merge-modal"
+                        title="{% trans 'Cannot discard merge because at least one known person has the same national number' %}"
+                    {% endif %}
+                >
+                    <i class="fas fa-ban" style="margin-right: 3px;"></i>
+                    {% trans "Discard fusion" %}
+                </button>
+                {% switch "admission:allow-merge-with-existing-account" %}
+                    <button
+                            type="button"
+                            class="btn btn-primary"
+                            style="margin-left: 0px;"
+                            hx-post="{{ request.get_full_path }}"
+                            hx-target="#form-ajax-modal"
+                            hx-trigger="click"
+                            hx-include="#matricule-form, #proposal-form, #curex-form"
+                            hx-vals='{"action": "MERGE"}'
+                            hx-indicator="#htmx-overlay"
+                            hx-swap="innerHTML"
+                        >
+                        <i class="fas fa-merge" style="margin-right: 3px;"></i>
+                        {% trans "Merge" context "admission" %}
+                    </button>
+                {% endswitch %}
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        let target = $(e.target).attr("href")
+        let personalDataAdditionalBtnFooter = document.querySelector("#personalDataAdditionalBtnFooter")
+        let previousExperienceAdditionalBtnFooter = document.querySelector("#previousExperienceAdditionalBtnFooter")
+
+        if (target === '#previous-experience'){
+           previousExperienceAdditionalBtnFooter.classList.remove('d-none')
+           previousExperienceAdditionalBtnFooter.classList.add('d-inline')
+           personalDataAdditionalBtnFooter.classList.add('d-none')
+           personalDataAdditionalBtnFooter.classList.remove('d-inline')
+        } else if (target === '#personal-data') {
+           personalDataAdditionalBtnFooter.classList.remove('d-none')
+           personalDataAdditionalBtnFooter.classList.add('d-inline')
+           previousExperienceAdditionalBtnFooter.classList.add('d-none')
+           previousExperienceAdditionalBtnFooter.classList.remove('d-inline')
+        }
+    });
 
     function formatState (state) {
         const split = state.text.split(' - ');

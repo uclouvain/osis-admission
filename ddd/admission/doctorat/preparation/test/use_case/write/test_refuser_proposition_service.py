@@ -117,7 +117,7 @@ class TestRefuserPropositionService(TestCase):
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         signatures = groupe.signatures_promoteurs
         self.assertEqual(len(signatures), 2)
-        self.assertEqual(len(groupe.signatures_membres_CA), 1)
+        self.assertEqual(len(groupe.signatures_membres_CA), 2)
         self.assertEqual(signatures[0].promoteur_id.uuid, self.uuid_promoteur)
         self.assertEqual(signatures[0].etat, ChoixEtatSignature.DECLINED)
         self.assertEqual(signatures[0].commentaire_interne, 'Commentaire interne')

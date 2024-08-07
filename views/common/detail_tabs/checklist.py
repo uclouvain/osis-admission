@@ -83,15 +83,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
         # TODO : add intermediary status to support async process (waiting for digit response)
 
         from infrastructure.messages_bus import message_bus_instance
-        message_bus_instance.invoke(RechercherCompteExistantCommand(
-            matricule=admission.candidate.global_id,
-            nom=admission.candidate.last_name,
-            prenom=admission.candidate.first_name,
-            autres_prenoms=admission.candidate.middle_name,
-            date_naissance=str(admission.candidate.birth_date) if admission.candidate.birth_date else "",
-            genre=admission.candidate.sex,
-            niss=admission.candidate.national_number,
-        ))
+        message_bus_instance.invoke(RechercherCompteExistantCommand(matricule=admission.candidate.global_id))
         message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
         with contextlib.suppress(
             NotInAccountCreationPeriodException,
@@ -99,10 +91,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
             PropositionFusionATraiterException,
         ):
             message_bus_instance.invoke(
-                SoumettreTicketPersonneCommand(
-                    global_id=admission.candidate.global_id,
-                    annee=admission.determined_academic_year.year,
-                )
+                SoumettreTicketPersonneCommand(global_id=admission.candidate.global_id)
             )
 
     admission.last_update_author = author

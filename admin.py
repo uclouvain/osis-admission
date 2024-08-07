@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from datetime import datetime
 from typing import Dict
 
 from django import forms
@@ -74,7 +74,7 @@ from admission.contrib.models.checklist import (
     FreeAdditionalApprovalCondition,
 )
 from admission.contrib.models.doctoral_training import Activity
-from admission.contrib.models.epc_injection import EPCInjection
+from admission.contrib.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
 from admission.contrib.models.working_list import WorkingList
@@ -84,6 +84,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
+from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from admission.tasks import bulk_create_digit_persons_tickets
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
@@ -91,7 +92,6 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
-from base.models.student import Student
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
@@ -607,17 +607,49 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
 
 
 class EPCInjectionAdmin(admin.ModelAdmin):
-    search_fields = ['admission']
-    list_display = ['admission', 'type', 'status', 'last_epc_response']
+    search_fields = ['admission__reference', 'admission__candidate__global_id', 'admission__candidate__last_name']
+    list_display = ['admission', 'type', 'status', 'errors_messages', 'last_attempt_date', 'last_response_date']
     list_filter = ['status', 'type']
     formfield_overrides = {
         models.JSONField: {'widget': JSONEditorWidget},
     }
+    raw_id_fields = ['admission']
+    actions = [
+        'reinjecter_la_signaletique_dans_epc',
+        'reinjecter_la_demande_dans_epc',
+    ]
 
-    @admin.display()
-    def last_epc_response(self, obj):
-        if obj.epc_responses:
-            return obj.epc_responses[-1]
+    def errors_messages(self, obj):
+        return obj.html_errors
+
+    @admin.action(description="Réinjecter la signalétique dans EPC")
+    def reinjecter_la_signaletique_dans_epc(self, request, queryset):
+        for injection in queryset.filter(
+            type=EPCInjectionType.SIGNALETIQUE.name
+        ).exclude(
+            status=EPCInjectionStatus.OK.name
+        ):
+            injection.last_attempt_date = datetime.now()
+            injection.save()
+            InjectionEPCSignaletique().envoyer_signaletique_dans_queue(
+                donnees=injection.payload,
+                admission_reference=injection.admission.reference
+            )
+
+    @admin.action(description="Réinjecter la demande dans EPC")
+    def reinjecter_la_demande_dans_epc(self, request, queryset):
+        for injection in queryset.filter(
+            type=EPCInjectionType.DEMANDE.name
+        ).exclude(
+            status=EPCInjectionStatus.OK.name
+        ):
+            injection.last_attempt_date = datetime.now()
+            injection.save()
+            InjectionEPCAdmission().envoyer_admission_dans_queue(
+                donnees=injection.payload,
+                admission_reference=injection.admission.reference,
+                admission_uuid=injection.admission.uuid
+            )
 
 
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):

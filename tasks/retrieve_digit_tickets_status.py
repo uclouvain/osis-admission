@@ -29,10 +29,11 @@ from typing import List
 import waffle
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand,
@@ -40,6 +41,8 @@ from admission.ddd.admission.commands import (
 )
 from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionEligibleException
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from backoffice.celery import app
 from base.models.person import Person
@@ -48,94 +51,106 @@ from base.tasks import send_pictures_to_card_app
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
+PREFIX_TASK = "[Retrieve DigIT ticket status] :"
+
 
 @app.task
+@transaction.non_atomic_requests
 def run(request=None):
     if not waffle.switch_is_active('fusion-digit'):
-        logger.info("fusion-digit switch not active")
+        logger.info(f"{PREFIX_TASK} fusion-digit switch not active")
         return
 
     from infrastructure.messages_bus import message_bus_instance
-
-    logger.info("Starting retrieve digit tickets status task")
+    logger.info(f"{PREFIX_TASK} starting task...")
 
     # Retrieve list of tickets
-    tickets_pending = message_bus_instance.invoke(
-        command=RetrieveListeTicketsEnAttenteQuery()
-    )  # type: List[StatutTicketPersonneDTO]
-
-    logger.info("[PENDING DIGIT TICKETS] : " + str(tickets_pending))
+    logger.info(f"{PREFIX_TASK} fetch pending DigIT tickets...")
+    tickets_pending = message_bus_instance.invoke(RetrieveListeTicketsEnAttenteQuery())  # type: List[StatutTicketPersonneDTO]
+    logger.info(f"{PREFIX_TASK} pending DigIT tickets..." + str(tickets_pending))
 
     for ticket in tickets_pending:
-        status = message_bus_instance.invoke(
-            command=RetrieveAndStoreStatutTicketPersonneFromDigitCommand(ticket_uuid=ticket.uuid)
-        )
-        logger.info(f"[DigIT Ticket] {ticket.nom}, {ticket.prenom}")
-        logger.info(f"[DigIT Ticket status] {status}")
+        try:
+            with transaction.atomic():
+                status = message_bus_instance.invoke(
+                    RetrieveAndStoreStatutTicketPersonneFromDigitCommand(ticket_uuid=ticket.uuid)
+                )
+                logger.info(f"{PREFIX_TASK} process DigIT ticket ({str(ticket)}")
 
-        if not Person.objects.filter(global_id=ticket.matricule).exists():
-            logger.info(f"[DigIT Ticket] Only send signaletique to EPC because already traited")
-            PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(status=PersonTicketCreationStatus.CREATED.name)
-            continue
+                if not Person.objects.filter(global_id=ticket.matricule).exists():
+                    logger.info(f"{PREFIX_TASK} matricule not found into database. Already processed ?")
+                    continue
 
-        if status in ["DONE", "DONE_WITH_WARNINGS"]:
-            try:
-                _process_response_ticket(message_bus_instance, ticket)
-            except PasDePropositionDeFusionEligibleException as e:
-                logger.info(e.message)
+                if status in ["DONE", "DONE_WITH_WARNINGS"]:
+                    try:
+                        _process_successful_response_ticket(message_bus_instance, ticket)
+                    except PasDePropositionDeFusionEligibleException as e:
+                        logger.info(f"{PREFIX_TASK} {e.message}")
+                else:
+                    logger.info(f"{PREFIX_TASK} ticket in status {status}. No processing ticket response.")
+        except Exception as e:
+            logger.info(f"{PREFIX_TASK} An error occured during processing ticket ({repr(e)})")
+            PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(
+                status=PersonTicketCreationStatus.ERROR.name,
+                errors=[{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
+            )
 
     # Handle response when task is ran as a cmd from admin panel
     if request:
         return redirect(request.META.get('HTTP_REFERER'))
 
 
-@transaction.atomic
-def _process_response_ticket(message_bus_instance, ticket):
+def _process_successful_response_ticket(message_bus_instance, ticket):
     from admission.infrastructure.admission.repository.digit import DigitRepository
     noma = DigitRepository.get_registration_id_sent_to_digit(global_id=ticket.matricule)
 
-    digit_matricule = message_bus_instance.invoke(
-        command=RecupererMatriculeDigitQuery(
-            noma=noma,
-        )
-    )
-    logger.info(f"[DigIT Ticket noma - matricule] NOMA: {noma} - MATR: {digit_matricule}")
+    logger.info(f"{PREFIX_TASK} fetch matricule DigIT from noma (NOMA: {noma})")
+    digit_matricule = message_bus_instance.invoke(RecupererMatriculeDigitQuery(noma=noma))
+    logger.info(f"{PREFIX_TASK} matricule DigIT found ({digit_matricule}) for noma ({noma})")
 
     if Person.objects.filter(global_id=digit_matricule).exists():
         try:
             message_bus_instance.invoke(
-                command=FusionnerCandidatAvecPersonneExistanteCommand(
+                FusionnerCandidatAvecPersonneExistanteCommand(
                     candidate_global_id=digit_matricule,
                     ticket_uuid=ticket.uuid,
                 )
             )
-            logger.info(f"[DigIT Ticket merge with existing person]")
+            logger.info(f"{PREFIX_TASK} merge candidate with existing person data")
         except PasDePropositionDeFusionEligibleException:
-            logger.info(f"[DigIT] Pas de proposition de fusion éligible. Fusion ignorée")
+            logger.info(f"{PREFIX_TASK} no merge candidate eligible. Merge abort")
     else:
         message_bus_instance.invoke(
-            command=ModifierMatriculeCandidatCommand(
+            ModifierMatriculeCandidatCommand(
                 candidate_global_id=ticket.matricule,
                 digit_global_id=digit_matricule,
                 ticket_uuid=ticket.uuid,
             )
         )
-        logger.info(f"[DigIT Ticket edit candidate global id]")
+        logger.info(f"{PREFIX_TASK} "
+                    f"edit candidate global_id ({ticket.matricule}) to set as internal account ({digit_matricule})")
 
-    logger.info("[DigIT Signaletique injection into EPC]")
+    logger.info(f"{PREFIX_TASK} send signaletique into EPC")
     _injecter_signaletique_a_epc(digit_matricule)
     send_pictures_to_card_app.run.delay(global_id=digit_matricule)
-    logger.info(f"[Send picture to card]")
+    logger.info(f"{PREFIX_TASK} send picture to card")
 
 
 def _injecter_signaletique_a_epc(matricule: str):
-    demande = BaseAdmission.objects.filter(
-        submitted_at__isnull=False,
+    # TODO: Inject also for other admisison type
+    demande = GeneralEducationAdmission.objects.filter(
         candidate__global_id=matricule,
-    ).order_by('submitted_at').first()
+    ).filter(
+        Q(
+            type_demande=TypeDemande.ADMISSION.name,
+            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
+        )
+        | Q(type_demande=TypeDemande.INSCRIPTION.name)
+    ).order_by('created_at').first()
     InjectionEPCSignaletique().injecter(admission=demande)
 
 
 @override_switch('fusion-digit', active=True)
+@transaction.non_atomic_requests
 def force_run(request=None):
     return run(request=request)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 from datetime import timedelta
 
+import rest_framework.permissions
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from rest_framework import status
@@ -127,6 +128,8 @@ class ExternalApprovalPropositionSchema(ApprovePropositionSchema):
 class ExternalApprovalPropositionAPIView(ApprovePropositionMixin, APIView):
     name = "external-approvals"
     schema = ExternalApprovalPropositionSchema()
+    authentication_classes = []
+    permission_classes = []
 
     @cached_property
     def actor(self):

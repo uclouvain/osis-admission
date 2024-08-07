@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -132,11 +132,20 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
 
     @classmethod
     def get_cotutelle_dto_from_model(cls, cotutelle: Optional[Cotutelle]) -> 'CotutelleDTO':
+        autre_institution = None
+        if cotutelle and (cotutelle.autre_institution_nom or cotutelle.autre_institution_adresse):
+            autre_institution = True
+        elif cotutelle and cotutelle.institution:
+            autre_institution = False
+
         return CotutelleDTO(
             cotutelle=None if cotutelle is None else cotutelle != pas_de_cotutelle,
             motivation=cotutelle and cotutelle.motivation or '',
             institution_fwb=cotutelle and cotutelle.institution_fwb,
             institution=cotutelle and cotutelle.institution or '',
+            autre_institution=autre_institution,
+            autre_institution_nom=cotutelle and cotutelle.autre_institution_nom or '',
+            autre_institution_adresse=cotutelle and cotutelle.autre_institution_adresse or '',
             demande_ouverture=cotutelle and cotutelle.demande_ouverture or [],
             convention=cotutelle and cotutelle.convention or [],
             autres_documents=cotutelle and cotutelle.autres_documents or [],

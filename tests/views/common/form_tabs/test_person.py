@@ -100,6 +100,7 @@ class PersonFormTestCase(TestCase):
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__global_id="80001234",
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -156,6 +157,13 @@ class PersonFormTestCase(TestCase):
         patcher = patch(
             "osis_document.contrib.fields.FileField._confirm_multiple_upload",
             side_effect=lambda _, value, __: value,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "infrastructure.messages_bus.message_bus_instance.publish",
+            side_effect=lambda *args, **kwargs: None,
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -671,6 +679,7 @@ class PersonFormTestCase(TestCase):
             training__academic_year=self.general_admission.training.academic_year,
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
+            candidate__global_id="81234565",
             submitted_profile={},
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )

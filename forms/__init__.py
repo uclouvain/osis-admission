@@ -33,7 +33,7 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
@@ -46,6 +46,7 @@ from reference.models.country import Country
 
 NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
+ALL_FEMININE_EMPTY_CHOICE = (('', pgettext_lazy('feminine', 'All')),)
 OTHER_EMPTY_CHOICE = (('', _('Other')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031

@@ -139,6 +139,9 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
             convention=groupe.cotutelle and groupe.cotutelle.convention or [],
             autres_documents=groupe.cotutelle and groupe.cotutelle.autres_documents or [],
+            autre_institution=True if groupe.cotutelle and groupe.cotutelle.autre_institution_nom else False,
+            autre_institution_nom=groupe.cotutelle and groupe.cotutelle.autre_institution_nom or '',
+            autre_institution_adresse=groupe.cotutelle and groupe.cotutelle.autre_institution_adresse or '',
         )
 
     @classmethod
