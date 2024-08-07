@@ -52,6 +52,7 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
         context_data = super().get_context_data(**kwargs)
         context_data.update(self.get_forms())
         context_data['BE_ISO_CODE'] = BE_ISO_CODE
+        context_data['proposition_fusion'] = self.proposition_fusion
         return context_data
 
     def post(self, request, *args, **kwargs):
