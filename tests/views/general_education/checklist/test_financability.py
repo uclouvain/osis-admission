@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import datetime
-from unittest import mock
 
 import freezegun
 from django.conf import settings
@@ -518,3 +517,60 @@ class FinancabiliteDerogationViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.financability_dispensation_first_notification_by, self.sic_manager_user.person
         )
+
+
+@freezegun.freeze_time('2022-01-01')
+class FinancabiliteNotConcernedViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.academic_year = AcademicYearFactory(year=2022)
+
+        cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        EntityVersionFactory(entity=cls.first_doctoral_commission)
+
+        cls.training = GeneralEducationTrainingFactory(
+            management_entity=cls.first_doctoral_commission,
+            academic_year=cls.academic_year,
+        )
+
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=cls.training,
+            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            financability_computed_rule=EtatFinancabilite.FINANCABLE.name,
+            financability_computed_rule_situation=SituationFinancabilite.FINANCABLE_D_OFFICE.name,
+            financability_computed_rule_on=timezone.now(),
+            specific_question_answers={str(AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL).uuid): 0},
+        )
+        cls.default_headers = {'HTTP_HX-Request': 'true'}
+        cls.url = resolve_url(
+            'admission:general-education:financability-not-concerned',
+            uuid=cls.general_admission.uuid,
+        )
+
+    def test_post(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.financability_rule, '')
+        self.assertEqual(
+            self.general_admission.financability_rule_established_by,
+            self.sic_manager_user.person,
+        )
+        self.assertEqual(
+            self.general_admission.checklist['current']['financabilite']['statut'],
+            ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
+        )
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
