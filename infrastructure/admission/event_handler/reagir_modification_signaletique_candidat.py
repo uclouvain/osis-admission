@@ -1,7 +1,3 @@
-
-
-
-
 # ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
@@ -30,10 +26,14 @@
 import contextlib
 from typing import Any, Union
 
-from admission.ddd.admission.commands import RechercherCompteExistantCommand, ValiderTicketPersonneCommand, \
-    SoumettreTicketPersonneCommand, DefairePropositionFusionCommand
-from admission.ddd.admission.formation_generale.events import DonneesIdentificationCandidatModifiee, \
-    CoordonneesCandidatModifiees
+from admission.ddd.admission.commands import (
+    RechercherCompteExistantCommand, ValiderTicketPersonneCommand,
+    SoumettreTicketPersonneCommand, DefairePropositionFusionCommand,
+)
+from admission.ddd.admission.formation_generale.events import (
+    DonneesIdentificationCandidatModifiee,
+    CoordonneesCandidatModifiees,
+)
 from osis_common.ddd.interface import BusinessException
 
 
