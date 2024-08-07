@@ -73,7 +73,10 @@ class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
                 'emergency_contact_phone': known_person.emergency_contact_phone,
             }
 
-        context['profil_candidat'] = context['admission'].profil_soumis_candidat
+        if self.is_doctorate and 'dossier' in context:
+            context['profil_candidat'] = context['dossier'].profil_soumis_candidat
+        elif self.is_general or self.is_continuing:
+            context['profil_candidat'] = context['admission'].profil_soumis_candidat
 
         return context
 
