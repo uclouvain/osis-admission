@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
 from osis_common.ddd.interface import ApplicationService
 
@@ -84,4 +85,12 @@ class IPropositionRepository(IGlobalPropositionRepository):
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'Proposition') -> None:  # type: ignore[override]
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_dto_for_gestionnaire(
+        cls,
+        entity_id: 'PropositionIdentity',
+    ) -> 'PropositionGestionnaireDTO':
         raise NotImplementedError
