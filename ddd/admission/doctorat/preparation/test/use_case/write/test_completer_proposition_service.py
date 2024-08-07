@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import attr
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (

@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierFinancabiliteRegleCommand,

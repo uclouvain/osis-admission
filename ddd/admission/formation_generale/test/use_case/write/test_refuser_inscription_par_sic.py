@@ -23,24 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
-
 import factory
+from django.test import TestCase
 
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    RefuserPropositionParFaculteCommand,
-    RefuserAdmissionParSicCommand,
     RefuserInscriptionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
-    DecisionFacultaireEnum,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
-    MotifRefusFacultaireNonSpecifieException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -51,7 +43,6 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestRefuserInscriptionParSic(TestCase):

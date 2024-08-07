@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import VerifierProposition

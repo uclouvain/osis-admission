@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
 from unittest.mock import patch
 
 import freezegun
 import mock
+from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -46,8 +46,10 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from ddd.logic.financabilite.dtos.parcours import ParcoursDTO, ParcoursAcademiqueInterneDTO, \
-    ParcoursAcademiqueExterneDTO
+from ddd.logic.financabilite.dtos.parcours import (
+    ParcoursDTO, ParcoursAcademiqueInterneDTO,
+    ParcoursAcademiqueExterneDTO,
+)
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository

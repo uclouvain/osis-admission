@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.jury.commands import RetirerMembreCommand
 from admission.ddd.parcours_doctoral.jury.validator.exceptions import (

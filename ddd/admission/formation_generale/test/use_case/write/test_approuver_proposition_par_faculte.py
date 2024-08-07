@@ -24,10 +24,10 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
 
 import factory
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.formation_generale.commands import (

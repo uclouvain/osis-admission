@@ -25,7 +25,8 @@
 # ##############################################################################
 
 import datetime
-from unittest import TestCase
+
+from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator

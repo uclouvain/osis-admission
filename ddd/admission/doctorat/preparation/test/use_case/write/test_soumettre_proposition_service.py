@@ -28,7 +28,7 @@ import datetime
 import attr
 import freezegun
 import mock
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import SoumettrePropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -39,18 +39,17 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
-from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
