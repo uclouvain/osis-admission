@@ -556,6 +556,7 @@ COMMAND_HANDLERS = {
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
     DefairePropositionFusionCommand: lambda msg_bus, cmd: defaire_proposition_fusion_personne(
+        msg_bus,
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),

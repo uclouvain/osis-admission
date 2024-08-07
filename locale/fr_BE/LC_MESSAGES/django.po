@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-07 11:51+0200\n"
+"POT-Creation-Date: 2024-08-06 14:44+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -8195,9 +8195,6 @@ msgstr "UE"
 
 msgid "UUID"
 msgstr "UUID"
-
-msgid "Unable to edit a known person's information"
-msgstr "Impossible de modifier les informations d'une personne connue"
 
 msgid "Unavailable"
 msgstr "Non disponible"

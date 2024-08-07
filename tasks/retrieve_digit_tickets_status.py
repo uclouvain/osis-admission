@@ -29,10 +29,11 @@ from typing import List
 import waffle
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand,
@@ -40,6 +41,8 @@ from admission.ddd.admission.commands import (
 )
 from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionEligibleException
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from backoffice.celery import app
 from base.models.person import Person
@@ -134,10 +137,16 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
 
 
 def _injecter_signaletique_a_epc(matricule: str):
-    demande = BaseAdmission.objects.filter(
-        submitted_at__isnull=False,
+    # TODO: Inject also for other admisison type
+    demande = GeneralEducationAdmission.objects.filter(
         candidate__global_id=matricule,
-    ).order_by('submitted_at').first()
+    ).filter(
+        Q(
+            type_demande=TypeDemande.ADMISSION.name,
+            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
+        )
+        | Q(type_demande=TypeDemande.INSCRIPTION.name)
+    ).order_by('created_at').first()
     InjectionEPCSignaletique().injecter(admission=demande)
 
 
