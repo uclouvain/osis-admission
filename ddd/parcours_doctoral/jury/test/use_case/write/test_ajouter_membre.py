@@ -23,11 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.jury.commands import AjouterMembreCommand
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury
-from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
 from admission.ddd.parcours_doctoral.jury.test.factory.jury import MembreJuryFactory
 from admission.ddd.parcours_doctoral.jury.validator.exceptions import (
     MembreExterneSansEmailException,

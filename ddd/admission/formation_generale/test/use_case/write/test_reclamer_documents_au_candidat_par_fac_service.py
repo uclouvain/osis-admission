@@ -25,9 +25,9 @@
 # ##############################################################################
 import datetime
 from typing import Dict
-from unittest import TestCase
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument

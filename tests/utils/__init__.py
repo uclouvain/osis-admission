@@ -24,7 +24,8 @@
 #
 # ##############################################################################
 import uuid
-from unittest import TestCase
+
+from django.test import TestCase
 
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO

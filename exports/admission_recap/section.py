@@ -554,6 +554,7 @@ def get_sections(
     with_free_requestable_documents=False,
     hide_curriculum=False,
     with_additional_documents=True,
+    with_epc_curex=True,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -578,10 +579,16 @@ def get_sections(
         pdf_sections.append(get_curriculum_section(context, {Onglets.CURRICULUM.name: []}, False))
 
     for educational_experience in context.curriculum.experiences_academiques:
-        pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
+        # TODO: test this part
+        if with_epc_curex or not educational_experience.epc_experience:
+            pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
-        pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
+        # TODO: test this part
+        if with_epc_curex or not non_educational_experience.epc_experience:
+            pdf_sections.append(
+                get_non_educational_experience_section(context, non_educational_experience, load_content)
+            )
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))

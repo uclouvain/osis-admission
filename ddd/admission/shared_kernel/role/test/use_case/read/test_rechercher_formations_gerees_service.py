@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance

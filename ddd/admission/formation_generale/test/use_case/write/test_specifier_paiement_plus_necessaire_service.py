@@ -24,9 +24,10 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase, mock
+from unittest import mock
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementPlusNecessaireCommand,

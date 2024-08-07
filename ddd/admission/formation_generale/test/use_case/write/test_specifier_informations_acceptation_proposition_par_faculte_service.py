@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 import uuid
-from unittest import TestCase
 
 import factory
+from django.test import TestCase
 
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (

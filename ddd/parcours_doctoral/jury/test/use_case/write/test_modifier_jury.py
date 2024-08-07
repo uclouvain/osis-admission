@@ -24,7 +24,8 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
+
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory,

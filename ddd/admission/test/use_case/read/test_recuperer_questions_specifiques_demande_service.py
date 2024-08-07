@@ -24,16 +24,16 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
+from django.test import TestCase
 
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesFormationGeneraleQuery,
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesFormationDoctoraleQuery,
 )
 from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesFormationContinueQuery,
 )
-from admission.ddd.admission.doctorat.preparation.commands import (
-    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesFormationDoctoraleQuery,
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesFormationGeneraleQuery,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 

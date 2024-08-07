@@ -25,16 +25,16 @@
 # ##############################################################################
 import datetime
 from typing import Dict
-from unittest import TestCase
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import ReclamerDocumentsAuCandidatCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

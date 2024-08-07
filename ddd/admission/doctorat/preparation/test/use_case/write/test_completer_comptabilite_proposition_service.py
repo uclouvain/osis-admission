@@ -23,11 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterComptabilitePropositionCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
+    PropositionAdmissionSC3DPMinimaleFactory,
 )
 from admission.ddd.admission.enums import (
     ChoixTypeCompteBancaire,
@@ -38,10 +41,6 @@ from admission.ddd.admission.enums import (
     ChoixAssimilation5,
     ChoixAssimilation6,
     LienParente,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
-    PropositionAdmissionSC3DPMinimaleFactory,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,

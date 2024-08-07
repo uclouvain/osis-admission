@@ -23,12 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase, mock
+from unittest import mock
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.domain.validator.exceptions import (
-    ConditionsAccessNonRempliesException,
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
