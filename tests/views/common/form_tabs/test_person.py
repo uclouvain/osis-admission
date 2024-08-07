@@ -161,6 +161,13 @@ class PersonFormTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = patch(
+            "infrastructure.messages_bus.message_bus_instance.publish",
+            side_effect=lambda *args, **kwargs: None,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_already_registered_field_initialization(self):
         form = AdmissionPersonForm(
             instance=PersonFactory(

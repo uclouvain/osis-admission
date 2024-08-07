@@ -64,6 +64,7 @@ class ReinitialiserEmplacementsDocumentsNonLibresPropositionService(interface.Do
                             uuid_proposition=proposition_identity.uuid,
                             auteur='',
                             raison='',
+                            # TODO
                             statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                         )
                     )

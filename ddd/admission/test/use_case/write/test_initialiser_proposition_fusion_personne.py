@@ -53,6 +53,7 @@ class TestInitialiserPropositionFusionPersonne(SimpleTestCase):
             lieu_naissance='New York',
             email='johndoe@example.com',
             genre='Male',
+            sex='Male',
             etat_civil='Single',
             nationalite='French',
             numero_national="123456789",

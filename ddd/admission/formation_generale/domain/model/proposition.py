@@ -830,6 +830,20 @@ class Proposition(interface.RootEntity):
                 extra={'to_be_completed': '0'},
             )
 
+    def specifier_financabilite_non_concernee(
+        self,
+        etabli_par: str,
+        auteur_modification: str,
+    ):
+        self.financabilite_regle = None
+        self.financabilite_regle_etabli_par = etabli_par
+        self.financabilite_regle_etabli_le = now()
+        self.auteur_derniere_modification = auteur_modification
+        self.checklist_actuelle.financabilite = StatutChecklist(
+            statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            libelle='',
+        )
+
     def specifier_derogation_financabilite(
         self,
         statut: DerogationFinancement,
