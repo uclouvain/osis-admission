@@ -138,6 +138,14 @@ class Notification(INotification):
         # Tokens communs
         candidat = Person.objects.get(global_id=proposition.matricule_candidat)
         common_tokens = cls.get_common_tokens(proposition, candidat)
+        common_tokens["admission_link_back"] = "{}{}".format(
+            settings.ADMISSION_BACKEND_LINK_PREFIX,
+            resolve_url('admission:doctorate:supervision', uuid=proposition.entity_id.uuid),
+        )
+        common_tokens["admission_link_front"] = "{}{}".format(
+            common_tokens["admission_link_front"],
+            'supervision',
+        )
         actor_list = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
 
         # Envoyer aux gestionnaires CDD

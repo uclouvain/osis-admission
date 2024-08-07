@@ -26,6 +26,11 @@
 {% endcomment %}
 
 {% block form %}
+    {% if proposition_fusion %}
+        <div class="alert alert-warning">
+            {% trans 'A merger proposal is currently being resolved. Saving the tab will cause a merge reset' %}
+        </div>
+    {% endif %}
     {% bootstrap_form_errors main_form %}
     {% bootstrap_form_errors residential %}
     {% bootstrap_form_errors contact %}

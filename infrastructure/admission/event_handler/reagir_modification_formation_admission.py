@@ -1,3 +1,7 @@
+
+
+
+
 # ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
@@ -6,7 +10,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,23 +27,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+import contextlib
+from typing import Any, Union
 
-import attr
-
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True)
-class Cotutelle(interface.ValueObject):
-    motivation: Optional[str] = ''
-    institution_fwb: Optional[bool] = None
-    institution: Optional[str] = ''
-    autre_institution_nom: Optional[str] = ''
-    autre_institution_adresse: Optional[str] = ''
-    demande_ouverture: List[str] = attr.Factory(list)
-    convention: List[str] = attr.Factory(list)
-    autres_documents: List[str] = attr.Factory(list)
+from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
+from admission.ddd.admission.formation_generale.events import FormationDuDossierAdmissionModifieeEvent
+from osis_common.ddd.interface import BusinessException
 
 
-pas_de_cotutelle = Cotutelle()
+def process(
+    msg_bus: Any,
+    event: Union[FormationDuDossierAdmissionModifieeEvent],
+) -> None:
+    with contextlib.suppress(BusinessException):
+        msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
