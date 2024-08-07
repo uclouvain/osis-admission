@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0210_generaleducationadmission_financability_rule_established_on'),
+        ('admission', '0212_alter_epcinjection_status'),
     ]
 
     operations = [
