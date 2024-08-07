@@ -560,9 +560,6 @@ msgstr ""
 msgid "Admission context"
 msgstr ""
 
-msgid "Admission date"
-msgstr ""
-
 msgid "Admission export"
 msgstr ""
 
@@ -598,6 +595,10 @@ msgstr ""
 msgid "Admission to regulated professions"
 msgstr ""
 
+msgid "Admission type"
+msgstr ""
+
+msgctxt "doctorate-filter"
 msgid "Admission type"
 msgstr ""
 
@@ -1142,10 +1143,11 @@ msgstr ""
 msgid "CDD opinion"
 msgstr ""
 
-msgid "CDD status"
+msgid "CDD:"
 msgstr ""
 
-msgid "CDD:"
+msgctxt "admission"
+msgid "CDD status"
 msgstr ""
 
 msgid "CDDs"
@@ -1997,6 +1999,10 @@ msgctxt "admission"
 msgid "Course units"
 msgstr ""
 
+msgctxt "admission"
+msgid "Courses"
+msgstr ""
+
 msgid "Courses taken"
 msgstr ""
 
@@ -2385,6 +2391,9 @@ msgstr ""
 msgid "Doctor"
 msgstr ""
 
+msgid "Doctoral commissions"
+msgstr ""
+
 msgid "Doctoral student:"
 msgstr ""
 
@@ -2403,6 +2412,12 @@ msgid "Doctorate education"
 msgstr ""
 
 msgid "Doctorate enrolment applications"
+msgstr ""
+
+msgid "Doctorate Ethics Regulations"
+msgstr ""
+
+msgid "Doctorate Regulations"
 msgstr ""
 
 msgid "Document"
@@ -2462,9 +2477,6 @@ msgstr ""
 msgid "Dossier"
 msgstr ""
 
-msgid "Dossier confirmation"
-msgstr ""
-
 msgid "Dossier not found."
 msgstr ""
 
@@ -2475,6 +2487,13 @@ msgid "Dossier reference:"
 msgstr ""
 
 msgid "Dossier status"
+msgstr ""
+
+msgctxt "doctorate-header-list"
+msgid "Dossier status"
+msgstr ""
+
+msgid "Dossier submission date"
 msgstr ""
 
 msgid "Double degree:"
@@ -2878,6 +2897,9 @@ msgstr ""
 msgid "FWB - Registered credits"
 msgstr ""
 
+msgid "FWB Cotutelle"
+msgstr ""
+
 msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
 msgstr ""
@@ -2886,6 +2908,9 @@ msgid "FWB equivalent course"
 msgstr ""
 
 msgid "Fac approval"
+msgstr ""
+
+msgid "Fac decision"
 msgstr ""
 
 msgctxt "ways_hear_about_training"
@@ -3018,6 +3043,9 @@ msgstr ""
 msgid ""
 "Financeable - %(rule)s (Established by %(established_by)s the "
 "%(established_on)s)"
+msgstr ""
+
+msgid "Financing comment"
 msgstr ""
 
 msgid "Financing rule"
@@ -3298,6 +3326,9 @@ msgid ""
 "Belgium?"
 msgstr ""
 
+msgid "Has your PhD project already started?"
+msgstr ""
+
 msgid ""
 "Have you applied <a href='https://allocations-etudes.cfwb.be/etudes-"
 "superieures/' target='_blank'>for a student grant</a> from the French "
@@ -3441,6 +3472,11 @@ msgstr ""
 msgid "I authorise"
 msgstr ""
 
+msgid ""
+"I confirm that I have read the PhD regulations on research ethics and "
+"certify that my project complies with these regulations."
+msgstr ""
+
 msgid "I do not authorize"
 msgstr ""
 
@@ -3510,6 +3546,12 @@ msgid ""
 msgstr ""
 
 msgid "I hereby declare that"
+msgstr ""
+
+msgid ""
+"I hereby declare that I have read and understood the regulations of the "
+"General PhD Committee and the specific requirements of the PhD Field "
+"Committee, to which I adhere."
 msgstr ""
 
 #, python-format
@@ -3846,6 +3888,10 @@ msgstr ""
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
+msgid ""
+"Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
+msgstr ""
+
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr ""
 
@@ -3927,6 +3973,9 @@ msgid "Last modification (author)"
 msgstr ""
 
 msgid "Last name"
+msgstr ""
+
+msgid "Last name / First name"
 msgstr ""
 
 msgid "Last name / First name / Email"
@@ -4170,10 +4219,6 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Mail sent to the CDD to inform them that a new application has been submitted"
-msgstr ""
-
-msgid ""
 "Mail sent to the applicant following approval or rejection by a member of "
 "the supervisory group"
 msgstr ""
@@ -4303,11 +4348,6 @@ msgstr ""
 msgid ""
 "Mail sent to the member of the supervision panel when deleted by the "
 "candidate"
-msgstr ""
-
-msgid ""
-"Mail sent to the members of the supervision panel to inform them that the "
-"application has been submitted to UCLouvain by the applicant"
 msgstr ""
 
 msgid "Main institute"
@@ -4955,6 +4995,12 @@ msgstr ""
 msgid "Other institute (if necessary)"
 msgstr ""
 
+msgid "Other institution address"
+msgstr ""
+
+msgid "Other institution name"
+msgstr ""
+
 msgid "Other international scholarship"
 msgstr ""
 
@@ -5152,6 +5198,9 @@ msgstr ""
 msgid "PhD proposal"
 msgstr ""
 
+msgid "PhD research experience"
+msgstr ""
+
 msgid "PhD research project"
 msgstr ""
 
@@ -5323,7 +5372,7 @@ msgstr ""
 msgid "Poster"
 msgstr ""
 
-msgid "Pre-admission date"
+msgid "Pre-admission"
 msgstr ""
 
 msgid "Pre-admission submission date"
@@ -5369,9 +5418,6 @@ msgid "Previous experiences"
 msgstr ""
 
 msgid "Previous notes"
-msgstr ""
-
-msgid "Previous research experience"
 msgstr ""
 
 msgid "Private"
@@ -5996,10 +6042,7 @@ msgstr ""
 msgid "SIC comment for the faculty"
 msgstr ""
 
-msgid "SIC status"
-msgstr ""
-
-msgid "SIC:"
+msgid "SIC decision"
 msgstr ""
 
 msgid "SIGNING_IN_PROGRESS"
@@ -6043,6 +6086,10 @@ msgid "Scholarship"
 msgstr ""
 
 msgctxt "admission model"
+msgid "Scholarship"
+msgstr ""
+
+msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr ""
 
@@ -6389,6 +6436,10 @@ msgstr ""
 msgid "Submission date"
 msgstr ""
 
+msgctxt "doctorate-header-list"
+msgid "Submission date"
+msgstr ""
+
 msgid "Submission date:"
 msgstr ""
 
@@ -6408,7 +6459,13 @@ msgstr ""
 msgid "Submitted for publication"
 msgstr ""
 
+msgid "Submitted from"
+msgstr ""
+
 msgid "Submitted profile"
+msgstr ""
+
+msgid "Submitted until"
 msgstr ""
 
 msgid ""
@@ -6437,6 +6494,10 @@ msgstr ""
 msgid "Supervision group not found."
 msgstr ""
 
+msgid "Supervisor"
+msgstr ""
+
+msgctxt "gender"
 msgid "Supervisor"
 msgstr ""
 
@@ -7661,6 +7722,9 @@ msgstr ""
 msgid "Work contract type"
 msgstr ""
 
+msgid "Work start date"
+msgstr ""
+
 msgid "Working contract type"
 msgstr ""
 
@@ -7942,11 +8006,6 @@ msgstr ""
 msgid "You indicated that you will obtain it in %(year)s."
 msgstr ""
 
-msgid "You must add at least one CA member in order to request signatures."
-msgstr ""
-"You must add at least one supervisory panel member in order to request "
-"signatures."
-
 msgid ""
 "You must add at least one UCLouvain supervisor in order to request "
 "signatures."
@@ -7955,6 +8014,11 @@ msgstr ""
 msgid ""
 "You must add at least one external supervisor in order to request signatures."
 msgstr ""
+
+msgid "You must add at least two CA member in order to request signatures."
+msgstr ""
+"You must add at least two supervisory panel member in order to request "
+"signatures."
 
 msgid "You must answer the question about external enrollment change."
 msgstr ""

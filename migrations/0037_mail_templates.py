@@ -9,8 +9,6 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
     ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
-    ADMISSION_EMAIL_SUBMISSION_CDD,
-    ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
 from osis_mail_template import MailTemplateMigration
 
@@ -117,9 +115,9 @@ L'équipe OSIS</p>
             ADMISSION_EMAIL_SIGNATURE_REFUSAL,
             {
                 'en': "[OSIS] Refusal from a member of the supervision group for the {training_title} "
-                      "of {candidate_first_name} {candidate_last_name}",
+                "of {candidate_first_name} {candidate_last_name}",
                 'fr-be': "[OSIS] Refus d'un membre du groupe de supervision pour le {training_title} "
-                         "de {candidate_first_name} {candidate_last_name}",
+                "de {candidate_first_name} {candidate_last_name}",
             },
             {
                 'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>
@@ -162,52 +160,6 @@ The OSIS Team</p>
                 'fr-be': '''<p>Bonjour {candidate_first_name} {candidate_last_name},</p>
 
 <p>Votre demande d'admission en {training_title} a été soumise avec succès.</p>
-
-<p>---<br/>
-L'équipe OSIS</p>
-''',
-            },
-        ),
-        MailTemplateMigration(
-            ADMISSION_EMAIL_SUBMISSION_CDD,
-            {
-                'en': '[OSIS] Admission request submitted by {candidate_first_name} {candidate_last_name}',
-                'fr-be': "[OSIS] Demande d'admission soumise par {candidate_first_name} {candidate_last_name}",
-            },
-            {
-                'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>
-
-<p>{candidate_first_name} {candidate_last_name} has submitted an application to {training_title}.</p>
-
-<p>---<br/>
-The OSIS Team</p>
-''',
-                'fr-be': '''<p>Bonjour {actor_first_name} {actor_last_name},</p>
-
-<p>{candidate_first_name} {candidate_last_name} a soumis une demande d'admission en {training_title}.</p>
-
-<p>---<br/>
-L'équipe OSIS</p>
-''',
-            },
-        ),
-        MailTemplateMigration(
-            ADMISSION_EMAIL_SUBMISSION_MEMBER,
-            {
-                'en': '[OSIS] Admission request submitted by {candidate_first_name} {candidate_last_name}',
-                'fr-be': "[OSIS] Demande d'admission soumise par {candidate_first_name} {candidate_last_name}",
-            },
-            {
-                'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>
-
-<p>{candidate_first_name} {candidate_last_name} has submitted an application to {training_title}.</p>
-
-<p>---<br/>
-The OSIS Team</p>
-''',
-                'fr-be': '''<p>Bonjour {actor_first_name} {actor_last_name},</p>
-
-<p>{candidate_first_name} {candidate_last_name} a soumis une demande d'admission en {training_title}.</p>
 
 <p>---<br/>
 L'équipe OSIS</p>
