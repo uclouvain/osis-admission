@@ -30,6 +30,10 @@
     <div class="alert alert-info">
       <strong>En attente</strong> La demande de création de compte à DigIT est en cours de traitement
     </div>
+{% elif digit_ticket.statut == 'ERROR' %}
+      <div class="alert alert-danger">
+        Une erreur est survenue lors de la demande de création de compte à DigIT. Veuillez contacter l'équipe informatique
+    </div>
 {% elif digit_ticket.statut == 'REFUSED' %}
     <div class="alert alert-danger">
         <strong>Compte refusé</strong> La demande de création de compte a été refusée par DigIT
