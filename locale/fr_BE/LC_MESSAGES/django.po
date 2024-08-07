@@ -2599,6 +2599,7 @@ msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 msgid "Doctor"
 msgstr "Docteur"
 
+
 msgid "Doctoral commissions"
 msgstr "Commissions doctorales"
 
@@ -2621,6 +2622,12 @@ msgstr "Formation doctorale"
 
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
+
+msgid "Doctorate Ethics Regulations"
+msgstr "Règlement de déontologie"
+
+msgid "Doctorate Regulations"
+msgstr "Règlement de la commission générale du doctorat"
 
 msgid "Document"
 msgstr "Document"
@@ -3793,6 +3800,14 @@ msgstr ""
 msgid "I authorise"
 msgstr "J'autorise"
 
+msgid ""
+"I confirm that I have read the PhD regulations on research ethics and "
+"certify that my project complies with these regulations."
+msgstr ""
+"Je confirme avoir pris connaissance du règlement doctoral relatif à la "
+"déontologie de la recherche et certifie que mon projet est conforme à ce "
+"règlement."
+
 msgid "I do not authorize"
 msgstr "Je n'autorise pas"
 
@@ -3883,6 +3898,15 @@ msgstr ""
 
 msgid "I hereby declare that"
 msgstr "Je déclare sur l'honneur que"
+
+msgid ""
+"I hereby declare that I have read and understood the regulations of the "
+"General PhD Committee and the specific requirements of the PhD Field "
+"Committee, to which I adhere."
+msgstr ""
+"Je déclare avoir pris connaissance et avoir compris le règlement de la "
+"commission générale du doctorat et des conditions particulières de la "
+"commission doctorale de domaine, auxquels j'adhère."
 
 #, python-format
 msgid ""
@@ -4634,11 +4658,6 @@ msgstr ""
 "de formation doctorale"
 
 msgid ""
-"Mail sent to the CDD to inform them that a new application has been submitted"
-msgstr ""
-"E-mail envoyé à la CDD pour l'informer qu'une nouvelle demande a été soumise"
-
-msgid ""
 "Mail sent to the applicant following approval or rejection by a member of "
 "the supervisory group"
 msgstr ""
@@ -4824,13 +4843,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au membre du groupe de supervision lors de sa suppression par "
 "le candidat"
-
-msgid ""
-"Mail sent to the members of the supervision panel to inform them that the "
-"application has been submitted to UCLouvain by the applicant"
-msgstr ""
-"E-mail envoyé aux membres du groupe de supervision pour les informer que la "
-"demande a été soumise à l'UCLouvain par le candidat"
 
 msgid "Main institute"
 msgstr "Institution principale"

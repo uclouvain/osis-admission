@@ -29,6 +29,7 @@ from typing import List
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
 from django.shortcuts import resolve_url
+from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
@@ -64,8 +65,6 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
-    ADMISSION_EMAIL_SUBMISSION_CDD,
-    ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
 from admission.mail_templates.document import (
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE,
@@ -276,7 +275,11 @@ class Notification(INotification):
     @classmethod
     def notifier_soumission(cls, proposition: Proposition) -> None:
         candidat = Person.objects.get(global_id=proposition.matricule_candidat)
-        admission = PropositionProxy.objects.get(uuid=proposition.entity_id.uuid)
+        admission = (
+            PropositionProxy.objects.annotate_training_management_faculty()
+            .annotate_with_reference()
+            .get(uuid=proposition.entity_id.uuid)
+        )
 
         # Create the async task to generate the pdf recap
         task = AsyncTask.objects.create(
@@ -302,30 +305,24 @@ class Notification(INotification):
             type=AdmissionTask.TaskType.DOCTORATE_MERGE.name,
         )
 
-        # Notifier le doctorant via mail
+        # Notifier le doctorant via mail en mettant en copie les membres du groupe de supervision
         common_tokens = cls.get_common_tokens(proposition, candidat)
+        common_tokens['training_acronym'] = proposition.formation_id.sigle
+        common_tokens['admission_reference'] = admission.formatted_reference
+        common_tokens['recap_link'] = common_tokens['admission_link_front'] + 'pdf-recap'
+
+        actors_invited = admission.supervision_group.actors.select_related('person')
         email_message = generate_email(
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
             candidat.language,
             common_tokens,
             recipients=[candidat.private_email],
+            cc_recipients=[actor.email for actor in actors_invited],
         )
         EmailNotificationHandler.create(email_message, person=candidat)
 
         # Envoyer aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            email_message = generate_email(
-                ADMISSION_EMAIL_SUBMISSION_CDD,
-                manager.language,
-                {
-                    **common_tokens,
-                    "actor_first_name": manager.first_name,
-                    "actor_last_name": manager.last_name,
-                },
-                recipients=[manager.email],
-            )
-            EmailNotificationHandler.create(email_message, person=manager)
-
             with translation.override(manager.language):
                 content = (
                     _(
@@ -337,21 +334,6 @@ class Notification(INotification):
                 )
                 web_notification = WebNotification(recipient=manager, content=str(content))
             WebNotificationHandler.create(web_notification)
-
-        # Envoyer aux membres du groupe de supervision
-        actors_invited = admission.supervision_group.actors.select_related('person')
-        for actor in actors_invited:
-            email_message = generate_email(
-                ADMISSION_EMAIL_SUBMISSION_MEMBER,
-                actor.language,
-                {
-                    **common_tokens,
-                    "actor_first_name": actor.first_name,
-                    "actor_last_name": actor.last_name,
-                },
-                recipients=[actor.email],
-            )
-            EmailNotificationHandler.create(email_message, person=actor.person_id and actor.person)
 
     @classmethod
     def notifier_suppression_membre(cls, proposition: Proposition, signataire_id: 'SignataireIdentity') -> None:
