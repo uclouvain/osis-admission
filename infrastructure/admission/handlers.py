@@ -26,6 +26,7 @@
 from django.conf import settings
 
 from admission.ddd.admission.commands import *
+from admission.ddd.admission.events import PropositionFusionDefaiteEvent
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
 from admission.ddd.admission.use_case.read import *
@@ -35,6 +36,7 @@ from admission.ddd.admission.use_case.write.modifier_matricule_candidat import m
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.event_handler.reagir_a_proposition_soumise import recherche_et_validation_digit
+from admission.infrastructure.admission.event_handler.reagir_proposition_fusion_defaite import validation_digit
 from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import (
     PropositionPersonneFusionRepository,
@@ -92,4 +94,5 @@ if 'admission' in settings.INSTALLED_APPS:
         PropositionSoumiseEvent: [recherche_et_validation_digit],
         InscriptionApprouveeParSicEvent: [reagir_a_approuver_proposition],
         AdmissionApprouveeParSicEvent: [reagir_a_approuver_proposition],
+        PropositionFusionDefaiteEvent: [validation_digit],
     }
