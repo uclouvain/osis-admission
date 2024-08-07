@@ -284,7 +284,7 @@ class InjectionEPCAdmission:
             type_document = parties_type_document[1]
         elif cls.__est_uuid_valide(parties_type_document[-1]):
             # type_document_compose = ONGLET.TYPE_DOCUMENT.uuid (Questions spécifiques)
-            _, type_document, uuid_question = parties_type_document[1]
+            _, type_document, uuid_question = parties_type_document
         elif len(parties_type_document) == 3:
             # type_document_compose = ONGLET.uuid.TYPE_DOCUMENT
             _, uuid_experience, type_document = parties_type_document
@@ -357,14 +357,15 @@ class InjectionEPCAdmission:
                 .select_related("academic_year")
                 .order_by("academic_year")
             )  # type: QuerySet[EducationalExperienceYear]
-
+            exp = []
             for experience_educative_annualisee in experiences_educatives_annualisees:
                 data_annuelle = InjectionEPCCurriculum._build_data_annuelle(
                     experience_educative,
                     experience_educative_annualisee,
                 )
-                experiences.append(data_annuelle)
-
+                exp.append(data_annuelle)
+            exp[-1].update({'diplome': experience_educative.obtained_diploma})
+            experiences += exp
         return experiences
 
     @classmethod
