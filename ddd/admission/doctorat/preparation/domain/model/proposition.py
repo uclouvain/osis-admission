@@ -139,7 +139,6 @@ class Proposition(interface.RootEntity):
 
     def completer(
         self,
-        type_admission: str,
         justification: Optional[str],
         commission_proximite: Optional[str],
         type_financement: Optional[str],
@@ -152,6 +151,8 @@ class Proposition(interface.RootEntity):
         bourse_preuve: List[str],
         duree_prevue: Optional[int],
         temps_consacre: Optional[int],
+        est_lie_fnrs_fria_fresh_csc: Optional[bool],
+        commentaire_financement: Optional[str],
         langue_redaction_these: str,
         institut_these: Optional[str],
         lieu_these: Optional[str],
@@ -162,6 +163,9 @@ class Proposition(interface.RootEntity):
         domaine_these: Optional[str],
         date_soutenance: Optional[datetime.date],
         raison_non_soutenue: Optional[str],
+        projet_doctoral_deja_commence: Optional[bool],
+        projet_doctoral_institution: Optional[str],
+        projet_doctoral_date_debut: Optional[datetime.date],
         documents: List[str] = None,
         graphe_gantt: List[str] = None,
         proposition_programme_doctoral: List[str] = None,
@@ -169,7 +173,7 @@ class Proposition(interface.RootEntity):
         lettres_recommandation: List[str] = None,
     ) -> None:
         CompletionPropositionValidatorList(
-            type_admission=type_admission,
+            type_admission=self.type_admission.name,
             type_financement=type_financement,
             justification=justification,
             type_contrat_travail=type_contrat_travail,
@@ -177,7 +181,7 @@ class Proposition(interface.RootEntity):
             institution=institution,
             domaine_these=domaine_these,
         ).validate()
-        self._completer_proposition(type_admission, justification, commission_proximite)
+        self._completer_proposition(justification, commission_proximite)
         self._completer_financement(
             type=type_financement,
             type_contrat_travail=type_contrat_travail,
@@ -189,6 +193,8 @@ class Proposition(interface.RootEntity):
             bourse_preuve=bourse_preuve,
             duree_prevue=duree_prevue,
             temps_consacre=temps_consacre,
+            est_lie_fnrs_fria_fresh_csc=est_lie_fnrs_fria_fresh_csc,
+            commentaire=commentaire_financement,
         )
         self._completer_projet(
             titre=titre,
@@ -196,6 +202,9 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            deja_commence=projet_doctoral_deja_commence,
+            deja_commence_institution=projet_doctoral_institution,
+            date_debut=projet_doctoral_date_debut,
             documents=documents,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
@@ -212,11 +221,9 @@ class Proposition(interface.RootEntity):
 
     def _completer_proposition(
         self,
-        type_admission: str,
         justification: Optional[str],
         commission_proximite: Optional[str],
     ):
-        self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self._definir_commission(commission_proximite)
 
@@ -241,6 +248,8 @@ class Proposition(interface.RootEntity):
         bourse_preuve: List[str],
         duree_prevue: Optional[int],
         temps_consacre: Optional[int],
+        est_lie_fnrs_fria_fresh_csc: Optional[bool],
+        commentaire: Optional[str],
     ):
         if type:
             self.financement = Financement(
@@ -254,6 +263,8 @@ class Proposition(interface.RootEntity):
                 bourse_preuve=bourse_preuve or [],
                 duree_prevue=duree_prevue,
                 temps_consacre=temps_consacre,
+                est_lie_fnrs_fria_fresh_csc=est_lie_fnrs_fria_fresh_csc,
+                commentaire=commentaire,
             )
         else:
             self.financement = financement_non_rempli
@@ -265,6 +276,9 @@ class Proposition(interface.RootEntity):
         langue_redaction_these: str,
         institut_these: Optional[str],
         lieu_these: Optional[str],
+        deja_commence: Optional[bool] = None,
+        deja_commence_institution: Optional[str] = '',
+        date_debut: Optional[datetime.date] = None,
         documents: List[str] = None,
         graphe_gantt: List[str] = None,
         proposition_programme_doctoral: List[str] = None,
@@ -282,6 +296,9 @@ class Proposition(interface.RootEntity):
             proposition_programme_doctoral=proposition_programme_doctoral or [],
             projet_formation_complementaire=projet_formation_complementaire or [],
             lettres_recommandation=lettres_recommandation or [],
+            deja_commence=deja_commence,
+            deja_commence_institution=deja_commence_institution,
+            date_debut=date_debut,
         )
 
     def _completer_experience_precedente(
@@ -434,7 +451,12 @@ class Proposition(interface.RootEntity):
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
-        ProjetDoctoralValidatorList(self.type_admission, self.projet, self.financement).validate()
+        ProjetDoctoralValidatorList(
+            self.type_admission,
+            self.projet,
+            self.financement,
+            self.experience_precedente_recherche,
+        ).validate()
 
     def finaliser(
         self,

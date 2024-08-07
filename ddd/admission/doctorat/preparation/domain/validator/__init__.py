@@ -42,7 +42,7 @@ from ._should_groupe_de_supervision_a_approuve import (
     ShouldMembresCAOntApprouve,
     ShouldPromoteursOntApprouve,
 )
-from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
+from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA
 from ._should_groupe_de_supervision_avoir_un_promoteur_de_reference import (
     ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference,
 )
@@ -76,7 +76,7 @@ __all__ = [
     "ShouldGroupeDeSupervisionNonCompletPourPromoteurs",
     "ShouldCotutelleEtreComplete",
     "ShouldProjetEtreComplet",
-    "ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA",
+    "ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA",
     "ShouldLanguesConnuesRequisesEtreSpecifiees",
     "ShouldCurriculumFichierEtreSpecifie",
     "ShouldDemandeSignatureLancee",

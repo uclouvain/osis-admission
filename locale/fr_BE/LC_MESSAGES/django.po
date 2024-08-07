@@ -3250,6 +3250,9 @@ msgid ""
 msgstr ""
 "Finançable - %(rule)s (Établi par %(established_by)s le %(established_on)s)"
 
+msgid "Financing comment"
+msgstr "Commentaire sur le financement"
+
 msgid "Financing rule"
 msgstr "Règle de financement"
 
@@ -3562,6 +3565,9 @@ msgid ""
 msgstr ""
 "Ce diplôme a-t-il fait l'objet d'une décision d'équivalence par les services "
 "de la Communauté française de Belgique ?"
+
+msgid "Has your PhD project already started?"
+msgstr "Votre projet doctoral a-t-il déjà commencé ?"
 
 msgid ""
 "Have you applied <a href='https://allocations-etudes.cfwb.be/etudes-"
@@ -4235,6 +4241,12 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
+
+msgid ""
+"Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
+msgstr ""
+"Votre demande d'admission est-elle en lien avec une candidature FNRS, FRIA, "
+"FRESH, CSC"
 
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr "Il n'est pas possible de passer du statut \"validé\" à ce statut."
@@ -5471,6 +5483,12 @@ msgstr "Autre institution"
 msgid "Other institute (if necessary)"
 msgstr "Autre institution (le cas échéant)"
 
+msgid "Other institution address"
+msgstr "Autre institution adresse"
+
+msgid "Other institution name"
+msgstr "Autre institution nom"
+
 msgid "Other international scholarship"
 msgstr "Autre bourse internationale"
 
@@ -5671,6 +5689,9 @@ msgstr "Projet doctoral"
 
 msgid "PhD proposal"
 msgstr "Projet de formation doctorale"
+
+msgid "PhD research experience"
+msgstr "Expérience de recherche doctoral"
 
 msgid "PhD research project"
 msgstr "Projet de recherche doctoral"
@@ -5929,9 +5950,6 @@ msgstr "Expériences du parcours"
 
 msgid "Previous notes"
 msgstr "Notes précédentes"
-
-msgid "Previous research experience"
-msgstr "Expérience précédente de recherche"
 
 msgid "Private"
 msgstr "Privé"
@@ -8450,6 +8468,9 @@ msgstr ""
 msgid "Work contract type"
 msgstr "Type de contrat de travail"
 
+msgid "Work start date"
+msgstr "Date de début des travaux"
+
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
 
@@ -8795,11 +8816,6 @@ msgstr "Vous n'avez pas encore soumis votre demande."
 msgid "You indicated that you will obtain it in %(year)s."
 msgstr "Vous avez indiqué que vous alliez l'obtenir en %(year)s."
 
-msgid "You must add at least one CA member in order to request signatures."
-msgstr ""
-"Vous devez ajouter au moins un membre du comité d'accompagnement afin de "
-"demander les signatures."
-
 msgid ""
 "You must add at least one UCLouvain supervisor in order to request "
 "signatures."
@@ -8812,6 +8828,11 @@ msgid ""
 msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
+
+msgid "You must add at least two CA member in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins deux membre du comité d'accompagnement afin de "
+"demander les signatures."
 
 msgid "You must answer the question about external enrollment change."
 msgstr ""
@@ -9163,6 +9184,3 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
-
-#~ msgid "High school graduation year"
-#~ msgstr "Année d'obtention du diplôme d'études secondaires"
