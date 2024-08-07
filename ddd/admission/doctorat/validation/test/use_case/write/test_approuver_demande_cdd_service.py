@@ -24,11 +24,9 @@
 #
 # ##############################################################################
 import datetime
-from unittest.mock import patch
-
-from unittest import TestCase
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.validation.builder.demande_identity import DemandeIdentityBuilder

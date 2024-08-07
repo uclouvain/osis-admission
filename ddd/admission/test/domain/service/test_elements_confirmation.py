@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
 from unittest.mock import patch
 
 import freezegun
 import mock
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoratQuery,
@@ -59,8 +59,10 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.financabilite.dtos.parcours import ParcoursDTO, ParcoursAcademiqueInterneDTO, \
-    ParcoursAcademiqueExterneDTO
+from ddd.logic.financabilite.dtos.parcours import (
+    ParcoursDTO, ParcoursAcademiqueInterneDTO,
+    ParcoursAcademiqueExterneDTO,
+)
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
@@ -70,6 +72,7 @@ from infrastructure.financabilite.domain.service.in_memory.financabilite import 
 class ElementsConfirmationTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         ProfilCandidatInMemoryTranslator.reset()
         FinancabiliteInMemoryFetcher.reset()
 

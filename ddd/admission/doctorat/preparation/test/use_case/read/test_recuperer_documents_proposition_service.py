@@ -25,9 +25,9 @@
 # ##############################################################################
 import datetime
 from typing import Optional
-from unittest import TestCase
 
 import freezegun
+from django.test import TestCase
 from mock import ANY
 
 from admission.ddd.admission.doctorat.preparation.commands import (
