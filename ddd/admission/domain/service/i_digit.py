@@ -34,7 +34,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.domain.service.i_periode_soumission_ticket_digit import \
     IPeriodeSoumissionTicketDigitTranslator
 from admission.ddd.admission.domain.validator.exceptions import NotInAccountCreationPeriodException, \
-    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException
+    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException, \
+    PropositionDeFusionAvecValidationSyntaxiqueInvalideException
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -53,20 +54,20 @@ class IDigitService(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> Optional[SimpleNamespace]:
+    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> SimpleNamespace:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def rechercher_compte_existant(
-            cls,
-            matricule: str,
-            nom: str,
-            prenom: str,
-            autres_prenoms: str,
-            genre: str,
-            date_naissance: str,
-            niss: str
+        cls,
+        matricule: str,
+        nom: str,
+        prenom: str,
+        autres_prenoms: str,
+        genre: str,
+        date_naissance: str,
+        niss: str
     ) -> str:
         raise NotImplementedError
 
@@ -93,15 +94,20 @@ class IDigitService(interface.DomainService):
                 )
 
             proposition_fusion = cls.recuperer_proposition_fusion(proposition.matricule_candidat)
-            if proposition_fusion:
-                if proposition_fusion.statut not in [
-                    PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.MERGED.name,
-                    PersonMergeStatus.REFUSED.name, PersonMergeStatus.NO_MATCH.name
-                ]:
-                    raise PropositionFusionATraiterException(
-                        merge_status=proposition_fusion.statut,
-                        matricule_candidat=proposition.matricule_candidat
-                    )
+            if proposition_fusion.statut not in [
+                PersonMergeStatus.IN_PROGRESS.name,
+                PersonMergeStatus.MERGED.name,
+                PersonMergeStatus.REFUSED.name,
+                PersonMergeStatus.NO_MATCH.name,
+            ]:
+                raise PropositionFusionATraiterException(
+                    merge_status=proposition_fusion.statut,
+                    matricule_candidat=proposition.matricule_candidat
+                )
+            if not proposition_fusion.a_une_syntaxe_valide:
+                raise PropositionDeFusionAvecValidationSyntaxiqueInvalideException(
+                    matricule_candidat=proposition.matricule_candidat,
+                )
         except BusinessException as e:
             logger.info(f"DIGIT submit ticket canceled: {e.message}")
             raise e

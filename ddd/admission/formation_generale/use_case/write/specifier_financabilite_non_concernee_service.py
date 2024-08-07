@@ -23,18 +23,18 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import SpecifierFinancabiliteResultatCalculCommand
+from admission.ddd.admission.formation_generale.commands import (
+    SpecifierFinancabiliteNonConcerneeCommand,
+)
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 
 
-def specifier_financabilite_resultat_calcul(
-    cmd: 'SpecifierFinancabiliteResultatCalculCommand',
+def specifier_financabilite_non_concernee(
+    cmd: 'SpecifierFinancabiliteNonConcerneeCommand',
     proposition_repository: 'IPropositionRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
@@ -42,9 +42,9 @@ def specifier_financabilite_resultat_calcul(
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     # THEN
-    proposition.specifier_financabilite_resultat_calcul(
-        financabilite_regle_calcule=EtatFinancabilite[cmd.financabilite_regle_calcule],
-        financabilite_regle_calcule_situation=cmd.financabilite_regle_calcule_situation,
+    proposition.specifier_financabilite_non_concernee(
+        cmd.etabli_par,
+        cmd.gestionnaire,
     )
     proposition_repository.save(proposition)
 

@@ -481,3 +481,8 @@ class ListerDemandesQuery(SortedQueryRequest):
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = None
     demandeur: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
+    uuid_proposition: str

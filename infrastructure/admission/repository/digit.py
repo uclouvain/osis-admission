@@ -334,14 +334,29 @@ def _retrieve_person_ticket_status(request_id: int):
                 },
             ],
         }
-    return requests.get(
-        headers={
-            'Content-Type': 'application/json',
-            'Authorization': settings.ESB_AUTHORIZATION,
-        },
-        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_REQUEST_STATUS_URL}/{request_id}"
-    ).json()
-
+    try:
+        response = requests.get(
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': settings.ESB_AUTHORIZATION,
+            },
+            url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_REQUEST_STATUS_URL}/{request_id}"
+        )
+        response_data = response.json()
+        if response_data.get('status') == 500:
+            return {
+                "status": PersonTicketCreationStatus.ERROR.name,
+                "errors": [
+                    {"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': response_data}
+                ]
+            }
+        return response_data
+    except Exception as e:
+        logger.info(f"An error occured when try to call DigIT endpoint retrieve person ticket status. {repr(e)}")
+        return {
+            "status": PersonTicketCreationStatus.ERROR.name,
+            "errors": [{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
+        }
 
 def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet, extra_ticket_data: dict):
     if settings.MOCK_DIGIT_SERVICE_CALL:
@@ -407,7 +422,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
             "lastName": person.last_name,
             "firstName": person.first_name,
             "birthDate": birth_date,
-            "gender": "M" if person.gender == "H" else person.gender,
+            "gender": "M" if person.sex == "H" else person.sex,
             "nationalRegister": "".join(filter(str.isdigit, person.national_number)),
             "nationality": person.country_of_citizenship.iso_code if person.country_of_citizenship else None,
             "otherFirstName": person.middle_name,

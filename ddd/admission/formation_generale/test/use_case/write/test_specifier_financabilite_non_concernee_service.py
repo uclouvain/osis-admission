@@ -23,61 +23,44 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from unittest import TestCase
 
 import freezegun
-from django.utils import timezone
+from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierFinancabiliteResultatCalculCommand,
+    SpecifierFinancabiliteNonConcerneeCommand,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 @freezegun.freeze_time('2020-11-01')
-class TestSpecifierFinancabiliteResultatCalcul(TestCase):
+class TestSpecifierFinancabiliteNonConcernee(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.academic_year_repository = AcademicYearInMemoryRepository()
-        for annee in range(2016, 2023):
-            cls.academic_year_repository.save(
-                AcademicYear(
-                    entity_id=AcademicYearIdentity(year=annee),
-                    start_date=datetime.date(annee, 9, 15),
-                    end_date=datetime.date(annee + 1, 9, 30),
-                )
-            )
         cls.message_bus = message_bus_in_memory_instance
 
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
-        self.candidat_translator = ProfilCandidatInMemoryTranslator()
-        self.candidat = self.candidat_translator.profil_candidats[1]
         self.proposition = self.proposition_repository.get(
             PropositionIdentity(
-                uuid='uuid-MASTER-SCI-CONFIRMED',
+                uuid='uuid-CERTIFICATE-CONFIRMED',
             ),
         )
 
-        self.command = SpecifierFinancabiliteResultatCalculCommand(
-            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-            financabilite_regle_calcule=EtatFinancabilite.FINANCABLE.name,
-            financabilite_regle_calcule_situation=SituationFinancabilite.REPRISE_APRES_5_ANS.name,
+        self.command = SpecifierFinancabiliteNonConcerneeCommand(
+            uuid_proposition='uuid-CERTIFICATE-CONFIRMED',
+            etabli_par='uuid-GESTIONNAIRE',
+            gestionnaire='0123456789',
         )
 
-    def test_should_specifier_resultat_calcul_etre_ok(self):
+    def test_should_specifier_etre_non_specifie(self):
         proposition_id = self.message_bus.invoke(self.command)
 
         proposition = self.proposition_repository.get(proposition_id)
@@ -86,6 +69,6 @@ class TestSpecifierFinancabiliteResultatCalcul(TestCase):
         self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
 
         # Proposition mise à jour
-        self.assertEqual(proposition.financabilite_regle_calcule, EtatFinancabilite.FINANCABLE)
-        self.assertEqual(proposition.financabilite_regle_calcule_situation, SituationFinancabilite.REPRISE_APRES_5_ANS)
-        self.assertEqual(proposition.financabilite_regle_calcule_le, timezone.now())
+        self.assertIsNone(proposition.financabilite_regle)
+        self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
+        self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.INITIAL_NON_CONCERNE)

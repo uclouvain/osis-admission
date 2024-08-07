@@ -41,6 +41,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
+from osis_document.contrib import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (
@@ -49,7 +50,7 @@ from admission.constants import (
     CONTEXT_GENERAL,
     CONTEXT_CONTINUING,
 )
-from admission.contrib.models.epc_injection import EPCInjectionStatus
+from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.contrib.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -78,7 +79,6 @@ from base.models.person import Person
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
-from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -138,6 +138,16 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 .order_by('-start_date')
                 .values("acronym")[:1]
             )
+        )
+
+    def annotate_last_status_update(self):
+        return self.annotate(
+            status_updated_at=Subquery(
+                HistoryEntry.objects.filter(
+                    object_uuid=OuterRef('uuid'),
+                    tags__contains=['proposition', 'status-changed'],
+                ).values('created')[:1]
+            ),
         )
 
     def annotate_with_student_registration_id(self):
@@ -551,7 +561,10 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
 
     @cached_property
     def sent_to_epc(self):
-        return any(injection.status == EPCInjectionStatus.OK.name for injection in self.epc_injection.all())
+        return any(
+            injection.status == EPCInjectionStatus.OK.name
+            for injection in self.epc_injection.filter(type=EPCInjectionType.DEMANDE.name)
+        )
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):

@@ -512,13 +512,19 @@ class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
     uuid_proposition: str
     financabilite_regle_calcule: str
     financabilite_regle_calcule_situation: str
-    gestionnaire: Optional[str] = ''
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
     uuid_proposition: str
     financabilite_regle: str
+    etabli_par: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteNonConcerneeCommand(interface.CommandRequest):
+    uuid_proposition: str
     etabli_par: str
     gestionnaire: str
 

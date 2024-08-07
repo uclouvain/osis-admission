@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 10:05+0200\n"
+"POT-Creation-Date: 2024-08-07 12:05+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -648,13 +648,6 @@ msgstr "Éléments de formulaire pour admission"
 msgid "Admission has been sent to EPC."
 msgstr "L'admission a été envoyé en EPC."
 
-msgid ""
-"Admission is not yet valid for searching UCLouvain account. The following "
-"fields are required: "
-msgstr ""
-"L'admission n'est pas encore valide pour rechercher une correspondance "
-"UCLouvain. Les champs suivants sont requis: "
-
 #, python-format
 msgid ""
 "Admission request for the academic year %(academic_year)s to the program:"
@@ -1143,6 +1136,10 @@ msgstr "Biologie"
 msgid "Bachelor"
 msgstr "Bachelier"
 
+msgid "Bachelor's course entrance exam"
+msgstr ""
+"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
+
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
 
@@ -1262,6 +1259,9 @@ msgid "CDD:"
 msgstr "CDD :"
 
 msgctxt "admission"
+msgid "CDD status"
+msgstr "Statut CDD"
+
 msgid "CDDs"
 msgstr "CDDs"
 
@@ -3123,6 +3123,9 @@ msgstr "FWB - Crédits acquis"
 msgid "FWB - Registered credits"
 msgstr "FWB - Crédits inscrits"
 
+msgid "FWB Cotutelle"
+msgstr "Cotutelle FWB"
+
 msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
 msgstr "Equivalence de grade académique FWB"
@@ -3615,9 +3618,6 @@ msgstr "Cacher le menu de la checklist"
 
 msgid "Hide the states of the checklist"
 msgstr "Cacher les états de la checklist"
-
-msgid "High school graduation year"
-msgstr "Année d'obtention du diplôme d'études secondaires"
 
 msgctxt "tab"
 msgid "History"
@@ -5148,6 +5148,9 @@ msgstr "Nouvelle échéance"
 msgid "New thesis title (if applicable):"
 msgstr "Nouveau titre de la thèse (le cas échéant) :"
 
+msgid "Next"
+msgstr "Suivant"
+
 msgid "No"
 msgstr "Non"
 
@@ -5165,6 +5168,9 @@ msgstr "Aucune étude en français"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
+
+msgid "No data"
+msgstr "Aucune données"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
@@ -6602,9 +6608,6 @@ msgstr "Commentaire de SIC pour la Faculté"
 msgid "SIC decision"
 msgstr "Décision SIC"
 
-msgid "SIC:"
-msgstr "SIC :"
-
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
 
@@ -6770,11 +6773,11 @@ msgstr "Envoyer en faculté"
 msgid "Sender"
 msgstr "Expéditeur"
 
+msgid "Sent to EPC"
+msgstr "Envoyée à EPC"
+
 msgid "Sent to digit"
 msgstr "Envoyer à DigIT"
-
-msgid "Sent to EPC"
-msgstr "Envoyée en EPC"
 
 msgid "Sentence indicating the late enrolment (if applicable)."
 msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
@@ -6857,8 +6860,7 @@ msgstr ""
 "l'onglet 'Informations complémentaires > Comptabilité'."
 
 msgid "Some fields are missing in the 'Absence of debt' block."
-msgstr ""
-"Des champs ne sont pas complétés dans la partie 'Absence de dettes'."
+msgstr "Des champs ne sont pas complétés dans la partie 'Absence de dettes'."
 
 msgid ""
 "Some fields are missing in the 'Belgian student status' block in the "
@@ -6868,8 +6870,7 @@ msgstr ""
 "'Informations complémentaires > Comptabilité'."
 
 msgid "Some fields are missing in the 'Belgian student status' block."
-msgstr ""
-"Des champs ne sont pas complétés dans la partie 'Assimilation'."
+msgstr "Des champs ne sont pas complétés dans la partie 'Assimilation'."
 
 msgid ""
 "Some fields are missing in the 'Memberships' block in the 'Additional "
@@ -9017,6 +9018,14 @@ msgstr ""
 
 #, python-format
 msgid ""
+"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
+"validation"
+msgstr ""
+"[%(matricule_candidat)s] Le candidat a une proposition de fusion avec des "
+"erreurs dans la validation syntaxique"
+
+#, python-format
+msgid ""
 "[%(matricule_candidat)s] Candidate has pending merge proposal: status "
 "%(merge_status)s"
 msgstr ""
@@ -9194,3 +9203,6 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
+
+#~ msgid "High school graduation year"
+#~ msgstr "Année d'obtention du diplôme d'études secondaires"

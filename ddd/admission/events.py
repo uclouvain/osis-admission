@@ -1,4 +1,3 @@
-# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -15,21 +14,22 @@
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU General Public License for more details.
 #
 #    A copy of this license - GNU General Public License - is available
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from admission.ddd.admission.commands import RefuserPropositionFusionCommand
+##############################################################################
+
+import attr
+
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
-from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
+from osis_common.ddd.interface import Event
 
 
-def refuser_proposition_fusion_personne(
-        cmd: 'RefuserPropositionFusionCommand',
-        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
-) -> PropositionFusionPersonneIdentity:
-    return proposition_fusion_personne_repository.refuser(global_id=cmd.global_id)
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class PropositionFusionDefaiteEvent(Event):
+    entity_id: 'PropositionFusionPersonneIdentity'
+    matricule: str

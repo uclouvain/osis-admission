@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 10:05+0200\n"
+"POT-Creation-Date: 2024-08-07 12:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -573,11 +573,6 @@ msgstr ""
 msgid "Admission has been sent to EPC."
 msgstr ""
 
-msgid ""
-"Admission is not yet valid for searching UCLouvain account. The following "
-"fields are required: "
-msgstr ""
-
 #, python-format
 msgid ""
 "Admission request for the academic year %(academic_year)s to the program:"
@@ -1030,6 +1025,9 @@ msgstr "Biology"
 msgid "Bachelor"
 msgstr ""
 
+msgid "Bachelor's course entrance exam"
+msgstr ""
+
 msgid "Back to checklist"
 msgstr ""
 
@@ -1144,6 +1142,9 @@ msgid "CDD:"
 msgstr ""
 
 msgctxt "admission"
+msgid "CDD status"
+msgstr ""
+
 msgid "CDDs"
 msgstr ""
 
@@ -2885,6 +2886,9 @@ msgstr ""
 msgid "FWB - Registered credits"
 msgstr ""
 
+msgid "FWB Cotutelle"
+msgstr ""
+
 msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
 msgstr ""
@@ -3335,9 +3339,6 @@ msgid "Hide the checklist menu"
 msgstr ""
 
 msgid "Hide the states of the checklist"
-msgstr ""
-
-msgid "High school graduation year"
 msgstr ""
 
 msgctxt "tab"
@@ -4640,6 +4641,9 @@ msgstr ""
 msgid "New thesis title (if applicable):"
 msgstr ""
 
+msgid "Next"
+msgstr ""
+
 msgid "No"
 msgstr ""
 
@@ -4654,6 +4658,9 @@ msgid "No French studies"
 msgstr ""
 
 msgid "No PhD found."
+msgstr ""
+
+msgid "No data"
 msgstr ""
 
 msgid "No defense reason"
@@ -6010,9 +6017,6 @@ msgstr ""
 msgid "SIC decision"
 msgstr ""
 
-msgid "SIC:"
-msgstr ""
-
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signing in progress"
 
@@ -6178,10 +6182,10 @@ msgstr ""
 msgid "Sender"
 msgstr ""
 
-msgid "Sent to digit"
+msgid "Sent to EPC"
 msgstr ""
 
-msgid "Sent to EPC"
+msgid "Sent to digit"
 msgstr ""
 
 msgid "Sentence indicating the late enrolment (if applicable)."
@@ -8118,6 +8122,12 @@ msgstr ""
 #, python-format
 msgid ""
 "[%(matricule_candidat)s] Candidate has already a pending creation ticket"
+msgstr ""
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
+"validation"
 msgstr ""
 
 #, python-format

@@ -426,4 +426,8 @@ COMMAND_HANDLERS = {
         cmd,
         lister_demandes_service=_lister_demandes_service,
     ),
+    RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }

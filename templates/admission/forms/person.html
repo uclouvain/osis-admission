@@ -30,10 +30,18 @@
   {% panel _("Identification") %}
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field form.last_name form_group_class='form-group required_field formatted-field container_last_name' %}
+        {% if form.last_name.field.disabled %}
+          {% bootstrap_field_with_tooltip form.last_name classes='form-group required_field formatted-field container_last_name' %}
+        {% else %}
+          {% bootstrap_field form.last_name form_group_class='form-group required_field formatted-field container_last_name' %}
+        {% endif %}
       </div>
       <div class="col-md-4">
-        {% bootstrap_field form.first_name form_group_class='form-group formatted-field container_first_name' %}
+        {% if form.first_name.field.disabled %}
+           {% bootstrap_field_with_tooltip form.first_name classes='form-group required_field formatted-field container_first_name' %}
+        {% else %}
+          {% bootstrap_field form.first_name form_group_class='form-group formatted-field container_first_name' %}
+        {% endif %}
       </div>
       <div class="col-md-4">
         {% bootstrap_field_with_tooltip form.middle_name classes='formatted-field' %}
@@ -41,7 +49,11 @@
     </div>
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field form.sex form_group_class="form-group required_field" %}
+        {% if form.sex.field.disabled %}
+          {% bootstrap_field_with_tooltip form.sex classes="form-group required_field" %}
+        {% else %}
+          {% bootstrap_field form.sex form_group_class="form-group required_field" %}
+        {% endif %}
       </div>
       <div class="col-md-4">
         {% bootstrap_field form.gender form_group_class="form-group required_field" %}
@@ -53,7 +65,11 @@
 
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field form.birth_date form_group_class="form-group required_field" %}
+        {% if form.birth_date.field.disabled %}
+          {% bootstrap_field_with_tooltip form.birth_date classes="form-group required_field" %}
+        {% else %}
+          {% bootstrap_field form.birth_date form_group_class="form-group required_field" %}
+        {% endif %}
       </div>
       <div class="col-md-4">
         {% bootstrap_field form.unknown_birth_date %}
@@ -64,7 +80,11 @@
     </div>
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field form.birth_country form_group_class="form-group required_field" %}
+        {% if form.birth_country.field.disabled %}
+          {% bootstrap_field_with_tooltip form.birth_country classes="form-group required_field" %}
+        {% else %}
+          {% bootstrap_field form.birth_country form_group_class="form-group required_field" %}
+        {% endif %}
       </div>
       <div class="col-md-4">
         {% bootstrap_field form.birth_place form_group_class="form-group required_field formatted-field" %}
@@ -175,10 +195,11 @@
           $('#birth_year').dependsOn({
               '#id_unknown_birth_date': { checked: true },
           });
-
-          $('#id_birth_date').dependsOn({
-              '#id_unknown_birth_date': { checked: false },
-          }, { valueOnDisable: '', hide: false });
+          {% if not form.birth_date.field.disabled %}
+            $('#id_birth_date').dependsOn({
+                '#id_unknown_birth_date': { checked: false },
+            }, { valueOnDisable: '', hide: false });
+          {% endif %}
 
           $('#already_registered').dependsOn({
               'input[name=already_registered]': { values: ['True'] },
