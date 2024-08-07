@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 import logging
 import re
 from typing import Optional, List
@@ -37,10 +38,13 @@ from admission.ddd.admission.domain.validator.exceptions import TicketDigitATrai
     PasDePropositionDeFusionEligibleException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
+from admission.templatetags.admission import format_matricule
+from base.business.student import find_student_by_discriminating
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationMergeType, \
     PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.models.student import Student
 from osis_common.utils.models import get_object_or_none
 from osis_profile.models import ProfessionalExperience, EducationalExperience
 from reference.models.country import Country
@@ -98,25 +102,46 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             }
         )
 
-        person_merge_proposal, created = PersonMergeProposal.objects.update_or_create(
-            original_person__global_id=global_id,
-            defaults={
-                "proposal_merge_person_id": merge_person.id,
-                "status": PersonMergeStatus.IN_PROGRESS.name if status == "MERGE" else PersonMergeStatus.PENDING.name,
-                "selected_global_id": selected_global_id,
-                "professional_curex_to_merge": professional_curex_ids,
-                "educational_curex_to_merge": educational_curex_ids,
-            }
+        person_merge_proposal = PersonMergeProposal.objects.get(original_person__global_id=global_id)
+        person_merge_proposal.proposal_merge_person_id = merge_person.id
+        person_merge_proposal.status = PersonMergeStatus.IN_PROGRESS.name if status == "MERGE" else \
+            PersonMergeStatus.PENDING.name
+        person_merge_proposal.selected_global_id = selected_global_id
+        person_merge_proposal.registration_id_sent_to_digit = cls._extract_registration_id_from_selected_global_id(
+            person_merge_proposal,
+            selected_global_id
         )
-
+        person_merge_proposal.professional_curex_to_merge = professional_curex_ids
+        person_merge_proposal.educational_curex_to_merge = educational_curex_ids
+        person_merge_proposal.save()
         return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)
+
+    @classmethod
+    def _extract_registration_id_from_selected_global_id(
+        self,
+        person_merge_proposal: PersonMergeProposal,
+        selected_global_id: str,
+    ) -> str:
+        student = find_student_by_discriminating(qs=Student.objects.filter(person__global_id=selected_global_id))
+        if student is not None and student.registration_id:
+            return student.registration_id
+
+        with contextlib.suppress(StopIteration):
+            if isinstance(person_merge_proposal.similarity_result, list):
+                selected_result = next(
+                    selected_result for selected_result in person_merge_proposal.similarity_result
+                    if format_matricule(selected_result['person']['matricule']) == selected_global_id
+                )
+                return next(app['sourceId'] for app in selected_result['applicationAccounts'] if app['source'] == 'ETU')
+        return ""
 
     @classmethod
     def get(cls, global_id: str) -> Optional[PropositionFusionPersonneDTO]:
         person_merge_proposal = get_object_or_none(
-            PersonMergeProposal, original_person__global_id=global_id
+            PersonMergeProposal,
+            original_person__global_id=global_id,
         )
-        if not person_merge_proposal:
+        if not person_merge_proposal or person_merge_proposal.selected_global_id == '':
             return None
         country = person_merge_proposal.proposal_merge_person.country_of_citizenship \
             if person_merge_proposal.proposal_merge_person else None
@@ -152,6 +177,11 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             original_person__global_id=global_id,
             defaults={
                 "status": PersonMergeStatus.MATCH_FOUND.name,
+                "selected_global_id": "",
+                "registration_id_sent_to_digit": "",
+                "professional_curex_to_merge": [],
+                "educational_curex_to_merge": [],
+                "proposal_merge_person": None
             }
         )
         return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)
@@ -161,6 +191,11 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
         person_merge_proposal = PersonMergeProposal.objects.get(original_person__global_id=global_id)
         if cls._peut_refuser_fusion(person_merge_proposal):
             person_merge_proposal.status = PersonMergeStatus.REFUSED.name
+            person_merge_proposal.selected_global_id = ''
+            person_merge_proposal.registration_id_sent_to_digit = ''
+            person_merge_proposal.professional_curex_to_merge = []
+            person_merge_proposal.educational_curex_to_merge = []
+            person_merge_proposal.proposal_merge_person = None
             person_merge_proposal.save()
         # fail silently
         return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)

@@ -1461,6 +1461,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 type=TrainingType.BACHELOR.name,
                 campus_inscription='Mons',
                 sigle_entite_gestion='FFD',
+                code='CFD1',
             ),
             reference='1234',
             annee_calculee=2023,

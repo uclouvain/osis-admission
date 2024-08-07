@@ -167,6 +167,8 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
 
 
 class DoctoratDTOSerializer(DTOSerializer):
+    code = None
+
     class Meta:
         source = DoctoratDTO
 

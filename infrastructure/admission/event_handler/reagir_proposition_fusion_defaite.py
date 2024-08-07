@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,23 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Any, Union
 
-from django.test import SimpleTestCase
-
-from admission.ddd.admission.commands import DefairePropositionFusionCommand
-from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import (
-    defaire_proposition_fusion_personne
-)
-from admission.infrastructure.admission.repository.in_memory.proposition_fusion_personne import \
-    PropositionPersonneFusionInMemoryRepository
+from admission.ddd.admission.events import PropositionFusionDefaiteEvent
 
 
-class DefairePropositionFusionPersonneTests(SimpleTestCase):
-
-    def setUp(self):
-        self.repository = PropositionPersonneFusionInMemoryRepository()
-
-    def test_defaire_proposition_fusion_personne_with_valid_inputs(self):
-        cmd = DefairePropositionFusionCommand(global_id="123")
-        result = defaire_proposition_fusion_personne(cmd, self.repository)
-        self.assertEqual(result.uuid, "uuid")
+def validation_digit(
+    msg_bus: Any,
+    event: Union['PropositionFusionDefaiteEvent'],
+) -> None:
+    from admission.ddd.admission.commands import ValiderTicketPersonneCommand
+    msg_bus.invoke(
+        ValiderTicketPersonneCommand(global_id=event.matricule)
+    )

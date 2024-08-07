@@ -23,19 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .lister_propositions_supervisees_service import lister_propositions_supervisees
-from .rechercher_doctorats_service import rechercher_doctorats
-from .recuperer_comptabilite_service import recuperer_comptabilite
-from .recuperer_cotutelle_service import recuperer_cotutelle
-from .recuperer_documents_proposition_service import recuperer_documents_proposition
-from .recuperer_documents_reclames_proposition_service import recuperer_documents_reclames_proposition
-from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
-from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
-from .recuperer_proposition_gestionnaire_service import recuperer_proposition_gestionnaire
-from .recuperer_proposition_service import recuperer_proposition
-from .recuperer_resume_proposition_service import recuperer_resume_proposition
-from .verifier_curriculum_service import verifier_curriculum
-from .verifier_projet_service import verifier_projet
-from .verifier_proposition_service import verifier_proposition
+from admission.ddd.admission.formation_generale.commands import (
+    SpecifierFinancabiliteNonConcerneeCommand,
+)
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+
+
+def specifier_financabilite_non_concernee(
+    cmd: 'SpecifierFinancabiliteNonConcerneeCommand',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
+
+    # THEN
+    proposition.specifier_financabilite_non_concernee(
+        cmd.etabli_par,
+        cmd.gestionnaire,
+    )
+    proposition_repository.save(proposition)
+
+    return proposition_id

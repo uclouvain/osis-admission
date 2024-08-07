@@ -464,3 +464,8 @@ class ReclamerDocumentsAuCandidatCommand(interface.CommandRequest):
     corps_message: str
     auteur: str
     type_gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
+    uuid_proposition: str

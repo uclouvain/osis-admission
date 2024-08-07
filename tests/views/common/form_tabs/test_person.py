@@ -100,6 +100,7 @@ class PersonFormTestCase(TestCase):
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__global_id="80001234",
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -671,6 +672,7 @@ class PersonFormTestCase(TestCase):
             training__academic_year=self.general_admission.training.academic_year,
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
+            candidate__global_id="81234565",
             submitted_profile={},
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )

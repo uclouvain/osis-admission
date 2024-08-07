@@ -52,7 +52,7 @@
       {% else %}
         {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
         {% checklist_state_button tab='financabilite' label=initial_candidat_label icon='user' state='INITIAL_CANDIDAT' class='info' htmx_post=change_status_url %}
-        {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='INITIAL_NON_CONCERNE' as change_status_url %}
+        {% url view.base_namespace|add:':financability-not-concerned' uuid=view.kwargs.uuid as change_status_url %}
         {% checklist_state_button tab='financabilite' label=initial_non_concerne_label icon='xmark' state='INITIAL_NON_CONCERNE' class='info' htmx_post=change_status_url %}
         {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-expert' as change_status_url %}
         {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' en_cours="expert" class='warning' htmx_post=change_status_url %}
@@ -193,7 +193,7 @@
         <div
             id="financabilite-computed-rule"
             {% has_perm 'admission.change_checklist' as can_compute_rule %}
-            {% if financabilite_compute_rule_needed and can_compute_rule %}
+            {% if can_compute_rule %}
             hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}"
             hx-trigger="financabiliteComputeRule"
             {% endif %}
@@ -205,7 +205,7 @@
 
     {% if current.extra.to_be_completed == '0' or current.statut == 'GEST_REUSSITE' %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url_initial_candidat %}
-      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='INITIAL_NON_CONCERNE' as change_status_url_initial_non_concerne %}
+      {% url view.base_namespace|add:':financability-not-concerned' uuid=view.kwargs.uuid as change_status_url_initial_non_concerne %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-expert' as change_status_url_en_cours_expert %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-derogation' as change_status_url_en_cours_derogation %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-1' as change_status_url_blocage_ulterieur %}
