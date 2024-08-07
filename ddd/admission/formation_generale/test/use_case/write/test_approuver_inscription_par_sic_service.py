@@ -24,10 +24,10 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
 
 import factory
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,

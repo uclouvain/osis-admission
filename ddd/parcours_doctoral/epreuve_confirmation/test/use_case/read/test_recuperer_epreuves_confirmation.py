@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery

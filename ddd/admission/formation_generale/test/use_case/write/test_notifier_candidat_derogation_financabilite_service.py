@@ -24,16 +24,14 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierFinancabiliteRegleCommand,
-    SpecifierDerogationFinancabiliteCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist, DerogationFinancement
+from admission.ddd.admission.formation_generale.domain.model.enums import DerogationFinancement
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (

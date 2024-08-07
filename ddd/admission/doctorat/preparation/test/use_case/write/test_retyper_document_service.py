@@ -23,13 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
-
 import freezegun
+from django.test import TestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.doctorat.preparation.commands import RetyperDocumentCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -39,6 +38,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 class RetyperDocumentTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.first_document_id = 'ID1-FD'
         cls.second_document_id = 'LIBRE_CANDIDAT.36de0c3d-3c06-4c93-8eb4-c8648f04f142'
 

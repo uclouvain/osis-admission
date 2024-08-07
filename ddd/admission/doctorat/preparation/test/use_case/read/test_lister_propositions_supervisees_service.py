@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import ListerPropositionsSuperviseesQuery
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory

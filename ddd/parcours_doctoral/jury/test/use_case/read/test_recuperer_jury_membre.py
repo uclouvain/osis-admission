@@ -23,8 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryMembreQuery
 from admission.ddd.parcours_doctoral.jury.dtos.jury import MembreJuryDTO

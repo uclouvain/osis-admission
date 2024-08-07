@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.epreuve_confirmation.builder.epreuve_confirmation_identity import (
     EpreuveConfirmationIdentityBuilder,

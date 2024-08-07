@@ -23,9 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
-
 import freezegun
+from django.test import TestCase
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.formation_generale.commands import RetyperDocumentCommand

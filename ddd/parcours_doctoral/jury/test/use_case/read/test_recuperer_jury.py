@@ -24,7 +24,8 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
+
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
 from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO

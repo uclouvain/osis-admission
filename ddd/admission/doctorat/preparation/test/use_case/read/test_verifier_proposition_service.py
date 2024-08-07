@@ -25,10 +25,10 @@
 # ##############################################################################
 import datetime
 import uuid
-from unittest import TestCase
 
 import freezegun
 import mock
+from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder

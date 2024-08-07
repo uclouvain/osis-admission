@@ -24,9 +24,8 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
-
 import attr
+from django.test import TestCase
 from mock import mock
 
 from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery

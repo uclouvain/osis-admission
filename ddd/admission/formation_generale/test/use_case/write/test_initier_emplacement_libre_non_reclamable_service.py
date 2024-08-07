@@ -26,9 +26,9 @@
 
 import datetime
 import uuid
-from unittest import TestCase
 
 import freezegun
+from django.test import TestCase
 
 from admission.constants import UUID_REGEX
 from admission.ddd.admission.enums.emplacement_document import (

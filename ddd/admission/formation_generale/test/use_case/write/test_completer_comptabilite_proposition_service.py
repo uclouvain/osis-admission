@@ -23,11 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
+from django.test import TestCase
 
-from admission.ddd.admission.formation_generale.commands import (
-    CompleterComptabilitePropositionCommand,
-)
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -38,6 +35,9 @@ from admission.ddd.admission.enums import (
     ChoixTypeCompteBancaire,
     LienParente,
     TypeSituationAssimilation,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    CompleterComptabilitePropositionCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
