@@ -31,7 +31,7 @@ from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, DoctorateAdmission, GeneralEducationAdmissionProxy
+from admission.contrib.models import Accounting, DoctorateAdmission
 from admission.contrib.models.doctorate import PropositionProxy
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
@@ -51,7 +51,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -543,6 +542,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 demande_ouverture=admission.cotutelle_opening_request,
                 convention=admission.cotutelle_convention,
                 autres_documents=admission.cotutelle_other_documents,
+                autre_institution=bool(
+                    admission.cotutelle_other_institution_name or admission.cotutelle_other_institution_address
+                ),
+                autre_institution_nom=admission.cotutelle_other_institution_name,
+                autre_institution_adresse=admission.cotutelle_other_institution_address
             )
             if admission.cotutelle
             else None,
