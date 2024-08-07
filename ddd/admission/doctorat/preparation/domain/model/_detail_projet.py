@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
 from typing import List, Optional
 
 import attr
@@ -38,6 +39,9 @@ class DetailProjet(interface.ValueObject):
     langue_redaction_these: str = ''
     institut_these: Optional[InstitutIdentity] = None
     lieu_these: str = ''
+    deja_commence: Optional[bool] = None
+    deja_commence_institution: Optional[str] = ''
+    date_debut: Optional[datetime.date] = None
     documents: List[str] = attr.Factory(list)
     graphe_gantt: List[str] = attr.Factory(list)
     proposition_programme_doctoral: List[str] = attr.Factory(list)

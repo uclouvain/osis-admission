@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -45,6 +45,8 @@ class Financement(interface.ValueObject):
     bourse_preuve: List[str] = attr.Factory(list)
     duree_prevue: Optional[int] = None
     temps_consacre: Optional[int] = None
+    est_lie_fnrs_fria_fresh_csc: Optional[bool] = None
+    commentaire: Optional[str] = ''
 
 
 financement_non_rempli = Financement(type=None)

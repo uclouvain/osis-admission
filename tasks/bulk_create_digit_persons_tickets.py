@@ -32,7 +32,8 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 from waffle.testutils import override_switch
 
-from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand, \
+    ValiderTicketPersonneCommand
 from backoffice.celery import app
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
@@ -57,22 +58,18 @@ def run(request=None, global_ids=None):
             if admission.determined_academic_year:
                 logger.info(f'[DigIT] retrieve info from digit for {candidate}')
                 from infrastructure.messages_bus import message_bus_instance
-                message_bus_instance.invoke(RechercherCompteExistantCommand(
-                    matricule=candidate.global_id,
-                    nom=candidate.last_name,
-                    prenom=candidate.first_name,
-                    date_naissance=str(candidate.birth_date) if candidate.birth_date else "",
-                    autres_prenoms=candidate.middle_name,
-                    niss=candidate.national_number,
-                    genre=candidate.sex,
-                ))
+                message_bus_instance.invoke(RechercherCompteExistantCommand(matricule=candidate.global_id))
+
+                logger.info(f'[DigIT] Validate ticket semantic info from digit for {candidate}')
+                message_bus_instance.invoke(
+                    ValiderTicketPersonneCommand(global_id=candidate.global_id)
+                )
 
                 logger.info(f'[DigIT] send creation ticket for {candidate}')
                 try:
-                    person_ticket_uuid = message_bus_instance.invoke(SoumettreTicketPersonneCommand(
-                        global_id=candidate.global_id,
-                        annee=admission.determined_academic_year.year,
-                    ))
+                    person_ticket_uuid = message_bus_instance.invoke(
+                        SoumettreTicketPersonneCommand(global_id=candidate.global_id)
+                    )
                     person_ticket = PersonTicketCreation.objects.get(uuid=person_ticket_uuid)
                     if person_ticket.status == PersonTicketCreationStatus.ERROR.name:
                         errors.append(_("An error occured during digit ticket creation : {}").format(

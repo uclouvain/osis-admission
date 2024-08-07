@@ -500,3 +500,11 @@ a.no-link {
 .admission-collapse-button[aria-expanded="true"] i.fa-chevron-down {
   display: none;
 }
+
+.word-break-keep-all {
+  word-break: keep-all;
+}
+
+.datepicker table {
+  width: 100%;
+}

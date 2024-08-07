@@ -33,6 +33,7 @@ from osis_common.ddd import interface
 ENTITY_CDE = 'CDE'
 ENTITY_CDSS = 'CDSS'
 ENTITY_CLSM = 'CLSM'
+ENTITY_SCIENCES = 'CDSC'
 SIGLE_SCIENCES = 'SC3DP'
 
 
