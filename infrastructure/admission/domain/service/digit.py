@@ -105,7 +105,7 @@ class DigitService(IDigitService):
                     url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
                 )
                 similarity_data = response.json()
-                if similarity_data.get('status') == 500:
+                if not isinstance(similarity_data, list) and similarity_data.get('status') == 500:
                     raise Exception(f"Digit internal server error (payload: {str(similarity_data)})")
             except Exception as e:
                 logger.info(

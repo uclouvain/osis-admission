@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-02 12:00+0200\n"
+"POT-Creation-Date: 2024-08-05 12:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4616,6 +4616,9 @@ msgid "New deadline"
 msgstr ""
 
 msgid "New thesis title (if applicable):"
+msgstr ""
+
+msgid "Next"
 msgstr ""
 
 msgid "No"
