@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-06 14:44+0200\n"
+"POT-Creation-Date: 2024-08-07 12:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1022,6 +1022,9 @@ msgid "BIOLOGY"
 msgstr "Biology"
 
 msgid "Bachelor"
+msgstr ""
+
+msgid "Bachelor's course entrance exam"
 msgstr ""
 
 msgid "Back to checklist"
@@ -3319,9 +3322,6 @@ msgstr ""
 msgid "Hide the states of the checklist"
 msgstr ""
 
-msgid "High school graduation year"
-msgstr ""
-
 msgctxt "tab"
 msgid "History"
 msgstr ""
@@ -4636,6 +4636,9 @@ msgid "No French studies"
 msgstr ""
 
 msgid "No PhD found."
+msgstr ""
+
+msgid "No data"
 msgstr ""
 
 msgid "No defense reason"

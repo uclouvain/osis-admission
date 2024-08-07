@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-06 14:44+0200\n"
+"POT-Creation-Date: 2024-08-07 12:05+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1134,6 +1134,10 @@ msgstr "Biologie"
 
 msgid "Bachelor"
 msgstr "Bachelier"
+
+msgid "Bachelor's course entrance exam"
+msgstr ""
+"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
@@ -3596,9 +3600,6 @@ msgstr "Cacher le menu de la checklist"
 msgid "Hide the states of the checklist"
 msgstr "Cacher les états de la checklist"
 
-msgid "High school graduation year"
-msgstr "Année d'obtention du diplôme d'études secondaires"
-
 msgctxt "tab"
 msgid "History"
 msgstr "Historique"
@@ -5145,6 +5146,9 @@ msgstr "Aucune étude en français"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
+
+msgid "No data"
+msgstr "Aucune données"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
@@ -9165,3 +9169,6 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
+
+#~ msgid "High school graduation year"
+#~ msgstr "Année d'obtention du diplôme d'études secondaires"
