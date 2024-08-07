@@ -52,7 +52,6 @@ class InitierPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterPropositionCommand(interface.CommandRequest):
     uuid: str
-    type_admission: str
     justification: Optional[str] = ''
     commission_proximite: Optional[str] = ''
     type_financement: Optional[str] = ''
@@ -65,6 +64,8 @@ class CompleterPropositionCommand(interface.CommandRequest):
     bourse_preuve: List[str] = attr.Factory(list)
     duree_prevue: Optional[int] = None
     temps_consacre: Optional[int] = None
+    est_lie_fnrs_fria_fresh_csc: Optional[bool] = None
+    commentaire_financement: Optional[str] = ''
     titre_projet: Optional[str] = ''
     resume_projet: Optional[str] = ''
     documents_projet: List[str] = attr.Factory(list)
@@ -75,6 +76,9 @@ class CompleterPropositionCommand(interface.CommandRequest):
     langue_redaction_these: str = ChoixLangueRedactionThese.UNDECIDED.name
     institut_these: Optional[str] = ''
     lieu_these: Optional[str] = ''
+    projet_doctoral_deja_commence: Optional[bool] = None
+    projet_doctoral_institution: Optional[str] = ''
+    projet_doctoral_date_debut: Optional[datetime.date] = None
     doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
     institution: Optional[str] = ''
     domaine_these: Optional[str] = ''
@@ -207,6 +211,8 @@ class DefinirCotutelleCommand(interface.CommandRequest):
     motivation: Optional[str] = ''
     institution_fwb: Optional[bool] = None
     institution: Optional[str] = ''
+    autre_institution_nom: Optional[str] = ''
+    autre_institution_adresse: Optional[str] = ''
     demande_ouverture: List[str] = attr.Factory(list)
     convention: List[str] = attr.Factory(list)
     autres_documents: List[str] = attr.Factory(list)

@@ -26,7 +26,6 @@
 import logging
 from abc import abstractmethod
 from types import SimpleNamespace
-from typing import Optional
 
 from django.conf import settings
 
@@ -62,12 +61,6 @@ class IDigitService(interface.DomainService):
     def rechercher_compte_existant(
         cls,
         matricule: str,
-        nom: str,
-        prenom: str,
-        autres_prenoms: str,
-        genre: str,
-        date_naissance: str,
-        niss: str
     ) -> str:
         raise NotImplementedError
 

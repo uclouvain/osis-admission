@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-07 12:05+0200\n"
+"POT-Creation-Date: 2024-08-07 15:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -158,8 +158,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a "
-"href=\"%(add_url)s\">add a course</a>"
+"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a href="
+"\"%(add_url)s\">add a course</a>"
 msgstr ""
 
 #, python-format
@@ -181,8 +181,8 @@ msgstr[1] ""
 #, python-brace-format
 msgid ""
 "<p>Depending on your previous experience, your faculty will supplement your "
-"annual programme with additional classes (for more information: <a "
-"href=\"{link}\">{link}</a>).</p>"
+"annual programme with additional classes (for more information: <a href="
+"\"{link}\">{link}</a>).</p>"
 msgstr ""
 
 #, python-brace-format
@@ -237,6 +237,11 @@ msgstr ""
 
 msgid ""
 "A member should be either internal or external, please check the fields."
+msgstr ""
+
+msgid ""
+"A merger proposal is currently being resolved. Saving the tab will cause a "
+"merge reset"
 msgstr ""
 
 msgid "A new version of the analysis folder has been generated."
@@ -3034,6 +3039,9 @@ msgid ""
 "%(established_on)s)"
 msgstr ""
 
+msgid "Financing comment"
+msgstr ""
+
 msgid "Financing rule"
 msgstr ""
 
@@ -3094,18 +3102,17 @@ msgid ""
 "used here.<br>Full example: <code>{\"CLASSE_CSS\": \"bg-info\"}</code>."
 "<br><br>For a text field, it is possible to specify if the user can enter a "
 "short (\"COURT\", by default) or a long (\"LONG\") text by using the "
-"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": "
-"\"LONG\"}</code>.<br><br>For a file field, it is possible to specify the "
-"maximum number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
+"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": \"LONG"
+"\"}</code>.<br><br>For a file field, it is possible to specify the maximum "
+"number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
 "(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
-"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], "
-"\"NOMBRE_MAX_DOCUMENTS\": 3}</code>.<br><br>For a selection field, it is "
-"possible to specify if the selection is realised through a list (\"LISTE\", "
-"by default), checkboxes (\"CASES_A_COCHER\") or radio buttons "
-"(\"BOUTONS_RADIOS\") by using the \"TYPE_SELECTION\" property. The list and "
-"the radios buttons allow to select only one value whereas the checkboxes "
-"allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
-"\"CASES_A_COCHER\"}</code>."
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
+"\": 3}</code>.<br><br>For a selection field, it is possible to specify if "
+"the selection is realised through a list (\"LISTE\", by default), checkboxes "
+"(\"CASES_A_COCHER\") or radio buttons (\"BOUTONS_RADIOS\") by using the "
+"\"TYPE_SELECTION\" property. The list and the radios buttons allow to select "
+"only one value whereas the checkboxes allow to select several values."
+"<br>Full example: <code>{\"TYPE_SELECTION\": \"CASES_A_COCHER\"}</code>."
 msgstr ""
 
 msgid "For the attention of"
@@ -3311,6 +3318,9 @@ msgstr ""
 msgid ""
 "Has this diploma been recognised as equivalent by the French Community of "
 "Belgium?"
+msgstr ""
+
+msgid "Has your PhD project already started?"
 msgstr ""
 
 msgid ""
@@ -3654,8 +3664,8 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
-"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees.html"
+"\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
 "reglementees.html</a>, I declare that, if the courses listed therein concern "
 "me, I have received the information relating to their requirements for "
 "admission or continuation and to the specific rules or restrictions of "
@@ -3704,8 +3714,8 @@ msgstr ""
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a "
-"href=\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between 1 June and 30 September %(year)s to <a href="
+"\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
 msgid "In payement order"
@@ -3859,6 +3869,10 @@ msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr ""
 
 msgid "Is non-resident (as defined in decree)"
+msgstr ""
+
+msgid ""
+"Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
 
 msgid "It is not possible to go from the \"validated\" status to this status."
@@ -4973,6 +4987,12 @@ msgstr ""
 msgid "Other institute (if necessary)"
 msgstr ""
 
+msgid "Other institution address"
+msgstr ""
+
+msgid "Other institution name"
+msgstr ""
+
 msgid "Other international scholarship"
 msgstr ""
 
@@ -5168,6 +5188,9 @@ msgid "PhD project"
 msgstr ""
 
 msgid "PhD proposal"
+msgstr ""
+
+msgid "PhD research experience"
 msgstr ""
 
 msgid "PhD research project"
@@ -5387,9 +5410,6 @@ msgid "Previous experiences"
 msgstr ""
 
 msgid "Previous notes"
-msgstr ""
-
-msgid "Previous research experience"
 msgstr ""
 
 msgid "Private"
@@ -7209,8 +7229,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
-"accomodation\">www.uclouvain.be/en/study/accomodation</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/study/accomodation"
+"\">www.uclouvain.be/en/study/accomodation</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7691,6 +7711,12 @@ msgstr ""
 msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 
+msgid "Work contract type"
+msgstr ""
+
+msgid "Work start date"
+msgstr ""
+
 msgid "Working contract type"
 msgstr ""
 
@@ -7754,8 +7780,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Would you like to switch courses this academic year at UCLouvain? (<a "
-"href=\"%(url)s\" target=\"_blank\">Informations</a>)"
+"Would you like to switch courses this academic year at UCLouvain? (<a href="
+"\"%(url)s\" target=\"_blank\">Informations</a>)"
 msgstr ""
 
 msgid "Writing ability"
@@ -7863,9 +7889,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"You can find more information on the French Community webpage <a "
-"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
-"</a>"
+"You can find more information on the French Community webpage <a href="
+"\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/</a>"
 msgstr ""
 
 msgid ""
@@ -7973,11 +7998,6 @@ msgstr ""
 msgid "You indicated that you will obtain it in %(year)s."
 msgstr ""
 
-msgid "You must add at least one CA member in order to request signatures."
-msgstr ""
-"You must add at least one supervisory panel member in order to request "
-"signatures."
-
 msgid ""
 "You must add at least one UCLouvain supervisor in order to request "
 "signatures."
@@ -7986,6 +8006,11 @@ msgstr ""
 msgid ""
 "You must add at least one external supervisor in order to request signatures."
 msgstr ""
+
+msgid "You must add at least two CA member in order to request signatures."
+msgstr ""
+"You must add at least two supervisory panel member in order to request "
+"signatures."
 
 msgid "You must answer the question about external enrollment change."
 msgstr ""

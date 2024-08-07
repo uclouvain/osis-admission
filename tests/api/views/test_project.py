@@ -732,6 +732,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
 
         CaMemberFactory(process=self.admission.supervision_group)
+        CaMemberFactory(process=self.admission.supervision_group)
         PromoterFactory(process=self.admission.supervision_group)
 
         response = self.client.get(self.url)
@@ -893,6 +894,8 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.first_not_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jack")
         cls.first_ca_member = CaMemberFactory(process=cls.first_invited_promoter.actor_ptr.process)
         cls.first_ca_member.actor_ptr.switch_state(SignatureState.APPROVED)
+        cls.second_ca_member = CaMemberFactory(process=cls.first_invited_promoter.actor_ptr.process)
+        cls.second_ca_member.actor_ptr.switch_state(SignatureState.APPROVED)
         cls.second_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jim")
         cls.second_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
 
