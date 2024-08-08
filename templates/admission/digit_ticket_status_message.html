@@ -28,30 +28,19 @@
 
 {% if digit_ticket.statut == 'CREATED' or digit_ticket.statut == 'IN_PROGRESS' %}
     <div class="alert alert-info">
-      <strong>En attente</strong> La demande de création de compte à DigIT est en cours de traitement
+      Une demande de création/mise à jour du compte à DigIT est en cours de traitement
     </div>
 {% elif digit_ticket.statut == 'ERROR' %}
       <div class="alert alert-danger">
-        Une erreur est survenue lors de la demande de création de compte à DigIT. Veuillez contacter l'équipe informatique
+        Une erreur est survenue lors de la demande de création/mise à jour du compte à DigIT. Veuillez contacter l'équipe informatique
     </div>
 {% elif digit_ticket.statut == 'REFUSED' %}
     <div class="alert alert-danger">
-        <strong>Compte refusé</strong> La demande de création de compte a été refusée par DigIT
-    </div>
-{% elif digit_ticket.statut == 'DONE' %}
-    <div class="alert alert-success">
-        <strong>Compte créé</strong> Le compte a été créé dans DigIT
+        Une demande de création/mise à jour du compte a été refusée par DigIT
     </div>
 {% elif digit_ticket.statut == 'DONE_WITH_ERRORS' %}
     <div class="alert alert-danger">
-        <form id="recreate-digit-person-form" method="POST" action="{% url 'admission:services:digit:request-digit-person-creation' uuid=uuid %}">
-            {% csrf_token %}
-            <button id="recreate-digit-person-btn" type="submit" class="btn btn-xs btn-danger pull-right"
-            {% if not peut_fusionner %} disabled {% endif %}>
-                <span class="fa fa-refresh" style="margin-right: 3px;"></span>{% trans "Resend" %}
-            </button>
-        </form>
-        <strong>Erreurs à la création du compte</strong> Il existe des erreurs qui empêchent la création du compte
+        <strong>Erreurs à la création/mise à jour du compte</strong>
         <ul>
             {% for error in digit_ticket.errors %}
                 <li><span style="text-decoration: underline;">{{ error.code|digit_error_description }}</span>:
@@ -59,6 +48,5 @@
                 </li>
             {% endfor %}
         </ul>
-
     </div>
 {% endif %}

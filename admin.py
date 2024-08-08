@@ -29,13 +29,16 @@ from typing import Dict
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
+from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
@@ -78,8 +81,11 @@ from admission.contrib.models.epc_injection import EPCInjection, EPCInjectionSta
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
 from admission.contrib.models.working_list import WorkingList
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
@@ -535,19 +541,69 @@ class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
     readonly_fields = []
 
 
+class BaseAdmissionStatutFilter(SimpleListFilter):
+    title = 'statut'
+    parameter_name = 'statut'
+
+    def lookups(self, request, model_admin):
+        return set(
+            ChoixStatutPropositionGenerale.choices()
+            + ChoixStatutPropositionContinue.choices()
+            + ChoixStatutPropositionDoctorale.choices()
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(
+                Q(generaleducationadmission__status=self.value()) |
+                Q(doctorateadmission__status=self.value()) |
+                Q(continuingeducationadmission__status=self.value())
+            )
+        return queryset
+
+
+class BaseAdmissionTypeFormationFilter(SimpleListFilter):
+    title = 'type_formation'
+    parameter_name = 'type_formation'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('general-education', 'Formation générale'),
+            ('doctorate', 'Doctorat'),
+            ('continuing-education', 'Formation continue'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(
+                Q(generaleducationadmission__isnull=self.value() != 'general-education') &
+                Q(doctorateadmission__isnull=self.value() != 'doctorate') &
+                Q(continuingeducationadmission__isnull=self.value() != 'continuing-education')
+            )
+        return queryset
+
+
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
-    search_fields = ['reference']
+    search_fields = ['reference', 'candidate__last_name', 'candidate__global_id', 'training__acronym']
     list_display = (
         'reference',
         'candidate',
         'training',
         'type_demande',
         'created_at',
+        'statut',
+        'type_formation'
     )
     readonly_fields = ['uuid']
     actions = [
         'injecter_dans_epc',
+    ]
+    list_filter = [
+        'type_demande',
+        BaseAdmissionTypeFormationFilter,
+        BaseAdmissionStatutFilter,
+        ('training__academic_year', RelatedDropdownFilter),
     ]
 
     @admin.action(description='Injecter la demande dans EPC')
@@ -561,6 +617,24 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+    @admin.display(description='Statut')
+    def statut(self, obj):
+        admission = (
+            getattr(obj, 'generaleducationadmission', None)
+            or getattr(obj, 'doctorateadmission', None)
+            or getattr(obj, 'continuingeducationadmission', None)
+        )
+        return admission.get_status_display()
+
+    @admin.display(description='Type formation')
+    def type_formation(self, obj):
+        if hasattr(obj, 'generaleducationadmission'):
+            return 'Formation générale'
+        if hasattr(obj, 'doctorateadmission'):
+            return 'Doctorat'
+        if hasattr(obj, 'continuingeducationadmission'):
+            return 'Formation continue'
 
 
 class DisplayTranslatedNameMixin:

@@ -553,6 +553,7 @@ COMMAND_HANDLERS = {
         partial(rechercher_compte_existant, cmd, digit_service=DigitService())
     ),
     InitialiserPropositionFusionPersonneCommand: lambda msg_bus, cmd: initialiser_proposition_fusion_personne(
+        msg_bus,
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
