@@ -28,7 +28,7 @@
 
 {% if result_code == 'ERROR' %}
     <div class="alert alert-danger">
-      <strong>Erreur</strong> Impossible de rechercher un compte existant
+       Une erreur est survenue lors de la recherche de doublons dans DigIT
     </div>
 {% elif result_code == 'MATCH_FOUND' %}
     <div class="alert alert-warning">
@@ -39,7 +39,7 @@
                 {% trans "Verify" %}
             </button>
         </form>
-        <strong>Correspondance trouvée</strong> Veuillez vérifier s'il y a lieu de fusionner les informations
+        DigIT a trouvé un potentiel doublon, veuillez vérifier s'il y a lieu de fusionner les informations
     </div>
 {% elif result_code == 'PENDING' %}
     <div class="alert alert-info">
@@ -52,16 +52,13 @@
         </form>
         <strong>Proposition de fusion enregistrée</strong> Vous pouvez poursuivre la fusion
     </div>
+{% elif result_code == 'IN_PROGRESS' %}
+     <div class="alert alert-info">
+         En attente du retour de fusion de DigIT
+     </div>
 {% elif result_code == 'REFUSED' %}
-    <div class="alert alert-danger">
-        <form id="undo-merge-proposal" method="POST" action="{% url 'admission:services:digit:undo-merge' uuid=uuid %}">
-            {% csrf_token %}
-            <button id="undo-merge-proposal-btn" type="submit" class="btn btn-xs btn-danger pull-right"
-                {% if not peut_fusionner %} disabled {% endif %}>
-                {% trans 'Undo' %}
-            </button>
-        </form>
-        <strong>Fusion refusée</strong> Une précédente proposition de fusion avec une personne existante a été refusée
+    <div class="alert alert-info">
+        Proposition de potentiel doublon refusée par le gestionnaire
     </div>
 {% endif %}
 
