@@ -39,7 +39,7 @@ def process(
     msg_bus: Any,
     event: Union[PropositionFusionInitialiseeEvent],
 ) -> None:
-    proposition_fusion_dto = msg_bus.invoke(GetPropositionFusionQuery(global_id=event.matricule))  # type: PropositionFusionPersonneDTO
+    proposition_fusion_dto = msg_bus.invoke(GetPropositionFusionQuery(global_id=event.matricule))  # type: PropositionFusionPersonneDTO  # noqa: E501
     if proposition_fusion_dto.status == PersonMergeStatus.IN_PROGRESS.name:
         with contextlib.suppress(BusinessException):
             msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
