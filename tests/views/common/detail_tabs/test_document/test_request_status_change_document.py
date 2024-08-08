@@ -673,10 +673,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             [
                 # Because they are read only
                 self.sic_free_non_requestable_internal_document,
-                # Or created by a fac manager
                 self.fac_free_non_requestable_internal_document,
-                self.fac_free_requestable_candidate_document_with_default_file,
-                self.fac_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
             ]
@@ -689,6 +686,24 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
                 response.status_code,
                 403,
                 'A SIC user cannot update the document n°%s' % index,
+            )
+
+        # Some documents can be requested
+        for index, identifier in enumerate(
+            [
+                # Even if they are created by a fac manager
+                self.fac_free_requestable_candidate_document_with_default_file,
+                self.fac_free_requestable_document,
+            ]
+        ):
+            response = self.client.get(
+                resolve_url(base_url, uuid=self.doctorate_admission.uuid, identifier=identifier),
+                **self.default_headers,
+            )
+            self.assertEqual(
+                response.status_code,
+                200,
+                'A SIC user can update the document n°%s' % index,
             )
 
         # Create a requested document
@@ -778,10 +793,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             [
                 # Because they are read only
                 self.fac_free_non_requestable_internal_document,
-                # Or created by a sic manager
                 self.sic_free_non_requestable_internal_document,
-                self.sic_free_requestable_candidate_document_with_default_file,
-                self.sic_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
             ]
@@ -794,6 +806,23 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
                 response.status_code,
                 403,
                 'A FAC user cannot update the document n°%s' % index,
+            )
+
+        for index, identifier in enumerate(
+            [
+                # A FAC manager can request a sic document
+                self.sic_free_requestable_candidate_document_with_default_file,
+                self.sic_free_requestable_document,
+            ]
+        ):
+            response = self.client.get(
+                resolve_url(base_url, uuid=self.doctorate_admission.uuid, identifier=identifier),
+                **self.default_headers,
+            )
+            self.assertEqual(
+                response.status_code,
+                200,
+                'A FAC user can update the document n°%s' % index,
             )
 
         # Create a requested document
@@ -826,19 +855,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
         self.assertEqual(form.fields[document_identifier].required, False)
-        self.assertEqual(len(form.fields[document_identifier].choices), 2)
-
-        # Post an invalid form
-        response = self.client.post(
-            resolve_url(base_url, uuid=self.doctorate_admission.uuid, identifier=document_identifier),
-            data={
-                document_identifier: StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
-            },
-            **self.default_headers,
-        )
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.fields[document_identifier].choices), 4)
 
         # Post a valid form
         response = self.client.post(
@@ -882,7 +899,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
     def test_doctorate_manager_updates_the_request_status_of_a_non_free_document(self, frozen_time):
         base_url = 'admission:doctorate:document:candidate-request-status'
 
-        # A FAC user cannot request a categorized document
+        # A FAC user can request a categorized document
         self.doctorate_admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
         self.doctorate_admission.save(update_fields=['status'])
         self.client.force_login(user=self.second_doctorate_fac_manager_user)
@@ -892,7 +909,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             **self.default_headers,
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         # A SIC user can request a categorized document
         self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name

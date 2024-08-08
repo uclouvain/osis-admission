@@ -560,10 +560,6 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 404)
 
         for identifier in [
-            # A SIC manager cannot replace FAC documents
-            self.fac_free_non_requestable_internal_document,
-            self.fac_free_requestable_candidate_document_with_default_file,
-            self.fac_free_requestable_document,
             # Or system ones
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
         ]:
@@ -572,6 +568,18 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
                 **self.default_headers,
             )
             self.assertEqual(response.status_code, 403)
+
+        for identifier in [
+            # A SIC manager can replace FAC documents
+            self.fac_free_non_requestable_internal_document,
+            self.fac_free_requestable_candidate_document_with_default_file,
+            self.fac_free_requestable_document,
+        ]:
+            response = self.client.post(
+                resolve_url(base_url, uuid=self.doctorate_admission.uuid, identifier=identifier),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
 
         # A SIC manager can replace SIC documents
         # Internal document
@@ -765,10 +773,6 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 404)
 
         for identifier in [
-            # A FAC manager cannot replace SIC documents
-            self.sic_free_non_requestable_internal_document,
-            self.sic_free_requestable_candidate_document_with_default_file,
-            self.sic_free_requestable_document,
             # Or system ones
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
         ]:
@@ -777,6 +781,18 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
                 **self.default_headers,
             )
             self.assertEqual(response.status_code, 403)
+
+        for identifier in [
+            # A FAC manager can replace SIC documents
+            self.sic_free_non_requestable_internal_document,
+            self.sic_free_requestable_candidate_document_with_default_file,
+            self.sic_free_requestable_document,
+        ]:
+            response = self.client.post(
+                resolve_url(base_url, uuid=self.doctorate_admission.uuid, identifier=identifier),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
 
         # A FAC manager can replace FAC documents
         # Internal document
@@ -872,4 +888,4 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
             **self.default_headers,
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)

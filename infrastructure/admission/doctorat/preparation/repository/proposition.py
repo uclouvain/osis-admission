@@ -51,7 +51,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -68,18 +67,23 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos import (
     DoctoratDTO,
     PropositionDTO,
+    CotutelleDTO,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
+from admission.infrastructure.utils import dto_to_dict
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -114,6 +118,9 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             langue_redaction_these=admission.thesis_language.code if admission.thesis_language else '',
             institut_these=InstitutIdentity(admission.thesis_institute.uuid) if admission.thesis_institute_id else None,
             lieu_these=admission.thesis_location,
+            deja_commence=admission.phd_alread_started,
+            deja_commence_institution=admission.phd_alread_started_institute,
+            date_debut=admission.work_start_date,
             graphe_gantt=admission.gantt_graph,
             proposition_programme_doctoral=admission.program_proposition,
             projet_formation_complementaire=admission.additional_training_project,
@@ -134,6 +141,8 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             bourse_preuve=admission.scholarship_proof,
             duree_prevue=admission.planned_duration,
             temps_consacre=admission.dedicated_time,
+            est_lie_fnrs_fria_fresh_csc=admission.is_fnrs_fria_fresh_csc_linked,
+            commentaire=admission.financing_comment,
         ),
         experience_precedente_recherche=ExperiencePrecedenteRecherche(
             doctorat_deja_realise=ChoixDoctoratDejaRealise[admission.phd_already_done],
@@ -151,6 +160,9 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
         auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
         documents_demandes=admission.requested_documents,
+        profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile)
+        if admission.submitted_profile
+        else None,
     )
 
 
@@ -222,6 +234,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'scholarship_proof': entity.financement.bourse_preuve,
                 'planned_duration': entity.financement.duree_prevue,
                 'dedicated_time': entity.financement.temps_consacre,
+                'is_fnrs_fria_fresh_csc_linked': entity.financement.est_lie_fnrs_fria_fresh_csc,
+                'financing_comment': entity.financement.commentaire,
                 'project_title': entity.projet.titre,
                 'project_abstract': entity.projet.resume,
                 'thesis_language': (
@@ -235,6 +249,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     else None
                 ),
                 'thesis_location': entity.projet.lieu_these,
+                'phd_alread_started': entity.projet.deja_commence,
+                'phd_alread_started_institute': entity.projet.deja_commence_institution,
+                'work_start_date': entity.projet.date_debut,
                 'project_document': entity.projet.documents,
                 'gantt_graph': entity.projet.graphe_gantt,
                 'program_proposition': entity.projet.proposition_programme_doctoral,
@@ -249,6 +266,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'confirmation_elements': entity.elements_confirmation,
+                'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -406,6 +424,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             type_admission=admission.type,
             doctorat=DoctoratDTO(
                 sigle=admission.doctorate.acronym,
+                code=admission.doctorate.partial_acronym,
                 annee=admission.doctorate.academic_year.year,
                 intitule=(
                     admission.doctorate.title_english
@@ -443,6 +462,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             bourse_preuve=admission.scholarship_proof,
             duree_prevue=admission.planned_duration,
             temps_consacre=admission.dedicated_time,
+            est_lie_fnrs_fria_fresh_csc=admission.is_fnrs_fria_fresh_csc_linked,
+            commentaire_financement=admission.financing_comment,
             titre_projet=admission.project_title,
             resume_projet=admission.project_abstract,
             documents_projet=admission.project_document,
@@ -455,6 +476,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nom_institut_these=admission.thesis_institute and admission.thesis_institute.title or '',
             sigle_institut_these=admission.thesis_institute and admission.thesis_institute.acronym or '',
             lieu_these=admission.thesis_location,
+            projet_doctoral_deja_commence=admission.phd_alread_started,
+            projet_doctoral_institution=admission.phd_alread_started_institute,
+            projet_doctoral_date_debut=admission.work_start_date,
             doctorat_deja_realise=admission.phd_already_done,
             institution=admission.phd_already_done_institution,
             domaine_these=admission.phd_already_done_thesis_domain,
@@ -477,3 +501,78 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
         )
+
+    @classmethod
+    def _load_dto_for_gestionnaire(
+        cls,
+        admission: PropositionProxy,
+    ) -> 'PropositionGestionnaireDTO':
+        proposition = cls._load_dto(admission)
+
+        country_of_citizenship_info = (
+            dict(
+                nationalite_candidat_fr=admission.candidate.country_of_citizenship.name,
+                nationalite_candidat_en=admission.candidate.country_of_citizenship.name_en,
+                nationalite_ue_candidat=admission.candidate.country_of_citizenship.european_union,
+                nationalite_candidat_code_iso=admission.candidate.country_of_citizenship.iso_code,
+            )
+            if admission.candidate.country_of_citizenship
+            else dict(
+                nationalite_candidat_fr='',
+                nationalite_candidat_en='',
+                nationalite_ue_candidat=None,
+                nationalite_candidat_code_iso='',
+            )
+        )
+
+        return PropositionGestionnaireDTO(
+            **dto_to_dict(proposition),
+            **country_of_citizenship_info,
+            date_changement_statut=admission.status_updated_at,  # from annotation
+            candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,
+            genre_candidat=admission.candidate.gender,
+            noma_candidat=admission.student_registration_id or '',  # from annotation
+            photo_identite_candidat=admission.candidate.id_photo,
+            adresse_email_candidat=admission.candidate.private_email,
+            cotutelle=CotutelleDTO(
+                cotutelle=admission.cotutelle,
+                motivation=admission.cotutelle_motivation,
+                institution_fwb=admission.cotutelle_institution_fwb,
+                institution=admission.cotutelle_institution,
+                demande_ouverture=admission.cotutelle_opening_request,
+                convention=admission.cotutelle_convention,
+                autres_documents=admission.cotutelle_other_documents,
+                autre_institution=bool(
+                    admission.cotutelle_other_institution_name or admission.cotutelle_other_institution_address
+                ),
+                autre_institution_nom=admission.cotutelle_other_institution_name,
+                autre_institution_adresse=admission.cotutelle_other_institution_address
+            )
+            if admission.cotutelle
+            else None,
+            profil_soumis_candidat=ProfilCandidatDTO.from_dict(
+                dict_profile=admission.submitted_profile,
+                nom_pays_nationalite=admission.submitted_profile_country_of_citizenship_name or '',  # from annotation
+                nom_pays_adresse=admission.submitted_profile_country_name or '',  # from annotation
+            )
+            if admission.submitted_profile
+            else None,
+        )
+
+    @classmethod
+    def get_dto_for_gestionnaire(
+        cls,
+        entity_id: 'PropositionIdentity',
+    ) -> 'PropositionGestionnaireDTO':
+        try:
+            admission = (
+                PropositionProxy.objects.annotate_with_student_registration_id()
+                .annotate_several_admissions_in_progress()
+                .annotate_submitted_profile_countries_names()
+                .annotate_last_status_update()
+                .get(uuid=entity_id.uuid)
+            )
+        except PropositionProxy.DoesNotExist:
+            raise PropositionNonTrouveeException
+
+        return cls._load_dto_for_gestionnaire(admission)

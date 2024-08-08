@@ -330,10 +330,6 @@ TAB_TREES = {
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
             Tab('accounting', _('Accounting')),
         ],
-        Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('send-mail', _('Send a mail')),
-            Tab('debug', _('Debug'), 'bug'),
-        ],
     },
     # TODO doctorate refactorization
     CONTEXT_DOCTORATE_AFTER_ENROLMENT: {
