@@ -27,24 +27,19 @@ import contextlib
 from typing import Any, Union
 
 from admission.ddd.admission.commands import (
-    RechercherCompteExistantCommand, ValiderTicketPersonneCommand,
-    SoumettreTicketPersonneCommand, DefairePropositionFusionCommand,
+    SoumettreTicketPersonneCommand, GetPropositionFusionQuery,
 )
-from admission.ddd.admission.formation_generale.events import (
-    DonneesIdentificationCandidatModifiee,
-    CoordonneesCandidatModifiees,
-)
+from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
+from admission.ddd.admission.events import PropositionFusionInitialiseeEvent
+from base.models.person_merge_proposal import PersonMergeStatus
 from osis_common.ddd.interface import BusinessException
 
 
 def process(
     msg_bus: Any,
-    event: Union[DonneesIdentificationCandidatModifiee, CoordonneesCandidatModifiees],
+    event: Union[PropositionFusionInitialiseeEvent],
 ) -> None:
-    with contextlib.suppress(BusinessException):
-        msg_bus.invoke(DefairePropositionFusionCommand(global_id=event.matricule))
-
-    with contextlib.suppress(BusinessException):
-        msg_bus.invoke(RechercherCompteExistantCommand(matricule=event.matricule))
-        msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
-        msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
+    proposition_fusion_dto = msg_bus.invoke(GetPropositionFusionQuery(global_id=event.matricule))  # type: PropositionFusionPersonneDTO  # noqa: E501
+    if proposition_fusion_dto.status == PersonMergeStatus.IN_PROGRESS.name:
+        with contextlib.suppress(BusinessException):
+            msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
