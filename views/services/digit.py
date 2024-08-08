@@ -23,9 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import logging
 
-from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -36,16 +34,13 @@ __all__ = [
 ]
 
 from django.views.generic import FormView
-from django.views.generic.edit import ProcessFormView
 
-from admission.contrib.models.base import BaseAdmission
-from admission.ddd.admission.commands import SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
+from admission.ddd.admission.commands import RefuserPropositionFusionCommand
 from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal
-from base.views.common import display_error_messages, display_success_messages
+from base.views.common import display_error_messages
 
-from osis_common.ddd.interface import BusinessException
 from osis_role.contrib.views import PermissionRequiredMixin
 
 from infrastructure.messages_bus import message_bus_instance
