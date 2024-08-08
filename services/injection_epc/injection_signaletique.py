@@ -37,6 +37,7 @@ from admission.contrib.models.base import (
 )
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
+from admission.tasks import injecter_signaletique_a_epc_task
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
@@ -54,9 +55,6 @@ SPORT_TOUT_CAMPUS = [
 
 class InjectionEPCSignaletique:
     def injecter(self, admission: BaseAdmission):
-        logger.info(
-            f"[INJECTION EPC] Recuperation des donnees de la signaletique pour le dossier (reference {str(admission)})"
-        )
         donnees = self.recuperer_donnees(admission=admission)
         EPCInjection.objects.get_or_create(
             admission=admission,
@@ -64,17 +62,11 @@ class InjectionEPCSignaletique:
             defaults={
                 'payload': donnees,
                 'status': EPCInjectionStatus.PENDING.name,
-                'last_attempt_date': datetime.now(),
+                'last_attempt_date': None,
             }
         )
-        logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
-        logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
-        transaction.on_commit(
-            lambda: self.envoyer_signaletique_dans_queue(
-                donnees=donnees,
-                admission_reference=str(admission)
-            )
-        )
+        if settings.USE_CELERY:
+            transaction.on_commit(lambda: injecter_signaletique_a_epc_task.run.delay(global_id=admission.reference))
         return donnees
 
     @classmethod
