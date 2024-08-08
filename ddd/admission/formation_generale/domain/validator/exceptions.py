@@ -298,3 +298,11 @@ class EtatChecklistFinancabiliteNonValidePourApprouverDemande(BusinessException)
             '"Not concerned" or "Financable" or "Dispensation granted".'
         )
         super().__init__(message, **kwargs)
+
+
+class PremierePropositionSoumisesNonTrouveeException(BusinessException):
+    status_code = "FORMATION-GENERALE-33"
+
+    def __init__(self, **kwargs):
+        message = _("First submitted proposition not found (Admission with state 'Application accepted' / Enrolment)")
+        super().__init__(message, **kwargs)
