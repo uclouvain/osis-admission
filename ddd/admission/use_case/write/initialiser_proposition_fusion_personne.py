@@ -25,14 +25,16 @@
 # ##############################################################################
 from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
+from admission.ddd.admission.events import PropositionFusionInitialiseeEvent
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 
 
 def initialiser_proposition_fusion_personne(
-        cmd: 'InitialiserPropositionFusionPersonneCommand',
-        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
+    msg_bus,
+    cmd: 'InitialiserPropositionFusionPersonneCommand',
+    proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
 ) -> PropositionFusionPersonneIdentity:
-    return proposition_fusion_personne_repository.initialiser(
+    proposition_fusion_personne_identity = proposition_fusion_personne_repository.initialiser(
         existing_merge_person_id=cmd.existing_merge_person_id,
         status=cmd.status,
         global_id=cmd.original_global_id,
@@ -56,3 +58,10 @@ def initialiser_proposition_fusion_personne(
         educational_curex_ids=cmd.educational_curex_uuids,
         professional_curex_ids=cmd.professional_curex_uuids,
     )
+    msg_bus.publish(
+        PropositionFusionInitialiseeEvent(
+            entity_id=proposition_fusion_personne_identity,
+            matricule=cmd.original_global_id,
+        )
+    )
+    return proposition_fusion_personne_identity
