@@ -24,6 +24,8 @@
 #
 # ##############################################################################
 from types import SimpleNamespace
+from typing import Optional
+
 from django.utils.translation import gettext_lazy as _
 
 from django.utils.functional import cached_property
@@ -89,20 +91,32 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
             RecupererEtudesSecondairesQuery(matricule_candidat=self.candidate['global_id'])
         )
 
-    @cached_property
-    def curriculum_personne_connue(self) -> CurriculumAdmissionDTO:
-        return message_bus_instance.invoke(
-            RechercherParcoursAnterieurQuery(
-                global_id=format_matricule(self.request.GET.get('matricule')),
-                uuid_proposition=self.kwargs['admission_uuid'],
-            )
-        )
+    @property
+    def matricule_personne_connue_selectionnee(self) -> Optional[str]:
+        if self.request.GET.get('matricule'):
+            return format_matricule(self.request.GET.get('matricule'))
+        return None
 
     @cached_property
-    def etudes_secondaires_personne_connue(self) -> EtudesSecondairesAdmissionDTO:
-        return message_bus_instance.invoke(
-            RecupererEtudesSecondairesQuery(matricule_candidat=self.candidate['global_id'])
-        )
+    def curriculum_personne_connue(self) -> Optional[CurriculumAdmissionDTO]:
+        if self.matricule_personne_connue_selectionnee:
+            return message_bus_instance.invoke(
+                RechercherParcoursAnterieurQuery(
+                    global_id=self.matricule_personne_connue_selectionnee,
+                    uuid_proposition=self.kwargs['admission_uuid'],
+                )
+            )
+        return None
+
+    @cached_property
+    def etudes_secondaires_personne_connue(self) -> Optional[EtudesSecondairesAdmissionDTO]:
+        if self.matricule_personne_connue_selectionnee:
+            return message_bus_instance.invoke(
+                RecupererEtudesSecondairesQuery(
+                    matricule_candidat=self.matricule_personne_connue_selectionnee,
+                )
+            )
+        return None
 
     def get_context_data(self, **kwargs):
         context = {
