@@ -43,6 +43,8 @@ def process(
 ) -> None:
     with contextlib.suppress(BusinessException):
         msg_bus.invoke(DefairePropositionFusionCommand(global_id=event.matricule))
+
+    with contextlib.suppress(BusinessException):
         msg_bus.invoke(RechercherCompteExistantCommand(matricule=event.matricule))
         msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
         msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))

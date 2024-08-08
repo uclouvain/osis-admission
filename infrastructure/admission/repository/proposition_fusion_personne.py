@@ -35,7 +35,7 @@ from django.db.models import Model, ForeignKey
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.domain.validator.exceptions import TicketDigitATraiterAvantException, \
-    PasDePropositionDeFusionEligibleException
+    PasDePropositionDeFusionEligibleException, PasDePropositionFusionPersonneTrouveeException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 from admission.templatetags.admission import format_matricule
@@ -139,12 +139,12 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
 
     @classmethod
     def get(cls, global_id: str) -> Optional[PropositionFusionPersonneDTO]:
-        person_merge_proposal = get_object_or_none(
-            PersonMergeProposal,
+        person_merge_proposal = PersonMergeProposal.objects.filter(
             original_person__global_id=global_id,
-        )
-        if not person_merge_proposal or person_merge_proposal.selected_global_id == '':
+        ).exclude(selected_global_id='').first()
+        if not person_merge_proposal:
             return None
+
         country = person_merge_proposal.proposal_merge_person.country_of_citizenship \
             if person_merge_proposal.proposal_merge_person else None
         person = person_merge_proposal.proposal_merge_person \
@@ -175,17 +175,19 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
 
     @classmethod
     def defaire(cls, global_id: str) -> PropositionFusionPersonneIdentity:
-        person_merge_proposal, _ = PersonMergeProposal.objects.update_or_create(
+        person_merge_proposal = PersonMergeProposal.objects.filter(
             original_person__global_id=global_id,
-            defaults={
-                "status": PersonMergeStatus.MATCH_FOUND.name,
-                "selected_global_id": "",
-                "registration_id_sent_to_digit": "",
-                "professional_curex_to_merge": [],
-                "educational_curex_to_merge": [],
-                "proposal_merge_person": None
-            }
-        )
+        ).exclude(selected_global_id='').first()
+        if not person_merge_proposal:
+            raise PasDePropositionFusionPersonneTrouveeException
+
+        person_merge_proposal.status = PersonMergeStatus.MATCH_FOUND.name
+        person_merge_proposal.selected_global_id = ''
+        person_merge_proposal.registration_id_sent_to_digit = ''
+        person_merge_proposal.professional_curex_to_merge = []
+        person_merge_proposal.educational_curex_to_merge = []
+        person_merge_proposal.proposal_merge_person = None
+        person_merge_proposal.save()
         return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)
 
     @classmethod
@@ -220,7 +222,6 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
 
     @classmethod
     def fusionner(cls, candidate_global_id: str, ticket_uuid: str):
-
         cls.verifier_eligible_fusion(ticket_uuid)
 
         candidate = Person.objects.prefetch_related('personticketcreation_set').get(global_id=candidate_global_id)

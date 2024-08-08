@@ -324,3 +324,11 @@ class PropositionDeFusionAvecValidationSyntaxiqueInvalideException(BusinessExcep
             "matricule_candidat": matricule_candidat,
         }
         super().__init__(message, **kwargs)
+
+
+class PasDePropositionFusionPersonneTrouveeException(BusinessException):
+    status_code = "FUSION-DIGIT-12"
+
+    def __init__(self, **kwargs):
+        message = _("Ressource not found.")
+        super().__init__(message, **kwargs)
