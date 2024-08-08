@@ -686,6 +686,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -701,6 +702,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -747,4 +749,13 @@ COMMAND_HANDLERS = {
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: lambda *args, **kwargs: Mock(),
     ValiderTicketPersonneCommand: lambda *args, **kwargs: Mock(),
     FusionnerCandidatAvecPersonneExistanteCommand: lambda *args, **kwargs: Mock(),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            academic_year_repository=_academic_year_repository,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        )
+    ),
 }

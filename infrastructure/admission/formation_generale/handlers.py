@@ -686,6 +686,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -701,6 +702,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -789,6 +791,15 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
 }
