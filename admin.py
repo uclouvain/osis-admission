@@ -35,7 +35,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
@@ -543,7 +543,7 @@ class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
 
 
 class BaseAdmissionStatutFilter(SimpleListFilter):
-    title = 'statut'
+    title = 'Statut'
     parameter_name = 'statut'
 
     def lookups(self, request, model_admin):
@@ -564,7 +564,7 @@ class BaseAdmissionStatutFilter(SimpleListFilter):
 
 
 class BaseAdmissionTypeFormationFilter(SimpleListFilter):
-    title = 'type_formation'
+    title = 'Type formation'
     parameter_name = 'type_formation'
 
     def lookups(self, request, model_admin):
@@ -585,21 +585,32 @@ class BaseAdmissionTypeFormationFilter(SimpleListFilter):
 
 
 class EPCInjectionStatusFilter(SimpleListFilter):
-    title = 'Injection EPC'
+    title = 'Injection EPC de la demande'
     parameter_name = 'epc_injection_status'
 
     def lookups(self, request, model_admin):
         return (
             *EPCInjectionStatus.choices(),
-            ('no_epc_injection', "Pas d'injection"),
+            ('no_epc_injection', "Pas d'injection lancée"),
         )
 
     def queryset(self, request, queryset):
         if self.value() in EPCInjectionStatus.get_names():
             statut = EPCInjectionStatus[self.value()]
-            return queryset.filter(epc_injection__status=statut)
+            return queryset.filter(
+                epc_injection__status=statut.name,
+                epc_injection__type=EPCInjectionType.DEMANDE.name
+            )
         elif self.value() == 'no_epc_injection':
-            return queryset.filter(epc_injection__isnull=True)
+            return queryset.filter(
+                Q(epc_injection__isnull=True) |
+                Q(~Exists(
+                    EPCInjection.objects.filter(
+                        admission_id=OuterRef('pk'),
+                        type=EPCInjectionType.DEMANDE.name,
+                    )
+                ))
+            )
         return queryset
 
 
@@ -624,7 +635,9 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         BaseAdmissionTypeFormationFilter,
         BaseAdmissionStatutFilter,
         EPCInjectionStatusFilter,
-        ('training__academic_year', RelatedDropdownFilter),
+        ('determined_academic_year', RelatedDropdownFilter),
+        'determined_pool',
+        'online_payments__status',
         'accounting__sport_affiliation',
     ]
 
