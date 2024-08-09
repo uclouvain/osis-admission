@@ -583,6 +583,25 @@ class BaseAdmissionTypeFormationFilter(SimpleListFilter):
         return queryset
 
 
+class EPCInjectionStatusFilter(SimpleListFilter):
+    title = 'Injection EPC'
+    parameter_name = 'epc_injection_status'
+
+    def lookups(self, request, model_admin):
+        return (
+            *EPCInjectionStatus.choices(),
+            ('no_epc_injection', "Pas d'injection"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() in EPCInjectionStatus.get_names():
+            statut = EPCInjectionStatus[self.value()]
+            return queryset.filter(epc_injection__status=statut)
+        elif self.value() == 'no_epc_injection':
+            return queryset.filter(epc_injection__isnull=True)
+        return queryset
+
+
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference', 'candidate__last_name', 'candidate__global_id', 'training__acronym']
@@ -603,6 +622,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'type_demande',
         BaseAdmissionTypeFormationFilter,
         BaseAdmissionStatutFilter,
+        EPCInjectionStatusFilter,
         ('training__academic_year', RelatedDropdownFilter),
         'accounting__sport_affiliation',
     ]
