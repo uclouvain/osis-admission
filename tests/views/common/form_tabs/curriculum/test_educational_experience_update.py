@@ -1524,7 +1524,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
     @freezegun.freeze_time('2023-01-01')
     def test_post_form_with_existing_years(self):
         self.client.force_login(self.sic_manager_user)
-
+        file_uuid = uuid.uuid4()
         response = self.client.post(
             self.form_url,
             data={
@@ -1536,6 +1536,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 'base_form-transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
                 'base_form-program': self.second_cycle_diploma.pk,
                 'base_form-obtained_diploma': False,
+                'base_form-transcript_0': [file_uuid],
                 'year_formset-TOTAL_FORMS': 2,
                 'year_formset-INITIAL_FORMS': 3,
                 'year_formset-2020-academic_year': 2020,
@@ -1561,6 +1562,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(self.experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(self.experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(self.experience.obtained_diploma, False)
+        self.assertEqual(self.experience.transcript, [file_uuid])
 
         # Check the years
         years = self.experience.educationalexperienceyear_set.all().order_by('academic_year__year')
@@ -1591,7 +1593,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         admission_url = resolve_url('admission')
         expected_url = f'{admission_url}#custom_hash'
-
+        file_uuid = uuid.uuid4()
         response = self.client.post(
             f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
             data={
@@ -1603,6 +1605,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 'base_form-transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
                 'base_form-program': self.second_cycle_diploma.pk,
                 'base_form-obtained_diploma': False,
+                'base_form-transcript_0': [file_uuid],
                 'year_formset-TOTAL_FORMS': 1,
                 'year_formset-INITIAL_FORMS': 3,
                 'year_formset-2004-academic_year': 2004,
@@ -1623,6 +1626,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(self.experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(self.experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(self.experience.obtained_diploma, False)
+        self.assertEqual(self.experience.transcript, [file_uuid])
 
         # Check the years
         years = self.experience.educationalexperienceyear_set.all()
@@ -1644,7 +1648,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 institute=self.second_institute,
             ).exists()
         )
-
+        file_uuid = uuid.uuid4()
         response = self.client.post(
             self.create_url,
             data={
@@ -1656,6 +1660,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 'base_form-transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
                 'base_form-program': self.second_cycle_diploma.pk,
                 'base_form-obtained_diploma': False,
+                'base_form-transcript_0': [file_uuid],
                 'year_formset-TOTAL_FORMS': 1,
                 'year_formset-INITIAL_FORMS': 3,
                 'year_formset-2004-academic_year': 2004,
@@ -1681,6 +1686,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(new_experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(new_experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(new_experience.obtained_diploma, False)
+        self.assertEqual(new_experience.transcript, [file_uuid])
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all()
@@ -1734,6 +1740,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             ).exists()
         )
 
+        file_uuid = uuid.uuid4()
         response = self.client.post(
             self.create_url,
             data={
@@ -1745,6 +1752,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 'base_form-transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
                 'base_form-program': self.second_cycle_diploma.pk,
                 'base_form-obtained_diploma': False,
+                'base_form-transcript_0': [file_uuid],
                 'year_formset-TOTAL_FORMS': 3,
                 'year_formset-INITIAL_FORMS': 3,
                 'year_formset-2004-academic_year': 2004,
@@ -1780,6 +1788,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(new_experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(new_experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(new_experience.obtained_diploma, False)
+        self.assertEqual(new_experience.transcript, [file_uuid])
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all().order_by('academic_year__year')
