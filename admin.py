@@ -604,6 +604,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         BaseAdmissionTypeFormationFilter,
         BaseAdmissionStatutFilter,
         ('training__academic_year', RelatedDropdownFilter),
+        'accounting__sport_affiliation',
     ]
 
     @admin.action(description='Injecter la demande dans EPC')
