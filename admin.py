@@ -91,7 +91,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import Categor
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
-from admission.tasks import bulk_create_digit_persons_tickets
+from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -698,17 +698,10 @@ class EPCInjectionAdmin(admin.ModelAdmin):
 
     @admin.action(description="Réinjecter la signalétique dans EPC")
     def reinjecter_la_signaletique_dans_epc(self, request, queryset):
-        for injection in queryset.filter(
+        admissions_references = queryset.filter(
             type=EPCInjectionType.SIGNALETIQUE.name
-        ).exclude(
-            status=EPCInjectionStatus.OK.name
-        ):
-            injection.last_attempt_date = datetime.now()
-            injection.save()
-            InjectionEPCSignaletique().envoyer_signaletique_dans_queue(
-                donnees=injection.payload,
-                admission_reference=injection.admission.reference
-            )
+        ).values_list('admission__reference', flat=True)
+        injecter_signaletique_a_epc_task.run(admissions_references=list(admissions_references))
 
     @admin.action(description="Réinjecter la demande dans EPC")
     def reinjecter_la_demande_dans_epc(self, request, queryset):

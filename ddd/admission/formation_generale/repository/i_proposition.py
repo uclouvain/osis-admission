@@ -68,7 +68,7 @@ class IPropositionRepository(IGlobalPropositionRepository):
 
     @classmethod
     @abc.abstractmethod
-    def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
+    def get_first_submitted_proposition(cls, matricule_candidat: str) -> 'Proposition':
         raise NotImplementedError
 
     @classmethod

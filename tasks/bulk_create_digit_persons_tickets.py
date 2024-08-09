@@ -60,13 +60,13 @@ def run(request=None, global_ids=None):
                 from infrastructure.messages_bus import message_bus_instance
                 message_bus_instance.invoke(RechercherCompteExistantCommand(matricule=candidate.global_id))
 
-                logger.info(f'[DigIT] Validate ticket semantic info from digit for {candidate}')
-                message_bus_instance.invoke(
-                    ValiderTicketPersonneCommand(global_id=candidate.global_id)
-                )
-
-                logger.info(f'[DigIT] send creation ticket for {candidate}')
                 try:
+                    logger.info(f'[DigIT] Validate ticket semantic info from digit for {candidate}')
+                    message_bus_instance.invoke(
+                        ValiderTicketPersonneCommand(global_id=candidate.global_id)
+                    )
+
+                    logger.info(f'[DigIT] send creation ticket for {candidate}')
                     person_ticket_uuid = message_bus_instance.invoke(
                         SoumettreTicketPersonneCommand(global_id=candidate.global_id)
                     )

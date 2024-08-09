@@ -40,6 +40,7 @@ TECHNICAL_ERRORS = CUREX_TECHNICAL_ERRORS + [
 class EPCInjectionStatus(ChoiceEnum):
     OK = "Injecté"
     ERROR = "Erreur"
+    NO_SENT = "Pas encore envoyé dans EPC"
     PENDING = "En attente du retour d'EPC"
 
 

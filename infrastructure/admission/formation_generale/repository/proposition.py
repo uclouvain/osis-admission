@@ -76,7 +76,8 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException, \
+    PremierePropositionSoumisesNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
@@ -124,7 +125,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return [cls._load_dto(proposition) for proposition in qs]
 
     @classmethod
-    def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
+    def get_first_submitted_proposition(cls, matricule_candidat: str) -> 'Proposition':
         first_submitted_proposition = (
             GeneralEducationAdmissionProxy.objects.prefetch_related(
                 'additional_approval_conditions',
@@ -151,7 +152,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         if first_submitted_proposition:
             return cls._load(first_submitted_proposition)
-        raise PropositionNonTrouveeException
+        raise PremierePropositionSoumisesNonTrouveeException
 
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:
