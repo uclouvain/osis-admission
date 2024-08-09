@@ -631,7 +631,10 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     def injecter_dans_epc(self, request, queryset):
         for demande in queryset:
             # Check injection state when it exists
-            InjectionEPCAdmission().injecter(demande)
+            try:
+                InjectionEPCAdmission().injecter(demande)
+            except Exception:
+                pass
 
     def has_add_permission(self, request):
         return False
