@@ -67,7 +67,7 @@ class InjectionEPCSignaletique:
         )
         if settings.USE_CELERY:
             transaction.on_commit(
-                lambda: injecter_signaletique_a_epc_task.run.delay(admissions_reference=[admission.reference])
+                lambda: injecter_signaletique_a_epc_task.run.delay(admissions_references=[admission.reference])
             )
 
     @classmethod
