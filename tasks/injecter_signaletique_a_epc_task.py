@@ -58,8 +58,8 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
         f"(nbre: {str(epc_injections_signaletique_to_send)}) "
     )
     for epc_injection_signaletique in epc_injections_signaletique_to_send:
-        try:
-            with transaction.atomic():
+        with transaction.atomic():
+            try:
                 logger.info(
                     f"{PREFIX_TASK} Injection vers EPC de la signaletique dans la queue. "
                     f"{json.dumps(epc_injection_signaletique.payload, indent=4)}"
@@ -69,15 +69,14 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
                     admission_reference=str(epc_injection_signaletique.admission)
                 )
                 epc_injection_signaletique.status = EPCInjectionStatus.PENDING.name
+            except Exception as e:
+                logger.info(
+                    f"{PREFIX_TASK} Une erreur est survenue lors de l'injection "
+                    f"vers EPC de la signaletique de la demande avec reference {str(epc_injection_signaletique.admission)}"
+                    f"(Cause: {repr(e)})"
+                )
+                epc_injection_signaletique.status = EPCInjectionStatus.ERROR.name
+            finally:
                 epc_injection_signaletique.last_attempt_date = datetime.now()
                 epc_injection_signaletique.save()
-        except Exception as e:
-            logger.info(
-                f"{PREFIX_TASK} Une erreur est survenue lors de l'injection "
-                f"vers EPC de la signaletique de la demande avec reference {str(epc_injection_signaletique.admission)}"
-                f"(Cause: {repr(e)})"
-            )
-            epc_injection_signaletique.status = EPCInjectionStatus.ERROR.name
-            epc_injection_signaletique.last_attempt_date = datetime.now()
-            epc_injection_signaletique.save()
     logger.info(f"{PREFIX_TASK} Fin des injections vers EPC de la signaletique dans la queue ")
