@@ -447,12 +447,14 @@ class InjectionEPCAdmission:
 
     @staticmethod
     def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
+        general_admission = getattr(admission, 'generaleducationadmission', None)
         return {
             "annee_academique": admission.training.academic_year.year,
-            "droits_majores": getattr(admission, "tuition_fees_dispensation", None),
+            "droits_majores": general_admission.tuition_fees_dispensation,
             "montant_doits_majores": (
-                str(getattr(admission, "tuition_fees_amount_other", ""))
-                or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount", None))
+                (str(getattr(general_admission, "tuition_fees_amount_other", ""))
+                    or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
+                if general_admission else None
             ),
         }
 
