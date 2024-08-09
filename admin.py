@@ -629,7 +629,9 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
 
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
-        for demande in queryset:
+        for demande in queryset.exclude(
+            epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]
+        ):
             # Check injection state when it exists
             try:
                 InjectionEPCAdmission().injecter(demande)
