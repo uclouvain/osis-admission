@@ -72,7 +72,8 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
             except Exception as e:
                 logger.info(
                     f"{PREFIX_TASK} Une erreur est survenue lors de l'injection "
-                    f"vers EPC de la signaletique de la demande avec reference {str(epc_injection_signaletique.admission)}"
+                    f"vers EPC de la signaletique de la demande avec reference "
+                    f"{str(epc_injection_signaletique.admission)}"
                     f"(Cause: {repr(e)})"
                 )
                 epc_injection_signaletique.status = EPCInjectionStatus.ERROR.name
