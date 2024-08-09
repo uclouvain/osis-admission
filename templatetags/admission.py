@@ -1144,6 +1144,17 @@ def search_account_digit_result_msg(context, admission):
     return context
 
 
+@register.inclusion_tag('admission/digit/validation_syntaxique_resultat_digit.html', takes_context=False)
+def validation_syntaxique_resultat_digit(admission):
+    if hasattr(admission.candidate, 'personmergeproposal'):
+        validation_digit = admission.candidate.personmergeproposal.validation
+        return {
+            'a_une_syntaxe_valide': validation_digit.get('valid', True),
+            'erreurs': validation_digit.get('errors', []),
+        }
+    return {}
+
+
 @register.inclusion_tag('admission/digit_ticket_status_message.html', takes_context=True)
 def digit_ticket_status_msg(context, digit_ticket):
     context['digit_ticket'] = digit_ticket

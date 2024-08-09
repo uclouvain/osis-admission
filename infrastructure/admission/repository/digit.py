@@ -142,6 +142,8 @@ class DigitRepository(IDigitRepository):
             '-created_at'
         ).select_related('person').filter(
             person__global_id=global_id
+        ).exclude(
+            person__personmergeproposal__isnull=True
         ).first()
 
         if ticket:
