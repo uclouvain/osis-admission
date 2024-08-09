@@ -125,6 +125,7 @@ class InjectionEPCSignaletique:
             'annee_academique': admission.training.academic_year.year,
             'nationalite': candidat.country_of_citizenship.iso_code,
             'type_demande': admission.type_demande,
+            'contexte': admission.get_admission_context().upper().replace('-', '_'),
             'carte_sport_lln_woluwe': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.LOUVAIN_WOLUWE.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False
@@ -139,6 +140,10 @@ class InjectionEPCSignaletique:
             ),
             'carte_sport_st_louis': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_LOUIS.name] + SPORT_TOUT_CAMPUS
+                if comptabilite else False
+            ),
+            'carte_sport_st_gilles': (
+                comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_GILLES.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False
             ),
             'carte_solidaire': comptabilite.solidarity_student or False if comptabilite else False,
