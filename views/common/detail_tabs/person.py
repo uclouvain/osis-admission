@@ -30,9 +30,6 @@ from admission.views.common.mixins import LoadDossierViewMixin
 
 __all__ = ['AdmissionPersonDetailView']
 
-from base.models.person_merge_proposal import PersonMergeProposal
-from osis_common.utils.models import get_object_or_none
-
 
 class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
     permission_required = 'admission.view_admission_person'
@@ -43,8 +40,5 @@ class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
 
         context['person'] = self.admission.candidate
         context['contact_language'] = get_languages().get(self.admission.candidate.language)
-        if self.is_doctorate and 'dossier' in context:
-            context['profil_candidat'] = context['dossier'].profil_soumis_candidat
-        elif self.is_general or self.is_continuing:
-            context['profil_candidat'] = context['admission'].profil_soumis_candidat
+        context['profil_candidat'] = context['admission'].profil_soumis_candidat
         return context
