@@ -132,6 +132,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
     logger.info(f"{PREFIX_TASK} send signaletique into EPC")
     _injecter_signaletique_a_epc(digit_matricule)
     if settings.USE_CELERY:
+        # TODO refactor to create a model which monitor sending picture to card
         send_pictures_to_card_app.run.delay(global_id=digit_matricule)
     logger.info(f"{PREFIX_TASK} send picture to card")
 

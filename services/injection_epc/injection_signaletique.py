@@ -54,20 +54,21 @@ SPORT_TOUT_CAMPUS = [
 
 
 class InjectionEPCSignaletique:
-    def injecter(self, admission: BaseAdmission):
+    def injecter(self, admission: BaseAdmission) -> None:
         donnees = self.recuperer_donnees(admission=admission)
         EPCInjection.objects.get_or_create(
             admission=admission,
             type=EPCInjectionType.SIGNALETIQUE.name,
             defaults={
                 'payload': donnees,
-                'status': EPCInjectionStatus.PENDING.name,
+                'status': EPCInjectionStatus.NO_SENT.name,
                 'last_attempt_date': None,
             }
         )
         if settings.USE_CELERY:
-            transaction.on_commit(lambda: injecter_signaletique_a_epc_task.run.delay(global_id=admission.reference))
-        return donnees
+            transaction.on_commit(
+                lambda: injecter_signaletique_a_epc_task.run.delay(admissions_reference=[admission.reference])
+            )
 
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):

@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
 import logging
 from datetime import datetime
 from typing import List
@@ -41,25 +42,33 @@ PREFIX_TASK = "[Injecter signaletique vers EPC] :"
 
 @celery_app.task
 @transaction.non_atomic_requests
-def run(admissions_reference: List[str] = None):  # pragma: no cover
+def run(admissions_references: List[str] = None):  # pragma: no cover
     from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 
     epc_injections_signaletique_to_send = EPCInjection.objects.filter(
         type=EPCInjectionType.SIGNALETIQUE.name,
-        last_attempt_date__isnull=True,
-    )
-    if admissions_reference is not None:
+    ).exclude(status=EPCInjectionStatus.OK.name)
+    if admissions_references is not None:
         epc_injections_signaletique_to_send = epc_injections_signaletique_to_send.filter(
-            admission__reference__in=admissions_reference,
+            admission__reference__in=admissions_references,
         )
 
+    logger.info(
+        f"{PREFIX_TASK} Lancement des injections vers EPC de la signaletique dans la queue "
+        f"(nbre: {str(epc_injections_signaletique_to_send)}) "
+    )
     for epc_injection_signaletique in epc_injections_signaletique_to_send:
         try:
             with transaction.atomic():
+                logger.info(
+                    f"{PREFIX_TASK} Injection vers EPC de la signaletique dans la queue. "
+                    f"{json.dumps(epc_injection_signaletique.payload, indent=4)}"
+                )
                 InjectionEPCSignaletique().envoyer_signaletique_dans_queue(
                     donnees=epc_injection_signaletique.payload,
                     admission_reference=str(epc_injection_signaletique.admission)
                 )
+                epc_injection_signaletique.status = EPCInjectionStatus.PENDING.name
                 epc_injection_signaletique.last_attempt_date = datetime.now()
                 epc_injection_signaletique.save()
         except Exception as e:
@@ -69,4 +78,6 @@ def run(admissions_reference: List[str] = None):  # pragma: no cover
                 f"(Cause: {repr(e)})"
             )
             epc_injection_signaletique.status = EPCInjectionStatus.ERROR.name
+            epc_injection_signaletique.last_attempt_date = datetime.now()
             epc_injection_signaletique.save()
+    logger.info(f"{PREFIX_TASK} Fin des injections vers EPC de la signaletique dans la queue ")
