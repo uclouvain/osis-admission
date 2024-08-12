@@ -25,11 +25,21 @@
 # ##############################################################################
 from admission.ddd.admission.commands import RefuserPropositionFusionCommand
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
+from admission.ddd.admission.events import PropositionFusionRefuseeEvent
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 
 
 def refuser_proposition_fusion_personne(
-        cmd: 'RefuserPropositionFusionCommand',
-        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
+    message_bus,
+    cmd: 'RefuserPropositionFusionCommand',
+    proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
 ) -> PropositionFusionPersonneIdentity:
-    return proposition_fusion_personne_repository.refuser(global_id=cmd.global_id)
+    proposition_fusion_personne_identity = proposition_fusion_personne_repository.refuser(global_id=cmd.global_id)
+
+    message_bus.publish(
+        PropositionFusionRefuseeEvent(
+            entity_id=proposition_fusion_personne_identity,
+            matricule=cmd.global_id,
+        )
+    )
+    return proposition_fusion_personne_identity

@@ -1,3 +1,4 @@
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -5,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -14,34 +15,25 @@
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    A copy of this license - GNU General Public License - is available
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
+import contextlib
+from typing import Any, Union
 
-import attr
-
-from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
-from osis_common.ddd.interface import Event
-
-
-@attr.dataclass(frozen=True, slots=True, kw_only=True)
-class PropositionFusionDefaiteEvent(Event):
-    entity_id: 'PropositionFusionPersonneIdentity'
-    matricule: str
+from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
+from admission.ddd.admission.events import PropositionFusionRefuseeEvent
+from osis_common.ddd.interface import BusinessException
 
 
-@attr.dataclass(frozen=True, slots=True, kw_only=True)
-class PropositionFusionRefuseeEvent(Event):
-    entity_id: 'PropositionFusionPersonneIdentity'
-    matricule: str
-
-
-@attr.dataclass(frozen=True, slots=True, kw_only=True)
-class PropositionFusionInitialiseeEvent(Event):
-    entity_id: 'PropositionFusionPersonneIdentity'
-    matricule: str
+def process(
+    msg_bus: Any,
+    event: Union[PropositionFusionRefuseeEvent],
+) -> None:
+    with contextlib.suppress(BusinessException):
+        msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))

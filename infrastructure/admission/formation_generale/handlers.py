@@ -563,6 +563,7 @@ COMMAND_HANDLERS = {
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
     RefuserPropositionFusionCommand: lambda msg_bus, cmd: refuser_proposition_fusion_personne(
+        msg_bus,
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
