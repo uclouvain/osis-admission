@@ -46,23 +46,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.enums import (
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -73,8 +60,20 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ModifierTypeAdmissionValidatorList,
     ProjetDoctoralValidatorList,
 )
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
@@ -141,7 +140,6 @@ class Proposition(interface.RootEntity):
     def completer(
         self,
         doctorat: Doctorat,
-        type_admission: str,
         justification: Optional[str],
         commission_proximite: Optional[str],
         type_financement: Optional[str],

@@ -47,7 +47,6 @@ def completer_proposition(
     # WHEN
     proposition_candidat.completer(
         doctorat=doctorat,
-        type_admission=cmd.type_admission,
         justification=cmd.justification,
         commission_proximite=cmd.commission_proximite,
         type_financement=cmd.type_financement,
