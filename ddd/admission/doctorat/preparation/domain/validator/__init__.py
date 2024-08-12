@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from ._should_commission_proximite_etre_valide import ShouldCommissionProximiteEtreValide
 from ._should_comptabilite_etre_completee import (
     ShouldAffiliationsEtreCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -87,6 +87,7 @@ __all__ = [
     "ShouldAffiliationsEtreCompletees",
     "ShouldMembreEtreInterneOuExterne",
     "ShouldSignaturesPasEtreEnvoyees",
+    "ShouldCommissionProximiteEtreValide",
     "ShouldAbsenceDeDetteEtreCompletee",
     "ShouldTypeCompteBancaireRemboursementEtreComplete",
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",

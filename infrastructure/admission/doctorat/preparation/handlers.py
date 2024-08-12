@@ -410,4 +410,9 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
+    ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        doctorat_translator=DoctoratTranslator(),
+    ),
 }

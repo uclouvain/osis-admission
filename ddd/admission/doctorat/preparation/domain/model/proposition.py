@@ -45,23 +45,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.enums import (
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -72,8 +60,20 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ModifierTypeAdmissionValidatorList,
     ProjetDoctoralValidatorList,
 )
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
@@ -139,6 +139,7 @@ class Proposition(interface.RootEntity):
 
     def completer(
         self,
+        doctorat: Doctorat,
         justification: Optional[str],
         commission_proximite: Optional[str],
         type_financement: Optional[str],
@@ -180,6 +181,8 @@ class Proposition(interface.RootEntity):
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
             domaine_these=domaine_these,
+            doctorat=doctorat,
+            commission_proximite=commission_proximite,
         ).validate()
         self._completer_proposition(justification, commission_proximite)
         self._completer_financement(
@@ -487,7 +490,7 @@ class Proposition(interface.RootEntity):
 
     def modifier_type_admission(
         self,
-        formation_id: FormationIdentity,
+        doctorat: Doctorat,
         type_admission: str,
         justification: Optional[str],
         reponses_questions_specifiques: Dict,
@@ -496,12 +499,37 @@ class Proposition(interface.RootEntity):
         ModifierTypeAdmissionValidatorList(
             type_admission=type_admission,
             justification=justification,
+            commission_proximite=commission_proximite,
+            doctorat=doctorat,
         ).validate()
         self._definir_commission(commission_proximite)
-        self.formation_id = formation_id
+        self.formation_id = doctorat.entity_id
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = self.matricule_candidat
+
+    def modifier_choix_formation_gestionnaire(
+        self,
+        doctorat: Doctorat,
+        type_admission: str,
+        justification: Optional[str],
+        reponses_questions_specifiques: Dict,
+        commission_proximite: Optional[str],
+        auteur: str,
+    ):
+        ModifierTypeAdmissionValidatorList(
+            type_admission=type_admission,
+            justification=justification,
+            commission_proximite=commission_proximite,
+            doctorat=doctorat,
+        ).validate()
+
+        self._definir_commission(commission_proximite)
+        self.type_admission = ChoixTypeAdmission[type_admission]
+        self.justification = justification or ''
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = auteur
 
     def reclamer_documents(self, auteur_modification: str, type_gestionnaire: str):
         self.statut = {

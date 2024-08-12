@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import attr
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
@@ -38,7 +38,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
     ChoixSousDomaineSciences,
-    ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
@@ -52,6 +51,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestCompleterPropositionService(TestCase):
@@ -109,23 +109,27 @@ class TestCompleterPropositionService(TestCase):
 
     def test_should_pas_completer_commission_proximite_cde_pas_vide_et_non_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_completer_commission_proximite_cdss_pas_vide_et_non_CDSS(self):
         cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDSS.ECLI.name)
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_completer_commission_proximite_cde_vide_et_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', uuid="uuid-ECGE3DP")
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_completer_commission_proximite_cdss_vide_et_CDSS(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', uuid="uuid-ESP3DP")
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_completer_commission_proximite_cde(self):
         cmd = attr.evolve(
@@ -145,13 +149,15 @@ class TestCompleterPropositionService(TestCase):
         cmd = attr.evolve(
             self.cmd, commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name, uuid="uuid-ESP3DP"
         )
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_pas_completer_commission_proximite_cde_invalide(self):
         cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDSS.ECLI.name, uuid="uuid-ECGE3DP")
-        with self.assertRaises(CommissionProximiteInconsistantException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
     def test_should_completer_sans_financement(self):
         cmd = attr.evolve(self.cmd, type_financement='', type_contrat_travail='')

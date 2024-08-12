@@ -207,7 +207,27 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             acronym=entity.sigle_formation,
             academic_year__year=entity.annee,
         )
-        candidate = Person.objects.get(global_id=entity.matricule_candidat)
+
+        persons = {
+            person.global_id: person
+            for person in Person.objects.filter(
+                global_id__in=[
+                    matricule
+                    for matricule in [
+                        entity.matricule_candidat,
+                        entity.auteur_derniere_modification,
+                    ]
+                    if matricule
+                ]
+            )
+        }
+
+        candidate = persons[entity.matricule_candidat]
+
+        last_update_author = (
+            persons[entity.auteur_derniere_modification] if entity.auteur_derniere_modification in persons else None
+        )
+
         admission, _ = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
@@ -267,6 +287,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'curriculum': entity.curriculum,
                 'confirmation_elements': entity.elements_confirmation,
                 'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
+                'last_update_author': last_update_author,
             },
         )
         Candidate.objects.get_or_create(person=candidate)

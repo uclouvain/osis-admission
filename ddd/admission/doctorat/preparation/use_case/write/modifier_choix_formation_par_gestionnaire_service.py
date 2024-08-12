@@ -23,32 +23,32 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.doctorat.preparation.commands import ModifierTypeAdmissionCommand
+from admission.ddd.admission.doctorat.preparation.commands import ModifierChoixFormationParGestionnaireCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-def modifier_type_admission(
-    cmd: 'ModifierTypeAdmissionCommand',
+def modifier_choix_formation_par_gestionnaire(
+    cmd: 'ModifierChoixFormationParGestionnaireCommand',
     proposition_repository: 'IPropositionRepository',
     doctorat_translator: 'IDoctoratTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
-    doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
+    doctorat = doctorat_translator.get(proposition.formation_id.sigle, proposition.formation_id.annee)
 
     # WHEN
-    proposition.modifier_type_admission(
+    proposition.modifier_choix_formation_gestionnaire(
         doctorat=doctorat,
         type_admission=cmd.type_admission,
         justification=cmd.justification,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         commission_proximite=cmd.commission_proximite,
+        auteur=cmd.auteur,
     )
 
     # THEN
