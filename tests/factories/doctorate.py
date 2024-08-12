@@ -114,6 +114,26 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
             cotutelle_convention=factory.LazyFunction(generate_token),
             cotutelle_other_documents=factory.LazyFunction(generate_token),
         )
+        submitted = factory.Trait(
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            submitted_profile={
+                "coordinates": {
+                    "city": "Louvain-la-Neuve",
+                    "place": "",
+                    "street": "Place de l'Université",
+                    "country": "BE",
+                    "postal_box": "",
+                    "postal_code": "1348",
+                    "street_number": "2",
+                },
+                "identification": {
+                    "gender": "H",
+                    "last_name": "Doe",
+                    "first_name": "John",
+                    "country_of_citizenship": "BE",
+                },
+            },
+        )
         admitted = factory.Trait(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,

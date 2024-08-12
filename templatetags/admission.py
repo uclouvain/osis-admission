@@ -1325,6 +1325,7 @@ def experience_details_template(
     hide_files=True,
     can_update_curriculum=False,
     can_update_education=False,
+    can_delete_curriculum=False,
 ):
     """
     Return the template used to render the experience details.
@@ -1336,6 +1337,7 @@ def experience_details_template(
     :param hide_files: Specify if the files should be hidden
     :param can_update_curriculum: Specify if the user can update the curriculum
     :param can_update_education: Specify if the user can update the education
+    :param can_delete_curriculum: Specify if the user can delete an experience from the curriculum
     :return: The rendered template
     """
     next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
@@ -1374,13 +1376,14 @@ def experience_details_template(
                     )
                     + next_url_suffix
                 )
-                res_context['delete_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:curriculum:educational_delete',
-                        args=[resume_proposition.proposition.uuid, experience.uuid],
+                if can_delete_curriculum:
+                    res_context['delete_link_button'] = (
+                        reverse(
+                            'admission:general-education:update:curriculum:educational_delete',
+                            args=[resume_proposition.proposition.uuid, experience.uuid],
+                        )
+                        + delete_next_url_suffix
                     )
-                    + delete_next_url_suffix
-                )
 
             elif context['admission'].noma_candidat:
                 res_context['curex_link_button'] = resolve_url(
@@ -1405,13 +1408,14 @@ def experience_details_template(
                     + next_url_suffix
                 )
 
-                res_context['delete_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:curriculum:non_educational_delete',
-                        args=[resume_proposition.proposition.uuid, experience.uuid],
+                if can_delete_curriculum:
+                    res_context['delete_link_button'] = (
+                        reverse(
+                            'admission:general-education:update:curriculum:non_educational_delete',
+                            args=[resume_proposition.proposition.uuid, experience.uuid],
+                        )
+                        + delete_next_url_suffix
                     )
-                    + delete_next_url_suffix
-                )
 
             elif context['admission'].noma_candidat:
                 res_context['edit_link_button'] = resolve_url(
@@ -1523,14 +1527,17 @@ def checklist_experience_action_links_context(
                     )
                     + next_url_suffix
                 )
-                result_context['delete_url'] = (
-                    resolve_url(
-                        f'{base_namespace}:update:curriculum:educational_delete',
-                        uuid=proposition_uuid_str,
-                        experience_uuid=experience.uuid,
+
+                can_delete_curriculum = has_perm(context, 'admission.can_delete_curriculum')
+                if can_delete_curriculum:
+                    result_context['delete_url'] = (
+                        resolve_url(
+                            f'{base_namespace}:update:curriculum:educational_delete',
+                            uuid=proposition_uuid_str,
+                            experience_uuid=experience.uuid,
+                        )
+                        + next_url_suffix
                     )
-                    + next_url_suffix
-                )
             elif context['admission'].noma_candidat:
                 result_context['curex_url'] = resolve_url(
                     'parcours-externe-view',
@@ -1553,14 +1560,17 @@ def checklist_experience_action_links_context(
                     )
                     + next_url_suffix
                 )
-                result_context['delete_url'] = (
-                    resolve_url(
-                        f'{base_namespace}:update:curriculum:non_educational_delete',
-                        uuid=proposition_uuid_str,
-                        experience_uuid=experience.uuid,
+
+                can_delete_curriculum = has_perm(context, 'admission.can_delete_curriculum')
+                if can_delete_curriculum:
+                    result_context['delete_url'] = (
+                        resolve_url(
+                            f'{base_namespace}:update:curriculum:non_educational_delete',
+                            uuid=proposition_uuid_str,
+                            experience_uuid=experience.uuid,
+                        )
+                        + next_url_suffix
                     )
-                    + next_url_suffix
-                )
             elif context['admission'].noma_candidat:
                 result_context['update_url'] = resolve_url(
                     'edit-experience-non-academique-view',

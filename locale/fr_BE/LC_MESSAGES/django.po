@@ -548,6 +548,9 @@ msgstr "Ajouter un cours"
 msgid "Add a custom mail template for <em>%(description)s</em>"
 msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
 
+msgid "Add a language"
+msgstr "Ajouter une langue"
+
 msgid "Add a new member"
 msgstr "Ajouter un nouveau membre."
 
@@ -838,6 +841,23 @@ msgstr ""
 
 msgid "Another admission has been submitted."
 msgstr "Une autre admission a déjà été soumise."
+
+msgid ""
+"Answer according to the European Framework of Reference for Languages (CEFR) "
+"classification. Detailed explanations of this framework can be found at <a "
+"href=\"https://www.coe.int/en/web/common-european-framework-reference-"
+"languages/table-1-cefr-3.3-common-reference-levels-global-scale\" "
+"target=\"_blank\"> https://www.coe.int/en/web/common-european-framework-"
+"reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale </"
+"a>"
+msgstr ""
+"Répondez en respectant le classement du cadre européen de référence pour les "
+"langues (CECRL). Des explications détaillées sur ce cadre de référence se "
+"trouvent à la page <a href=\"https://www.coe.int/fr/web/common-european-"
+"framework-reference-languages/table-1-cefr-3.3-common-reference-levels-"
+"global-scale\" target=\"_blank\">https://www.coe.int/fr/web/common-european-"
+"framework-reference-languages/table-1-cefr-3.3-common-reference-levels-"
+"global-scale</a>"
 
 msgid "Application"
 msgstr "Demande"
@@ -4040,6 +4060,14 @@ msgstr ""
 "l’Union européenne"
 
 msgid ""
+"If applicable, upload a language proficiency certificate in the format "
+"required by the specific provisions of your PhD committee."
+msgstr ""
+"Le cas échéant, téléversez une attestation de connaissance de langue au "
+"format exigé par les dispositions particulières de votre commission "
+"doctorale de domaine"
+
+msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
 "defense preparation below before submitting the jury proposition."
 msgstr ""
@@ -4956,6 +4984,10 @@ msgid ""
 msgstr ""
 "Les champs requis des questions spécifiques dans l'onglet 'Parcours "
 "antérieur > Études secondaires' sont manquants."
+
+#, python-format
+msgid "Mandatory languages are missing (%(languages)s)."
+msgstr "Des langues obligatoires sont manquantes (%(languages)s)."
 
 msgid "Mandatory languages are missing."
 msgstr "Des langues obligatoires sont manquantes."
@@ -6437,7 +6469,7 @@ msgstr "Lien de parenté"
 msgid "Remind the applicant"
 msgstr "Rappeler au candidat"
 
-msgctxt "jury member"
+msgctxt "admission"
 msgid "Remove"
 msgstr "Retirer"
 
@@ -8067,6 +8099,9 @@ msgid ""
 msgstr ""
 "Ce titre est provisoire et pourra être modifié ultérieurement en fonction de "
 "l’analyse du jury."
+
+msgid "This language is set more than once."
+msgstr "Cette langue est définie plusieurs fois."
 
 msgid "This page is currently under construction."
 msgstr "Cette page est en cours de construction."

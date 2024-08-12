@@ -327,9 +327,11 @@ class Proposition(interface.RootEntity):
         self,
         curriculum: List[str],
         reponses_questions_specifiques: Dict,
+        auteur_modification: str,
     ):
         self.curriculum = curriculum
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = auteur_modification
 
     def completer_comptabilite(
         self,

@@ -96,8 +96,14 @@ class ProgramManager(EducationGroupRoleModel):
             & continuing.in_manager_status
             & ~is_sent_to_epc,
             'admission.view_admission_languages': is_part_of_education_group,
+            'admission.change_admission_languages': is_part_of_education_group
+            & doctorate.in_fac_status
+            & ~is_sent_to_epc,
             'admission.view_admission_curriculum': is_part_of_education_group,
             'admission.change_admission_curriculum': is_part_of_education_group
+            & (continuing.in_manager_status | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
+            'admission.delete_admission_curriculum': is_part_of_education_group
             & continuing.in_manager_status
             & ~is_sent_to_epc,
             # Project
@@ -124,15 +130,18 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_documents_management': is_part_of_education_group
             & (general.is_submitted | continuing.is_submitted_or_not_cancelled | doctorate.is_submitted),
             'admission.edit_documents': is_part_of_education_group
-            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted) & ~is_sent_to_epc,
+            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted)
+            & ~is_sent_to_epc,
             'admission.request_documents': is_part_of_education_group
-            & (general.in_fac_status | continuing.can_request_documents | doctorate.in_fac_status) & ~is_sent_to_epc,
+            & (general.in_fac_status | continuing.can_request_documents | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
             'admission.cancel_document_request': is_part_of_education_group
             & (
                 general.in_fac_document_request_status
                 | continuing.in_document_request_status
                 | doctorate.in_fac_document_request_status
-            ) & ~is_sent_to_epc,
+            )
+            & ~is_sent_to_epc,
             'admission.generate_in_progress_analysis_folder': is_part_of_education_group
             & continuing.is_continuing
             & continuing.in_progress,
@@ -143,13 +152,17 @@ class ProgramManager(EducationGroupRoleModel):
             & continuing.is_submitted
             & ~is_sent_to_epc,
             'admission.checklist_change_faculty_decision': is_part_of_education_group
-            & (general.in_fac_status | doctorate.in_fac_status) & ~is_sent_to_epc,
+            & (general.in_fac_status | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
             'admission.checklist_faculty_decision_transfer_to_sic_with_decision': is_part_of_education_group
-            & (general.in_fac_status | doctorate.in_fac_status) & ~is_sent_to_epc,
+            & (general.in_fac_status | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_part_of_education_group
-            & (general.in_fac_status | doctorate.in_fac_status) & ~is_sent_to_epc,
+            & (general.in_fac_status | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
             'admission.checklist_select_access_title': is_part_of_education_group
-            & (general.in_fac_status | doctorate.in_fac_status) & ~is_sent_to_epc,
+            & (general.in_fac_status | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
             'admission.checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation_fac': is_part_of_education_group & ~is_sent_to_epc,
             'admission.continuing_checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
