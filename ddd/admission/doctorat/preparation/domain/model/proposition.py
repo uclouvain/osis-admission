@@ -333,6 +333,7 @@ class Proposition(interface.RootEntity):
 
     def completer_comptabilite(
         self,
+        auteur_modification: str,
         attestation_absence_dette_etablissement: List[str],
         type_situation_assimilation: Optional[str],
         sous_type_situation_assimilation_1: Optional[str],
@@ -381,6 +382,7 @@ class Proposition(interface.RootEntity):
         prenom_titulaire_compte: Optional[str],
         nom_titulaire_compte: Optional[str],
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.comptabilite = Comptabilite(
             attestation_absence_dette_etablissement=attestation_absence_dette_etablissement,
             type_situation_assimilation=TypeSituationAssimilation[type_situation_assimilation]
