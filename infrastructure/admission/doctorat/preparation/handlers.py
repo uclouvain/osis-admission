@@ -48,6 +48,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
+from .domain.service.lister_demandes import ListerDemandesService
 from .domain.service.membre_CA import MembreCATranslator
 from .domain.service.notification import Notification
 from .domain.service.promoteur import PromoteurTranslator
@@ -400,6 +401,10 @@ COMMAND_HANDLERS = {
     RetyperDocumentCommand: lambda msg_bus, cmd: retyper_document(
         cmd,
         emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    ListerDemandesQuery: lambda msg_bus, cmd: lister_demandes(
+        cmd,
+        lister_demandes_service=ListerDemandesService(),
     ),
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,

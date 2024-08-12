@@ -676,11 +676,7 @@ class UploadDocumentByManagerTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 404)
 
         for identifier in [
-            # A SIC manager cannot upload FAC documents
-            self.fac_free_non_requestable_internal_document,
-            self.fac_free_requestable_candidate_document_with_default_file,
-            self.fac_free_requestable_document,
-            # Or system ones
+            # A SIC manager cannot upload system documents
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
         ]:
             response = self.client.post(
@@ -692,6 +688,22 @@ class UploadDocumentByManagerTestCase(BaseDocumentViewTestCase):
                 **self.default_headers,
             )
             self.assertEqual(response.status_code, 403)
+
+        for identifier in [
+            # A SIC manager can upload FAC documents
+            self.fac_free_non_requestable_internal_document,
+            self.fac_free_requestable_candidate_document_with_default_file,
+            self.fac_free_requestable_document,
+        ]:
+            response = self.client.post(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
 
         # A SIC manager can upload SIC documents
         # Internal document
@@ -909,11 +921,7 @@ class UploadDocumentByManagerTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 404)
 
         for identifier in [
-            # A FAC manager cannot upload SIC documents
-            self.sic_free_non_requestable_internal_document,
-            self.sic_free_requestable_candidate_document_with_default_file,
-            self.sic_free_requestable_document,
-            # Or system ones
+            # A FAC manager cannot upload system documents
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
         ]:
             response = self.client.post(
@@ -925,6 +933,22 @@ class UploadDocumentByManagerTestCase(BaseDocumentViewTestCase):
                 **self.default_headers,
             )
             self.assertEqual(response.status_code, 403)
+
+        for identifier in [
+            # A FAC manager can upload SIC documents
+            self.sic_free_non_requestable_internal_document,
+            self.sic_free_requestable_candidate_document_with_default_file,
+            self.sic_free_requestable_document,
+        ]:
+            response = self.client.post(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
 
         # A FAC manager can upload FAC documents
         # Internal document
@@ -1028,4 +1052,4 @@ class UploadDocumentByManagerTestCase(BaseDocumentViewTestCase):
             **self.default_headers,
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)

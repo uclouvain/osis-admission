@@ -25,6 +25,8 @@
 # ##############################################################################
 import re
 
+import waffle
+from django.core.exceptions import PermissionDenied
 from django.forms import model_to_dict
 from django.http import HttpResponse
 from django.urls import reverse
@@ -35,8 +37,7 @@ __all__ = [
 ]
 
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
-    ValiderTicketPersonneCommand
+from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
 from admission.templatetags.admission import format_matricule
 from admission.utils import get_cached_general_education_admission_perm_obj
@@ -102,8 +103,10 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
         if not is_required:
             form.is_valid()
             return self.form_valid(form)
-        else:
+        elif waffle.switch_is_active('admission:allow-merge-with-existing-account'):
             return super().post(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
 
     def form_valid(self, form):
         from infrastructure.messages_bus import message_bus_instance
@@ -121,6 +124,7 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
                 lieu_naissance=form.cleaned_data.get('birth_place', ''),
                 email=form.cleaned_data.get('email', ''),
                 genre=form.cleaned_data.get('gender', ''),
+                sex=form.cleaned_data.get('gender', ''),  # TODO: Clarify sex/gender notion with DigIT
                 nationalite=form.cleaned_data.get('country_of_citizenship', ''),
                 etat_civil=form.cleaned_data.get('civil_state', ''),
                 numero_national=form.cleaned_data.get('national_number', ''),
@@ -134,8 +138,6 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
                 annee_diplome_etudes_secondaires=self.get_high_school_graduation_year(),
             )
         )
-        if self.request.POST.get('action') == 'MERGE':
-            message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=self.candidate['global_id']))
         return HttpResponse(status=200, headers={'HX-Refresh': 'true'})
 
     def form_invalid(self, form):

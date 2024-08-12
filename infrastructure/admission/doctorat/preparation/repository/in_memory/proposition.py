@@ -29,7 +29,7 @@ from typing import List, Optional
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
@@ -53,7 +53,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
@@ -67,7 +66,6 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
 from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
 from admission.infrastructure.utils import dto_to_dict
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
-from base.models.enums.education_group_types import TrainingType
 
 
 @dataclass
@@ -251,6 +249,10 @@ class PropositionInMemoryRepository(
             bourse_preuve=proposition.financement.bourse_preuve,
             duree_prevue=proposition.financement.duree_prevue,
             temps_consacre=proposition.financement.temps_consacre,
+            est_lie_fnrs_fria_fresh_csc=(
+                proposition.financement.est_lie_fnrs_fria_fresh_csc if proposition.financement else None
+            ),
+            commentaire_financement=proposition.financement.commentaire if proposition.financement else '',
             titre_projet=proposition.projet.titre,
             resume_projet=proposition.projet.resume,
             documents_projet=proposition.projet.documents,
@@ -263,6 +265,9 @@ class PropositionInMemoryRepository(
             nom_institut_these=institut.nom if institut else '',
             sigle_institut_these=institut.acronyme if institut else '',
             lieu_these=proposition.projet.lieu_these,
+            projet_doctoral_deja_commence=proposition.projet.deja_commence if proposition.projet else None,
+            projet_doctoral_institution=proposition.projet.deja_commence_institution if proposition.projet else '',
+            projet_doctoral_date_debut=proposition.projet.date_debut if proposition.projet else None,
             doctorat_deja_realise=proposition.experience_precedente_recherche.doctorat_deja_realise.name,
             institution=proposition.experience_precedente_recherche.institution,
             domaine_these=proposition.experience_precedente_recherche.domaine_these,

@@ -1,0 +1,12 @@
+{% load admission %}
+
+{% if a_une_syntaxe_valide == False %}
+  <div class="alert alert-danger">
+    <strong>Erreurs lors de la validation DigIT</strong>
+      {% for error in erreurs %}
+      <li>
+            {{ error.errorCode|digit_error_description }}
+      </li>
+    {% endfor %}
+  </div>
+{% endif %}

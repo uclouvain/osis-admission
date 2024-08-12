@@ -23,8 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
-    DefairePropositionFusionCommand, RefuserPropositionFusionCommand
+from admission.ddd.admission.commands import RefuserPropositionFusionCommand
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 

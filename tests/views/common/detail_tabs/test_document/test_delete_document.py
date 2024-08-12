@@ -375,10 +375,6 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 404)
 
         for identifier in [
-            # A SIC manager cannot delete FAC documents
-            self.fac_free_non_requestable_internal_document,
-            self.fac_free_requestable_candidate_document_with_default_file,
-            self.fac_free_requestable_document,
             # A manager cannot delete a system document
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
         ]:
@@ -391,6 +387,22 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
                 **self.default_headers,
             )
             self.assertEqual(response.status_code, 403)
+
+        # A SIC manager can delete FAC documents
+        for identifier in [
+            self.fac_free_non_requestable_internal_document,
+            self.fac_free_requestable_candidate_document_with_default_file,
+            self.fac_free_requestable_document,
+        ]:
+            response = self.client.delete(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 204)
 
         # A SIC manager can delete SIC documents
         # Internal document
@@ -488,10 +500,6 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 404)
 
         for identifier in [
-            # A FAC manager cannot delete SIC documents
-            self.sic_free_non_requestable_internal_document,
-            self.sic_free_requestable_candidate_document_with_default_file,
-            self.sic_free_requestable_document,
             # A manager cannot delete a system document
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
         ]:
@@ -504,6 +512,22 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
                 **self.default_headers,
             )
             self.assertEqual(response.status_code, 403)
+
+        for identifier in [
+            # A FAC manager can delete SIC documents
+            self.sic_free_non_requestable_internal_document,
+            self.sic_free_requestable_candidate_document_with_default_file,
+            self.sic_free_requestable_document,
+        ]:
+            response = self.client.delete(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 204)
 
         # A FAC manager can delete FAC documents
         # Internal document
@@ -566,4 +590,4 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
             **self.default_headers,
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 204)

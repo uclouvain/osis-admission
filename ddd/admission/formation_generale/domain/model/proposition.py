@@ -794,13 +794,17 @@ class Proposition(interface.RootEntity):
     def specifier_financabilite_resultat_calcul(
         self,
         financabilite_regle_calcule: EtatFinancabilite,
-        financabilite_regle_calcule_situation: SituationFinancabilite,
+        financabilite_regle_calcule_situation: str,
         auteur_modification: Optional[str] = '',
     ):
         self.financabilite_regle_calcule = financabilite_regle_calcule
-        self.financabilite_regle_calcule_situation = financabilite_regle_calcule_situation
+        self.financabilite_regle_calcule_situation = (
+            SituationFinancabilite[financabilite_regle_calcule_situation]
+            if financabilite_regle_calcule_situation else ''
+        )
         self.financabilite_regle_calcule_le = now()
-        self.auteur_derniere_modification = auteur_modification
+        if auteur_modification:
+            self.auteur_derniere_modification = auteur_modification
 
     def specifier_financabilite_regle(
         self,
@@ -825,6 +829,20 @@ class Proposition(interface.RootEntity):
                 libelle=__('Not financeable'),
                 extra={'to_be_completed': '0'},
             )
+
+    def specifier_financabilite_non_concernee(
+        self,
+        etabli_par: str,
+        auteur_modification: str,
+    ):
+        self.financabilite_regle = None
+        self.financabilite_regle_etabli_par = etabli_par
+        self.financabilite_regle_etabli_le = now()
+        self.auteur_derniere_modification = auteur_modification
+        self.checklist_actuelle.financabilite = StatutChecklist(
+            statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            libelle='',
+        )
 
     def specifier_derogation_financabilite(
         self,
@@ -1033,8 +1051,6 @@ class Proposition(interface.RootEntity):
                 avec_conditions_complementaires=self.avec_conditions_complementaires,
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
-                avec_complements_formation=self.avec_complements_formation,
-                complements_formation=self.complements_formation,
                 documents_dto=documents_dto,
             ).validate()
 
