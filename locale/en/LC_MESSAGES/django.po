@@ -4647,6 +4647,7 @@ msgstr ""
 msgid "No PhD found."
 msgstr ""
 
+msgctxt "admission"
 msgid "No data"
 msgstr ""
 
