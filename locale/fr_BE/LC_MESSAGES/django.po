@@ -5233,6 +5233,7 @@ msgstr "Aucune étude en français"
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
 
+msgctxt "admission"
 msgid "No data"
 msgstr "Aucune données"
 
