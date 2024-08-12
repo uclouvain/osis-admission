@@ -62,6 +62,8 @@ class PropositionDTO(interface.DTO):
     bourse_preuve: List[str]
     duree_prevue: Optional[int]
     temps_consacre: Optional[int]
+    est_lie_fnrs_fria_fresh_csc: Optional[bool]
+    commentaire_financement: Optional[str]
     titre_projet: Optional[str]
     resume_projet: Optional[str]
     documents_projet: List[str]
@@ -74,6 +76,9 @@ class PropositionDTO(interface.DTO):
     nom_institut_these: str
     sigle_institut_these: str
     lieu_these: str
+    projet_doctoral_deja_commence: Optional[bool]
+    projet_doctoral_institution: Optional[str]
+    projet_doctoral_date_debut: Optional[datetime.date]
     doctorat_deja_realise: str
     institution: Optional[str]
     domaine_these: str

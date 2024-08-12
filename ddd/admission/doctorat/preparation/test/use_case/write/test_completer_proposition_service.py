@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import attr
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
@@ -38,7 +38,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
     ChoixSousDomaineSciences,
-    ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
@@ -67,7 +66,6 @@ class TestCompleterPropositionService(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = CompleterPropositionCommand(
             uuid=self.proposition_existante.entity_id.uuid,
-            type_admission=ChoixTypeAdmission.ADMISSION.name,
             commission_proximite=ChoixSousDomaineSciences.BIOLOGY.name,
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
@@ -85,7 +83,7 @@ class TestCompleterPropositionService(TestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition_id, proposition.entity_id)
-        self.assertEqual(ChoixTypeAdmission[self.cmd.type_admission], proposition.type_admission)
+        self.assertEqual(self.cmd.titre_projet, proposition.projet.titre)
 
     def test_should_completer_financement(self):
         proposition_id = self.message_bus.invoke(self.cmd)

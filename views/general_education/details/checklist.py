@@ -33,7 +33,7 @@ from django.db.models import QuerySet
 from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import resolve_url, redirect, render
+from django.shortcuts import resolve_url, redirect
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
 from django.utils import translation, timezone
@@ -44,6 +44,7 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -118,7 +119,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverInscriptionTardiveParFaculteCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
     SpecifierDerogationFinancabiliteCommand,
-    NotifierCandidatDerogationFinancabiliteCommand,
+    NotifierCandidatDerogationFinancabiliteCommand, SpecifierFinancabiliteNonConcerneeCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -217,7 +218,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParco
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -249,6 +249,7 @@ __all__ = [
     'FinancabiliteApprovalSetRuleView',
     'FinancabiliteNotFinanceableSetRuleView',
     'FinancabiliteNotFinanceableView',
+    'FinancabiliteNotConcernedView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
     'SicApprovalDecisionView',
@@ -2350,6 +2351,23 @@ class FinancabiliteNotFinanceableView(HtmxPermissionRequiredMixin, Financabilite
             )
         )
 
+        return HttpResponseClientRefresh()
+
+
+class FinancabiliteNotConcernedView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, View):
+    urlpatterns = {'financability-not-concerned': 'financability-checklist-not-concerned'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteNonConcerneeCommand(
+                uuid_proposition=self.admission_uuid,
+                etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
         return HttpResponseClientRefresh()
 
 

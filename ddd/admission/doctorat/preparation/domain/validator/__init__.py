@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,14 @@
 #
 # ##############################################################################
 from ._should_commission_proximite_etre_valide import ShouldCommissionProximiteEtreValide
-from ._should_comptabilite_etre_completee import ShouldAffiliationsEtreCompletees
+from ._should_comptabilite_etre_completee import (
+    ShouldAffiliationsEtreCompletees,
+    ShouldAbsenceDeDetteEtreCompletee,
+    ShouldTypeCompteBancaireRemboursementEtreComplete,
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+    ShouldAssimilationEtreCompletee,
+)
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
 from ._should_curriculum_etre_complete import (
     ShouldCurriculumFichierEtreSpecifie,
@@ -35,7 +42,7 @@ from ._should_groupe_de_supervision_a_approuve import (
     ShouldMembresCAOntApprouve,
     ShouldPromoteursOntApprouve,
 )
-from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
+from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA
 from ._should_groupe_de_supervision_avoir_un_promoteur_de_reference import (
     ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference,
 )
@@ -69,7 +76,7 @@ __all__ = [
     "ShouldGroupeDeSupervisionNonCompletPourPromoteurs",
     "ShouldCotutelleEtreComplete",
     "ShouldProjetEtreComplet",
-    "ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA",
+    "ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA",
     "ShouldLanguesConnuesRequisesEtreSpecifiees",
     "ShouldCurriculumFichierEtreSpecifie",
     "ShouldDemandeSignatureLancee",
@@ -81,4 +88,9 @@ __all__ = [
     "ShouldMembreEtreInterneOuExterne",
     "ShouldSignaturesPasEtreEnvoyees",
     "ShouldCommissionProximiteEtreValide",
+    "ShouldAbsenceDeDetteEtreCompletee",
+    "ShouldTypeCompteBancaireRemboursementEtreComplete",
+    "ShouldIBANCarteBancaireRemboursementEtreCompletee",
+    "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
+    "ShouldAssimilationEtreCompletee",
 ]

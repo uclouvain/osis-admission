@@ -54,8 +54,8 @@ def soumettre_ticket_creation_personne(
     noma = digit_repository.get_registration_id_sent_to_digit(global_id=cmd.global_id)
     if not noma:
         noma = NomaGenerateurService.generer_noma(
-            compteur=compteur_noma.get_compteur(annee=cmd.annee).compteur,
-            annee=cmd.annee,
+            compteur=compteur_noma.get_compteur(annee=proposition.annee_calculee).compteur,
+            annee=proposition.annee_calculee,
         )
     extra_ticket_data = {'program_type': formation.type.name, 'sap_number': sap_number}
     return digit_repository.submit_person_ticket(

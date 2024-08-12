@@ -31,7 +31,7 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import OuterRef, Subquery, Prefetch
+from django.db.models import OuterRef, Subquery, Prefetch, Q
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
@@ -76,7 +76,8 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException, \
+    PremierePropositionSoumisesNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
@@ -124,7 +125,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return [cls._load_dto(proposition) for proposition in qs]
 
     @classmethod
-    def get_first_submitted_proposition(cls, matricule_candidat: str) -> Optional['Proposition']:
+    def get_first_submitted_proposition(cls, matricule_candidat: str) -> 'Proposition':
         first_submitted_proposition = (
             GeneralEducationAdmissionProxy.objects.prefetch_related(
                 'additional_approval_conditions',
@@ -138,16 +139,20 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'last_update_author',
             )
             .filter(
-                submitted_at__isnull=False,
-                candidate__global_id=matricule_candidat,
-            )
-            .order_by('submitted_at')
+                candidate__global_id=matricule_candidat
+            ).filter(
+                Q(
+                    type_demande=TypeDemande.ADMISSION.name,
+                    status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
+                )
+                | Q(type_demande=TypeDemande.INSCRIPTION.name)
+            ).order_by('created_at')
             .first()
         )
 
         if first_submitted_proposition:
             return cls._load(first_submitted_proposition)
-        raise PropositionNonTrouveeException
+        raise PremierePropositionSoumisesNonTrouveeException
 
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:

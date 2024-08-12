@@ -67,6 +67,8 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import \
+    specifier_financabilite_non_concernee
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -547,6 +549,7 @@ COMMAND_HANDLERS = {
         paiement_frais_dossier_service=_paiement_frais_dossier,
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         bourse_translator=_bourse_translator,
@@ -605,6 +608,10 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
     ),
     SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    SpecifierFinancabiliteNonConcerneeCommand: lambda msg_bus, cmd: specifier_financabilite_non_concernee(
         cmd,
         proposition_repository=_proposition_repository,
     ),

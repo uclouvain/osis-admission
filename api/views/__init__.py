@@ -23,60 +23,50 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.views.dashboard import DashboardViewSet
+from admission.api.views.accounting import DoctorateAccountingView, GeneralAccountingView
+from admission.api.views.approvals import *
 from admission.api.views.autocomplete import *
+from admission.api.views.confirmation import *
+from admission.api.views.continuing_education import RetrieveContinuingEducationSpecificInformationView
 from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonneesView, ContinuingCoordonneesView
+from admission.api.views.cotutelle import CotutelleAPIView
 from admission.api.views.curriculum import *
+from admission.api.views.dashboard import DashboardViewSet
+from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.documents import (
     GeneralRequestedDocumentListView,
     ContinuingRequestedDocumentListView,
     DoctorateRequestedDocumentListView,
 )
-from admission.api.views.secondary_studies import (
-    SecondaryStudiesViewSet,
-    GeneralSecondaryStudiesView,
-    ContinuingSecondaryStudiesView,
-)
-from admission.api.views.pdf_recap import ContinuingPDFRecapView, GeneralPDFRecapView, DoctoratePDFRecapView
+from admission.api.views.jury import *
 from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
-from admission.api.views.cotutelle import CotutelleAPIView
+from admission.api.views.payment import (
+    OpenApplicationFeesPaymentView,
+    ApplicationFeesListView,
+)
+from admission.api.views.payment_method import PaymentMethodAPIView
+from admission.api.views.pdf_recap import ContinuingPDFRecapView, GeneralPDFRecapView, DoctoratePDFRecapView
 from admission.api.views.person import (
     PersonViewSet,
     GeneralPersonView,
     ContinuingPersonView,
     IdentificationDTOView,
 )
-from admission.api.views.continuing_education import RetrieveContinuingEducationSpecificInformationView
-from admission.api.views.project import *
 from admission.api.views.pool_questions import PoolQuestionsView
-from admission.api.views.submission import *
-from admission.api.views.supervision import *
-from admission.api.views.signatures import RequestSignaturesAPIView
-from admission.api.views.approvals import *
-from admission.api.views.confirmation import *
-from admission.api.views.doctorate import DoctorateAPIView
-from admission.api.views.jury import *
-from admission.api.views.training import *
-from admission.api.views.accounting import DoctorateAccountingView, GeneralAccountingView
-from admission.api.views.payment import (
-    OpenApplicationFeesPaymentView,
-    ApplicationFeesListView,
-)
+from admission.api.views.project import *
+from admission.api.views.proposition import GeneralPropositionView, ContinuingPropositionView
 from admission.api.views.references import (
     ListCampusView,
     RetrieveCampusView,
     RetrieveDiplomaticPostView,
     RetrieveScholarshipView,
 )
-from admission.api.views.training_choice import (
-    ContinuingTrainingChoiceAPIView,
-    ContinuingUpdateTrainingChoiceAPIView,
-    DoctorateTrainingChoiceAPIView,
-    DoctorateUpdateAdmissionTypeAPIView,
-    GeneralTrainingChoiceAPIView,
-    GeneralUpdateTrainingChoiceAPIView,
+from admission.api.views.secondary_studies import (
+    SecondaryStudiesViewSet,
+    GeneralSecondaryStudiesView,
+    ContinuingSecondaryStudiesView,
 )
-from admission.api.views.proposition import GeneralPropositionView, ContinuingPropositionView
+from admission.api.views.signatures import RequestSignaturesAPIView
 from admission.api.views.specific_questions import (
     GeneralSpecificQuestionListView,
     DoctorateSpecificQuestionListView,
@@ -84,4 +74,15 @@ from admission.api.views.specific_questions import (
     GeneralSpecificQuestionAPIView,
     ContinuingSpecificQuestionAPIView,
     GeneralIdentificationView,
+)
+from admission.api.views.submission import *
+from admission.api.views.supervision import *
+from admission.api.views.training import *
+from admission.api.views.training_choice import (
+    ContinuingTrainingChoiceAPIView,
+    ContinuingUpdateTrainingChoiceAPIView,
+    DoctorateTrainingChoiceAPIView,
+    DoctorateUpdateAdmissionTypeAPIView,
+    GeneralTrainingChoiceAPIView,
+    GeneralUpdateTrainingChoiceAPIView,
 )

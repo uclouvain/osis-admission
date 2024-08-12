@@ -178,7 +178,7 @@ def soumettre_proposition(
 
     proposition.specifier_financabilite_resultat_calcul(
         financabilite_regle_calcule=EtatFinancabilite[financabilite.etat],
-        financabilite_regle_calcule_situation=SituationFinancabilite[financabilite.situation],
+        financabilite_regle_calcule_situation=financabilite.situation,
     )
 
     Checklist.initialiser(

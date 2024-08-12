@@ -135,12 +135,6 @@ class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest)
 @attr.dataclass(frozen=True, slots=True)
 class RechercherCompteExistantCommand(interface.QueryRequest):
     matricule: str
-    nom: str
-    prenom: str
-    autres_prenoms: Optional[str]
-    date_naissance: str
-    genre: str
-    niss: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -156,6 +150,7 @@ class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     lieu_naissance: str
     email: str
     genre: str
+    sex: str
     etat_civil: str
     nationalite: str
     numero_national: str
@@ -208,7 +203,6 @@ class RecupererExperienceNonAcademiqueQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SoumettreTicketPersonneCommand(interface.CommandRequest):
     global_id: str
-    annee: int
 
 
 @attr.dataclass(frozen=True, slots=True)

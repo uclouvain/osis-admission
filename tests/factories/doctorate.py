@@ -102,6 +102,8 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     thesis_proposed_title = 'Thesis title'
 
+    last_update_author = factory.SubFactory(PersonFactory)
+
     class Params:
         with_cotutelle = factory.Trait(
             cotutelle=True,

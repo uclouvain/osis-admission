@@ -94,13 +94,6 @@ def approuver_inscription_par_sic(
         InscriptionApprouveeParSicEvent(
             entity_id=proposition.entity_id,
             matricule=proposition.matricule_candidat,
-            nom=identification.nom,
-            prenom=identification.prenom,
-            autres_prenoms=identification.autres_prenoms,
-            date_naissance=str(identification.date_naissance),
-            genre=identification.genre,
-            niss=identification.numero_registre_national_belge,
-            annee=proposition.annee_calculee,
         )
     )
     return proposition.entity_id
