@@ -114,6 +114,7 @@ class InjectionEPCSignaletique:
     def _get_inscription_annee_academique(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
         candidat = admission.candidate  # type: Person
         assimilation_checklist = admission.checklist.get('current', {}).get('assimilation', {})
+        date_assimilation = assimilation_checklist.get('extra', {}).get('date_debut', None)
         return {
             'annee_academique': admission.training.academic_year.year,
             'nationalite': candidat.country_of_citizenship.iso_code,
@@ -173,7 +174,10 @@ class InjectionEPCSignaletique:
                 TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name
                 if comptabilite else False
             ),
-            'date_assimilation': assimilation_checklist.get('extra', {}).get('date_debut', None)
+            'date_assimilation': (
+                datetime.strptime(date_assimilation, '%Y-%m-%d').strftime('%d/%m/%Y')
+                if date_assimilation else None
+            )
         }
 
     @staticmethod
