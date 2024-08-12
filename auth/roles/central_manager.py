@@ -29,13 +29,14 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
+from admission.auth.predicates import general, continuing, doctorate
 from admission.auth.predicates.common import (
     has_scope,
     is_debug,
     is_entity_manager,
     is_sent_to_epc,
+    pending_digit_ticket_response,
 )
-from admission.auth.predicates import general, continuing, doctorate
 from education_group.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
 
@@ -73,11 +74,12 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc & ~pending_digit_ticket_response,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)

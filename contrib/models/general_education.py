@@ -29,7 +29,6 @@ from contextlib import suppress
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
@@ -526,7 +525,6 @@ class GeneralEducationAdmission(BaseAdmission):
         message_bus_instance.invoke(
             SpecifierFinancabiliteResultatCalculCommand(
                 uuid_proposition=self.uuid,
-                gestionnaire=author.global_id,
                 financabilite_regle_calcule=financabilite.etat,
                 financabilite_regle_calcule_situation=financabilite.situation,
             )

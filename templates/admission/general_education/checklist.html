@@ -133,18 +133,7 @@
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
 
         {% search_account_digit_result_msg original_admission %}
-
-        {% if proposition_fusion.validation.errors %}
-            <div class="alert alert-danger">
-              <strong>Erreurs lors de la validation DigIT</strong>
-              {% for error in proposition_fusion.validation.errors %}
-              <li>
-                    {{ error.errorCode|digit_error_description }}
-              </li>
-              {% endfor %}
-            </div>
-        {% endif %}
-
+        {% validation_syntaxique_resultat_digit original_admission %}
         {% if digit_ticket %}
             {% digit_ticket_status_msg digit_ticket %}
         {% endif %}

@@ -28,12 +28,12 @@ import json
 import logging
 import re
 from types import SimpleNamespace
-from typing import Optional
 
 import requests
 from django.conf import settings
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
+from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionTrouveeException
 from admission.templatetags.admission import format_matricule
 from base.business.student import find_student_by_discriminating
 from base.models.person import Person
@@ -47,23 +47,11 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX = ['8', '9']
 
+
 class DigitService(IDigitService):
     @classmethod
-    def rechercher_compte_existant(
-            cls,
-            matricule: str,
-            nom: str,
-            prenom: str,
-            autres_prenoms: str,
-            genre: str,
-            date_naissance: str,
-            niss: str
-    ):
-        if not cls.correspond_a_compte_temporaire(matricule):
-            return []
-
+    def rechercher_compte_existant(cls, matricule: str):
         original_person = Person.objects.get(global_id=matricule)
-
         person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
             original_person=original_person,
             defaults={
@@ -71,21 +59,40 @@ class DigitService(IDigitService):
             },
         )
 
-        if person_merge_proposal.status in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.MERGED.name]:
-            return []
+        if person_merge_proposal.status in [
+            PersonMergeStatus.PENDING.name,      # Cas gestionnaire en cours de résolution
+            PersonMergeStatus.IN_PROGRESS.name,  # En attente du retour de fusion de DiGIT
+        ]:
+            logger.info(
+                f"[Recherche doublon potentiel DigIT - {matricule} ] Recherche non effectuée car "
+                f"état de la proposition de fusion est {person_merge_proposal.status}"
+            )
+            return None
 
-        if niss:
+        if not cls.correspond_a_compte_temporaire(matricule):
+            person_merge_proposal.status = PersonMergeStatus.NO_MATCH.name
+            person_merge_proposal.similarity_result = []
+            person_merge_proposal.last_similarity_result_update = datetime.datetime.now()
+            person_merge_proposal.save()
+            logger.info(
+                f"[Recherche doublon potentiel DigIT - {matricule} ] Recherche non effectuée car compte interne"
+            )
+            return None
+
+        national_number_sanatized = None
+        if original_person.national_number:
             # keep only digits in niss
-            niss = re.sub(r'\D', '', niss)
+            national_number_sanatized = re.sub(r'\D', '', original_person.national_number)
 
         data = {
-            "lastname": nom, "firstname": prenom, "birthdate": date_naissance,
-            "sex": genre, "nationalRegister": niss, "otherFirstName": autres_prenoms,
+            "lastname": original_person.last_name,
+            "firstname": original_person.first_name,
+            "birthdate": str(original_person.birth_date) if original_person.birth_date else "",
+            "sex": original_person.sex,
+            "nationalRegister": national_number_sanatized,
+            "otherFirstName": original_person.middle_name,
         }
-        logger.info(
-            f"DIGIT search existing person: "
-            f'{json.dumps(data)}'
-        )
+        logger.info(f"[Recherche doublon potentiel DigIT - {matricule}] Données envoyées à DigIT {json.dumps(data)}")
 
         if MOCK_DIGIT_SERVICE_CALL:
             similarity_data = _mock_search_digit_account_return_response()
@@ -100,25 +107,25 @@ class DigitService(IDigitService):
                     url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
                 )
                 similarity_data = response.json()
-            except Exception:
-                logger.info("An error occured when try to call DigIT endpoint recherche_compte_existant. "
-                            "Set PersonMergeProposal to ERROR")
+                if not isinstance(similarity_data, list) and similarity_data.get('status') == 500:
+                    raise Exception(f"Digit internal server error (payload: {str(similarity_data)})")
+            except Exception as e:
+                logger.info(
+                    f"[Recherche doublon potentiel DigIT - {matricule}] Une erreur est survenue avec DigIT {repr(e)}"
+                )
                 PersonMergeProposal.objects.update_or_create(
                     original_person=original_person,
                     defaults={
                         "status": PersonMergeStatus.ERROR.name,
-                        "similarity_result": {},
+                        "similarity_result": [],
                         "last_similarity_result_update": datetime.datetime.now(),
                     }
                 )
-                return {}
+                return None
 
-        logger.info(f"DIGIT Response: {similarity_data}")
-
+        logger.info(f"[Recherche doublon potentiel DigIT - {matricule}] Données recues de DigIT {similarity_data}")
         similarity_data = _clean_data_from_duplicate_registration_ids(similarity_data)
-
         similarity_data = _retrieve_private_email_in_data(similarity_data)
-
         PersonMergeProposal.objects.update_or_create(
             original_person=original_person,
             defaults={
@@ -128,20 +135,20 @@ class DigitService(IDigitService):
             }
         )
 
-        return similarity_data
-
-
     @classmethod
     def correspond_a_compte_temporaire(cls, matricule_candidat: str) -> bool:
         return matricule_candidat[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 
     @classmethod
-    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> Optional[SimpleNamespace]:
+    def recuperer_proposition_fusion(cls, matricule_candidat: str) -> SimpleNamespace:
         try:
             proposition_fusion = PersonMergeProposal.objects.get(original_person__global_id=matricule_candidat)
-            return SimpleNamespace(statut=proposition_fusion.status)
+            return SimpleNamespace(
+                statut=proposition_fusion.status,
+                a_une_syntaxe_valide=proposition_fusion.validation.get('valid', False)
+            )
         except PersonMergeProposal.DoesNotExist:
-            return None
+            raise PasDePropositionDeFusionTrouveeException
 
 
 def _get_status_from_digit_response(similarity_data):
@@ -194,6 +201,7 @@ def _retrieve_private_email_in_data(similarity_data):
         person = get_object_or_none(Person, global_id=global_id)
         result['person']['private_email'] = person.private_email if person and person.private_email else None
     return similarity_data
+
 
 def _mock_search_digit_account_return_response():
     return json.loads(

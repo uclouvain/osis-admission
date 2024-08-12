@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 10:05+0200\n"
+"POT-Creation-Date: 2024-08-08 16:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -158,8 +158,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a "
-"href=\"%(add_url)s\">add a course</a>"
+"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a href="
+"\"%(add_url)s\">add a course</a>"
 msgstr ""
 
 #, python-format
@@ -181,8 +181,8 @@ msgstr[1] ""
 #, python-brace-format
 msgid ""
 "<p>Depending on your previous experience, your faculty will supplement your "
-"annual programme with additional classes (for more information: <a "
-"href=\"{link}\">{link}</a>).</p>"
+"annual programme with additional classes (for more information: <a href="
+"\"{link}\">{link}</a>).</p>"
 msgstr ""
 
 #, python-brace-format
@@ -237,6 +237,11 @@ msgstr ""
 
 msgid ""
 "A member should be either internal or external, please check the fields."
+msgstr ""
+
+msgid ""
+"A merger proposal is currently being resolved. Saving the tab will cause a "
+"merge reset"
 msgstr ""
 
 msgid "A new version of the analysis folder has been generated."
@@ -558,9 +563,6 @@ msgstr ""
 msgid "Admission context"
 msgstr ""
 
-msgid "Admission date"
-msgstr ""
-
 msgid "Admission export"
 msgstr ""
 
@@ -577,11 +579,6 @@ msgid "Admission form items"
 msgstr ""
 
 msgid "Admission has been sent to EPC."
-msgstr ""
-
-msgid ""
-"Admission is not yet valid for searching UCLouvain account. The following "
-"fields are required: "
 msgstr ""
 
 #, python-format
@@ -601,6 +598,10 @@ msgstr ""
 msgid "Admission to regulated professions"
 msgstr ""
 
+msgid "Admission type"
+msgstr ""
+
+msgctxt "doctorate-filter"
 msgid "Admission type"
 msgstr ""
 
@@ -1042,6 +1043,9 @@ msgstr "Biology"
 msgid "Bachelor"
 msgstr ""
 
+msgid "Bachelor's course entrance exam"
+msgstr ""
+
 msgid "Back to checklist"
 msgstr ""
 
@@ -1152,6 +1156,10 @@ msgstr ""
 msgid "CDD opinion"
 msgstr ""
 
+msgid "CDD:"
+msgstr ""
+
+msgctxt "admission"
 msgid "CDD status"
 msgstr ""
 
@@ -2004,6 +2012,10 @@ msgctxt "admission"
 msgid "Course units"
 msgstr ""
 
+msgctxt "admission"
+msgid "Courses"
+msgstr ""
+
 msgid "Courses taken"
 msgstr ""
 
@@ -2392,6 +2404,12 @@ msgstr ""
 msgid "Doctor"
 msgstr ""
 
+msgid "Doctoral commissions"
+msgstr ""
+
+msgid "Doctoral student:"
+msgstr ""
+
 msgid "Doctorate admission"
 msgstr ""
 
@@ -2407,6 +2425,12 @@ msgid "Doctorate education"
 msgstr ""
 
 msgid "Doctorate enrolment applications"
+msgstr ""
+
+msgid "Doctorate Ethics Regulations"
+msgstr ""
+
+msgid "Doctorate Regulations"
 msgstr ""
 
 msgid "Document"
@@ -2466,9 +2490,6 @@ msgstr ""
 msgid "Dossier"
 msgstr ""
 
-msgid "Dossier confirmation"
-msgstr ""
-
 msgid "Dossier not found."
 msgstr ""
 
@@ -2479,6 +2500,13 @@ msgid "Dossier reference:"
 msgstr ""
 
 msgid "Dossier status"
+msgstr ""
+
+msgctxt "doctorate-header-list"
+msgid "Dossier status"
+msgstr ""
+
+msgid "Dossier submission date"
 msgstr ""
 
 msgid "Double degree:"
@@ -2910,6 +2938,9 @@ msgstr ""
 msgid "Fac approval"
 msgstr ""
 
+msgid "Fac decision"
+msgstr ""
+
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
 msgstr ""
@@ -3042,6 +3073,9 @@ msgid ""
 "%(established_on)s)"
 msgstr ""
 
+msgid "Financing comment"
+msgstr ""
+
 msgid "Financing rule"
 msgstr ""
 
@@ -3056,6 +3090,11 @@ msgid "First name Last name:"
 msgstr ""
 
 msgid "First name and last name"
+msgstr ""
+
+msgid ""
+"First submitted proposition not found (Admission with state 'Application "
+"accepted' / Enrolment)"
 msgstr ""
 
 msgid "First year of"
@@ -3102,18 +3141,17 @@ msgid ""
 "used here.<br>Full example: <code>{\"CLASSE_CSS\": \"bg-info\"}</code>."
 "<br><br>For a text field, it is possible to specify if the user can enter a "
 "short (\"COURT\", by default) or a long (\"LONG\") text by using the "
-"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": "
-"\"LONG\"}</code>.<br><br>For a file field, it is possible to specify the "
-"maximum number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
+"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": \"LONG"
+"\"}</code>.<br><br>For a file field, it is possible to specify the maximum "
+"number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
 "(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
-"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], "
-"\"NOMBRE_MAX_DOCUMENTS\": 3}</code>.<br><br>For a selection field, it is "
-"possible to specify if the selection is realised through a list (\"LISTE\", "
-"by default), checkboxes (\"CASES_A_COCHER\") or radio buttons "
-"(\"BOUTONS_RADIOS\") by using the \"TYPE_SELECTION\" property. The list and "
-"the radios buttons allow to select only one value whereas the checkboxes "
-"allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
-"\"CASES_A_COCHER\"}</code>."
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
+"\": 3}</code>.<br><br>For a selection field, it is possible to specify if "
+"the selection is realised through a list (\"LISTE\", by default), checkboxes "
+"(\"CASES_A_COCHER\") or radio buttons (\"BOUTONS_RADIOS\") by using the "
+"\"TYPE_SELECTION\" property. The list and the radios buttons allow to select "
+"only one value whereas the checkboxes allow to select several values."
+"<br>Full example: <code>{\"TYPE_SELECTION\": \"CASES_A_COCHER\"}</code>."
 msgstr ""
 
 msgid "For the attention of"
@@ -3321,6 +3359,9 @@ msgid ""
 "Belgium?"
 msgstr ""
 
+msgid "Has your PhD project already started?"
+msgstr ""
+
 msgid ""
 "Have you applied <a href='https://allocations-etudes.cfwb.be/etudes-"
 "superieures/' target='_blank'>for a student grant</a> from the French "
@@ -3347,9 +3388,6 @@ msgid "Hide the checklist menu"
 msgstr ""
 
 msgid "Hide the states of the checklist"
-msgstr ""
-
-msgid "High school graduation year"
 msgstr ""
 
 msgctxt "tab"
@@ -3467,6 +3505,11 @@ msgstr ""
 msgid "I authorise"
 msgstr ""
 
+msgid ""
+"I confirm that I have read the PhD regulations on research ethics and "
+"certify that my project complies with these regulations."
+msgstr ""
+
 msgid "I do not authorize"
 msgstr ""
 
@@ -3536,6 +3579,12 @@ msgid ""
 msgstr ""
 
 msgid "I hereby declare that"
+msgstr ""
+
+msgid ""
+"I hereby declare that I have read and understood the regulations of the "
+"General PhD Committee and the specific requirements of the PhD Field "
+"Committee, to which I adhere."
 msgstr ""
 
 #, python-format
@@ -3670,8 +3719,8 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
-"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees.html"
+"\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
 "reglementees.html</a>, I declare that, if the courses listed therein concern "
 "me, I have received the information relating to their requirements for "
 "admission or continuation and to the specific rules or restrictions of "
@@ -3720,8 +3769,8 @@ msgstr ""
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a "
-"href=\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between 1 June and 30 September %(year)s to <a href="
+"\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
 msgid "In payement order"
@@ -3877,6 +3926,10 @@ msgstr ""
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
+msgid ""
+"Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
+msgstr ""
+
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr ""
 
@@ -3958,6 +4011,9 @@ msgid "Last modification (author)"
 msgstr ""
 
 msgid "Last name"
+msgstr ""
+
+msgid "Last name / First name"
 msgstr ""
 
 msgid "Last name / First name / Email"
@@ -4201,10 +4257,6 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Mail sent to the CDD to inform them that a new application has been submitted"
-msgstr ""
-
-msgid ""
 "Mail sent to the applicant following approval or rejection by a member of "
 "the supervisory group"
 msgstr ""
@@ -4334,11 +4386,6 @@ msgstr ""
 msgid ""
 "Mail sent to the member of the supervision panel when deleted by the "
 "candidate"
-msgstr ""
-
-msgid ""
-"Mail sent to the members of the supervision panel to inform them that the "
-"application has been submitted to UCLouvain by the applicant"
 msgstr ""
 
 msgid "Main institute"
@@ -4658,6 +4705,9 @@ msgstr ""
 msgid "New thesis title (if applicable):"
 msgstr ""
 
+msgid "Next"
+msgstr ""
+
 msgid "No"
 msgstr ""
 
@@ -4672,6 +4722,9 @@ msgid "No French studies"
 msgstr ""
 
 msgid "No PhD found."
+msgstr ""
+
+msgid "No data"
 msgstr ""
 
 msgid "No defense reason"
@@ -4984,6 +5037,12 @@ msgstr ""
 msgid "Other institute (if necessary)"
 msgstr ""
 
+msgid "Other institution address"
+msgstr ""
+
+msgid "Other institution name"
+msgstr ""
+
 msgid "Other international scholarship"
 msgstr ""
 
@@ -5181,6 +5240,9 @@ msgstr ""
 msgid "PhD proposal"
 msgstr ""
 
+msgid "PhD research experience"
+msgstr ""
+
 msgid "PhD research project"
 msgstr ""
 
@@ -5352,7 +5414,7 @@ msgstr ""
 msgid "Poster"
 msgstr ""
 
-msgid "Pre-admission date"
+msgid "Pre-admission"
 msgstr ""
 
 msgid "Pre-admission submission date"
@@ -5398,9 +5460,6 @@ msgid "Previous experiences"
 msgstr ""
 
 msgid "Previous notes"
-msgstr ""
-
-msgid "Previous research experience"
 msgstr ""
 
 msgid "Private"
@@ -5866,9 +5925,6 @@ msgstr ""
 msgid "Research seminar"
 msgstr ""
 
-msgid "Resend"
-msgstr ""
-
 msgid "Reset"
 msgstr ""
 
@@ -6028,7 +6084,7 @@ msgstr ""
 msgid "SIC comment for the faculty"
 msgstr ""
 
-msgid "SIC status"
+msgid "SIC decision"
 msgstr ""
 
 msgid "SIGNING_IN_PROGRESS"
@@ -6072,6 +6128,10 @@ msgid "Scholarship"
 msgstr ""
 
 msgctxt "admission model"
+msgid "Scholarship"
+msgstr ""
+
+msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr ""
 
@@ -6274,9 +6334,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Absence of debt' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Belgian student status' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Belgian student status' block."
 msgstr ""
 
 msgid ""
@@ -6284,9 +6350,15 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields are missing in the 'Memberships' block."
+msgstr ""
+
 msgid ""
 "Some fields are missing in the 'Reduced tuition fee' block in the "
 "'Additional information > Accounting' tab."
+msgstr ""
+
+msgid "Some fields are missing in the 'Reduced tuition fee' block."
 msgstr ""
 
 msgid ""
@@ -6294,9 +6366,16 @@ msgid ""
 "information > Accounting' tab."
 msgstr ""
 
+msgid "Some fields related to the bank account are missing."
+msgstr ""
+
 msgid ""
 "Some fields related to the bank account number in IBAN format are missing in "
 "the 'Additional information > Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields related to the bank account number in IBAN format are missing."
 msgstr ""
 
 msgid ""
@@ -6399,6 +6478,10 @@ msgstr ""
 msgid "Submission date"
 msgstr ""
 
+msgctxt "doctorate-header-list"
+msgid "Submission date"
+msgstr ""
+
 msgid "Submission date:"
 msgstr ""
 
@@ -6418,7 +6501,13 @@ msgstr ""
 msgid "Submitted for publication"
 msgstr ""
 
+msgid "Submitted from"
+msgstr ""
+
 msgid "Submitted profile"
+msgstr ""
+
+msgid "Submitted until"
 msgstr ""
 
 msgid ""
@@ -6447,6 +6536,10 @@ msgstr ""
 msgid "Supervision group not found."
 msgstr ""
 
+msgid "Supervisor"
+msgstr ""
+
+msgctxt "gender"
 msgid "Supervisor"
 msgstr ""
 
@@ -7186,8 +7279,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
-"accomodation\">www.uclouvain.be/en/study/accomodation</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/study/accomodation"
+"\">www.uclouvain.be/en/study/accomodation</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7441,9 +7534,6 @@ msgstr ""
 msgid "Undecided"
 msgstr ""
 
-msgid "Undo"
-msgstr ""
-
 msgid "Unique business number"
 msgstr ""
 
@@ -7674,6 +7764,9 @@ msgstr ""
 msgid "Work contract type"
 msgstr ""
 
+msgid "Work start date"
+msgstr ""
+
 msgid "Working contract type"
 msgstr ""
 
@@ -7737,8 +7830,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Would you like to switch courses this academic year at UCLouvain? (<a "
-"href=\"%(url)s\" target=\"_blank\">Informations</a>)"
+"Would you like to switch courses this academic year at UCLouvain? (<a href="
+"\"%(url)s\" target=\"_blank\">Informations</a>)"
 msgstr ""
 
 msgid "Writing ability"
@@ -7846,9 +7939,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"You can find more information on the French Community webpage <a "
-"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
-"</a>"
+"You can find more information on the French Community webpage <a href="
+"\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/</a>"
 msgstr ""
 
 msgid ""
@@ -7946,17 +8038,15 @@ msgid ""
 "'Additional information > Accounting' tab."
 msgstr ""
 
+msgid "You haven't answered to the question about your bank account."
+msgstr ""
+
 msgid "You haven't yet submitted your application."
 msgstr ""
 
 #, python-format
 msgid "You indicated that you will obtain it in %(year)s."
 msgstr ""
-
-msgid "You must add at least one CA member in order to request signatures."
-msgstr ""
-"You must add at least one supervisory panel member in order to request "
-"signatures."
 
 msgid ""
 "You must add at least one UCLouvain supervisor in order to request "
@@ -7966,6 +8056,11 @@ msgstr ""
 msgid ""
 "You must add at least one external supervisor in order to request signatures."
 msgstr ""
+
+msgid "You must add at least two CA member in order to request signatures."
+msgstr ""
+"You must add at least two supervisory panel member in order to request "
+"signatures."
 
 msgid "You must answer the question about external enrollment change."
 msgstr ""
@@ -8102,6 +8197,12 @@ msgstr ""
 #, python-format
 msgid ""
 "[%(matricule_candidat)s] Candidate has already a pending creation ticket"
+msgstr ""
+
+#, python-format
+msgid ""
+"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
+"validation"
 msgstr ""
 
 #, python-format

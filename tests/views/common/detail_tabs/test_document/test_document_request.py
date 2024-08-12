@@ -926,11 +926,7 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
 
         self.assertCountEqual(
             form.fields['request_status'].choices,
-            (BLANK_CHOICE[0],)
-            + StatutReclamationEmplacementDocument.choices_except(
-                StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT,
-                StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
-            ),
+            (BLANK_CHOICE[0],) + StatutReclamationEmplacementDocument.choices(),
         )
 
         # Submit an invalid form
@@ -1028,4 +1024,4 @@ class DocumentRequestTestCase(BaseDocumentViewTestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context['form'].is_valid())
+        self.assertTrue(response.context['form'].is_valid())

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -77,6 +77,8 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 "cotutelle_motivation",
                 "cotutelle_institution_fwb",
                 "cotutelle_institution",
+                "cotutelle_other_institution_name",
+                "cotutelle_other_institution_address",
                 "cotutelle_opening_request",
                 "cotutelle_convention",
                 "cotutelle_other_documents",
@@ -99,6 +101,8 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 motivation=proposition.cotutelle_motivation,
                 institution_fwb=proposition.cotutelle_institution_fwb,
                 institution=proposition.cotutelle_institution,
+                autre_institution_nom=proposition.cotutelle_other_institution_name,
+                autre_institution_adresse=proposition.cotutelle_other_institution_address,
                 demande_ouverture=proposition.cotutelle_opening_request,
                 convention=proposition.cotutelle_convention,
                 autres_documents=proposition.cotutelle_other_documents,
@@ -218,6 +222,8 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             proposition.cotutelle_motivation = entity.cotutelle.motivation
             proposition.cotutelle_institution_fwb = entity.cotutelle.institution_fwb
             proposition.cotutelle_institution = entity.cotutelle.institution
+            proposition.cotutelle_other_institution_name = entity.cotutelle.autre_institution_nom
+            proposition.cotutelle_other_institution_address = entity.cotutelle.autre_institution_adresse
             proposition.cotutelle_opening_request = entity.cotutelle.demande_ouverture
             proposition.cotutelle_convention = entity.cotutelle.convention
             proposition.cotutelle_other_documents = entity.cotutelle.autres_documents

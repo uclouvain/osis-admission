@@ -31,6 +31,9 @@ from admission.ddd.admission.doctorat.preparation.business_types import *
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
+from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
+    ExperiencePrecedenteRecherche,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
@@ -41,12 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
-    ShouldAbsenceDeDetteEtreCompletee,
-    ShouldIBANCarteBancaireRemboursementEtreCompletee,
-    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldExperiencesAcademiquesEtreCompletees,
-    ShouldTypeCompteBancaireRemboursementEtreComplete,
-    ShouldAssimilationEtreCompletee,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
@@ -250,13 +248,19 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     type_admission: 'ChoixTypeAdmission'
     projet: 'DetailProjet'
     financement: 'Financement'
+    experience_precedente_recherche: 'ExperiencePrecedenteRecherche'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldProjetEtreComplet(self.type_admission, self.projet, self.financement),
+            ShouldProjetEtreComplet(
+                self.type_admission,
+                self.projet,
+                self.financement,
+                self.experience_precedente_recherche,
+            ),
         ]
 
 
@@ -318,6 +322,9 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldAffiliationsEtreCompletees(
+                etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+            ),
             ShouldAbsenceDeDetteEtreCompletee(
                 attestation_absence_dette_etablissement=self.comptabilite.attestation_absence_dette_etablissement,
                 a_frequente_recemment_etablissement_communaute_fr=(
@@ -327,9 +334,6 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ShouldAssimilationEtreCompletee(
                 pays_nationalite_ue=self.pays_nationalite_ue,
                 comptabilite=self.comptabilite,
-            ),
-            ShouldAffiliationsEtreCompletees(
-                etudiant_solidaire=self.comptabilite.etudiant_solidaire,
             ),
             ShouldTypeCompteBancaireRemboursementEtreComplete(
                 type_numero_compte=self.comptabilite.type_numero_compte,
@@ -372,7 +376,7 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
+            ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA(self.groupe_de_supervision.signatures_membres_CA),
             ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(self.groupe_de_supervision),
         ]
 

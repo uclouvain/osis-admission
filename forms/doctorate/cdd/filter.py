@@ -24,8 +24,6 @@
 #
 # ##############################################################################
 
-import re
-
 from dal import forward
 from django import forms
 from django.conf import settings
@@ -33,11 +31,13 @@ from django.db.models import Q
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models import EntityProxy, Scholarship
+from admission.contrib.models.working_list import WorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
     ENTITY_CLSM,
     SIGLE_SCIENCES,
+    ENTITY_SCIENCES,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
@@ -45,61 +45,37 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
     ChoixTypeAdmission,
-    ChoixTypeContratTravail,
     ChoixTypeFinancement,
+    ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.forms import (
-    get_academic_year_choices,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+    ALL_EMPTY_CHOICE,
+    ALL_FEMININE_EMPTY_CHOICE,
 )
-from base.forms.utils import EMPTY_CHOICE, autocomplete
-from base.forms.utils.datefield import CustomDateInput
+from admission.forms.admission.filter import BaseAdmissionFilterForm, WorkingListField
+from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from base.forms.utils import autocomplete
+from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person import Person
-from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from education_group.contrib.models import EducationGroupRoleModel
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from reference.models.country import Country
 
 
-class DoctorateListFilterForm(forms.Form):
-    numero = forms.RegexField(
-        label=_('Dossier numero'),
-        regex=re.compile(r'^\d{4}\.\d{4}$'),
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                'data-mask': '0000.0000',
-                'placeholder': '0000.0000',
-            },
-        ),
-    )
-    etat_cdd = forms.ChoiceField(
-        choices=EMPTY_CHOICE + ChoixStatutCDD.choices(),
-        label=_('CDD status'),
-        required=False,
-    )
-    etat_sic = forms.ChoiceField(
-        choices=EMPTY_CHOICE + ChoixStatutSIC.choices(),
-        label=_('SIC status'),
-        required=False,
-    )
-    matricule_candidat = forms.CharField(
-        label=_('Last name / First name / Email / NOMA'),
-        required=False,
-        widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:candidates",
-            attrs={
-                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-                'data-placeholder': _('Last name / First name / Email / NOMA'),
-            },
-        ),
-    )
+class DoctorateListFilterForm(BaseAdmissionFilterForm):
+    statuses_choices = ChoixStatutPropositionDoctorale.choices()
+
     nationalite = forms.CharField(
         label=_("Nationality"),
         required=False,
@@ -113,8 +89,8 @@ class DoctorateListFilterForm(forms.Form):
         ),
     )
     type = forms.ChoiceField(
-        choices=EMPTY_CHOICE + ChoixTypeAdmission.choices(),
-        label=_('Admission type'),
+        choices=ALL_EMPTY_CHOICE + ChoixTypeAdmission.choices(),
+        label=pgettext_lazy('doctorate-filter', 'Admission type'),
         required=False,
     )
     cotutelle = forms.NullBooleanField(
@@ -122,51 +98,33 @@ class DoctorateListFilterForm(forms.Form):
         required=False,
         widget=forms.Select(
             choices=(
-                EMPTY_CHOICE[0],
+                ALL_EMPTY_CHOICE[0],
                 (True, _('Yes')),
                 (False, _('No')),
             ),
         ),
     )
-    date_pre_admission_debut = forms.DateField(
-        disabled=True,
+    date_soumission_debut = forms.DateField(
         label=_("From"),
         required=False,
-        widget=CustomDateInput(),
+        widget=DatePickerInput(),
     )
-    date_pre_admission_fin = forms.DateField(
-        disabled=True,
+    date_soumission_fin = forms.DateField(
         label=_("To"),
         required=False,
-        widget=CustomDateInput(),
-    )
-    date_admission_debut = forms.DateField(
-        disabled=True,
-        label=_("From"),
-        required=False,
-        widget=CustomDateInput(),
-    )
-    date_admission_fin = forms.DateField(
-        disabled=True,
-        label=_("To"),
-        required=False,
-        widget=CustomDateInput(),
-    )
-    annee_academique = forms.ChoiceField(
-        label=_('Year'),
-        required=False,
+        widget=DatePickerInput(),
     )
     commission_proximite = forms.ChoiceField(
         label=_('Proximity commission'),
         required=False,
     )
     cdds = forms.MultipleChoiceField(
-        label=_('CDDs'),
+        label=_('Doctoral commissions'),
         required=False,
         widget=autocomplete.Select2Multiple(),
     )
     matricule_promoteur = forms.CharField(
-        label=_('Supervisor'),
+        label=pgettext_lazy('gender', 'Supervisor'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:promoters",
@@ -177,7 +135,7 @@ class DoctorateListFilterForm(forms.Form):
         ),
     )
     sigles_formations = forms.MultipleChoiceField(
-        label=pgettext_lazy('admission', 'Course'),
+        label=pgettext_lazy('admission', 'Courses'),
         required=False,
         widget=autocomplete.Select2Multiple(
             attrs={
@@ -186,26 +144,48 @@ class DoctorateListFilterForm(forms.Form):
         ),
     )
     type_financement = forms.ChoiceField(
-        choices=EMPTY_CHOICE + ChoixTypeFinancement.choices(),
+        choices=ALL_EMPTY_CHOICE + ChoixTypeFinancement.choices(),
         label=_('Funding type'),
-        required=False,
-    )
-    type_contrat_travail = forms.ChoiceField(
-        label=_("Work contract type"),
-        choices=EMPTY_CHOICE + ChoixTypeContratTravail.choices(),
         required=False,
     )
     bourse_recherche = forms.ChoiceField(
         label=_("Research scholarship"),
         required=False,
     )
-    taille_page = forms.ChoiceField(
-        label=_("Page size"),
-        choices=((size, size) for size in PAGINATOR_SIZE_LIST),
-        widget=forms.Select(attrs={'form': 'search_form', 'autocomplete': 'off'}),
-        help_text=_("items per page"),
+    mode_filtres_etats_checklist = forms.ChoiceField(
+        choices=ModeFiltrageChecklist.choices(),
+        label=_('Include or exclude the checklist filters'),
+        required=False,
+        initial=ModeFiltrageChecklist.INCLUSION.name,
+        widget=forms.RadioSelect(),
+    )
+    filtres_etats_checklist = ChecklistStateFilterField(
+        configurations=[],  # TODO
+        label=_('Checklist filters'),
         required=False,
     )
+    liste_travail = WorkingListField(
+        label=_('Working list'),
+        queryset=WorkingList.objects.none(),  # TODO
+        required=False,
+        empty_label=_('Personalized'),
+        widget=autocomplete.ListSelect2(
+            url="admission:autocomplete:working-lists",
+            attrs={
+                'data-placeholder': _('Personalized'),
+                'data-allow-clear': 'true',
+            },
+        ),
+    )
+
+    class Media:
+        js = [
+            # Dates
+            'js/moment.min.js',
+            'js/locales/moment-fr.js',
+            'js/bootstrap-datetimepicker.min.js',
+            'js/dates-input.js',
+        ]
 
     def get_doctorate_queryset(self):
         """Used to determine which training to filter on"""
@@ -243,7 +223,7 @@ class DoctorateListFilterForm(forms.Form):
         return qs.filter(conditions).with_acronym().order_by('acronym').values_list('acronym', flat=True)
 
     def get_proximity_commission_choices(self):
-        proximity_commission_choices = [EMPTY_CHOICE[0]]
+        proximity_commission_choices = [ALL_FEMININE_EMPTY_CHOICE[0]]
 
         if ENTITY_CDE in self.cdd_acronyms or ENTITY_CLSM in self.cdd_acronyms:
             proximity_commission_choices.append(
@@ -254,7 +234,7 @@ class DoctorateListFilterForm(forms.Form):
             proximity_commission_choices.append([ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()])
 
         if SIGLE_SCIENCES in dict(self.doctorates):
-            proximity_commission_choices.append([SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()])
+            proximity_commission_choices.append([ENTITY_SCIENCES, ChoixSousDomaineSciences.choices()])
 
         return proximity_commission_choices
 
@@ -264,13 +244,13 @@ class DoctorateListFilterForm(forms.Form):
         ).order_by('short_name')
 
         return (
-            [EMPTY_CHOICE[0]]
+            [ALL_FEMININE_EMPTY_CHOICE[0]]
             + [(scholarship.uuid, scholarship.short_name) for scholarship in doctorate_scholarships]
             + [(BourseRecherche.OTHER.name, BourseRecherche.OTHER.value)]
         )
 
     def __init__(self, user, load_labels=False, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(load_labels, **kwargs)
 
         self.user = user
         self.relevant_roles = _get_relevant_roles(user, 'admission.view_doctorate_enrolment_applications')
@@ -297,7 +277,14 @@ class DoctorateListFilterForm(forms.Form):
             self.fields['commission_proximite'].widget = forms.HiddenInput()
 
         # Initialize the academic year field
-        self.fields['annee_academique'].choices = [EMPTY_CHOICE[0]] + get_academic_year_choices()
+        current_academic_year = AnneeInscriptionFormationTranslator().recuperer(
+            AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT
+        )
+        if current_academic_year:
+            self.fields['annee_academique'].initial = current_academic_year + 1
+
+        # Change the label of the candidate field
+        self.fields['matricule_candidat'].label = _('Last name / First name / Email / NOMA')
 
         # Initialize the labels of the autocomplete fields
         if load_labels:
@@ -311,14 +298,6 @@ class DoctorateListFilterForm(forms.Form):
                 if country:
                     self.fields['nationalite'].widget.choices = ((nationality, country[0]),)
 
-            candidate = self.data.get(self.add_prefix('matricule_candidat'))
-            if candidate:
-                person = Person.objects.values('last_name', 'first_name').filter(global_id=candidate).first()
-                if person:
-                    self.fields['matricule_candidat'].widget.choices = (
-                        (candidate, '{}, {}'.format(person['last_name'], person['first_name'])),
-                    )
-
             promoter = self.data.get(self.add_prefix('matricule_promoteur'))
             if promoter:
                 person = Person.objects.values('last_name', 'first_name').filter(global_id=promoter).first()
@@ -327,27 +306,13 @@ class DoctorateListFilterForm(forms.Form):
                         (promoter, '{}, {}'.format(person['last_name'], person['first_name'])),
                     )
 
-    def clean_numero(self):
-        numero = self.cleaned_data.get('numero')
-        if numero != '':
-            return int(numero.replace('.', ''))
+    def clean(self):
+        cleaned_data = super().clean()
 
-    def clean_cdds(self):
-        # Ensure cdds are set if roles are found
-        return self.cdd_acronyms if self.relevant_roles and not self.cleaned_data['cdds'] else self.cleaned_data['cdds']
+        # Check that the start date is before the end date
+        submission_date_start = cleaned_data.get('date_soumission_debut')
+        submission_date_end = cleaned_data.get('date_soumission_fin')
+        if submission_date_start and submission_date_end and submission_date_start > submission_date_end:
+            self.add_error(None, _("The start date must be earlier than or the same as the end date."))
 
-    def clean_sigles_formations(self):
-        # Ensure trainings are set if roles are found
-        return (
-            [acronym for acronym, title in self.doctorates]
-            if self.relevant_roles and not self.cleaned_data['sigles_formations']
-            else self.cleaned_data['sigles_formations']
-        )
-
-    class Media:
-        js = [
-            # DependsOn
-            'js/dependsOn.min.js',
-            # Mask
-            'js/jquery.mask.min.js',
-        ]
+        return cleaned_data
