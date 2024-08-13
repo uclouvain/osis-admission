@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
 
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
@@ -80,6 +81,40 @@ class LanguageAutocompleteTestCase(TestCase):
                 'results': [
                     {
                         'id': language.code,
+                        'text': language.name,
+                        'selected_text': language.name,
+                    }
+                    for language in [
+                        self.en_language,
+                        self.es_language,
+                        self.fr_language,
+                    ]
+                ],
+            },
+        )
+
+    @override_settings(LANGUAGE_CODE='fr-be')
+    def test_retrieve_languages_with_their_id_instead_of_their_language_code(self):
+        self.client.force_login(user=self.user)
+
+        response = self.client.get(
+            self.url,
+            {
+                'forward': json.dumps({'id_field': 'id'}),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = response.json()
+
+        self.assertEqual(
+            json_response,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    {
+                        'id': language.id,
                         'text': language.name,
                         'selected_text': language.name,
                     }

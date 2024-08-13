@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ def completer_curriculum(
     proposition.completer_curriculum(
         curriculum=cmd.curriculum,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
+        auteur_modification=cmd.auteur_modification,
     )
 
     # THEN

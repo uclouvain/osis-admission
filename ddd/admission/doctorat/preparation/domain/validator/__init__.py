@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from ._should_commission_proximite_etre_valide import ShouldCommissionProximiteEtreValide
 from ._should_comptabilite_etre_completee import (
     ShouldAffiliationsEtreCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -42,7 +42,7 @@ from ._should_groupe_de_supervision_a_approuve import (
     ShouldMembresCAOntApprouve,
     ShouldPromoteursOntApprouve,
 )
-from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
+from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA
 from ._should_groupe_de_supervision_avoir_un_promoteur_de_reference import (
     ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference,
 )
@@ -76,7 +76,7 @@ __all__ = [
     "ShouldGroupeDeSupervisionNonCompletPourPromoteurs",
     "ShouldCotutelleEtreComplete",
     "ShouldProjetEtreComplet",
-    "ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA",
+    "ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA",
     "ShouldLanguesConnuesRequisesEtreSpecifiees",
     "ShouldCurriculumFichierEtreSpecifie",
     "ShouldDemandeSignatureLancee",
@@ -87,6 +87,7 @@ __all__ = [
     "ShouldAffiliationsEtreCompletees",
     "ShouldMembreEtreInterneOuExterne",
     "ShouldSignaturesPasEtreEnvoyees",
+    "ShouldCommissionProximiteEtreValide",
     "ShouldAbsenceDeDetteEtreCompletee",
     "ShouldTypeCompteBancaireRemboursementEtreComplete",
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",
