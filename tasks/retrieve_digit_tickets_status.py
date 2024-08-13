@@ -27,17 +27,18 @@ import logging
 from typing import List
 
 import waffle
+from django.apps import apps
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Model, ForeignKey
 from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
 from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, FusionnerCandidatAvecPersonneExistanteCommand,
-    RecupererMatriculeDigitQuery, ModifierMatriculeCandidatCommand,
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
 )
 from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionEligibleException
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
@@ -46,7 +47,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from backoffice.celery import app
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tasks import send_pictures_to_card_app
+from osis_profile.models import ProfessionalExperience, EducationalExperience
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
@@ -75,11 +78,6 @@ def run(request=None):
                     RetrieveAndStoreStatutTicketPersonneFromDigitCommand(ticket_uuid=ticket.uuid)
                 )
                 logger.info(f"{PREFIX_TASK} process DigIT ticket ({str(ticket)}")
-
-                if not Person.objects.filter(global_id=ticket.matricule).exists():
-                    logger.info(f"{PREFIX_TASK} matricule not found into database. Already processed ?")
-                    continue
-
                 if status in ["DONE", "DONE_WITH_WARNINGS"]:
                     try:
                         _process_successful_response_ticket(message_bus_instance, ticket)
@@ -107,27 +105,83 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
     digit_matricule = message_bus_instance.invoke(RecupererMatriculeDigitQuery(noma=noma))
     logger.info(f"{PREFIX_TASK} matricule DigIT found ({digit_matricule}) for noma ({noma})")
 
-    if Person.objects.filter(global_id=digit_matricule).exists():
-        try:
-            message_bus_instance.invoke(
-                FusionnerCandidatAvecPersonneExistanteCommand(
-                    candidate_global_id=digit_matricule,
-                    ticket_uuid=ticket.uuid,
-                )
-            )
-            logger.info(f"{PREFIX_TASK} merge candidate with existing person data")
-        except PasDePropositionDeFusionEligibleException:
-            logger.info(f"{PREFIX_TASK} no merge candidate eligible. Merge abort")
-    else:
-        message_bus_instance.invoke(
-            ModifierMatriculeCandidatCommand(
-                candidate_global_id=ticket.matricule,
-                digit_global_id=digit_matricule,
-                ticket_uuid=ticket.uuid,
-            )
+    candidat = PersonTicketCreation.objects.get(uuid=ticket.uuid).person
+    if candidat.global_id != digit_matricule:
+        logger.info(
+            f"{PREFIX_TASK} "
+            f"edit candidate global_id ({candidat.global_id}) to set DigIT matricule ({digit_matricule})"
         )
-        logger.info(f"{PREFIX_TASK} "
-                    f"edit candidate global_id ({ticket.matricule}) to set as internal account ({digit_matricule})")
+        candidat.global_id = digit_matricule
+        candidat.external_id = f"osis.person_{digit_matricule}"
+        if candidat.user:
+            candidat.user.usergroup_set.all().delete()
+            candidat.user.delete()
+        candidat.user = None
+        candidat.save()
+    else:
+        logger.info(
+            f"{PREFIX_TASK} "
+            f"candidate global_id ({candidat.global_id}) is already the same as DigIT response ({digit_matricule})"
+        )
+
+    try:
+        proposition_fusion = PersonMergeProposal.objects.select_related(
+            'proposal_merge_person'
+        ).filter(
+            original_person_id=candidat.pk,
+            status=PersonMergeStatus.IN_PROGRESS.name,
+            proposal_merge_person__isnull=False,
+        ).exclude(selected_global_id='').get()
+
+        # OSIS only contains data > 2015. Manager can select a matricule which are not present in OSIS
+        # (result coming from search_potential_duplicate from DigIT)
+        try:
+            personne_connue = Person.objects.get(global_id=proposition_fusion.selected_global_id)
+        except Person.DoesNotExist:
+            personne_connue = Person(global_id=proposition_fusion.selected_global_id)
+
+        _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
+        personne_connue.save()
+
+        models = _find_models_with_fk_to_person()
+        for model, field_name in models:
+            if model == BaseAdmission:
+                admissions = model.objects.filter(
+                    **{field_name: proposition_fusion.original_person}
+                )
+                for admission in admissions:
+                    admission.candidate_id = personne_connue.pk
+                    if admission.valuated_secondary_studies_person_id:
+                        admission.valuated_secondary_studies_person_id = personne_connue.pk
+                    admission.save()
+                logger.info(f"{PREFIX_TASK} update {len(admissions)} instances of {model.__name__}")
+            elif model in [ProfessionalExperience, EducationalExperience]:
+                experiences = model.objects.filter(**{field_name: proposition_fusion.original_person})
+                curex_to_merge = proposition_fusion.professional_curex_to_merge + \
+                                 proposition_fusion.educational_curex_to_merge
+
+                for experience in experiences:
+                    if experience.uuid in curex_to_merge:
+                        experience.person_id = personne_connue.pk
+                        experience.save()
+                    else:
+                        experience.delete()
+            else:
+                updated_count = model.objects.filter(
+                    **{field_name: proposition_fusion.original_person}
+                ).update(**{field_name: personne_connue})
+                logger.info(f"{PREFIX_TASK} update {updated_count} instances of {model.__name__}")
+
+        proposition_fusion.status = PersonMergeStatus.MERGED.name
+        proposition_fusion.save()
+
+        # delete person_to_merge after merge
+        proposition_fusion.proposal_merge_person.delete()
+    except PersonMergeProposal.DoesNotExist:
+        logger.info(
+            f"{PREFIX_TASK} No person merge proposal found in valid state for candidate (PK: {candidat.pk})"
+            f"(Status: IN_PROGRESS / selected_global_id not empty / proposal_merge_person exist)"
+        )
 
     logger.info(f"{PREFIX_TASK} send signaletique into EPC")
     _injecter_signaletique_a_epc(digit_matricule)
@@ -151,6 +205,28 @@ def _injecter_signaletique_a_epc(matricule: str):
         | Q(type_demande=TypeDemande.INSCRIPTION.name)
     ).order_by('created_at').first()
     InjectionEPCSignaletique().injecter(admission=demande)
+
+
+def _update_non_empty_fields(source_obj: Model, target_obj: Model):
+    """
+    Update non-empty fields from source_obj to target_obj.
+    """
+    for field in source_obj._meta.fields:
+        field_name = field.name
+        source_value = getattr(source_obj, field_name)
+        # Skip if the field is empty or uuid or it's the primary key
+        if field.primary_key or field.name == 'uuid' or not source_value:
+            continue
+        setattr(target_obj, field_name, source_value)
+
+
+def _find_models_with_fk_to_person():
+    models_with_fk = []
+    for model in [model for model in apps.get_models() if model != PersonMergeProposal]:
+        for field in model._meta.get_fields():
+            if isinstance(field, ForeignKey) and field.related_model == Person:
+                models_with_fk.append((model, field.name))
+    return models_with_fk
 
 
 @override_switch('fusion-digit', active=True)
