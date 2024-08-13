@@ -28,9 +28,8 @@ import logging
 from datetime import datetime
 from typing import List
 
-from django.db import transaction
 from django.conf import settings
-
+from django.db import transaction
 
 from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjection, EPCInjectionStatus
 from backoffice.celery import app as celery_app
@@ -55,7 +54,7 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
 
     logger.info(
         f"{PREFIX_TASK} Lancement des injections vers EPC de la signaletique dans la queue "
-        f"(nbre: {str(epc_injections_signaletique_to_send)}) "
+        f"(nbre: {epc_injections_signaletique_to_send.count()}) "
     )
     for epc_injection_signaletique in epc_injections_signaletique_to_send:
         with transaction.atomic():
