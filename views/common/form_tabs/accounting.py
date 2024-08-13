@@ -26,8 +26,14 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE
 from admission.ddd.admission.enums import FORMATTED_RELATIONSHIPS, LienParente
-from admission.ddd.admission.formation_generale.commands import CompleterComptabilitePropositionCommand
+from admission.ddd.admission.formation_generale.commands import (
+    CompleterComptabilitePropositionCommand as CompleterComptabilitePropositionGeneraleCommand,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    CompleterComptabilitePropositionCommand as CompleterComptabilitePropositionDoctoraleCommand,
+)
 from admission.forms.admission.accounting import AccountingForm
 from admission.views.common.detail_tabs.accounting import AccountingMixinView
 from infrastructure.messages_bus import message_bus_instance
@@ -41,6 +47,10 @@ class AccountingFormView(AccountingMixinView, FormView):
     urlpatterns = 'accounting'
     update_requested_documents = True
     form_class = AccountingForm
+    command_class = {
+        CONTEXT_GENERAL: CompleterComptabilitePropositionGeneraleCommand,
+        CONTEXT_DOCTORATE: CompleterComptabilitePropositionDoctoraleCommand,
+    }
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -66,7 +76,7 @@ class AccountingFormView(AccountingMixinView, FormView):
 
     def form_valid(self, form):
         message_bus_instance.invoke(
-            CompleterComptabilitePropositionCommand(
+            self.command_class[self.current_context](
                 uuid_proposition=self.admission_uuid,
                 auteur_modification=self.request.user.person.global_id,
                 **form.cleaned_data,

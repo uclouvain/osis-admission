@@ -46,6 +46,7 @@ class DoctoratTranslator(IDoctoratTranslator):
     def _build_dto(cls, dto: 'TrainingDto') -> 'DoctoratDTO':
         return DoctoratDTO(
             sigle=dto.acronym,
+            code=dto.code,
             annee=dto.year,
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE_FR else dto.title_en,
             sigle_entite_gestion=dto.management_entity_acronym,

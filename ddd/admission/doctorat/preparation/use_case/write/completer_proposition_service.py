@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.commission_proximite import CommissionProximite
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
@@ -43,12 +42,11 @@ def completer_proposition(
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     doctorat = doctorat_translator.get(proposition_candidat.sigle_formation, proposition_candidat.annee)
-    CommissionProximite().verifier(doctorat, cmd.commission_proximite)
     bourse_recherche_id = BourseIdentityBuilder.build_from_uuid(cmd.bourse_recherche) if cmd.bourse_recherche else None
 
     # WHEN
     proposition_candidat.completer(
-        type_admission=cmd.type_admission,
+        doctorat=doctorat,
         justification=cmd.justification,
         commission_proximite=cmd.commission_proximite,
         type_financement=cmd.type_financement,
@@ -61,11 +59,16 @@ def completer_proposition(
         bourse_preuve=cmd.bourse_preuve,
         duree_prevue=cmd.duree_prevue,
         temps_consacre=cmd.temps_consacre,
+        est_lie_fnrs_fria_fresh_csc=cmd.est_lie_fnrs_fria_fresh_csc,
+        commentaire_financement=cmd.commentaire_financement,
         titre=cmd.titre_projet,
         resume=cmd.resume_projet,
         langue_redaction_these=cmd.langue_redaction_these,
         institut_these=cmd.institut_these,
         lieu_these=cmd.lieu_these,
+        projet_doctoral_deja_commence=cmd.projet_doctoral_deja_commence,
+        projet_doctoral_institution=cmd.projet_doctoral_institution,
+        projet_doctoral_date_debut=cmd.projet_doctoral_date_debut,
         documents=cmd.documents_projet,
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,

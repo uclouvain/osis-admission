@@ -73,11 +73,12 @@ class ManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView)
 
     def results(self, results: List[BaseFormationDTO]) -> List[Dict]:
         excluded_training = self.forwarded.get('excluded_training')
+        id_field = self.forwarded.get('id_field') or 'uuid'
 
         formatted_results = []
 
         for result in results:
-            result_uuid = str(result.uuid)
+            result_uuid = str(getattr(result, id_field))
 
             if excluded_training and result_uuid == excluded_training:
                 continue

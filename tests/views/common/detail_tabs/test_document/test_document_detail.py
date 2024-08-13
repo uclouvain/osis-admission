@@ -624,7 +624,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline': '2022-01-15',
                 'message_object': 'Objects',
                 'message_content': 'Content',
-                self.fac_free_requestable_document: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                self.sic_free_non_requestable_internal_document: (
+                    StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+                ),
             },
             **self.default_headers,
         )
@@ -871,7 +873,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline': '2022-01-15',
                 'message_object': 'Objects',
                 'message_content': 'Content',
-                self.sic_free_requestable_document: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                self.fac_free_non_requestable_internal_document: (
+                    StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+                ),
             },
             **self.default_headers,
         )

@@ -44,6 +44,39 @@
         <div id="general-education-training-container" class="required_field">
           {% bootstrap_field form.general_education_training %}
         </div>
+      {% elif view.is_doctorate %}
+        <div id="doctorate-training-container">
+          <div class="required_field">
+            {% bootstrap_field form.admission_type %}
+          </div>
+          <div class="required_field" id="pre-admission-justification">
+            <p class="well">
+              {% blocktrans trimmed %}
+                Extract from the Doctoral Regulations (Article 2.1):<br />
+                "Pre-admission is an optional stage of the doctoral programme. It aims to allow the candidate to complete
+                the administrative and social formalities that would require a prior registration for the doctorate. [...]
+                Pre-admission is valid for a maximum period of 12 months. Recourse to a pre-admission phase must be
+                justified, the objectives to be achieved planned and the duration of the pre-admission period fixed in
+                accordance with them. Unless exceptionally authorised by the CSD, FRIA or FNRS scholarship holders and, in
+                general, doctoral candidates engaged in a research project that has already been defined, are not
+                authorised to take a pre-admission phase for a doctorate."
+                <br /> Please also consult the special provisions of the field for all pre-admission conditions.
+              {% endblocktrans %}
+            </p>
+            {% bootstrap_field form.justification %}
+          </div>
+          <div class="required_field">
+            {% bootstrap_field form.sector %}
+          </div>
+          <div class="required_field" id="doctorate-training-field">
+            {% bootstrap_field form.doctorate_training %}
+          </div>
+          {% if form.proximity_commission_field %}
+            <div class="required_field">
+              {% bootstrap_field form|get_bound_field:form.proximity_commission_field %}
+            </div>
+          {% endif %}
+        </div>
       {% elif view.is_continuing %}
         <div id="continuing-education-training-container" class="required_field row">
           <div class="col-md-2">
@@ -164,6 +197,10 @@
                   'input[name="has_erasmus_mundus_scholarship"]': {
                       values: ['True'],
                   },
+              }, defaultOptions);
+          {% elif view.is_doctorate %}
+              $('#pre-admission-justification').dependsOn({
+                  'input[name="admission_type"]': {values: ['PRE_ADMISSION']},
               }, defaultOptions);
           {% elif view.is_continuing %}
               const longContinuingFields = $('.long-continuing-fields');

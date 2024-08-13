@@ -25,6 +25,7 @@
 # ##############################################################################
 from django.test import TestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
@@ -32,6 +33,7 @@ from admission.ddd.admission.test.factory.profil import (
     ExperienceNonAcademiqueDTOFactory,
     AnneeExperienceAcademiqueDTOFactory,
 )
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from admission.utils import get_experience_urls
@@ -51,6 +53,12 @@ class ExperienceUrlsTestCase(TestCase):
             education_group=cls.continuing_education.training.education_group,
         ).person.user
         cls.candidate: Person = cls.continuing_education.candidate
+        cls.doctorate_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        cls.user_who_can_edit_cv_but_cannot_edit_profile_or_delete_cv = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
 
     def test_get_urls_of_an_academic_experience_if_the_user_cannot_change_the_cv(self):
         academic_experience = ExperienceAcademiqueDTOFactory()
@@ -111,6 +119,41 @@ class ExperienceUrlsTestCase(TestCase):
             '/admissions/continuing-education/{admission_uuid}/update/curriculum/educational/'
             '{experience_uuid}/duplicate'.format(
                 admission_uuid=self.continuing_education.uuid,
+                experience_uuid=academic_experience.uuid,
+            ),
+        )
+
+    def test_get_urls_of_an_academic_experience_if_the_user_can_change_the_cv_but_cannot_delete_an_experience(self):
+        academic_experience = ExperienceAcademiqueDTOFactory()
+
+        experience_urls = get_experience_urls(
+            user=self.user_who_can_edit_cv_but_cannot_edit_profile_or_delete_cv,
+            admission=self.doctorate_admission,
+            experience=academic_experience,
+        )
+
+        self.assertEqual(
+            experience_urls['details_url'],
+            '/admissions/doctorate/{admission_uuid}/curriculum/educational/{experience_uuid}'.format(
+                admission_uuid=self.doctorate_admission.uuid,
+                experience_uuid=academic_experience.uuid,
+            ),
+        )
+        self.assertEqual(experience_urls['delete_url'], '')
+        self.assertEqual(
+            experience_urls['edit_url'],
+            '/admissions/doctorate/{admission_uuid}/update/curriculum/educational/'
+            '{experience_uuid}'.format(
+                admission_uuid=self.doctorate_admission.uuid,
+                experience_uuid=academic_experience.uuid,
+            ),
+        )
+        self.assertEqual(experience_urls['edit_new_link_tab'], False)
+        self.assertEqual(
+            experience_urls['duplicate_url'],
+            '/admissions/doctorate/{admission_uuid}/update/curriculum/educational/'
+            '{experience_uuid}/duplicate'.format(
+                admission_uuid=self.doctorate_admission.uuid,
                 experience_uuid=academic_experience.uuid,
             ),
         )

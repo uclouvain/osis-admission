@@ -45,22 +45,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.enums import (
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -71,8 +60,20 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ModifierTypeAdmissionValidatorList,
     ProjetDoctoralValidatorList,
 )
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
@@ -110,6 +111,8 @@ class Proposition(interface.RootEntity):
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
 
+    profil_soumis_candidat: ProfilCandidat = None
+
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     reponses_questions_specifiques: Dict = attr.Factory(dict)
@@ -136,7 +139,7 @@ class Proposition(interface.RootEntity):
 
     def completer(
         self,
-        type_admission: str,
+        doctorat: Doctorat,
         justification: Optional[str],
         commission_proximite: Optional[str],
         type_financement: Optional[str],
@@ -149,6 +152,8 @@ class Proposition(interface.RootEntity):
         bourse_preuve: List[str],
         duree_prevue: Optional[int],
         temps_consacre: Optional[int],
+        est_lie_fnrs_fria_fresh_csc: Optional[bool],
+        commentaire_financement: Optional[str],
         langue_redaction_these: str,
         institut_these: Optional[str],
         lieu_these: Optional[str],
@@ -159,6 +164,9 @@ class Proposition(interface.RootEntity):
         domaine_these: Optional[str],
         date_soutenance: Optional[datetime.date],
         raison_non_soutenue: Optional[str],
+        projet_doctoral_deja_commence: Optional[bool],
+        projet_doctoral_institution: Optional[str],
+        projet_doctoral_date_debut: Optional[datetime.date],
         documents: List[str] = None,
         graphe_gantt: List[str] = None,
         proposition_programme_doctoral: List[str] = None,
@@ -166,15 +174,17 @@ class Proposition(interface.RootEntity):
         lettres_recommandation: List[str] = None,
     ) -> None:
         CompletionPropositionValidatorList(
-            type_admission=type_admission,
+            type_admission=self.type_admission.name,
             type_financement=type_financement,
             justification=justification,
             type_contrat_travail=type_contrat_travail,
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
             domaine_these=domaine_these,
+            doctorat=doctorat,
+            commission_proximite=commission_proximite,
         ).validate()
-        self._completer_proposition(type_admission, justification, commission_proximite)
+        self._completer_proposition(justification, commission_proximite)
         self._completer_financement(
             type=type_financement,
             type_contrat_travail=type_contrat_travail,
@@ -186,6 +196,8 @@ class Proposition(interface.RootEntity):
             bourse_preuve=bourse_preuve,
             duree_prevue=duree_prevue,
             temps_consacre=temps_consacre,
+            est_lie_fnrs_fria_fresh_csc=est_lie_fnrs_fria_fresh_csc,
+            commentaire=commentaire_financement,
         )
         self._completer_projet(
             titre=titre,
@@ -193,6 +205,9 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            deja_commence=projet_doctoral_deja_commence,
+            deja_commence_institution=projet_doctoral_institution,
+            date_debut=projet_doctoral_date_debut,
             documents=documents,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
@@ -209,11 +224,9 @@ class Proposition(interface.RootEntity):
 
     def _completer_proposition(
         self,
-        type_admission: str,
         justification: Optional[str],
         commission_proximite: Optional[str],
     ):
-        self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self._definir_commission(commission_proximite)
 
@@ -238,6 +251,8 @@ class Proposition(interface.RootEntity):
         bourse_preuve: List[str],
         duree_prevue: Optional[int],
         temps_consacre: Optional[int],
+        est_lie_fnrs_fria_fresh_csc: Optional[bool],
+        commentaire: Optional[str],
     ):
         if type:
             self.financement = Financement(
@@ -251,6 +266,8 @@ class Proposition(interface.RootEntity):
                 bourse_preuve=bourse_preuve or [],
                 duree_prevue=duree_prevue,
                 temps_consacre=temps_consacre,
+                est_lie_fnrs_fria_fresh_csc=est_lie_fnrs_fria_fresh_csc,
+                commentaire=commentaire,
             )
         else:
             self.financement = financement_non_rempli
@@ -262,6 +279,9 @@ class Proposition(interface.RootEntity):
         langue_redaction_these: str,
         institut_these: Optional[str],
         lieu_these: Optional[str],
+        deja_commence: Optional[bool] = None,
+        deja_commence_institution: Optional[str] = '',
+        date_debut: Optional[datetime.date] = None,
         documents: List[str] = None,
         graphe_gantt: List[str] = None,
         proposition_programme_doctoral: List[str] = None,
@@ -279,6 +299,9 @@ class Proposition(interface.RootEntity):
             proposition_programme_doctoral=proposition_programme_doctoral or [],
             projet_formation_complementaire=projet_formation_complementaire or [],
             lettres_recommandation=lettres_recommandation or [],
+            deja_commence=deja_commence,
+            deja_commence_institution=deja_commence_institution,
+            date_debut=date_debut,
         )
 
     def _completer_experience_precedente(
@@ -304,12 +327,15 @@ class Proposition(interface.RootEntity):
         self,
         curriculum: List[str],
         reponses_questions_specifiques: Dict,
+        auteur_modification: str,
     ):
         self.curriculum = curriculum
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = auteur_modification
 
     def completer_comptabilite(
         self,
+        auteur_modification: str,
         attestation_absence_dette_etablissement: List[str],
         type_situation_assimilation: Optional[str],
         sous_type_situation_assimilation_1: Optional[str],
@@ -358,6 +384,7 @@ class Proposition(interface.RootEntity):
         prenom_titulaire_compte: Optional[str],
         nom_titulaire_compte: Optional[str],
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.comptabilite = Comptabilite(
             attestation_absence_dette_etablissement=attestation_absence_dette_etablissement,
             type_situation_assimilation=TypeSituationAssimilation[type_situation_assimilation]
@@ -431,7 +458,12 @@ class Proposition(interface.RootEntity):
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
-        ProjetDoctoralValidatorList(self.type_admission, self.projet, self.financement).validate()
+        ProjetDoctoralValidatorList(
+            self.type_admission,
+            self.projet,
+            self.financement,
+            self.experience_precedente_recherche,
+        ).validate()
 
     def finaliser(
         self,
@@ -440,7 +472,7 @@ class Proposition(interface.RootEntity):
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
     ):
-        self.statut = ChoixStatutPropositionDoctorale.CONFIRMEE
+        self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
         self.type_demande = type_demande
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
@@ -462,7 +494,7 @@ class Proposition(interface.RootEntity):
 
     def modifier_type_admission(
         self,
-        formation_id: FormationIdentity,
+        doctorat: Doctorat,
         type_admission: str,
         justification: Optional[str],
         reponses_questions_specifiques: Dict,
@@ -471,12 +503,37 @@ class Proposition(interface.RootEntity):
         ModifierTypeAdmissionValidatorList(
             type_admission=type_admission,
             justification=justification,
+            commission_proximite=commission_proximite,
+            doctorat=doctorat,
         ).validate()
         self._definir_commission(commission_proximite)
-        self.formation_id = formation_id
+        self.formation_id = doctorat.entity_id
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = self.matricule_candidat
+
+    def modifier_choix_formation_gestionnaire(
+        self,
+        doctorat: Doctorat,
+        type_admission: str,
+        justification: Optional[str],
+        reponses_questions_specifiques: Dict,
+        commission_proximite: Optional[str],
+        auteur: str,
+    ):
+        ModifierTypeAdmissionValidatorList(
+            type_admission=type_admission,
+            justification=justification,
+            commission_proximite=commission_proximite,
+            doctorat=doctorat,
+        ).validate()
+
+        self._definir_commission(commission_proximite)
+        self.type_admission = ChoixTypeAdmission[type_admission]
+        self.justification = justification or ''
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = auteur
 
     def reclamer_documents(self, auteur_modification: str, type_gestionnaire: str):
         self.statut = {
