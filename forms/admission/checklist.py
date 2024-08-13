@@ -1206,7 +1206,10 @@ class FinancabiliteDispensationForm(forms.Form):
         super().__init__(*args, **kwargs)
         if not is_central_manager and not is_program_manager:
             self.fields['dispensation_status'].disabled = True
-        elif not is_central_manager and self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name:
+        elif not is_central_manager and (
+            self.initial['dispensation_status'] == DerogationFinancement.NON_CONCERNE.name
+            or not self.initial.get('dispensation_status')
+        ):
             self.fields['dispensation_status'].disabled = True
 
 

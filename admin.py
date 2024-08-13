@@ -23,19 +23,23 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import logging
+from datetime import datetime
 from typing import Dict
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import Q, Exists, OuterRef
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
+from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
@@ -74,24 +78,26 @@ from admission.contrib.models.checklist import (
     FreeAdditionalApprovalCondition,
 )
 from admission.contrib.models.doctoral_training import Activity
-from admission.contrib.models.epc_injection import EPCInjection
+from admission.contrib.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
 from admission.contrib.models.working_list import WorkingList
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
-from admission.tasks import bulk_create_digit_persons_tickets
+from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
-from base.models.student import Student
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
@@ -535,32 +541,143 @@ class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
     readonly_fields = []
 
 
+class BaseAdmissionStatutFilter(SimpleListFilter):
+    title = 'Statut'
+    parameter_name = 'statut'
+
+    def lookups(self, request, model_admin):
+        return set(
+            ChoixStatutPropositionGenerale.choices()
+            + ChoixStatutPropositionContinue.choices()
+            + ChoixStatutPropositionDoctorale.choices()
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(
+                Q(generaleducationadmission__status=self.value()) |
+                Q(doctorateadmission__status=self.value()) |
+                Q(continuingeducationadmission__status=self.value())
+            )
+        return queryset
+
+
+class BaseAdmissionTypeFormationFilter(SimpleListFilter):
+    title = 'Type formation'
+    parameter_name = 'type_formation'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('general-education', 'Formation générale'),
+            ('doctorate', 'Doctorat'),
+            ('continuing-education', 'Formation continue'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(
+                Q(generaleducationadmission__isnull=self.value() != 'general-education') &
+                Q(doctorateadmission__isnull=self.value() != 'doctorate') &
+                Q(continuingeducationadmission__isnull=self.value() != 'continuing-education')
+            )
+        return queryset
+
+
+class EPCInjectionStatusFilter(SimpleListFilter):
+    title = 'Injection EPC de la demande'
+    parameter_name = 'epc_injection_status'
+
+    def lookups(self, request, model_admin):
+        return (
+            *EPCInjectionStatus.choices(),
+            ('no_epc_injection', "Pas d'injection lancée"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() in EPCInjectionStatus.get_names():
+            statut = EPCInjectionStatus[self.value()]
+            return queryset.filter(
+                epc_injection__status=statut.name,
+                epc_injection__type=EPCInjectionType.DEMANDE.name
+            )
+        elif self.value() == 'no_epc_injection':
+            return queryset.filter(
+                Q(epc_injection__isnull=True) |
+                Q(~Exists(
+                    EPCInjection.objects.filter(
+                        admission_id=OuterRef('pk'),
+                        type=EPCInjectionType.DEMANDE.name,
+                    )
+                ))
+            )
+        return queryset
+
+
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
-    search_fields = ['reference']
+    search_fields = ['reference', 'candidate__last_name', 'candidate__global_id', 'training__acronym']
     list_display = (
         'reference',
         'candidate',
         'training',
         'type_demande',
         'created_at',
+        'statut',
+        'type_formation'
     )
     readonly_fields = ['uuid']
     actions = [
         'injecter_dans_epc',
     ]
+    list_filter = [
+        'type_demande',
+        BaseAdmissionTypeFormationFilter,
+        BaseAdmissionStatutFilter,
+        EPCInjectionStatusFilter,
+        ('determined_academic_year', RelatedDropdownFilter),
+        'determined_pool',
+        'online_payments__status',
+        'accounting__sport_affiliation',
+        'generaleducationadmission__tuition_fees_dispensation',
+        'generaleducationadmission__tuition_fees_amount'
+    ]
 
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
-        for demande in queryset:
+        for demande in queryset.exclude(
+            Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]) &
+            Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
+        ):
             # Check injection state when it exists
-            InjectionEPCAdmission().injecter(demande)
+            try:
+                InjectionEPCAdmission().injecter(demande)
+            except Exception as e:
+                logger = logging.getLogger(settings.DEFAULT_LOGGER)
+                logger.error(e)
 
     def has_add_permission(self, request):
         return False
 
     def has_change_permission(self, request, obj=None):
         return False
+
+    @admin.display(description='Statut')
+    def statut(self, obj):
+        admission = (
+            getattr(obj, 'generaleducationadmission', None)
+            or getattr(obj, 'doctorateadmission', None)
+            or getattr(obj, 'continuingeducationadmission', None)
+        )
+        return admission.get_status_display()
+
+    @admin.display(description='Type formation')
+    def type_formation(self, obj):
+        if hasattr(obj, 'generaleducationadmission'):
+            return 'Formation générale'
+        if hasattr(obj, 'doctorateadmission'):
+            return 'Doctorat'
+        if hasattr(obj, 'continuingeducationadmission'):
+            return 'Formation continue'
 
 
 class DisplayTranslatedNameMixin:
@@ -607,17 +724,42 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
 
 
 class EPCInjectionAdmin(admin.ModelAdmin):
-    search_fields = ['admission']
-    list_display = ['admission', 'type', 'status', 'last_epc_response']
+    search_fields = ['admission__reference', 'admission__candidate__global_id', 'admission__candidate__last_name']
+    list_display = ['admission', 'type', 'status', 'errors_messages', 'last_attempt_date', 'last_response_date']
     list_filter = ['status', 'type']
     formfield_overrides = {
         models.JSONField: {'widget': JSONEditorWidget},
     }
+    raw_id_fields = ['admission']
+    actions = [
+        'reinjecter_la_signaletique_dans_epc',
+        'reinjecter_la_demande_dans_epc',
+    ]
 
-    @admin.display()
-    def last_epc_response(self, obj):
-        if obj.epc_responses:
-            return obj.epc_responses[-1]
+    def errors_messages(self, obj):
+        return obj.html_errors
+
+    @admin.action(description="Réinjecter la signalétique dans EPC")
+    def reinjecter_la_signaletique_dans_epc(self, request, queryset):
+        admissions_references = queryset.filter(
+            type=EPCInjectionType.SIGNALETIQUE.name
+        ).values_list('admission__reference', flat=True)
+        injecter_signaletique_a_epc_task.run(admissions_references=list(admissions_references))
+
+    @admin.action(description="Réinjecter la demande dans EPC")
+    def reinjecter_la_demande_dans_epc(self, request, queryset):
+        for injection in queryset.filter(
+            type=EPCInjectionType.DEMANDE.name
+        ).exclude(
+            status=EPCInjectionStatus.OK.name
+        ):
+            injection.last_attempt_date = datetime.now()
+            injection.save()
+            InjectionEPCAdmission().envoyer_admission_dans_queue(
+                donnees=injection.payload,
+                admission_reference=injection.admission.reference,
+                admission_uuid=injection.admission.uuid
+            )
 
 
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):

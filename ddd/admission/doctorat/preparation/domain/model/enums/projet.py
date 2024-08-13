@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import itertools
 
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
@@ -138,6 +139,16 @@ class ChoixSousDomaineSciences(ChoiceEnum):
     STATISTICS = _("STATISTICS")
     BIOLOGY = _("BIOLOGY")
     GEOGRAPHY = _("GEOGRAPHY")
+
+
+TOUS_CHOIX_COMMISSION_PROXIMITE = {
+    enum_item.name: enum_item.value
+    for enum_item in itertools.chain(
+        ChoixCommissionProximiteCDEouCLSM,
+        ChoixCommissionProximiteCDSS,
+        ChoixSousDomaineSciences,
+    )
+}
 
 
 class ChoixTypeAdmission(ChoiceEnum):

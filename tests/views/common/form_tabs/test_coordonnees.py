@@ -28,6 +28,8 @@ import datetime
 import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from unittest.mock import patch
+
 
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
@@ -116,6 +118,14 @@ class CoordonneesFormTestCase(TestCase):
         )
 
         cls.doctorate_url = resolve_url('admission:doctorate:update:coordonnees', uuid=cls.doctorate_admission.uuid)
+
+    def setUp(self) -> None:
+        patcher = patch(
+            "infrastructure.messages_bus.message_bus_instance.publish",
+            side_effect=lambda *args, **kwargs: None,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_form_initialization(self):
         form = AdmissionCoordonneesForm(

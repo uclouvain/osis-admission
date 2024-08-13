@@ -33,18 +33,35 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models import Scholarship
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+    COMMISSIONS_CDE_CLSM,
+    COMMISSIONS_CDSS,
+    SIGLES_SCIENCES,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
+    PropositionGestionnaireDTO as PropositionDoctoraleDTO,
+)
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMoyensDecouverteFormation
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionContinueDTO
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO as PropositionGeneraleDTO,
+)
 from admission.forms import get_scholarship_choices, format_training, AdmissionMainCampusChoiceField
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils import FIELD_REQUIRED_MESSAGE, EMPTY_CHOICE
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.fields import RadioBooleanField
 from base.models.education_group_year import EducationGroupYear
@@ -116,7 +133,7 @@ class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
         widget=autocomplete.ListSelect2,
     )
 
-    def __init__(self, proposition: PropositionGestionnaireDTO, user: User, *args, **kwargs):
+    def __init__(self, proposition: PropositionGeneraleDTO, user: User, *args, **kwargs):
         self.training_type = AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[
             proposition.formation.type
         ]
@@ -334,3 +351,120 @@ class ContinuingTrainingChoiceForm(BaseTrainingChoiceForm):
                 self.add_error('other_way_to_find_out_about_the_course', FIELD_REQUIRED_MESSAGE)
         else:
             cleaned_data['other_way_to_find_out_about_the_course'] = ''
+
+
+class DoctorateTrainingChoiceForm(BaseTrainingChoiceForm):
+    campus = forms.ChoiceField(
+        label=_('Campus (optional)'),
+        required=False,
+        disabled=True,
+    )
+
+    admission_type = forms.ChoiceField(
+        choices=ChoixTypeAdmission.choices(),
+        initial=ChoixTypeAdmission.ADMISSION.name,
+        label=_('Admission type'),
+        widget=forms.RadioSelect,
+    )
+
+    justification = forms.CharField(
+        label=_("Brief justification"),
+        widget=forms.Textarea(
+            attrs={
+                'rows': 2,
+                'placeholder': _("Reasons for provisional admission."),
+            }
+        ),
+        required=False,
+    )
+
+    sector = forms.ChoiceField(
+        label=_('Sector'),
+        required=False,
+        disabled=True,
+    )
+
+    doctorate_training = forms.ChoiceField(
+        label=pgettext_lazy('admission', 'Course'),
+        disabled=True,
+    )
+
+    proximity_commission_cde = forms.ChoiceField(
+        label=_("Proximity commission / Subdomain"),
+        choices=EMPTY_CHOICE + ChoixCommissionProximiteCDEouCLSM.choices(),
+        required=False,
+    )
+
+    proximity_commission_cdss = forms.ChoiceField(
+        label=_("Proximity commission / Subdomain"),
+        choices=EMPTY_CHOICE + ChoixCommissionProximiteCDSS.choices(),
+        required=False,
+    )
+
+    science_sub_domain = forms.ChoiceField(
+        label=_("Proximity commission / Subdomain"),
+        choices=EMPTY_CHOICE + ChoixSousDomaineSciences.choices(),
+        required=False,
+    )
+
+    @classmethod
+    def get_proximity_commission_field(cls, training: DoctoratDTO) -> Optional[str]:
+        """Determine the proximity commission field name for a given training."""
+        if training.sigle_entite_gestion in COMMISSIONS_CDE_CLSM:
+            return 'proximity_commission_cde'
+        elif training.sigle_entite_gestion in COMMISSIONS_CDSS:
+            return 'proximity_commission_cdss'
+        elif training.sigle in SIGLES_SCIENCES:
+            return 'science_sub_domain'
+
+    class Media:
+        js = ('js/dependsOn.min.js',)
+
+    def __init__(self, proposition: PropositionDoctoraleDTO, user: User, *args, **kwargs):
+        self.training_type = AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[
+            proposition.doctorat.type
+        ]
+
+        kwargs['initial'] = {
+            'campus': 'CAMPUS',
+            'training_type': self.training_type,
+            'doctorate_training': proposition.doctorat.sigle,
+            'specific_question_answers': proposition.reponses_questions_specifiques,
+            'justification': proposition.justification,
+            'sector': proposition.code_secteur_formation,
+            'admission_type': proposition.type_admission,
+        }
+
+        self.proximity_commission_field = self.get_proximity_commission_field(proposition.doctorat)
+
+        if proposition.commission_proximite and self.proximity_commission_field:
+            kwargs['initial'][self.proximity_commission_field] = proposition.commission_proximite
+
+        super().__init__(*args, **kwargs)
+
+        # Initialise the choice fields
+        self.fields['doctorate_training'].choices = [
+            [self.initial['doctorate_training'], mark_safe(format_training(proposition.formation))]
+        ]
+        self.fields['sector'].choices = [[self.initial['sector'], proposition.intitule_secteur_formation]]
+        self.fields['campus'].choices = [[self.initial['campus'], proposition.formation.campus]]
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('admission_type') == ChoixTypeAdmission.PRE_ADMISSION.name:
+            if not cleaned_data.get('justification'):
+                self.add_error('justification', FIELD_REQUIRED_MESSAGE)
+        else:
+            cleaned_data['justification'] = ''
+
+        for field in [
+            'proximity_commission_cde',
+            'proximity_commission_cdss',
+            'science_sub_domain',
+        ]:
+            if field == self.proximity_commission_field:
+                if not cleaned_data.get(field):
+                    self.add_error(field, FIELD_REQUIRED_MESSAGE)
+            else:
+                cleaned_data[field] = ''

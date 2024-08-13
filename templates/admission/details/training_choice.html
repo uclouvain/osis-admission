@@ -27,6 +27,13 @@
 
 {% block tab_content %}
   {% panel _('Choose your course') %}
+    {% if view.is_doctorate %}
+      {% field_data _("Admission type") admission.type_admission|enum_display:'ChoixTypeAdmission' %}
+      {% if admission.justification %}
+        {% field_data _("Brief justification") admission.justification|linebreaks %}
+      {% endif %}
+      {% field_data _("Sector") admission.intitule_secteur_formation %}
+    {% endif %}
     {% field_data _('Course name') admission.formation.intitule %}
     {% field_data _('Campus') admission.formation.campus %}
     {% if view.is_continuing %}
@@ -35,6 +42,11 @@
     {% switch 'debug' %}
       {% field_data _('Academic year') admission.formation.annee|get_academic_year css_class='debug-content' %}
     {% endswitch %}
+    {% if view.is_doctorate %}
+      {% if admission.commission_proximite %}
+        {% field_data _("Proximity commission / Subdomain") admission.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
+      {% endif %}
+    {% endif %}
   {% endpanel %}
 
   {% if admission.formation.type|admission_training_type == 'MASTER' %}

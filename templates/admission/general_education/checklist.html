@@ -63,6 +63,7 @@
     {% can_update_tab 'specific-questions' as can_update_specific_questions_tab %}
     {% can_update_tab 'curriculum' as can_update_curriculum %}
     {% can_update_tab 'education' as can_update_education %}
+    {% has_perm 'admission.can_delete_curriculum' as can_delete_curriculum %}
 
     {% if can_update_person_tab %}
       {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
@@ -132,18 +133,7 @@
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
 
         {% search_account_digit_result_msg original_admission %}
-
-        {% if proposition_fusion.validation.errors %}
-            <div class="alert alert-danger">
-              <strong>Erreurs lors de la validation DigIT</strong>
-              {% for error in proposition_fusion.validation.errors %}
-              <li>
-                    {{ error.errorCode|digit_error_description }}
-              </li>
-              {% endfor %}
-            </div>
-        {% endif %}
-
+        {% validation_syntaxique_resultat_digit original_admission %}
         {% if digit_ticket %}
             {% digit_ticket_status_msg digit_ticket %}
         {% endif %}
@@ -368,7 +358,7 @@
               {% else %}
                 {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant %}
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True can_update_curriculum=can_update_curriculum can_update_education=can_update_education specific_questions=specific_questions_by_tab %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True can_update_curriculum=can_update_curriculum can_update_education=can_update_education specific_questions=specific_questions_by_tab can_delete_curriculum=can_delete_curriculum %}
                 </div>
               {% endif %}
             {% endwith %}

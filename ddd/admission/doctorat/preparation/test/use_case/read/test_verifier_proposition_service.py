@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,13 +39,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    AbsenceDeDetteNonCompleteeException,
+    AbsenceDeDetteNonCompleteeDoctoratException,
     AdresseCorrespondanceNonCompleteeException,
     AdresseDomicileLegalNonCompleteeException,
     AnneesCurriculumNonSpecifieesException,
     CandidatNonTrouveException,
-    CarteBancaireRemboursementAutreFormatNonCompleteException,
-    CarteBancaireRemboursementIbanNonCompleteException,
+    CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException,
+    CarteBancaireRemboursementIbanNonCompleteDoctoratException,
     CarteIdentiteeNonSpecifieeException,
     DateOuAnneeNaissanceNonSpecifieeException,
     DetailsPasseportNonSpecifiesException,
@@ -59,8 +59,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
     ExperiencesAcademiquesNonCompleteesException,
-    TypeCompteBancaireRemboursementNonCompleteException,
-    AssimilationNonCompleteeException,
+    TypeCompteBancaireRemboursementNonCompleteDoctoratException,
+    AssimilationNonCompleteeDoctoratException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     _SignatureMembreCAFactory,
@@ -377,13 +377,13 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_retourner_erreur_si_absence_dettes_incomplet(self):
         self._test_should_retourner_erreur_si_comptabilite_incomplete(
             comptabilite=_ComptabiliteFactory(attestation_absence_dette_etablissement=[]),
-            exception=AbsenceDeDetteNonCompleteeException,
+            exception=AbsenceDeDetteNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_situation(self):
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=_ComptabiliteFactory(type_situation_assimilation=None),
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_1(self):
@@ -393,7 +393,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_1_incomplete_pour_carte_resident_longue_duree(self):
@@ -404,7 +404,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_1_incomplete_pour_carte_etranger(self):
@@ -415,7 +415,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_1_incomplete_pour_carte_sejour_membre_famille_ue(self):
@@ -426,7 +426,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_1_incomplete_pour_carte_sejour_permanent_membre_famille_ue(self):
@@ -437,7 +437,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_2(self):
@@ -448,7 +448,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_refugie(self):
@@ -460,7 +460,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_demandeur_asile_annexe(self):
@@ -472,7 +472,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_demandeur_asile_attestation(self):
@@ -484,7 +484,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_subsidiaire_carte_a_b(self):
@@ -496,7 +496,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_subsidiaire_decision(self):
@@ -508,7 +508,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_temporaire(self):
@@ -520,7 +520,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_3(self):
@@ -532,7 +532,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_3_incomplete_pour_revenus_professionnels_titre_sejour(self):
@@ -545,7 +545,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_3_incomplete_pour_revenus_professionnels_fiche_remuneration(self):
@@ -558,7 +558,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_3_incomplete_pour_revenus_remplacemente_titre_sejour(self):
@@ -571,7 +571,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_3_incomplete_pour_revenus_remplacemente_preuve_allocations(self):
@@ -584,7 +584,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_4_incomplete(self):
@@ -594,7 +594,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_5(self):
@@ -607,7 +607,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_lien_parente_assimilation_5(self):
@@ -620,7 +620,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_avec_pere_composition_menage_acte_naissance(self):
@@ -634,7 +634,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_avec_mere_composition_menage_acte_naissance(self):
@@ -648,7 +648,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_avec_tuteur_acte_tutelle(self):
@@ -662,7 +662,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_avec_conjoint_acte_tutelle(self):
@@ -676,7 +676,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_avec_cohabitant_legal_attestation(self):
@@ -690,7 +690,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_carte_identite(self):
@@ -704,7 +704,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_titre_sejour_longue_duree(self):
@@ -718,7 +718,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_refugie_apatride(self):
@@ -734,7 +734,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_titre_sejour(self):
@@ -750,7 +750,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_revenus(self):
@@ -766,7 +766,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_5_incomplete_attestation_cpas(self):
@@ -780,7 +780,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_6(self):
@@ -790,7 +790,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_6_incomplete_bourse_communaute_francaise(self):
@@ -801,7 +801,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_6_incomplete_bourse_cooperation_developpement(self):
@@ -812,7 +812,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_7_incomplete_titre_identite_sejour_longue_duree_ue(self):
@@ -822,7 +822,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_assimilation_7_incomplete_titre_sejour_belgique(self):
@@ -833,7 +833,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=AssimilationNonCompleteeException,
+            exception=AssimilationNonCompleteeDoctoratException,
         )
 
     def test_should_retourner_erreur_si_type_compte_bancaire_non_renseigne(self):
@@ -842,7 +842,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_comptabilite_incomplete(
             comptabilite=comptabilite,
-            exception=TypeCompteBancaireRemboursementNonCompleteException,
+            exception=TypeCompteBancaireRemboursementNonCompleteDoctoratException,
         )
 
     def test_should_retourner_erreur_si_compte_bancaire_iban_incomplet(self):
@@ -852,7 +852,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=CarteBancaireRemboursementIbanNonCompleteException,
+            exception=CarteBancaireRemboursementIbanNonCompleteDoctoratException,
         )
 
     def test_should_retourner_erreur_prenom_titulaire_compte_bancaire_iban_non_renseigne(self):
@@ -862,7 +862,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=CarteBancaireRemboursementIbanNonCompleteException,
+            exception=CarteBancaireRemboursementIbanNonCompleteDoctoratException,
         )
 
     def test_should_retourner_erreur_nom_titulaire_compte_bancaire_iban_non_renseigne(self):
@@ -872,7 +872,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=CarteBancaireRemboursementIbanNonCompleteException,
+            exception=CarteBancaireRemboursementIbanNonCompleteDoctoratException,
         )
 
     def test_should_retourner_erreur_si_numero_compte_bancaire_autre_format_non_renseigne(self):
@@ -882,7 +882,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=CarteBancaireRemboursementAutreFormatNonCompleteException,
+            exception=CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException,
         )
 
     def test_should_retourner_erreur_si_code_bic_compte_bancaire_autre_format_non_renseigne(self):
@@ -892,7 +892,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=CarteBancaireRemboursementAutreFormatNonCompleteException,
+            exception=CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException,
         )
 
     def test_should_retourner_erreur_prenom_titulaire_compte_bancaire_autre_format_non_renseigne(self):
@@ -902,7 +902,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=CarteBancaireRemboursementAutreFormatNonCompleteException,
+            exception=CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException,
         )
 
     def test_should_retourner_erreur_nom_titulaire_compte_bancaire_autre_format_non_renseigne(self):
@@ -912,7 +912,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
-            exception=CarteBancaireRemboursementAutreFormatNonCompleteException,
+            exception=CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException,
         )
 
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):

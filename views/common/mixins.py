@@ -41,7 +41,7 @@ from admission.contrib.models.base import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
-    GetPropositionCommand,
+    RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
     GetCotutelleCommand,
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
@@ -156,7 +156,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     @cached_property
     def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO, PropositionContinueDTO]:
         cmd = {
-            CONTEXT_DOCTORATE: GetPropositionCommand(uuid_proposition=self.admission_uuid),
+            CONTEXT_DOCTORATE: RecupererPropositionDoctoraleGestionnaireQuery(uuid_proposition=self.admission_uuid),
             CONTEXT_CONTINUING: RecupererPropositionQuery(uuid_proposition=self.admission_uuid),
             CONTEXT_GENERAL: RecupererPropositionGestionnaireQuery(uuid_proposition=self.admission_uuid),
         }[self.current_context]
@@ -247,16 +247,13 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             context['specific_questions'] = self.specific_questions
 
         if self.is_doctorate:
+            context['is_doctorate'] = True
             try:
+                context['admission'] = self.proposition
+                # TODO doctorate refactorization
                 if admission_status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
                     context['dossier'] = self.dossier
                     context['doctorate'] = self.doctorate
-                else:
-                    if admission_status == ChoixStatutPropositionDoctorale.CONFIRMEE.name:
-                        context['dossier'] = self.dossier
-
-                    context['admission'] = self.proposition
-
             except (PropositionNonTrouveeException, DemandeNonTrouveeException, DoctoratNonTrouveException) as e:
                 raise Http404(e.message)
         elif self.is_general:

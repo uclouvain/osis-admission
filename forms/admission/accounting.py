@@ -426,14 +426,14 @@ class AccountingForm(forms.Form):
                 'names': ', '.join(names),
             }
 
+        # Only display the sport question for the right campuses
+        self.fields['affiliation_sport'].choices = ChoixAffiliationSport.choices_by_education_site(
+            self.education_site
+        )
+
         if self.is_general_admission:
             self.fields['demande_allocation_d_etudes_communaute_francaise_belgique'].required = True
             self.fields['enfant_personnel'].required = True
-
-            # Only display the sport question for the right campuses
-            self.fields['affiliation_sport'].choices = ChoixAffiliationSport.choices_by_education_site(
-                self.education_site
-            )
 
             if len(self.fields['affiliation_sport'].choices) > 1:
                 self.fields['affiliation_sport'].required = True
@@ -572,6 +572,14 @@ class AccountingForm(forms.Form):
         if self.is_general_admission:
             if not cleaned_data.get('enfant_personnel'):
                 cleaned_data['attestation_enfant_personnel'] = []
+        else:
+            for field in [
+                'demande_allocation_d_etudes_communaute_francaise_belgique',
+                'attestation_enfant_personnel',
+                'enfant_personnel',
+                'affiliation_sport',
+            ]:
+                cleaned_data.pop(field, None)
 
         # Assimilation
         self.clean_assimilation_fields(cleaned_data)

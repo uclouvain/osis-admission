@@ -36,19 +36,6 @@ def recherche_et_validation_digit(
     event,
 ) -> None:
     with contextlib.suppress(BusinessException):
-        msg_bus.invoke(RechercherCompteExistantCommand(
-            matricule=event.matricule,
-            nom=event.nom,
-            prenom=event.prenom,
-            autres_prenoms=event.autres_prenoms,
-            date_naissance=event.date_naissance,
-            genre=event.genre,
-            niss=event.niss,
-        ))
+        msg_bus.invoke(RechercherCompteExistantCommand(matricule=event.matricule))
         msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
-        msg_bus.invoke(
-            SoumettreTicketPersonneCommand(
-                global_id=event.matricule,
-                annee=event.annee,
-            )
-        )
+        msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
