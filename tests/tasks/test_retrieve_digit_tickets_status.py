@@ -119,7 +119,10 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertEqual(self.personne_compte_temporaire.external_id, 'osis.person_00345678')
 
     def test_assert_merge_with_existing_account_and_existing_in_osis(self):
-        personne_connue = PersonFactory(global_id='00345678')
+        self.personne_compte_temporaire.global_id = '00345678'   # Set as internal account
+        self.personne_compte_temporaire.save()
+
+        personne_connue = PersonFactory(global_id='00948959')
 
         self.person_merge_proposal.status = PersonMergeStatus.IN_PROGRESS.name   # Fusion acceptée par le gestionnaire
         self.person_merge_proposal.selected_global_id = personne_connue.global_id
