@@ -91,7 +91,6 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
-from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
@@ -639,12 +638,15 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'determined_pool',
         'online_payments__status',
         'accounting__sport_affiliation',
+        'generaleducationadmission__tuition_fees_dispensation',
+        'generaleducationadmission__tuition_fees_amount'
     ]
 
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
         for demande in queryset.exclude(
-            epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]
+            Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]) &
+            Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
         ):
             # Check injection state when it exists
             try:
