@@ -233,26 +233,6 @@ class ExperienceNonTrouveeException(BusinessException):
         super().__init__(self.message, **kwargs)
 
 
-class ADejaTicketCreationEnAttenteException(BusinessException):
-    status_code = "FUSION-DIGIT-2"
-
-    def __init__(self, matricule_candidat, **kwargs):
-        message = _("[%(matricule_candidat)s] Candidate has already a pending creation ticket") % {
-            "matricule_candidat": matricule_candidat
-        }
-        super().__init__(message, **kwargs)
-
-
-class NeCorrespondPasACompteTemporaireException(BusinessException):
-    status_code = "FUSION-DIGIT-3"
-
-    def __init__(self, matricule_candidat, **kwargs):
-        message = _("[%(matricule_candidat)s] Candidate matricule is not a temporary account matricule") % {
-            "matricule_candidat": matricule_candidat
-        }
-        super().__init__(message, **kwargs)
-
-
 class NotInAccountCreationPeriodException(BusinessException):
     status_code = "FUSION-DIGIT-4"
 
@@ -290,23 +270,6 @@ class ValidationTicketCreationDigitEchoueeException(BusinessException):
 
     def __init__(self, **kwargs):
         super().__init__(self.message, **kwargs)
-
-
-class TicketDigitATraiterAvantException(BusinessException):
-    status_code = "FUSION-DIGIT-8"
-    message = _("There exists some digit tickets to treat before")
-
-    def __init__(self, **kwargs):
-        super().__init__(self.message, **kwargs)
-
-
-class PasDePropositionDeFusionEligibleException(BusinessException):
-    status_code = "FUSION-DIGIT-9"
-    message = _("No merge proposal eligible for this ticket")
-
-    def __init__(self, **kwargs):
-        super().__init__(self.message, **kwargs)
-
 
 class PasDePropositionDeFusionTrouveeException(BusinessException):
     status_code = "FUSION-DIGIT-10"

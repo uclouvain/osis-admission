@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-08 16:17+0200\n"
+"POT-Creation-Date: 2024-08-14 14:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4767,9 +4767,6 @@ msgstr ""
 msgid "No longer designate the document as to be requested"
 msgstr ""
 
-msgid "No merge proposal eligible for this ticket"
-msgstr ""
-
 msgid "No one invited"
 msgstr ""
 
@@ -7147,9 +7144,6 @@ msgstr ""
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
 
-msgid "There exists some digit tickets to treat before"
-msgstr ""
-
 msgid ""
 "There has been a problem when merging the documents, this document contains "
 "several files and only the first one is displayed in the viewer. You can "
@@ -8197,11 +8191,6 @@ msgstr ""
 
 #, python-format
 msgid ""
-"[%(matricule_candidat)s] Candidate has already a pending creation ticket"
-msgstr ""
-
-#, python-format
-msgid ""
 "[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
 "validation"
 msgstr ""
@@ -8210,12 +8199,6 @@ msgstr ""
 msgid ""
 "[%(matricule_candidat)s] Candidate has pending merge proposal: status "
 "%(merge_status)s"
-msgstr ""
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate matricule is not a temporary account "
-"matricule"
 msgstr ""
 
 #, python-format

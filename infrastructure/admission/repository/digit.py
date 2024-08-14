@@ -35,19 +35,16 @@ from django.conf import settings
 from django.db.models import QuerySet, Q
 from django.utils.datetime_safe import date
 
-from admission.ddd.admission.domain.validator.exceptions import ValidationTicketCreationDigitEchoueeException, \
-    TicketDigitATraiterAvantException
+from admission.ddd.admission.domain.validator.exceptions import ValidationTicketCreationDigitEchoueeException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.dtos.validation_ticket_response import ValidationTicketResponseDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
-from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.templatetags.admission import format_matricule
 from base.business.student import find_student_by_discriminating
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
-from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus, \
-    PersonTicketCreationMergeType
+from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.models.student import Student
 
@@ -261,36 +258,6 @@ class DigitRepository(IDigitRepository):
             return format_matricule(matricule)
 
     @classmethod
-    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str, ticket_uuid: str):
-        candidate = Person.objects.prefetch_related('personticketcreation_set').get(global_id=candidate_global_id)
-        person_tickets = candidate.personticketcreation_set.all()
-
-        ticket = next((t for t in person_tickets if str(t.uuid) == ticket_uuid), None)
-        if not ticket:
-            raise PersonTicketCreation.DoesNotExist
-
-        if any(
-                p for p in person_tickets if p.created_at < ticket.created_at and p.status not in [
-                    PersonTicketCreationStatus.DONE.name,
-                    PersonTicketCreationStatus.DONE_WITH_WARNINGS.name
-                ]
-        ):
-            raise TicketDigitATraiterAvantException()
-
-        candidate.global_id = digit_global_id
-        candidate.external_id = f"osis.person_{digit_global_id}"
-        # delete user to enable new connection from temporary account
-        if candidate.user:
-            # Delete related UserGroup instances first
-            candidate.user.usergroup_set.all().delete()
-            candidate.user.delete()
-        candidate.user = None
-        candidate.save()
-
-        ticket.merge_type = PersonTicketCreationMergeType.MERGED_WITH_CANDIDATE.name
-        ticket.save()
-
-    @classmethod
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
         candidate = Person.objects.get(global_id=global_id)
 
@@ -303,15 +270,6 @@ class DigitRepository(IDigitRepository):
         if student is not None and student.registration_id:
             return student.registration_id
 
-    @classmethod
-    def has_pending_digit_creation_ticket(cls, global_id: str) -> bool:
-        candidate = Person.objects.prefetch_related('personticketcreation_set').get(global_id=global_id)
-        return any(t for t in candidate.personticketcreation_set.all() if t.status in [
-            PersonTicketCreationStatus.CREATED.name,
-            PersonTicketCreationStatus.DONE.name,
-            PersonTicketCreationStatus.DONE_WITH_WARNINGS.name,
-            PersonTicketCreationStatus.IN_PROGRESS.name,
-        ])
 
 
 def _retrieve_person_ticket_status(request_id: int):
