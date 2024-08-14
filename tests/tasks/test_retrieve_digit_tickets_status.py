@@ -29,6 +29,8 @@ from unittest import mock
 
 from django.test import TestCase
 from waffle.testutils import override_switch
+from django.test.utils import override_settings
+
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery
@@ -47,6 +49,7 @@ from osis_profile.models.enums.curriculum import ActivityType
 
 
 @override_switch('fusion-digit', active=True)
+@override_settings(USE_CELERY=False)
 class TestRetrieveDigitTicketsStatus(TestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
