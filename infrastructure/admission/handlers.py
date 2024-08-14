@@ -32,7 +32,6 @@ from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read impo
 from admission.ddd.admission.use_case.read import *
 from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
 from admission.ddd.admission.use_case.read.recuperer_matricule_digit import recuperer_matricule_digit
-from admission.ddd.admission.use_case.write.modifier_matricule_candidat import modifier_matricule_candidat
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.event_handler import reagir_modification_signaletique_candidat, \
@@ -60,10 +59,6 @@ COMMAND_HANDLERS = {
         proposition_fusion_repository=PropositionPersonneFusionRepository(),
     ),
     RecupererMatriculeDigitQuery: lambda msg_bus, query: recuperer_matricule_digit(
-        query,
-        digit_repository=DigitRepository(),
-    ),
-    ModifierMatriculeCandidatCommand: lambda msg_bus, query: modifier_matricule_candidat(
         query,
         digit_repository=DigitRepository(),
     ),

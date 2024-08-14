@@ -32,7 +32,6 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand,
     RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
@@ -746,5 +745,4 @@ COMMAND_HANDLERS = {
     RetrieveListePropositionFusionEnErreurQuery: lambda *args, **kwargs: Mock(),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: lambda *args, **kwargs: Mock(),
     ValiderTicketPersonneCommand: lambda *args, **kwargs: Mock(),
-    FusionnerCandidatAvecPersonneExistanteCommand: lambda *args, **kwargs: Mock(),
 }

@@ -25,6 +25,7 @@
 # ##############################################################################
 import logging
 from typing import List
+from uuid import UUID
 
 import waffle
 from django.apps import apps
@@ -40,10 +41,10 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
 )
-from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionEligibleException
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from backoffice.celery import app
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
@@ -79,10 +80,7 @@ def run(request=None):
                 )
                 logger.info(f"{PREFIX_TASK} process DigIT ticket ({str(ticket)}")
                 if status in ["DONE", "DONE_WITH_WARNINGS"]:
-                    try:
-                        _process_successful_response_ticket(message_bus_instance, ticket)
-                    except PasDePropositionDeFusionEligibleException as e:
-                        logger.info(f"{PREFIX_TASK} {e.message}")
+                    _process_successful_response_ticket(message_bus_instance, ticket)
                 else:
                     logger.info(f"{PREFIX_TASK} ticket in status {status}. No processing ticket response.")
         except Exception as e:
@@ -98,15 +96,32 @@ def run(request=None):
 
 
 def _process_successful_response_ticket(message_bus_instance, ticket):
+    logger.info(f"{PREFIX_TASK} ####### START PROCESS SUCCESSFUL DIGIT RESPONSE #######")
+    ticket_rowdb = PersonTicketCreation.objects.get(uuid=ticket.uuid)
+    logger.info(f"{PREFIX_TASK} check if pending/errored tickets")
+    qs_pending_errored_tickets = PersonTicketCreation.objects.filter(
+        person=ticket_rowdb.person,
+        created_at__lt=ticket_rowdb.created_at,
+    ).exclude(
+        uuid=ticket.uuid,
+        status__in=[
+            PersonTicketCreationStatus.DONE.name,
+            PersonTicketCreationStatus.DONE_WITH_WARNINGS.name
+        ]
+    )
+    if qs_pending_errored_tickets.exists():
+        raise Exception(
+            f"There exists some digit tickets to treat before (Count: {qs_pending_errored_tickets.count()})"
+        )
+
     from admission.infrastructure.admission.repository.digit import DigitRepository
     noma = DigitRepository.get_registration_id_sent_to_digit(global_id=ticket.matricule)
 
     logger.info(f"{PREFIX_TASK} fetch matricule DigIT from noma (NOMA: {noma})")
     digit_matricule = message_bus_instance.invoke(RecupererMatriculeDigitQuery(noma=noma))
     logger.info(f"{PREFIX_TASK} matricule DigIT found ({digit_matricule}) for noma ({noma})")
-
-    candidat = PersonTicketCreation.objects.get(uuid=ticket.uuid).person
-    if candidat.global_id != digit_matricule:
+    candidat = ticket_rowdb.person
+    if candidat.global_id[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX and candidat.global_id != digit_matricule:
         logger.info(
             f"{PREFIX_TASK} "
             f"edit candidate global_id ({candidat.global_id}) to set DigIT matricule ({digit_matricule})"
@@ -118,11 +133,20 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             candidat.user.delete()
         candidat.user = None
         candidat.save()
-    else:
+    elif candidat.global_id == digit_matricule:
         logger.info(
             f"{PREFIX_TASK} "
             f"candidate global_id ({candidat.global_id}) is already the same as DigIT response ({digit_matricule})"
         )
+    else:
+        msg = f"candidate global_id ({candidat.global_id}) is not the same as DigIT response ({digit_matricule}) " \
+              f"for noma {noma}. Please verify data integrity !"
+        logger.info(f"{PREFIX_TASK} {msg}")
+        PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(
+            status=PersonTicketCreationStatus.ERROR.name,
+            errors=[{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': msg}]
+        )
+        return
 
     try:
         proposition_fusion = PersonMergeProposal.objects.select_related(
@@ -132,16 +156,26 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             status=PersonMergeStatus.IN_PROGRESS.name,
             proposal_merge_person__isnull=False,
         ).exclude(selected_global_id='').get()
+        logger.info(
+            f"{PREFIX_TASK} Person merge proposal found in valid state for candidate "
+            f"(PK: {candidat.pk} - UUID: {candidat.uuid})"
+        )
 
-        # OSIS only contains data > 2015. Manager can select a matricule which are not present in OSIS
+        # OSIS only contains data >= 2015. Manager can select a matricule which are not present in OSIS
         # (result coming from search_potential_duplicate from DigIT)
         try:
             personne_connue = Person.objects.get(global_id=proposition_fusion.selected_global_id)
+            logger.info(f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) found")
         except Person.DoesNotExist:
             personne_connue = Person(global_id=proposition_fusion.selected_global_id)
+            logger.info(
+                f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
+            )
 
         _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
         personne_connue.save()
+        proposition_fusion.proposal_merge_person.delete()
+        proposition_fusion.proposal_merge_person = None
 
         models = _find_models_with_fk_to_person()
         for model, field_name in models:
@@ -154,29 +188,40 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     if admission.valuated_secondary_studies_person_id:
                         admission.valuated_secondary_studies_person_id = personne_connue.pk
                     admission.save()
-                logger.info(f"{PREFIX_TASK} update {len(admissions)} instances of {model.__name__}")
+                logger.info(
+                    f"{PREFIX_TASK} Link {len(admissions)} instances of {model.__name__} from candidate to known person"
+                )
             elif model in [ProfessionalExperience, EducationalExperience]:
                 experiences = model.objects.filter(**{field_name: proposition_fusion.original_person})
-                curex_to_merge = proposition_fusion.professional_curex_to_merge + \
-                                 proposition_fusion.educational_curex_to_merge
+                logger.info(f"{PREFIX_TASK} {len(experiences)} instances of {model.__name__} of candidate")
+                curex_to_merge = [
+                    UUID(experience_uuid) for experience_uuid in
+                    (proposition_fusion.professional_curex_to_merge + proposition_fusion.educational_curex_to_merge)
+                ]
 
                 for experience in experiences:
                     if experience.uuid in curex_to_merge:
+                        logger.info(
+                            f"{PREFIX_TASK} Link instance of {model.__name__} ({experience.uuid}) from candidate "
+                            f"to known person"
+                        )
                         experience.person_id = personne_connue.pk
                         experience.save()
                     else:
+                        logger.info(f"{PREFIX_TASK} Removing instance of {model.__name__} ({experience.uuid})")
                         experience.delete()
+
             else:
                 updated_count = model.objects.filter(
                     **{field_name: proposition_fusion.original_person}
                 ).update(**{field_name: personne_connue})
-                logger.info(f"{PREFIX_TASK} update {updated_count} instances of {model.__name__}")
+                logger.info(
+                    f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__} from candidate to known person"
+                )
 
         proposition_fusion.status = PersonMergeStatus.MERGED.name
+        proposition_fusion.selected_global_id = ''
         proposition_fusion.save()
-
-        # delete person_to_merge after merge
-        proposition_fusion.proposal_merge_person.delete()
     except PersonMergeProposal.DoesNotExist:
         logger.info(
             f"{PREFIX_TASK} No person merge proposal found in valid state for candidate (PK: {candidat.pk})"
@@ -189,6 +234,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         # TODO refactor to create a model which monitor sending picture to card
         send_pictures_to_card_app.run.delay(global_id=digit_matricule)
     logger.info(f"{PREFIX_TASK} send picture to card")
+    logger.info(f"{PREFIX_TASK} ####### END PROCESS SUCCESSFUL DIGIT RESPONSE #######")
 
 
 def _injecter_signaletique_a_epc(matricule: str):
@@ -215,7 +261,7 @@ def _update_non_empty_fields(source_obj: Model, target_obj: Model):
         field_name = field.name
         source_value = getattr(source_obj, field_name)
         # Skip if the field is empty or uuid or it's the primary key
-        if field.primary_key or field.name == 'uuid' or not source_value:
+        if field.primary_key or field.name in ['uuid', 'user'] or not source_value:
             continue
         setattr(target_obj, field_name, source_value)
 

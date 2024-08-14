@@ -38,7 +38,7 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand, RetrieveListePropositionFusionEnErreurQuery,
+    RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
@@ -95,9 +95,6 @@ from admission.ddd.admission.use_case.write import (
 )
 from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import (
     defaire_proposition_fusion_personne,
-)
-from admission.ddd.admission.use_case.write.fusionner_candidat_avec_personne_existante import (
-    fusionner_candidat_avec_personne_existante,
 )
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import (
     initialiser_proposition_fusion_personne,
@@ -767,12 +764,6 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             formation_translator=FormationGeneraleTranslator(),
             client_comptabilite_translator=ClientComptabiliteTranslator(),
-        )
-    ),
-    FusionnerCandidatAvecPersonneExistanteCommand: (
-        lambda msg_bus, cmd: fusionner_candidat_avec_personne_existante(
-            cmd,
-            proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
         )
     ),
     SpecifierDerogationFinancabiliteCommand: (
