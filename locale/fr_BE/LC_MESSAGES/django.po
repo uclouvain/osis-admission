@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-08 16:17+0200\n"
+"POT-Creation-Date: 2024-08-14 14:40+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -5309,9 +5309,6 @@ msgstr "Aucune connaissance des langues renseignée."
 msgid "No longer designate the document as to be requested"
 msgstr "Ne plus désigner le document comme étant à réclamer"
 
-msgid "No merge proposal eligible for this ticket"
-msgstr "Pas de proposition de fusion éligible pour ce ticket"
-
 msgid "No one invited"
 msgstr "Aucun invité"
 
@@ -7901,9 +7898,6 @@ msgid "There can be no more promoters in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
 
-msgid "There exists some digit tickets to treat before"
-msgstr "Il existe des tickets DigIT à traiter avant"
-
 msgid ""
 "There has been a problem when merging the documents, this document contains "
 "several files and only the first one is displayed in the viewer. You can "
@@ -9119,12 +9113,6 @@ msgstr "[%(matricule_candidat)s] Période de création de compte fermée"
 
 #, python-format
 msgid ""
-"[%(matricule_candidat)s] Candidate has already a pending creation ticket"
-msgstr ""
-"[%(matricule_candidat)s] Le candidat a déjà un ticket de création en attente"
-
-#, python-format
-msgid ""
 "[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
 "validation"
 msgstr ""
@@ -9138,14 +9126,6 @@ msgid ""
 msgstr ""
 "[%(matricule_candidat)s] Le candidat a une proposition de fusion en attente: "
 "statut %(merge_status)s"
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate matricule is not a temporary account "
-"matricule"
-msgstr ""
-"[%(matricule_candidat)s] Le matricule du candidat n'est pas lié à un compte "
-"temporaire"
 
 #, python-format
 msgid ""
