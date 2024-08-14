@@ -136,6 +136,7 @@
         {% if digit_ticket %}
             {% digit_ticket_status_msg digit_ticket %}
         {% endif %}
+
         {% if injection_signaletique %}
             <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
                 <div class="panel-body bg-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">

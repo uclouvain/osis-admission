@@ -2725,7 +2725,11 @@ class ChecklistView(
     def injection_signaletique(self):
         return EPCInjection.objects.filter(
             admission=self.admission,
-            status__in=[EPCInjectionStatus.PENDING.name, EPCInjectionStatus.NO_SENT.name, EPCInjectionStatus.ERROR.name],
+            status__in=[
+                EPCInjectionStatus.PENDING.name,
+                EPCInjectionStatus.NO_SENT.name,
+                EPCInjectionStatus.ERROR.name,
+            ],
             type=EPCInjectionType.SIGNALETIQUE.name,
         ).first()
 
