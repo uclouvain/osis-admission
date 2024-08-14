@@ -136,6 +136,15 @@
         {% if digit_ticket %}
             {% digit_ticket_status_msg digit_ticket %}
         {% endif %}
+        {% if injection_signaletique %}
+            <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+                <div class="panel-body bg-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+                    <div>
+                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.status == 'ERROR' %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
 
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
@@ -158,7 +167,7 @@
         <div role="tabpanel" class="tab-pane" id="financabilite">
 
           {% include "admission/general_education/includes/checklist/financabilite.html" %}
-          
+
           {% include "admission/general_education/includes/checklist/financabilite_derogation_non_concerne_modal.html" %}
           {% include "admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_modal.html" %}
           {% include "admission/general_education/includes/checklist/financabilite_derogation_abandon_du_candidat_modal.html" %}
@@ -1309,11 +1318,11 @@
     .approval-conditions-fields .form-group {
       margin-bottom: 0;
     }
-    
+
     button[name="hide-other-approval-conditions"] {
       background-color: transparent;
     }
-    
+
     button[name="hide-other-approval-conditions"][value="on"] > i.fa-square-chevron-down, button[name="hide-other-approval-conditions"][value="off"] > i.fa-square-chevron-up {
       display: none;
     }
@@ -1359,7 +1368,7 @@
     #checklist-menu .sub-item.bg-warning {
       background-color: #fcf8e3;
     }
-    
+
     /* Allow to scroll the content above the header menu */
     html {
       overflow: auto;
