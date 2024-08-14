@@ -26,6 +26,10 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationDoctoraleParGestionnaireCommand,
+)
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationContinueParGestionnaireCommand,
@@ -33,8 +37,11 @@ from admission.ddd.admission.formation_continue.commands import (
 from admission.ddd.admission.formation_generale.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationGeneraleParGestionnaireCommand,
 )
-from admission.forms.admission.training_choice import GeneralTrainingChoiceForm, ContinuingTrainingChoiceForm
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.forms.admission.training_choice import (
+    GeneralTrainingChoiceForm,
+    ContinuingTrainingChoiceForm,
+    DoctorateTrainingChoiceForm,
+)
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
@@ -52,6 +59,7 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
         return {
             CONTEXT_GENERAL: GeneralTrainingChoiceForm,
             CONTEXT_CONTINUING: ContinuingTrainingChoiceForm,
+            CONTEXT_DOCTORATE: DoctorateTrainingChoiceForm,
         }[self.current_context]
 
     def get_form_kwargs(self):
@@ -86,6 +94,18 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
                     moyens_decouverte_formation=form.cleaned_data['ways_to_find_out_about_the_course'],
                     autre_moyen_decouverte_formation=form.cleaned_data['other_way_to_find_out_about_the_course'],
                     marque_d_interet=form.cleaned_data['interested_mark'],
+                )
+            )
+
+        elif self.is_doctorate:
+            message_bus_instance.invoke(
+                ModifierChoixFormationDoctoraleParGestionnaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    auteur=self.request.user.person.global_id,
+                    type_admission=form.cleaned_data['admission_type'],
+                    commission_proximite=form.cleaned_data.get(form.proximity_commission_field, ''),
+                    justification=form.cleaned_data['justification'],
+                    reponses_questions_specifiques=form.cleaned_data['specific_question_answers'],
                 )
             )
 

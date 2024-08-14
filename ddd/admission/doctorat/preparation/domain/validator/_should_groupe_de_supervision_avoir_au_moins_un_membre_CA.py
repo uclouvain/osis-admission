@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(BusinessValidator):
+class ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA(BusinessValidator):
     signatures_membres_CA: List[SignatureMembreCA]
 
     def validate(self, *args, **kwargs):
-        if len(self.signatures_membres_CA) <= 0:
+        if len(self.signatures_membres_CA) < 2:
             raise MembreCAManquantException

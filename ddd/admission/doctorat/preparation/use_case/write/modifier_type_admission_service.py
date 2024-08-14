@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,13 +24,12 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.doctorat.preparation.domain.service.commission_proximite import CommissionProximite
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.doctorat.preparation.commands import ModifierTypeAdmissionCommand
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
+from admission.ddd.admission.doctorat.preparation.commands import ModifierTypeAdmissionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
@@ -42,11 +41,10 @@ def modifier_type_admission(
     # GIVEN
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
     doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
-    CommissionProximite().verifier(doctorat, cmd.commission_proximite)
 
     # WHEN
     proposition.modifier_type_admission(
-        formation_id=doctorat.entity_id,
+        doctorat=doctorat,
         type_admission=cmd.type_admission,
         justification=cmd.justification,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,

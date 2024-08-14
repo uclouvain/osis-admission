@@ -208,7 +208,27 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def _get_language_knowledge_dto(cls, candidate: Person) -> List[ConnaissanceLangueDTO]:
+    def get_connaissances_langues(cls, matricule: str) -> List[ConnaissanceLangueDTO]:
+        languages = (
+            LanguageKnowledge.objects.select_related('language')
+            .filter(person__global_id=matricule)
+            .alias(
+                relevancy=Case(
+                    When(language__code='EN', then=2),
+                    When(language__code='FR', then=1),
+                    default=0,
+                ),
+            )
+            .order_by('-relevancy', 'language__code')
+        )
+        return cls._get_language_knowledge_dto(languages=languages)
+
+    @classmethod
+    def _get_language_knowledge_dto(
+        cls,
+        candidate: Optional[Person] = None,
+        languages: Optional[List[LanguageKnowledge]] = None,
+    ) -> List[ConnaissanceLangueDTO]:
         """Returns the DTO of the language knowledge data of the given candidate."""
         return [
             ConnaissanceLangueDTO(
@@ -220,7 +240,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 capacite_ecriture=langue.writing_ability or '',
                 certificat=langue.certificate or '',
             )
-            for langue in candidate.languages_knowledge.all()
+            for langue in (candidate.languages_knowledge.all() if candidate else languages)
         ]
 
     @classmethod

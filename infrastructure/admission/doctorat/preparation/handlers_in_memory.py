@@ -51,6 +51,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
+from .domain.service.in_memory.lister_demandes import ListerDemandesInMemoryService
 from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
 from .domain.service.in_memory.notification import NotificationInMemory
 from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
@@ -87,6 +88,7 @@ _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInM
 _personne_connue_translator = PersonneConnueUclInMemoryTranslator()
 _historique_global = HistoriqueGlobalInMemory()
 _emplacement_document_repository = emplacement_document_in_memory_repository
+_lister_demandes_service = ListerDemandesInMemoryService()
 
 
 COMMAND_HANDLERS = {
@@ -419,5 +421,18 @@ COMMAND_HANDLERS = {
     RetyperDocumentCommand: lambda msg_bus, cmd: retyper_document(
         cmd,
         emplacement_document_repository=_emplacement_document_repository,
+    ),
+    ListerDemandesQuery: lambda msg_bus, cmd: lister_demandes(
+        cmd,
+        lister_demandes_service=_lister_demandes_service,
+    ),
+    RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+        doctorat_translator=_doctorat_translator,
     ),
 }

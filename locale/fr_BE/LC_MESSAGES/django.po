@@ -548,6 +548,9 @@ msgstr "Ajouter un cours"
 msgid "Add a custom mail template for <em>%(description)s</em>"
 msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
 
+msgid "Add a language"
+msgstr "Ajouter une langue"
+
 msgid "Add a new member"
 msgstr "Ajouter un nouveau membre."
 
@@ -637,9 +640,6 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
-msgid "Admission date"
-msgstr "Date admission"
-
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -679,6 +679,10 @@ msgstr "Accès aux professions réglementées"
 
 msgid "Admission type"
 msgstr "Type de l'admission"
+
+msgctxt "doctorate-filter"
+msgid "Admission type"
+msgstr "Type d'admission"
 
 msgid "Admissions"
 msgstr "Admissions"
@@ -837,6 +841,23 @@ msgstr ""
 
 msgid "Another admission has been submitted."
 msgstr "Une autre admission a déjà été soumise."
+
+msgid ""
+"Answer according to the European Framework of Reference for Languages (CEFR) "
+"classification. Detailed explanations of this framework can be found at <a "
+"href=\"https://www.coe.int/en/web/common-european-framework-reference-"
+"languages/table-1-cefr-3.3-common-reference-levels-global-scale\" "
+"target=\"_blank\"> https://www.coe.int/en/web/common-european-framework-"
+"reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale </"
+"a>"
+msgstr ""
+"Répondez en respectant le classement du cadre européen de référence pour les "
+"langues (CECRL). Des explications détaillées sur ce cadre de référence se "
+"trouvent à la page <a href=\"https://www.coe.int/fr/web/common-european-"
+"framework-reference-languages/table-1-cefr-3.3-common-reference-levels-"
+"global-scale\" target=\"_blank\">https://www.coe.int/fr/web/common-european-"
+"framework-reference-languages/table-1-cefr-3.3-common-reference-levels-"
+"global-scale</a>"
 
 msgid "Application"
 msgstr "Demande"
@@ -1261,11 +1282,12 @@ msgstr "Commentaire du gestionnaire CDD"
 msgid "CDD opinion"
 msgstr "Avis de la CDD"
 
-msgid "CDD status"
-msgstr "Statut CDD"
-
 msgid "CDD:"
 msgstr "CDD :"
+
+msgctxt "admission"
+msgid "CDD status"
+msgstr "Statut CDD"
 
 msgid "CDDs"
 msgstr "CDDs"
@@ -2198,6 +2220,10 @@ msgctxt "admission"
 msgid "Course units"
 msgstr "Cours"
 
+msgctxt "admission"
+msgid "Courses"
+msgstr "Formations"
+
 msgid "Courses taken"
 msgstr "Cours suivis"
 
@@ -2593,6 +2619,10 @@ msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 msgid "Doctor"
 msgstr "Docteur"
 
+
+msgid "Doctoral commissions"
+msgstr "Commissions doctorales"
+
 msgid "Doctoral student:"
 msgstr "Doctorant :"
 
@@ -2612,6 +2642,12 @@ msgstr "Formation doctorale"
 
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
+
+msgid "Doctorate Ethics Regulations"
+msgstr "Règlement de déontologie"
+
+msgid "Doctorate Regulations"
+msgstr "Règlement de la commission générale du doctorat"
 
 msgid "Document"
 msgstr "Document"
@@ -2676,9 +2712,6 @@ msgstr "Fait à"
 msgid "Dossier"
 msgstr "Dossier"
 
-msgid "Dossier confirmation"
-msgstr "Confirmation dossier"
-
 msgid "Dossier not found."
 msgstr "Dossier non trouvé."
 
@@ -2690,6 +2723,13 @@ msgstr "Numéro de dossier :"
 
 msgid "Dossier status"
 msgstr "Statut dossier"
+
+msgctxt "doctorate-header-list"
+msgid "Dossier status"
+msgstr "État de la demande"
+
+msgid "Dossier submission date"
+msgstr "Date de soumission du dossier"
 
 msgid "Double degree:"
 msgstr "Bourse double diplomation:"
@@ -3093,6 +3133,34 @@ msgstr "Modification / réorientation externe"
 msgid "External reorientation/modification"
 msgstr "Réorientation/modification externe"
 
+msgid ""
+"Extract from the Doctoral Regulations (Article 2.1):<br /> \"Pre-admission "
+"is an optional stage of the doctoral programme. It aims to allow the "
+"candidate to complete the administrative and social formalities that would "
+"require a prior registration for the doctorate. [...] Pre-admission is valid "
+"for a maximum period of 12 months. Recourse to a pre-admission phase must be "
+"justified, the objectives to be achieved planned and the duration of the pre-"
+"admission period fixed in accordance with them. Unless exceptionally "
+"authorised by the CSD, FRIA or FNRS scholarship holders and, in general, "
+"doctoral candidates engaged in a research project that has already been "
+"defined, are not authorised to take a pre-admission phase for a doctorate.\" "
+"<br /> Please also consult the special provisions of the field for all pre-"
+"admission conditions."
+msgstr ""
+"Extrait du Règlement doctoral (article 2.1) :<br /> « La pré-admission est "
+"une étape facultative du cursus doctoral. Elle vise à permettre au ou à la "
+"candidat·e d’accomplir les formalités administratives et sociales qui "
+"nécessiteraient une inscription préalable au doctorat. […] La pré-admission "
+"est valable pour une période de 12 mois maximum. Le recours à une phase de "
+"pré-admission doit être motivé, les objectifs à atteindre planifiés et la "
+"durée de la période de pré-admission fixée en fonction de ceux-ci. Sauf "
+"autorisation exceptionnelle de la CDD, les boursiers·ières FRIA ou FNRS et, "
+"de manière générale, les doctorant·es engagé·es dans le cadre d'un projet de "
+"recherche déjà défini, ne sont pas autorisé·es à prendre une préadmission au "
+"doctorat. ». <br /> Veuillez également consulter les dispositions "
+"particulières du domaine afin de connaître toutes les conditions de pré-"
+"admission."
+
 msgid "FAC"
 msgstr "FAC"
 
@@ -3117,6 +3185,9 @@ msgstr "FWB - Crédits acquis"
 msgid "FWB - Registered credits"
 msgstr "FWB - Crédits inscrits"
 
+msgid "FWB Cotutelle"
+msgstr "Cotutelle FWB"
+
 msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
 msgstr "Equivalence de grade académique FWB"
@@ -3126,6 +3197,9 @@ msgstr "Formation FWB équivalente"
 
 msgid "Fac approval"
 msgstr "Accord fac"
+
+msgid "Fac decision"
+msgstr "Décision fac."
 
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
@@ -3259,6 +3333,9 @@ msgid ""
 "%(established_on)s)"
 msgstr ""
 "Finançable - %(rule)s (Établi par %(established_by)s le %(established_on)s)"
+
+msgid "Financing comment"
+msgstr "Commentaire sur le financement"
 
 msgid "Financing rule"
 msgstr "Règle de financement"
@@ -3578,6 +3655,9 @@ msgstr ""
 "Ce diplôme a-t-il fait l'objet d'une décision d'équivalence par les services "
 "de la Communauté française de Belgique ?"
 
+msgid "Has your PhD project already started?"
+msgstr "Votre projet doctoral a-t-il déjà commencé ?"
+
 msgid ""
 "Have you applied <a href='https://allocations-etudes.cfwb.be/etudes-"
 "superieures/' target='_blank'>for a student grant</a> from the French "
@@ -3775,6 +3855,14 @@ msgstr ""
 msgid "I authorise"
 msgstr "J'autorise"
 
+msgid ""
+"I confirm that I have read the PhD regulations on research ethics and "
+"certify that my project complies with these regulations."
+msgstr ""
+"Je confirme avoir pris connaissance du règlement doctoral relatif à la "
+"déontologie de la recherche et certifie que mon projet est conforme à ce "
+"règlement."
+
 msgid "I do not authorize"
 msgstr "Je n'autorise pas"
 
@@ -3865,6 +3953,15 @@ msgstr ""
 
 msgid "I hereby declare that"
 msgstr "Je déclare sur l'honneur que"
+
+msgid ""
+"I hereby declare that I have read and understood the regulations of the "
+"General PhD Committee and the specific requirements of the PhD Field "
+"Committee, to which I adhere."
+msgstr ""
+"Je déclare avoir pris connaissance et avoir compris le règlement de la "
+"commission générale du doctorat et des conditions particulières de la "
+"commission doctorale de domaine, auxquels j'adhère."
 
 #, python-format
 msgid ""
@@ -3961,6 +4058,14 @@ msgid ""
 msgstr ""
 "Titre d’identité prouvant le séjour longue durée dans un pays membre de "
 "l’Union européenne"
+
+msgid ""
+"If applicable, upload a language proficiency certificate in the format "
+"required by the specific provisions of your PhD committee."
+msgstr ""
+"Le cas échéant, téléversez une attestation de connaissance de langue au "
+"format exigé par les dispositions particulières de votre commission "
+"doctorale de domaine"
 
 msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
@@ -4251,6 +4356,12 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
+msgid ""
+"Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
+msgstr ""
+"Votre demande d'admission est-elle en lien avec une candidature FNRS, FRIA, "
+"FRESH, CSC"
+
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr "Il n'est pas possible de passer du statut \"validé\" à ce statut."
 
@@ -4333,6 +4444,9 @@ msgstr "Dernière modif. (auteur)"
 
 msgid "Last name"
 msgstr "Nom"
+
+msgid "Last name / First name"
+msgstr "Nom / Prénom"
 
 msgid "Last name / First name / Email"
 msgstr "Nom / Prénom / E-mail"
@@ -4607,11 +4721,6 @@ msgstr ""
 "de formation doctorale"
 
 msgid ""
-"Mail sent to the CDD to inform them that a new application has been submitted"
-msgstr ""
-"E-mail envoyé à la CDD pour l'informer qu'une nouvelle demande a été soumise"
-
-msgid ""
 "Mail sent to the applicant following approval or rejection by a member of "
 "the supervisory group"
 msgstr ""
@@ -4798,13 +4907,6 @@ msgstr ""
 "E-mail envoyé au membre du groupe de supervision lors de sa suppression par "
 "le candidat"
 
-msgid ""
-"Mail sent to the members of the supervision panel to inform them that the "
-"application has been submitted to UCLouvain by the applicant"
-msgstr ""
-"E-mail envoyé aux membres du groupe de supervision pour les informer que la "
-"demande a été soumise à l'UCLouvain par le candidat"
-
 msgid "Main institute"
 msgstr "Institution principale"
 
@@ -4882,6 +4984,10 @@ msgid ""
 msgstr ""
 "Les champs requis des questions spécifiques dans l'onglet 'Parcours "
 "antérieur > Études secondaires' sont manquants."
+
+#, python-format
+msgid "Mandatory languages are missing (%(languages)s)."
+msgstr "Des langues obligatoires sont manquantes (%(languages)s)."
 
 msgid "Mandatory languages are missing."
 msgstr "Des langues obligatoires sont manquantes."
@@ -5159,6 +5265,7 @@ msgstr "Aucune étude en français"
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
 
+msgctxt "admission"
 msgid "No data"
 msgstr "Aucune données"
 
@@ -5483,6 +5590,12 @@ msgstr "Autre institution"
 msgid "Other institute (if necessary)"
 msgstr "Autre institution (le cas échéant)"
 
+msgid "Other institution address"
+msgstr "Autre institution adresse"
+
+msgid "Other institution name"
+msgstr "Autre institution nom"
+
 msgid "Other international scholarship"
 msgstr "Autre bourse internationale"
 
@@ -5683,6 +5796,9 @@ msgstr "Projet doctoral"
 
 msgid "PhD proposal"
 msgstr "Projet de formation doctorale"
+
+msgid "PhD research experience"
+msgstr "Expérience de recherche doctoral"
 
 msgid "PhD research project"
 msgstr "Projet de recherche doctoral"
@@ -5894,8 +6010,8 @@ msgstr "Code postal"
 msgid "Poster"
 msgstr "Poster"
 
-msgid "Pre-admission date"
-msgstr "Date de pré-admission"
+msgid "Pre-admission"
+msgstr "Pré-admission"
 
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
@@ -5941,9 +6057,6 @@ msgstr "Expériences du parcours"
 
 msgid "Previous notes"
 msgstr "Notes précédentes"
-
-msgid "Previous research experience"
-msgstr "Expérience précédente de recherche"
 
 msgid "Private"
 msgstr "Privé"
@@ -6207,6 +6320,9 @@ msgstr "Motifs"
 msgid "Reasons for not accepting"
 msgstr "Motif de refus"
 
+msgid "Reasons for provisional admission."
+msgstr "Détaillez ici les raisons justifiant une admission provisoire."
+
 msgid "Reasons for putting on hold"
 msgstr "Motif de mise en attente"
 
@@ -6350,7 +6466,7 @@ msgstr "Lien de parenté"
 msgid "Remind the applicant"
 msgstr "Rappeler au candidat"
 
-msgctxt "jury member"
+msgctxt "admission"
 msgid "Remove"
 msgstr "Retirer"
 
@@ -6589,11 +6705,8 @@ msgstr "Autorisation SIC"
 msgid "SIC comment for the faculty"
 msgstr "Commentaire de SIC pour la Faculté"
 
-msgid "SIC status"
-msgstr "Statut SIC"
-
-msgid "SIC:"
-msgstr "SIC :"
+msgid "SIC decision"
+msgstr "Décision SIC"
 
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
@@ -6636,6 +6749,10 @@ msgid "Scholarship"
 msgstr "Boursier"
 
 msgctxt "admission model"
+msgid "Scholarship"
+msgstr "Bourse"
+
+msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr "Bourse"
 
@@ -7007,6 +7124,10 @@ msgstr "Sujet"
 msgid "Submission date"
 msgstr "Date de soumission"
 
+msgctxt "doctorate-header-list"
+msgid "Submission date"
+msgstr "Date soumission"
+
 msgid "Submission date:"
 msgstr "Date de soumission :"
 
@@ -7026,8 +7147,14 @@ msgstr "Soumis pour publication"
 msgid "Submitted for publication"
 msgstr "Soumis pour publication"
 
+msgid "Submitted from"
+msgstr "Soumise à partir du"
+
 msgid "Submitted profile"
 msgstr "Profil soumis"
+
+msgid "Submitted until"
+msgstr "Soumise jusqu'au"
 
 msgid ""
 "Subsidiary protection status is granted to a foreign national who cannot be "
@@ -7061,6 +7188,10 @@ msgstr "Groupe de supervision non trouvé."
 
 msgid "Supervisor"
 msgstr "Promoteur"
+
+msgctxt "gender"
+msgid "Supervisor"
+msgstr "Promoteur·trice"
 
 msgid "Supervisor not found."
 msgstr "Promoteur non trouvé."
@@ -7963,6 +8094,9 @@ msgstr ""
 "Ce titre est provisoire et pourra être modifié ultérieurement en fonction de "
 "l’analyse du jury."
 
+msgid "This language is set more than once."
+msgstr "Cette langue est définie plusieurs fois."
+
 msgid "This page is currently under construction."
 msgstr "Cette page est en cours de construction."
 
@@ -8455,6 +8589,9 @@ msgstr ""
 msgid "Work contract type"
 msgstr "Type de contrat de travail"
 
+msgid "Work start date"
+msgstr "Date de début des travaux"
+
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
 
@@ -8799,11 +8936,6 @@ msgstr "Vous n'avez pas encore soumis votre demande."
 msgid "You indicated that you will obtain it in %(year)s."
 msgstr "Vous avez indiqué que vous alliez l'obtenir en %(year)s."
 
-msgid "You must add at least one CA member in order to request signatures."
-msgstr ""
-"Vous devez ajouter au moins un membre du comité d'accompagnement afin de "
-"demander les signatures."
-
 msgid ""
 "You must add at least one UCLouvain supervisor in order to request "
 "signatures."
@@ -8816,6 +8948,11 @@ msgid ""
 msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
+
+msgid "You must add at least two CA member in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins deux membre du comité d'accompagnement afin de "
+"demander les signatures."
 
 msgid "You must answer the question about external enrollment change."
 msgstr ""

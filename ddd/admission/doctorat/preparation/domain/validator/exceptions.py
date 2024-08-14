@@ -186,7 +186,7 @@ class MembreCAManquantException(BusinessException):
     status_code = "PROPOSITION-20"
 
     def __init__(self, **kwargs):
-        message = _("You must add at least one CA member in order to request signatures.")
+        message = _("You must add at least two CA member in order to request signatures.")
         super().__init__(message, **kwargs)
 
 
