@@ -50,6 +50,8 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
+from admission.contrib.models import EPCInjection
+from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
@@ -2719,6 +2721,18 @@ class ChecklistView(
             return ["admission/general_education/checklist_menu.html"]
         return ["admission/general_education/checklist.html"]
 
+    @property
+    def injection_signaletique(self):
+        return EPCInjection.objects.filter(
+            admission=self.admission,
+            status__in=[
+                EPCInjectionStatus.PENDING.name,
+                EPCInjectionStatus.NO_SENT.name,
+                EPCInjectionStatus.ERROR.name,
+            ],
+            type=EPCInjectionType.SIGNALETIQUE.name,
+        ).first()
+
     def get_context_data(self, **kwargs):
         from infrastructure.messages_bus import message_bus_instance
 
@@ -3036,6 +3050,7 @@ class ChecklistView(
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 
+        context['injection_signaletique'] = self.injection_signaletique
         return context
 
     def _merge_with_known_curriculum(self, curex_a_fusionner, resume):
