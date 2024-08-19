@@ -23,15 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 from typing import Any, Union
 
+from admission.ddd.admission.commands import RechercherCompteExistantCommand, ValiderTicketPersonneCommand, \
+    SoumettreTicketPersonneCommand
 from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent, \
     InscriptionApprouveeParSicEvent
+from osis_common.ddd.interface import BusinessException
 
 
 def reagir_a_approuver_proposition(
     msg_bus: Any,
     event: Union['InscriptionApprouveeParSicEvent', 'AdmissionApprouveeParSicEvent'],
 ) -> None:
-    from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
-    msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
+    with contextlib.suppress(BusinessException):
+        msg_bus.invoke(RechercherCompteExistantCommand(matricule=event.matricule))
+        msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
+        msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
