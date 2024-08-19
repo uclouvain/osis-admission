@@ -299,6 +299,11 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         # Personne connue
         personne_connue_creee = Person.objects.get(global_id='00825759')
         self.assertEqual(
+            personne_connue_creee.external_id,
+            "osis.person_00825759",
+            msg="External id doit être = au global_id afin d'éviter des soucis avec la synchro",
+        )
+        self.assertEqual(
             personne_connue_creee.last_name,
             'Varky',
             msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
