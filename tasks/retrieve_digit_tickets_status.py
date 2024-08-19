@@ -167,7 +167,10 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             personne_connue = Person.objects.get(global_id=proposition_fusion.selected_global_id)
             logger.info(f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) found")
         except Person.DoesNotExist:
-            personne_connue = Person(global_id=proposition_fusion.selected_global_id)
+            personne_connue = Person(
+                external_id=f"osis.person_{proposition_fusion.selected_global_id}",
+                global_id=proposition_fusion.selected_global_id,
+            )
             logger.info(
                 f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
             )
