@@ -38,7 +38,9 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.contrib.models import (
-    DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+    ContinuingEducationAdmission,
     EPCInjection,
 )
 from admission.contrib.models.base import AdmissionViewer
@@ -297,7 +299,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 class AdmissionFormMixin(AdmissionViewMixin):
     message_on_success = _('Your data have been saved.')
     message_on_failure = _('Some errors have been encountered.')
-    update_requested_documents = False
     update_admission_author = False
     default_htmx_trigger_form_extra = {}
     close_modal_on_htmx_request = True
@@ -335,10 +336,6 @@ class AdmissionFormMixin(AdmissionViewMixin):
             # Additional updates if needed
             self.update_current_admission_on_form_valid(form, admission)
             admission.save()
-
-        # Update the requested documents
-        if self.update_requested_documents and hasattr(self.admission, 'update_requested_documents'):
-            self.admission.update_requested_documents()
 
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)

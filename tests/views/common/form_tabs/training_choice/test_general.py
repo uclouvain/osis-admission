@@ -297,7 +297,7 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         )
         self.assertEqual(self.master_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.master_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
+        self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.master_admission.requested_documents,
         )
@@ -461,7 +461,7 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
 
         self.assertEqual(self.bachelor_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.bachelor_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
+        self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.bachelor_admission.requested_documents,
         )

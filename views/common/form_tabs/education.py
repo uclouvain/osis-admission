@@ -48,7 +48,6 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
     urlpatterns = 'education'
     template_name = 'admission/forms/education.html'
     specific_questions_tab = Onglets.ETUDES_SECONDAIRES
-    update_requested_documents = True
     update_admission_author = True
     permission_required = 'admission.change_admission_secondary_studies'
     foreign_form_class = AdmissionBachelorEducationForeignDiplomaForm
