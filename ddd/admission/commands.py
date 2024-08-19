@@ -231,23 +231,15 @@ class RetrieveListePropositionFusionEnErreurQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class FusionnerCandidatAvecPersonneExistanteCommand(interface.CommandRequest):
-    candidate_global_id: str
-    ticket_uuid: str
-
-
-@attr.dataclass(frozen=True, slots=True)
 class RecupererMatriculeDigitQuery(interface.QueryRequest):
     noma: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ModifierMatriculeCandidatCommand(interface.QueryRequest):
-    digit_global_id: str
-    candidate_global_id: str
-    ticket_uuid: str
+class RecupererEtudesSecondairesQuery(interface.QueryRequest):
+    matricule_candidat: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererEtudesSecondairesQuery(interface.QueryRequest):
+class RecupererConnaissancesLanguesQuery(interface.QueryRequest):
     matricule_candidat: str

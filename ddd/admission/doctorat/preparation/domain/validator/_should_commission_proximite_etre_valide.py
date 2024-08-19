@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,8 +22,10 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
 from typing import Optional
+
+import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -34,29 +36,33 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
 )
-from osis_common.ddd import interface
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class CommissionProximite(interface.DomainService):
-    @classmethod
-    def verifier(cls, doctorat: "Doctorat", commission_proximite: Optional[str]) -> None:
-        if (doctorat.est_entite_CDE() or doctorat.est_entite_CLSM()) and (
-            not commission_proximite or commission_proximite not in ChoixCommissionProximiteCDEouCLSM.get_names()
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCommissionProximiteEtreValide(BusinessValidator):
+    doctorat: Doctorat
+    commission_proximite: Optional[str]
+
+    def validate(self, *args, **kwargs):
+        if (self.doctorat.est_entite_CDE() or self.doctorat.est_entite_CLSM()) and (
+            not self.commission_proximite
+            or self.commission_proximite not in ChoixCommissionProximiteCDEouCLSM.get_names()
         ):
             raise CommissionProximiteInconsistantException()
-        elif doctorat.est_entite_CDSS() and (
-            not commission_proximite or commission_proximite not in ChoixCommissionProximiteCDSS.get_names()
+        elif self.doctorat.est_entite_CDSS() and (
+            not self.commission_proximite or self.commission_proximite not in ChoixCommissionProximiteCDSS.get_names()
         ):
             raise CommissionProximiteInconsistantException()
-        elif doctorat.est_domaine_des_sciences() and (
-            not commission_proximite or commission_proximite not in ChoixSousDomaineSciences.get_names()
+        elif self.doctorat.est_domaine_des_sciences() and (
+            not self.commission_proximite or self.commission_proximite not in ChoixSousDomaineSciences.get_names()
         ):
             raise CommissionProximiteInconsistantException()
         elif (
-            not doctorat.est_entite_CDE()
-            and not doctorat.est_entite_CDSS()
-            and not doctorat.est_entite_CLSM()
-            and not doctorat.est_domaine_des_sciences()
-            and commission_proximite
+            not self.doctorat.est_entite_CDE()
+            and not self.doctorat.est_entite_CDSS()
+            and not self.doctorat.est_entite_CLSM()
+            and not self.doctorat.est_domaine_des_sciences()
+            and self.commission_proximite
         ):
             raise CommissionProximiteInconsistantException()

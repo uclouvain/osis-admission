@@ -63,6 +63,7 @@
     {% can_update_tab 'specific-questions' as can_update_specific_questions_tab %}
     {% can_update_tab 'curriculum' as can_update_curriculum %}
     {% can_update_tab 'education' as can_update_education %}
+    {% has_perm 'admission.can_delete_curriculum' as can_delete_curriculum %}
 
     {% if can_update_person_tab %}
       {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
@@ -137,6 +138,16 @@
             {% digit_ticket_status_msg digit_ticket %}
         {% endif %}
 
+        {% if injection_signaletique %}
+            <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+                <div class="panel-body bg-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+                    <div>
+                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.status == 'ERROR' %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' %}
@@ -158,7 +169,7 @@
         <div role="tabpanel" class="tab-pane" id="financabilite">
 
           {% include "admission/general_education/includes/checklist/financabilite.html" %}
-          
+
           {% include "admission/general_education/includes/checklist/financabilite_derogation_non_concerne_modal.html" %}
           {% include "admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_modal.html" %}
           {% include "admission/general_education/includes/checklist/financabilite_derogation_abandon_du_candidat_modal.html" %}
@@ -357,7 +368,7 @@
               {% else %}
                 {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant %}
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True can_update_curriculum=can_update_curriculum can_update_education=can_update_education specific_questions=specific_questions_by_tab %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True can_update_curriculum=can_update_curriculum can_update_education=can_update_education specific_questions=specific_questions_by_tab can_delete_curriculum=can_delete_curriculum %}
                 </div>
               {% endif %}
             {% endwith %}
@@ -1309,11 +1320,11 @@
     .approval-conditions-fields .form-group {
       margin-bottom: 0;
     }
-    
+
     button[name="hide-other-approval-conditions"] {
       background-color: transparent;
     }
-    
+
     button[name="hide-other-approval-conditions"][value="on"] > i.fa-square-chevron-down, button[name="hide-other-approval-conditions"][value="off"] > i.fa-square-chevron-up {
       display: none;
     }
@@ -1359,7 +1370,7 @@
     #checklist-menu .sub-item.bg-warning {
       background-color: #fcf8e3;
     }
-    
+
     /* Allow to scroll the content above the header menu */
     html {
       overflow: auto;

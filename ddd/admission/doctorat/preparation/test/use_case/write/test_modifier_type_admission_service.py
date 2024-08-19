@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,12 +24,9 @@
 #
 # ##############################################################################
 
-import uuid
-
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.commands import ModifierTypeAdmissionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -39,7 +36,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonTrouveeException,
     JustificationRequiseException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -68,6 +64,7 @@ class TestModifierTypeAdmissionPropositionService(SimpleTestCase):
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.type_admission, ChoixTypeAdmission[self.cmd.type_admission])
         self.assertEqual(proposition.justification, self.cmd.justification)
+        self.assertEqual(proposition.auteur_derniere_modification, proposition.matricule_candidat)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')

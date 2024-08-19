@@ -54,7 +54,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PromoteurDeReferenceManquantException,
     PromoteurManquantException, AbsenceDeDetteNonCompleteeDoctoratException,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
@@ -732,6 +732,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
 
         CaMemberFactory(process=self.admission.supervision_group)
+        CaMemberFactory(process=self.admission.supervision_group)
         PromoterFactory(process=self.admission.supervision_group)
 
         response = self.client.get(self.url)
@@ -893,6 +894,8 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.first_not_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jack")
         cls.first_ca_member = CaMemberFactory(process=cls.first_invited_promoter.actor_ptr.process)
         cls.first_ca_member.actor_ptr.switch_state(SignatureState.APPROVED)
+        cls.second_ca_member = CaMemberFactory(process=cls.first_invited_promoter.actor_ptr.process)
+        cls.second_ca_member.actor_ptr.switch_state(SignatureState.APPROVED)
         cls.second_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jim")
         cls.second_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
 
@@ -935,7 +938,8 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             'pool': AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
             'annee': 2020,
             'elements_confirmation': {
-                'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
+                'reglement_doctorat': IElementsConfirmation.REGLEMENT_DOCTORAT,
+                'reglement_doctorat_deontologie': IElementsConfirmation.REGLEMENT_DOCTORAT_DEONTOLOGIE,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
@@ -1015,16 +1019,10 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json().get('uuid'), str(admission.uuid))
 
-        # TODO Replace the following lines by the commented ones when the admission approval by CDD and SIC
-        #  will be created
-        self.assertEqual(updated_admission.status, ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name)
-        self.assertEqual(updated_admission.status_cdd, ChoixStatutCDD.ACCEPTED.name)
-        self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMITTED.name)
-
-        # self.assertEqual(updated_admission.status, ChoixStatutPropositionDoctorale.CONFIRMEE.name)
-        # self.assertEqual(updated_admission.status_sic, ChoixStatutCDD.TO_BE_VERIFIED.name)
-        # self.assertEqual(updated_admission.status_cdd, ChoixStatutSIC.TO_BE_VERIFIED.name)
-        # self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name)
+        self.assertEqual(updated_admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
+        self.assertEqual(updated_admission.status_sic, ChoixStatutCDD.TO_BE_VERIFIED.name)
+        self.assertEqual(updated_admission.status_cdd, ChoixStatutSIC.TO_BE_VERIFIED.name)
+        self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name)
 
         self.assertEqual(updated_admission.submitted_at.date(), datetime.date.today())
         self.assertEqual(
@@ -1035,7 +1033,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                     'last_name': self.first_candidate.last_name,
                     'gender': self.first_candidate.gender,
                     'country_of_citizenship': self.first_candidate.country_of_citizenship.iso_code,
-                    'date_of_birth': None,
+                    'date_of_birth': self.first_candidate.birth_date.isoformat(),
                 },
                 'coordinates': {
                     'country': 'BE',

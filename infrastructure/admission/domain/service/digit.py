@@ -62,6 +62,7 @@ class DigitService(IDigitService):
         if person_merge_proposal.status in [
             PersonMergeStatus.PENDING.name,      # Cas gestionnaire en cours de résolution
             PersonMergeStatus.IN_PROGRESS.name,  # En attente du retour de fusion de DiGIT
+            PersonMergeStatus.REFUSED.name,      # Gestionnaire refuse la proposition de fusion
         ]:
             logger.info(
                 f"[Recherche doublon potentiel DigIT - {matricule} ] Recherche non effectuée car "

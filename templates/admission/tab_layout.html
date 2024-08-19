@@ -128,6 +128,15 @@
       </div>
     </div>
     <div class="panel-body">
+    {% if injection_inscription %}
+        <div class="panel panel-{% if injection_inscription.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+            <div class="panel-body bg-{% if injection_inscription.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+                <div>
+                    <strong>Injection de l'inscription</strong> : {% if injection_inscription.status == 'ERROR' %}{{ injection_inscription.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
     {% if not without_menu %}
       {% admission_tabs %}
       {% current_subtabs as subtabs_context %}

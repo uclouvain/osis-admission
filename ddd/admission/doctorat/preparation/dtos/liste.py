@@ -23,14 +23,52 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from typing import Optional
 
-from django.views.generic import TemplateView
+import attr
 
-from admission.views.common.mixins import LoadDossierViewMixin
-
-__all__ = ['DoctorateAdmissionCurriculumDetailView']
+from osis_common.ddd import interface
 
 
-class DoctorateAdmissionCurriculumDetailView(LoadDossierViewMixin, TemplateView):
-    template_name = 'admission/doctorate/details/curriculum.html'
-    permission_required = 'admission.view_admission_curriculum'
+@attr.dataclass(frozen=True, slots=True)
+class DemandeRechercheDTO(interface.DTO):
+    uuid: str
+    numero_demande: str
+    etat_demande: str
+
+    nom_candidat: str
+    prenom_candidat: str
+    sigle_formation: str
+    code_formation: str
+    intitule_formation: str
+
+    decision_fac: str
+    decision_sic: str
+
+    date_confirmation: Optional[datetime.datetime]
+
+    derniere_modification_le: datetime.datetime
+    type_admission: str
+
+    cotutelle: Optional[bool]
+
+    code_pays_nationalite_candidat: str = ''
+    nom_pays_nationalite_candidat: str = ''
+
+    code_bourse: str = ''
+
+    prenom_auteur_derniere_modification: str = ''
+    nom_auteur_derniere_modification: str = ''
+
+    @property
+    def formation(self) -> str:
+        return f'{self.sigle_formation} - {self.intitule_formation}'
+
+    @property
+    def candidat(self) -> str:
+        return f'{self.nom_candidat}, {self.prenom_candidat}'
+
+    @property
+    def derniere_modification_par(self) -> str:
+        return f'{self.nom_auteur_derniere_modification}, {self.prenom_auteur_derniere_modification[:1]}'

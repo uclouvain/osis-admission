@@ -77,11 +77,13 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc & ~pending_digit_ticket_response,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc
             & ~pending_digit_ticket_response,
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,
@@ -90,7 +92,11 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc,
             'admission.view_admission_curriculum': is_entity_manager,
             'admission.change_admission_curriculum': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
+            'admission.delete_admission_curriculum': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,
             'admission.change_admission_project': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_cotutelle': is_entity_manager,
@@ -99,7 +105,8 @@ class CentralManager(EntityRoleModel):
             'admission.change_admission_supervision': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_accounting': is_entity_manager,
             'admission.change_admission_accounting': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.view_admission_specific_questions': is_entity_manager,
             'admission.change_admission_specific_questions': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status)
@@ -115,45 +122,57 @@ class CentralManager(EntityRoleModel):
             'admission.view_documents_management': is_entity_manager
             & (general.not_cancelled | continuing.is_submitted_or_not_cancelled | doctorate.not_cancelled),
             'admission.edit_documents': is_entity_manager
-            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted) & ~is_sent_to_epc,
+            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted)
+            & ~is_sent_to_epc,
             'admission.request_documents': is_entity_manager
-            & (general.in_sic_status | continuing.can_request_documents | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | continuing.can_request_documents | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.cancel_document_request': is_entity_manager
             & (
                 general.in_sic_document_request_status
                 | continuing.in_document_request_status
                 | doctorate.in_sic_document_request_status
-            ) & ~is_sent_to_epc,
+            )
+            & ~is_sent_to_epc,
             'admission.generate_in_progress_analysis_folder': is_entity_manager
             & (
                 (general.is_general & general.in_progress)
                 | (continuing.is_continuing & continuing.in_progress)
                 | (doctorate.is_doctorate & doctorate.in_progress)
-            ) & ~is_sent_to_epc,
+            )
+            & ~is_sent_to_epc,
             'admission.view_checklist': is_entity_manager
             & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.change_checklist': is_entity_manager
-            & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.change_checklist_iufc': is_entity_manager & continuing.is_submitted & ~is_sent_to_epc,
             'admission.change_payment': is_entity_manager & general.in_sic_status_or_application_fees & ~is_sent_to_epc,
             'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager
-            & (general.can_send_to_fac_faculty_decision | doctorate.can_send_to_fac_faculty_decision) & ~is_sent_to_epc,
+            & (general.can_send_to_fac_faculty_decision | doctorate.can_send_to_fac_faculty_decision)
+            & ~is_sent_to_epc,
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_entity_manager
-            & (general.in_fac_status | doctorate.in_fac_status) & ~is_sent_to_epc,
+            & (general.in_fac_status | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
             'admission.checklist_change_past_experiences': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.checklist_select_access_title': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.checklist_change_sic_comment': is_entity_manager
-            & (general.is_submitted | doctorate.is_submitted) & ~is_sent_to_epc,
+            & (general.is_submitted | doctorate.is_submitted)
+            & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation': is_entity_manager & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation_fac': is_entity_manager & ~is_sent_to_epc,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager & ~is_sent_to_epc,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager & ~is_sent_to_epc,
             'admission.checklist_change_comment': is_entity_manager
-            & (general.is_submitted | continuing.is_continuing | doctorate.is_submitted) & ~is_sent_to_epc,
+            & (general.is_submitted | continuing.is_continuing | doctorate.is_submitted)
+            & ~is_sent_to_epc,
             'admission.checklist_change_sic_decision': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status) & ~is_sent_to_epc,
+            & (general.in_sic_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
             # Fusion
