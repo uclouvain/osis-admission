@@ -63,7 +63,7 @@
     {% can_update_tab 'specific-questions' as can_update_specific_questions_tab %}
     {% can_update_tab 'curriculum' as can_update_curriculum %}
     {% can_update_tab 'education' as can_update_education %}
-    {% has_perm 'admission.can_delete_curriculum' as can_delete_curriculum %}
+    {% has_perm 'admission.delete_admission_curriculum' as can_delete_curriculum %}
 
     {% if can_update_person_tab %}
       {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
