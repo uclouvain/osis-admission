@@ -268,7 +268,10 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             )
         ):
             return False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
-        if not self.admission.candidate.merge_proposal.registration_id_sent_to_digit:
+        if not (
+            self.admission.candidate.merge_proposal
+            and self.admission.candidate.merge_proposal.registration_id_sent_to_digit
+        ):
             return False, "Il manque le noma"
         if not self.admission.candidate.global_id.startswith('00'):
             return False, "Le compte interne n'a pas encore été créé"
