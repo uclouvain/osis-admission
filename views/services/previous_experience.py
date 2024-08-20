@@ -23,26 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 from types import SimpleNamespace
 from typing import Optional
 
-from django.utils.translation import gettext_lazy as _
-
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery, RecupererEtudesSecondairesQuery
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO, \
-    DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO
-from infrastructure.messages_bus import message_bus_instance
-
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery, RecupererEtudesSecondairesQuery
 from admission.templatetags.admission import format_matricule
 from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO, \
+    DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO
+from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
@@ -99,23 +98,25 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
 
     @cached_property
     def curriculum_personne_connue(self) -> Optional[CurriculumAdmissionDTO]:
-        if self.matricule_personne_connue_selectionnee:
-            return message_bus_instance.invoke(
-                RechercherParcoursAnterieurQuery(
-                    global_id=self.matricule_personne_connue_selectionnee,
-                    uuid_proposition=self.kwargs['admission_uuid'],
+        with contextlib.suppress(Person.DoesNotExist):
+            if self.matricule_personne_connue_selectionnee:
+                return message_bus_instance.invoke(
+                    RechercherParcoursAnterieurQuery(
+                        global_id=self.matricule_personne_connue_selectionnee,
+                        uuid_proposition=self.kwargs['admission_uuid'],
+                    )
                 )
-            )
         return None
 
     @cached_property
     def etudes_secondaires_personne_connue(self) -> Optional[EtudesSecondairesAdmissionDTO]:
-        if self.matricule_personne_connue_selectionnee:
-            return message_bus_instance.invoke(
-                RecupererEtudesSecondairesQuery(
-                    matricule_candidat=self.matricule_personne_connue_selectionnee,
+        with contextlib.suppress(Person.DoesNotExist):
+            if self.matricule_personne_connue_selectionnee:
+                return message_bus_instance.invoke(
+                    RecupererEtudesSecondairesQuery(
+                        matricule_candidat=self.matricule_personne_connue_selectionnee,
+                    )
                 )
-            )
         return None
 
     def get_context_data(self, **kwargs):
