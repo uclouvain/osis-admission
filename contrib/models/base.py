@@ -306,6 +306,17 @@ class BaseAdmissionQuerySet(models.QuerySet):
 
         return self.filter(entities_conditions, education_group_conditions)
 
+    def filter_in_quarantine(self):
+        return self.filter(
+            Q(candidate__personmergeproposal__isnull=False)
+            & Q(
+                Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
+                |
+                # Cas validation ticket Digit en erreur
+                ~Q(candidate__personmergeproposal__validation__valid=True)
+            )
+        )
+
     def annotate_submitted_profile_countries_names(self):
         """
         Annotate the admission with the names of the countries specified in the submitted profile of the candidate.
@@ -569,16 +580,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
 
     @cached_property
     def is_in_quarantine(self):
-        quarantine_status = {
-            PersonMergeStatus.MATCH_FOUND.name,
-            PersonMergeStatus.PENDING.name,
-            PersonMergeStatus.ERROR.name,
-            PersonMergeStatus.IN_PROGRESS.name,
-        }
-        try:
-            return self.candidate.personmergeproposal.status in quarantine_status
-        except Person.personmergeproposal.RelatedObjectDoesNotExist:
-            return False
+        return BaseAdmission.objects.filter(pk=self.pk).filter_in_quarantine().exists()
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):

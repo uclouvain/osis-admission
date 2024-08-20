@@ -168,8 +168,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
             qs = qs.filter(reference=numero)
         if noma:
             qs = qs.filter(
-                Q(candidate__student__registration_id=noma) |
-                Q(candidate__personmergeproposal__registration_id_sent_to_digit=noma)
+                Q(candidate__student__registration_id=noma)
+                | Q(candidate__personmergeproposal__registration_id_sent_to_digit=noma)
             )
         if matricule_candidat:
             qs = qs.filter(candidate__global_id=matricule_candidat)
@@ -209,15 +209,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if quarantaine in [True, False]:
             # Validation de la quarantaine queryset
             if quarantaine:
-                qs = qs.filter(
-                    Q(candidate__personmergeproposal__isnull=False)
-                    & Q(
-                        Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
-                        |
-                        # Cas validation ticket Digit en erreur
-                        ~Q(candidate__personmergeproposal__validation__valid=True)
-                    )
-                )
+                qs = qs.filter_in_quarantine()
             else:
                 qs = qs.filter(
                     Q(candidate__personmergeproposal__isnull=True)

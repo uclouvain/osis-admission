@@ -9299,12 +9299,3 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
-
-#~ msgid "Fusion digit flag is inactive"
-#~ msgstr "Flag fusion digit inactif"
-
-#~ msgid "Retrieve from DigIT"
-#~ msgstr "Récupérer depuis DigIT"
-
-#~ msgid "Send to DigIT"
-#~ msgstr "Envoyer à DigIT"
