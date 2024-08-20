@@ -112,7 +112,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_training_choice': is_part_of_education_group,
             'admission.change_admission_training_choice': is_part_of_education_group
             & (continuing.in_manager_status | doctorate.in_fac_status)
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc & ~pending_digit_ticket_response,
             'admission.view_admission_accounting': is_part_of_education_group,
             'admission.view_admission_specific_questions': is_part_of_education_group,
             'admission.change_admission_specific_questions': is_part_of_education_group
