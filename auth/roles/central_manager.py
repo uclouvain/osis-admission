@@ -83,7 +83,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc & ~pending_digit_ticket_response,
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,

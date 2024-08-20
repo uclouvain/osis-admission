@@ -138,7 +138,7 @@ def is_sent_to_epc(self, user: User, obj: BaseAdmission):
 
 @predicate(bind=True)
 def pending_digit_ticket_response(self, user: User, obj: BaseAdmission):
-    return PersonTicketCreation.objects.filter(
+    return obj.candidate.global_id[0] in ['8', '9'] and PersonTicketCreation.objects.filter(
         person_id=obj.candidate_id,
         status__in=[
            PersonTicketCreationStatus.CREATED.name,
