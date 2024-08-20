@@ -79,8 +79,9 @@ from admission.ddd.admission.use_case.read import (
 )
 from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
-from admission.ddd.admission.use_case.read.recuperer_propositions_en_erreur_service import \
-    recuperer_propositions_en_erreur
+from admission.ddd.admission.use_case.read.recuperer_propositions_en_erreur_service import (
+    recuperer_propositions_en_erreur,
+)
 from admission.ddd.admission.use_case.read.recuperer_statut_ticket_personne import recuperer_statut_ticket_personne
 from admission.ddd.admission.use_case.read.recuperer_tickets_en_attente import recuperer_tickets_en_attente
 from admission.ddd.admission.use_case.write import (
@@ -122,8 +123,9 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
 )
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
-from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import \
-    PeriodeSoumissionTicketDigitTranslator
+from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import (
+    PeriodeSoumissionTicketDigitTranslator,
+)
 from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
@@ -682,6 +684,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -697,6 +700,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -747,8 +751,8 @@ COMMAND_HANDLERS = {
         digit_repository=DigitRepository(),
     ),
     RetrieveListePropositionFusionEnErreurQuery: lambda msg_bus, query: recuperer_propositions_en_erreur(
-      query,
-      digit_repository=DigitRepository(),
+        query,
+        digit_repository=DigitRepository(),
     ),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: (
         lambda msg_bus, cmd: recuperer_statut_ticket_personne_de_digit(
@@ -779,6 +783,15 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
 }
