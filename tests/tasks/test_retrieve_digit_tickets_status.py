@@ -395,3 +395,22 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             PersonTicketCreationStatus.ERROR.name,
             msg="Doit être en erreur car situation anormale, un ticket est lancé avant un ticket antérieur DigIT"
         )
+
+    def test_assert_process_when_tickets_before_are_done(self):
+        ticket_digit_anterieur = PersonTicketCreation.objects.create(
+            uuid=uuid.uuid4(),
+            status=PersonTicketCreationStatus.DONE_WITH_WARNINGS.name,
+            person=self.personne_compte_temporaire,
+        )
+        ticket_digit_anterieur.created_at = self.ticket_digit.created_at - timedelta(days=1)
+        ticket_digit_anterieur.save()
+
+        retrieve_digit_tickets_status.run()
+
+        # Ticket DigIT
+        self.ticket_digit.refresh_from_db()
+        self.assertEqual(
+            self.ticket_digit.status,
+            PersonTicketCreationStatus.DONE.name,
+            msg="Doit être ok car les tickets antérieurs sont DONE/DONE WITH WARNINGS"
+        )

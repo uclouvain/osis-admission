@@ -103,11 +103,13 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         person=ticket_rowdb.person,
         created_at__lt=ticket_rowdb.created_at,
     ).exclude(
-        uuid=ticket.uuid,
-        status__in=[
-            PersonTicketCreationStatus.DONE.name,
-            PersonTicketCreationStatus.DONE_WITH_WARNINGS.name
-        ]
+        Q(uuid=ticket.uuid) |
+        Q(
+            status__in=[
+                PersonTicketCreationStatus.DONE.name,
+                PersonTicketCreationStatus.DONE_WITH_WARNINGS.name
+            ]
+        )
     )
     if qs_pending_errored_tickets.exists():
         raise Exception(
