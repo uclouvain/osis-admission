@@ -2956,18 +2956,20 @@ class ChecklistView(
                 children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
 
             prefixed_past_experiences_documents = []
-            documents_from_not_valuated_experiences = []
-            context['read_only_documents'] = documents_from_not_valuated_experiences
+            read_only_documents = []
+            context['read_only_documents'] = read_only_documents
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
+                if admission_document.lecture_seule:
+                    read_only_documents.append(admission_document.identifiant)
                 document_tab_identifier = admission_document.onglet.split('.')
 
                 if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
                     tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
 
                     if document_tab_identifier[1] in not_valuated_by_current_admission_experiences_uuids:
-                        documents_from_not_valuated_experiences.append(admission_document.identifiant)
+                        read_only_documents.append(admission_document.identifiant)
 
                     if tab_identifier not in context['documents']:
                         context['documents'][tab_identifier] = [admission_document]
