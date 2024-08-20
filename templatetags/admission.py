@@ -1528,7 +1528,7 @@ def checklist_experience_action_links_context(
                     + next_url_suffix
                 )
 
-                can_delete_curriculum = has_perm(context, 'admission.can_delete_curriculum')
+                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
                 if can_delete_curriculum:
                     result_context['delete_url'] = (
                         resolve_url(
@@ -1561,7 +1561,7 @@ def checklist_experience_action_links_context(
                     + next_url_suffix
                 )
 
-                can_delete_curriculum = has_perm(context, 'admission.can_delete_curriculum')
+                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
                 if can_delete_curriculum:
                     result_context['delete_url'] = (
                         resolve_url(
