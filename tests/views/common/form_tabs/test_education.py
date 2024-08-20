@@ -191,7 +191,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Graduated from high school year
         self.assertEqual(form['graduated_from_high_school_year'].value(), 2021)
 
-        all_past_academic_years = AcademicYear.objects.filter(year__lte=2020).order_by('-year')
+        all_past_academic_years = AcademicYear.objects.filter(year__lte=2021).order_by('-year')
 
         academic_year_choices = [('', BLANK_CHOICE_DISPLAY)] + [
             (academic_year.year, f'{academic_year.year}-{academic_year.year + 1}')
@@ -913,7 +913,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Graduated from high school year
         self.assertEqual(main_form['graduated_from_high_school_year'].value(), 2021)
 
-        all_past_academic_years = AcademicYear.objects.filter(year__lte=2020).order_by('-year')
+        all_past_academic_years = AcademicYear.objects.filter(year__lte=2021).order_by('-year')
 
         academic_year_choices = [('', BLANK_CHOICE_DISPLAY)] + [
             (academic_year.year, f'{academic_year.year}-{academic_year.year + 1}')
