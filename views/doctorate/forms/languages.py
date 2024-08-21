@@ -42,7 +42,6 @@ class DoctorateAdmissionLanguagesFormView(AdmissionFormMixin, LoadDossierViewMix
     permission_required = 'admission.change_admission_languages'
     form_class = DoctorateAdmissionLanguagesKnowledgeFormSet
     update_admission_author = True
-    update_requested_documents = True
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)

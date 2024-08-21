@@ -51,7 +51,6 @@ __all__ = ['AdmissionTrainingChoiceFormView']
 class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
     template_name = 'admission/forms/training_choice.html'
     permission_required = 'admission.change_admission_training_choice'
-    update_requested_documents = True
     urlpatterns = 'training-choice'
     specific_questions_tab = Onglets.CHOIX_FORMATION
 

@@ -39,7 +39,6 @@ __all__ = ['AdmissionCoordonneesFormView']
 class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
     template_name = 'admission/forms/coordonnees.html'
     permission_required = 'admission.change_admission_coordinates'
-    update_requested_documents = True
     update_admission_author = True
 
     def __init__(self, *args, **kwargs):
@@ -84,9 +83,8 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
 
         form_valid = super().form_valid(forms)
         from infrastructure.messages_bus import message_bus_instance
-        message_bus_instance.publish(
-            CoordonneesCandidatModifiees(matricule=self.admission.candidate.global_id)
-        )
+
+        message_bus_instance.publish(CoordonneesCandidatModifiees(matricule=self.admission.candidate.global_id))
         return form_valid
 
     def update_current_admission_on_form_valid(self, form, admission):
