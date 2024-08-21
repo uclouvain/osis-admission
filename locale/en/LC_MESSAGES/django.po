@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-14 14:40+0200\n"
+"POT-Creation-Date: 2024-08-20 14:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1154,16 +1154,6 @@ msgid "CDD manager comment"
 msgstr ""
 
 msgid "CDD opinion"
-msgstr ""
-
-msgid "CDD:"
-msgstr ""
-
-msgctxt "admission"
-msgid "CDD status"
-msgstr ""
-
-msgid "CDDs"
 msgstr ""
 
 msgid "CEP"
@@ -2407,7 +2397,10 @@ msgstr ""
 msgid "Doctoral commissions"
 msgstr ""
 
-msgid "Doctoral student:"
+msgid "Doctorate Ethics Regulations"
+msgstr ""
+
+msgid "Doctorate Regulations"
 msgstr ""
 
 msgid "Doctorate admission"
@@ -2425,12 +2418,6 @@ msgid "Doctorate education"
 msgstr ""
 
 msgid "Doctorate enrolment applications"
-msgstr ""
-
-msgid "Doctorate Ethics Regulations"
-msgstr ""
-
-msgid "Doctorate Regulations"
 msgstr ""
 
 msgid "Document"
@@ -6239,6 +6226,9 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Send to EPC"
+msgstr ""
+
 msgid "Send to SIC"
 msgstr ""
 
@@ -7755,9 +7745,6 @@ msgid "Work contract"
 msgstr ""
 
 msgid "Work contract should be set when funding type is set to work contract"
-msgstr ""
-
-msgid "Work contract type"
 msgstr ""
 
 msgid "Work start date"

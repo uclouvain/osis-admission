@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-14 14:40+0200\n"
+"POT-Creation-Date: 2024-08-20 14:56+0200\n"
 "PO-Revision-Date: 2024-04-05 19:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1281,16 +1281,6 @@ msgstr "Commentaire du gestionnaire CDD"
 
 msgid "CDD opinion"
 msgstr "Avis de la CDD"
-
-msgid "CDD:"
-msgstr "CDD :"
-
-msgctxt "admission"
-msgid "CDD status"
-msgstr "Statut CDD"
-
-msgid "CDDs"
-msgstr "CDDs"
 
 msgid "CEP"
 msgstr "CEP"
@@ -2619,12 +2609,14 @@ msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 msgid "Doctor"
 msgstr "Docteur"
 
-
 msgid "Doctoral commissions"
 msgstr "Commissions doctorales"
 
-msgid "Doctoral student:"
-msgstr "Doctorant :"
+msgid "Doctorate Ethics Regulations"
+msgstr "Règlement de déontologie"
+
+msgid "Doctorate Regulations"
+msgstr "Règlement de la commission générale du doctorat"
 
 msgid "Doctorate admission"
 msgstr "Admission en doctorat"
@@ -2642,12 +2634,6 @@ msgstr "Formation doctorale"
 
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
-
-msgid "Doctorate Ethics Regulations"
-msgstr "Règlement de déontologie"
-
-msgid "Doctorate Regulations"
-msgstr "Règlement de la commission générale du doctorat"
 
 msgid "Document"
 msgstr "Document"
@@ -6863,6 +6849,9 @@ msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
 msgid "Send the message"
 msgstr "Envoyer le message"
 
+msgid "Send to EPC"
+msgstr "Envoyer à EPC"
+
 msgid "Send to SIC"
 msgstr "Envoyer en SIC"
 
@@ -8588,9 +8577,6 @@ msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail"
-
-msgid "Work contract type"
-msgstr "Type de contrat de travail"
 
 msgid "Work start date"
 msgstr "Date de début des travaux"

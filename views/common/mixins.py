@@ -71,6 +71,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
@@ -94,6 +95,7 @@ from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
 )
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -252,6 +254,40 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             type=EPCInjectionType.DEMANDE.name,
         ).first()
 
+    @property
+    def injection_possible(self):
+        if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
+            return False, "Le dossier doit être en 'Inscription autorisée'"
+        contexte = self.admission.get_admission_context()
+        if contexte == CONTEXT_GENERAL:
+            statut_financabilite_ko = [EtatFinancabilite.NON_FINANCABLE.name, EtatFinancabilite.A_CLARIFIER.name]
+            if self.admission.financability_computed_rule in statut_financabilite_ko:
+                return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
+            if (
+                self.admission.financability_computed_rule == EtatFinancabilite.FINANCABLE.name
+                and (
+                    self.admission.financability_rule == ''
+                    or self.admission.financability_computed_rule_on is None
+                    or self.admission.financability_rule_established_by_id is None
+                )
+            ):
+                return (
+                    False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
+                )
+        if not (
+            getattr(self.admission.candidate, 'merge_proposal', None)
+            and self.admission.candidate.merge_proposal.registration_id_sent_to_digit
+        ):
+            return False, "Il manque le noma"
+        if not self.admission.candidate.global_id.startswith('00'):
+            return False, "Le compte interne n'a pas encore été créé"
+        if 'uclouvain.be' not in self.admission.candidate.email:
+            return False, "Le candidat n'a toujours pas d'email uclouvain"
+        if self.admission.sent_to_epc:
+            return False, "La demande a déjà été envoyée dans EPC"
+        return True, ''
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
@@ -282,6 +318,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         else:
             context['admission'] = self.admission
         context['injection_inscription'] = self.injection_inscription
+        context['injection_possible'] = self.injection_possible[0]
+        context['raison_injection_impossible'] = self.injection_possible[1]
         return context
 
     def dispatch(self, request, *args, **kwargs):
