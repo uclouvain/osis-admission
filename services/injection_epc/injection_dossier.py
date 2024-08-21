@@ -252,7 +252,7 @@ class InjectionEPCAdmission:
         form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
         for form_item in form_items:
             documents_specifiques.append({
-                "type": form_item.internal_label.replace(' ', '_'),
+                "type": unidecode(form_item.internal_label.replace(' ', '_').lower()),
                 "documents": admission.specific_question_answers[str(form_item.uuid)]
             })
         return documents_specifiques
