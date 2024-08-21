@@ -36,6 +36,7 @@ from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
 from unidecode import unidecode
 
 from admission.contrib.models import Accounting, EPCInjection, AdmissionFormItem
+from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import (
     BaseAdmission,
     AdmissionEducationalValuatedExperiences,
@@ -44,7 +45,6 @@ from admission.contrib.models.base import (
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
 )
@@ -396,7 +396,7 @@ class InjectionEPCAdmission:
         double_diplome = getattr(admission, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission, 'international_scholarship', None)
         type_erasmus = getattr(admission, 'erasmus_mundus_scholarship', None)
-        admission_generale = getattr(admission, 'generaleducationadmission', None)
+        admission_generale = getattr(admission, 'generaleducationadmission', None)  # type: GeneralEducationAdmission
         return {
             "num_offre": num_offre,
             "validite": validite,
@@ -410,7 +410,7 @@ class InjectionEPCAdmission:
             'double_diplome': str(double_diplome.uuid) if double_diplome else None,
             'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
             'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,
-            'complement_de_formation': AdmissionPrerequisiteCourses.objects.filter(admission_id=admission.id).exists(),
+            'complement_de_formation': admission_generale.with_prerequisite_courses if admission_generale else False,
             'etat_financabilite': {
                 'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
                 'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
