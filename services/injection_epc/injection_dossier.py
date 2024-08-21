@@ -217,6 +217,7 @@ class InjectionEPCAdmission:
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
+        documents_specifiques = cls._recuperer_documents_specifiques(admission)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -238,10 +239,23 @@ class InjectionEPCAdmission:
             "donnees_comptables": cls._get_donnees_comptables(admission=admission),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
-                InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else []
+                (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
+                +
+                documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
+
+    @classmethod
+    def _recuperer_documents_specifiques(cls, admission):
+        documents_specifiques = []
+        form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
+        for form_item in form_items:
+            documents_specifiques.append({
+                "type": unidecode(form_item.internal_label.replace(' ', '_').lower()),
+                "documents": admission.specific_question_answers[str(form_item.uuid)]
+            })
+        return documents_specifiques
 
     @classmethod
     def _recuperer_documents_manquants(cls, admission: "BaseAdmission"):
@@ -393,10 +407,10 @@ class InjectionEPCAdmission:
     def _get_inscription_offre(cls, admission: BaseAdmission) -> Dict:
         num_offre, validite = cls.__get_validite_num_offre(admission)
         groupe_de_supervision = getattr(admission, 'supervision_group', None)
-        double_diplome = getattr(admission, 'double_degree_scholarship', None)
-        type_demande_bourse = getattr(admission, 'international_scholarship', None)
-        type_erasmus = getattr(admission, 'erasmus_mundus_scholarship', None)
         admission_generale = getattr(admission, 'generaleducationadmission', None)  # type: GeneralEducationAdmission
+        double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
+        type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
+        type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
         return {
             "num_offre": num_offre,
             "validite": validite,
@@ -454,7 +468,7 @@ class InjectionEPCAdmission:
             "droits_majores": general_admission.tuition_fees_dispensation,
             "montant_droits_majores": (
                 ((str(autre_montant) if autre_montant else None)
-                    or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
+                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
                 if general_admission else None
             ),
         }
