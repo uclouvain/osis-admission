@@ -82,18 +82,25 @@ class DigitRepository(IDigitRepository):
 
         ticket_response = _request_person_ticket_creation(person, noma, addresses, extra_ticket_data)
         logger.info(f"[Creation d'un ticket DigIT - {person.global_id} ] Données recues de DigIT {ticket_response}")
+        errors_responses = []
         if ticket_response and ticket_response['status'] == PersonTicketCreationStatus.CREATED.name:
             request_id = ticket_response['requestId']
             status = ticket_response['status']
         else:
             request_id = None
             status = PersonTicketCreationStatus.ERROR.name
+            errors_responses = [
+                {
+                    "msg": str(ticket_response),
+                    "errorCode": {"errorCode": "ERROR_DURING_DIGIT_TICKET_CREATION"}
+                }
+            ]
 
         person_ticket = PersonTicketCreation.objects.create(
             person=candidate,
             request_id=request_id,
             status=status,
-            errors=ticket_response if status == PersonTicketCreationStatus.ERROR.name else {},
+            errors=errors_responses,
         )
 
         return person_ticket.uuid
