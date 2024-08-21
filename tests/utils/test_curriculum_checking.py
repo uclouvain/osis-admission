@@ -43,6 +43,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.student import StudentFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.type_duree import TypeDuree
 from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 
@@ -231,16 +232,22 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             programme_cycle=pce_a,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
             programme__offer__academic_year=self.academic_years[2010],
+            programme__root_group__academic_year=self.academic_years[2010],
+            type_duree=TypeDuree.NORMAL.name,
         )
         pce_a_pae_b = InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             etat_inscription=EtatInscriptionFormation.ERREUR.name,
             programme__offer__academic_year=self.academic_years[2012],
+            programme__root_group__academic_year=self.academic_years[2012],
+            type_duree=TypeDuree.NORMAL.name,
         )
         pce_a_pae_c = InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
             programme__offer__academic_year=self.academic_years[2013],
+            programme__root_group__academic_year=self.academic_years[2013],
+            type_duree=TypeDuree.NORMAL.name,
         )
         pce_b = InscriptionProgrammeCycleFactory(
             etudiant=student,
@@ -251,6 +258,8 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             programme_cycle=pce_b,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
             programme__offer__academic_year=self.academic_years[2014],
+            programme__root_group__academic_year=self.academic_years[2014],
+            type_duree=TypeDuree.NORMAL.name,
         )
 
         result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
