@@ -56,6 +56,7 @@ def approuver_admission_par_sic(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
+    digit_repository: 'IDigitRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -113,9 +114,10 @@ def approuver_admission_par_sic(
         auteur=cmd.auteur,
     )
     message = notification.accepter_proposition_par_sic(
-        proposition=proposition,
+        proposition_uuid=proposition.entity_id.uuid,
         objet_message=cmd.objet_message,
         corps_message=cmd.corps_message,
+        digit_repository=digit_repository,
     )
     historique.historiser_acceptation_sic(
         proposition=proposition,

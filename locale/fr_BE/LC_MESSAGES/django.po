@@ -5175,6 +5175,9 @@ msgstr "Non"
 msgid "NOMA"
 msgstr "NOMA"
 
+msgid "NOMA not found"
+msgstr "NOMA non trouvé"
+
 msgid "NON_CONCERNE"
 msgstr "Non concerné·e"
 

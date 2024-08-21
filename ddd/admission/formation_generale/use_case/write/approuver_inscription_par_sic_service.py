@@ -43,7 +43,6 @@ def approuver_inscription_par_sic(
     cmd: ApprouverInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
-    notification: 'INotification',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
@@ -56,7 +55,6 @@ def approuver_inscription_par_sic(
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
-    identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
     resume_dto = ResumeProposition.get_resume(
         profil_candidat_translator=profil_candidat_translator,
@@ -88,14 +86,8 @@ def approuver_inscription_par_sic(
 
     # THEN
     proposition_repository.save(entity=proposition)
-    message = notification.accepter_proposition_par_sic(
-        proposition=proposition,
-        objet_message=cmd.objet_message,
-        corps_message=cmd.corps_message,
-    )
     historique.historiser_acceptation_sic(
         proposition=proposition,
-        message=message,
         gestionnaire=cmd.auteur,
     )
 
@@ -103,6 +95,9 @@ def approuver_inscription_par_sic(
         InscriptionApprouveeParSicEvent(
             entity_id=proposition.entity_id,
             matricule=proposition.matricule_candidat,
+            auteur=cmd.auteur,
+            objet_message=cmd.objet_message,
+            corps_message=cmd.corps_message,
         )
     )
     return proposition.entity_id
