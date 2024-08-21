@@ -217,6 +217,14 @@ class InjectionEPCAdmission:
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
+        documents_specifiques = [
+            document
+            for document in message_bus_instance.invoke(
+                RecupererDocumentsPropositionQuery(uuid_proposition=admission.uuid)
+            )
+            if document.onglet == OngletsDemande.INFORMATIONS_ADDITIONNELLES.name
+        ]
+        documents_specifiques = cls._recuperer_documents_specifiques(admission, documents_specifiques)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -238,10 +246,22 @@ class InjectionEPCAdmission:
             "donnees_comptables": cls._get_donnees_comptables(admission=admission),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
-                InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else []
+                (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
+                +
+                documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
+
+    @classmethod
+    def _recuperer_documents_specifiques(cls, admission, documents_specifiques):
+        documents_specifiques = []
+        form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
+        for form_item in form_items:
+            documents_specifiques.append({
+                form_item.internal_label.upper().replace(' ', '_'): admission.specific_question_answers[form_item.uuid]
+            })
+        return documents_specifiques
 
     @classmethod
     def _recuperer_documents_manquants(cls, admission: "BaseAdmission"):
