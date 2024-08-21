@@ -79,7 +79,6 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     }
     template_name = 'admission/forms/curriculum_educational_experience.html'
     permission_required = 'admission.change_admission_curriculum'
-    update_requested_documents = True
     update_admission_author = True
 
     def has_permission(self):
@@ -175,7 +174,6 @@ class CurriculumNonEducationalExperienceFormView(
     }
     template_name = 'admission/forms/curriculum_non_educational_experience.html'
     permission_required = 'admission.change_admission_curriculum'
-    update_requested_documents = True
     update_admission_author = True
 
     @property
@@ -326,8 +324,6 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
 
         admission.save()
 
-        self.admission.update_requested_documents()
-
         return delete
 
     def get_success_url(self):
@@ -384,7 +380,6 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
     template_name = 'admission/empty_template.html'
     form_class = forms.Form
     update_admission_author = True
-    update_requested_documents = True
 
     experience_model = None  # Name of the model of the experience to duplicate
     valuated_experience_model = None  # Name of the model of the valuated experience
@@ -540,7 +535,6 @@ class CurriculumBaseExperienceValuateView(AdmissionFormMixin, LoadDossierViewMix
     experience_model = None
     valuated_experience_model = None
     valuated_experience_field_id_name = None
-    update_requested_documents = True
     update_admission_author = True
     message_on_success = _('The experience has been valuated.')
 

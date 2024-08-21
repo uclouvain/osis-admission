@@ -442,7 +442,6 @@ class DeleteDocumentView(DocumentFormView):
 
         if self.document:
             if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
-                self.admission.update_requested_documents()
                 self.htmx_trigger_form_extra['next'] = 'missing'
 
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
@@ -595,9 +594,6 @@ class UploadDocumentByManagerView(DocumentFormView):
         )
 
         if self.document:
-            if self.document.type == TypeEmplacementDocument.NON_LIBRE.name:
-                self.admission.update_requested_documents()
-
             self.htmx_trigger_form_extra['next'] = (
                 'received' if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES else 'uclouvain'
             )

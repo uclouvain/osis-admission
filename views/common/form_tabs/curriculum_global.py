@@ -55,7 +55,6 @@ class CurriculumGlobalFormView(AdmissionFormMixin, CurriculumGlobalCommonViewMix
     template_name = 'admission/forms/curriculum.html'
     permission_required = 'admission.change_admission_curriculum'
     form_class = GlobalCurriculumForm
-    update_requested_documents = True
     extra_context = {
         'force_form': True,
     }
