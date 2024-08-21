@@ -393,10 +393,10 @@ class InjectionEPCAdmission:
     def _get_inscription_offre(cls, admission: BaseAdmission) -> Dict:
         num_offre, validite = cls.__get_validite_num_offre(admission)
         groupe_de_supervision = getattr(admission, 'supervision_group', None)
-        double_diplome = getattr(admission, 'double_degree_scholarship', None)
-        type_demande_bourse = getattr(admission, 'international_scholarship', None)
-        type_erasmus = getattr(admission, 'erasmus_mundus_scholarship', None)
         admission_generale = getattr(admission, 'generaleducationadmission', None)  # type: GeneralEducationAdmission
+        double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
+        type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
+        type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
         return {
             "num_offre": num_offre,
             "validite": validite,
