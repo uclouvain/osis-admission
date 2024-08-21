@@ -45,6 +45,8 @@ from admission.contrib.models.base import (
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_generale.commands import RecupererDocumentsPropositionQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
 )
@@ -62,6 +64,7 @@ from base.models.person import Person
 from base.models.person_address import PersonAddress
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
+from infrastructure.messages_bus import message_bus_instance
 from osis_common.queue.queue_sender import send_message, logger
 from osis_profile.models import (
     EducationalExperience,
@@ -217,6 +220,13 @@ class InjectionEPCAdmission:
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
+        documents_specifiques = [
+            document
+            for document in message_bus_instance.invoke(
+                RecupererDocumentsPropositionQuery(uuid_proposition=admission.uuid)
+            )
+            if document.onglet == OngletsDemande.INFORMATIONS_ADDITIONNELLES.name
+        ]
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -238,7 +248,9 @@ class InjectionEPCAdmission:
             "donnees_comptables": cls._get_donnees_comptables(admission=admission),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
-                InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else []
+                (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
+                +
+                ([{'documents': document.document_uuids, 'type': ''} for document in documents_specifiques])
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
@@ -454,7 +466,7 @@ class InjectionEPCAdmission:
             "droits_majores": general_admission.tuition_fees_dispensation,
             "montant_droits_majores": (
                 ((str(autre_montant) if autre_montant else None)
-                    or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
+                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
                 if general_admission else None
             ),
         }
