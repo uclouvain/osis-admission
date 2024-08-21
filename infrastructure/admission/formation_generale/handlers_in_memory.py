@@ -685,6 +685,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit_repository=_digit_repository,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -693,13 +694,20 @@ COMMAND_HANDLERS = {
             cmd=cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
-            notification=_notification,
             profil_candidat_translator=_profil_candidat_translator,
             comptabilite_translator=_comptabilite_translator,
             question_specifique_translator=_question_specific_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+        )
+    ),
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
+        lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            cmd=cmd,
+            notification=_notification,
+            historique=_historique_formation_generale,
+            digit_repository=_digit_repository,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (

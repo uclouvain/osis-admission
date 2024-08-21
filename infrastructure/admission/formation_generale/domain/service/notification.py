@@ -33,6 +33,7 @@ from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
 
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
@@ -66,6 +67,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL,
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
 )
 from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
@@ -393,18 +395,19 @@ class Notification(INotification):
     @classmethod
     def accepter_proposition_par_sic(
         cls,
-        proposition: Proposition,
+        proposition_uuid: str,
         objet_message: str,
         corps_message: str,
+        digit_repository: 'IDigitRepository',
     ) -> EmailMessage:
-        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
-
         admission = (
-            GeneralEducationAdmission.objects.filter(uuid=proposition.entity_id.uuid)
+            GeneralEducationAdmission.objects.filter(uuid=proposition_uuid)
             .only(
                 'sic_approval_certificate',
                 'sic_annexe_approval_certificate',
+                'candidate',
             )
+            .select_related('candidate')
             .first()
         )
 
@@ -444,15 +447,23 @@ class Notification(INotification):
             sic_annexe_approval_certificate_url,
         )
 
+        if EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN in corps_message:
+            noma_genere = digit_repository.get_registration_id_sent_to_digit(global_id=admission.candidate.global_id)
+
+            corps_message = corps_message.replace(
+                EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
+                noma_genere or _('NOMA not found'),
+            )
+
         email_notification = EmailNotification(
-            recipient=candidate.private_email,
+            recipient=admission.candidate.private_email,
             subject=objet_message,
             html_content=corps_message,
             plain_text_content=transform_html_to_text(corps_message),
         )
 
         candidate_email_message = EmailNotificationHandler.build(email_notification)
-        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+        EmailNotificationHandler.create(candidate_email_message, person=admission.candidate)
 
         return candidate_email_message
 
