@@ -40,7 +40,6 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateVi
     template_name = 'admission/forms/person.html'
     permission_required = 'admission.change_admission_person'
     form_class = AdmissionPersonForm
-    update_requested_documents = True
     update_admission_author = True
 
     def get_object(self):

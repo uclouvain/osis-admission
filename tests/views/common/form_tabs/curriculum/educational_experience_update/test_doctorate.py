@@ -595,7 +595,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         self.doctorate_admission.refresh_from_db()
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
+        self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.doctorate_admission.requested_documents,
         )
