@@ -49,3 +49,6 @@ class EPCInjectionView(HtmxPermissionRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         InjectionEPCAdmission().injecter(admission=self.admission)
         return HttpResponseClientRefresh()
+
+    def get_permission_object(self):
+        return self.admission
