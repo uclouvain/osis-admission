@@ -269,7 +269,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                     or self.admission.financability_rule_established_by_id is None
                 )
             ):
-                return False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
+                return (
+                    False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
+                )
         if not (
             getattr(self.admission.candidate, 'merge_proposal', None)
             and self.admission.candidate.merge_proposal.registration_id_sent_to_digit
