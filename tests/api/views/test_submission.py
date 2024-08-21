@@ -63,8 +63,11 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.faculty_decision import (
     FreeAdditionalApprovalConditionFactory,
 )
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory, \
-    AdmissionFormItemFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+    AdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -174,7 +177,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 % {'to_service': _("to the UCLouvain Registration Service")},
             },
         }
-
 
     def test_general_proposition_verification_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)
@@ -316,6 +318,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
         self.assertEqual(self.admission_ok.late_enrollment, False)
+        self.assertEqual(self.admission_ok.last_update_author, self.admission_ok.candidate)
         self.assertEqual(
             self.admission_ok.submitted_profile,
             {
@@ -845,6 +848,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 },
             },
         )
+        self.assertEqual(self.admission_ok.last_update_author, self.admission_ok.candidate)
 
         # Check tasks
         admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok)
