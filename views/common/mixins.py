@@ -260,11 +260,14 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "Le dossier doit être en 'Inscription autorisée'"
         contexte = self.admission.get_admission_context()
         if contexte == CONTEXT_GENERAL:
-            statut_financabilite_ko = [EtatFinancabilite.NON_FINANCABLE.name, EtatFinancabilite.A_CLARIFIER.name]
-            if self.admission.financability_computed_rule in statut_financabilite_ko:
+            etat_financabilite = {
+                'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
+                'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
+            }.get(self.admission.checklist.get('current', {}).get('financabilite', {}).get('statut'))
+            if etat_financabilite is None:
                 return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
             if (
-                self.admission.financability_computed_rule == EtatFinancabilite.FINANCABLE.name
+                etat_financabilite == EtatFinancabilite.FINANCABLE.name
                 and (
                     self.admission.financability_rule == ''
                     or self.admission.financability_computed_rule_on is None
@@ -275,8 +278,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                     False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
                 )
         if not (
-            getattr(self.admission.candidate, 'merge_proposal', None)
-            and self.admission.candidate.merge_proposal.registration_id_sent_to_digit
+            getattr(self.admission.candidate, 'personmergeproposal', None)
+            and self.admission.candidate.personmergeproposal.registration_id_sent_to_digit
         ):
             return False, "Il manque le noma"
         if not self.admission.candidate.global_id.startswith('00'):
