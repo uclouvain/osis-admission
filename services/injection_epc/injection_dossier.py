@@ -45,8 +45,6 @@ from admission.contrib.models.base import (
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.commands import RecupererDocumentsPropositionQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
 )
@@ -64,7 +62,6 @@ from base.models.person import Person
 from base.models.person_address import PersonAddress
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
-from infrastructure.messages_bus import message_bus_instance
 from osis_common.queue.queue_sender import send_message, logger
 from osis_profile.models import (
     EducationalExperience,
@@ -220,14 +217,7 @@ class InjectionEPCAdmission:
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
-        documents_specifiques = [
-            document
-            for document in message_bus_instance.invoke(
-                RecupererDocumentsPropositionQuery(uuid_proposition=admission.uuid)
-            )
-            if document.onglet == OngletsDemande.INFORMATIONS_ADDITIONNELLES.name
-        ]
-        documents_specifiques = cls._recuperer_documents_specifiques(admission, documents_specifiques)
+        documents_specifiques = cls._recuperer_documents_specifiques(admission)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -257,12 +247,13 @@ class InjectionEPCAdmission:
         }
 
     @classmethod
-    def _recuperer_documents_specifiques(cls, admission, documents_specifiques):
+    def _recuperer_documents_specifiques(cls, admission):
         documents_specifiques = []
         form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
         for form_item in form_items:
             documents_specifiques.append({
-                form_item.internal_label.upper().replace(' ', '_'): admission.specific_question_answers[form_item.uuid]
+                "type": form_item.internal_label.replace(' ', '_'),
+                "documents": admission.specific_question_answers[str(form_item.uuid)]
             })
         return documents_specifiques
 
