@@ -227,6 +227,7 @@ class InjectionEPCAdmission:
             )
             if document.onglet == OngletsDemande.INFORMATIONS_ADDITIONNELLES.name
         ]
+        documents_specifiques = cls._recuperer_documents_specifiques(admission, documents_specifiques)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -250,10 +251,20 @@ class InjectionEPCAdmission:
             "documents": (
                 (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
                 +
-                ([{'documents': document.document_uuids, 'type': ''} for document in documents_specifiques])
+                documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
+
+    @classmethod
+    def _recuperer_documents_specifiques(cls, admission, documents_specifiques):
+        documents_specifiques = []
+        form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
+        for form_item in form_items:
+            documents_specifiques.append({
+                form_item.internal_label.upper().replace(' ', '_'): admission.specific_question_answers[form_item.uuid]
+            })
+        return documents_specifiques
 
     @classmethod
     def _recuperer_documents_manquants(cls, admission: "BaseAdmission"):
