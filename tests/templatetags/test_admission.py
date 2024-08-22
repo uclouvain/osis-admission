@@ -31,6 +31,7 @@ import freezegun
 import mock
 from django.conf import settings
 from django.http import HttpResponse
+from django.shortcuts import resolve_url
 from django.template import Context, Template
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
@@ -93,6 +94,7 @@ from admission.templatetags.admission import (
     experience_valuation_url,
     checklist_experience_action_links_context,
     format_ways_to_find_out_about_the_course,
+    get_document_details_url,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -1275,6 +1277,53 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             ),
             f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n'
             f'\t<li>{ChoixMoyensDecouverteFormation.AUTRE.value}</li>',
+        )
+
+    def test_get_document_details_url(self):
+        admission_uuid = str(uuid.uuid4())
+        context = {
+            'request': Mock(
+                resolver_match=Mock(namespace='admission:general-education'),
+            ),
+            'view': Mock(kwargs={'uuid': admission_uuid}),
+        }
+
+        document = Mock(
+            identifiant='foo',
+            lecture_seule=None,
+            requis_automatiquement=None,
+        )
+
+        base_url = resolve_url(
+            'admission:general-education:document:detail',
+            uuid=admission_uuid,
+            identifier='foo',
+        )
+
+        self.assertEqual(
+            get_document_details_url(context, document),
+            base_url,
+        )
+
+        document.lecture_seule = True
+        document.requis_automatiquement = False
+        self.assertEqual(
+            get_document_details_url(context, document),
+            f'{base_url}?read-only=1',
+        )
+
+        document.lecture_seule = True
+        document.requis_automatiquement = True
+        self.assertEqual(
+            get_document_details_url(context, document),
+            f'{base_url}?read-only=1&mandatory=1',
+        )
+
+        document.lecture_seule = False
+        document.requis_automatiquement = True
+        self.assertEqual(
+            get_document_details_url(context, document),
+            f'{base_url}?mandatory=1',
         )
 
 
