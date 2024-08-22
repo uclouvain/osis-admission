@@ -306,3 +306,11 @@ class PremierePropositionSoumisesNonTrouveeException(BusinessException):
     def __init__(self, **kwargs):
         message = _("First submitted proposition not found (Admission with state 'Application accepted' / Enrolment)")
         super().__init__(message, **kwargs)
+
+
+class CurriculumNonCompletePourAcceptationException(BusinessException):
+    status_code = "FORMATION-GENERALE-34"
+
+    def __init__(self, **kwargs):
+        message = _("The 'Approved' status requires the last 5 years to be justified in the previous experience.")
+        super().__init__(message, **kwargs)

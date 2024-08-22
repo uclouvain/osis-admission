@@ -6623,7 +6623,12 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The 'Dispensation granted' status is reserved to enrolment application whith "
+"The 'Approved' status requires the last 5 years to be justified in the "
+"previous experience."
+msgstr ""
+
+msgid ""
+"The 'Dispensation granted' status is reserved to enrolment application with "
 "financability dispensation status set to 'Faculty dispensation granted'."
 msgstr ""
 
@@ -6906,6 +6911,11 @@ msgstr[1] ""
 
 msgid "The following admission has not been updated: {}."
 msgid_plural "The following admissions have not been updated: {}."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "The following period must be justified in the curriculum:"
+msgid_plural "The following periods must be justified in the curriculum:"
 msgstr[0] ""
 msgstr[1] ""
 

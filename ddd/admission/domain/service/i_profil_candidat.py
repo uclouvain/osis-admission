@@ -145,9 +145,14 @@ class IProfilCandidatTranslator(interface.DomainService):
         )
 
     @classmethod
-    def get_date_maximale_curriculum(cls):
-        """Retourne la date de la dernière expérience à remplir dans le CV (mois précédent la date du jour)."""
-        return (datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+    def get_date_maximale_curriculum(cls, date_reference: Optional[datetime.date] = None):
+        """
+        Retourne la date de la dernière expérience à remplir dans le CV (mois précédent la date de référence,
+        par défaut celle du jour).
+        """
+        if not date_reference:
+            date_reference = datetime.date.today()
+        return (date_reference.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 
     @classmethod
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
