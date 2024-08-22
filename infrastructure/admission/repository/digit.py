@@ -362,7 +362,6 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra
 
 
 def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str = None, sap_number: str = None):
-    noma = person.last_registration_id if person.last_registration_id else noma
     if person.birth_date:
         birth_date = person.birth_date.strftime('%Y-%m-%d')
     elif person.birth_year:
