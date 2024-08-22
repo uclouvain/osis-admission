@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import json
+import re
 import uuid
 from datetime import datetime
 from typing import Dict, List, Tuple
@@ -252,7 +253,7 @@ class InjectionEPCAdmission:
         form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
         for form_item in form_items:
             documents_specifiques.append({
-                "type": unidecode(form_item.internal_label.replace(' ', '_').lower()),
+                "type": re.sub(r'[\W_]+', '_',unidecode(form_item.internal_label.lower())).strip('_'),
                 "documents": admission.specific_question_answers[str(form_item.uuid)]
             })
         return documents_specifiques
@@ -468,7 +469,7 @@ class InjectionEPCAdmission:
             "droits_majores": general_admission.tuition_fees_dispensation,
             "montant_droits_majores": (
                 ((str(autre_montant) if autre_montant else None)
-                    or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
+                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
                 if general_admission else None
             ),
         }

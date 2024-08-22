@@ -351,7 +351,7 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra
                     'Authorization': settings.ESB_AUTHORIZATION,
                 },
                 data=payload,
-                url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}"
+                url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}?validateResemblance=false"
             )
             return response.json()
         except Exception as e:
