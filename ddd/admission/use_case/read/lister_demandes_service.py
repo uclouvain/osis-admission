@@ -57,4 +57,5 @@ def lister_demandes(
         taille_page=cmd.taille_page,
         mode_filtres_etats_checklist=cmd.mode_filtres_etats_checklist,
         filtres_etats_checklist=cmd.filtres_etats_checklist,
+        injection_en_erreur=cmd.injection_en_erreur,
     )

@@ -3747,6 +3747,12 @@ msgstr ""
 msgid "In draft form"
 msgstr ""
 
+msgid "In error"
+msgstr ""
+
+msgid "In error,Without error,All"
+msgstr ""
+
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
@@ -3802,6 +3808,9 @@ msgstr ""
 
 msgid ""
 "Initialization of the predefined specific questions for an academic year"
+msgstr ""
+
+msgid "Injection error"
 msgstr ""
 
 msgctxt "admission"
@@ -5605,6 +5614,9 @@ msgid "Publications"
 msgstr ""
 
 msgid "Published"
+msgstr ""
+
+msgid "Quarantine"
 msgstr ""
 
 msgid ""
@@ -7734,6 +7746,9 @@ msgstr ""
 msgid "Without condition"
 msgstr ""
 
+msgid "Without error"
+msgstr ""
+
 msgid "Without free documents"
 msgstr ""
 
@@ -7877,6 +7892,9 @@ msgstr "Yes, only in Saint-Louis (€12)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"
+
+msgid "Yes,No,All"
+msgstr ""
 
 msgid "Yes,No,Incomplete field"
 msgstr ""

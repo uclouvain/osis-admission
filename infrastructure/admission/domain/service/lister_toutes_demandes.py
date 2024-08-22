@@ -46,6 +46,7 @@ from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -92,6 +93,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         taille_page: Optional[int] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
+        injection_en_erreur: Optional[bool] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -236,6 +238,17 @@ class ListerToutesDemandes(IListerToutesDemandes):
                         ]
                     )
                 )
+
+        if injection_en_erreur is not None:
+            injection_condition = Q(
+                epc_injection__type=EPCInjectionType.DEMANDE.name,
+                epc_injection__status=EPCInjectionStatus.ERROR.name,
+            )
+
+            if injection_en_erreur:
+                qs = qs.filter(injection_condition)
+            else:
+                qs = qs.exclude(injection_condition)
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 
