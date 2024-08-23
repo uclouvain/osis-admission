@@ -289,7 +289,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "La demande a déjà été envoyée dans EPC"
         if personmergeproposal and (
             personmergeproposal.status in PersonMergeStatus.quarantine_statuses
-            or personmergeproposal.validation.get('valid') != True
+            or personmergeproposal.validation.get('valid') is not True
         ):
             return False, "La demande est en quarantaine"
         return True, ''
