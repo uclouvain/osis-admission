@@ -95,6 +95,7 @@ from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
 )
+from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -277,10 +278,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 return (
                     False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
                 )
-        if not (
-            getattr(self.admission.candidate, 'personmergeproposal', None)
-            and self.admission.candidate.personmergeproposal.registration_id_sent_to_digit
-        ):
+        personmergeproposal = getattr(self.admission.candidate, 'personmergeproposal', None)
+        if not (personmergeproposal and self.admission.candidate.personmergeproposal.registration_id_sent_to_digit):
             return False, "Il manque le noma"
         if not self.admission.candidate.global_id.startswith('00'):
             return False, "Le compte interne n'a pas encore été créé"
@@ -288,6 +287,11 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "Le candidat n'a toujours pas d'email uclouvain"
         if self.admission.sent_to_epc:
             return False, "La demande a déjà été envoyée dans EPC"
+        if personmergeproposal and (
+            personmergeproposal.status in PersonMergeStatus.quarantine_statuses
+            or personmergeproposal.validation.get('valid') != True
+        ):
+            return False, "La demande est en quarantaine"
         return True, ''
 
 
