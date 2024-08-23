@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import unittest
 import uuid
 from unittest.mock import Mock, patch, MagicMock
 
@@ -46,7 +47,7 @@ from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
+from admission.ddd.admission.enums import TypeItemFormulaire, Onglets, ChoixAffiliationSport
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixMoyensDecouverteFormation,
@@ -95,6 +96,7 @@ from admission.templatetags.admission import (
     checklist_experience_action_links_context,
     format_ways_to_find_out_about_the_course,
     get_document_details_url,
+    sport_affiliation_value,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -1036,6 +1038,46 @@ class DisplayTagTestCase(TestCase):
                 experience=experience,
             ),
             '',
+        )
+
+    def test_sport_affiliation_value(self):
+        self.assertEqual(
+            sport_affiliation_value(None, None),
+            '',
+        )
+
+        self.assertEqual(
+            sport_affiliation_value(None, 'Louvain-la-Neuve'),
+            '',
+        )
+
+        self.assertEqual(
+            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, None),
+            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
+        )
+
+        self.assertEqual(
+            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, 'Bruxelles Woluwe'),
+            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
+        )
+
+        for campus in [
+            None,
+            '',
+            'Bruxelles Saint-Gilles',
+            'Bruxelles Woluwe',
+            'Louvain-la-Neuve',
+            'Mons',
+            'Tournai',
+        ]:
+            self.assertEqual(
+                sport_affiliation_value(ChoixAffiliationSport.NON.name, campus),
+                ChoixAffiliationSport.NON.value,
+            )
+
+        self.assertEqual(
+            sport_affiliation_value(ChoixAffiliationSport.NON.name, 'Bruxelles Saint-Louis'),
+            _('No (access to sports facilities on the Saint-Louis campus is free)'),
         )
 
 
