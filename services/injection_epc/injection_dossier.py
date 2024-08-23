@@ -254,9 +254,8 @@ class InjectionEPCAdmission:
         for form_item in form_items:
             label = form_item.internal_label.lower()
             if cls.__contient_uuid_valide(label):
-                label = CategorizedFreeDocument.objects.get(
-                    long_label_fr=form_item.title['fr-be'],
-                ).short_label_fr.lower()
+                document = CategorizedFreeDocument.objects.filter(long_label_fr=form_item.title['fr-be']).first()
+                label = document.short_label_fr.lower() if document else "Label du document non trouve"
             documents_specifiques.append({
                 "type": re.sub(r'[\W_]+', '_', unidecode(label)).strip('_'),
                 "documents": admission.specific_question_answers[str(form_item.uuid)]
