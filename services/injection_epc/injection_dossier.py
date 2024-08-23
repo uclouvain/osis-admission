@@ -252,8 +252,12 @@ class InjectionEPCAdmission:
         documents_specifiques = []
         form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
         for form_item in form_items:
+            label = form_item.internal_label.lower()
+            if cls.__contient_uuid_valide(label):
+                document = CategorizedFreeDocument.objects.filter(long_label_fr=form_item.title['fr-be']).first()
+                label = document.short_label_fr.lower() if document else "Label du document non trouve"
             documents_specifiques.append({
-                "type": re.sub(r'[\W_]+', '_', unidecode(form_item.internal_label.lower())).strip('_'),
+                "type": re.sub(r'[\W_]+', '_', unidecode(label)).strip('_'),
                 "documents": admission.specific_question_answers[str(form_item.uuid)]
             })
         return documents_specifiques
@@ -300,7 +304,7 @@ class InjectionEPCAdmission:
         elif len(parties_type_document) == 2:
             # type_document_compose = ONGLET.TYPE_DOCUMENT
             type_document = parties_type_document[1]
-        elif cls.__est_uuid_valide(parties_type_document[-1]):
+        elif cls.__contient_uuid_valide(parties_type_document[-1]):
             # type_document_compose = ONGLET.TYPE_DOCUMENT.uuid (Questions spécifiques)
             _, type_document, uuid_question = parties_type_document
         elif len(parties_type_document) == 3:
@@ -318,12 +322,16 @@ class InjectionEPCAdmission:
         return annee, type_document, str(uuid_experience)
 
     @staticmethod
-    def __est_uuid_valide(chaine):
-        try:
-            uuid.UUID(chaine)
-            return True
-        except ValueError:
-            return False
+    def __contient_uuid_valide(chaine):
+        uuid_regex = r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+        match = re.search(uuid_regex, chaine)
+        if match:
+            try:
+                uuid.UUID(match.group(0))
+                return True
+            except ValueError:
+                return False
+        return False
 
     @classmethod
     def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
