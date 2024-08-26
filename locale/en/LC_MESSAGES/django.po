@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-08 16:17+0200\n"
+"POT-Creation-Date: 2024-08-20 14:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -158,8 +158,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a href="
-"\"%(add_url)s\">add a course</a>"
+"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a "
+"href=\"%(add_url)s\">add a course</a>"
 msgstr ""
 
 #, python-format
@@ -181,8 +181,8 @@ msgstr[1] ""
 #, python-brace-format
 msgid ""
 "<p>Depending on your previous experience, your faculty will supplement your "
-"annual programme with additional classes (for more information: <a href="
-"\"{link}\">{link}</a>).</p>"
+"annual programme with additional classes (for more information: <a "
+"href=\"{link}\">{link}</a>).</p>"
 msgstr ""
 
 #, python-brace-format
@@ -1154,16 +1154,6 @@ msgid "CDD manager comment"
 msgstr ""
 
 msgid "CDD opinion"
-msgstr ""
-
-msgid "CDD:"
-msgstr ""
-
-msgctxt "admission"
-msgid "CDD status"
-msgstr ""
-
-msgid "CDDs"
 msgstr ""
 
 msgid "CEP"
@@ -2407,7 +2397,10 @@ msgstr ""
 msgid "Doctoral commissions"
 msgstr ""
 
-msgid "Doctoral student:"
+msgid "Doctorate Ethics Regulations"
+msgstr ""
+
+msgid "Doctorate Regulations"
 msgstr ""
 
 msgid "Doctorate admission"
@@ -2425,12 +2418,6 @@ msgid "Doctorate education"
 msgstr ""
 
 msgid "Doctorate enrolment applications"
-msgstr ""
-
-msgid "Doctorate Ethics Regulations"
-msgstr ""
-
-msgid "Doctorate Regulations"
 msgstr ""
 
 msgid "Document"
@@ -3141,17 +3128,18 @@ msgid ""
 "used here.<br>Full example: <code>{\"CLASSE_CSS\": \"bg-info\"}</code>."
 "<br><br>For a text field, it is possible to specify if the user can enter a "
 "short (\"COURT\", by default) or a long (\"LONG\") text by using the "
-"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": \"LONG"
-"\"}</code>.<br><br>For a file field, it is possible to specify the maximum "
-"number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
+"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": "
+"\"LONG\"}</code>.<br><br>For a file field, it is possible to specify the "
+"maximum number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
 "(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
-"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
-"\": 3}</code>.<br><br>For a selection field, it is possible to specify if "
-"the selection is realised through a list (\"LISTE\", by default), checkboxes "
-"(\"CASES_A_COCHER\") or radio buttons (\"BOUTONS_RADIOS\") by using the "
-"\"TYPE_SELECTION\" property. The list and the radios buttons allow to select "
-"only one value whereas the checkboxes allow to select several values."
-"<br>Full example: <code>{\"TYPE_SELECTION\": \"CASES_A_COCHER\"}</code>."
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], "
+"\"NOMBRE_MAX_DOCUMENTS\": 3}</code>.<br><br>For a selection field, it is "
+"possible to specify if the selection is realised through a list (\"LISTE\", "
+"by default), checkboxes (\"CASES_A_COCHER\") or radio buttons "
+"(\"BOUTONS_RADIOS\") by using the \"TYPE_SELECTION\" property. The list and "
+"the radios buttons allow to select only one value whereas the checkboxes "
+"allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
+"\"CASES_A_COCHER\"}</code>."
 msgstr ""
 
 msgid "For the attention of"
@@ -3719,8 +3707,8 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees.html"
-"\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
+"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
 "reglementees.html</a>, I declare that, if the courses listed therein concern "
 "me, I have received the information relating to their requirements for "
 "admission or continuation and to the specific rules or restrictions of "
@@ -3769,8 +3757,8 @@ msgstr ""
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a href="
-"\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between 1 June and 30 September %(year)s to <a "
+"href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
 msgid "In payement order"
@@ -4648,6 +4636,9 @@ msgstr "No"
 msgid "NOMA"
 msgstr ""
 
+msgid "NOMA not found"
+msgstr ""
+
 msgid "NON_CONCERNE"
 msgstr "Not concerned"
 
@@ -4765,9 +4756,6 @@ msgid "No knowledge of languages provided."
 msgstr ""
 
 msgid "No longer designate the document as to be requested"
-msgstr ""
-
-msgid "No merge proposal eligible for this ticket"
 msgstr ""
 
 msgid "No one invited"
@@ -6241,6 +6229,9 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Send to EPC"
+msgstr ""
+
 msgid "Send to SIC"
 msgstr ""
 
@@ -6635,7 +6626,12 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The 'Dispensation granted' status is reserved to enrolment application whith "
+"The 'Approved' status requires the last 5 years to be justified in the "
+"previous experience."
+msgstr ""
+
+msgid ""
+"The 'Dispensation granted' status is reserved to enrolment application with "
 "financability dispensation status set to 'Faculty dispensation granted'."
 msgstr ""
 
@@ -6921,6 +6917,11 @@ msgid_plural "The following admissions have not been updated: {}."
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "The following period must be justified in the curriculum:"
+msgid_plural "The following periods must be justified in the curriculum:"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid ""
 "The global status of the application must be one of the following in order "
 "to realize this action: "
@@ -7147,9 +7148,6 @@ msgstr ""
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
 
-msgid "There exists some digit tickets to treat before"
-msgstr ""
-
 msgid ""
 "There has been a problem when merging the documents, this document contains "
 "several files and only the first one is displayed in the viewer. You can "
@@ -7280,8 +7278,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/study/accomodation"
-"\">www.uclouvain.be/en/study/accomodation</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
+"accomodation\">www.uclouvain.be/en/study/accomodation</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7762,9 +7760,6 @@ msgstr ""
 msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 
-msgid "Work contract type"
-msgstr ""
-
 msgid "Work start date"
 msgstr ""
 
@@ -7831,8 +7826,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Would you like to switch courses this academic year at UCLouvain? (<a href="
-"\"%(url)s\" target=\"_blank\">Informations</a>)"
+"Would you like to switch courses this academic year at UCLouvain? (<a "
+"href=\"%(url)s\" target=\"_blank\">Informations</a>)"
 msgstr ""
 
 msgid "Writing ability"
@@ -7848,9 +7843,6 @@ msgid "Year of birth"
 msgstr ""
 
 msgid "Year of the training"
-msgstr ""
-
-msgid "Year without enrolling in the course."
 msgstr ""
 
 msgid "Years"
@@ -7940,8 +7932,9 @@ msgid ""
 msgstr ""
 
 msgid ""
-"You can find more information on the French Community webpage <a href="
-"\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/</a>"
+"You can find more information on the French Community webpage <a "
+"href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
+"</a>"
 msgstr ""
 
 msgid ""
@@ -8197,11 +8190,6 @@ msgstr ""
 
 #, python-format
 msgid ""
-"[%(matricule_candidat)s] Candidate has already a pending creation ticket"
-msgstr ""
-
-#, python-format
-msgid ""
 "[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
 "validation"
 msgstr ""
@@ -8210,12 +8198,6 @@ msgstr ""
 msgid ""
 "[%(matricule_candidat)s] Candidate has pending merge proposal: status "
 "%(merge_status)s"
-msgstr ""
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate matricule is not a temporary account "
-"matricule"
 msgstr ""
 
 #, python-format

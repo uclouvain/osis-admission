@@ -38,7 +38,6 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand,
     RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
@@ -97,9 +96,6 @@ from admission.ddd.admission.use_case.write import (
 )
 from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import (
     defaire_proposition_fusion_personne,
-)
-from admission.ddd.admission.use_case.write.fusionner_candidat_avec_personne_existante import (
-    fusionner_candidat_avec_personne_existante,
 )
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import (
     initialiser_proposition_fusion_personne,
@@ -566,6 +562,7 @@ COMMAND_HANDLERS = {
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
     RefuserPropositionFusionCommand: lambda msg_bus, cmd: refuser_proposition_fusion_personne(
+        msg_bus,
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
@@ -687,6 +684,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            digit_repository=DigitRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -695,13 +694,21 @@ COMMAND_HANDLERS = {
             cmd=cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
-            notification=Notification(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+        )
+    ),
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
+        lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            cmd=cmd,
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+            digit_repository=DigitRepository(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -771,12 +778,6 @@ COMMAND_HANDLERS = {
             client_comptabilite_translator=ClientComptabiliteTranslator(),
         )
     ),
-    FusionnerCandidatAvecPersonneExistanteCommand: (
-        lambda msg_bus, cmd: fusionner_candidat_avec_personne_existante(
-            cmd,
-            proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
-        )
-    ),
     SpecifierDerogationFinancabiliteCommand: (
         lambda msg_bus, cmd: specifier_derogation_financabilite(
             cmd,
@@ -790,6 +791,15 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
 }

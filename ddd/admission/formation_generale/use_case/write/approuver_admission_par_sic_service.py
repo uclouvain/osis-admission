@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation 
 from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_admission_par_sic(
@@ -54,6 +55,8 @@ def approuver_admission_par_sic(
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
+    experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
+    digit_repository: 'IDigitRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -80,7 +83,14 @@ def approuver_admission_par_sic(
     )
 
     # WHEN
-    proposition.approuver_par_sic(auteur_modification=cmd.auteur, documents_dto=documents_dto)
+    proposition.approuver_par_sic(
+        auteur_modification=cmd.auteur,
+        documents_dto=documents_dto,
+        curriculum_dto=resume_dto.curriculum,
+        academic_year_repository=academic_year_repository,
+        profil_candidat_translator=profil_candidat_translator,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
+    )
 
     # THEN
     pdf_generation.generer_attestation_accord_sic(
@@ -104,9 +114,10 @@ def approuver_admission_par_sic(
         auteur=cmd.auteur,
     )
     message = notification.accepter_proposition_par_sic(
-        proposition=proposition,
+        proposition_uuid=proposition.entity_id.uuid,
         objet_message=cmd.objet_message,
         corps_message=cmd.corps_message,
+        digit_repository=digit_repository,
     )
     historique.historiser_acceptation_sic(
         proposition=proposition,

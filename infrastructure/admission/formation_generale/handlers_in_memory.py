@@ -32,7 +32,6 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand,
     RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
@@ -686,6 +685,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
+            digit_repository=_digit_repository,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -694,13 +695,21 @@ COMMAND_HANDLERS = {
             cmd=cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
-            notification=_notification,
             profil_candidat_translator=_profil_candidat_translator,
             comptabilite_translator=_comptabilite_translator,
             question_specifique_translator=_question_specific_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        )
+    ),
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
+        lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            cmd=cmd,
+            notification=_notification,
+            historique=_historique_formation_generale,
+            digit_repository=_digit_repository,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -746,5 +755,13 @@ COMMAND_HANDLERS = {
     RetrieveListePropositionFusionEnErreurQuery: lambda *args, **kwargs: Mock(),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: lambda *args, **kwargs: Mock(),
     ValiderTicketPersonneCommand: lambda *args, **kwargs: Mock(),
-    FusionnerCandidatAvecPersonneExistanteCommand: lambda *args, **kwargs: Mock(),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            academic_year_repository=_academic_year_repository,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        )
+    ),
 }

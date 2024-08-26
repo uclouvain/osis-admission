@@ -63,7 +63,6 @@ from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdm
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
-    EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -72,7 +71,6 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
-from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -564,8 +562,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_secondary_studies_valuation_annotations(cls):
-        be_institute_address = ''
-
         return dict(
             belgian_highschool_diploma_institute_address=Concat(
                 F('belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress__street'),

@@ -782,7 +782,7 @@ class PersonFormTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertIn(transcript_identifier, self.general_admission.requested_documents)
+        self.assertNotIn(transcript_identifier, self.general_admission.requested_documents)
 
     def test_general_person_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)

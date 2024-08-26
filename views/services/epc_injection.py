@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import FusionnerCandidatAvecPersonneExistanteCommand
-from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
+
+from django.views import View
+from django_htmx.http import HttpResponseClientRefresh
+
+__all__ = [
+    'EPCInjectionView',
+]
+
+from admission.contrib.models.base import BaseAdmission
+from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
+
+from base.utils.htmx import HtmxPermissionRequiredMixin
 
 
-def fusionner_candidat_avec_personne_existante(
-        cmd: 'FusionnerCandidatAvecPersonneExistanteCommand',
-        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
-):
-    return proposition_fusion_personne_repository.fusionner(
-        candidate_global_id=cmd.candidate_global_id,
-        ticket_uuid=cmd.ticket_uuid,
-    )
+class EPCInjectionView(HtmxPermissionRequiredMixin, View):
+    urlpatterns = {'epc-injection': 'epc-injection/<uuid:uuid>'}
+    permission_required = 'admission.can_inject_to_epc'
+    http_method_names = ['post']
+
+    @property
+    def admission(self):
+        return BaseAdmission.objects.get(uuid=self.kwargs['uuid'])
+
+    def post(self, request, *args, **kwargs):
+        InjectionEPCAdmission().injecter(admission=self.admission)
+        return HttpResponseClientRefresh()
+
+    def get_permission_object(self):
+        return self.admission

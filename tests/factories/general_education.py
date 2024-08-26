@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
 import factory
 
@@ -121,6 +122,7 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
         )
         admitted = factory.Trait(
             status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            submitted_at=factory.LazyAttribute(lambda obj: datetime.datetime(obj.determined_academic_year.year, 1, 1)),
             submitted_profile={
                 "coordinates": {
                     "city": "Louvain-La-Neuve",

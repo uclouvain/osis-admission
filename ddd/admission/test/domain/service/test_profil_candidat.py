@@ -27,6 +27,8 @@
 import datetime
 from unittest import TestCase
 
+import freezegun
+
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.models.enums.community import CommunityEnum
@@ -266,3 +268,21 @@ class ProfilCandidatTestCase(TestCase):
                 'Institut 4',
             ],
         )
+
+    def test_get_date_maximale_curriculum(self):
+        with freezegun.freeze_time('2023-04-01'):
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(),
+                datetime.date(2023, 3, 1),
+            )
+
+        with freezegun.freeze_time('2023-01-31'):
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(),
+                datetime.date(2022, 12, 1),
+            )
+
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(date_reference=datetime.date(2022, 2, 1)),
+                datetime.date(2022, 1, 1),
+            )

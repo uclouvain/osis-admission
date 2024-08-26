@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,37 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 from typing import Any, Union
 
-from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent, \
-    InscriptionApprouveeParSicEvent
+from admission.ddd.admission.commands import (
+    RechercherCompteExistantCommand,
+    ValiderTicketPersonneCommand,
+    SoumettreTicketPersonneCommand,
+)
+from admission.ddd.admission.formation_generale.commands import EnvoyerEmailApprobationInscriptionAuCandidatCommand
+from admission.ddd.admission.formation_generale.events import (
+    AdmissionApprouveeParSicEvent,
+    InscriptionApprouveeParSicEvent,
+)
+from osis_common.ddd.interface import BusinessException
 
 
 def reagir_a_approuver_proposition(
     msg_bus: Any,
     event: Union['InscriptionApprouveeParSicEvent', 'AdmissionApprouveeParSicEvent'],
 ) -> None:
-    from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
-    msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
+    with contextlib.suppress(BusinessException):
+        msg_bus.invoke(RechercherCompteExistantCommand(matricule=event.matricule))
+        msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
+        msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
+
+        if isinstance(event, InscriptionApprouveeParSicEvent):
+            msg_bus.invoke(
+                EnvoyerEmailApprobationInscriptionAuCandidatCommand(
+                    uuid_proposition=event.entity_id.uuid,
+                    objet_message=event.objet_message,
+                    corps_message=event.corps_message,
+                    auteur=event.auteur,
+                )
+            )

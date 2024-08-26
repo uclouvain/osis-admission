@@ -36,9 +36,16 @@ from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.contrib.models import (
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+    ContinuingEducationAdmission,
+    EPCInjection,
+)
 from admission.contrib.models.base import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
@@ -58,14 +65,14 @@ from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
 )
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
-
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
@@ -78,7 +85,6 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions 
 )
 from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
 from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
-from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -89,6 +95,8 @@ from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
 )
+from base.models.person_merge_proposal import PersonMergeStatus
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -235,6 +243,58 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             )
         )
 
+    @property
+    def injection_inscription(self):
+        return EPCInjection.objects.filter(
+            admission=self.admission,
+            status__in=[
+                EPCInjectionStatus.PENDING.name,
+                EPCInjectionStatus.NO_SENT.name,
+                EPCInjectionStatus.ERROR.name,
+            ],
+            type=EPCInjectionType.DEMANDE.name,
+        ).first()
+
+    @property
+    def injection_possible(self):
+        if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
+            return False, "Le dossier doit être en 'Inscription autorisée'"
+        contexte = self.admission.get_admission_context()
+        if contexte == CONTEXT_GENERAL:
+            etat_financabilite = {
+                'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
+                'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
+            }.get(self.admission.checklist.get('current', {}).get('financabilite', {}).get('statut'))
+            if etat_financabilite is None:
+                return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
+            if (
+                etat_financabilite == EtatFinancabilite.FINANCABLE.name
+                and (
+                    self.admission.financability_rule == ''
+                    or self.admission.financability_computed_rule_on is None
+                    or self.admission.financability_rule_established_by_id is None
+                )
+            ):
+                return (
+                    False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
+                )
+        personmergeproposal = getattr(self.admission.candidate, 'personmergeproposal', None)
+        if not (personmergeproposal and personmergeproposal.registration_id_sent_to_digit):
+            return False, "Il manque le noma"
+        if not self.admission.candidate.global_id.startswith('00'):
+            return False, "Le compte interne n'a pas encore été créé"
+        if 'uclouvain.be' not in self.admission.candidate.email:
+            return False, "Le candidat n'a toujours pas d'email uclouvain"
+        if self.admission.sent_to_epc:
+            return False, "La demande a déjà été envoyée dans EPC"
+        if personmergeproposal and (
+            personmergeproposal.status in PersonMergeStatus.quarantine_statuses()
+            or personmergeproposal.validation.get('valid') is not True
+        ):
+            return False, "La demande est en quarantaine"
+        return True, ''
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
@@ -264,7 +324,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             context['is_continuing'] = True
         else:
             context['admission'] = self.admission
-
+        context['injection_inscription'] = self.injection_inscription
+        context['injection_possible'] = self.injection_possible[0]
+        context['raison_injection_impossible'] = self.injection_possible[1]
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -282,7 +344,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 class AdmissionFormMixin(AdmissionViewMixin):
     message_on_success = _('Your data have been saved.')
     message_on_failure = _('Some errors have been encountered.')
-    update_requested_documents = False
     update_admission_author = False
     default_htmx_trigger_form_extra = {}
     close_modal_on_htmx_request = True
@@ -320,10 +381,6 @@ class AdmissionFormMixin(AdmissionViewMixin):
             # Additional updates if needed
             self.update_current_admission_on_form_valid(form, admission)
             admission.save()
-
-        # Update the requested documents
-        if self.update_requested_documents and hasattr(self.admission, 'update_requested_documents'):
-            self.admission.update_requested_documents()
 
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)

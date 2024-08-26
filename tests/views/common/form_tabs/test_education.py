@@ -191,7 +191,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Graduated from high school year
         self.assertEqual(form['graduated_from_high_school_year'].value(), 2021)
 
-        all_past_academic_years = AcademicYear.objects.filter(year__lte=2020).order_by('-year')
+        all_past_academic_years = AcademicYear.objects.filter(year__lte=2021).order_by('-year')
 
         academic_year_choices = [('', BLANK_CHOICE_DISPLAY)] + [
             (academic_year.year, f'{academic_year.year}-{academic_year.year + 1}')
@@ -251,7 +251,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
+        self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.general_admission.requested_documents,
         )
@@ -753,7 +753,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         # Check additional updates
         self.assertEqual(self.continuing_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.continuing_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
+        self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.continuing_admission.requested_documents,
         )
@@ -913,7 +913,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Graduated from high school year
         self.assertEqual(main_form['graduated_from_high_school_year'].value(), 2021)
 
-        all_past_academic_years = AcademicYear.objects.filter(year__lte=2020).order_by('-year')
+        all_past_academic_years = AcademicYear.objects.filter(year__lte=2021).order_by('-year')
 
         academic_year_choices = [('', BLANK_CHOICE_DISPLAY)] + [
             (academic_year.year, f'{academic_year.year}-{academic_year.year + 1}')

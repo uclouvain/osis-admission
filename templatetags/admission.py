@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
 from typing import Union, Optional, List, Dict
+from urllib.parse import urlencode
 
 from django import template
 from django.conf import settings
@@ -40,6 +41,8 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -1528,7 +1531,7 @@ def checklist_experience_action_links_context(
                     + next_url_suffix
                 )
 
-                can_delete_curriculum = has_perm(context, 'admission.can_delete_curriculum')
+                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
                 if can_delete_curriculum:
                     result_context['delete_url'] = (
                         resolve_url(
@@ -1561,7 +1564,7 @@ def checklist_experience_action_links_context(
                     + next_url_suffix
                 )
 
-                can_delete_curriculum = has_perm(context, 'admission.can_delete_curriculum')
+                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
                 if can_delete_curriculum:
                     result_context['delete_url'] = (
                         resolve_url(
@@ -1813,3 +1816,27 @@ def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO
             for way in proposition.moyens_decouverte_formation
         ]
     )
+
+
+@register.simple_tag(takes_context=True)
+def get_document_details_url(context, document: EmplacementDocumentDTO):
+    """From a document, return the url to the document detail page."""
+    match = context['request'].resolver_match
+    base_url = resolve_url(
+        f'{match.namespace}:document:detail',
+        uuid=context['view'].kwargs['uuid'],
+        identifier=document.identifiant,
+    )
+
+    query_params = {}
+
+    if document.lecture_seule:
+        query_params['read-only'] = '1'
+
+    if document.requis_automatiquement:
+        query_params['mandatory'] = '1'
+
+    if query_params:
+        return f'{base_url}?{urlencode(query_params)}'
+
+    return base_url

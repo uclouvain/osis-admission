@@ -73,7 +73,7 @@
         {% endif %}
       {% endif %}
       {% if original_admission.type_demande == 'ADMISSION' or original_admission.financability_dispensation_status != 'ACCORD_DE_DEROGATION_FACULTAIRE' %}
-        {% translate "The 'Dispensation granted' status is reserved to enrolment application whith financability dispensation status set to 'Faculty dispensation granted'." as dispensation_disabled_tooltip %}
+        {% translate "The 'Dispensation granted' status is reserved to enrolment application with financability dispensation status set to 'Faculty dispensation granted'." as dispensation_disabled_tooltip %}
         {% checklist_state_button tab='financabilite' label=_("Dispensation granted") icon='check' state='GEST_REUSSITE' reussite="derogation" class='success' tooltip=dispensation_disabled_tooltip disabled=True %}
       {% else %}
         {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_REUSSITE-derogation' as change_status_url %}

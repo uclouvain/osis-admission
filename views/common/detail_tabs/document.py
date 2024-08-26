@@ -268,6 +268,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['editable_document'] = editable_document
         context['retypable_document'] = can_retype_document(document, document_identifier)
         context['read_only_document'] = self.request.GET.get('read-only') == '1'
+        context['mandatory_document'] = self.request.GET.get('mandatory') == '1'
         context['document'] = document
         context['several_files'] = len(document.uuids) > 1
 
@@ -442,7 +443,6 @@ class DeleteDocumentView(DocumentFormView):
 
         if self.document:
             if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
-                self.admission.update_requested_documents()
                 self.htmx_trigger_form_extra['next'] = 'missing'
 
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
@@ -595,9 +595,6 @@ class UploadDocumentByManagerView(DocumentFormView):
         )
 
         if self.document:
-            if self.document.type == TypeEmplacementDocument.NON_LIBRE.name:
-                self.admission.update_requested_documents()
-
             self.htmx_trigger_form_extra['next'] = (
                 'received' if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES else 'uclouvain'
             )

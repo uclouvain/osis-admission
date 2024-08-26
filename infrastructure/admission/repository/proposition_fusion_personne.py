@@ -28,25 +28,18 @@ import logging
 import re
 from typing import Optional, List
 
-from django.apps import apps
 from django.conf import settings
-from django.db.models import Model, ForeignKey
 
-from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
-from admission.ddd.admission.domain.validator.exceptions import TicketDigitATraiterAvantException, \
-    PasDePropositionDeFusionEligibleException, PasDePropositionFusionPersonneTrouveeException
+from admission.ddd.admission.domain.validator.exceptions import PasDePropositionFusionPersonneTrouveeException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 from admission.templatetags.admission import format_matricule
 from base.business.student import find_student_by_discriminating
 from base.models.person import Person
-from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationMergeType, \
-    PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.models.student import Student
 from osis_common.utils.models import get_object_or_none
-from osis_profile.models import ProfessionalExperience, EducationalExperience
 from reference.models.country import Country
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
@@ -219,112 +212,3 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
     @classmethod
     def _only_digits(cls, input_string):
         return re.sub('[^0-9]', '', input_string)
-
-    @classmethod
-    def fusionner(cls, candidate_global_id: str, ticket_uuid: str):
-        cls.verifier_eligible_fusion(ticket_uuid)
-
-        candidate = Person.objects.prefetch_related('personticketcreation_set').get(global_id=candidate_global_id)
-        person_tickets = candidate.personticketcreation_set.all()
-
-        ticket = next((t for t in person_tickets if str(t.uuid) == ticket_uuid), None)
-        if not ticket:
-            raise PersonTicketCreation.DoesNotExist
-
-        if any(
-                p for p in person_tickets if p.created_at < ticket.created_at and p.status not in [
-                    PersonTicketCreationStatus.DONE.name,
-                    PersonTicketCreationStatus.DONE_WITH_WARNINGS.name
-                ]
-        ):
-            raise TicketDigitATraiterAvantException()
-
-        person_merge_proposal = get_object_or_none(
-            PersonMergeProposal, original_person__global_id=candidate_global_id
-        )
-        known_person_global_id = person_merge_proposal.selected_global_id
-        known_person = get_object_or_none(Person, global_id=known_person_global_id)
-
-        if known_person:
-            person_to_merge = person_merge_proposal.proposal_merge_person
-            cls._update_non_empty_fields(person_to_merge, known_person)
-            known_person.save()
-
-            models = cls._find_models_with_fk_to_person()
-            for model, field_name in models:
-                if model == BaseAdmission:
-                    admissions = model.objects.filter(
-                        **{field_name: person_merge_proposal.original_person}
-                    )
-                    for admission in admissions:
-                        if admission.valuated_secondary_studies_person:
-                            admission.valuated_secondary_studies_person = known_person
-                            admission.candidate_id = known_person.id
-                            admission.save()
-                            logger.info(
-                                f'Updated {admission} instances of {model.__name__} '
-                                f'for fields valuated_secondary_studies_person and candidate_id.'
-                            )
-                        else:
-                            admission.candidate_id = known_person.id
-                            admission.save()
-                            logger.info(
-                                f'Updated {admission} instances of {model.__name__} for candidate_id.')
-                elif model == ProfessionalExperience or model == EducationalExperience:
-                    experiences = model.objects.filter(
-                        **{field_name: person_merge_proposal.original_person}
-                    )
-                    curex_to_merge = (person_merge_proposal.professional_curex_to_merge +
-                                      person_merge_proposal.educational_curex_to_merge)
-                    for experience in experiences:
-                        if experience.uuid in curex_to_merge:
-                            experience.person_id = known_person.id
-                            experience.save()
-                        else:
-                            experience.delete()
-                else:
-                    updated_count = model.objects.filter(
-                        **{field_name: person_merge_proposal.original_person}
-                    ).update(**{field_name: known_person})
-                    logger.info(f'Updated {updated_count} instances of {model.__name__}.')
-
-            person_merge_proposal.status = PersonMergeStatus.MERGED.name
-            person_merge_proposal.save()
-
-            # delete person_to_merge after merge
-            person_to_merge.delete()
-
-            ticket.merge_type = PersonTicketCreationMergeType.MERGED_WITH_KNOWN_PERSON.name
-            ticket.save()
-
-
-    @classmethod
-    def _update_non_empty_fields(cls, source_obj: Model, target_obj: Model):
-        """
-        Update non-empty fields from source_obj to target_obj.
-        """
-        for field in source_obj._meta.fields:
-            field_name = field.name
-            source_value = getattr(source_obj, field_name)
-
-            # Skip if the field is empty or uuid or it's the primary key
-            if field.primary_key or field.name == 'uuid' or not source_value:
-                continue
-
-            setattr(target_obj, field_name, source_value)
-
-    @classmethod
-    def _find_models_with_fk_to_person(cls):
-        models_with_fk = []
-        for model in [model for model in apps.get_models() if model != PersonMergeProposal]:
-            for field in model._meta.get_fields():
-                if isinstance(field, ForeignKey) and field.related_model == Person:
-                    models_with_fk.append((model, field.name))
-        return models_with_fk
-
-    @classmethod
-    def verifier_eligible_fusion(cls, ticket_uuid: str):
-        ticket = PersonTicketCreation.objects.get(uuid=ticket_uuid)
-        person_merge_proposal = get_object_or_none(PersonMergeProposal, original_person=ticket.person)
-        if not person_merge_proposal or person_merge_proposal.status != PersonMergeStatus.IN_PROGRESS.name:
-            raise PasDePropositionDeFusionEligibleException

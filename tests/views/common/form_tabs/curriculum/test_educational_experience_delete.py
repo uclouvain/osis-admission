@@ -320,7 +320,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertIn(
+        self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.general_admission.requested_documents,
         )

@@ -63,7 +63,7 @@
     {% can_update_tab 'specific-questions' as can_update_specific_questions_tab %}
     {% can_update_tab 'curriculum' as can_update_curriculum %}
     {% can_update_tab 'education' as can_update_education %}
-    {% has_perm 'admission.can_delete_curriculum' as can_delete_curriculum %}
+    {% has_perm 'admission.delete_admission_curriculum' as can_delete_curriculum %}
 
     {% if can_update_person_tab %}
       {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
@@ -138,6 +138,16 @@
             {% digit_ticket_status_msg digit_ticket %}
         {% endif %}
 
+        {% if injection_signaletique %}
+            <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+                <div class="panel-body bg-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+                    <div>
+                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.status == 'ERROR' %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' %}
@@ -159,7 +169,7 @@
         <div role="tabpanel" class="tab-pane" id="financabilite">
 
           {% include "admission/general_education/includes/checklist/financabilite.html" %}
-          
+
           {% include "admission/general_education/includes/checklist/financabilite_derogation_non_concerne_modal.html" %}
           {% include "admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_modal.html" %}
           {% include "admission/general_education/includes/checklist/financabilite_derogation_abandon_du_candidat_modal.html" %}
@@ -485,10 +495,15 @@
                   name="identifier"
               >
                 {% for document in documents %}
-                  <option value="{{ document.identifiant }}" data-document-status="{{ document.statut }}">{{ document.libelle }}</option>
+                  <option
+                    value="{{ document.identifiant }}"
+                    data-document-status="{{ document.statut }}"
+                    data-mandatory-document="{% if document.requis_automatiquement %}1{% else %}0{% endif %}"
+                  >{{ document.libelle }}</option>
                 {% endfor %}
               </select>
               <input name="read-only" type="hidden" value='0' />
+              <input name="mandatory" type="hidden" value='0' />
               <button type="button" class="btn btn-default next-option-button">
                 <i class="fa-solid fa-angle-right"></i>
               </button>
@@ -621,6 +636,7 @@
               const parentForm = $(this).parent('form');
               // Specify if the document must be readonly
               parentForm.find('input[name="read-only"]').val(readOnlyDocumentsIdentifiers.includes($(this).val()) ? '1' : '0');
+              parentForm.find('input[name="mandatory"]').val($(this).find(':selected').data('mandatory-document'));
               // Submit the form to refresh the document view (htmx)
               parentForm[0].requestSubmit();
               // Manage the previous and next buttons
@@ -1310,11 +1326,11 @@
     .approval-conditions-fields .form-group {
       margin-bottom: 0;
     }
-    
+
     button[name="hide-other-approval-conditions"] {
       background-color: transparent;
     }
-    
+
     button[name="hide-other-approval-conditions"][value="on"] > i.fa-square-chevron-down, button[name="hide-other-approval-conditions"][value="off"] > i.fa-square-chevron-up {
       display: none;
     }
@@ -1360,7 +1376,7 @@
     #checklist-menu .sub-item.bg-warning {
       background-color: #fcf8e3;
     }
-    
+
     /* Allow to scroll the content above the header menu */
     html {
       overflow: auto;

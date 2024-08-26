@@ -232,6 +232,25 @@ class Historique(IHistorique):
         )
 
     @classmethod
+    def historiser_mail_acceptation_inscription_sic(
+        cls,
+        proposition_uuid: str,
+        gestionnaire: str,
+        message: EmailMessage,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+
+        message_a_historiser = get_message_to_historize(message)
+
+        add_history_entry(
+            proposition_uuid,
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "sic-decision", "approval", "message"],
+        )
+
+    @classmethod
     def historiser_specification_motifs_refus_sic(
         cls,
         proposition: Proposition,
