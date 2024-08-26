@@ -31,6 +31,7 @@ import freezegun
 import mock
 from django.conf import settings
 from django.http import HttpResponse
+from django.shortcuts import resolve_url
 from django.template import Context, Template
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
@@ -93,6 +94,7 @@ from admission.templatetags.admission import (
     experience_valuation_url,
     checklist_experience_action_links_context,
     format_ways_to_find_out_about_the_course,
+    get_document_details_url,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -565,6 +567,7 @@ class DisplayTagTestCase(TestCase):
             ),
             'experience': experience,
             'can_update_curriculum': True,
+            'can_delete_curriculum': True,
         }
 
         template_params = experience_details_template(**kwargs)
@@ -604,6 +607,14 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['is_belgian_experience'], True)
         self.assertEqual(template_params['translation_required'], False)
         self.assertEqual(template_params['evaluation_system_with_credits'], True)
+
+        # Without the right to delete an experience
+        kwargs['can_delete_curriculum'] = False
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(template_params['delete_link_button'], '')
+
+        kwargs['can_delete_curriculum'] = True
 
         # With a valuated experience
         kwargs['experience'] = ExperienceAcademiqueDTOFactory(
@@ -653,6 +664,7 @@ class DisplayTagTestCase(TestCase):
             ),
             'experience': experience,
             'can_update_curriculum': True,
+            'can_delete_curriculum': True,
         }
 
         template_params = experience_details_template(**kwargs)
@@ -689,6 +701,14 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['experience'], experience)
         self.assertEqual(template_params['with_single_header_buttons'], True)
         self.assertEqual(template_params['CURRICULUM_ACTIVITY_LABEL'], CURRICULUM_ACTIVITY_LABEL)
+
+        # Without the right to delete an experience
+        kwargs['can_delete_curriculum'] = False
+        template_params = experience_details_template(**kwargs)
+
+        self.assertEqual(template_params['delete_link_button'], '')
+
+        kwargs['can_delete_curriculum'] = True
 
         # With a valuated experience
         kwargs['experience'] = ExperienceNonAcademiqueDTOFactory(identifiant_externe='EPC-1')
@@ -764,7 +784,10 @@ class DisplayTagTestCase(TestCase):
 
         self.assertEqual(template_params['edit_link_button'], '')
 
-    def test_checklist_experience_action_links_context_with_an_educational_experience(self):
+    @patch('admission.templatetags.admission.has_perm')
+    def test_checklist_experience_action_links_context_with_an_educational_experience(self, mock_has_perm):
+        mock_has_perm.return_value = True
+
         proposition_uuid = uuid.uuid4()
 
         experience = ExperienceAcademiqueDTOFactory(
@@ -804,6 +827,13 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(context['experience_uuid'], str(experience.uuid))
         self.assertEqual(context['edit_link_button_in_new_tab'], False)
 
+        mock_has_perm.return_value = False
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['delete_url'], '')
+
+        mock_has_perm.return_value = True
+
         # With a valuated experience
         experience = ExperienceAcademiqueDTOFactory(
             annees=[AnneeExperienceAcademiqueDTOFactory(uuid=uuid.uuid4(), annee=2020)],
@@ -821,7 +851,10 @@ class DisplayTagTestCase(TestCase):
         )
         self.assertEqual(context['delete_url'], '')
 
-    def test_checklist_experience_action_links_context_with_a_non_educational_experience(self):
+    @patch('admission.templatetags.admission.has_perm')
+    def test_checklist_experience_action_links_context_with_a_non_educational_experience(self, mock_has_perm):
+        mock_has_perm.return_value = True
+
         proposition_uuid = uuid.uuid4()
 
         experience = ExperienceNonAcademiqueDTOFactory(
@@ -860,6 +893,13 @@ class DisplayTagTestCase(TestCase):
         )
         self.assertEqual(context['experience_uuid'], str(experience.uuid))
         self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
+        mock_has_perm.return_value = False
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['delete_url'], '')
+
+        mock_has_perm.return_value = True
 
         # With a valuated experience
         experience = ExperienceNonAcademiqueDTOFactory(
@@ -1237,6 +1277,53 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             ),
             f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n'
             f'\t<li>{ChoixMoyensDecouverteFormation.AUTRE.value}</li>',
+        )
+
+    def test_get_document_details_url(self):
+        admission_uuid = str(uuid.uuid4())
+        context = {
+            'request': Mock(
+                resolver_match=Mock(namespace='admission:general-education'),
+            ),
+            'view': Mock(kwargs={'uuid': admission_uuid}),
+        }
+
+        document = Mock(
+            identifiant='foo',
+            lecture_seule=None,
+            requis_automatiquement=None,
+        )
+
+        base_url = resolve_url(
+            'admission:general-education:document:detail',
+            uuid=admission_uuid,
+            identifier='foo',
+        )
+
+        self.assertEqual(
+            get_document_details_url(context, document),
+            base_url,
+        )
+
+        document.lecture_seule = True
+        document.requis_automatiquement = False
+        self.assertEqual(
+            get_document_details_url(context, document),
+            f'{base_url}?read-only=1',
+        )
+
+        document.lecture_seule = True
+        document.requis_automatiquement = True
+        self.assertEqual(
+            get_document_details_url(context, document),
+            f'{base_url}?read-only=1&mandatory=1',
+        )
+
+        document.lecture_seule = False
+        document.requis_automatiquement = True
+        self.assertEqual(
+            get_document_details_url(context, document),
+            f'{base_url}?mandatory=1',
         )
 
 

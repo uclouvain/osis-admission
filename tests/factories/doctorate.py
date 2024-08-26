@@ -102,6 +102,8 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     thesis_proposed_title = 'Thesis title'
 
+    last_update_author = factory.SubFactory(PersonFactory)
+
     class Params:
         with_cotutelle = factory.Trait(
             cotutelle=True,
@@ -111,6 +113,26 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
             cotutelle_opening_request=factory.LazyFunction(generate_token),  # This is to overcome circular import
             cotutelle_convention=factory.LazyFunction(generate_token),
             cotutelle_other_documents=factory.LazyFunction(generate_token),
+        )
+        submitted = factory.Trait(
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            submitted_profile={
+                "coordinates": {
+                    "city": "Louvain-la-Neuve",
+                    "place": "",
+                    "street": "Place de l'Université",
+                    "country": "BE",
+                    "postal_box": "",
+                    "postal_code": "1348",
+                    "street_number": "2",
+                },
+                "identification": {
+                    "gender": "H",
+                    "last_name": "Doe",
+                    "first_name": "John",
+                    "country_of_citizenship": "BE",
+                },
+            },
         )
         admitted = factory.Trait(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
@@ -176,4 +198,9 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def create_accounting(self, create, extracted, **kwargs):
-        AccountingFactory(admission_id=self.pk)
+        AccountingFactory(
+            admission_id=self.pk,
+            french_community_study_allowance_application=None,
+            sport_affiliation='',
+            is_staff_child=None,
+        )

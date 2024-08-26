@@ -65,14 +65,14 @@ class ModifierMembreExterneTestCase(SimpleTestCase):
     def test_should_modifier_membre_externe(self):
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(self.proposition_id)
         membres = self.groupe_de_supervision_repository.get_members(groupe.entity_id)
-        self.assertEqual(len(membres), 3)
+        self.assertEqual(len(membres), 4)
         index = next(i for i, m in enumerate(membres) if m.uuid == 'promoteur-SC3DP-externe')
         self.assertTrue(membres[index].est_externe)
 
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
         membres = self.groupe_de_supervision_repository.get_members(groupe.entity_id)
-        self.assertEqual(len(membres), 3)
+        self.assertEqual(len(membres), 4)
         index = next(i for i, m in enumerate(membres) if m.uuid == 'promoteur-SC3DP-externe')
         self.assertEqual(membres[index].prenom, "John")
 

@@ -59,6 +59,14 @@ class IElementsConfirmation(interface.DomainService):
         '<a href="https://uclouvain.be/en/study/inscriptions/calendrier-inscriptions.html" target="_blank">'
         'www.uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the academic year %(year)s.'
     )
+    REGLEMENT_DOCTORAT = _(
+        'I hereby declare that I have read and understood the regulations of the General PhD Committee and the'
+        ' specific requirements of the PhD Field Committee, to which I adhere.'
+    )
+    REGLEMENT_DOCTORAT_DEONTOLOGIE = _(
+        'I confirm that I have read the PhD regulations on research ethics and certify that my project '
+        'complies with these regulations.'
+    )
     REGLEMENT_GENERAL = _(
         'In accordance with the information at <a target="_blank" href="'
         'https://uclouvain.be/en/study/inscriptions/reglementations.html">'
@@ -139,6 +147,8 @@ class IElementsConfirmation(interface.DomainService):
     )
     TITRE_ELEMENT_CONFIRMATION = {
         'hors_delai': '',
+        'reglement_doctorat': _("Doctorate Regulations"),
+        'reglement_doctorat_deontologie': _("Doctorate Ethics Regulations"),
         'reglement_general': _("Academic Regulations"),
         'protection_donnees': _("Data protection"),
         'professions_reglementees': _("Admission to regulated professions"),
@@ -177,13 +187,33 @@ class IElementsConfirmation(interface.DomainService):
                     texte=cls.HORS_DELAI % {'year': f"{annee_a_prendre_en_compte}-{annee_a_prendre_en_compte + 1}"},
                 )
             )
+
+        if isinstance(proposition, PropositionDoctorale):
+            elements += [
+                # Règlement doctoral
+                ElementConfirmation(
+                    nom='reglement_doctorat',
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['reglement_doctorat'],
+                    texte=cls.REGLEMENT_DOCTORAT,
+                ),
+                # Règlement doctoral relatif à la déontologie de la recherche
+                ElementConfirmation(
+                    nom='reglement_doctorat_deontologie',
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['reglement_doctorat_deontologie'],
+                    texte=cls.REGLEMENT_DOCTORAT_DEONTOLOGIE,
+                ),
+            ]
+        else:
+            elements += [
+                # Règlement général des études
+                ElementConfirmation(
+                    nom='reglement_general',
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['reglement_general'],
+                    texte=cls.REGLEMENT_GENERAL,
+                ),
+            ]
+
         elements += [
-            # Règlement général des études
-            ElementConfirmation(
-                nom='reglement_general',
-                titre=cls.TITRE_ELEMENT_CONFIRMATION['reglement_general'],
-                texte=cls.REGLEMENT_GENERAL,
-            ),
             # Protection des données
             ElementConfirmation(
                 nom='protection_donnees',

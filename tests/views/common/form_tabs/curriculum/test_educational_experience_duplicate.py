@@ -35,13 +35,16 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
+from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -82,6 +85,14 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
+
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=cls.academic_years[0],
+            candidate=cls.general_admission.candidate,
+            submitted=True,
+        )
+
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
 
@@ -105,6 +116,9 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.general_admission.training.education_group,
+        ).person.user
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
         ).person.user
 
         cls.files_uuids = [uuid.uuid4() for _ in range(9)]
@@ -172,10 +186,15 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             reduction=Reduction.A151.name,
             is_102_change_of_course=False,
         )
-        # Targeted url
+        # Targeted urls
         self.duplicate_url = resolve_url(
             'admission:general-education:update:curriculum:educational_duplicate',
             uuid=self.general_admission.uuid,
+            experience_uuid=self.experience.uuid,
+        )
+        self.doctorate_duplicate_url = resolve_url(
+            'admission:doctorate:update:curriculum:educational_duplicate',
+            uuid=self.doctorate_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
 
@@ -491,4 +510,30 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             other_valuated_admission_without_checklist.checklist.get('current', {})
             .get('parcours_anterieur', {})
             .get('enfants', []),
+        )
+
+    def test_duplicate_experience_from_doctorate_curriculum_is_allowed_for_fac_users(self):
+        self.client.force_login(self.doctorate_program_manager_user)
+
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        response = self.client.post(
+            resolve_url(
+                'admission:doctorate:update:curriculum:educational_duplicate',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            ),
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_duplicate_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.post(self.doctorate_duplicate_url)
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=resolve_url('admission:doctorate:curriculum', uuid=self.doctorate_admission.uuid),
         )

@@ -48,7 +48,6 @@ from osis_profile import BE_ISO_CODE
 class SpecificQuestionsFormView(SpecificQuestionsMixinView, FormView):
     permission_required = 'admission.change_admission_specific_questions'
     urlpatterns = 'specific-questions'
-    update_requested_documents = True
 
     def get_template_names(self):
         return [

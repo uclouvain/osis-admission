@@ -41,7 +41,7 @@
         {% for document in documents %}
           {% if document.type in EMPLACEMENTS_DOCUMENTS_INTERNES %}
             <tr
-                hx-get="{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
+                hx-get="{% get_document_details_url document %}"
                 hx-target="#document-details"
                 hx-swap="outerHTML"
                 data-document-id="{{ document.identifiant }}"

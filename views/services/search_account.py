@@ -124,6 +124,7 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
                 lieu_naissance=form.cleaned_data.get('birth_place', ''),
                 email=form.cleaned_data.get('email', ''),
                 genre=form.cleaned_data.get('gender', ''),
+                sex=form.cleaned_data.get('gender', ''),  # TODO: Clarify sex/gender notion with DigIT
                 nationalite=form.cleaned_data.get('country_of_citizenship', ''),
                 etat_civil=form.cleaned_data.get('civil_state', ''),
                 numero_national=form.cleaned_data.get('national_number', ''),

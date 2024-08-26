@@ -65,6 +65,7 @@ class AdmissionEducationDetailView(LoadDossierViewMixin, TemplateView):
 
         context_data['edit_url'] = experience_urls['edit_url']
         context_data['edit_new_link_tab'] = experience_urls['edit_new_link_tab']
+        context_data['formation'] = self.proposition.formation
 
         if etudes_secondaires.diplome_etranger:
             context_data['need_translations'] = etudes_secondaires.a_besoin_traductions

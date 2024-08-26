@@ -161,6 +161,13 @@ class PersonFormTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = patch(
+            "infrastructure.messages_bus.message_bus_instance.publish",
+            side_effect=lambda *args, **kwargs: None,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_already_registered_field_initialization(self):
         form = AdmissionPersonForm(
             instance=PersonFactory(
@@ -775,7 +782,7 @@ class PersonFormTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertIn(transcript_identifier, self.general_admission.requested_documents)
+        self.assertNotIn(transcript_identifier, self.general_admission.requested_documents)
 
     def test_general_person_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -222,11 +222,12 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             document_soumis_le=parse_datetime(metadonnees_document['uploaded_at'])
             if metadonnees_document.get('uploaded_at')
             else None,
-            requis_automatiquement=est_requis_et_manquant,
+            requis_automatiquement=document.required,
             types_documents=types_documents,
             noms_documents_televerses=noms_documents_televerses,
             statut_reclamation=document_demande.get('request_status', ''),
             onglet_checklist_associe=document_demande.get('related_checklist_tab') or '',
+            lecture_seule=document.readonly,
         )
 
     @classmethod

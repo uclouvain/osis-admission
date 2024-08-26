@@ -32,6 +32,7 @@ import attr
 from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
@@ -49,6 +50,8 @@ from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiploma
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import (
@@ -77,6 +80,9 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutsChecklistGenerale,
     StatutChecklist,
 )
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    CurriculumNonCompletePourAcceptationException,
+)
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
     RefuserParFacValidatorList,
@@ -95,12 +101,14 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierInformationsApprobationInscriptionValidatorList,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
     SITUATION_FINANCABILITE_PAR_ETAT,
 )
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
@@ -1042,7 +1050,15 @@ class Proposition(interface.RootEntity):
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE
         self.auteur_derniere_modification = auteur_modification
 
-    def approuver_par_sic(self, auteur_modification: str, documents_dto: List[EmplacementDocumentDTO]):
+    def approuver_par_sic(
+        self,
+        auteur_modification: str,
+        documents_dto: List[EmplacementDocumentDTO],
+        curriculum_dto: CurriculumAdmissionDTO,
+        academic_year_repository: IAcademicYearRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
+    ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
                 statut=self.statut,
@@ -1066,6 +1082,17 @@ class Proposition(interface.RootEntity):
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
             ).validate()
+
+        try:
+            ProfilCandidatService.verifier_curriculum_formation_generale_apres_soumission(
+                proposition=self,
+                curriculum_dto=curriculum_dto,
+                academic_year_repository=academic_year_repository,
+                profil_candidat_translator=profil_candidat_translator,
+                experience_parcours_interne_translator=experience_parcours_interne_translator,
+            )
+        except MultipleBusinessExceptions:
+            raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])
 
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_REUSSITE,

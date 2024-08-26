@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.validation.commands import FiltrerDemandesQuery
+from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.views.list import BaseAdmissionList
 
@@ -36,5 +36,10 @@ class DoctorateAdmissionList(BaseAdmissionList):
     template_name = 'admission/doctorate/cdd/list.html'
     htmx_template_name = 'admission/doctorate/cdd/list_block.html'
     permission_required = 'admission.view_doctorate_enrolment_applications'
-    filtering_query_class = FiltrerDemandesQuery
+    filtering_query_class = ListerDemandesQuery
     form_class = DoctorateListFilterForm
+
+    def additional_command_kwargs(self):
+        return {
+            'demandeur': self.request.user.person.uuid,
+        }

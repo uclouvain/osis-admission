@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List, Dict
 
 from dal_select2.views import Select2ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -31,12 +32,15 @@ from django.shortcuts import get_object_or_404
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False
@@ -52,6 +56,7 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
     retrieve_documents_command = {
         CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
         CONTEXT_CONTINUING: continuing_education_commands.RecupererDocumentsPropositionQuery,
+        CONTEXT_DOCTORATE: doctorate_education_commands.RecupererDocumentsPropositionQuery,
     }
 
     def get(self, request, *args, **kwargs):
@@ -60,7 +65,7 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
         admission = get_object_or_404(BaseAdmission, uuid=admission_uuid)
         admission_context = admission.get_admission_context()
 
-        documents = (
+        documents: List[EmplacementDocumentDTO] = (
             message_bus_instance.invoke(
                 self.retrieve_documents_command[admission_context](
                     uuid_proposition=admission_uuid,
@@ -71,10 +76,17 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
             else []
         )
 
-        documents_by_category = {}
+        documents_by_category: Dict[str, List[EmplacementDocumentDTO]] = {}
+        original_document_is_required = False
+        search_term = self.q.lower()
+
         for document in documents:
-            if self.q and self.q.lower() not in document.libelle.lower():
+            if document.identifiant == document_identifier:
+                original_document_is_required = document.requis_automatiquement
+
+            if search_term not in document.libelle.lower():
                 continue
+
             if (
                 document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES
                 and document.identifiant not in DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION
@@ -92,7 +104,9 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
                             f'{"paperclip" if document.document_uuids else "link-slash"}'
                             f'"></i> {document.libelle}'
                         ),
-                        'disabled': document.identifiant == document_identifier,
+                        'disabled': document.identifiant == document_identifier
+                        or original_document_is_required
+                        and not bool(document.document_uuids),
                     }
                     for document in category_documents
                 ],

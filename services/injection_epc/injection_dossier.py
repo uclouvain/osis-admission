@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import json
+import re
 import uuid
 from datetime import datetime
 from typing import Dict, List, Tuple
@@ -36,6 +37,7 @@ from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
 from unidecode import unidecode
 
 from admission.contrib.models import Accounting, EPCInjection, AdmissionFormItem
+from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import (
     BaseAdmission,
     AdmissionEducationalValuatedExperiences,
@@ -44,7 +46,6 @@ from admission.contrib.models.base import (
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
 )
@@ -217,6 +218,7 @@ class InjectionEPCAdmission:
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
+        documents_specifiques = cls._recuperer_documents_specifiques(admission)
         return {
             "dossier_uuid": str(admission.uuid),
             "signaletique": InjectionEPCSignaletique._get_signaletique(
@@ -238,10 +240,27 @@ class InjectionEPCAdmission:
             "donnees_comptables": cls._get_donnees_comptables(admission=admission),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
-                InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else []
+                (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
+                +
+                documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
+
+    @classmethod
+    def _recuperer_documents_specifiques(cls, admission):
+        documents_specifiques = []
+        form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
+        for form_item in form_items:
+            label = form_item.internal_label.lower()
+            if cls.__contient_uuid_valide(label):
+                document = CategorizedFreeDocument.objects.filter(long_label_fr=form_item.title['fr-be']).first()
+                label = document.short_label_fr.lower() if document else "Label du document non trouve"
+            documents_specifiques.append({
+                "type": re.sub(r'[\W_]+', '_', unidecode(label)).strip('_'),
+                "documents": admission.specific_question_answers[str(form_item.uuid)]
+            })
+        return documents_specifiques
 
     @classmethod
     def _recuperer_documents_manquants(cls, admission: "BaseAdmission"):
@@ -285,7 +304,7 @@ class InjectionEPCAdmission:
         elif len(parties_type_document) == 2:
             # type_document_compose = ONGLET.TYPE_DOCUMENT
             type_document = parties_type_document[1]
-        elif cls.__est_uuid_valide(parties_type_document[-1]):
+        elif cls.__contient_uuid_valide(parties_type_document[-1]):
             # type_document_compose = ONGLET.TYPE_DOCUMENT.uuid (Questions spécifiques)
             _, type_document, uuid_question = parties_type_document
         elif len(parties_type_document) == 3:
@@ -303,12 +322,16 @@ class InjectionEPCAdmission:
         return annee, type_document, str(uuid_experience)
 
     @staticmethod
-    def __est_uuid_valide(chaine):
-        try:
-            uuid.UUID(chaine)
-            return True
-        except ValueError:
-            return False
+    def __contient_uuid_valide(chaine):
+        uuid_regex = r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+        match = re.search(uuid_regex, chaine)
+        if match:
+            try:
+                uuid.UUID(match.group(0))
+                return True
+            except ValueError:
+                return False
+        return False
 
     @classmethod
     def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
@@ -393,10 +416,10 @@ class InjectionEPCAdmission:
     def _get_inscription_offre(cls, admission: BaseAdmission) -> Dict:
         num_offre, validite = cls.__get_validite_num_offre(admission)
         groupe_de_supervision = getattr(admission, 'supervision_group', None)
-        double_diplome = getattr(admission, 'double_degree_scholarship', None)
-        type_demande_bourse = getattr(admission, 'international_scholarship', None)
-        type_erasmus = getattr(admission, 'erasmus_mundus_scholarship', None)
-        admission_generale = getattr(admission, 'generaleducationadmission', None)
+        admission_generale = getattr(admission, 'generaleducationadmission', None)  # type: GeneralEducationAdmission
+        double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
+        type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
+        type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
         return {
             "num_offre": num_offre,
             "validite": validite,
@@ -410,7 +433,7 @@ class InjectionEPCAdmission:
             'double_diplome': str(double_diplome.uuid) if double_diplome else None,
             'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
             'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,
-            'complement_de_formation': AdmissionPrerequisiteCourses.objects.filter(admission_id=admission.id).exists(),
+            'complement_de_formation': admission_generale.with_prerequisite_courses if admission_generale else False,
             'etat_financabilite': {
                 'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
                 'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
@@ -447,12 +470,15 @@ class InjectionEPCAdmission:
 
     @staticmethod
     def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
+        general_admission = getattr(admission, 'generaleducationadmission', None)
+        autre_montant = getattr(general_admission, 'tuition_fees_amount_other')
         return {
             "annee_academique": admission.training.academic_year.year,
-            "droits_majores": getattr(admission, "tuition_fees_dispensation", None),
-            "montant_doits_majores": (
-                str(getattr(admission, "tuition_fees_amount_other", ""))
-                or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount", None))
+            "droits_majores": general_admission.tuition_fees_dispensation,
+            "montant_droits_majores": (
+                ((str(autre_montant) if autre_montant else None)
+                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
+                if general_admission else None
             ),
         }
 

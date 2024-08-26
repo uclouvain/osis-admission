@@ -167,6 +167,8 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
 
 
 class DoctoratDTOSerializer(DTOSerializer):
+    code = None
+
     class Meta:
         source = DoctoratDTO
 
@@ -486,6 +488,8 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
             'bourse_preuve',
             'duree_prevue',
             'temps_consacre',
+            'est_lie_fnrs_fria_fresh_csc',
+            'commentaire_financement',
             'titre_projet',
             'resume_projet',
             'documents_projet',
@@ -498,6 +502,9 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
             'nom_institut_these',
             'sigle_institut_these',
             'lieu_these',
+            'projet_doctoral_deja_commence',
+            'projet_doctoral_institution',
+            'projet_doctoral_date_debut',
             'doctorat_deja_realise',
             'institution',
             'domaine_these',
@@ -717,6 +724,7 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
     )
     langue_redaction_these = RelatedLanguageField(required=False)
     institut_these = RelatedInstituteField(required=False)
+    type_admission = None
 
     class Meta:
         source = CompleterPropositionCommand

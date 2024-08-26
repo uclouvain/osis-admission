@@ -36,7 +36,6 @@ from osis_mail_template.models import MailTemplate
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
@@ -202,7 +201,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
     def requestable_documents(self):
         requestable_types = (
             EMPLACEMENTS_DOCUMENTS_RECLAMABLES
-            if self.is_continuing
+            if self.is_continuing or self.is_doctorate
             else EMPLACEMENTS_FAC
             if self.is_fac
             else EMPLACEMENTS_SIC

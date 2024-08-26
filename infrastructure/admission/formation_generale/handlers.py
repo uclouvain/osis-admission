@@ -38,7 +38,7 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand, RetrieveListePropositionFusionEnErreurQuery,
+    RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
@@ -79,8 +79,9 @@ from admission.ddd.admission.use_case.read import (
 )
 from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
-from admission.ddd.admission.use_case.read.recuperer_propositions_en_erreur_service import \
-    recuperer_propositions_en_erreur
+from admission.ddd.admission.use_case.read.recuperer_propositions_en_erreur_service import (
+    recuperer_propositions_en_erreur,
+)
 from admission.ddd.admission.use_case.read.recuperer_statut_ticket_personne import recuperer_statut_ticket_personne
 from admission.ddd.admission.use_case.read.recuperer_tickets_en_attente import recuperer_tickets_en_attente
 from admission.ddd.admission.use_case.write import (
@@ -95,9 +96,6 @@ from admission.ddd.admission.use_case.write import (
 )
 from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import (
     defaire_proposition_fusion_personne,
-)
-from admission.ddd.admission.use_case.write.fusionner_candidat_avec_personne_existante import (
-    fusionner_candidat_avec_personne_existante,
 )
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import (
     initialiser_proposition_fusion_personne,
@@ -125,8 +123,9 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
 )
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
-from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import \
-    PeriodeSoumissionTicketDigitTranslator
+from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import (
+    PeriodeSoumissionTicketDigitTranslator,
+)
 from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
@@ -530,6 +529,7 @@ COMMAND_HANDLERS = {
         paiement_frais_dossier_service=PaiementFraisDossier(),
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         bourse_translator=BourseTranslator(),
@@ -552,6 +552,7 @@ COMMAND_HANDLERS = {
         partial(rechercher_compte_existant, cmd, digit_service=DigitService())
     ),
     InitialiserPropositionFusionPersonneCommand: lambda msg_bus, cmd: initialiser_proposition_fusion_personne(
+        msg_bus,
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
@@ -561,6 +562,7 @@ COMMAND_HANDLERS = {
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
     RefuserPropositionFusionCommand: lambda msg_bus, cmd: refuser_proposition_fusion_personne(
+        msg_bus,
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
     ),
@@ -682,6 +684,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            digit_repository=DigitRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -690,13 +694,21 @@ COMMAND_HANDLERS = {
             cmd=cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
-            notification=Notification(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             comptabilite_translator=ComptabiliteTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+        )
+    ),
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
+        lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            cmd=cmd,
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+            digit_repository=DigitRepository(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -747,8 +759,8 @@ COMMAND_HANDLERS = {
         digit_repository=DigitRepository(),
     ),
     RetrieveListePropositionFusionEnErreurQuery: lambda msg_bus, query: recuperer_propositions_en_erreur(
-      query,
-      digit_repository=DigitRepository(),
+        query,
+        digit_repository=DigitRepository(),
     ),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: (
         lambda msg_bus, cmd: recuperer_statut_ticket_personne_de_digit(
@@ -766,12 +778,6 @@ COMMAND_HANDLERS = {
             client_comptabilite_translator=ClientComptabiliteTranslator(),
         )
     ),
-    FusionnerCandidatAvecPersonneExistanteCommand: (
-        lambda msg_bus, cmd: fusionner_candidat_avec_personne_existante(
-            cmd,
-            proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
-        )
-    ),
     SpecifierDerogationFinancabiliteCommand: (
         lambda msg_bus, cmd: specifier_derogation_financabilite(
             cmd,
@@ -785,6 +791,15 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         )
     ),
 }

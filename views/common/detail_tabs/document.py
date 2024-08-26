@@ -145,10 +145,10 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
 def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool, context: str) -> bool:
     """
     Check if the document can be edited by the person.
-    For the general and doctorate admissions:
+    For the general admissions:
     - FAC user can only update their own documents
     - SIC user can update all documents except the FAC and SYSTEM ones
-    For the continuing admissions: FAC and SIC users can update all documents except the SYSTEM ones.
+    For the continuing and doctorate admissions: FAC and SIC users can update all documents except the SYSTEM ones.
     """
 
     document_type = document.type
@@ -157,10 +157,10 @@ def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool, c
         return False
 
     if document_type in EMPLACEMENTS_FAC:
-        return (is_fac and context in {CONTEXT_GENERAL, CONTEXT_DOCTORATE}) or context == CONTEXT_CONTINUING
+        return (is_fac and context in {CONTEXT_GENERAL}) or context in {CONTEXT_CONTINUING, CONTEXT_DOCTORATE}
 
     if document_type in EMPLACEMENTS_SIC:
-        return (is_sic and context in {CONTEXT_GENERAL, CONTEXT_DOCTORATE}) or context == CONTEXT_CONTINUING
+        return (is_sic and context in {CONTEXT_GENERAL}) or context in {CONTEXT_CONTINUING, CONTEXT_DOCTORATE}
 
     return False
 
@@ -224,7 +224,7 @@ class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['only_limited_request_choices'] = (self.is_general or self.is_doctorate) & self.is_fac
+        kwargs['only_limited_request_choices'] = self.is_general and self.is_fac
         kwargs['candidate_language'] = self.admission.candidate.language
         return kwargs
 
@@ -268,6 +268,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['editable_document'] = editable_document
         context['retypable_document'] = can_retype_document(document, document_identifier)
         context['read_only_document'] = self.request.GET.get('read-only') == '1'
+        context['mandatory_document'] = self.request.GET.get('mandatory') == '1'
         context['document'] = document
         context['several_files'] = len(document.uuids) > 1
 
@@ -291,9 +292,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             candidate_language=self.admission.candidate.language,
             initial=request_initial,
             editable_document=editable_document,
-            only_limited_request_choices=(self.is_general or self.is_doctorate)
-            and self.is_fac
-            and document.type in EMPLACEMENTS_FAC,
+            only_limited_request_choices=self.is_general and self.is_fac and document.type in EMPLACEMENTS_FAC,
         )
 
         context['retype_form'] = RetypeDocumentForm(admission_uuid=self.admission_uuid, identifier=document_identifier)
@@ -390,7 +389,7 @@ class RequestCandidateDocumentView(DocumentFormView):
         kwargs['candidate_language'] = self.admission.candidate.language
         kwargs['editable_document'] = self.editable_document
         kwargs['only_limited_request_choices'] = (
-            (self.is_general or self.is_doctorate) and self.is_fac and self.document.type in EMPLACEMENTS_FAC
+            self.is_general and self.is_fac and self.document.type in EMPLACEMENTS_FAC
         )
         return kwargs
 
@@ -444,7 +443,6 @@ class DeleteDocumentView(DocumentFormView):
 
         if self.document:
             if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
-                self.admission.update_requested_documents()
                 self.htmx_trigger_form_extra['next'] = 'missing'
 
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
@@ -488,7 +486,7 @@ class RequestStatusChangeDocumentView(DocumentFormView):
         kwargs['document_identifier'] = self.document_identifier
         kwargs['proposition_uuid'] = self.admission_uuid
         kwargs['only_limited_request_choices'] = (
-            (self.is_general or self.is_doctorate) and self.is_fac and self.document.type in EMPLACEMENTS_FAC
+            self.is_general and self.is_fac and self.document.type in EMPLACEMENTS_FAC
         )
         kwargs['context'] = self.current_context
         return kwargs
@@ -597,9 +595,6 @@ class UploadDocumentByManagerView(DocumentFormView):
         )
 
         if self.document:
-            if self.document.type == TypeEmplacementDocument.NON_LIBRE.name:
-                self.admission.update_requested_documents()
-
             self.htmx_trigger_form_extra['next'] = (
                 'received' if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES else 'uclouvain'
             )

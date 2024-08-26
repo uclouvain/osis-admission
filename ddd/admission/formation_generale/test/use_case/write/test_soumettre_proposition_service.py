@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -47,7 +47,8 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.dtos.parcours import (
-    ParcoursDTO, ParcoursAcademiqueInterneDTO,
+    ParcoursDTO,
+    ParcoursAcademiqueInterneDTO,
     ParcoursAcademiqueExterneDTO,
 )
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
@@ -89,13 +90,15 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
             FormationGeneraleInMemoryTranslator(),
         )
-        self.financabilite_fetcher.save(ParcoursDTO(
-            matricule_fgs='0000000001',
-            parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-            parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
-            annee_diplome_etudes_secondaires=2015,
-            nombre_tentative_de_passer_concours_pass_et_las=0,
-        ))
+        self.financabilite_fetcher.save(
+            ParcoursDTO(
+                matricule_fgs='0000000001',
+                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                annee_diplome_etudes_secondaires=2015,
+                nombre_tentative_de_passer_concours_pass_et_las=0,
+            )
+        )
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
                 uuid_proposition="uuid-BACHELIER-FINANCABILITE",
@@ -112,6 +115,7 @@ class TestSoumettrePropositionGenerale(TestCase):
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)
         self.assertEqual(updated_proposition.est_inscription_tardive, False)
+        self.assertEqual(updated_proposition.auteur_derniere_modification, self.candidat.matricule)
 
     @freezegun.freeze_time('22/10/2024')
     @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
@@ -135,13 +139,15 @@ class TestSoumettrePropositionGenerale(TestCase):
 
             self.proposition_repository.save(proposition)
 
-            self.financabilite_fetcher.save(ParcoursDTO(
-                matricule_fgs=proposition.matricule_candidat,
-                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
-                annee_diplome_etudes_secondaires=2015,
-                nombre_tentative_de_passer_concours_pass_et_las=0,
-            ))
+            self.financabilite_fetcher.save(
+                ParcoursDTO(
+                    matricule_fgs=proposition.matricule_candidat,
+                    parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+                    parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                    annee_diplome_etudes_secondaires=2015,
+                    nombre_tentative_de_passer_concours_pass_et_las=0,
+                )
+            )
 
             elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
                 self.proposition_repository.get(proposition.entity_id),
@@ -183,13 +189,15 @@ class TestSoumettrePropositionGenerale(TestCase):
 
             self.proposition_repository.save(proposition)
 
-            self.financabilite_fetcher.save(ParcoursDTO(
-                matricule_fgs=proposition.matricule_candidat,
-                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
-                annee_diplome_etudes_secondaires=2015,
-                nombre_tentative_de_passer_concours_pass_et_las=0,
-            ))
+            self.financabilite_fetcher.save(
+                ParcoursDTO(
+                    matricule_fgs=proposition.matricule_candidat,
+                    parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+                    parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                    annee_diplome_etudes_secondaires=2015,
+                    nombre_tentative_de_passer_concours_pass_et_las=0,
+                )
+            )
 
             elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
                 self.proposition_repository.get(proposition.entity_id),
@@ -216,13 +224,15 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
             FormationGeneraleInMemoryTranslator(),
         )
-        self.financabilite_fetcher.save(ParcoursDTO(
-            matricule_fgs='0000000001',
-            parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-            parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
-            annee_diplome_etudes_secondaires=2015,
-            nombre_tentative_de_passer_concours_pass_et_las=0,
-        ))
+        self.financabilite_fetcher.save(
+            ParcoursDTO(
+                matricule_fgs='0000000001',
+                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                annee_diplome_etudes_secondaires=2015,
+                nombre_tentative_de_passer_concours_pass_et_las=0,
+            )
+        )
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
                 uuid_proposition="uuid-BACHELIER-FINANCABILITE",
