@@ -364,29 +364,29 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         international_scholarship = InternationalScholarshipFactory(short_name='ID1')
         double_degree_scholarship = DoubleDegreeScholarshipFactory(short_name="DD1")
         erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory(short_name="EM1")
-        filters = str(
-            {
-                'annee_academique': 2022,
-                'numero': 1,
-                'noma': '00000001',
-                'matricule_candidat': candidate.global_id,
-                'etats': [ChoixStatutPropositionGenerale.CONFIRMEE.name],
-                'type': TypeDemande.ADMISSION.name,
-                'site_inscription': str(campus.uuid),
-                'entites': 'ENT',
-                'types_formation': [TrainingType.BACHELOR.name, TrainingType.PHD.name],
-                'formation': 'Informatique',
-                'bourse_internationale': str(international_scholarship.uuid),
-                'bourse_erasmus_mundus': str(erasmus_mundus_scholarship.uuid),
-                'bourse_double_diplomation': str(double_degree_scholarship.uuid),
-                'demandeur': str(self.sic_management_user.person.uuid),
-                'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
-                'filtres_etats_checklist': {
-                    OngletsChecklist.donnees_personnelles.name: ['A_TRAITER'],
-                    OngletsChecklist.frais_dossier.name: ['PAYES'],
-                },
-            }
-        )
+        filters = {
+            'annee_academique': 2022,
+            'numero': 1,
+            'noma': '00000001',
+            'matricule_candidat': candidate.global_id,
+            'etats': [ChoixStatutPropositionGenerale.CONFIRMEE.name],
+            'type': TypeDemande.ADMISSION.name,
+            'site_inscription': str(campus.uuid),
+            'entites': 'ENT',
+            'types_formation': [TrainingType.BACHELOR.name, TrainingType.PHD.name],
+            'formation': 'Informatique',
+            'bourse_internationale': str(international_scholarship.uuid),
+            'bourse_erasmus_mundus': str(erasmus_mundus_scholarship.uuid),
+            'bourse_double_diplomation': str(double_degree_scholarship.uuid),
+            'demandeur': str(self.sic_management_user.person.uuid),
+            'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
+            'filtres_etats_checklist': {
+                OngletsChecklist.donnees_personnelles.name: ['A_TRAITER'],
+                OngletsChecklist.frais_dossier.name: ['PAYES'],
+            },
+            'quarantaine': 'True',
+            'injection_en_erreur': 'True',
+        }
 
         view = AdmissionListExcelExportView()
         workbook = Workbook()
@@ -395,12 +395,12 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         view.customize_parameters_worksheet(
             worksheet=worksheet,
             person=self.sic_management_user.person,
-            filters=filters,
+            filters=str(filters),
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 18)
-        self.assertEqual(len(values), 18)
+        self.assertEqual(len(names), 20)
+        self.assertEqual(len(values), 20)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -421,6 +421,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(names[15], _('Dual degree scholarship'))
         self.assertEqual(names[16], _('Include or exclude the checklist filters'))
         self.assertEqual(names[17], _('Checklist filters'))
+        self.assertEqual(names[18], _('Quarantine'))
+        self.assertEqual(names[19], _('Injection error'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '1 Janvier 2023')
@@ -449,6 +451,44 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 }
             ),
         )
+        self.assertEqual(values[18], 'Oui')
+        self.assertEqual(values[19], 'En erreur')
+
+        filters['quarantaine'] = False
+        filters['injection_en_erreur'] = False
+
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_management_user.person,
+            filters=str(filters),
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+        self.assertEqual(len(names), 20)
+        self.assertEqual(len(values), 20)
+
+        self.assertEqual(values[18], 'Non')
+        self.assertEqual(values[19], 'Sans erreur')
+
+        filters['quarantaine'] = None
+        filters['injection_en_erreur'] = None
+
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_management_user.person,
+            filters=str(filters),
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+        self.assertEqual(len(names), 20)
+        self.assertEqual(len(values), 20)
+
+        self.assertEqual(values[18], 'Tous')
+        self.assertEqual(values[19], 'Tous')
 
 
 @freezegun.freeze_time('2023-01-03')
