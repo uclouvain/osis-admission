@@ -35,7 +35,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Q, Exists, OuterRef, F
+from django.db.models import Q, Exists, OuterRef, F, Value, When, Case
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
@@ -613,6 +613,70 @@ class EPCInjectionStatusFilter(SimpleListFilter):
         return queryset
 
 
+class EmailInterneFilter(admin.SimpleListFilter):
+    title = 'Email est interne ?'
+    parameter_name = 'email_interne'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(candidate__email__icontains='uclouvain')
+        elif self.value() == 'no':
+            return queryset.exclude(candidate__email__icontains='uclouvain')
+        return queryset
+
+
+class MatriculeInterneFilter(admin.SimpleListFilter):
+    title = 'Matricule est interne ?'
+    parameter_name = 'matricule_interne'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(candidate__global_id__startswith='0')
+        elif self.value() == 'no':
+            return queryset.exclude(candidate__global_id__startswith='0')
+        return queryset
+
+
+class FinancabiliteOKFilter(admin.SimpleListFilter):
+    title = 'Financabilite bien renseignée ?'
+    parameter_name = 'financabilite_ok'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        queryset = queryset.annotate(
+            financabilite_ok=Case(
+                When(
+                    Q(generaleducationadmission__financability_rule='')
+                    | Q(generaleducationadmission__financability_computed_rule_on__isnull=True)
+                    | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
+                    generaleducationadmission__isnull=False,
+                    then=Value(False)
+                ),
+                default=Value(True)
+            )
+        )
+        if self.value():
+            return queryset.filter(financabilite_ok=self.value() == 'yes')
+        return queryset
+
+
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference', 'candidate__last_name', 'candidate__global_id', 'training__acronym']
@@ -642,12 +706,15 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'generaleducationadmission__tuition_fees_dispensation',
         'generaleducationadmission__tuition_fees_amount',
         'candidate__personmergeproposal__status',
+        EmailInterneFilter,
+        MatriculeInterneFilter,
+        FinancabiliteOKFilter
     ]
     sortable_by = ['reference', 'noma_sent_to_digit']
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
-            _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit')
+            _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
         )
 
     def noma_sent_to_digit(self, obj):
