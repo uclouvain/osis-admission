@@ -35,7 +35,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Q, Exists, OuterRef
+from django.db.models import Q, Exists, OuterRef, F
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
@@ -623,7 +623,8 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'type_demande',
         'created_at',
         'statut',
-        'type_formation'
+        'type_formation',
+        'noma_sent_to_digit'
     )
     readonly_fields = ['uuid']
     actions = [
@@ -639,8 +640,20 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'online_payments__status',
         'accounting__sport_affiliation',
         'generaleducationadmission__tuition_fees_dispensation',
-        'generaleducationadmission__tuition_fees_amount'
+        'generaleducationadmission__tuition_fees_amount',
+        'candidate__personmergeproposal__status',
     ]
+    sortable_by = ['reference', 'noma_sent_to_digit']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit')
+        )
+
+    def noma_sent_to_digit(self, obj):
+        return obj._noma_sent_to_digit
+
+    noma_sent_to_digit.admin_order_field = '_noma_sent_to_digit'
 
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
