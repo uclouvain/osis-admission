@@ -315,12 +315,8 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if person_merge_proposal and (
-                person_merge_proposal.status not in
-                [
-                    PersonMergeStatus.NO_MATCH.name,
-                    PersonMergeStatus.MERGED.name,
-                    PersonMergeStatus.REFUSED.name
-                ] or not person_merge_proposal.validation.get('valid', True)
+                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+                or not person_merge_proposal.validation.get('valid', True)
         ):
             # Cas display warning when quarantaine
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
