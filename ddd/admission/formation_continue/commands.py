@@ -174,6 +174,7 @@ class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQ
 @attr.dataclass(frozen=True, slots=True)
 class RecupererDocumentsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    avec_documents_du_curex_epc: bool = True
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -30,6 +30,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
@@ -68,6 +69,7 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
             message_bus_instance.invoke(
                 self.retrieve_documents_command[admission_context](
                     uuid_proposition=admission_uuid,
+                    avec_documents_du_curex_epc=False,
                 )
             )
             if admission_context in self.retrieve_documents_command
