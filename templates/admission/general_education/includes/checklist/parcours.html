@@ -23,6 +23,21 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% if view.missing_curriculum_periods %}
+  <div class="alert alert-warning" role="alert">
+    {% blocktranslate trimmed count nb_messages=view.missing_curriculum_periods|length %}
+      The following period must be justified in the curriculum:
+      {% plural %}
+      The following periods must be justified in the curriculum:
+    {% endblocktranslate %}
+    <ul>
+      {% for missing_curriculum_period in view.missing_curriculum_periods %}
+        <li>{{ missing_curriculum_period }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
 <ul class="nav nav-tabs" role="tablist">
   <li role="presentation" {% if not default_tab or default_tab == 'complete' %}class="active"{% endif %}>
     <a href="#{{ prefix }}-parcours-complete" aria-controls="{{ prefix }}-parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
