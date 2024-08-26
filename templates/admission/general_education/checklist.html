@@ -495,10 +495,15 @@
                   name="identifier"
               >
                 {% for document in documents %}
-                  <option value="{{ document.identifiant }}" data-document-status="{{ document.statut }}">{{ document.libelle }}</option>
+                  <option
+                    value="{{ document.identifiant }}"
+                    data-document-status="{{ document.statut }}"
+                    data-mandatory-document="{% if document.requis_automatiquement %}1{% else %}0{% endif %}"
+                  >{{ document.libelle }}</option>
                 {% endfor %}
               </select>
               <input name="read-only" type="hidden" value='0' />
+              <input name="mandatory" type="hidden" value='0' />
               <button type="button" class="btn btn-default next-option-button">
                 <i class="fa-solid fa-angle-right"></i>
               </button>
@@ -631,6 +636,7 @@
               const parentForm = $(this).parent('form');
               // Specify if the document must be readonly
               parentForm.find('input[name="read-only"]').val(readOnlyDocumentsIdentifiers.includes($(this).val()) ? '1' : '0');
+              parentForm.find('input[name="mandatory"]').val($(this).find(':selected').data('mandatory-document'));
               // Submit the form to refresh the document view (htmx)
               parentForm[0].requestSubmit();
               // Manage the previous and next buttons

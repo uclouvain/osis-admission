@@ -51,7 +51,7 @@
                 {% elif document.statut == 'RECLAME' %}
                   class="bg-info"
                 {% endif %}
-                  hx-get="{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier=document.identifiant %}{% if document.lecture_seule %}?read-only=1{% endif %}"
+                  hx-get="{% get_document_details_url document %}"
                   hx-target="#document-details"
                   hx-swap="outerHTML"
                   data-document-id="{{ document.identifiant }}"

@@ -268,6 +268,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['editable_document'] = editable_document
         context['retypable_document'] = can_retype_document(document, document_identifier)
         context['read_only_document'] = self.request.GET.get('read-only') == '1'
+        context['mandatory_document'] = self.request.GET.get('mandatory') == '1'
         context['document'] = document
         context['several_files'] = len(document.uuids) > 1
 
