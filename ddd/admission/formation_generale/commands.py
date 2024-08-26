@@ -658,6 +658,14 @@ class ApprouverInscriptionParSicCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class EnvoyerEmailApprobationInscriptionAuCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
     uuid_proposition: str
     pdf: str

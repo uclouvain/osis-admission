@@ -4636,6 +4636,9 @@ msgstr "No"
 msgid "NOMA"
 msgstr ""
 
+msgid "NOMA not found"
+msgstr ""
+
 msgid "NON_CONCERNE"
 msgstr "Not concerned"
 

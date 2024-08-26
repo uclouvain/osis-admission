@@ -183,6 +183,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
     INSCRIPTION_EMAIL_SIC_APPROVAL,
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
 )
 from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_SIC_REFUSAL,
@@ -1269,14 +1270,9 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         required_documents_paragraph += f'<li>{document_name}</li>'
                     required_documents_paragraph += '</ul>'
 
-                noma = ''
-                student = Student.objects.filter(person=self.admission.candidate).values('registration_id').first()
-                if student is not None:
-                    noma = student['registration_id']
-
             tokens.update(
                 {
-                    'noma': noma,
+                    'noma': self.proposition.noma_candidat or EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
                     'contact_person_paragraph': contact_person_paragraph,
                     'planned_years_paragraph': planned_years_paragraph,
                     'prerequisite_courses_paragraph': prerequisite_courses_paragraph,
