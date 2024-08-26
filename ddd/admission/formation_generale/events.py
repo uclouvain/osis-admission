@@ -56,6 +56,9 @@ class PropositionSoumiseEvent(Event):
 class InscriptionApprouveeParSicEvent(Event):
     entity_id: 'PropositionIdentity'
     matricule: str
+    objet_message: str
+    corps_message: str
+    auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
