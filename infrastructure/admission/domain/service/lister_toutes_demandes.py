@@ -212,7 +212,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 qs = qs.filter(
                     Q(candidate__personmergeproposal__isnull=False)
                     & Q(
-                        Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses)
+                        Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
                         |
                         # Cas validation ticket Digit en erreur
                         ~Q(candidate__personmergeproposal__validation__valid=True)
@@ -222,7 +222,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 qs = qs.filter(
                     Q(candidate__personmergeproposal__isnull=True)
                     | Q(candidate__personmergeproposal__status__isnull=True)
-                    | ~Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses)
+                    | ~Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
                 )
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:

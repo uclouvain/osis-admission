@@ -279,7 +279,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                     False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
                 )
         personmergeproposal = getattr(self.admission.candidate, 'personmergeproposal', None)
-        if not (personmergeproposal and self.admission.candidate.personmergeproposal.registration_id_sent_to_digit):
+        if not (personmergeproposal and personmergeproposal.registration_id_sent_to_digit):
             return False, "Il manque le noma"
         if not self.admission.candidate.global_id.startswith('00'):
             return False, "Le compte interne n'a pas encore été créé"
@@ -288,7 +288,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         if self.admission.sent_to_epc:
             return False, "La demande a déjà été envoyée dans EPC"
         if personmergeproposal and (
-            personmergeproposal.status in PersonMergeStatus.quarantine_statuses
+            personmergeproposal.status in PersonMergeStatus.quarantine_statuses()
             or personmergeproposal.validation.get('valid') is not True
         ):
             return False, "La demande est en quarantaine"
