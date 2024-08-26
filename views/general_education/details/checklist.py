@@ -204,6 +204,7 @@ from admission.utils import (
     get_salutation_prefix,
     format_academic_year,
     get_training_url,
+    get_missing_curriculum_periods,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
@@ -289,6 +290,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     @cached_property
     def can_update_checklist_tab(self):
         return has_perm('admission.change_checklist', user=self.request.user, obj=self.admission)
+
+    @cached_property
+    def missing_curriculum_periods(self):
+        return get_missing_curriculum_periods(self.admission_uuid)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
