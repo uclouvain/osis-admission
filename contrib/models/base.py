@@ -76,6 +76,7 @@ from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeStatus
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
@@ -304,6 +305,17 @@ class BaseAdmissionQuerySet(models.QuerySet):
             )
 
         return self.filter(entities_conditions, education_group_conditions)
+
+    def filter_in_quarantine(self):
+        return self.filter(
+            Q(candidate__personmergeproposal__isnull=False)
+            & Q(
+                Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
+                |
+                # Cas validation ticket Digit en erreur
+                ~Q(candidate__personmergeproposal__validation__valid=True)
+            )
+        )
 
     def annotate_submitted_profile_countries_names(self):
         """
@@ -565,6 +577,10 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
             injection.status == EPCInjectionStatus.OK.name
             for injection in self.epc_injection.filter(type=EPCInjectionType.DEMANDE.name)
         )
+
+    @cached_property
+    def is_in_quarantine(self):
+        return BaseAdmission.objects.filter(pk=self.pk).filter_in_quarantine().exists()
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):
