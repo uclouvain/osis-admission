@@ -25,6 +25,8 @@
 # ##############################################################################
 
 import ast
+import datetime
+import uuid
 from typing import Dict
 
 from django.conf import settings
@@ -33,18 +35,27 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import yesno
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.html import format_html
 from django.utils.text import slugify
-from django.utils.translation import gettext as _, gettext_lazy, pgettext
+from django.utils.translation import gettext as _, gettext_lazy, pgettext, get_language
 from django.views import View
 
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
+    TOUS_CHOIX_COMMISSION_PROXIMITE,
+    ChoixTypeFinancement,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery
+from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
@@ -52,6 +63,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
@@ -66,10 +78,13 @@ from osis_export.models.enums.types import ExportTypes
 __all__ = [
     'AdmissionListExcelExportView',
     'ContinuingAdmissionListExcelExportView',
+    'DoctorateAdmissionListExcelExportView',
 ]
 
+from reference.models.country import Country
 
 FULL_DATE_FORMAT = '%Y/%m/%d, %H:%M:%S'
+SHORT_DATE_FORMAT = '%Y/%m/%d'
 
 
 class BaseAdmissionExcelExportView(
@@ -95,9 +110,14 @@ class BaseAdmissionExcelExportView(
         """Get filters as a dict of key/value pairs corresponding to the command params"""
         raise NotImplementedError
 
+    def process_filters_before_command(self, filters):
+        """Process filters before sending them to the command"""
+        return filters
+
     def get_export_objects(self, **kwargs):
         # The filters are saved as dict string so we convert it here to a dict
         filters = ast.literal_eval(kwargs.get('filters'))
+        self.process_filters_before_command(filters)
         return message_bus_instance.invoke(self.command(**filters))
 
     def get(self, request):
@@ -245,6 +265,13 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
         if trainings_types:
             mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
 
+        # Format boolean values
+        mapping_filter_key_value['quarantaine'] = yesno(formatted_filters.get('quarantaine'), _('Yes,No,All'))
+        mapping_filter_key_value['injection_en_erreur'] = yesno(
+            formatted_filters.get('injection_en_erreur'),
+            _('In error,Without error,All'),
+        )
+
         return {
             mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])
             for key, value in formatted_filters.items()
@@ -305,7 +332,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
 
 class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
-    command = ListerDemandesQuery
+    command = ListerDemandesContinuesQuery
     export_name = gettext_lazy('Admission applications export')
     export_description = gettext_lazy('Excel export of admission applications')
     permission_required = 'admission.view_continuing_enrolment_applications'
@@ -419,3 +446,182 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters['demandeur'] = str(self.request.user.person.uuid)
             return form.cleaned_data
         return {}
+
+
+class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
+    command = ListerDemandesDoctoralesQuery
+    export_name = gettext_lazy('Admission applications export')
+    export_description = gettext_lazy('Excel export of admission applications')
+    permission_required = 'admission.view_doctorate_enrolment_applications'
+    redirect_url_name = 'admission:doctorate:cdd:list'
+    urlpatterns = 'doctorate-admissions-list'
+    DATE_FIELDS = [
+        'date_soumission_debut',
+        'date_soumission_fin',
+    ]
+
+    @cached_property
+    def current_language(self):
+        return get_language()
+
+    def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
+        current_language = self.current_language
+
+        formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
+
+        # Remove the filters not used in the excel export
+        formatted_filters.pop('demandeur', None)
+        formatted_filters.pop('tri_inverse', None)
+        formatted_filters.pop('champ_tri', None)
+
+        # Formatting of the names of the filters
+        base_fields = DoctorateListFilterForm.base_fields
+        mapping_filter_key_name = {
+            key: str(base_fields[key].label) if key in base_fields else key for key in formatted_filters
+        }
+
+        mapping_filter_key_name['matricule_candidat'] = _('Last name / First name / Email / NOMA')
+        mapping_filter_key_name['date_soumission_debut'] = _('Submitted from')
+        mapping_filter_key_name['date_soumission_fin'] = _('Submitted until')
+
+        # Formatting of the values of the filters
+        mapping_filter_key_value = {}
+
+        # Retrieve the names of the persons
+        field_name_by_global_id = {
+            formatted_filters[field_name]: field_name
+            for field_name in [
+                'matricule_candidat',
+                'matricule_promoteur',
+            ]
+            if formatted_filters.get(field_name)
+        }
+
+        if field_name_by_global_id:
+            persons = Person.objects.filter(global_id__in=list(field_name_by_global_id.keys()))
+            for person in persons:
+                mapping_filter_key_value[field_name_by_global_id[person.global_id]] = person.full_name
+
+        # Retrieve the nationality
+        country_of_citizenship_iso_code = formatted_filters.get('nationalite')
+        if country_of_citizenship_iso_code:
+            country_field = {
+                settings.LANGUAGE_CODE_FR: 'name',
+                settings.LANGUAGE_CODE_EN: 'name_en',
+            }.get(current_language, 'name')
+
+            country = Country.objects.filter(iso_code=country_of_citizenship_iso_code).first()
+
+            if country:
+                mapping_filter_key_value['nationalite'] = getattr(country, country_field)
+
+        # Retrieve the names of the scholarships
+        field_name_by_global_id = {
+            uuid.UUID(formatted_filters[field_name]): field_name
+            for field_name in [
+                'bourse_recherche',
+            ]
+            if formatted_filters.get(field_name)
+        }
+
+        if field_name_by_global_id:
+            scholarships = Scholarship.objects.filter(uuid__in=list(field_name_by_global_id.keys()))
+            for scholarship in scholarships:
+                mapping_filter_key_value[field_name_by_global_id[scholarship.uuid]] = scholarship.short_name
+
+        # Format enums
+        statuses = formatted_filters.get('etats')
+        if statuses:
+            mapping_filter_key_value['etats'] = [
+                ChoixStatutPropositionDoctorale.get_value(status_key) for status_key in statuses
+            ]
+
+        admission_type = formatted_filters.get('type')
+        if admission_type:
+            mapping_filter_key_value['type'] = ChoixTypeAdmission.get_value(admission_type)
+
+        proximity_commission = formatted_filters.get('commission_proximite')
+        if proximity_commission:
+            mapping_filter_key_value['commission_proximite'] = TOUS_CHOIX_COMMISSION_PROXIMITE.get(proximity_commission)
+
+        financing_type = formatted_filters.get('type_financement')
+        if financing_type:
+            mapping_filter_key_value['type_financement'] = ChoixTypeFinancement.get_value(financing_type)
+
+        checklist_mode = formatted_filters.get('mode_filtres_etats_checklist')
+        if checklist_mode:
+            mapping_filter_key_value['mode_filtres_etats_checklist'] = ModeFiltrageChecklist.get_value(checklist_mode)
+
+        # Format boolean values
+        # > "Yes" / "No" / ""
+        for filter_name in ['cotutelle']:
+            mapping_filter_key_value[filter_name] = yesno(formatted_filters[filter_name], _('yes,no,'))
+
+        return {
+            mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])
+            for key, value in formatted_filters.items()
+        }
+
+    def get_header(self):
+        return [
+            _('Application no.'),
+            _('Last name / First name'),
+            _('Nationality'),
+            _('Scholarship'),
+            pgettext('admission', 'Course'),
+            _('Dossier status'),
+            _('Fac decision'),
+            _('SIC decision'),
+            _('Submission date'),
+            _('Last modification'),
+            _('Modification author'),
+            _('Pre-admission'),
+            _('Cotutelle'),
+        ]
+
+    def get_row_data(self, row: DemandeRechercheDTO):
+        return [
+            row.numero_demande,
+            row.candidat,
+            row.nom_pays_nationalite_candidat,
+            row.code_bourse,
+            row.formation,
+            str(ChoixStatutPropositionDoctorale.get_value(row.etat_demande)),
+            row.decision_fac,
+            row.decision_sic,
+            row.date_confirmation.strftime(SHORT_DATE_FORMAT) if row.date_confirmation else '',
+            row.derniere_modification_le.strftime(SHORT_DATE_FORMAT),
+            row.derniere_modification_par,
+            yesno(row.type_admission == ChoixTypeAdmission.PRE_ADMISSION.name),
+            yesno(row.cotutelle, _('yes,no,')),
+        ]
+
+    def get_filters(self):
+        form = DoctorateListFilterForm(user=self.request.user, data=self.request.GET)
+
+        if form.is_valid():
+            filters = form.cleaned_data
+            filters.pop('taille_page', None)
+            filters.pop('page', None)
+            filters.pop('liste_travail', None)
+
+            ordering_field = self.request.GET.get('o')
+            if ordering_field:
+                filters['tri_inverse'] = ordering_field[0] == '-'
+                filters['champ_tri'] = ordering_field.lstrip('-')
+
+            filters['demandeur'] = str(self.request.user.person.uuid)
+
+            # Convert the dates to strings
+            for date_field in self.DATE_FIELDS:
+                filters[date_field] = filters[date_field].toisoformat() if filters.get(date_field) else ''
+
+            return form.cleaned_data
+        return {}
+
+    def process_filters_before_command(self, filters):
+        # Convert the dates from strings to dates
+        for date_field in self.DATE_FIELDS:
+            filters[date_field] = datetime.date.fromisoformat(filters[date_field]) if filters.get(date_field) else None
+
+        return filters

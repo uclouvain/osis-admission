@@ -23,24 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 from types import SimpleNamespace
-from django.utils.translation import gettext_lazy as _
+from typing import Optional
 
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery, RecupererEtudesSecondairesQuery
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO, \
-    DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO
-from infrastructure.messages_bus import message_bus_instance
-
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery, RecupererEtudesSecondairesQuery
 from admission.templatetags.admission import format_matricule
 from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO, \
+    DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO
+from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
@@ -89,20 +90,34 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
             RecupererEtudesSecondairesQuery(matricule_candidat=self.candidate['global_id'])
         )
 
-    @cached_property
-    def curriculum_personne_connue(self) -> CurriculumAdmissionDTO:
-        return message_bus_instance.invoke(
-            RechercherParcoursAnterieurQuery(
-                global_id=format_matricule(self.request.GET.get('matricule')),
-                uuid_proposition=self.kwargs['admission_uuid'],
-            )
-        )
+    @property
+    def matricule_personne_connue_selectionnee(self) -> Optional[str]:
+        if self.request.GET.get('matricule'):
+            return format_matricule(self.request.GET.get('matricule'))
+        return None
 
     @cached_property
-    def etudes_secondaires_personne_connue(self) -> EtudesSecondairesAdmissionDTO:
-        return message_bus_instance.invoke(
-            RecupererEtudesSecondairesQuery(matricule_candidat=self.candidate['global_id'])
-        )
+    def curriculum_personne_connue(self) -> Optional[CurriculumAdmissionDTO]:
+        with contextlib.suppress(Person.DoesNotExist):
+            if self.matricule_personne_connue_selectionnee:
+                return message_bus_instance.invoke(
+                    RechercherParcoursAnterieurQuery(
+                        global_id=self.matricule_personne_connue_selectionnee,
+                        uuid_proposition=self.kwargs['admission_uuid'],
+                    )
+                )
+        return None
+
+    @cached_property
+    def etudes_secondaires_personne_connue(self) -> Optional[EtudesSecondairesAdmissionDTO]:
+        with contextlib.suppress(Person.DoesNotExist):
+            if self.matricule_personne_connue_selectionnee:
+                return message_bus_instance.invoke(
+                    RecupererEtudesSecondairesQuery(
+                        matricule_candidat=self.matricule_personne_connue_selectionnee,
+                    )
+                )
+        return None
 
     def get_context_data(self, **kwargs):
         context = {
@@ -118,7 +133,7 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
     def get_secondary_school_or_alternative_experiences(self):
         secondary_school_or_alternative_experiences = [
             SimpleNamespace(
-                uuid=self.etudes_secondaires_candidat.experience.uuid,
+                uuid=self.etudes_secondaires_candidat.uuid,
                 annees=self.etudes_secondaires_candidat.annee_diplome_etudes_secondaires,
                 nom_formation=self._get_nom_formation_etude_secondaire(self.etudes_secondaires_candidat),
                 nom_institut=self._get_nom_institut_etude_secondaire(self.etudes_secondaires_candidat),
@@ -131,7 +146,7 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
         if self.etudes_secondaires_personne_connue:
             secondary_school_or_alternative_experiences.append(
                 SimpleNamespace(
-                    uuid=self.etudes_secondaires_personne_connue.experience.uuid,
+                    uuid=self.etudes_secondaires_personne_connue.uuid,
                     annees=self.etudes_secondaires_personne_connue.annee_diplome_etudes_secondaires,
                     nom_formation=self._get_nom_formation_etude_secondaire(self.etudes_secondaires_personne_connue),
                     nom_institut=self._get_nom_institut_etude_secondaire(self.etudes_secondaires_personne_connue),

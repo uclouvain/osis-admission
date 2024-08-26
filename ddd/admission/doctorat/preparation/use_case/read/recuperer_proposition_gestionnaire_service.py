@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,16 +22,17 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from admission.ddd.admission.commands import FusionnerCandidatAvecPersonneExistanteCommand
-from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
+##############################################################################
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-def fusionner_candidat_avec_personne_existante(
-        cmd: 'FusionnerCandidatAvecPersonneExistanteCommand',
-        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
-):
-    return proposition_fusion_personne_repository.fusionner(
-        candidate_global_id=cmd.candidate_global_id,
-        ticket_uuid=cmd.ticket_uuid,
+def recuperer_proposition_gestionnaire(
+    cmd: 'RecupererPropositionGestionnaireQuery',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionDTO':
+    return proposition_repository.get_dto_for_gestionnaire(
+        PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition),
     )

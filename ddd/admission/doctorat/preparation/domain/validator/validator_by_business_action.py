@@ -31,11 +31,15 @@ from admission.ddd.admission.doctorat.preparation.business_types import *
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
+from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
+    ExperiencePrecedenteRecherche,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixDoctoratDejaRealise, ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.domain.validator import (
@@ -49,6 +53,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcade
 @attr.dataclass(frozen=True, slots=True)
 class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
+    doctorat: Doctorat
+    commission_proximite: Optional[str] = ''
     justification: Optional[str] = ''
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -57,12 +63,15 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldJustificationDonneeSiPreadmission(self.type_admission, self.justification),
+            ShouldCommissionProximiteEtreValide(doctorat=self.doctorat, commission_proximite=self.commission_proximite),
         ]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
+    doctorat: Doctorat
+    commission_proximite: Optional[str] = ''
     justification: Optional[str] = ''
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -71,18 +80,21 @@ class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListVa
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldJustificationDonneeSiPreadmission(self.type_admission, self.justification),
+            ShouldCommissionProximiteEtreValide(doctorat=self.doctorat, commission_proximite=self.commission_proximite),
         ]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
+    doctorat: Doctorat
     type_financement: Optional[str] = ''
     justification: Optional[str] = ''
     type_contrat_travail: Optional[str] = ''
     doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
     institution: Optional[str] = ''
     domaine_these: Optional[str] = ''
+    commission_proximite: Optional[str] = ''
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -93,6 +105,7 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
             ShouldTypeContratTravailDependreTypeFinancement(self.type_financement, self.type_contrat_travail),
             ShouldInstitutionDependreDoctoratRealise(self.doctorat_deja_realise, self.institution),
             ShouldDomaineDependreDoctoratRealise(self.doctorat_deja_realise, self.domaine_these),
+            ShouldCommissionProximiteEtreValide(doctorat=self.doctorat, commission_proximite=self.commission_proximite),
         ]
 
 
@@ -235,13 +248,19 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     type_admission: 'ChoixTypeAdmission'
     projet: 'DetailProjet'
     financement: 'Financement'
+    experience_precedente_recherche: 'ExperiencePrecedenteRecherche'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldProjetEtreComplet(self.type_admission, self.projet, self.financement),
+            ShouldProjetEtreComplet(
+                self.type_admission,
+                self.projet,
+                self.financement,
+                self.experience_precedente_recherche,
+            ),
         ]
 
 
@@ -357,7 +376,7 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
+            ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA(self.groupe_de_supervision.signatures_membres_CA),
             ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(self.groupe_de_supervision),
         ]
 

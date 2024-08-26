@@ -118,6 +118,15 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
+    def historiser_mail_acceptation_inscription_sic(
+        cls,
+        proposition_uuid: str,
+        gestionnaire: str,
+        message: EmailMessage,
+    ):
+        pass
+
+    @classmethod
     def historiser_demande_verification_titre_acces(
         cls,
         proposition: Proposition,

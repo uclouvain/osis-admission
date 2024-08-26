@@ -37,6 +37,7 @@ from admission.contrib.models.base import (
 )
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
+from admission.tasks import injecter_signaletique_a_epc_task
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
@@ -53,29 +54,21 @@ SPORT_TOUT_CAMPUS = [
 
 
 class InjectionEPCSignaletique:
-    def injecter(self, admission: BaseAdmission):
-        logger.info(
-            f"[INJECTION EPC] Recuperation des donnees de la signaletique pour le dossier (reference {str(admission)})"
-        )
+    def injecter(self, admission: BaseAdmission) -> None:
         donnees = self.recuperer_donnees(admission=admission)
         EPCInjection.objects.get_or_create(
             admission=admission,
             type=EPCInjectionType.SIGNALETIQUE.name,
             defaults={
                 'payload': donnees,
-                'status': EPCInjectionStatus.PENDING.name,
-                'last_attempt_date': datetime.now(),
+                'status': EPCInjectionStatus.NO_SENT.name,
+                'last_attempt_date': None,
             }
         )
-        logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
-        logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
-        transaction.on_commit(
-            lambda: self.envoyer_signaletique_dans_queue(
-                donnees=donnees,
-                admission_reference=str(admission)
+        if settings.USE_CELERY:
+            transaction.on_commit(
+                lambda: injecter_signaletique_a_epc_task.run.delay(admissions_references=[admission.reference])
             )
-        )
-        return donnees
 
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
@@ -98,7 +91,7 @@ class InjectionEPCSignaletique:
         fusion = PersonMergeProposal.objects.filter(original_person=candidat).first()
         return {
             'noma': fusion.registration_id_sent_to_digit if fusion else '',
-            'email': candidat.email,
+            'email': candidat.private_email,
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
             'prenom_suivant': candidat.middle_name,
@@ -121,10 +114,12 @@ class InjectionEPCSignaletique:
     def _get_inscription_annee_academique(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
         candidat = admission.candidate  # type: Person
         assimilation_checklist = admission.checklist.get('current', {}).get('assimilation', {})
+        date_assimilation = assimilation_checklist.get('extra', {}).get('date_debut', None)
         return {
             'annee_academique': admission.training.academic_year.year,
             'nationalite': candidat.country_of_citizenship.iso_code,
             'type_demande': admission.type_demande,
+            'contexte': admission.get_admission_context().upper().replace('-', '_'),
             'carte_sport_lln_woluwe': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.LOUVAIN_WOLUWE.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False
@@ -139,6 +134,10 @@ class InjectionEPCSignaletique:
             ),
             'carte_sport_st_louis': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_LOUIS.name] + SPORT_TOUT_CAMPUS
+                if comptabilite else False
+            ),
+            'carte_sport_st_gilles': (
+                comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_GILLES.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False
             ),
             'carte_solidaire': comptabilite.solidarity_student or False if comptabilite else False,
@@ -175,7 +174,10 @@ class InjectionEPCSignaletique:
                 TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name
                 if comptabilite else False
             ),
-            'date_assimilation': assimilation_checklist.get('extra', {}).get('date_debut', None)
+            'date_assimilation': (
+                datetime.strptime(date_assimilation, '%Y-%m-%d').strftime('%d/%m/%Y')
+                if date_assimilation else None
+            )
         }
 
     @staticmethod

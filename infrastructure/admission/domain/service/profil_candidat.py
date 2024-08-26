@@ -63,7 +63,6 @@ from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdm
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
-    EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -72,7 +71,6 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
-from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -208,7 +206,27 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def _get_language_knowledge_dto(cls, candidate: Person) -> List[ConnaissanceLangueDTO]:
+    def get_connaissances_langues(cls, matricule: str) -> List[ConnaissanceLangueDTO]:
+        languages = (
+            LanguageKnowledge.objects.select_related('language')
+            .filter(person__global_id=matricule)
+            .alias(
+                relevancy=Case(
+                    When(language__code='EN', then=2),
+                    When(language__code='FR', then=1),
+                    default=0,
+                ),
+            )
+            .order_by('-relevancy', 'language__code')
+        )
+        return cls._get_language_knowledge_dto(languages=languages)
+
+    @classmethod
+    def _get_language_knowledge_dto(
+        cls,
+        candidate: Optional[Person] = None,
+        languages: Optional[List[LanguageKnowledge]] = None,
+    ) -> List[ConnaissanceLangueDTO]:
         """Returns the DTO of the language knowledge data of the given candidate."""
         return [
             ConnaissanceLangueDTO(
@@ -220,7 +238,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 capacite_ecriture=langue.writing_ability or '',
                 certificat=langue.certificate or '',
             )
-            for langue in candidate.languages_knowledge.all()
+            for langue in (candidate.languages_knowledge.all() if candidate else languages)
         ]
 
     @classmethod
@@ -544,8 +562,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_secondary_studies_valuation_annotations(cls):
-        be_institute_address = ''
-
         return dict(
             belgian_highschool_diploma_institute_address=Concat(
                 F('belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress__street'),

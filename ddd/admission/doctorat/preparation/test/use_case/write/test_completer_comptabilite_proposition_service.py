@@ -127,6 +127,7 @@ class TestCompleterComptabilitePropositionService(TestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition_id, proposition.entity_id)
+        self.assertEqual(proposition.auteur_derniere_modification, self.cmd.auteur_modification)
         self.assertEqual(
             proposition.comptabilite.attestation_absence_dette_etablissement,
             self.cmd.attestation_absence_dette_etablissement,

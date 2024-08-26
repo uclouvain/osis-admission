@@ -89,7 +89,7 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
             self.assertEqual(
                 response.status_code,
                 403,
-                'A SIC user cannot update the document n°%s' % index,
+                'A SIC user cannot cancel the document n°%s' % index,
             )
 
         # Create a requested document
@@ -204,7 +204,7 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
             self.assertEqual(
                 response.status_code,
                 403,
-                'A FAC user cannot update the document n°%s' % index,
+                'A FAC user cannot cancel the document n°%s' % index,
             )
 
         # Create a requested document
@@ -444,10 +444,7 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
             [
                 # Because they are read only
                 self.sic_free_non_requestable_internal_document,
-                # Or created by a fac manager
                 self.fac_free_non_requestable_internal_document,
-                self.fac_free_requestable_candidate_document_with_default_file,
-                self.fac_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
             ]
@@ -463,8 +460,26 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
             self.assertEqual(
                 response.status_code,
                 403,
-                'A SIC user cannot update the document n°%s' % index,
+                'A SIC user cannot cancel the document n°%s' % index,
             )
+
+        # SIC user can cancel FAC documents
+        for identifier in [
+            self.fac_free_requestable_candidate_document_with_default_file,
+            self.fac_free_requestable_document,
+        ]:
+            response = self.client.post(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                data={
+                    'request_status': '',
+                },
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
 
         # Create a requested document
         document_identifier = self._create_a_free_document(
@@ -560,10 +575,7 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
             [
                 # Because they are read only
                 self.fac_free_non_requestable_internal_document,
-                # Or created by a fac manager
                 self.sic_free_non_requestable_internal_document,
-                self.sic_free_requestable_candidate_document_with_default_file,
-                self.sic_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
             ]
@@ -579,8 +591,25 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
             self.assertEqual(
                 response.status_code,
                 403,
-                'A FAC user cannot update the document n°%s' % index,
+                'A FAC user cannot cancel the document n°%s' % index,
             )
+
+        # FAC manager can cancel SIC documents
+        for index, identifier in enumerate(
+            [
+                self.sic_free_requestable_candidate_document_with_default_file,
+                self.sic_free_requestable_document,
+            ]
+        ):
+            response = self.client.get(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
 
         # Create a requested document
         document_identifier = self._create_a_free_document(
@@ -656,7 +685,7 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
     def test_doctorate_manager_cancels_the_request_of_a_non_free_document(self, frozen_time):
         base_url = 'admission:doctorate:document:candidate-request'
 
-        # A FAC user cannot request a categorized document
+        # A FAC user can request a categorized document
         self.doctorate_admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
         self.doctorate_admission.save(update_fields=['status'])
         self.client.force_login(user=self.doctorate_fac_manager_user)
@@ -670,7 +699,7 @@ class CancelDocumentRequestTestCase(BaseDocumentViewTestCase):
             **self.default_headers,
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         # A SIC user can request a categorized document
         self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name

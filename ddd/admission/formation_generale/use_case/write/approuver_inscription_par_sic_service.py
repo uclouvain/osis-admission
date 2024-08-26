@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.events import InscriptionApprouveeParSicEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_inscription_par_sic(
@@ -42,19 +43,18 @@ def approuver_inscription_par_sic(
     cmd: ApprouverInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
-    notification: 'INotification',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
+    experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
-    identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
     resume_dto = ResumeProposition.get_resume(
         profil_candidat_translator=profil_candidat_translator,
@@ -75,18 +75,19 @@ def approuver_inscription_par_sic(
     )
 
     # WHEN
-    proposition.approuver_par_sic(auteur_modification=cmd.auteur, documents_dto=documents_dto)
+    proposition.approuver_par_sic(
+        auteur_modification=cmd.auteur,
+        documents_dto=documents_dto,
+        curriculum_dto=resume_dto.curriculum,
+        academic_year_repository=academic_year_repository,
+        profil_candidat_translator=profil_candidat_translator,
+        experience_parcours_interne_translator=experience_parcours_interne_translator,
+    )
 
     # THEN
     proposition_repository.save(entity=proposition)
-    message = notification.accepter_proposition_par_sic(
-        proposition=proposition,
-        objet_message=cmd.objet_message,
-        corps_message=cmd.corps_message,
-    )
     historique.historiser_acceptation_sic(
         proposition=proposition,
-        message=message,
         gestionnaire=cmd.auteur,
     )
 
@@ -94,6 +95,9 @@ def approuver_inscription_par_sic(
         InscriptionApprouveeParSicEvent(
             entity_id=proposition.entity_id,
             matricule=proposition.matricule_candidat,
+            auteur=cmd.auteur,
+            objet_message=cmd.objet_message,
+            corps_message=cmd.corps_message,
         )
     )
     return proposition.entity_id

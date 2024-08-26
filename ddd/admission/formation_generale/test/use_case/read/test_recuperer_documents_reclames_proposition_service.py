@@ -117,7 +117,7 @@ class RecupererDocumentsReclamesPropositionTestCase(SimpleTestCase):
         self.assertEqual(curriculum.nom_onglet, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.nom_onglet_langue_candidat, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.uuid_proposition, 'uuid-MASTER-SCI')
-        self.assertEqual(curriculum.requis_automatiquement, False)
+        self.assertEqual(curriculum.requis_automatiquement, True)
 
         # Documents libres réclamables
         document: Optional[EmplacementDocumentDTO] = next(

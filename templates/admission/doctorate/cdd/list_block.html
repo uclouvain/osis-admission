@@ -1,5 +1,5 @@
 {% extends "admission/list/base_block.html" %}
-{% load bootstrap3 i18n admission enums %}
+{% load i18n admission enums %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -25,29 +25,60 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% block exports_list %}
+  <li>
+    <button
+      type="button"
+      class="scroll-to-top"
+      hx-get="{% url 'admission:excel-exports:doctorate-admissions-list' %}?{{ view.query_params.urlencode }}"
+      hx-indicator="#htmx-overlay"
+      hx-swap="none"
+    >
+      {% translate "Produce xls" %}
+    </button>
+  </li>
+{% endblock %}
+
 {% block list_block_header %}
   {% translate 'Course' context 'admission' as course_label %}
-  {% sortable_header_div 'numero_demande' _('Dossier numero') %}
-  {% sortable_header_div 'nom_candidat' _('Name') %}
-  {% sortable_header_div 'formation' course_label %}
+  {% translate 'Scholarship' context 'doctorate-header-list' as scholarship_label %}
+  {% translate 'Dossier status' context 'doctorate-header-list' as status_label %}
+  {% translate 'Submission date' context 'doctorate-header-list' as submission_date_label %}
+  {% sortable_header_div 'numero_demande' _('Application numero') %}
+  {% sortable_header_div 'nom_candidat' _('Last name / First name') %}
   {% sortable_header_div 'nationalite' _('Nationality') %}
-  {% sortable_header_div 'code_bourse' _('Scholarship') %}
-  {% sortable_header_div 'statut_demande' _('Dossier status') %}
-  {% sortable_header_div 'statut_cdd' _('CDD status') %}
-  {% sortable_header_div 'statut_sic' _('SIC status') %}
+  {% sortable_header_div 'code_bourse' scholarship_label %}
+  {% sortable_header_div 'formation' course_label %}
+  {% sortable_header_div 'etat_demande' status_label %}
+  {% sortable_header_div 'fac_decision' _('Fac decision') %}
+  {% sortable_header_div 'sic_decision' _('SIC decision') %}
+  {% sortable_header_div 'date_confirmation' submission_date_label %}
   {% sortable_header_div 'derniere_modification' _('Last modification') %}
-  {% sortable_header_div 'date_confirmation' _('Dossier confirmation') %}
+  {% sortable_header_div 'derniere_modification_par' _('Actor') %}
+  {% sortable_header_div 'pre_admission' _('Pre-admission') %}
+  {% sortable_header_div 'cotutelle' _('Cotutelle') %}
 {% endblock %}
 
 {% block list_block_row_result %}
-  <td><a href="{% url 'admission:doctorate' admission.uuid %}">{{ admission.numero_demande }}</a></td>
-  <td>{{ admission.nom_candidat }}</td>
-  <td>{{ admission.formation }}</td>
-  <td>{{ admission.nationalite|default_if_none:'' }}</td>
+  <td class="word-break-keep-all"><a href="{% url 'admission:doctorate' admission.uuid %}">{{ admission.numero_demande }}</a></td>
+  <td>{{ admission.candidat }}</td>
+  <td>{{ admission.nom_pays_nationalite_candidat|default:'' }}</td>
   <td>{{ admission.code_bourse }}</td>
-  <td>{{ admission.statut_demande|enum_display:'ChoixStatutPropositionDoctorale' }}</td>
-  <td>{{ admission.statut_cdd|enum_display:'ChoixStatutCDD' }}</td>
-  <td>{{ admission.statut_sic|enum_display:'ChoixStatutSIC' }}</td>
-  <td>{{ admission.derniere_modification }}</td>
-  <td>{{ admission.date_confirmation|default_if_none:'' }}</td>
+  <td>{{ admission.formation }}</td>
+  <td>{{ admission.etat_demande|enum_display:'ChoixStatutPropositionDoctorale' }}</td>
+  <td>{{ admission.decision_fac }}</td>
+  <td>{{ admission.decision_sic }}</td>
+  <td>{{ admission.date_confirmation|date:'SHORT_DATE_FORMAT'|default:'' }}</td>
+  <td>{{ admission.derniere_modification_le|date:'SHORT_DATE_FORMAT' }}</td>
+  <td>{{ admission.derniere_modification_par }}</td>
+  <td>
+    {% if admission.type_admission == 'PRE_ADMISSION' %}
+      <i class="fa-solid fa-flag" style="color: #c01c28;"></i>
+    {% endif %}
+    </td>
+  <td>
+    {% if admission.cotutelle %}
+      <i class="fa-solid fa-seedling" style="color: #26a269;"></i>
+    {% endif %}
+  </td>
 {% endblock %}

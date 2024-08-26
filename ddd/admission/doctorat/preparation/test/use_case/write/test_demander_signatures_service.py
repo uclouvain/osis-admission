@@ -81,7 +81,7 @@ class TestDemanderSignaturesService(TestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE)
         self.assertTrue(proposition.est_verrouillee_pour_signature)
         self.assertEqual(len(signatures), 2)
-        self.assertEqual(len(groupe.signatures_membres_CA), 1)
+        self.assertEqual(len(groupe.signatures_membres_CA), 2)
         self.assertEqual(signatures[0].promoteur_id.uuid, 'promoteur-SC3DP-externe')
         self.assertEqual(signatures[0].etat, ChoixEtatSignature.INVITED)
 
@@ -94,7 +94,7 @@ class TestDemanderSignaturesService(TestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE)
         self.assertTrue(proposition.est_verrouillee_pour_signature)
         self.assertEqual(len(groupe.signatures_promoteurs), 1)
-        self.assertEqual(len(groupe.signatures_membres_CA), 1)
+        self.assertEqual(len(groupe.signatures_membres_CA), 2)
         self.assertEqual(groupe.signatures_promoteurs[0].etat, ChoixEtatSignature.INVITED)
         self.assertEqual(groupe.signatures_membres_CA[0].etat, ChoixEtatSignature.APPROVED)
 

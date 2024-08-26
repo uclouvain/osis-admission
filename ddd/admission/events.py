@@ -33,3 +33,15 @@ from osis_common.ddd.interface import Event
 class PropositionFusionDefaiteEvent(Event):
     entity_id: 'PropositionFusionPersonneIdentity'
     matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class PropositionFusionRefuseeEvent(Event):
+    entity_id: 'PropositionFusionPersonneIdentity'
+    matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class PropositionFusionInitialiseeEvent(Event):
+    entity_id: 'PropositionFusionPersonneIdentity'
+    matricule: str
