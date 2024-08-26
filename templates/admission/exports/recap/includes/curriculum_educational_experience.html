@@ -156,7 +156,6 @@
         </thead>
         <tbody>
           {% for experience_year in experience.annees %}
-            {% if experience_year.resultat %}
               <tr>
                 <td class="academic-year-container" {% if experience.type_releve_notes == 'ONE_A_YEAR' and not hide_files %}rowspan="2"{% endif %}>
                   {{ experience_year.annee|get_academic_year }}
@@ -208,14 +207,6 @@
                   </td>
                 </tr>
               {% endif %}
-            {% else %}
-              <tr>
-                <td class="academic-year-container">{{ experience_year.annee }}</td>
-                <td {% if evaluation_system_with_credits %}colspan="3"{% endif %}>
-                  {% translate 'Year without enrolling in the course.' %}
-                </td>
-              </tr>
-            {% endif %}
           {% endfor %}
         </tbody>
       </table>

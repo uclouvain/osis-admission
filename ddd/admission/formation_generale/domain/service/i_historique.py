@@ -112,6 +112,16 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    @abstractmethod
+    def historiser_mail_acceptation_inscription_sic(
+        cls,
+        proposition_uuid: str,
+        gestionnaire: str,
+        message: EmailMessage,
+    ):
+        raise NotImplementedError
+
+    @classmethod
     def historiser_modification_authentification_experience_parcours(
         cls,
         proposition: Proposition,

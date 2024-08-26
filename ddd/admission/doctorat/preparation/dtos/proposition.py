@@ -29,8 +29,11 @@ from uuid import UUID
 
 import attr
 
+from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
 from admission.ddd.admission.dtos.bourse import BourseDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from osis_common.ddd import interface
+from osis_profile import PLUS_5_ISO_CODES
 from .doctorat import DoctoratDTO
 from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 
@@ -59,6 +62,8 @@ class PropositionDTO(interface.DTO):
     bourse_preuve: List[str]
     duree_prevue: Optional[int]
     temps_consacre: Optional[int]
+    est_lie_fnrs_fria_fresh_csc: Optional[bool]
+    commentaire_financement: Optional[str]
     titre_projet: Optional[str]
     resume_projet: Optional[str]
     documents_projet: List[str]
@@ -71,6 +76,9 @@ class PropositionDTO(interface.DTO):
     nom_institut_these: str
     sigle_institut_these: str
     lieu_these: str
+    projet_doctoral_deja_commence: Optional[bool]
+    projet_doctoral_institution: Optional[str]
+    projet_doctoral_date_debut: Optional[datetime.date]
     doctorat_deja_realise: str
     institution: Optional[str]
     domaine_these: str
@@ -98,3 +106,35 @@ class PropositionDTO(interface.DTO):
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PropositionGestionnaireDTO(PropositionDTO):
+    date_changement_statut: Optional[datetime.datetime]
+
+    genre_candidat: str
+    noma_candidat: str
+    adresse_email_candidat: str
+    nationalite_candidat_fr: str
+    nationalite_candidat_en: str
+    nationalite_candidat_code_iso: str
+    nationalite_ue_candidat: Optional[bool]
+    photo_identite_candidat: List[str]
+
+    candidat_a_plusieurs_demandes: bool
+
+    cotutelle: Optional[CotutelleDTO]
+
+    profil_soumis_candidat: Optional[ProfilCandidatDTO]
+
+    @property
+    def candidat_a_nationalite_ue_5(self):
+        return self.nationalite_ue_candidat is True or self.nationalite_candidat_code_iso in PLUS_5_ISO_CODES
+
+    @property
+    def candidat_a_nationalite_hors_ue_5(self):
+        return self.nationalite_ue_candidat is False and self.nationalite_candidat_code_iso not in PLUS_5_ISO_CODES
+
+    @property
+    def formation(self):
+        return self.doctorat

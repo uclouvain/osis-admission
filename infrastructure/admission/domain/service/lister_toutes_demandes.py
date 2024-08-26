@@ -167,7 +167,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if numero:
             qs = qs.filter(reference=numero)
         if noma:
-            qs = qs.filter(candidate__student__registration_id=noma)
+            qs = qs.filter(
+                Q(candidate__student__registration_id=noma) |
+                Q(candidate__personmergeproposal__registration_id_sent_to_digit=noma)
+            )
         if matricule_candidat:
             qs = qs.filter(candidate__global_id=matricule_candidat)
         if type:
@@ -209,13 +212,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 qs = qs.filter(
                     Q(candidate__personmergeproposal__isnull=False)
                     & Q(
-                        ~Q(
-                            candidate__personmergeproposal__status__in=[
-                                PersonMergeStatus.NO_MATCH.name,
-                                PersonMergeStatus.MERGED.name,
-                                PersonMergeStatus.REFUSED.name,
-                            ]
-                        )
+                        Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
                         |
                         # Cas validation ticket Digit en erreur
                         ~Q(candidate__personmergeproposal__validation__valid=True)
@@ -225,13 +222,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 qs = qs.filter(
                     Q(candidate__personmergeproposal__isnull=True)
                     | Q(candidate__personmergeproposal__status__isnull=True)
-                    | Q(
-                        candidate__personmergeproposal__status__in=[
-                            PersonMergeStatus.NO_MATCH.name,
-                            PersonMergeStatus.MERGED.name,
-                            PersonMergeStatus.REFUSED.name,
-                        ]
-                    )
+                    | ~Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
                 )
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:

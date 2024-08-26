@@ -95,12 +95,13 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
         promoter = PromoterFactory(is_reference_promoter=True)
         CaMemberFactory(process=promoter.process)
+        CaMemberFactory(process=promoter.process)
         self.admission.supervision_group = promoter.actor_ptr.process
         self.admission.save()
 
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(EmailNotification.objects.count(), 3)
+        self.assertEqual(EmailNotification.objects.count(), 4)
 
     def test_request_signatures_using_api_without_ca_members_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -158,6 +159,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         promoter = ExternalPromoterFactory()
         PromoterFactory(process=promoter.actor_ptr.process, is_reference_promoter=True)
         CaMemberFactory(process=promoter.actor_ptr.process)
+        CaMemberFactory(process=promoter.actor_ptr.process)
         admission.supervision_group = promoter.actor_ptr.process
         admission.save()
 
@@ -180,6 +182,7 @@ class RequestSignaturesApiTestCase(APITestCase):
 
         promoter = PromoterFactory(is_reference_promoter=True)
         external_promoter = ExternalPromoterFactory(process=promoter.process)
+        CaMemberFactory(process=promoter.process)
         CaMemberFactory(process=promoter.process)
         self.admission.supervision_group = promoter.actor_ptr.process
         self.admission.save()

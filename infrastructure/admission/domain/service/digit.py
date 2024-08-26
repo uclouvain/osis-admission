@@ -50,16 +50,7 @@ TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX = ['8', '9']
 
 class DigitService(IDigitService):
     @classmethod
-    def rechercher_compte_existant(
-        cls,
-        matricule: str,
-        nom: str,
-        prenom: str,
-        autres_prenoms: str,
-        genre: str,
-        date_naissance: str,
-        niss: str
-    ):
+    def rechercher_compte_existant(cls, matricule: str):
         original_person = Person.objects.get(global_id=matricule)
         person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
             original_person=original_person,
@@ -69,10 +60,14 @@ class DigitService(IDigitService):
         )
 
         if person_merge_proposal.status in [
-            PersonMergeStatus.IN_PROGRESS.name,
-            PersonMergeStatus.MERGED.name
+            PersonMergeStatus.PENDING.name,      # Cas gestionnaire en cours de résolution
+            PersonMergeStatus.IN_PROGRESS.name,  # En attente du retour de fusion de DiGIT
+            PersonMergeStatus.REFUSED.name,      # Gestionnaire refuse la proposition de fusion
         ]:
-            # Cas gestionnaire en cours de résolution de fusion OU personne déjà fusionnée par DigIT
+            logger.info(
+                f"[Recherche doublon potentiel DigIT - {matricule} ] Recherche non effectuée car "
+                f"état de la proposition de fusion est {person_merge_proposal.status}"
+            )
             return None
 
         if not cls.correspond_a_compte_temporaire(matricule):
@@ -80,17 +75,25 @@ class DigitService(IDigitService):
             person_merge_proposal.similarity_result = []
             person_merge_proposal.last_similarity_result_update = datetime.datetime.now()
             person_merge_proposal.save()
+            logger.info(
+                f"[Recherche doublon potentiel DigIT - {matricule} ] Recherche non effectuée car compte interne"
+            )
             return None
 
-        if niss:
+        national_number_sanatized = None
+        if original_person.national_number:
             # keep only digits in niss
-            niss = re.sub(r'\D', '', niss)
+            national_number_sanatized = re.sub(r'\D', '', original_person.national_number)
 
         data = {
-            "lastname": nom, "firstname": prenom, "birthdate": date_naissance,
-            "sex": genre, "nationalRegister": niss, "otherFirstName": autres_prenoms,
+            "lastname": original_person.last_name,
+            "firstname": original_person.first_name,
+            "birthdate": str(original_person.birth_date) if original_person.birth_date else "",
+            "sex": original_person.sex,
+            "nationalRegister": national_number_sanatized,
+            "otherFirstName": original_person.middle_name,
         }
-        logger.info(f"DIGIT search existing person: {json.dumps(data)}")
+        logger.info(f"[Recherche doublon potentiel DigIT - {matricule}] Données envoyées à DigIT {json.dumps(data)}")
 
         if MOCK_DIGIT_SERVICE_CALL:
             similarity_data = _mock_search_digit_account_return_response()
@@ -109,8 +112,7 @@ class DigitService(IDigitService):
                     raise Exception(f"Digit internal server error (payload: {str(similarity_data)})")
             except Exception as e:
                 logger.info(
-                    f"An error occured when try to call DigIT endpoint recherche_compte_existant. "
-                    f"set PersonMergeProposal to ERROR : {repr(e)}"
+                    f"[Recherche doublon potentiel DigIT - {matricule}] Une erreur est survenue avec DigIT {repr(e)}"
                 )
                 PersonMergeProposal.objects.update_or_create(
                     original_person=original_person,
@@ -122,7 +124,7 @@ class DigitService(IDigitService):
                 )
                 return None
 
-        logger.info(f"DIGIT Response: {similarity_data}")
+        logger.info(f"[Recherche doublon potentiel DigIT - {matricule}] Données recues de DigIT {similarity_data}")
         similarity_data = _clean_data_from_duplicate_registration_ids(similarity_data)
         similarity_data = _retrieve_private_email_in_data(similarity_data)
         PersonMergeProposal.objects.update_or_create(

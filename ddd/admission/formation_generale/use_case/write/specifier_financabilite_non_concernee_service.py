@@ -23,14 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.formation_generale.commands import (
+    SpecifierFinancabiliteNonConcerneeCommand,
+)
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
-from django.views.generic import TemplateView
 
-from admission.views.common.mixins import LoadDossierViewMixin
+def specifier_financabilite_non_concernee(
+    cmd: 'SpecifierFinancabiliteNonConcerneeCommand',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
 
-__all__ = ['DoctorateAdmissionCurriculumDetailView']
+    # THEN
+    proposition.specifier_financabilite_non_concernee(
+        cmd.etabli_par,
+        cmd.gestionnaire,
+    )
+    proposition_repository.save(proposition)
 
-
-class DoctorateAdmissionCurriculumDetailView(LoadDossierViewMixin, TemplateView):
-    template_name = 'admission/doctorate/details/curriculum.html'
-    permission_required = 'admission.view_admission_curriculum'
+    return proposition_id

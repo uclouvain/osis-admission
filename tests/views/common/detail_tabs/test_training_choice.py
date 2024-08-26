@@ -30,10 +30,12 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, MessageAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -57,6 +59,7 @@ class TrainingChoiceDetailViewTestCase(TestCase):
 
         general_entity = EntityVersionFactory().entity
         continuing_entity = EntityVersionFactory().entity
+        doctorate_entity = EntityVersionFactory().entity
 
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training__management_entity=general_entity,
@@ -70,6 +73,13 @@ class TrainingChoiceDetailViewTestCase(TestCase):
             training__academic_year=academic_years[0],
             determined_academic_year=cls.general_admission.determined_academic_year,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=doctorate_entity,
+            training__academic_year=academic_years[0],
+            determined_academic_year=cls.general_admission.determined_academic_year,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
         cls.specific_questions = [
@@ -96,12 +106,19 @@ class TrainingChoiceDetailViewTestCase(TestCase):
             education_group=cls.continuing_admission.training.education_group
         ).person.user
 
+        cls.doctorate_sic_manager_user = SicManagementRoleFactory(entity=doctorate_entity).person.user
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group
+        ).person.user
+
         cls.general_url = resolve_url('admission:general-education:training-choice', uuid=cls.general_admission.uuid)
 
         cls.continuing_url = resolve_url(
             'admission:continuing-education:training-choice',
             uuid=cls.continuing_admission.uuid,
         )
+
+        cls.doctorate_url = resolve_url('admission:doctorate:training-choice', uuid=cls.doctorate_admission.uuid)
 
     def test_general_training_choice_access(self):
         # If the user is not authenticated, they should be redirected to the login page
@@ -119,6 +136,14 @@ class TrainingChoiceDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         self.client.force_login(self.continuing_program_manager_user)
+        response = self.client.get(self.general_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.doctorate_sic_manager_user)
+        response = self.client.get(self.general_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.doctorate_program_manager_user)
         response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -159,7 +184,15 @@ class TrainingChoiceDetailViewTestCase(TestCase):
         response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        self.client.force_login(self.general_sic_manager_user)
+        self.client.force_login(self.general_program_manager_user)
+        response = self.client.get(self.continuing_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.doctorate_sic_manager_user)
+        response = self.client.get(self.continuing_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.doctorate_program_manager_user)
         response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -180,6 +213,55 @@ class TrainingChoiceDetailViewTestCase(TestCase):
 
         # Check context data
         self.assertEqual(response.context['admission'].uuid, self.continuing_admission.uuid)
+
+        specific_questions: List[QuestionSpecifiqueDTO] = response.context.get('specific_questions', [])
+        self.assertEqual(len(specific_questions), 1)
+        self.assertEqual(specific_questions[0].uuid, str(self.specific_questions[0].form_item.uuid))
+
+    def test_doctorate_training_choice_access(self):
+        # If the user is not authenticated, they should be redirected to the login page
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, resolve_url('login') + '?next=' + self.doctorate_url)
+
+        # If the user is authenticated but doesn't have the right role, raise a 403
+        self.client.force_login(CandidateFactory().person.user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.general_sic_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.general_program_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.continuing_sic_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(self.continuing_program_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # If the user is authenticated and has the right role, they should be able to access the page
+        self.client.force_login(self.doctorate_sic_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_login(self.doctorate_program_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_doctorate_training_choice(self):
+        self.client.force_login(self.doctorate_sic_manager_user)
+        response = self.client.get(self.doctorate_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check context data
+        self.assertEqual(response.context['admission'].uuid, self.doctorate_admission.uuid)
 
         specific_questions: List[QuestionSpecifiqueDTO] = response.context.get('specific_questions', [])
         self.assertEqual(len(specific_questions), 1)

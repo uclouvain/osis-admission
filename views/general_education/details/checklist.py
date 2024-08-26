@@ -33,7 +33,7 @@ from django.db.models import QuerySet
 from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import resolve_url, redirect, render
+from django.shortcuts import resolve_url, redirect
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
 from django.utils import translation, timezone
@@ -44,11 +44,14 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
+from admission.contrib.models import EPCInjection
+from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
@@ -118,7 +121,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverInscriptionTardiveParFaculteCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
     SpecifierDerogationFinancabiliteCommand,
-    NotifierCandidatDerogationFinancabiliteCommand,
+    NotifierCandidatDerogationFinancabiliteCommand, SpecifierFinancabiliteNonConcerneeCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -180,6 +183,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
     INSCRIPTION_EMAIL_SIC_APPROVAL,
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
 )
 from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_SIC_REFUSAL,
@@ -217,7 +221,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParco
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -249,6 +252,7 @@ __all__ = [
     'FinancabiliteApprovalSetRuleView',
     'FinancabiliteNotFinanceableSetRuleView',
     'FinancabiliteNotFinanceableView',
+    'FinancabiliteNotConcernedView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
     'SicApprovalDecisionView',
@@ -306,12 +310,8 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if person_merge_proposal and (
-                person_merge_proposal.status not in
-                [
-                    PersonMergeStatus.NO_MATCH.name,
-                    PersonMergeStatus.MERGED.name,
-                    PersonMergeStatus.REFUSED.name
-                ] or not person_merge_proposal.validation.get('valid', True)
+                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+                or not person_merge_proposal.validation.get('valid', True)
         ):
             # Cas display warning when quarantaine
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
@@ -1261,14 +1261,9 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         required_documents_paragraph += f'<li>{document_name}</li>'
                     required_documents_paragraph += '</ul>'
 
-                noma = ''
-                student = Student.objects.filter(person=self.admission.candidate).values('registration_id').first()
-                if student is not None:
-                    noma = student['registration_id']
-
             tokens.update(
                 {
-                    'noma': noma,
+                    'noma': self.proposition.noma_candidat or EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
                     'contact_person_paragraph': contact_person_paragraph,
                     'planned_years_paragraph': planned_years_paragraph,
                     'prerequisite_courses_paragraph': prerequisite_courses_paragraph,
@@ -2353,6 +2348,23 @@ class FinancabiliteNotFinanceableView(HtmxPermissionRequiredMixin, Financabilite
         return HttpResponseClientRefresh()
 
 
+class FinancabiliteNotConcernedView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, View):
+    urlpatterns = {'financability-not-concerned': 'financability-checklist-not-concerned'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteNonConcerneeCommand(
+                uuid_proposition=self.admission_uuid,
+                etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
+            )
+        )
+        return HttpResponseClientRefresh()
+
+
 class FinancabiliteDerogationNonConcerneView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
     urlpatterns = {'financability-derogation-non-concerne': 'financability-derogation-non-concerne'}
     template_name = 'admission/general_education/includes/checklist/financabilite.html'
@@ -2701,6 +2713,18 @@ class ChecklistView(
             return ["admission/general_education/checklist_menu.html"]
         return ["admission/general_education/checklist.html"]
 
+    @property
+    def injection_signaletique(self):
+        return EPCInjection.objects.filter(
+            admission=self.admission,
+            status__in=[
+                EPCInjectionStatus.PENDING.name,
+                EPCInjectionStatus.NO_SENT.name,
+                EPCInjectionStatus.ERROR.name,
+            ],
+            type=EPCInjectionType.SIGNALETIQUE.name,
+        ).first()
+
     def get_context_data(self, **kwargs):
         from infrastructure.messages_bus import message_bus_instance
 
@@ -2924,18 +2948,20 @@ class ChecklistView(
                 children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
 
             prefixed_past_experiences_documents = []
-            documents_from_not_valuated_experiences = []
-            context['read_only_documents'] = documents_from_not_valuated_experiences
+            read_only_documents = []
+            context['read_only_documents'] = read_only_documents
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
+                if admission_document.lecture_seule:
+                    read_only_documents.append(admission_document.identifiant)
                 document_tab_identifier = admission_document.onglet.split('.')
 
                 if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
                     tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
 
                     if document_tab_identifier[1] in not_valuated_by_current_admission_experiences_uuids:
-                        documents_from_not_valuated_experiences.append(admission_document.identifiant)
+                        read_only_documents.append(admission_document.identifiant)
 
                     if tab_identifier not in context['documents']:
                         context['documents'][tab_identifier] = [admission_document]
@@ -3018,6 +3044,7 @@ class ChecklistView(
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 
+        context['injection_signaletique'] = self.injection_signaletique
         return context
 
     def _merge_with_known_curriculum(self, curex_a_fusionner, resume):

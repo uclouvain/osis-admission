@@ -552,11 +552,17 @@ def get_experience_urls(
                 uuid=admission.uuid,
                 experience_uuid=experience.uuid,
             )
-            res_context['delete_url'] = resolve_url(
-                f'{base_namespace}:update:curriculum:educational_delete',
-                uuid=admission.uuid,
-                experience_uuid=experience.uuid,
+
+            can_delete_curriculum_via_admission = user.has_perm(
+                perm='admission.delete_admission_curriculum',
+                obj=admission,
             )
+            if can_delete_curriculum_via_admission:
+                res_context['delete_url'] = resolve_url(
+                    f'{base_namespace}:update:curriculum:educational_delete',
+                    uuid=admission.uuid,
+                    experience_uuid=experience.uuid,
+                )
 
     elif isinstance(experience, ExperienceNonAcademiqueDTO):
         res_context['details_url'] = resolve_url(
@@ -591,11 +597,17 @@ def get_experience_urls(
                 uuid=admission.uuid,
                 experience_uuid=experience.uuid,
             )
-            res_context['delete_url'] = resolve_url(
-                f'{base_namespace}:update:curriculum:non_educational_delete',
-                uuid=admission.uuid,
-                experience_uuid=experience.uuid,
+
+            can_delete_curriculum_via_admission = user.has_perm(
+                perm='admission.delete_admission_curriculum',
+                obj=admission,
             )
+            if can_delete_curriculum_via_admission:
+                res_context['delete_url'] = resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational_delete',
+                    uuid=admission.uuid,
+                    experience_uuid=experience.uuid,
+                )
 
     elif isinstance(experience, EtudesSecondairesAdmissionDTO):
         res_context['details_url'] = resolve_url(

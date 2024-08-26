@@ -1078,6 +1078,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
+            identifiant_externe='123456789',
         )
         cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -1125,6 +1126,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
+            identifiant_externe='123456789',
         )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[
@@ -1138,6 +1140,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     fonction='Librarian',
                     secteur=ActivitySector.PUBLIC.name,
                     autre_activite='Other name',
+                    identifiant_externe='123456789',
                 )
             ],
             experiences_academiques=[
@@ -1192,6 +1195,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 est_valorise_par_epc=False,
                 types_formations_admissions_valorisees=[],
             ),
+            identifiant_externe='123456789',
         )
 
         accounting_dto = _ComptabiliteDTO(
@@ -1461,6 +1465,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 type=TrainingType.BACHELOR.name,
                 campus_inscription='Mons',
                 sigle_entite_gestion='FFD',
+                code='CFD1',
             ),
             reference='1234',
             annee_calculee=2023,
@@ -1503,12 +1508,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             langue_redaction_these='',
             lettres_recommandation=['uuid-lettres-recommandation'],
             lieu_these='',
+            projet_doctoral_deja_commence=False,
+            projet_doctoral_institution='',
+            projet_doctoral_date_debut=None,
             nationalite_candidat='',
             projet_formation_complementaire=['uuid-projet-formation-complementaire'],
             proposition_programme_doctoral=['uuid-proposition-programme-doctoral'],
             raison_non_soutenue='',
             resume_projet='',
             temps_consacre=None,
+            est_lie_fnrs_fria_fresh_csc=False,
+            commentaire_financement='',
             titre_projet='',
             type_admission='',
             type_contrat_travail='',
@@ -1611,6 +1621,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     demande_ouverture=['uuid-demande-ouverture'],
                     convention=['uuid-convention'],
                     autres_documents=['uuid-autres-documents'],
+                    autre_institution=False,
+                    autre_institution_nom='',
+                    autre_institution_adresse='',
                 ),
             ),
         )
@@ -1646,6 +1659,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
     def test_identification_attachments_with_national_number(self):
         with mock.patch.multiple(
@@ -1663,11 +1677,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'CARTE_IDENTITE')
             self.assertEqual(attachments[1].label, DocumentsIdentification['CARTE_IDENTITE'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
             self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
     def test_identification_attachments_with_id_card_number(self):
         with mock.patch.multiple(
@@ -1685,11 +1701,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'CARTE_IDENTITE')
             self.assertEqual(attachments[1].label, DocumentsIdentification['CARTE_IDENTITE'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
             self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
     def test_identification_attachments_with_passport_number(self):
         with mock.patch.multiple(
@@ -1707,11 +1725,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'PASSEPORT')
             self.assertEqual(attachments[1].label, DocumentsIdentification['PASSEPORT'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.passeport)
             self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
     # Secondary studies attachments
     def test_secondary_studies_attachments_for_continuing_proposition(self):
@@ -1732,6 +1752,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, document_question.label)
         self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
         self.assertFalse(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_got_belgian_diploma(self):
         with mock.patch.multiple(
@@ -1756,6 +1777,27 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
+
+    def test_secondary_studies_attachments_for_bachelor_proposition_and_got_not_epc_belgian_diploma(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.etudes_secondaires,
+            diplome_etranger=None,
+            alternative_secondaires=None,
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            identifiant_externe=None,
+        ):
+            section = get_secondary_studies_section(
+                self.general_bachelor_context,
+                self.empty_questions,
+                False,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
+            self.assertFalse(attachments[0].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_got_belgian_diploma_this_year(self):
         with mock.patch.multiple(
@@ -1781,6 +1823,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             # The document is missing
             with mock.patch.multiple(
@@ -1798,6 +1841,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
                 self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
                 self.assertTrue(attachments[0].required)
+                self.assertTrue(attachments[0].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_alternative(self):
         with mock.patch.multiple(
@@ -1827,6 +1871,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             # Required because it is not a VAE access
             self.assertTrue(attachments[0].required)
 
+            self.assertTrue(attachments[0].readonly)
+
             # Simulate a VAE access (36 months of non academic experiences) -> Not required
             experience = self.general_bachelor_context.curriculum.experiences_non_academiques[0]
             with mock.patch.multiple(experience, date_debut=datetime.date(2020, 4, 1)):
@@ -1843,6 +1889,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
                 )
                 self.assertFalse(attachments[0].required)
+                self.assertTrue(attachments[0].readonly)
 
             # Simulate a non-VAE access (35 months of non academic experiences) -> Required
             with mock.patch.multiple(experience, date_debut=datetime.date(2020, 5, 1)):
@@ -1859,6 +1906,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
                 )
                 self.assertTrue(attachments[0].required)
+                self.assertTrue(attachments[0].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_foreign_diploma(self):
         with mock.patch.multiple(
@@ -1883,6 +1931,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -1891,6 +1940,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_foreign_diploma_with_translations(self):
         with mock.patch.multiple(
@@ -1919,6 +1969,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'])
@@ -1927,6 +1978,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -1935,6 +1987,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
             self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
             self.assertEqual(
@@ -1946,6 +1999,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
             )
             self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
             # The diploma is not specified -> the related translation is required
             with mock.patch.multiple(
@@ -1963,6 +2017,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
                 self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
                 self.assertTrue(attachments[1].required)
+                self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_diploma_this_year(self):
         with mock.patch.multiple(
@@ -1991,6 +2046,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -1999,6 +2055,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_diploma_with_translations(self):
         with mock.patch.multiple(
@@ -2027,6 +2084,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'])
@@ -2035,6 +2093,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -2043,6 +2102,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
             self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
             self.assertEqual(
@@ -2054,6 +2114,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
             )
             self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
             # The diploma is not specified -> the related translation is required
             with mock.patch.multiple(
@@ -2071,6 +2132,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
                 self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
                 self.assertTrue(attachments[1].required)
+                self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_diploma_this_year(self):
         with mock.patch.multiple(
@@ -2099,6 +2161,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'])
@@ -2107,6 +2170,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -2115,6 +2179,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
             self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
             self.assertEqual(
@@ -2126,6 +2191,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
             )
             self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
             # The diploma is not specified
             with mock.patch.multiple(
@@ -2143,6 +2209,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
                 self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
                 self.assertTrue(attachments[1].required)
+                self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_assimilated_foreign_diploma_this_year(self):
         with mock.patch.multiple(
@@ -2170,6 +2237,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -2178,6 +2246,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             # The diploma is missing
             with mock.patch.multiple(
@@ -2195,6 +2264,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
                 self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
                 self.assertTrue(attachments[0].required)
+                self.assertTrue(attachments[0].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_national_bachelor_diploma_equiv(
         self,
@@ -2227,6 +2297,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
@@ -2235,6 +2306,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -2243,6 +2315,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_equival(
         self,
@@ -2272,6 +2345,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
@@ -2280,6 +2354,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -2288,6 +2363,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_pending_eq(
         self,
@@ -2320,6 +2396,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.preuve_decision_equivalence,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
@@ -2328,6 +2405,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -2336,6 +2414,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_without_eq(
         self,
@@ -2361,6 +2440,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
@@ -2369,6 +2449,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
     def test_curriculum_attachments_for_continuing_proposition_with_short_training(self):
         with mock.patch.multiple(
@@ -2394,6 +2475,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.curriculum)
             self.assertFalse(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
     # Curriculum attachments
     def test_curriculum_attachments_for_continuing_proposition_without_equivalence(self):
@@ -2412,6 +2494,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
         self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.curriculum)
         self.assertFalse(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
         self.assertEqual(
             attachments[1].identifier,
@@ -2420,6 +2503,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[1].label, document_question.label)
         self.assertEqual(attachments[1].uuids, self.admission.specific_question_answers[document_question.uuid])
         self.assertFalse(attachments[1].required)
+        self.assertFalse(attachments[1].readonly)
 
     def test_curriculum_attachments_for_continuing_proposition_with_equivalence(self):
         with mock.patch.multiple(
@@ -2435,11 +2519,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsCurriculum['DIPLOME_EQUIVALENCE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.equivalence_diplome)
             self.assertFalse(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'CURRICULUM')
             self.assertEqual(attachments[1].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.proposition.curriculum)
             self.assertFalse(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
     def test_curriculum_attachments_for_master_proposition(self):
         with mock.patch.multiple(
@@ -2455,6 +2541,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.curriculum)
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
     def test_curriculum_attachments_for_capaes_proposition_and_equivalence(self):
         with mock.patch.multiple(
@@ -2471,11 +2558,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsCurriculum['DIPLOME_EQUIVALENCE'])
             self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.equivalence_diplome)
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'CURRICULUM')
             self.assertEqual(attachments[1].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[1].uuids, self.general_bachelor_context.proposition.curriculum)
             self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
             # With only one obtained belgian diploma, don't display the equivalence
             with mock.patch.multiple(
@@ -2561,6 +2650,27 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, DocumentsCurriculum['DIPLOME'])
         self.assertEqual(attachments[0].uuids, experience.diplome)
         self.assertTrue(attachments[0].required)
+        self.assertTrue(attachments[0].readonly)
+
+    def test_curriculum_acad_non_epc_experience_attachments_with_continuing_proposition(self):
+        experience = self.continuing_context.curriculum.experiences_academiques[0]
+
+        with mock.patch.multiple(
+            experience,
+            type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            identifiant_externe=None,
+        ):
+            section = get_educational_experience_section(
+                self.continuing_context,
+                experience,
+                True,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'DIPLOME')
+            self.assertFalse(attachments[0].readonly)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_global_transcript(self):
         experience = self.general_bachelor_context.curriculum.experiences_academiques[0]
@@ -2578,11 +2688,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsCurriculum['RELEVE_NOTES'])
             self.assertEqual(attachments[0].uuids, experience.releve_notes)
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[1].uuids, experience.diplome)
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_global_transcript_and_translation(
         self,
@@ -2607,21 +2719,25 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsCurriculum['RELEVE_NOTES'])
             self.assertEqual(attachments[0].uuids, experience.releve_notes)
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'TRADUCTION_RELEVE_NOTES')
             self.assertEqual(attachments[1].label, DocumentsCurriculum['TRADUCTION_RELEVE_NOTES'])
             self.assertEqual(attachments[1].uuids, experience.traduction_releve_notes)
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME')
             self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[2].uuids, experience.diplome)
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
             self.assertEqual(attachments[3].identifier, 'TRADUCTION_DIPLOME')
             self.assertEqual(attachments[3].label, DocumentsCurriculum['TRADUCTION_DIPLOME'])
             self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
             self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_annual_transcript(self):
         experience = self.general_bachelor_context.curriculum.experiences_academiques[0]
@@ -2643,11 +2759,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[1].uuids, experience.diplome)
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_annual_transcript_and_translation(
         self,
@@ -2675,6 +2793,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
             self.assertTrue(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, f'{experience_year.annee}.TRADUCTION_RELEVE_NOTES_ANNUEL')
             self.assertEqual(
@@ -2684,16 +2803,19 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertEqual(attachments[1].uuids, experience_year.traduction_releve_notes)
             self.assertTrue(attachments[1].required)
+            self.assertTrue(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'DIPLOME')
             self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[2].uuids, experience.diplome)
             self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[2].readonly)
 
             self.assertEqual(attachments[3].identifier, 'TRADUCTION_DIPLOME')
             self.assertEqual(attachments[3].label, DocumentsCurriculum['TRADUCTION_DIPLOME'])
             self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
             self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_pending_result(self):
         experience = self.general_bachelor_context.curriculum.experiences_academiques[0]
@@ -2720,6 +2842,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 )
                 self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
                 self.assertFalse(attachments[0].required)
+                self.assertTrue(attachments[0].readonly)
 
                 self.assertEqual(attachments[1].identifier, f'{experience_year.annee}.TRADUCTION_RELEVE_NOTES_ANNUEL')
                 self.assertEqual(
@@ -2729,16 +2852,19 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 )
                 self.assertEqual(attachments[1].uuids, experience_year.traduction_releve_notes)
                 self.assertFalse(attachments[1].required)
+                self.assertTrue(attachments[1].readonly)
 
                 self.assertEqual(attachments[2].identifier, 'DIPLOME')
                 self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
                 self.assertEqual(attachments[2].uuids, experience.diplome)
                 self.assertTrue(attachments[2].required)
+                self.assertTrue(attachments[2].readonly)
 
                 self.assertEqual(attachments[3].identifier, 'TRADUCTION_DIPLOME')
                 self.assertEqual(attachments[3].label, DocumentsCurriculum['TRADUCTION_DIPLOME'])
                 self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
                 self.assertTrue(attachments[3].required)
+                self.assertTrue(attachments[3].readonly)
 
     def test_curriculum_acad_experience_attachments_with_doctorate_proposition(self):
         experience = self.doctorate_context.curriculum.experiences_academiques[0]
@@ -2755,16 +2881,19 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, DocumentsCurriculum['RELEVE_NOTES'])
         self.assertEqual(attachments[0].uuids, experience.releve_notes)
         self.assertTrue(attachments[0].required)
+        self.assertTrue(attachments[0].readonly)
 
         self.assertEqual(attachments[1].identifier, 'RESUME_MEMOIRE')
         self.assertEqual(attachments[1].label, DocumentsCurriculum['RESUME_MEMOIRE'])
         self.assertEqual(attachments[1].uuids, experience.resume_memoire)
         self.assertTrue(attachments[1].required)
+        self.assertTrue(attachments[1].readonly)
 
         self.assertEqual(attachments[2].identifier, 'DIPLOME')
         self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
         self.assertEqual(attachments[2].uuids, experience.diplome)
         self.assertTrue(attachments[2].required)
+        self.assertTrue(attachments[2].readonly)
 
     def test_curriculum_non_academic_experience_attachments_with_continuing_proposition(self):
         section = get_non_educational_experience_section(
@@ -2789,6 +2918,22 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.WORK.name))
         self.assertEqual(attachments[0].uuids, experience.certificat)
         self.assertFalse(attachments[0].required)
+        self.assertTrue(attachments[0].readonly)
+
+    def test_curriculum_non_academic_non_epc_experience_attachments_with_general_proposition_and_working_activity(self):
+        experience = self.general_bachelor_context.curriculum.experiences_non_academiques[0]
+        with mock.patch.multiple(experience, identifiant_externe=None):
+            section = get_non_educational_experience_section(
+                self.general_bachelor_context,
+                experience,
+                False,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'CERTIFICAT_EXPERIENCE')
+            self.assertFalse(attachments[0].readonly)
 
     def test_curriculum_non_academic_experience_attachments_with_general_proposition_and_other_activity(self):
         experience = self.general_bachelor_context.curriculum.experiences_non_academiques[0]
@@ -2802,6 +2947,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.OTHER.name))
             self.assertEqual(attachments[0].uuids, experience.certificat)
             self.assertFalse(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
     def test_curriculum_non_academic_experience_attachments_with_doctorate_proposition_and_travel_activity(self):
         experience = self.doctorate_context.curriculum.experiences_non_academiques[0]
@@ -2819,6 +2965,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.LANGUAGE_TRAVEL.name))
             self.assertEqual(attachments[0].uuids, experience.certificat)
             self.assertFalse(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
 
     def test_specific_questions_attachments_with_continuing_proposition(self):
         with mock.patch.multiple(
@@ -2842,6 +2989,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, document_question.label)
             self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
             self.assertFalse(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
             self.assertEqual(
                 attachments[1].identifier,
                 'ADDITIONAL_DOCUMENTS',
@@ -2849,6 +2997,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
             self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
             self.assertFalse(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
     def test_specific_questions_attachments_with_continuing_proposition_non_ue_candidate(self):
         with mock.patch.multiple(
@@ -2869,6 +3018,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['COPIE_TITRE_SEJOUR'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.copie_titre_sejour)
             self.assertFalse(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(
                 attachments[1].identifier,
@@ -2876,6 +3026,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
             self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+            self.assertFalse(attachments[1].readonly)
 
     def test_specific_questions_attachments_with_general_proposition_and_reorientation(self):
         with mock.patch.multiple(
@@ -2899,10 +3050,12 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.proposition.attestation_inscription_reguliere,
             )
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
             self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
             self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+            self.assertFalse(attachments[1].readonly)
 
             # The pool is not open...
             with freezegun.freeze_time('2023-10-1'):
@@ -2941,6 +3094,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                         self.general_bachelor_context.proposition.attestation_inscription_reguliere,
                     )
                     self.assertTrue(attachments[0].required)
+                    self.assertFalse(attachments[0].readonly)
                     self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
 
         with mock.patch.multiple(
@@ -2983,9 +3137,11 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.proposition.formulaire_modification_inscription,
             )
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
             self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
             self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
             self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+            self.assertFalse(attachments[1].readonly)
 
             # The pool is not open...
             with freezegun.freeze_time('2023-10-1'):
@@ -3024,6 +3180,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                         self.general_bachelor_context.proposition.formulaire_modification_inscription,
                     )
                     self.assertTrue(attachments[0].required)
+                    self.assertFalse(attachments[0].readonly)
                     self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
 
         with mock.patch.multiple(
@@ -3076,6 +3233,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
             )
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'ATTESTATION_ENFANT_PERSONNEL')
             self.assertEqual(attachments[1].label, DocumentsComptabilite['ATTESTATION_ENFANT_PERSONNEL'])
@@ -3084,6 +3242,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.comptabilite.attestation_enfant_personnel,
             )
             self.assertFalse(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
     def test_accounting_attachments_with_general_proposition_for_not_ue_candidate(self):
         type_situation = TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name
@@ -3113,6 +3272,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
             )
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'COMPOSITION_MENAGE_ACTE_NAISSANCE')
             self.assertEqual(attachments[1].label, DocumentsComptabilite['COMPOSITION_MENAGE_ACTE_NAISSANCE'])
@@ -3121,6 +3281,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.comptabilite.composition_menage_acte_naissance,
             )
             self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
             self.assertEqual(
                 attachments[2].identifier,
@@ -3135,6 +3296,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.comptabilite.attestation_cpas_parent,
             )
             self.assertTrue(attachments[2].required)
+            self.assertFalse(attachments[2].readonly)
 
     def test_languages_attachments_with_doctorate_proposition(self):
         section = get_languages_section(self.doctorate_context, True)
@@ -3156,6 +3318,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.doctorate_context.connaissances_langues[0].certificat,
         )
         self.assertFalse(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
         self.assertEqual(
             attachments[1].identifier,
@@ -3171,6 +3334,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.doctorate_context.connaissances_langues[1].certificat,
         )
         self.assertFalse(attachments[1].required)
+        self.assertFalse(attachments[1].readonly)
 
     def test_research_project_attachments_with_doctorate_proposition(self):
         section = get_research_project_section(self.doctorate_context, True)
@@ -3182,26 +3346,31 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, DocumentsProjetRecherche['DOCUMENTS_PROJET'])
         self.assertEqual(attachments[0].uuids, self.doctorate_context.proposition.documents_projet)
         self.assertTrue(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
         self.assertEqual(attachments[1].identifier, 'PROPOSITION_PROGRAMME_DOCTORAL')
         self.assertEqual(attachments[1].label, DocumentsProjetRecherche['PROPOSITION_PROGRAMME_DOCTORAL'])
         self.assertEqual(attachments[1].uuids, self.doctorate_context.proposition.proposition_programme_doctoral)
         self.assertTrue(attachments[1].required)
+        self.assertFalse(attachments[1].readonly)
 
         self.assertEqual(attachments[2].identifier, 'PROJET_FORMATION_COMPLEMENTAIRE')
         self.assertEqual(attachments[2].label, DocumentsProjetRecherche['PROJET_FORMATION_COMPLEMENTAIRE'])
         self.assertEqual(attachments[2].uuids, self.doctorate_context.proposition.projet_formation_complementaire)
         self.assertFalse(attachments[2].required)
+        self.assertFalse(attachments[2].readonly)
 
         self.assertEqual(attachments[3].identifier, 'GRAPHE_GANTT')
         self.assertEqual(attachments[3].label, DocumentsProjetRecherche['GRAPHE_GANTT'])
         self.assertEqual(attachments[3].uuids, self.doctorate_context.proposition.graphe_gantt)
         self.assertFalse(attachments[3].required)
+        self.assertFalse(attachments[3].readonly)
 
         self.assertEqual(attachments[4].identifier, 'LETTRES_RECOMMANDATION')
         self.assertEqual(attachments[4].label, DocumentsProjetRecherche['LETTRES_RECOMMANDATION'])
         self.assertEqual(attachments[4].uuids, self.doctorate_context.proposition.lettres_recommandation)
         self.assertFalse(attachments[4].required)
+        self.assertFalse(attachments[4].readonly)
 
     def test_research_project_attachments_with_doctorate_proposition_and_search_scholarship(self):
         with mock.patch.multiple(
@@ -3217,31 +3386,37 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsProjetRecherche['PREUVE_BOURSE'])
             self.assertEqual(attachments[0].uuids, self.doctorate_context.proposition.bourse_preuve)
             self.assertFalse(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DOCUMENTS_PROJET')
             self.assertEqual(attachments[1].label, DocumentsProjetRecherche['DOCUMENTS_PROJET'])
             self.assertEqual(attachments[1].uuids, self.doctorate_context.proposition.documents_projet)
             self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].readonly)
 
             self.assertEqual(attachments[2].identifier, 'PROPOSITION_PROGRAMME_DOCTORAL')
             self.assertEqual(attachments[2].label, DocumentsProjetRecherche['PROPOSITION_PROGRAMME_DOCTORAL'])
             self.assertEqual(attachments[2].uuids, self.doctorate_context.proposition.proposition_programme_doctoral)
             self.assertTrue(attachments[2].required)
+            self.assertFalse(attachments[2].readonly)
 
             self.assertEqual(attachments[3].identifier, 'PROJET_FORMATION_COMPLEMENTAIRE')
             self.assertEqual(attachments[3].label, DocumentsProjetRecherche['PROJET_FORMATION_COMPLEMENTAIRE'])
             self.assertEqual(attachments[3].uuids, self.doctorate_context.proposition.projet_formation_complementaire)
             self.assertFalse(attachments[3].required)
+            self.assertFalse(attachments[3].readonly)
 
             self.assertEqual(attachments[4].identifier, 'GRAPHE_GANTT')
             self.assertEqual(attachments[4].label, DocumentsProjetRecherche['GRAPHE_GANTT'])
             self.assertEqual(attachments[4].uuids, self.doctorate_context.proposition.graphe_gantt)
             self.assertFalse(attachments[4].required)
+            self.assertFalse(attachments[4].readonly)
 
             self.assertEqual(attachments[5].identifier, 'LETTRES_RECOMMANDATION')
             self.assertEqual(attachments[5].label, DocumentsProjetRecherche['LETTRES_RECOMMANDATION'])
             self.assertEqual(attachments[5].uuids, self.doctorate_context.proposition.lettres_recommandation)
             self.assertFalse(attachments[5].required)
+            self.assertFalse(attachments[5].readonly)
 
     def test_cotutelle_attachments_with_doctorate_proposition_without_specified_cotutelle(self):
         with mock.patch.multiple(
@@ -3269,16 +3444,19 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, DocumentsCotutelle['DEMANDE_OUVERTURE'])
         self.assertEqual(attachments[0].uuids, self.doctorate_context.groupe_supervision.cotutelle.demande_ouverture)
         self.assertTrue(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
         self.assertEqual(attachments[1].identifier, 'CONVENTION')
         self.assertEqual(attachments[1].label, DocumentsCotutelle['CONVENTION'])
         self.assertEqual(attachments[1].uuids, self.doctorate_context.groupe_supervision.cotutelle.convention)
         self.assertFalse(attachments[1].required)
+        self.assertFalse(attachments[1].readonly)
 
         self.assertEqual(attachments[2].identifier, 'AUTRES_DOCUMENTS')
         self.assertEqual(attachments[2].label, DocumentsCotutelle['AUTRES_DOCUMENTS'])
         self.assertEqual(attachments[2].uuids, self.doctorate_context.groupe_supervision.cotutelle.autres_documents)
         self.assertFalse(attachments[2].required)
+        self.assertFalse(attachments[2].readonly)
 
     def test_supervision_attachments_with_doctorate_proposition(self):
         section = get_supervision_section(self.doctorate_context, False)
@@ -3296,6 +3474,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
         self.assertEqual(attachments[0].uuids, signature_promoteur.pdf)
         self.assertFalse(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
         self.assertEqual(attachments[1].identifier, f'{signature_membre_ca.membre_CA.uuid}.APPROBATION_PDF')
         self.assertEqual(
@@ -3305,6 +3484,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
         self.assertEqual(attachments[1].uuids, signature_membre_ca.pdf)
         self.assertFalse(attachments[1].required)
+        self.assertFalse(attachments[1].readonly)
 
     def test_authorization_attachments_with_doctorate_proposition(self):
         section = get_authorization_section(
@@ -3429,6 +3609,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, document_question.label)
         self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
         self.assertFalse(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
     def test_training_choice_attachments(self):
         section = get_training_choice_section(
@@ -3448,6 +3629,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].label, document_question.label)
         self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
         self.assertFalse(attachments[0].required)
+        self.assertFalse(attachments[0].readonly)
 
         with mock.patch.multiple(document_question, requis=True):
             section = get_training_choice_section(
@@ -3464,3 +3646,4 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
 
             self.assertTrue(attachments[0].required)
+            self.assertFalse(attachments[0].readonly)

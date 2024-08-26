@@ -55,6 +55,9 @@ class MembreCAInMemoryTranslator(IMembreCATranslator):
             MembreCAIdentity('membre-ca-SC3DP'), "John", "Doe", "john.doe@example.org", matricule='membre-ca-SC3DP'
         ),
         MembreCA(
+            MembreCAIdentity('membre-ca-SC3DP2'), "John", "Doe", "john.doe2@example.org", matricule='membre-ca-SC3DP2'
+        ),
+        MembreCA(
             MembreCAIdentity('membre-externe'),
             nom="John",
             prenom="Mills",

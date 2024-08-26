@@ -1,4 +1,3 @@
-# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -15,31 +14,34 @@
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU General Public License for more details.
 #
 #    A copy of this license - GNU General Public License - is available
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
+##############################################################################
 
-from django.test import SimpleTestCase
+import attr
 
-from admission.ddd.admission.commands import DefairePropositionFusionCommand
-from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import (
-    defaire_proposition_fusion_personne
-)
-from admission.infrastructure.admission.repository.in_memory.proposition_fusion_personne import \
-    PropositionPersonneFusionInMemoryRepository
+from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
+from osis_common.ddd.interface import Event
 
 
-class DefairePropositionFusionPersonneTests(SimpleTestCase):
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class PropositionFusionDefaiteEvent(Event):
+    entity_id: 'PropositionFusionPersonneIdentity'
+    matricule: str
 
-    def setUp(self):
-        self.repository = PropositionPersonneFusionInMemoryRepository()
 
-    def test_defaire_proposition_fusion_personne_with_valid_inputs(self):
-        cmd = DefairePropositionFusionCommand(global_id="123")
-        result = defaire_proposition_fusion_personne(cmd, self.repository)
-        self.assertEqual(result.uuid, "uuid")
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class PropositionFusionRefuseeEvent(Event):
+    entity_id: 'PropositionFusionPersonneIdentity'
+    matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class PropositionFusionInitialiseeEvent(Event):
+    entity_id: 'PropositionFusionPersonneIdentity'
+    matricule: str

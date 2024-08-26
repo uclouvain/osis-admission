@@ -135,12 +135,6 @@ class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest)
 @attr.dataclass(frozen=True, slots=True)
 class RechercherCompteExistantCommand(interface.QueryRequest):
     matricule: str
-    nom: str
-    prenom: str
-    autres_prenoms: Optional[str]
-    date_naissance: str
-    genre: str
-    niss: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -156,6 +150,7 @@ class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     lieu_naissance: str
     email: str
     genre: str
+    sex: str
     etat_civil: str
     nationalite: str
     numero_national: str
@@ -236,23 +231,15 @@ class RetrieveListePropositionFusionEnErreurQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class FusionnerCandidatAvecPersonneExistanteCommand(interface.CommandRequest):
-    candidate_global_id: str
-    ticket_uuid: str
-
-
-@attr.dataclass(frozen=True, slots=True)
 class RecupererMatriculeDigitQuery(interface.QueryRequest):
     noma: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ModifierMatriculeCandidatCommand(interface.QueryRequest):
-    digit_global_id: str
-    candidate_global_id: str
-    ticket_uuid: str
+class RecupererEtudesSecondairesQuery(interface.QueryRequest):
+    matricule_candidat: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererEtudesSecondairesQuery(interface.QueryRequest):
+class RecupererConnaissancesLanguesQuery(interface.QueryRequest):
     matricule_candidat: str

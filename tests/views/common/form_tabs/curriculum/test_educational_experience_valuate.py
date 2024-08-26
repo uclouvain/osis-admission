@@ -32,12 +32,15 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
+from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
 )
@@ -61,10 +64,20 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=entity,
+            training__academic_year=cls.academic_years[0],
+            candidate=cls.general_admission.candidate,
+            submitted=True,
+        )
+
         # Create users
         cls.sic_manager_user = SicManagementRoleFactory(entity=entity).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.general_admission.training.education_group,
+        ).person.user
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
         ).person.user
 
     def setUp(self):
@@ -77,6 +90,11 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         self.valuate_url = resolve_url(
             'admission:general-education:update:curriculum:educational_valuate',
             uuid=self.general_admission.uuid,
+            experience_uuid=self.experience.uuid,
+        )
+        self.doctorate_valuate_url = resolve_url(
+            'admission:doctorate:update:curriculum:educational_valuate',
+            uuid=self.doctorate_admission.uuid,
             experience_uuid=self.experience.uuid,
         )
 
@@ -177,3 +195,32 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         self.assertEqual(len(new_saved_experience_checklist), 1)
         self.assertNotEqual(new_saved_experience_checklist[0], default_experience_checklist)
         self.assertEqual(new_saved_experience_checklist[0], saved_experience_checklist[0])
+
+    def test_valuate_experience_from_doctorate_curriculum_is_allowed_for_fac_users(self):
+        self.client.force_login(self.doctorate_program_manager_user)
+
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        response = self.client.post(
+            resolve_url(
+                'admission:doctorate:update:curriculum:educational_valuate',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            )
+            + '?next='
+            + resolve_url('admission'),
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_valuate_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.post(f'{self.doctorate_valuate_url}?next={admission_url}&next_hash_url=custom_hash')
+
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)

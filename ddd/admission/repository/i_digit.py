@@ -59,13 +59,5 @@ class IDigitRepository:
         raise NotImplementedError
 
     @classmethod
-    def modifier_matricule_candidat(cls, candidate_global_id: str, digit_global_id: str, ticket_uuid: str):
-        raise NotImplementedError
-
-    @classmethod
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
-        raise NotImplementedError
-
-    @classmethod
-    def has_pending_digit_creation_ticket(cls, global_id: str) -> bool:
         raise NotImplementedError

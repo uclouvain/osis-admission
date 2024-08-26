@@ -26,6 +26,7 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
+from admission.ddd.admission.formation_generale.events import CoordonneesCandidatModifiees
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
@@ -38,7 +39,6 @@ __all__ = ['AdmissionCoordonneesFormView']
 class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
     template_name = 'admission/forms/coordonnees.html'
     permission_required = 'admission.change_admission_coordinates'
-    update_requested_documents = True
     update_admission_author = True
 
     def __init__(self, *args, **kwargs):
@@ -51,6 +51,7 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
         context_data = super().get_context_data(**kwargs)
         context_data.update(self.get_forms())
         context_data['BE_ISO_CODE'] = BE_ISO_CODE
+        context_data['proposition_fusion'] = self.proposition_fusion
         return context_data
 
     def post(self, request, *args, **kwargs):
@@ -80,7 +81,11 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
                 label=PersonAddressType.CONTACT.name,
             ).delete()
 
-        return super().form_valid(forms)
+        form_valid = super().form_valid(forms)
+        from infrastructure.messages_bus import message_bus_instance
+
+        message_bus_instance.publish(CoordonneesCandidatModifiees(matricule=self.admission.candidate.global_id))
+        return form_valid
 
     def update_current_admission_on_form_valid(self, form, admission):
         # Update submitted profile with newer data

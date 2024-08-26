@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
 from typing import Union, Optional, List, Dict
+from urllib.parse import urlencode
 
 from django import template
 from django.conf import settings
@@ -40,6 +41,8 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -317,6 +320,9 @@ TAB_TREES = {
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
+        Tab('doctorate-education', _('Course choice'), 'person-chalkboard'): [
+            Tab('training-choice', _('Course choice')),
+        ],
         # TODO Education choice
         Tab('experience', _('Previous experience'), 'list-alt'): [
             Tab('curriculum', _('Curriculum')),
@@ -327,12 +333,8 @@ TAB_TREES = {
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
-        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+        Tab('additional-information', _('Accounting'), 'puzzle-piece'): [
             Tab('accounting', _('Accounting')),
-        ],
-        Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('send-mail', _('Send a mail')),
-            Tab('debug', _('Debug'), 'bug'),
         ],
     },
     # TODO doctorate refactorization
@@ -877,6 +879,12 @@ def get_item_or_none(dictionary, value):
     return dictionary.get(value)
 
 
+@register.filter
+def get_bound_field(form, field_name):
+    """Returns the bound field of a form"""
+    return form[field_name]
+
+
 @register.simple_tag
 def get_item_or_default(dictionary, value, default=None):
     """Returns the value of a key in a dictionary if it exists else the default value itself"""
@@ -1144,6 +1152,17 @@ def search_account_digit_result_msg(context, admission):
     return context
 
 
+@register.inclusion_tag('admission/digit/validation_syntaxique_resultat_digit.html', takes_context=False)
+def validation_syntaxique_resultat_digit(admission):
+    if hasattr(admission.candidate, 'personmergeproposal'):
+        validation_digit = admission.candidate.personmergeproposal.validation
+        return {
+            'a_une_syntaxe_valide': validation_digit.get('valid', True),
+            'erreurs': validation_digit.get('errors', []),
+        }
+    return {}
+
+
 @register.inclusion_tag('admission/digit_ticket_status_message.html', takes_context=True)
 def digit_ticket_status_msg(context, digit_ticket):
     context['digit_ticket'] = digit_ticket
@@ -1309,6 +1328,7 @@ def experience_details_template(
     hide_files=True,
     can_update_curriculum=False,
     can_update_education=False,
+    can_delete_curriculum=False,
 ):
     """
     Return the template used to render the experience details.
@@ -1320,6 +1340,7 @@ def experience_details_template(
     :param hide_files: Specify if the files should be hidden
     :param can_update_curriculum: Specify if the user can update the curriculum
     :param can_update_education: Specify if the user can update the education
+    :param can_delete_curriculum: Specify if the user can delete an experience from the curriculum
     :return: The rendered template
     """
     next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
@@ -1358,13 +1379,14 @@ def experience_details_template(
                     )
                     + next_url_suffix
                 )
-                res_context['delete_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:curriculum:educational_delete',
-                        args=[resume_proposition.proposition.uuid, experience.uuid],
+                if can_delete_curriculum:
+                    res_context['delete_link_button'] = (
+                        reverse(
+                            'admission:general-education:update:curriculum:educational_delete',
+                            args=[resume_proposition.proposition.uuid, experience.uuid],
+                        )
+                        + delete_next_url_suffix
                     )
-                    + delete_next_url_suffix
-                )
 
             elif context['admission'].noma_candidat:
                 res_context['curex_link_button'] = resolve_url(
@@ -1389,13 +1411,14 @@ def experience_details_template(
                     + next_url_suffix
                 )
 
-                res_context['delete_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:curriculum:non_educational_delete',
-                        args=[resume_proposition.proposition.uuid, experience.uuid],
+                if can_delete_curriculum:
+                    res_context['delete_link_button'] = (
+                        reverse(
+                            'admission:general-education:update:curriculum:non_educational_delete',
+                            args=[resume_proposition.proposition.uuid, experience.uuid],
+                        )
+                        + delete_next_url_suffix
                     )
-                    + delete_next_url_suffix
-                )
 
             elif context['admission'].noma_candidat:
                 res_context['edit_link_button'] = resolve_url(
@@ -1507,14 +1530,17 @@ def checklist_experience_action_links_context(
                     )
                     + next_url_suffix
                 )
-                result_context['delete_url'] = (
-                    resolve_url(
-                        f'{base_namespace}:update:curriculum:educational_delete',
-                        uuid=proposition_uuid_str,
-                        experience_uuid=experience.uuid,
+
+                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
+                if can_delete_curriculum:
+                    result_context['delete_url'] = (
+                        resolve_url(
+                            f'{base_namespace}:update:curriculum:educational_delete',
+                            uuid=proposition_uuid_str,
+                            experience_uuid=experience.uuid,
+                        )
+                        + next_url_suffix
                     )
-                    + next_url_suffix
-                )
             elif context['admission'].noma_candidat:
                 result_context['curex_url'] = resolve_url(
                     'parcours-externe-view',
@@ -1537,14 +1563,17 @@ def checklist_experience_action_links_context(
                     )
                     + next_url_suffix
                 )
-                result_context['delete_url'] = (
-                    resolve_url(
-                        f'{base_namespace}:update:curriculum:non_educational_delete',
-                        uuid=proposition_uuid_str,
-                        experience_uuid=experience.uuid,
+
+                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
+                if can_delete_curriculum:
+                    result_context['delete_url'] = (
+                        resolve_url(
+                            f'{base_namespace}:update:curriculum:non_educational_delete',
+                            uuid=proposition_uuid_str,
+                            experience_uuid=experience.uuid,
+                        )
+                        + next_url_suffix
                     )
-                    + next_url_suffix
-                )
             elif context['admission'].noma_candidat:
                 result_context['update_url'] = resolve_url(
                     'edit-experience-non-academique-view',
@@ -1766,7 +1795,7 @@ def digit_error_description(error_code):
         "RSTARTDATE0002": "La date de début est d'un format incorrect",
         "RSTOPDATE0001": "La date de début est null",
         "RSTOPDATE0002": "La date de début est d'un format incorrect",
-        "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible"
+        "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible",
     }
 
     return error_mapping[error_code]
@@ -1787,3 +1816,27 @@ def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO
             for way in proposition.moyens_decouverte_formation
         ]
     )
+
+
+@register.simple_tag(takes_context=True)
+def get_document_details_url(context, document: EmplacementDocumentDTO):
+    """From a document, return the url to the document detail page."""
+    match = context['request'].resolver_match
+    base_url = resolve_url(
+        f'{match.namespace}:document:detail',
+        uuid=context['view'].kwargs['uuid'],
+        identifier=document.identifiant,
+    )
+
+    query_params = {}
+
+    if document.lecture_seule:
+        query_params['read-only'] = '1'
+
+    if document.requis_automatiquement:
+        query_params['mandatory'] = '1'
+
+    if query_params:
+        return f'{base_url}?{urlencode(query_params)}'
+
+    return base_url

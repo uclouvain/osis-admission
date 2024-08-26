@@ -523,6 +523,13 @@ class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteNonConcerneeCommand(interface.CommandRequest):
+    uuid_proposition: str
+    etabli_par: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierDerogationFinancabiliteCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str
@@ -639,6 +646,14 @@ class ApprouverAdmissionParSicCommand(interface.CommandRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerEmailApprobationInscriptionAuCandidatCommand(interface.CommandRequest):
     uuid_proposition: str
     objet_message: str
     corps_message: str

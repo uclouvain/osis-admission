@@ -32,7 +32,6 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
     ValiderTicketPersonneCommand,
-    FusionnerCandidatAvecPersonneExistanteCommand,
     RetrieveListePropositionFusionEnErreurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
@@ -67,6 +66,8 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import \
+    specifier_financabilite_non_concernee
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -547,6 +548,7 @@ COMMAND_HANDLERS = {
         paiement_frais_dossier_service=_paiement_frais_dossier,
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         bourse_translator=_bourse_translator,
@@ -605,6 +607,10 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
     ),
     SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    SpecifierFinancabiliteNonConcerneeCommand: lambda msg_bus, cmd: specifier_financabilite_non_concernee(
         cmd,
         proposition_repository=_proposition_repository,
     ),
@@ -679,6 +685,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit_repository=_digit_repository,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -687,13 +694,20 @@ COMMAND_HANDLERS = {
             cmd=cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
-            notification=_notification,
             profil_candidat_translator=_profil_candidat_translator,
             comptabilite_translator=_comptabilite_translator,
             question_specifique_translator=_question_specific_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+        )
+    ),
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
+        lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            cmd=cmd,
+            notification=_notification,
+            historique=_historique_formation_generale,
+            digit_repository=_digit_repository,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -739,5 +753,4 @@ COMMAND_HANDLERS = {
     RetrieveListePropositionFusionEnErreurQuery: lambda *args, **kwargs: Mock(),
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand: lambda *args, **kwargs: Mock(),
     ValiderTicketPersonneCommand: lambda *args, **kwargs: Mock(),
-    FusionnerCandidatAvecPersonneExistanteCommand: lambda *args, **kwargs: Mock(),
 }

@@ -44,6 +44,7 @@ class IPropositionPersonneFusionRepository:
             lieu_naissance: str,
             email: str,
             genre: str,
+            sex: str,
             etat_civil: str,
             nationalite: str,
             numero_national: str,
@@ -67,13 +68,4 @@ class IPropositionPersonneFusionRepository:
 
     @classmethod
     def refuser(cls, global_id: str) -> 'PropositionFusionPersonneIdentity':
-        raise NotImplementedError
-
-    @classmethod
-    def fusionner(cls, candidate_global_id: str, ticket_uuid: str) -> 'PropositionFusionPersonneIdentity':
-        raise NotImplementedError
-
-
-    @classmethod
-    def verifier_eligible_fusion(cls, ticket_uuid: str):
         raise NotImplementedError
