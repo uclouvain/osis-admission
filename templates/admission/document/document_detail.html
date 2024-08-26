@@ -87,6 +87,7 @@
         {% endif %}
         {% include 'admission/document/retype_modal.html' %}
         {% if editable_document and can_edit_documents %}
+          {% if not mandatory_document %}
           <button
               class="btn btn-danger"
               data-toggle="modal"
@@ -95,6 +96,7 @@
           >
             <i class="fas fa-trash"></i>
           </button>
+          {% endif %}
           {% include 'admission/document/delete_confirm_modal.html' %}
           <button
               class="btn btn-default"
