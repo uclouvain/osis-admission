@@ -75,6 +75,9 @@
   {% if original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}
     {% translate 'The status of the checklist for the financability must be "Not concerned" or "Financable" or "Dispensation granted".' as approval_disabled_tooltip %}
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
+  {% elif original_admission.is_in_quarantine %}
+    {% translate 'The transition to this status is not possible while the application is in quarantine.' as approval_disabled_tooltip %}
+    {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
   {% elif admission.est_admission and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' or admission.est_inscription and current.statut == 'INITIAL_CANDIDAT' or admission.est_inscription and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' and admission.besoin_de_derogation == 'ACCORD_DIRECTION' %}
     {% if view.missing_curriculum_periods %}
       {% translate "The 'Approved' status requires the last 5 years to be justified in the previous experience." as approval_disabled_tooltip %}
