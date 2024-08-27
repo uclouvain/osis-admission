@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import Optional, List, Set
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
@@ -304,15 +304,15 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
     def reinitialiser_emplacements_documents_non_libres(
         cls,
         proposition_identity: PropositionIdentity,
-        entities: List[EmplacementDocument],
+        identifiants_documents_pertinents: Set[str],
     ) -> None:
         cls.entities = [
             entity
             for entity in cls.entities
             if entity.entity_id.proposition_id != proposition_identity
             or entity.type != TypeEmplacementDocument.NON_LIBRE
+            or entity.entity_id.identifiant in identifiants_documents_pertinents
         ]
-        cls.save_multiple(entities, auteur='0123456789')
 
 
 emplacement_document_in_memory_repository = EmplacementDocumentInMemoryRepository()
