@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import (
@@ -34,6 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     CurriculumValidatorList,
     LanguesConnuesValidatorList,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.admission.domain.model.formation import Formation
@@ -43,21 +44,22 @@ from admission.ddd.admission.domain.validator.validator_by_business_action impor
     CoordonneesValidatorList,
     IdentificationValidatorList,
 )
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
     FormationContinueCurriculumValidatorList,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as FormationGeneraleProposition,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     FormationGeneraleCurriculumValidatorList,
     FormationGeneraleComptabiliteValidatorList,
     EtudesSecondairesValidatorList,
     BachelierEtudesSecondairesValidatorList,
     FormationGeneraleInformationsComplementairesValidatorList,
+    FormationGeneraleCurriculumPostSoumissionValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from osis_common.ddd import interface
 
 
@@ -198,7 +200,7 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_curriculum_formation_generale(
         cls,
-        proposition: FormationGeneraleProposition,
+        proposition,
         type_formation: TrainingType,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
@@ -224,6 +226,51 @@ class ProfilCandidat(interface.DomainService):
             type_formation=type_formation,
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
+        ).validate()
+
+    @classmethod
+    def verifier_curriculum_formation_generale_apres_soumission(
+        cls,
+        proposition,
+        academic_year_repository: 'IAcademicYearRepository',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
+        curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
+    ) -> None:
+        date_soumission = proposition.soumise_le.date()
+
+        annee_soumission = (
+            GetCurrentAcademicYear().get_starting_academic_year(date_soumission, academic_year_repository).year
+        )
+
+        experiences_parcours_interne = experience_parcours_interne_translator.recuperer(
+            matricule=proposition.matricule_candidat,
+        )
+
+        curriculum = (
+            profil_candidat_translator.get_curriculum(
+                matricule=proposition.matricule_candidat,
+                annee_courante=annee_soumission,
+                uuid_proposition=proposition.entity_id.uuid,
+                experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
+            )
+            if curriculum_dto is None
+            else curriculum_dto
+        )
+
+        experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
+            experiences=curriculum.experiences_academiques,
+            annee_courante=annee_soumission,
+        )
+
+        FormationGeneraleCurriculumPostSoumissionValidatorList(
+            date_soumission=date_soumission,
+            annee_soumission=annee_soumission,
+            experiences_academiques=curriculum.experiences_academiques,
+            experiences_academiques_incompletes=experiences_academiques_incompletes,
+            annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
+            experiences_non_academiques=curriculum.experiences_non_academiques,
+            experiences_parcours_interne=experiences_parcours_interne,
         ).validate()
 
     @classmethod
@@ -262,7 +309,7 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_comptabilite_formation_generale(
         cls,
-        proposition: PropositionGenerale,
+        proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
         formation: Formation,
@@ -283,7 +330,7 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_informations_complementaires_formation_generale(
         cls,
-        proposition: PropositionGenerale,
+        proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)

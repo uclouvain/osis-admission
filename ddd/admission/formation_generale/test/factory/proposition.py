@@ -233,6 +233,7 @@ class PropositionFactory(factory.Factory):
             statut=ChoixStatutPropositionGenerale.CONFIRMEE,
             checklist_initiale=factory.SubFactory(StatutsChecklistGeneraleFactory),
             checklist_actuelle=factory.SubFactory(StatutsChecklistGeneraleFactory),
+            soumise_le=factory.Faker('past_datetime'),
         )
         est_refusee_par_fac_raison_libre = factory.Trait(
             autres_motifs_refus=['Ma raison'],
