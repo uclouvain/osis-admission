@@ -46,6 +46,7 @@ from admission.contrib.models.base import (
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
 )
@@ -257,7 +258,10 @@ class InjectionEPCAdmission:
     @classmethod
     def _recuperer_documents_specifiques(cls, admission):
         documents_specifiques = []
-        form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
+        form_items = AdmissionFormItem.objects.filter(
+            uuid__in=admission.specific_question_answers.keys(),
+            type=TypeItemFormulaire.DOCUMENT.name
+        )
         for form_item in form_items:
             label = form_item.internal_label.lower()
             if cls.__contient_uuid_valide(label):
