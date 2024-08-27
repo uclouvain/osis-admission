@@ -245,7 +245,7 @@ class InjectionEPCAdmission:
                 comptabilite=comptabilite,
             ),
             "inscription_offre": cls._get_inscription_offre(admission=admission),
-            "donnees_comptables": cls._get_donnees_comptables(admission=admission),
+            "donnees_comptables": cls._get_donnees_comptables(admission=admission, comptabilite=comptabilite),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
                 (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
@@ -360,7 +360,6 @@ class InjectionEPCAdmission:
                 "bic": comptabilite.bic_swift_code,
                 "nom_titulaire": comptabilite.account_holder_last_name,
                 "prenom_titulaire": comptabilite.account_holder_first_name,
-                "allocation_etudes": comptabilite.french_community_study_allowance_application,
                 "documents": documents,
             }
         return {}
@@ -481,7 +480,7 @@ class InjectionEPCAdmission:
         return num_offre, validite
 
     @staticmethod
-    def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
+    def _get_donnees_comptables(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
         general_admission = getattr(admission, 'generaleducationadmission', None)
         autre_montant = getattr(general_admission, 'tuition_fees_amount_other')
         return {
@@ -492,6 +491,7 @@ class InjectionEPCAdmission:
                  or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
                 if general_admission else None
             ),
+            "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
         }
 
     @staticmethod
