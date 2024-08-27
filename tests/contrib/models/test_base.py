@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
 from django.db import IntegrityError
 from django.test import TestCase
 
@@ -32,7 +34,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.person import PersonFactory
 
 
 class BaseTestCase(TestCase):
@@ -114,3 +118,56 @@ class AdmissionViewerTestCase(TestCase):
         with self.assertRaises(IntegrityError):
             AdmissionViewerFactory(admission=admission, person=admission.candidate)
             AdmissionViewerFactory(admission=admission, person=admission.candidate)
+
+
+class AdmissionInQuarantineTestCase(TestCase):
+    def test_admission_in_quarantine(self):
+        # With no person proposal
+        admission = GeneralEducationAdmissionFactory()
+
+        self.assertFalse(admission.is_in_quarantine)
+
+        # With a person proposal
+        related_person = PersonFactory()
+        other_person = PersonFactory()
+
+        proposal = PersonMergeProposal(
+            status=PersonMergeStatus.MATCH_FOUND.name,
+            original_person=other_person,
+            proposal_merge_person=related_person,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        admission = BaseAdmission.objects.get(pk=admission.pk)
+        self.assertFalse(admission.is_in_quarantine)
+
+        proposal.original_person = admission.candidate
+        proposal.save()
+
+        admission = BaseAdmission.objects.get(pk=admission.pk)
+        self.assertTrue(admission.is_in_quarantine)
+
+        in_quarantine_statuses = {
+            PersonMergeStatus.MATCH_FOUND,
+            PersonMergeStatus.PENDING,
+            PersonMergeStatus.ERROR,
+            PersonMergeStatus.IN_PROGRESS,
+        }
+
+        for status in PersonMergeStatus:
+            proposal.status = status.name
+            proposal.validation = {}
+            proposal.save()
+
+            admission = BaseAdmission.objects.get(pk=admission.pk)
+
+            # The admission is in quarantine depending on the proposal status
+            self.assertEqual(admission.is_in_quarantine, status in in_quarantine_statuses)
+
+            # The admission is always in quarantine if there is an error during the digit ticket validation
+            proposal.validation = {'valid': False}
+            proposal.save()
+
+            admission = BaseAdmission.objects.get(pk=admission.pk)
+
+            self.assertTrue(admission.is_in_quarantine)

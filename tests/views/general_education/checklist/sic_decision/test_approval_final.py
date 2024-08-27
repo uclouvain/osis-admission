@@ -129,6 +129,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
                 country_of_citizenship__european_union=True,
+                graduated_from_high_school_year=AcademicYearFactory(current=True),
                 private_email='foo@bar',
             ),
             status=ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,

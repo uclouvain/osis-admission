@@ -33,7 +33,13 @@ from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.contrib.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+    EPCInjection,
+)
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -421,6 +427,74 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         response = self._do_request(types_formation=self.admissions[0].training.education_group_type.name)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
+
+    def test_list_with_filter_by_injection_error(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # Without injection
+        response = self._do_request(injection_en_erreur=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        # With an identification injection
+        identification_injection = EPCInjection(
+            admission=self.admissions[0],
+            type=EPCInjectionType.SIGNALETIQUE.name,
+            status=EPCInjectionStatus.ERROR.name,
+        )
+        response = self._do_request(injection_en_erreur='True')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='False')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        # With an admission injection but without error
+        admission_injection = EPCInjection(
+            admission=self.admissions[0],
+            type=EPCInjectionType.DEMANDE.name,
+            status=EPCInjectionStatus.OK.name,
+        )
+        response = self._do_request(injection_en_erreur='True')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='False')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        # With an admission injection with error
+        admission_injection.status = EPCInjectionStatus.ERROR.name
+        admission_injection.save()
+
+        response = self._do_request(injection_en_erreur='True')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='False')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
 
     def test_list_with_filter_by_training(self):
         self.client.force_login(user=self.sic_management_user)
