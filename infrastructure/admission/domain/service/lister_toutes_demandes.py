@@ -222,7 +222,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if injection_en_erreur is not None:
             injection_condition = Q(
                 epc_injection__type=EPCInjectionType.DEMANDE.name,
-                epc_injection__status=EPCInjectionStatus.ERROR.name,
+                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name]
             )
 
             if injection_en_erreur:
