@@ -355,6 +355,7 @@ class InjectionEPCAdmission:
                 "bic": comptabilite.bic_swift_code,
                 "nom_titulaire": comptabilite.account_holder_last_name,
                 "prenom_titulaire": comptabilite.account_holder_first_name,
+                "allocation_etudes": comptabilite.french_community_study_allowance_application,
                 "documents": documents,
             }
         return {}
