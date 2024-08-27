@@ -29,7 +29,7 @@ import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Union, Iterable, List
+from typing import Dict, Union, Iterable, List, Optional
 
 import weasyprint
 from django.conf import settings
@@ -57,6 +57,7 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import Choix
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.formation_generale.commands import VerifierCurriculumApresSoumissionQuery
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
@@ -138,6 +139,16 @@ def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:
             data = get_error_data(data, exception, {})
 
     return data
+
+
+def get_missing_curriculum_periods(proposition_uuid: str):
+    from infrastructure.messages_bus import message_bus_instance
+
+    try:
+        message_bus_instance.invoke(VerifierCurriculumApresSoumissionQuery(uuid_proposition=proposition_uuid))
+        return []
+    except MultipleBusinessExceptions as exc:
+        return [e.message for e in sorted(exc.exceptions, key=lambda exception: exception.periode[0], reverse=True)]
 
 
 def get_mail_templates_from_admission(admission: DoctorateAdmission):
