@@ -862,11 +862,7 @@ class EPCInjectionAdmin(admin.ModelAdmin):
         ):
             injection.last_attempt_date = datetime.now()
             injection.save()
-            InjectionEPCAdmission().envoyer_admission_dans_queue(
-                donnees=injection.payload,
-                admission_reference=injection.admission.reference,
-                admission_uuid=injection.admission.uuid
-            )
+            InjectionEPCAdmission().injecter(injection.admission)
 
 
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
