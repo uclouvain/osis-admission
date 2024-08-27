@@ -214,7 +214,6 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
-from base.models.student import Student
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
@@ -2731,6 +2730,7 @@ class ChecklistView(
                 EPCInjectionStatus.PENDING.name,
                 EPCInjectionStatus.NO_SENT.name,
                 EPCInjectionStatus.ERROR.name,
+                EPCInjectionStatus.OSIS_ERROR.name
             ],
             type=EPCInjectionType.SIGNALETIQUE.name,
         ).first()
