@@ -415,4 +415,10 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
     ),
+    EnvoyerMessageCandidatCommand: lambda msg_bus, cmd: envoyer_message_au_candidat(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        notification=Notification(),
+        historique=Historique(),
+    ),
 }

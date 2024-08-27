@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import List
+from typing import List, Optional
 
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
@@ -35,7 +35,7 @@ from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
 from osis_mail_template.utils import transform_html_to_text
 
-from admission.contrib.models import AdmissionTask, SupervisionActor
+from admission.contrib.models import AdmissionTask, SupervisionActor, DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.doctorate import PropositionProxy
 from admission.contrib.models.enums.actor_type import ActorType
@@ -104,16 +104,17 @@ class Notification(INotification):
     @classmethod
     def get_common_tokens(cls, proposition, candidat):
         """Return common tokens about a submission"""
-        frontend_link = settings.ADMISSION_FRONTEND_LINK.format(context='doctorate', uuid=proposition.entity_id.uuid)
+        frontend_link = get_portal_admission_url(context='doctorate', admission_uuid=proposition.entity_id.uuid)
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
             "training_title": cls._get_doctorate_title_translation(proposition.formation_id),
             "admission_link_front": frontend_link,
             "admission_link_front_supervision": "{}supervision".format(frontend_link),
-            "admission_link_back": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX,
-                resolve_url('admission:doctorate:project', uuid=proposition.entity_id.uuid),
+            "admission_link_back": get_backoffice_admission_url(
+                context='doctorate',
+                admission_uuid=proposition.entity_id.uuid,
+                url_suffix='project',
             ),
             "reference": proposition.reference,
         }
@@ -274,7 +275,6 @@ class Notification(INotification):
 
     @classmethod
     def notifier_soumission(cls, proposition: Proposition) -> None:
-        candidat = Person.objects.get(global_id=proposition.matricule_candidat)
         admission = (
             PropositionProxy.objects.annotate_training_management_faculty()
             .annotate_with_reference()
@@ -306,20 +306,21 @@ class Notification(INotification):
         )
 
         # Notifier le doctorant via mail en mettant en copie les membres du groupe de supervision
-        common_tokens = cls.get_common_tokens(proposition, candidat)
+        common_tokens = cls.get_common_tokens(proposition, admission.candidate)
         common_tokens['training_acronym'] = proposition.formation_id.sigle
         common_tokens['admission_reference'] = admission.formatted_reference
         common_tokens['recap_link'] = common_tokens['admission_link_front'] + 'pdf-recap'
+        common_tokens['salutation'] = get_salutation_prefix(person=admission.candidate)
 
         actors_invited = admission.supervision_group.actors.select_related('person')
         email_message = generate_email(
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
-            candidat.language,
+            admission.candidate.language,
             common_tokens,
-            recipients=[candidat.private_email],
+            recipients=[admission.candidate.private_email],
             cc_recipients=[actor.email for actor in actors_invited],
         )
-        EmailNotificationHandler.create(email_message, person=candidat)
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
 
         # Envoyer aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
@@ -400,18 +401,42 @@ class Notification(INotification):
         proposition: Proposition,
         objet_message: str,
         corps_message: str,
+        matricule_emetteur: Optional[str] = None,
+        cc_promoteurs: bool = False,
+        cc_membres_ca: bool = False,
     ) -> EmailMessage:
-        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        admission = DoctorateAdmission.objects.select_related(
+            'candidate',
+            'supervision_group',
+        ).get(uuid=proposition.entity_id.uuid)
 
         email_notification = EmailNotification(
-            recipient=candidate.private_email,
+            recipient=admission.candidate.private_email,
             subject=objet_message,
             html_content=corps_message,
             plain_text_content=transform_html_to_text(corps_message),
         )
 
         email_message = EmailNotificationHandler.build(email_notification)
-        EmailNotificationHandler.create(email_message, person=candidate)
+
+        if cc_promoteurs or cc_membres_ca:
+            actors = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
+
+            cc_list = []
+
+            if cc_promoteurs:
+                for promoter in actors.filter(type=ActorType.PROMOTER.name):
+                    cc_list.append(cls._format_email(promoter))
+
+            if cc_membres_ca:
+                for ca_member in actors.filter(type=ActorType.CA_MEMBER.name):
+                    cc_list.append(cls._format_email(ca_member))
+
+            if cc_list:
+                email_message['Cc'] = ','.join(cc_list)
+
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
         return email_message
 
     @classmethod
@@ -443,8 +468,8 @@ class Notification(INotification):
             'enrolment_service_email': admission.training.enrollment_campus.sic_enrollment_email
             or MAIL_INSCRIPTION_DEFAUT,
             'training_year': format_academic_year(proposition.annee_calculee),
-            'admission_link_front': get_portal_admission_url('continuing-education', proposition.uuid),
-            'admission_link_back': get_backoffice_admission_url('continuing-education', proposition.uuid),
+            'admission_link_front': get_portal_admission_url('doctorate', proposition.uuid),
+            'admission_link_back': get_backoffice_admission_url('doctorate', proposition.uuid),
         }
 
         email_message = generate_email(
@@ -471,3 +496,7 @@ class Notification(INotification):
             admission=admission,
             type=AdmissionTask.TaskType.DOCTORATE_FOLDER.name,
         )
+
+    @classmethod
+    def _format_email(cls, actor: SupervisionActor):
+        return "{a.first_name} {a.last_name} <{a.email}>".format(a=actor)

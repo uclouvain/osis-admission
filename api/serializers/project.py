@@ -208,8 +208,8 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctorateProp
                     'update_languages',
                     'destroy_proposition',
                     'submit_proposition',
-                    'retrieve_proposition',
-                    'update_proposition',
+                    'retrieve_project',
+                    'update_project',
                     'retrieve_cotutelle',
                     'update_cotutelle',
                     'retrieve_supervision',
@@ -419,8 +419,8 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
             'destroy_proposition': DOCTORATE_ACTION_LINKS['destroy_proposition'],
             'submit_proposition': DOCTORATE_ACTION_LINKS['submit_proposition'],
             # Project
-            'retrieve_proposition': DOCTORATE_ACTION_LINKS['retrieve_proposition'],
-            'update_proposition': DOCTORATE_ACTION_LINKS['update_proposition'],
+            'retrieve_project': DOCTORATE_ACTION_LINKS['retrieve_project'],
+            'update_project': DOCTORATE_ACTION_LINKS['update_project'],
             # Course choice
             'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
             'update_training_choice': DOCTORATE_ACTION_LINKS['update_doctorate_training_choice'],

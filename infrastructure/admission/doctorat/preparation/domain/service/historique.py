@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,11 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
 
 from django.conf import settings
 from django.utils import translation
 
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     SignataireIdentity,
@@ -37,6 +39,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_historique im
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 from admission.infrastructure.admission.doctorat.preparation.domain.service.membre_CA import MembreCATranslator
 from admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur import PromoteurTranslator
+from admission.infrastructure.utils import get_message_to_historize
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from osis_history.utilities import add_history_entry
 
@@ -82,7 +85,13 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_avis(cls, proposition: Proposition, signataire_id: 'SignataireIdentity', avis: AvisDTO):
+    def historiser_avis(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        avis: AvisDTO,
+        statut_original_proposition: 'ChoixStatutPropositionDoctorale',
+    ):
         signataire = cls.get_signataire(signataire_id)
         auteur = PersonneConnueUclTranslator().get(proposition.matricule_candidat) if avis.pdf else signataire
 
@@ -124,12 +133,17 @@ class Historique(IHistorique):
                 details = " ({})".format('; '.join(details))
                 message_en += details
 
+        tags = ["proposition", "supervision"]
+
+        if statut_original_proposition != proposition.statut:
+            tags.append("status-changed")
+
         add_history_entry(
             proposition.entity_id.uuid,
             message_fr,
             message_en,
             "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
-            tags=["proposition", "supervision"],
+            tags=tags,
         )
 
     @classmethod
@@ -209,4 +223,18 @@ class Historique(IHistorique):
             "The proposition has been cancelled.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
             tags=["proposition", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_message_au_candidat(cls, proposition: Proposition, matricule_emetteur: str, message: EmailMessage):
+        emetteur = PersonneConnueUclTranslator.get(matricule_emetteur)
+
+        message_a_historiser = get_message_to_historize(message)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
+            "{emetteur.prenom} {emetteur.nom}".format(emetteur=emetteur),
+            tags=["proposition", "message"],
         )

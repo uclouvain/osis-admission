@@ -112,7 +112,8 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_training_choice': is_part_of_education_group,
             'admission.change_admission_training_choice': is_part_of_education_group
             & (continuing.in_manager_status | doctorate.in_fac_status)
-            & ~is_sent_to_epc & ~pending_digit_ticket_response,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_accounting': is_part_of_education_group,
             'admission.view_admission_specific_questions': is_part_of_education_group,
             'admission.change_admission_specific_questions': is_part_of_education_group
@@ -170,6 +171,7 @@ class ProgramManager(EducationGroupRoleModel):
             & continuing.is_continuing
             & ~is_sent_to_epc,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
+            'admission.send_message': is_part_of_education_group,
             # Exports
             'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,
         }

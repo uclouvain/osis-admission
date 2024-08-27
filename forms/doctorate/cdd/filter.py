@@ -152,6 +152,10 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         label=_("Research scholarship"),
         required=False,
     )
+    fnrs_fria_fresh = forms.BooleanField(
+        label=_("FNRS, FRIA, FRESH"),
+        required=False,
+    )
     mode_filtres_etats_checklist = forms.ChoiceField(
         choices=ModeFiltrageChecklist.choices(),
         label=_('Include or exclude the checklist filters'),
@@ -220,7 +224,16 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
                     person=self.user.person
                 ).values_list('education_group_id')
             )
-        return qs.filter(conditions).with_acronym().order_by('acronym').values_list('acronym', flat=True)
+        return (
+            qs.filter(conditions)
+            .with_acronym()
+            .distinct('acronym')
+            .order_by('acronym')
+            .values_list(
+                'acronym',
+                flat=True,
+            )
+        )
 
     def get_proximity_commission_choices(self):
         proximity_commission_choices = [ALL_FEMININE_EMPTY_CHOICE[0]]

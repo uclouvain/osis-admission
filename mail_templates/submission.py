@@ -59,6 +59,11 @@ templates.register(
             description=_("Link to download a copy of the file related to the admission (frontoffice)."),
             example="https://dev.studies.uclouvain.be/somewhere",
         ),
+        Token(
+            name='salutation',
+            description=_('Mail salutation'),
+            example='Chère',
+        ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,
 )
