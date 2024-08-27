@@ -189,24 +189,30 @@ DOCUMENT_MAPPING = {
 class InjectionEPCAdmission:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
-        donnees = self.recuperer_donnees(admission=admission)
+        try:
+            donnees = self.recuperer_donnees(admission=admission)
+            logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
+            logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
+            transaction.on_commit(
+                lambda: self.envoyer_admission_dans_queue(
+                    donnees=donnees,
+                    admission_uuid=admission.uuid,
+                    admission_reference=str(admission),
+                )
+            )
+            statut = EPCInjectionStatus.PENDING.name
+        except Exception:
+            donnees = {}
+            statut = EPCInjectionStatus.OSIS_ERROR.name
+
         EPCInjection.objects.get_or_create(
             admission=admission,
             type=EPCInjectionType.DEMANDE.name,
             defaults={
                 "payload": donnees,
-                "status": EPCInjectionStatus.PENDING.name,
+                "status": statut,
                 'last_attempt_date': datetime.now(),
             },
-        )
-        logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
-        logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
-        transaction.on_commit(
-            lambda: self.envoyer_admission_dans_queue(
-                donnees=donnees,
-                admission_uuid=admission.uuid,
-                admission_reference=str(admission),
-            )
         )
         return donnees
 
