@@ -265,6 +265,13 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
         if trainings_types:
             mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
 
+        # Format boolean values
+        mapping_filter_key_value['quarantaine'] = yesno(formatted_filters.get('quarantaine'), _('Yes,No,All'))
+        mapping_filter_key_value['injection_en_erreur'] = yesno(
+            formatted_filters.get('injection_en_erreur'),
+            _('In error,Without error,All'),
+        )
+
         return {
             mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])
             for key, value in formatted_filters.items()

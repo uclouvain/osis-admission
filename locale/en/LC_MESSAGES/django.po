@@ -3747,6 +3747,12 @@ msgstr ""
 msgid "In draft form"
 msgstr ""
 
+msgid "In error"
+msgstr ""
+
+msgid "In error,Without error,All"
+msgstr ""
+
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
@@ -3802,6 +3808,9 @@ msgstr ""
 
 msgid ""
 "Initialization of the predefined specific questions for an academic year"
+msgstr ""
+
+msgid "Injection error"
 msgstr ""
 
 msgctxt "admission"
@@ -5610,6 +5619,9 @@ msgstr ""
 msgid "Published"
 msgstr ""
 
+msgid "Quarantine"
+msgstr ""
+
 msgid ""
 "Question label for Document, Selection and Text form elements. Not used for "
 "Message elements."
@@ -6626,7 +6638,12 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The 'Dispensation granted' status is reserved to enrolment application whith "
+"The 'Approved' status requires the last 5 years to be justified in the "
+"previous experience."
+msgstr ""
+
+msgid ""
+"The 'Dispensation granted' status is reserved to enrolment application with "
 "financability dispensation status set to 'Faculty dispensation granted'."
 msgstr ""
 
@@ -6912,6 +6929,11 @@ msgid_plural "The following admissions have not been updated: {}."
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "The following period must be justified in the curriculum:"
+msgid_plural "The following periods must be justified in the curriculum:"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid ""
 "The global status of the application must be one of the following in order "
 "to realize this action: "
@@ -7105,6 +7127,11 @@ msgstr ""
 
 #, python-format
 msgid "The text size must be one of the following values: %(values)s."
+msgstr ""
+
+msgid ""
+"The transition to this status is not possible while the application is in "
+"quarantine."
 msgstr ""
 
 #, python-format
@@ -7737,6 +7764,9 @@ msgstr ""
 msgid "Without condition"
 msgstr ""
 
+msgid "Without error"
+msgstr ""
+
 msgid "Without free documents"
 msgstr ""
 
@@ -7880,6 +7910,9 @@ msgstr "Yes, only in Saint-Louis (€12)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"
+
+msgid "Yes,No,All"
+msgstr ""
 
 msgid "Yes,No,Incomplete field"
 msgstr ""
