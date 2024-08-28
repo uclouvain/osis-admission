@@ -66,7 +66,7 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
     @property
     def candidate(self):
         return Person.objects.values(
-            'first_name', 'middle_name', 'last_name', 'national_number', 'gender', 'birth_date',
+            'first_name', 'middle_name', 'last_name', 'national_number', 'sex', 'birth_date',
             'email', 'civil_state', 'birth_place', 'country_of_citizenship__name', 'id_card_number',
             'passport_number', 'id_card_expiry_date', 'passport_expiry_date', 'global_id'
         ).get(baseadmissions__uuid=self.kwargs['uuid'])
@@ -123,8 +123,7 @@ class SearchAccountView(HtmxMixin, HtmxPermissionRequiredMixin, FormView):
                 date_naissance=form.cleaned_data.get('birth_date'),
                 lieu_naissance=form.cleaned_data.get('birth_place', ''),
                 email=form.cleaned_data.get('email', ''),
-                genre=form.cleaned_data.get('gender', ''),
-                sex=form.cleaned_data.get('gender', ''),  # TODO: Clarify sex/gender notion with DigIT
+                sex=form.cleaned_data.get('sex', ''),
                 nationalite=form.cleaned_data.get('country_of_citizenship', ''),
                 etat_civil=form.cleaned_data.get('civil_state', ''),
                 numero_national=form.cleaned_data.get('national_number', ''),
