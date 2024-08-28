@@ -550,7 +550,7 @@ class InjectionDemandeVersEPCException(Exception):
 
 
 def admission_response_from_epc_callback(donnees):
-    donnees = json.loads(donnees.decode("utf-8").replace("'", '"'))
+    donnees = json.loads(donnees.decode("utf-8"))
     dossier_uuid, statut = donnees["dossier_uuid"], donnees["status"]
     logger.info(
         f"[INJECTION EPC - RETOUR] Reception d une reponse d EPC pour l admission avec uuid "
