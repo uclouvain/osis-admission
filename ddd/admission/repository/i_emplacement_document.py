@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 from abc import ABCMeta
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Set
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
@@ -106,7 +106,7 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
     def reinitialiser_emplacements_documents_non_libres(
         cls,
         proposition_identity: PropositionIdentity,
-        entities: List[EmplacementDocument],
+        identifiants_documents_pertinents: Set[str],
     ) -> None:
         raise NotImplementedError
 
