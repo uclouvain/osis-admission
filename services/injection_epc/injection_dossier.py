@@ -36,6 +36,7 @@ from django.db import transaction
 from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
 from unidecode import unidecode
 
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.contrib.models import Accounting, EPCInjection, AdmissionFormItem
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import (
@@ -46,7 +47,17 @@ from admission.contrib.models.base import (
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as
+    RecalculerEmplacementsDocumentsNonLibresDoctoratCommand
+)
 from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.formation_continue.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresGeneralCommand
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS, PoursuiteDeCycle,
 )
@@ -64,6 +75,7 @@ from base.models.person import Person
 from base.models.person_address import PersonAddress
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
+from infrastructure.messages_bus import message_bus_instance
 from osis_common.queue.queue_sender import send_message, logger
 from osis_profile.models import (
     EducationalExperience,
@@ -191,6 +203,7 @@ class InjectionEPCAdmission:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
         try:
+            self._nettoyer_documents_reclames(admission)
             donnees = self.recuperer_donnees(admission=admission)
             logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
             logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
@@ -217,6 +230,19 @@ class InjectionEPCAdmission:
             },
         )
         return donnees
+
+    @staticmethod
+    def _nettoyer_documents_reclames(admission):
+        logger.info("[INJECTION EPC] Nettoyage des documents reclames plus necessaires")
+        commands = {
+            CONTEXT_GENERAL: RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
+            CONTEXT_CONTINUING: RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
+            CONTEXT_DOCTORATE: RecalculerEmplacementsDocumentsNonLibresDoctoratCommand
+        }
+        RecalculerEmplacementsDocumentsNonLibresCommand = commands[admission.get_admission_context()]
+        message_bus_instance.invoke(
+            RecalculerEmplacementsDocumentsNonLibresCommand(uuid_proposition=admission.uuid)
+        )
 
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
