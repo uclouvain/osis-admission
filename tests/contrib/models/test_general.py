@@ -24,14 +24,21 @@
 #
 # ##############################################################################
 
-import uuid
 from unittest.mock import patch
 
 import freezegun
 from django.test import override_settings
 
 from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
+)
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    AdmissionEducationalValuatedExperiencesFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -47,18 +54,6 @@ class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.auto_required_params = {
-            'automatically_required': True,
-            'last_action_at': '2023-01-01T00:00:00',
-            'last_actor': '',
-            'deadline_at': '',
-            'reason': '',
-            'requested_at': '',
-            'status': 'A_RECLAMER',
-            'type': 'NON_LIBRE',
-            'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-            'related_checklist_tab': '',
-        }
         cls.manuel_required_params = {
             'automatically_required': False,
             'last_action_at': '2023-01-01T00:00:00',
@@ -112,53 +107,81 @@ class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
         self.general_admission.update_requested_documents()
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(
-            self.general_admission.requested_documents,
-            {
-                'CURRICULUM.CURRICULUM': self.auto_required_params,
-            },
+        self.assertEqual(self.general_admission.requested_documents, {})
+
+    def test_update_requested_documents_with_existing_requests(self):
+        # Simulate documents requests
+        experience = EducationalExperienceFactory(
+            person=self.general_admission.candidate,
+            obtained_diploma=True,
         )
 
-        # Complete the missing field
-        self.general_admission.curriculum = [uuid.uuid4()]
-        self.general_admission.save()
-        self.general_admission.update_requested_documents()
-        self.general_admission.refresh_from_db()
-        self.assertEqual(
-            self.general_admission.requested_documents,
-            {},
+        experience_year = EducationalExperienceYearFactory(
+            educational_experience=experience,
         )
 
-    def test_update_requested_documents_with_existing_request_concerning_the_missing_field(self):
-        # Simulate a manuel request on the missing field
+        valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.general_admission,
+            educationalexperience=experience,
+        )
+
+        # Unknown documents
+        self.general_admission.requested_documents = {
+            # Unknown documents
+            f'CURRICULUM.IDENTIFIANT_PERSONNALISE_{document_type}': {
+                **self.manuel_required_params,
+                'type': document_type,
+            }
+            for document_type in [
+                # Non-free documents -> must be deleted
+                TypeEmplacementDocument.NON_LIBRE.name,
+                # Other documents -> must be kept
+                TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                TypeEmplacementDocument.LIBRE_INTERNE_SIC.name,
+                TypeEmplacementDocument.LIBRE_INTERNE_FAC.name,
+                TypeEmplacementDocument.SYSTEME.name,
+            ]
+        }
+
+        # Known non-free documents -> must be kept
         self.general_admission.requested_documents['CURRICULUM.CURRICULUM'] = self.manuel_required_params
+        self.general_admission.requested_documents[
+            f'CURRICULUM.{experience.uuid}.RELEVE_NOTES'
+        ] = self.manuel_required_params
+
         self.general_admission.save()
         self.general_admission.update_requested_documents()
         self.general_admission.refresh_from_db()
 
-        # We just specify that this field is automatically required and keep the previous request data
-        self.assertEqual(
-            self.general_admission.requested_documents,
-            {
-                'CURRICULUM.CURRICULUM': {
-                    **self.manuel_required_params,
-                    'automatically_required': True,
-                }
-            },
-        )
+        for document_identifier in [
+            TypeEmplacementDocument.NON_LIBRE.name,
+        ]:
+            self.assertIsNone(
+                self.general_admission.requested_documents.get(document_identifier),
+                f'{document_identifier} must be deleted',
+            )
 
-    def test_update_requested_documents_with_existing_request_concerning_other_field(self):
-        # Simulate a manuel request on the missing field
-        self.general_admission.requested_documents['IDENTIFICATION.CARTE_IDENTITE'] = self.manuel_required_params
-        self.general_admission.save()
+        for document_identifier in [
+            f'CURRICULUM.IDENTIFIANT_PERSONNALISE_{TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name}',
+            f'CURRICULUM.IDENTIFIANT_PERSONNALISE_{TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name}',
+            f'CURRICULUM.IDENTIFIANT_PERSONNALISE_{TypeEmplacementDocument.LIBRE_INTERNE_SIC.name}',
+            f'CURRICULUM.IDENTIFIANT_PERSONNALISE_{TypeEmplacementDocument.LIBRE_INTERNE_FAC.name}',
+            f'CURRICULUM.IDENTIFIANT_PERSONNALISE_{TypeEmplacementDocument.SYSTEME.name}',
+        ] + [
+            'CURRICULUM.CURRICULUM',
+            f'CURRICULUM.{experience.uuid}.RELEVE_NOTES',
+        ]:
+            self.assertIsNotNone(
+                self.general_admission.requested_documents.get(document_identifier),
+                f'{document_identifier} must be kept',
+            )
+
+        # The experience is not valuated anymore so we don't want to keep the document
+        valuation.delete()
+
         self.general_admission.update_requested_documents()
+
         self.general_admission.refresh_from_db()
 
-        # We keep the previous manuel request data
-        self.assertEqual(
-            self.general_admission.requested_documents,
-            {
-                'IDENTIFICATION.CARTE_IDENTITE': self.manuel_required_params,
-                'CURRICULUM.CURRICULUM': self.auto_required_params,
-            },
-        )
+        self.assertIsNone(self.general_admission.requested_documents.get(f'CURRICULUM.{experience.uuid}.RELEVE_NOTES'))
