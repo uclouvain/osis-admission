@@ -48,7 +48,7 @@ from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
+    DROITS_INSCRIPTION_MONTANT_VALEURS, PoursuiteDeCycle,
 )
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
@@ -431,6 +431,7 @@ class InjectionEPCAdmission:
         double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
         type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
+        financabilite_checklist = admission.checklist.get('current', {}).get('financabilite', {})
         return {
             "num_offre": num_offre,
             "validite": validite,
@@ -448,7 +449,7 @@ class InjectionEPCAdmission:
             'etat_financabilite': {
                 'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
                 'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
-            }.get(admission.checklist.get('current', {}).get('financabilite', {}).get('statut')),
+            }.get(financabilite_checklist.get('statut')),
             'situation_financabilite': admission_generale.financability_rule if admission_generale else None,
             'utilisateur_financabilite': (
                 admission_generale.financability_rule_established_by.full_name if admission_generale else None
@@ -457,11 +458,7 @@ class InjectionEPCAdmission:
                 admission_generale.financability_rule_established_on.strftime("%d/%m/%Y")
                 if admission_generale else None
             ),
-            'derogation_financabilite': (
-                admission_generale.financability_dispensation_status
-                == DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name
-                if admission_generale else False
-            )
+            'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
         }
 
     @staticmethod
@@ -550,7 +547,7 @@ class InjectionDemandeVersEPCException(Exception):
 
 
 def admission_response_from_epc_callback(donnees):
-    donnees = json.loads(donnees.decode("utf-8").replace("'", '"'))
+    donnees = json.loads(donnees.decode("utf-8"))
     dossier_uuid, statut = donnees["dossier_uuid"], donnees["status"]
     logger.info(
         f"[INJECTION EPC - RETOUR] Reception d une reponse d EPC pour l admission avec uuid "
