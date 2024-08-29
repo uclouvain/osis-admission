@@ -46,6 +46,7 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from backoffice.celery import app
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
@@ -130,6 +131,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         )
         candidat.global_id = digit_matricule
         candidat.external_id = f"osis.person_{digit_matricule}"
+        for address in candidat.personaddress_set.all().filter(label=PersonAddressType.RESIDENTIAL.name):
+            address.external_id = f"osis.student_address_STUDENT_{digit_matricule}_RESIDENTIAL"
+            address.save()
         if candidat.user:
             candidat.user.usergroup_set.all().delete()
             candidat.user.delete()

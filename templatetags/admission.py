@@ -41,8 +41,6 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
-
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -64,9 +62,10 @@ from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -1182,7 +1181,7 @@ def map_fields_items(digit_fields):
         "middle_name": "",
         "last_name": "lastName",
         "national_number": "nationalRegister",
-        "gender": "gender",
+        "sex": "gender",
         "birth_date": "birthDate",
         "email": "private_email",
         "civil_state": "",
@@ -1199,7 +1198,6 @@ def map_fields_items(digit_fields):
         mapped_fields[admission_field] = digit_fields.get('person').get(digit_field)
 
     mapped_fields['birth_date'] = datetime.datetime.strptime(mapped_fields['birth_date'], "%Y-%m-%d")
-    mapped_fields['gender'] = "H" if mapped_fields['gender'] == "M" else "F"
 
     if mapped_fields['country_of_citizenship__name']:
         mapped_fields['country_of_citizenship__name'] = Country.objects.get(
@@ -1213,9 +1211,9 @@ def map_fields_items(digit_fields):
 def input_field_data(label, value, editable=True, mask=None, select_key=None):
     if isinstance(value, datetime.date):
         value = value.strftime("%d/%m/%Y")
-    if label == 'gender' and value is not None:
+    if label == 'sex' and value is not None:
         select_key = value
-        value = ChoixGenre.get_value(select_key)
+        value = ChoixSexe.get_value(select_key)
     if label == 'civil_state' and value is not None:
         select_key = value
         value = CivilState.get_value(select_key)
