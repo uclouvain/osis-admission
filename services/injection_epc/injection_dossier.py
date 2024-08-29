@@ -243,6 +243,7 @@ class InjectionEPCAdmission:
         message_bus_instance.invoke(
             RecalculerEmplacementsDocumentsNonLibresCommand(uuid_proposition=admission.uuid)
         )
+        admission.refresh_from_db(fields=['requested_documents'])
 
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
