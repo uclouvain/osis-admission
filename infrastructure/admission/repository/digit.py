@@ -383,7 +383,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
             "lastName": person.last_name,
             "firstName": person.first_name,
             "birthDate": birth_date,
-            "gender": "M" if person.sex == "H" else person.sex,
+            "gender": person.sex,
             "nationalRegister": "".join(filter(str.isdigit, person.national_number)),
             "nationality": person.country_of_citizenship.iso_code if person.country_of_citizenship else None,
             "otherFirstName": person.middle_name,
