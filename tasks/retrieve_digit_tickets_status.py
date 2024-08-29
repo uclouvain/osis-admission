@@ -46,7 +46,6 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from backoffice.celery import app
-from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
@@ -131,8 +130,8 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         )
         candidat.global_id = digit_matricule
         candidat.external_id = f"osis.person_{digit_matricule}"
-        for address in candidat.personaddress_set.all().filter(label=PersonAddressType.RESIDENTIAL.name):
-            address.external_id = f"osis.student_address_STUDENT_{digit_matricule}_RESIDENTIAL"
+        for address in candidat.personaddress_set.all():
+            address.external_id = f"osis.student_address_STUDENT_{digit_matricule}_{address.label}"
             address.save()
         if candidat.user:
             candidat.user.usergroup_set.all().delete()
@@ -180,7 +179,6 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             logger.info(
                 f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
             )
-
         _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
         personne_connue.save()
         proposition_fusion.proposal_merge_person.delete()
