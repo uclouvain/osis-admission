@@ -25,7 +25,7 @@
 # ##############################################################################
 
 import attr
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import DesignerPromoteurReferenceCommand

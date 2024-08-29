@@ -23,9 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
-
 import factory
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity

@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import attr
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import SupprimerPropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale

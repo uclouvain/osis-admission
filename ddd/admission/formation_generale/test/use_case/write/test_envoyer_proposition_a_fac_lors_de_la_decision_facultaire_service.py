@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (

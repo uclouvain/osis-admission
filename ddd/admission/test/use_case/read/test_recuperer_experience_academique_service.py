@@ -24,7 +24,8 @@
 #
 # ##############################################################################
 import uuid
-from unittest import TestCase
+
+from django.test import TestCase
 
 from admission.ddd.admission.commands import RecupererExperienceNonAcademiqueQuery, RecupererExperienceAcademiqueQuery
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException

@@ -25,13 +25,10 @@
 # ##############################################################################
 
 import uuid
-from unittest import TestCase
+
+from django.test import TestCase
 
 from admission.constants import UUID_REGEX
-from admission.ddd.admission.formation_generale.commands import (
-    InitialiserEmplacementDocumentLibreAReclamerCommand,
-    AnnulerReclamationEmplacementDocumentCommand,
-)
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
@@ -41,6 +38,10 @@ from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
     StatutReclamationEmplacementDocument,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    InitialiserEmplacementDocumentLibreAReclamerCommand,
+    AnnulerReclamationEmplacementDocumentCommand,
 )
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     EmplacementDocumentInMemoryRepository,
