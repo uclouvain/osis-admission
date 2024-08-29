@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 import datetime
-from unittest import TestCase
 from unittest.mock import patch
 
 import freezegun
 import mock
+from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale

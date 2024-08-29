@@ -23,8 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
 from unittest.mock import MagicMock
+
+from django.test import TestCase
 
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationEtudesSecondairesDTO

@@ -25,7 +25,8 @@
 # ##############################################################################
 
 import uuid
-from unittest import TestCase
+
+from django.test import TestCase
 
 from admission.constants import UUID_REGEX
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity

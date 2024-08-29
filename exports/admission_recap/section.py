@@ -581,7 +581,9 @@ def get_sections(
         pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
-        pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
+        pdf_sections.append(
+            get_non_educational_experience_section(context, non_educational_experience, load_content)
+        )
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))

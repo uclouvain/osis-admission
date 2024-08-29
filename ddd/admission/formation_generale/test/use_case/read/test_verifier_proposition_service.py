@@ -26,9 +26,10 @@
 import datetime
 import uuid
 from typing import Optional
-from unittest import TestCase, mock
+from unittest import mock
 
 import freezegun
+from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -122,6 +123,7 @@ class TestVerifierPropositionService(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        super().setUpClass()
         cls.experience_academiques_complete = ExperienceAcademique(
             personne='0000000001',
             communaute_fr=True,

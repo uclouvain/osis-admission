@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (

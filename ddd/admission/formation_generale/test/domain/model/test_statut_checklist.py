@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutChecklist
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
@@ -36,6 +36,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 class ConfigurationStatutChecklistTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.default_kwargs = {
             'identifiant': 'id-1',
             'libelle': 'label',
@@ -166,6 +167,7 @@ class ConfigurationStatutChecklistTestCase(TestCase):
 class ConfigurationOngletChecklistTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.default_kwargs = {
             'identifiant': 'id-1',
             'libelle': 'label',
