@@ -77,7 +77,6 @@ def recuperer_documents_proposition(
         personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
         questions_specifiques=questions_specifiques_dtos,
-        avec_curex_d_epc=cmd.avec_documents_du_curex_epc
     )
 
     # THEN
