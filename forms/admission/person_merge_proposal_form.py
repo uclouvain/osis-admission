@@ -115,7 +115,7 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'last_name',
             'national_number',
             'last_registration_id',
-            'gender',
+            'sex',
             'birth_date',
             'email',
             'civil_state',
@@ -129,7 +129,7 @@ class PersonMergeProposalForm(AdmissionPersonForm):
         exclude = [
             'birth_country',
             'birth_year',
-            'sex',
+            'gender',
             'language',
             'id_photo',
             'id_card',

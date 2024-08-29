@@ -130,6 +130,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         )
         candidat.global_id = digit_matricule
         candidat.external_id = f"osis.person_{digit_matricule}"
+        for address in candidat.personaddress_set.all():
+            address.external_id = f"osis.student_address_STUDENT_{digit_matricule}_{address.label}"
+            address.save()
         if candidat.user:
             candidat.user.usergroup_set.all().delete()
             candidat.user.delete()
@@ -176,7 +179,6 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             logger.info(
                 f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
             )
-
         _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
         personne_connue.save()
         proposition_fusion.proposal_merge_person.delete()

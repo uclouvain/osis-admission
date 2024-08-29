@@ -43,7 +43,6 @@ class IPropositionPersonneFusionRepository:
             date_naissance: str,
             lieu_naissance: str,
             email: str,
-            genre: str,
             sex: str,
             etat_civil: str,
             nationalite: str,

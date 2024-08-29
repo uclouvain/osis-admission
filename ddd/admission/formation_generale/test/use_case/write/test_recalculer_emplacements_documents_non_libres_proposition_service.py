@@ -28,13 +28,11 @@ import datetime
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity as SuperPropositionIdentity
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity, EmplacementDocument
 from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutEmplacementDocument,
-    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery,
@@ -75,37 +73,48 @@ class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(SimpleTestCase
         self.addCleanup(self.emplacement_document_repository.reset)
 
     def test_recalculer_emplacements_documents_non_libres_proposition(self):
-        nb_entites = len(self.emplacement_document_repository.entities)
-
         proposition = self.proposition_repository.get(PropositionIdentity('uuid-MASTER-SCI'))
-        proposition.curriculum = []
+
+        emplacement_document = EmplacementDocument(
+            entity_id=EmplacementDocumentIdentity(
+                proposition_id=proposition.entity_id,
+                identifiant='TAB.CUSTOM',
+            ),
+            uuids_documents=[],
+            type=TypeEmplacementDocument.NON_LIBRE,
+            statut=StatutEmplacementDocument.A_RECLAMER,
+            justification_gestionnaire='',
+        )
+
+        self.emplacement_document_repository.save(emplacement_document)
+
+        emplacement_document_curriculum = EmplacementDocument(
+            entity_id=EmplacementDocumentIdentity(
+                proposition_id=proposition.entity_id,
+                identifiant='CURRICULUM.CURRICULUM',
+            ),
+            uuids_documents=[],
+            type=TypeEmplacementDocument.NON_LIBRE,
+            statut=StatutEmplacementDocument.A_RECLAMER,
+            justification_gestionnaire='',
+        )
+
+        self.emplacement_document_repository.save(emplacement_document_curriculum)
+
         proposition_id = self.message_bus.invoke(self.cmd)
 
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertTrue(len(self.emplacement_document_repository.entities) > nb_entites)
 
-        try:
-            emplacement_entity_id = EmplacementDocumentIdentity(
-                identifiant='CURRICULUM.CURRICULUM',
-                proposition_id=SuperPropositionIdentity('uuid-MASTER-SCI'),
-            )
-            emplacement = self.emplacement_document_repository.get(emplacement_entity_id)
-            self.assertEqual(emplacement.entity_id, emplacement_entity_id)
-            self.assertEqual(emplacement.uuids_documents, [])
-            self.assertEqual(emplacement.type, TypeEmplacementDocument.NON_LIBRE)
-            self.assertEqual(emplacement.statut, StatutEmplacementDocument.A_RECLAMER)
-            self.assertEqual(emplacement.statut_reclamation, StatutReclamationEmplacementDocument.IMMEDIATEMENT)
-            self.assertEqual(emplacement.justification_gestionnaire, '')
-            self.assertEqual(emplacement.requis_automatiquement, True)
-            self.assertEqual(emplacement.libelle, '')
-            self.assertEqual(emplacement.reclame_le, None)
-            self.assertEqual(emplacement.a_echeance_le, None)
-            self.assertEqual(emplacement.derniere_action_le, datetime.datetime(2023, 10, 1))
-            self.assertEqual(emplacement.dernier_acteur, '')
-            self.assertEqual(emplacement.document_soumis_par, '')
+        with self.assertRaises(EmplacementDocumentNonTrouveException):
+            self.emplacement_document_repository.get(emplacement_document.entity_id)
 
-        except EmplacementDocumentNonTrouveException:
-            self.fail('The document placement \'CURRICULUM.CURRICULUM\' has not been added to the repository.')
+        emplacement_document_pertinent = (
+            self.emplacement_document_repository.get(
+                emplacement_document_curriculum.entity_id,
+            ),
+        )
+
+        self.assertIsNotNone(emplacement_document_pertinent)
 
     def test_lever_exception_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):

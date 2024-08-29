@@ -26,7 +26,7 @@
 
 import datetime
 import uuid
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Set
 
 from django.conf import settings
 from django.db import transaction
@@ -65,6 +65,7 @@ from admission.infrastructure.utils import get_document_from_identifier, Admissi
 from base.models.person import Person
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
+from base.tests.models.test_tutor import request
 
 
 class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
@@ -318,27 +319,17 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
     def reinitialiser_emplacements_documents_non_libres(
         cls,
         proposition_identity: PropositionIdentity,
-        entities: List[EmplacementDocument],
+        identifiants_documents_pertinents: Set[str],
     ) -> None:
         admission = cls.get_admission(entity_id=proposition_identity)
-        entities_to_keep = set(entity.entity_id.identifiant for entity in entities)
 
-        # Remove or update the previously requested non free documents
+        # Remove the non-free documents that are no longer relevant to the admission
         for requested_document_identifier in list(admission.requested_documents.keys()):
             current_document = admission.requested_documents[requested_document_identifier]
 
             if current_document['type'] == TypeEmplacementDocument.NON_LIBRE.name:
-                # Indicate if this document is automatically required by the system
-                current_document['automatically_required'] = requested_document_identifier in entities_to_keep
-
-                # Remove the non free documents that weren't requested by a manager
-                if not current_document['last_actor']:
+                if requested_document_identifier not in identifiants_documents_pertinents:
                     del admission.requested_documents[requested_document_identifier]
-
-        # Add the new documents requested by the system
-        for entity in entities:
-            if entity.entity_id.identifiant not in admission.requested_documents:
-                admission.requested_documents[entity.entity_id.identifiant] = cls.entity_to_dict(entity)
 
         admission.save(update_fields=['requested_documents'])
 

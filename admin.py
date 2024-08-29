@@ -98,6 +98,7 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeStatus
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
@@ -614,7 +615,7 @@ class EPCInjectionStatusFilter(SimpleListFilter):
 
 
 class EmailInterneFilter(admin.SimpleListFilter):
-    title = 'Email est interne ?'
+    title = 'Email interne'
     parameter_name = 'email_interne'
 
     def lookups(self, request, model_admin):
@@ -632,7 +633,7 @@ class EmailInterneFilter(admin.SimpleListFilter):
 
 
 class MatriculeInterneFilter(admin.SimpleListFilter):
-    title = 'Matricule est interne ?'
+    title = 'Matricule interne'
     parameter_name = 'matricule_interne'
 
     def lookups(self, request, model_admin):
@@ -663,7 +664,8 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
         queryset = queryset.annotate(
             financabilite_ok=Case(
                 When(
-                    Q(generaleducationadmission__financability_rule='')
+                    ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
+                    | Q(generaleducationadmission__financability_rule='')
                     | Q(generaleducationadmission__financability_computed_rule_on__isnull=True)
                     | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
                     generaleducationadmission__isnull=False,
@@ -674,6 +676,32 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
         )
         if self.value():
             return queryset.filter(financabilite_ok=self.value() == 'yes')
+        return queryset
+
+
+class QuarantaineFilter(admin.SimpleListFilter):
+    title = 'Quaranrataine'
+    parameter_name = 'quarantaine'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        queryset = queryset.annotate(
+            quarantaine=Case(
+                When(
+                    Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
+                    | ~Q(candidate__personmergeproposal__validation__valid=True),
+                    then=Value(True)
+                ),
+                default=Value(False)
+            )
+        )
+        if self.value():
+            return queryset.filter(quarantaine=self.value() == 'yes')
         return queryset
 
 
@@ -701,14 +729,13 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         EPCInjectionStatusFilter,
         ('determined_academic_year', RelatedDropdownFilter),
         'determined_pool',
-        'online_payments__status',
         'accounting__sport_affiliation',
         'generaleducationadmission__tuition_fees_dispensation',
         'generaleducationadmission__tuition_fees_amount',
-        'candidate__personmergeproposal__status',
         EmailInterneFilter,
         MatriculeInterneFilter,
-        FinancabiliteOKFilter
+        FinancabiliteOKFilter,
+        QuarantaineFilter,
     ]
     sortable_by = ['reference', 'noma_sent_to_digit']
 
@@ -835,11 +862,7 @@ class EPCInjectionAdmin(admin.ModelAdmin):
         ):
             injection.last_attempt_date = datetime.now()
             injection.save()
-            InjectionEPCAdmission().envoyer_admission_dans_queue(
-                donnees=injection.payload,
-                admission_reference=injection.admission.reference,
-                admission_uuid=injection.admission.uuid
-            )
+            InjectionEPCAdmission().injecter(injection.admission)
 
 
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
