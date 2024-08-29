@@ -26,6 +26,7 @@
 
 <div id="choix-formation-form">
   {% panel _("Proposition features") %}
+    {% bootstrap_form_errors form %}
     <form
         hx-post="{% url 'admission:general-education:choix-formation-update' uuid=view.kwargs.uuid %}"
         hx-target="#choix-formation-form"
@@ -48,9 +49,6 @@
   {% endpanel %}
   {{ form.media }}
   <script>
-      $('#id_annee_academique').change(function() {
-          $('#id_formation').val(null).trigger('change');
-      });
       $('#id_formation').on('select2:select select2:clear', function (event) {
           if(event.params.data.type === 'BACHELOR') {
               $('#bachelor-cycle-continuation-container').removeClass('hidden');
