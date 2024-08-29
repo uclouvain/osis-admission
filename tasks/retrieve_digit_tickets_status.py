@@ -274,6 +274,7 @@ def _update_non_empty_fields(source_obj: Model, target_obj: Model):
             'user',
             'external_id',
             'global_id',
+            'email',
         ] or not source_value:
             continue
         setattr(target_obj, field_name, source_value)
