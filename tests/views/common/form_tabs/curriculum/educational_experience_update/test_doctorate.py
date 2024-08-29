@@ -92,7 +92,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             submitted=True,
         )
 
-        cls.files_uuids = [[uuid.uuid4()] for _ in range(3)]
+        cls.files_uuids = [[uuid.uuid4()] for _ in range(4)]
 
         # Create users
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
@@ -479,6 +479,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
                 'base_form-dissertation_summary_0': ['uuid1'],
                 'base_form-graduate_degree_0': ['uuid2'],
                 'base_form-graduate_degree_translation_0': ['uuid3'],
+                'base_form-transcript_0': self.files_uuids[0],
                 'base_form-rank_in_diploma': 'My rank',
                 'year_formset-TOTAL_FORMS': 1,
                 'year_formset-INITIAL_FORMS': 0,
@@ -551,6 +552,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
                 'base_form-dissertation_summary_0': self.files_uuids[0],
                 'base_form-graduate_degree_0': self.files_uuids[1],
                 'base_form-graduate_degree_translation_0': self.files_uuids[2],
+                'base_form-transcript_0': self.files_uuids[3],
                 'base_form-rank_in_diploma': 'My rank',
                 'year_formset-TOTAL_FORMS': 1,
                 'year_formset-INITIAL_FORMS': 3,
@@ -561,7 +563,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
                 'year_formset-2021-registered_credit_number': 20,
             },
         )
-
+        print(response)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         # Check the updated experience
