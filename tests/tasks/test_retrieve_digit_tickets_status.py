@@ -28,9 +28,8 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 from django.test import TestCase
-from waffle.testutils import override_switch
 from django.test.utils import override_settings
-
+from waffle.testutils import override_switch
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery
@@ -40,10 +39,12 @@ from admission.tasks import retrieve_digit_tickets_status
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory, EducationalExperienceFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.civil_state import CivilState
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.person import PersonFactory
+from base.tests.factories.person_address import PersonAddressFactory
 from osis_profile.models import ProfessionalExperience, EducationalExperience
 from osis_profile.models.enums.curriculum import ActivityType
 
@@ -53,6 +54,10 @@ from osis_profile.models.enums.curriculum import ActivityType
 class TestRetrieveDigitTicketsStatus(TestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
+        self.addresse_residentielle_personne_temporaire = PersonAddressFactory(
+            person=self.personne_compte_temporaire,
+            label=PersonAddressType.RESIDENTIAL.name
+        )
         self.person_merge_proposal = PersonMergeProposal.objects.create(
             original_person=self.personne_compte_temporaire,
             proposal_merge_person=None,
@@ -143,6 +148,8 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.personne_compte_temporaire.refresh_from_db()
         self.assertEqual(self.personne_compte_temporaire.global_id, '00345678')
         self.assertEqual(self.personne_compte_temporaire.external_id, 'osis.person_00345678')
+        self.addresse_residentielle_personne_temporaire.refresh_from_db()
+        self.assertEqual(self.addresse_residentielle_personne_temporaire.external_id, 'osis.student_address_STUDENT_00345678_RESIDENTIAL')
 
     def test_assert_merge_with_existing_account_and_existing_in_osis(self):
         self.personne_compte_temporaire.global_id = '00345678'   # Set as internal account

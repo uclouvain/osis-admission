@@ -28,10 +28,6 @@ from typing import Optional, List
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
-from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
-from osis_common.utils.models import get_object_or_none
-from reference.models.country import Country
 
 
 class PropositionPersonneFusionInMemoryRepository(IPropositionPersonneFusionRepository):
@@ -48,7 +44,6 @@ class PropositionPersonneFusionInMemoryRepository(IPropositionPersonneFusionRepo
             date_naissance: str,
             lieu_naissance: str,
             email: str,
-            genre: str,
             sex: str,
             etat_civil: str,
             nationalite: str,
