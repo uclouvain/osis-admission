@@ -25,13 +25,16 @@
 # ##############################################################################
 
 import datetime
+import uuid
 from unittest.mock import patch
 
 import freezegun
 from django.conf import settings
+from django.http import QueryDict
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
@@ -72,21 +75,30 @@ class PersonFormTestCase(TestCase):
         cls.belgium_country = CountryFactory(iso_code=BE_ISO_CODE)
         cls.france_country = CountryFactory(iso_code=FR_ISO_CODE)
         cls.academic_year = AcademicYearFactory(year=2021)
-        cls.form_data = {
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'birth_date': datetime.date(1990, 1, 1),
-            'birth_country': cls.belgium_country.pk,
-            'country_of_citizenship': cls.belgium_country.pk,
-            'birth_place': 'Louvain-la-Neuve',
-            'sex': ChoixSexe.M.name,
-            'gender': ChoixGenre.H.name,
-            'civil_state': CivilState.MARRIED.name,
-            'has_national_number': True,
-            'national_number': '01234567899',
-            'id_card_expiry_date': datetime.date(2020, 2, 2),
-            'passport_expiry_date': datetime.date(2020, 2, 2),
-        }
+        cls.form_data = QueryDict(
+            urlencode(
+                {
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'birth_date': datetime.date(1990, 1, 1),
+                    'birth_country': cls.belgium_country.pk,
+                    'country_of_citizenship': cls.belgium_country.pk,
+                    'birth_place': 'Louvain-la-Neuve',
+                    'sex': ChoixSexe.M.name,
+                    'gender': ChoixGenre.H.name,
+                    'civil_state': CivilState.MARRIED.name,
+                    'has_national_number': True,
+                    'national_number': '01234567899',
+                    'id_card_expiry_date': datetime.date(2020, 2, 2),
+                    'passport_expiry_date': datetime.date(2020, 2, 2),
+                    'id_photo_0': str(uuid.uuid4()),
+                    'id_card_0': str(uuid.uuid4()),
+                }
+            ),
+            mutable=True,
+        )
+
+        cls.form_data_as_dict = cls.form_data.dict()
 
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -143,7 +155,13 @@ class PersonFormTestCase(TestCase):
 
         patcher = patch(
             "osis_document.api.utils.get_remote_metadata",
-            return_value={"name": "myfile", "mimetype": "application/pdf", "size": 1},
+            side_effect=lambda token, *args, **kwargs: {
+                "name": "myfile",
+                "mimetype": "image/png"
+                if token in {'file-0-token', self.form_data['id_photo_0']}
+                else "application/pdf",
+                "size": 1,
+            },
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -324,7 +342,7 @@ class PersonFormTestCase(TestCase):
         # The birth date is unknown and the birth year and the birth date are specified
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'birth_year': 1990,
                 'birth_date': datetime.date(1990, 1, 1),
                 'unknown_birth_date': True,
@@ -337,7 +355,7 @@ class PersonFormTestCase(TestCase):
         # The birthdate is known and the birth year and the birth date are specified
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'birth_year': 1990,
                 'birth_date': datetime.date(1990, 1, 1),
                 'unknown_birth_date': False,
@@ -350,7 +368,7 @@ class PersonFormTestCase(TestCase):
         # The birth date is unknown but the birth year is not specified
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'birth_year': None,
                 'unknown_birth_date': True,
             },
@@ -361,7 +379,7 @@ class PersonFormTestCase(TestCase):
         # The birth date is known but not specified
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'birth_date': None,
                 'unknown_birth_date': False,
             },
@@ -380,7 +398,7 @@ class PersonFormTestCase(TestCase):
         # The candidate hasn't already been registered but the related fields are specified -> to clean
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'already_registered': False,
                 'last_registration_year': self.academic_year.pk,
                 'last_registration_id': '01234567',
@@ -393,7 +411,7 @@ class PersonFormTestCase(TestCase):
         # The candidate has already been registered but one related field is missing
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'already_registered': True,
                 'last_registration_year': None,
                 'last_registration_id': '1234567',
@@ -406,7 +424,7 @@ class PersonFormTestCase(TestCase):
         # The first name and / or the last name must be specified
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'first_name': '',
                 'last_name': '',
             },
@@ -419,7 +437,7 @@ class PersonFormTestCase(TestCase):
         # The candidate is belgian and resides in Belgium -> the belgian national number is required
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'has_national_number': False,
                 'national_number': '',
                 'id_card_expiry_date': '',
@@ -432,10 +450,21 @@ class PersonFormTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_expiry_date', []))
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
 
+        form = AdmissionPersonForm(
+            data={
+                **self.form_data_as_dict,
+                'has_national_number': False,
+                'country_of_citizenship': self.belgium_country.pk,
+                'id_card': [],
+            },
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
+
         # The candidate indicated that he has a belgian national number -> the belgian national number is required
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'has_national_number': True,
                 'national_number': '',
                 'id_card_expiry_date': '',
@@ -449,7 +478,17 @@ class PersonFormTestCase(TestCase):
 
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
+                'has_national_number': True,
+                'id_card': [],
+            },
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
+
+        form = AdmissionPersonForm(
+            data={
+                **self.form_data_as_dict,
                 'has_national_number': True,
                 'national_number': '01234567899',
                 'id_card_expiry_date': datetime.date(2020, 1, 1),
@@ -473,7 +512,7 @@ class PersonFormTestCase(TestCase):
         # The candidate indicated that he has another national number -> this number is required
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
@@ -489,7 +528,19 @@ class PersonFormTestCase(TestCase):
 
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
+                'country_of_citizenship': self.france_country.pk,
+                'has_national_number': False,
+                'identification_type': IdentificationType.ID_CARD_NUMBER.name,
+                'id_card': [],
+            },
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
+
+        form = AdmissionPersonForm(
+            data={
+                **self.form_data_as_dict,
                 'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
@@ -514,7 +565,7 @@ class PersonFormTestCase(TestCase):
         # The candidate indicated that he has a passport number -> this number is required
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.PASSPORT_NUMBER.name,
@@ -530,7 +581,19 @@ class PersonFormTestCase(TestCase):
 
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
+                'country_of_citizenship': self.france_country.pk,
+                'has_national_number': False,
+                'identification_type': IdentificationType.PASSPORT_NUMBER.name,
+                'passport': [],
+            },
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport', []))
+
+        form = AdmissionPersonForm(
+            data={
+                **self.form_data_as_dict,
                 'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.PASSPORT_NUMBER.name,
@@ -555,7 +618,7 @@ class PersonFormTestCase(TestCase):
         # Some data are specified but the type of national number is not -> to clean
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'country_of_citizenship': self.france_country.pk,
                 'has_national_number': None,
                 'identification_type': '',
@@ -580,7 +643,7 @@ class PersonFormTestCase(TestCase):
     def test_transform_fields_to_title_case(self):
         form = AdmissionPersonForm(
             data={
-                **self.form_data,
+                **self.form_data_as_dict,
                 'first_name': 'JOHN',
                 'last_name': 'DOE',
                 'middle_name': 'JIM',
@@ -651,6 +714,7 @@ class PersonFormTestCase(TestCase):
         self.assertRedirects(
             response,
             reverse('admission:general-education:person', args=[self.general_admission.uuid]),
+            fetch_redirect_response=False,
         )
 
         candidate = Person.objects.get(pk=self.general_admission.candidate.pk)
@@ -847,6 +911,7 @@ class PersonFormTestCase(TestCase):
         self.assertRedirects(
             response,
             reverse('admission:continuing-education:person', args=[self.continuing_admission.uuid]),
+            fetch_redirect_response=False,
         )
 
         candidate = Person.objects.get(pk=self.continuing_admission.candidate.pk)
@@ -900,7 +965,11 @@ class PersonFormTestCase(TestCase):
 
         response = self.client.post(self.doctorate_url, self.form_data)
 
-        self.assertRedirects(response, reverse('admission:doctorate:person', args=[self.doctorate_admission.uuid]))
+        self.assertRedirects(
+            response,
+            reverse('admission:doctorate:person', args=[self.doctorate_admission.uuid]),
+            fetch_redirect_response=False,
+        )
 
         candidate = Person.objects.get(pk=self.doctorate_admission.candidate.pk)
         self.assertEqual(candidate.first_name, self.form_data['first_name'])
