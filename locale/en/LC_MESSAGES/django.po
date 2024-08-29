@@ -4782,6 +4782,9 @@ msgstr ""
 msgid "No specific question available for this dossier."
 msgstr ""
 
+msgid "No training found for the specific year."
+msgstr ""
+
 msgid "No training found."
 msgstr ""
 
