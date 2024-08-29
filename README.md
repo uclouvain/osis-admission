@@ -36,3 +36,5 @@ Then, still from the root osis directory, run
 ```shell
 mypy -p admission.ddd
 ```
+
+
