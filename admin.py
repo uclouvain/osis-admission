@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import logging
 from datetime import datetime
 from typing import Dict
 
@@ -755,12 +754,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
             Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]) &
             Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
         ):
-            # Check injection state when it exists
-            try:
-                InjectionEPCAdmission().injecter(demande)
-            except Exception as e:
-                logger = logging.getLogger(settings.DEFAULT_LOGGER)
-                logger.error(e)
+            InjectionEPCAdmission().injecter(demande)
 
     def has_add_permission(self, request):
         return False
