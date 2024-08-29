@@ -73,14 +73,12 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
         questions_specifiques: List[QuestionSpecifiqueDTO],
         personne_connue_translator: IPersonneConnueUclTranslator,
         avec_documents_libres=True,
-        avec_curex_d_epc=True,
     ) -> List[EmplacementDocumentDTO]:
         # Get the requested documents by tab
         sections = get_sections(
             context=resume_dto,
             specific_questions=questions_specifiques,
             with_free_requestable_documents=avec_documents_libres,
-            with_epc_curex=avec_curex_d_epc
         )
 
         # Get a read token and metadata of all documents

@@ -30,17 +30,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False
@@ -69,7 +68,6 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
             message_bus_instance.invoke(
                 self.retrieve_documents_command[admission_context](
                     uuid_proposition=admission_uuid,
-                    avec_documents_du_curex_epc=False,
                 )
             )
             if admission_context in self.retrieve_documents_command
@@ -105,6 +103,7 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
                             f'"></i> {document.libelle}'
                         ),
                         'disabled': document.identifiant == document_identifier
+                        or document.lecture_seule
                         or original_document_is_required
                         and not bool(document.document_uuids),
                     }
