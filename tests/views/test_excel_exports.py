@@ -986,6 +986,13 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             last_update_author=self.candidate,
             cotutelle=None,
             type=ChoixTypeAdmission.ADMISSION.name,
+            checklist={
+                'initial': {},
+                'current': {
+                    'decision_sic': {'statut': 'INITIAL_CANDIDAT'},
+                    'decision_facultaire': {'statut': 'GEST_EN_COURS'},
+                },
+            },
         )
 
         results: List[DemandeDoctoraleRechercheDTO] = message_bus_instance.invoke(
@@ -1006,8 +1013,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(row_data[3], result.code_bourse)
         self.assertEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
         self.assertEqual(row_data[5], ChoixStatutPropositionDoctorale.CONFIRMEE.value)
-        self.assertEqual(row_data[6], 'TODO')
-        self.assertEqual(row_data[7], 'TODO')
+        self.assertEqual(row_data[6], _('Taken in charge'))
+        self.assertEqual(row_data[7], _('To be processed'))
         self.assertEqual(row_data[8], '2023/01/01')
         self.assertEqual(row_data[9], '2023/01/03')
         self.assertEqual(

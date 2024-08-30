@@ -34,7 +34,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, IntegrityError
 from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count, IntegerField
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
-from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace
+from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace, JSONObject
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -111,6 +111,30 @@ def training_campus_subquery(training_field: str):
     )
 
 
+def teaching_campus_subquery(training_field: str):
+    return Subquery(
+        EducationGroupVersion.standard.filter(offer_id=OuterRef(training_field), transition_name='')
+        .select_related('root_group__main_teaching_campus__country')
+        .annotate(
+            main_teaching_campus=JSONObject(
+                uuid=F('root_group__main_teaching_campus__uuid'),
+                name=F('root_group__main_teaching_campus__name'),
+                postal_code=F('root_group__main_teaching_campus__postal_code'),
+                city=F('root_group__main_teaching_campus__city'),
+                country_code=Coalesce(F('root_group__main_teaching_campus__country__iso_code'), Value('')),
+                fr_country_name=Coalesce(F('root_group__main_teaching_campus__country__name'), Value('')),
+                en_country_name=Coalesce(F('root_group__main_teaching_campus__country__name_en'), Value('')),
+                street=F('root_group__main_teaching_campus__street'),
+                street_number=F('root_group__main_teaching_campus__street_number'),
+                postal_box=F('root_group__main_teaching_campus__postal_box'),
+                location=F('root_group__main_teaching_campus__location'),
+                sic_enrollment_email=F('root_group__main_teaching_campus__sic_enrollment_email'),
+            )
+        )
+        .values('main_teaching_campus')[:1]
+    )
+
+
 class BaseAdmissionQuerySet(models.QuerySet):
     def annotate_campus(self, training_field='training_id', annotation_name='teaching_campus'):
         """
@@ -119,6 +143,14 @@ class BaseAdmissionQuerySet(models.QuerySet):
         @param annotation_name: the name of the output annotation
         """
         return self.annotate(**{annotation_name: training_campus_subquery(training_field)})
+
+    def annotate_campus_info(self, training_field='training_id', annotation_name='teaching_campus_info'):
+        """
+        Annotate the queryset with the teaching campus information.
+        @param training_field: the name of the training field in the model
+        @param annotation_name: the name of the output annotation
+        """
+        return self.annotate(**{annotation_name: teaching_campus_subquery(training_field)})
 
     def annotate_pool_end_date(self):
         today = timezone.now().today()

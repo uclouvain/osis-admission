@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, Dict
 
 from rest_framework import serializers
 
@@ -42,7 +41,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
@@ -167,7 +165,13 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
 
 
 class DoctoratDTOSerializer(DTOSerializer):
-    code = None
+    campus = serializers.CharField(source='campus.nom', default='')
+    campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+
+    date_debut = None
+    intitule_fr = None
+    intitule_en = None
+    credits = None
 
     class Meta:
         source = DoctoratDTO
@@ -231,6 +235,8 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctorateProp
             },
         }
     )
+
+    doctorat = DoctoratDTOSerializer()
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
@@ -460,6 +466,8 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     elements_confirmation = None
     documents_demandes = None
+    doctorat = DoctoratDTOSerializer()
+
     # The schema is explicit in PropositionSchema
     erreurs = serializers.JSONField()
 

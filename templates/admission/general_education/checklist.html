@@ -407,7 +407,7 @@
         </div>
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire next_url=next_base_url|add:'fac_decision' %}
+      {% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire next_url=next_base_url|add:'decision_facultaire' %}
         <div role="tabpanel" class="tab-pane" id="decision_facultaire">
           {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
 

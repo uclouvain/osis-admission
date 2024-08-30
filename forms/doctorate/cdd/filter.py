@@ -31,7 +31,7 @@ from django.db.models import Q
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models import EntityProxy, Scholarship
-from admission.contrib.models.working_list import WorkingList
+from admission.contrib.models.working_list import WorkingList, DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -50,6 +50,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_bourse import TypeBourse
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
+)
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     ALL_EMPTY_CHOICE,
@@ -164,17 +167,17 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         widget=forms.RadioSelect(),
     )
     filtres_etats_checklist = ChecklistStateFilterField(
-        configurations=[],  # TODO
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
         label=_('Checklist filters'),
         required=False,
     )
     liste_travail = WorkingListField(
         label=_('Working list'),
-        queryset=WorkingList.objects.none(),  # TODO
+        queryset=DoctorateWorkingList.objects.all(),
         required=False,
         empty_label=_('Personalized'),
         widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:working-lists",
+            url="admission:autocomplete:doctorate-working-lists",
             attrs={
                 'data-placeholder': _('Personalized'),
                 'data-allow-clear': 'true',

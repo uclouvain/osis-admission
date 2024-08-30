@@ -27,6 +27,7 @@ from admission.ddd.admission.commands import *
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
 from admission.ddd.admission.use_case.read import *
+from admission.ddd.admission.use_case.write import specifier_experience_en_tant_que_titre_acces
 from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
@@ -35,12 +36,20 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
+from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
+    TitreAccesSelectionnableInMemoryRepository,
+)
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory import (
     EmailDestinataireInMemoryRepository,
+)
+from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
+    ExperienceParcoursInterneInMemoryTranslator,
 )
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepository()
+_experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -67,5 +76,16 @@ COMMAND_HANDLERS = {
     RecupererConnaissancesLanguesQuery: lambda msg_bus, query: recuperer_connaissances_langues(
         query,
         profil_candidat_translator=_profil_candidat_translator,
+    ),
+    RecupererTitresAccesSelectionnablesPropositionQuery: (
+        lambda msg_bus, query: recuperer_titres_acces_selectionnables_proposition(
+            query,
+            titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+            experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        )
+    ),
+    SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        cmd,
+        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
     ),
 }

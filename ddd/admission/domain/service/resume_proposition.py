@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional
+from typing import Optional, List
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity as PropositionDoctoraleIdentity,
@@ -35,6 +35,9 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite 
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import (
     GroupeDeSupervisionDTO,
     PropositionDTO as PropositionDoctoraleDTO,
@@ -46,6 +49,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
     IPropositionRepository as IPropositionDoctoraleRepository,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO, AdmissionPropositionDTO, AdmissionComptabiliteDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
@@ -63,6 +67,7 @@ class ResumeProposition(interface.DomainService):
         comptabilite_dto: Optional[AdmissionComptabiliteDTO] = None,
         groupe_supervision_dto: Optional[GroupeDeSupervisionDTO] = None,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+        questions_specifiques_dtos: Optional[List[QuestionSpecifiqueDTO]] = None,
     ) -> 'ResumePropositionDTO':
         annee_courante = (
             GetCurrentAcademicYear()
@@ -92,6 +97,7 @@ class ResumeProposition(interface.DomainService):
             etudes_secondaires=resume_candidat_dto.etudes_secondaires,
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
+            questions_specifiques_dtos=questions_specifiques_dtos,
         )
 
     @classmethod
@@ -105,6 +111,8 @@ class ResumeProposition(interface.DomainService):
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
         promoteur_translator: 'IPromoteurTranslator',
         membre_ca_translator: 'IMembreCATranslator',
+        question_specifique_translator: 'IQuestionSpecifiqueTranslator',
+        experiences_cv_recuperees: Optional[ExperiencesCVRecuperees] = None,
     ) -> 'ResumePropositionDTO':
         proposition_dto = proposition_repository.get_dto(entity_id=PropositionDoctoraleIdentity(uuid=uuid_proposition))
         comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=uuid_proposition)
@@ -114,13 +122,20 @@ class ResumeProposition(interface.DomainService):
             promoteur_translator=promoteur_translator,
             membre_ca_translator=membre_ca_translator,
         )
+        questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
+            proposition_uuid=uuid_proposition,
+        )
         return cls.get_resume(
             profil_candidat_translator=profil_candidat_translator,
             proposition_dto=proposition_dto,
             comptabilite_dto=comptabilite_dto,
             groupe_supervision_dto=groupe_supervision_dto,
             academic_year_repository=academic_year_repository,
-            experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
-            if proposition_dto.est_non_soumise
-            else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+            experiences_cv_recuperees=experiences_cv_recuperees
+            or (
+                ExperiencesCVRecuperees.TOUTES
+                if proposition_dto.est_non_soumise
+                else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+            ),
+            questions_specifiques_dtos=questions_specifiques_dtos,
         )
