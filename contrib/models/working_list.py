@@ -30,6 +30,7 @@ from django.utils.translation import gettext_lazy as _
 from ordered_model.models import OrderedModel
 
 from admission.contrib.models.form_item import TranslatedJSONField
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -102,3 +103,27 @@ class ContinuingWorkingList(CommonWorkingList):
     class Meta(OrderedModel.Meta):
         verbose_name = _('Continuing working list')
         verbose_name_plural = _('Continuing working lists')
+
+
+class DoctorateWorkingList(CommonWorkingList):
+    admission_statuses = ArrayField(
+        default=list,
+        verbose_name=_('Admission statuses'),
+        base_field=models.CharField(
+            choices=ChoixStatutPropositionDoctorale.choices(),
+            max_length=30,
+        ),
+        blank=True,
+    )
+
+    admission_type = models.CharField(
+        blank=True,
+        verbose_name=_('Admission type'),
+        choices=TypeDemande.choices(),
+        default='',
+        max_length=16,
+    )
+
+    class Meta(OrderedModel.Meta):
+        verbose_name = _('Doctorate working list')
+        verbose_name_plural = _('Doctorate working lists')

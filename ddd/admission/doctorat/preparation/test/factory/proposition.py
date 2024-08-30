@@ -27,7 +27,9 @@ import string
 import uuid
 
 import factory
+from factory.fuzzy import FuzzyText
 
+from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
 )
@@ -50,6 +52,20 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+    DroitsInscriptionMontant,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    StatutChecklist,
+    StatutsChecklistDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.checklist import Checklist
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+)
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.enums import (
     ChoixTypeCompteBancaire,
     ChoixAssimilation1,
@@ -68,6 +84,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -165,6 +182,56 @@ class _ComptabiliteFactory(factory.Factory):
     nom_titulaire_compte = 'Doe'
 
 
+class StatutChecklistFactory(factory.Factory):
+    class Meta:
+        model = StatutChecklist
+        abstract = False
+
+    libelle = FuzzyText(length=10, chars=string.digits)
+    enfants = factory.List([])
+    statut = ChoixStatutChecklist.INITIAL_CANDIDAT
+    extra = factory.Dict({})
+
+
+class StatutsChecklistDoctoraleFactory(factory.Factory):
+    class Meta:
+        model = StatutsChecklistDoctorale
+        abstract = False
+
+    donnees_personnelles = factory.SubFactory(StatutChecklistFactory)
+    assimilation = factory.SubFactory(StatutChecklistFactory)
+    choix_formation = factory.SubFactory(StatutChecklistFactory)
+    parcours_anterieur = factory.SubFactory(StatutChecklistFactory)
+    financabilite = factory.SubFactory(StatutChecklistFactory)
+    projet_recherche = factory.SubFactory(StatutChecklistFactory)
+    decision_facultaire = factory.SubFactory(StatutChecklistFactory)
+    decision_sic = factory.SubFactory(StatutChecklistFactory)
+
+
+class MotifRefusIdentityFactory(factory.Factory):
+    class Meta:
+        model = MotifRefusIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class ConditionComplementaireApprobationIdentityFactory(factory.Factory):
+    class Meta:
+        model = ConditionComplementaireApprobationIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class ComplementFormationIdentityFactory(factory.Factory):
+    class Meta:
+        model = ComplementFormationIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
 class _PropositionFactory(factory.Factory):
     class Meta:
         model = Proposition
@@ -213,6 +280,91 @@ class _PropositionFactory(factory.Factory):
             },
         }
     )
+
+    class Params:
+        est_confirmee = factory.Trait(
+            statut=ChoixStatutPropositionDoctorale.CONFIRMEE,
+            checklist_initiale=factory.SubFactory(StatutsChecklistDoctoraleFactory),
+            checklist_actuelle=factory.SubFactory(StatutsChecklistDoctoraleFactory),
+            soumise_le=factory.Faker('past_datetime'),
+        )
+        est_refusee_par_fac_raison_libre = factory.Trait(
+            autres_motifs_refus=['Ma raison'],
+            certificat_refus_fac=['uuid-certificat_refus_fac'],
+        )
+        est_refusee_par_fac_raison_connue = factory.Trait(
+            motifs_refus=[factory.SubFactory(MotifRefusIdentityFactory)],
+            certificat_refus_fac=['uuid-certificat_refus_fac'],
+        )
+        est_approuvee_par_fac = factory.Trait(
+            certificat_approbation_fac=['uuid-certificat_approbation_fac'],
+            autre_formation_choisie_fac_id=factory.SubFactory(FormationIdentityFactory),
+            avec_conditions_complementaires=True,
+            conditions_complementaires_existantes=factory.List(
+                params=[
+                    ConditionComplementaireApprobationIdentityFactory(),
+                    ConditionComplementaireApprobationIdentityFactory(),
+                ]
+            ),
+            conditions_complementaires_libres=factory.List(
+                params=[
+                    factory.fuzzy.FuzzyText(),
+                    factory.fuzzy.FuzzyText(),
+                ]
+            ),
+            complements_formation=factory.List(
+                params=[
+                    ComplementFormationIdentityFactory(),
+                    ComplementFormationIdentityFactory(),
+                ]
+            ),
+            avec_complements_formation=True,
+            commentaire_complements_formation=factory.fuzzy.FuzzyText(),
+            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
+                low=DUREE_MINIMALE_PROGRAMME,
+                high=DUREE_MAXIMALE_PROGRAMME,
+            ),
+            nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
+            email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
+            commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
+        )
+        est_approuvee_par_sic = factory.Trait(
+            avec_conditions_complementaires=True,
+            conditions_complementaires_existantes=factory.List(
+                params=[
+                    ConditionComplementaireApprobationIdentityFactory(),
+                    ConditionComplementaireApprobationIdentityFactory(),
+                ]
+            ),
+            conditions_complementaires_libres=factory.List(
+                params=[
+                    factory.fuzzy.FuzzyText(),
+                    factory.fuzzy.FuzzyText(),
+                ]
+            ),
+            complements_formation=factory.List(
+                params=[
+                    ComplementFormationIdentityFactory(),
+                    ComplementFormationIdentityFactory(),
+                ]
+            ),
+            avec_complements_formation=True,
+            commentaire_complements_formation=factory.fuzzy.FuzzyText(),
+            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
+                low=DUREE_MINIMALE_PROGRAMME,
+                high=DUREE_MAXIMALE_PROGRAMME,
+            ),
+            nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
+            email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
+            droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE,
+            est_mobilite=False,
+            doit_se_presenter_en_sic=False,
+            checklist_actuelle=factory.SubFactory(
+                StatutsChecklistDoctoraleFactory,
+                financabilite__statut=ChoixStatutChecklist.GEST_REUSSITE,
+                financabilite__extra={'reussite': 'financable'},
+            ),
+        )
 
 
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
@@ -322,3 +474,17 @@ class PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
         type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP,
         autre_bourse_recherche=BourseRecherche.ARC.name,
     )
+
+
+class PropositionAdmissionSC3DPConfirmeeFactory(PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-confirmee')
+    statut = ChoixStatutPropositionDoctorale.CONFIRMEE
+    soumise_le = factory.Faker('past_datetime')
+
+    @factory.post_generation
+    def checklist_initialization(self, create, extracted, **kwargs):
+        Checklist.initialiser(
+            proposition=self,
+            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
+            annee_courante=self.annee_calculee,
+        )

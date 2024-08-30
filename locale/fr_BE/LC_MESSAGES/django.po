@@ -2641,6 +2641,18 @@ msgstr "Formation doctorale"
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
+msgid "Doctorate free additional approval condition"
+msgstr "Condition complémentaire d'acceptation libre doctorale"
+
+msgid "Doctorate free additional approval conditions"
+msgstr "Conditions complémentaires d'acceptation libres doctorales"
+
+msgid "Doctorate working list"
+msgstr "Liste de travail doctorale"
+
+msgid "Doctorate working lists"
+msgstr "Listes de travail doctorales"
+
 msgid "Document"
 msgstr "Document"
 
@@ -2847,12 +2859,31 @@ msgid ""
 msgstr ""
 "Mail réclamant les frais de dossier au candidat le %(date)s par %(author)s."
 
+msgid ""
+"Email sent to the EU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat UE+5 lorsque SIC approuve une proposition en "
+"formation doctorale."
+
 msgid "Email sent to the EU+5 candidate when SIC approves an admission."
 msgstr "E-mail envoyé au candidat UE+5 lorsque SIC approuve une proposition."
+
+msgid ""
+"Email sent to the NEU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat H(UE+5) lorsque SIC approuve une proposition en "
+"formation doctorale."
 
 msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
 msgstr ""
 "E-mail envoyé au candidat H(UE+5) lorsque SIC approuve une proposition."
+
+msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed for a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat pour l'informer qu'une dérogation à la "
+"financabilité est nécessaire pour une demande en formation doctorale."
 
 msgid ""
 "Email sent to the candidate to inform him that a financability dispensation "
@@ -2867,6 +2898,14 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour l'informer de la nécessité de payer les frais "
 "de dossier pour finaliser une demande en formation générale"
+
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress for a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que la vérification de "
+"l'authentification de son parcours est en cours pour une demande en "
+"formation doctorale."
 
 msgid ""
 "Email sent to the candidate to inform him that the checking of the "
@@ -2892,8 +2931,18 @@ msgstr ""
 msgid "Email sent to the candidate when IUFC validate the application."
 msgstr "E-mail envoyé au candidat lorsque l'IUFC valide une proposition."
 
+msgid "Email sent to the candidate when SIC approves a doctorate inscription."
+msgstr ""
+"E-mail envoyé au candidat lorsque SIC approuve une inscription en formation "
+"doctorale."
+
 msgid "Email sent to the candidate when SIC approves an inscription."
 msgstr "E-mail envoyé au candidat lorsque SIC approuve une inscription."
+
+msgid "Email sent to the candidate when SIC refuses a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat lorsque SIC refuse une proposition en formation "
+"doctorale."
 
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
@@ -2914,6 +2963,14 @@ msgstr ""
 
 msgid ""
 "Email sent to the checkers to inform them to check the background "
+"authentication of the candidate for a doctorate admission."
+msgstr ""
+"E-Mail envoyé aux vérificateurs pour les informer de la nécessité de "
+"vérifier l'authentification du parcours du candidat pour une demande en "
+"formation doctorale."
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
 "authentication of the candidate."
 msgstr ""
 "E-Mail envoyé aux vérificateurs pour les informer de la nécessité de "
@@ -2921,6 +2978,13 @@ msgstr ""
 
 msgid "Email sent to the faculty when IUFC needs more information."
 msgstr "E-mail envoyé à la Faculté lorsque l'IUFC demande plus d'information."
+
+msgid ""
+"Email sent to the faculty when the SIC submits the application during the "
+"faculty decision process for a doctorate admission."
+msgstr ""
+"E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
+"de décision facultaire pour une demande en formation doctorale."
 
 msgid ""
 "Email sent to the faculty when the SIC submits the application during the "
@@ -6558,6 +6622,9 @@ msgstr "Rapport de recherche"
 msgid "Research scholarship"
 msgstr "Bourse de recherche"
 
+msgid "Research scholarship:"
+msgstr "Bourse de recherche :"
+
 msgid "Research seminar"
 msgstr "Séminaire de recherche"
 
@@ -8650,6 +8717,9 @@ msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail"
+
+msgid "Work in progress"
+msgstr "En cours de réalisation"
 
 msgid "Work start date"
 msgstr "Date de début des travaux"

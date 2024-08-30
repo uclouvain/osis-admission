@@ -24,8 +24,9 @@
 #
 # ##############################################################################
 import itertools
+from typing import Iterable
 
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
 
 from base.models.utils.utils import ChoiceEnum
 
@@ -48,6 +49,10 @@ class ChoixStatutPropositionDoctorale(ChoiceEnum):
     CLOTUREE = _('Closed')
     INSCRIPTION_AUTORISEE = _('Application accepted')
     INSCRIPTION_REFUSEE = _('Application denied')
+
+    @classmethod
+    def get_specific_values(cls, keys: Iterable[str]):
+        return ', '.join([str(getattr(cls, key).value) for key in keys])
 
 
 STATUTS_PROPOSITION_AVANT_SOUMISSION = {
@@ -167,15 +172,3 @@ class ChoixDoctoratDejaRealise(ChoiceEnum):
     YES = _('YES')
     NO = _('NO')
     PARTIAL = _('PARTIAL')
-
-
-class OngletsChecklist(ChoiceEnum):
-    donnees_personnelles = _('Personal data')
-    assimilation = _('Belgian student status')
-    parcours_anterieur = _('Previous experience')
-    experiences_parcours_anterieur = _('Previous experiences')
-    financabilite = _('Financeability')
-    choix_formation = _('Course choice')
-    projet_recherche = pgettext_lazy('tab', 'Research project')
-    decision_facultaire = _('Decision of the faculty')
-    decision_sic = _('Decision of SIC')
