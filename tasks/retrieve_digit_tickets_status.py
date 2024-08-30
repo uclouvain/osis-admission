@@ -179,6 +179,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             logger.info(
                 f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
             )
+        _update_non_empty_fields(source_obj=candidat, target_obj=personne_connue)
         _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
         personne_connue.save()
         proposition_fusion.proposal_merge_person.delete()
@@ -267,8 +268,14 @@ def _update_non_empty_fields(source_obj: Model, target_obj: Model):
     for field in source_obj._meta.fields:
         field_name = field.name
         source_value = getattr(source_obj, field_name)
-        # Skip if the field is empty or uuid or it's the primary key
-        if field.primary_key or field.name in ['uuid', 'user'] or not source_value:
+        # Skip fields that should not be updated
+        if field.primary_key or field.name in [
+            'uuid',
+            'user',
+            'external_id',
+            'global_id',
+            'email',
+        ] or not source_value:
             continue
         setattr(target_obj, field_name, source_value)
 
