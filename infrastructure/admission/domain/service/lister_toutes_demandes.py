@@ -62,6 +62,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
+from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperienceYear
@@ -157,6 +158,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     to_attr='other_admission_viewers',
                 ),
                 'candidate__student_set',
+                'candidate__personmergeproposal',
             )
         )
 
@@ -169,10 +171,14 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if numero:
             qs = qs.filter(reference=numero)
         if noma:
-            qs = qs.filter(
-                Q(candidate__student__registration_id=noma)
-                | Q(candidate__personmergeproposal__registration_id_sent_to_digit=noma)
-            )
+            candidate_from_noma = (
+                Person.objects.filter(
+                    Q(student__registration_id=noma)
+                    | Q(personmergeproposal__registration_id_sent_to_digit=noma)
+                )
+                .only('id')
+            ).first()
+            qs = qs.filter(candidate_id=candidate_from_noma.id) if candidate_from_noma else qs.none()
         if matricule_candidat:
             qs = qs.filter(candidate__global_id=matricule_candidat)
         if type:

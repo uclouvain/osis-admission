@@ -177,6 +177,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             last_registration_id='',
             id_card_expiry_date=None,
             passport_expiry_date=None,
+            emergency_contact_phone='', # champ non modifié par la fusion car pas connu de digit
         )
         self.person_merge_proposal.professional_curex_to_merge = [str(self.experience_professionelle_1.uuid)]
         self.person_merge_proposal.educational_curex_to_merge = []
@@ -211,9 +212,9 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
         )
         self.assertEqual(
-            personne_connue.email,
-            'thomas.durant@gmail.com',
-            msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
+            personne_connue.private_email,
+            self.personne_compte_temporaire.private_email,
+            msg="Donnée provenant du candidat (aka. original_person) qui n'est pas vide",
         )
         self.assertEqual(
             personne_connue.sex,
@@ -223,7 +224,12 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertEqual(
             personne_connue.gender,
             'M',
-            msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
+            msg="Donnée provenant du candidat (aka. original_person) qui n'est pas vide",
+        )
+        self.assertEqual(
+            personne_connue.emergency_contact_phone,
+            self.personne_compte_temporaire.emergency_contact_phone,
+            msg="Donnée provenant du candidat (aka. original_person) qui n'est pas vide",
         )
 
         # Admission
@@ -318,11 +324,6 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertEqual(
             personne_connue_creee.first_name,
             'Louis',
-            msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
-        )
-        self.assertEqual(
-            personne_connue_creee.email,
-            'louis.varky@hotmail.com',
             msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
         )
         self.assertEqual(

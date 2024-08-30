@@ -326,6 +326,9 @@ class AdmissionPersonForm(AdmissionModelForm):
             self.add_error('first_name', _('This field is required if the surname is missing.'))
             self.add_error('last_name', _('This field is required if the first name is missing.'))
 
+        if not data.get('id_photo'):
+            self.add_error('id_photo', FIELD_REQUIRED_MESSAGE)
+
         is_belgian = data.get('country_of_citizenship') and data.get('country_of_citizenship').iso_code == BE_ISO_CODE
 
         if is_belgian or data.get('has_national_number'):
@@ -338,6 +341,8 @@ class AdmissionPersonForm(AdmissionModelForm):
                 self.add_error('national_number', FIELD_REQUIRED_MESSAGE)
             if not data.get('id_card_expiry_date'):
                 self.add_error('id_card_expiry_date', FIELD_REQUIRED_MESSAGE)
+            if not data.get('id_card'):
+                self.add_error('id_card', FIELD_REQUIRED_MESSAGE)
 
         elif data.get('identification_type') == IdentificationType.ID_CARD_NUMBER.name:
             data['national_number'] = ''
@@ -349,6 +354,8 @@ class AdmissionPersonForm(AdmissionModelForm):
                 self.add_error('id_card_number', FIELD_REQUIRED_MESSAGE)
             if not data.get('id_card_expiry_date'):
                 self.add_error('id_card_expiry_date', FIELD_REQUIRED_MESSAGE)
+            if not data.get('id_card'):
+                self.add_error('id_card', FIELD_REQUIRED_MESSAGE)
 
         elif data.get('identification_type') == IdentificationType.PASSPORT_NUMBER.name:
             data['national_number'] = ''
@@ -360,6 +367,8 @@ class AdmissionPersonForm(AdmissionModelForm):
                 self.add_error('passport_number', FIELD_REQUIRED_MESSAGE)
             if not data.get('passport_expiry_date'):
                 self.add_error('passport_expiry_date', FIELD_REQUIRED_MESSAGE)
+            if not data.get('passport'):
+                self.add_error('passport', FIELD_REQUIRED_MESSAGE)
 
         else:
             data['national_number'] = ''

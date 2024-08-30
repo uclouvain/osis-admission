@@ -5324,6 +5324,9 @@ msgstr "Pas de profil particulier"
 msgid "No specific question available for this dossier."
 msgstr "Aucune question spécifique n'est disponible pour cette demande."
 
+msgid "No training found for the specific year."
+msgstr "Formation non trouvée pour l'année spécifiée."
+
 msgid "No training found."
 msgstr "Formation non trouvée."
 
