@@ -282,9 +282,9 @@ def _update_non_empty_fields(source_obj: Model, target_obj: Model):
         setattr(target_obj, field_name, source_value)
 
 
-def _find_models_with_fk_to_person():
+def _find_models_with_fk_to_person(known_person):
     models_with_fk = []
-    for model in [model for model in apps.get_models() if model != PersonMergeProposal]:
+    for model in [model for model in apps.get_models()]:
         for field in model._meta.get_fields():
             if isinstance(field, ForeignKey) and field.related_model == Person:
                 models_with_fk.append((model, field.name))
