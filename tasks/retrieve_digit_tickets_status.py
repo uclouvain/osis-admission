@@ -124,15 +124,17 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
     logger.info(f"{PREFIX_TASK} matricule DigIT found ({digit_matricule}) for noma ({noma})")
     candidat = ticket_rowdb.person
     if candidat.global_id[0] in TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX and candidat.global_id != digit_matricule:
-        logger.info(
-            f"{PREFIX_TASK} "
-            f"edit candidate global_id ({candidat.global_id}) to set DigIT matricule ({digit_matricule})"
-        )
-        candidat.global_id = digit_matricule
-        candidat.external_id = f"osis.person_{digit_matricule}"
-        for address in candidat.personaddress_set.all():
-            address.external_id = f"osis.student_address_STUDENT_{digit_matricule}_{address.label}"
-            address.save()
+        # personne pas encore connue de osis - on remplace le global_id et external_id
+        if not Person.objects.filter(global_id=digit_matricule).exists():
+            logger.info(
+                f"{PREFIX_TASK} "
+                f"edit candidate global_id ({candidat.global_id}) to set DigIT matricule ({digit_matricule})"
+            )
+            candidat.global_id = digit_matricule
+            candidat.external_id = f"osis.person_{digit_matricule}"
+            for address in candidat.personaddress_set.all():
+                address.external_id = f"osis.student_address_STUDENT_{digit_matricule}_{address.label}"
+                address.save()
         if candidat.user:
             candidat.user.usergroup_set.all().delete()
             candidat.user.delete()
