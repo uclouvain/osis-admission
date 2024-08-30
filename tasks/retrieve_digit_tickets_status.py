@@ -231,7 +231,10 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
 
         proposition_fusion.status = PersonMergeStatus.MERGED.name
         proposition_fusion.selected_global_id = ''
+        if personne_connue:
+            proposition_fusion.original_person = personne_connue
         proposition_fusion.save()
+
     except PersonMergeProposal.DoesNotExist:
         logger.info(
             f"{PREFIX_TASK} No person merge proposal found in valid state for candidate (PK: {candidat.pk})"
@@ -282,9 +285,9 @@ def _update_non_empty_fields(source_obj: Model, target_obj: Model):
         setattr(target_obj, field_name, source_value)
 
 
-def _find_models_with_fk_to_person(known_person):
+def _find_models_with_fk_to_person():
     models_with_fk = []
-    for model in [model for model in apps.get_models()]:
+    for model in [model for model in apps.get_models() if model != PersonMergeProposal]:
         for field in model._meta.get_fields():
             if isinstance(field, ForeignKey) and field.related_model == Person:
                 models_with_fk.append((model, field.name))

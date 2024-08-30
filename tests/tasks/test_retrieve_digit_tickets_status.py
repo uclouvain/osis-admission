@@ -59,6 +59,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             label=PersonAddressType.RESIDENTIAL.name
         )
         self.person_merge_proposal = PersonMergeProposal.objects.create(
+            uuid=uuid.uuid4(),
             original_person=self.personne_compte_temporaire,
             proposal_merge_person=None,
             status=PersonMergeStatus.NO_MATCH.name,
@@ -202,6 +203,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
 
         # Ticket DigIT
         self.ticket_digit.refresh_from_db()
+
         self.assertEqual(self.ticket_digit.status, PersonTicketCreationStatus.DONE.name)
 
         # Proposition Fusion
@@ -212,6 +214,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="Doit être supprimée car information fusionnée avec la personne connue",
         )
         self.assertEqual(self.person_merge_proposal.selected_global_id, '')
+        self.assertEqual(self.person_merge_proposal.original_person, personne_connue)
 
         # Personne connue
         personne_connue.refresh_from_db()
@@ -275,6 +278,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         ):
             self.experience_academique.refresh_from_db()
 
+
     def test_assert_merge_with_existing_account_and_but_not_existing_in_osis(self):
         self.personne_compte_temporaire.global_id = '00345678'  # Set as internal account
         self.personne_compte_temporaire.save()
@@ -313,6 +317,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
 
         # Ticket DigIT
         self.ticket_digit.refresh_from_db()
+        print(self.ticket_digit.errors)
         self.assertEqual(self.ticket_digit.status, PersonTicketCreationStatus.DONE.name)
 
         # Proposition Fusion
