@@ -42,6 +42,7 @@ class EPCInjectionStatus(ChoiceEnum):
     ERROR = "Erreur"
     NO_SENT = "Pas encore envoyé dans EPC"
     PENDING = "En attente du retour d'EPC"
+    OSIS_ERROR = "Erreur OSIS"
 
 
 class EPCInjectionType(ChoiceEnum):
@@ -58,7 +59,7 @@ class EPCInjection(models.Model):
         related_name='epc_injection',
     )
     type = models.CharField(choices=EPCInjectionType.choices(), null=False, blank=True, default='', max_length=12)
-    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=7)
+    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=10)
     payload = models.JSONField(default=dict, blank=True)
     epc_responses = models.JSONField(default=list, blank=True)
 

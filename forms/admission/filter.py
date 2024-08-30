@@ -273,6 +273,7 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
     )
 
     quarantaine = forms.TypedChoiceField(
+        label=_('Quarantine'),
         coerce=lambda x: x == 'True',
         required=False,
         choices=(
@@ -281,6 +282,20 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
             (False, _('No')),
         ),
         widget=forms.Select(attrs={"class": "form-control"}),
+        empty_value=None,
+    )
+
+    injection_en_erreur = forms.TypedChoiceField(
+        label=_('Injection error'),
+        coerce=lambda x: x == 'True',
+        required=False,
+        choices=(
+            (None, _('All')),
+            (True, _('In error')),
+            (False, _('Without error')),
+        ),
+        widget=forms.Select(attrs={"class": "form-control"}),
+        empty_value=None,
     )
 
     liste_travail = WorkingListField(

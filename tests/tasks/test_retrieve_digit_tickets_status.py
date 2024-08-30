@@ -28,9 +28,8 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 from django.test import TestCase
-from waffle.testutils import override_switch
 from django.test.utils import override_settings
-
+from waffle.testutils import override_switch
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery
@@ -40,10 +39,12 @@ from admission.tasks import retrieve_digit_tickets_status
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory, EducationalExperienceFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.civil_state import CivilState
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.person import PersonFactory
+from base.tests.factories.person_address import PersonAddressFactory
 from osis_profile.models import ProfessionalExperience, EducationalExperience
 from osis_profile.models.enums.curriculum import ActivityType
 
@@ -53,6 +54,10 @@ from osis_profile.models.enums.curriculum import ActivityType
 class TestRetrieveDigitTicketsStatus(TestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
+        self.addresse_residentielle_personne_temporaire = PersonAddressFactory(
+            person=self.personne_compte_temporaire,
+            label=PersonAddressType.RESIDENTIAL.name
+        )
         self.person_merge_proposal = PersonMergeProposal.objects.create(
             original_person=self.personne_compte_temporaire,
             proposal_merge_person=None,
@@ -143,6 +148,8 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.personne_compte_temporaire.refresh_from_db()
         self.assertEqual(self.personne_compte_temporaire.global_id, '00345678')
         self.assertEqual(self.personne_compte_temporaire.external_id, 'osis.person_00345678')
+        self.addresse_residentielle_personne_temporaire.refresh_from_db()
+        self.assertEqual(self.addresse_residentielle_personne_temporaire.external_id, 'osis.student_address_STUDENT_00345678_RESIDENTIAL')
 
     def test_assert_merge_with_existing_account_and_existing_in_osis(self):
         self.personne_compte_temporaire.global_id = '00345678'   # Set as internal account
@@ -170,6 +177,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             last_registration_id='',
             id_card_expiry_date=None,
             passport_expiry_date=None,
+            emergency_contact_phone='', # champ non modifié par la fusion car pas connu de digit
         )
         self.person_merge_proposal.professional_curex_to_merge = [str(self.experience_professionelle_1.uuid)]
         self.person_merge_proposal.educational_curex_to_merge = []
@@ -204,9 +212,9 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
         )
         self.assertEqual(
-            personne_connue.email,
-            'thomas.durant@gmail.com',
-            msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
+            personne_connue.private_email,
+            self.personne_compte_temporaire.private_email,
+            msg="Donnée provenant du candidat (aka. original_person) qui n'est pas vide",
         )
         self.assertEqual(
             personne_connue.sex,
@@ -216,7 +224,12 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertEqual(
             personne_connue.gender,
             'M',
-            msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
+            msg="Donnée provenant du candidat (aka. original_person) qui n'est pas vide",
+        )
+        self.assertEqual(
+            personne_connue.emergency_contact_phone,
+            self.personne_compte_temporaire.emergency_contact_phone,
+            msg="Donnée provenant du candidat (aka. original_person) qui n'est pas vide",
         )
 
         # Admission
@@ -311,11 +324,6 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertEqual(
             personne_connue_creee.first_name,
             'Louis',
-            msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
-        )
-        self.assertEqual(
-            personne_connue_creee.email,
-            'louis.varky@hotmail.com',
             msg="Donnée provenant de la proposition de fusion (aka. proposal_merge_person) qui n'est pas vide",
         )
         self.assertEqual(

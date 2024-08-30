@@ -251,6 +251,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 EPCInjectionStatus.PENDING.name,
                 EPCInjectionStatus.NO_SENT.name,
                 EPCInjectionStatus.ERROR.name,
+                EPCInjectionStatus.OSIS_ERROR.name,
             ],
             type=EPCInjectionType.DEMANDE.name,
         ).first()

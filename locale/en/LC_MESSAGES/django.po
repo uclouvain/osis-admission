@@ -3747,6 +3747,12 @@ msgstr ""
 msgid "In draft form"
 msgstr ""
 
+msgid "In error"
+msgstr ""
+
+msgid "In error,Without error,All"
+msgstr ""
+
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
@@ -3802,6 +3808,9 @@ msgstr ""
 
 msgid ""
 "Initialization of the predefined specific questions for an academic year"
+msgstr ""
+
+msgid "Injection error"
 msgstr ""
 
 msgctxt "admission"
@@ -4773,6 +4782,9 @@ msgstr ""
 msgid "No specific question available for this dossier."
 msgstr ""
 
+msgid "No training found for the specific year."
+msgstr ""
+
 msgid "No training found."
 msgstr ""
 
@@ -5608,6 +5620,9 @@ msgid "Publications"
 msgstr ""
 
 msgid "Published"
+msgstr ""
+
+msgid "Quarantine"
 msgstr ""
 
 msgid ""
@@ -7117,6 +7132,11 @@ msgstr ""
 msgid "The text size must be one of the following values: %(values)s."
 msgstr ""
 
+msgid ""
+"The transition to this status is not possible while the application is in "
+"quarantine."
+msgstr ""
+
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr ""
@@ -7747,6 +7767,9 @@ msgstr ""
 msgid "Without condition"
 msgstr ""
 
+msgid "Without error"
+msgstr ""
+
 msgid "Without free documents"
 msgstr ""
 
@@ -7890,6 +7913,9 @@ msgstr "Yes, only in Saint-Louis (€12)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"
+
+msgid "Yes,No,All"
+msgstr ""
 
 msgid "Yes,No,Incomplete field"
 msgstr ""

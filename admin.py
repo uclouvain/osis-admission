@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import logging
 from datetime import datetime
 from typing import Dict
 
@@ -35,7 +34,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Q, Exists, OuterRef, F
+from django.db.models import Q, Exists, OuterRef, F, Value, When, Case
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
@@ -98,6 +97,7 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeStatus
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
@@ -613,6 +613,97 @@ class EPCInjectionStatusFilter(SimpleListFilter):
         return queryset
 
 
+class EmailInterneFilter(admin.SimpleListFilter):
+    title = 'Email interne'
+    parameter_name = 'email_interne'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(candidate__email__icontains='uclouvain')
+        elif self.value() == 'no':
+            return queryset.exclude(candidate__email__icontains='uclouvain')
+        return queryset
+
+
+class MatriculeInterneFilter(admin.SimpleListFilter):
+    title = 'Matricule interne'
+    parameter_name = 'matricule_interne'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(candidate__global_id__startswith='0')
+        elif self.value() == 'no':
+            return queryset.exclude(candidate__global_id__startswith='0')
+        return queryset
+
+
+class FinancabiliteOKFilter(admin.SimpleListFilter):
+    title = 'Financabilite bien renseignée ?'
+    parameter_name = 'financabilite_ok'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        queryset = queryset.annotate(
+            financabilite_ok=Case(
+                When(
+                    ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
+                    | Q(generaleducationadmission__financability_rule='')
+                    | Q(generaleducationadmission__financability_computed_rule_on__isnull=True)
+                    | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
+                    generaleducationadmission__isnull=False,
+                    then=Value(False)
+                ),
+                default=Value(True)
+            )
+        )
+        if self.value():
+            return queryset.filter(financabilite_ok=self.value() == 'yes')
+        return queryset
+
+
+class QuarantaineFilter(admin.SimpleListFilter):
+    title = 'Quaranrataine'
+    parameter_name = 'quarantaine'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Oui'),
+            ('no', 'Non'),
+        )
+
+    def queryset(self, request, queryset):
+        queryset = queryset.annotate(
+            quarantaine=Case(
+                When(
+                    Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
+                    | ~Q(candidate__personmergeproposal__validation__valid=True),
+                    then=Value(True)
+                ),
+                default=Value(False)
+            )
+        )
+        if self.value():
+            return queryset.filter(quarantaine=self.value() == 'yes')
+        return queryset
+
+
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference', 'candidate__last_name', 'candidate__global_id', 'training__acronym']
@@ -637,17 +728,19 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         EPCInjectionStatusFilter,
         ('determined_academic_year', RelatedDropdownFilter),
         'determined_pool',
-        'online_payments__status',
         'accounting__sport_affiliation',
         'generaleducationadmission__tuition_fees_dispensation',
         'generaleducationadmission__tuition_fees_amount',
-        'candidate__personmergeproposal__status',
+        EmailInterneFilter,
+        MatriculeInterneFilter,
+        FinancabiliteOKFilter,
+        QuarantaineFilter,
     ]
     sortable_by = ['reference', 'noma_sent_to_digit']
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
-            _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit')
+            _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
         )
 
     def noma_sent_to_digit(self, obj):
@@ -661,12 +754,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
             Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]) &
             Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
         ):
-            # Check injection state when it exists
-            try:
-                InjectionEPCAdmission().injecter(demande)
-            except Exception as e:
-                logger = logging.getLogger(settings.DEFAULT_LOGGER)
-                logger.error(e)
+            InjectionEPCAdmission().injecter(demande)
 
     def has_add_permission(self, request):
         return False
@@ -768,11 +856,7 @@ class EPCInjectionAdmin(admin.ModelAdmin):
         ):
             injection.last_attempt_date = datetime.now()
             injection.save()
-            InjectionEPCAdmission().envoyer_admission_dans_queue(
-                donnees=injection.payload,
-                admission_reference=injection.admission.reference,
-                admission_uuid=injection.admission.uuid
-            )
+            InjectionEPCAdmission().injecter(injection.admission)
 
 
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):

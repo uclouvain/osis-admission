@@ -4164,6 +4164,12 @@ msgstr ""
 msgid "In draft form"
 msgstr "En brouillon"
 
+msgid "In error"
+msgstr "En erreur"
+
+msgid "In error,Without error,All"
+msgstr "En erreur,Sans erreur,Tous"
+
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
@@ -4231,6 +4237,9 @@ msgid ""
 msgstr ""
 "Initialisation des questions spécifiques prédéfinies pour une année "
 "académique"
+
+msgid "Injection error"
+msgstr "Erreur d'injection"
 
 msgctxt "admission"
 msgid "Institute"
@@ -5315,6 +5324,9 @@ msgstr "Pas de profil particulier"
 msgid "No specific question available for this dossier."
 msgstr "Aucune question spécifique n'est disponible pour cette demande."
 
+msgid "No training found for the specific year."
+msgstr "Formation non trouvée pour l'année spécifiée."
+
 msgid "No training found."
 msgstr "Formation non trouvée."
 
@@ -6215,6 +6227,9 @@ msgstr "Publications"
 
 msgid "Published"
 msgstr "Publié"
+
+msgid "Quarantine"
+msgstr "Quarantaine"
 
 msgid ""
 "Question label for Document, Selection and Text form elements. Not used for "
@@ -7869,6 +7884,13 @@ msgstr ""
 msgid "The text size must be one of the following values: %(values)s."
 msgstr "La taille du texte doit être une des valeurs suivantes : %(values)s."
 
+msgid ""
+"The transition to this status is not possible while the application is in "
+"quarantine."
+msgstr ""
+"Le passage à cet état n’est pas possible tant que la demande est en "
+"quarantaine."
+
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s)."
@@ -8578,6 +8600,9 @@ msgstr "Sous condition"
 msgid "Without condition"
 msgstr "Sans condition"
 
+msgid "Without error"
+msgstr "Sans erreur"
+
 msgid "Without free documents"
 msgstr "Sans les documents libres"
 
@@ -8738,6 +8763,9 @@ msgstr "Oui, sur Saint-Louis uniquement (12 EUR)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Oui, sur Tournai uniquement (12 EUR)"
+
+msgid "Yes,No,All"
+msgstr "Oui,Non,Tous"
 
 msgid "Yes,No,Incomplete field"
 msgstr "Oui,Non,Non renseigné·e"

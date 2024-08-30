@@ -23,11 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
 from unittest.mock import PropertyMock
 
 import freezegun
 import mock
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,

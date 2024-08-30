@@ -27,8 +27,10 @@ import datetime
 
 import freezegun
 from django.conf import settings
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from django.utils.translation import gettext
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
@@ -159,6 +161,26 @@ class ChoixFormationFormViewTestCase(TestCase):
 
         response = self.client.post(self.url, self.data)
         self.assertEqual(response.status_code, 302)
+
+    def test_post_unknown_training(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.post(
+            self.url,
+            data={
+                **self.data,
+                'annee_academique': self.academic_years[-1].year,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+
+        self.assertIn(
+            gettext('No training found for the specific year.'),
+            form.errors.get(NON_FIELD_ERRORS, []),
+        )
 
     def test_post_with_master(self):
         self.client.force_login(user=self.sic_manager_user)

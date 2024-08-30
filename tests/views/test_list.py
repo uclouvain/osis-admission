@@ -26,6 +26,7 @@
 import datetime
 import uuid
 from typing import List, Union
+from unittest.mock import ANY
 
 import freezegun
 from django.contrib.auth.models import User
@@ -33,7 +34,13 @@ from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.contrib.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+    EPCInjection,
+)
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -58,6 +65,7 @@ from admission.tests.factories.roles import (
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -133,11 +141,6 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         lite_reference = '{:08}'.format(cls.admissions[0].reference)
         cls.lite_reference = f'{lite_reference[:4]}.{lite_reference[4:]}'
 
-        cls.student = StudentFactory(
-            person=cls.admissions[0].candidate,
-            registration_id='01234567',
-        )
-
         teaching_campus = (
             EducationGroupVersion.objects.filter(offer=cls.admissions[0].training)
             .first()
@@ -163,7 +166,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 numero_demande=f'M-ABCDEF22-{cls.lite_reference}',
                 nom_candidat=cls.admissions[0].candidate.last_name,
                 prenom_candidat=cls.admissions[0].candidate.first_name,
-                noma_candidat=cls.student.registration_id,
+                noma_candidat=ANY,
                 plusieurs_demandes=False,
                 sigle_formation=cls.admissions[0].training.acronym,
                 code_formation=cls.admissions[0].training.partial_acronym,
@@ -346,9 +349,37 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     def test_list_with_filter_by_noma(self):
         self.client.force_login(user=self.sic_management_user)
 
-        response = self._do_request(noma=self.student.registration_id)
+        # Unknown noma -> No results
+        response = self._do_request(noma='01234567', allowed_sql_surplus=1)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        # noma from the student model
+        student = StudentFactory(
+            person=self.admissions[0].candidate,
+            registration_id='01234567',
+        )
+
+        response = self._do_request(noma=student.registration_id, allowed_sql_surplus=1)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
+        self.assertEqual(self.results[0].noma_candidat, student.registration_id)
+
+        student.delete()
+
+        # noma from the personmergeproposal model
+        person_proposal = PersonMergeProposal(
+            original_person=self.admissions[0].candidate,
+            last_similarity_result_update=datetime.datetime.now(),
+            registration_id_sent_to_digit='76543210',
+        )
+
+        person_proposal.save()
+
+        response = self._do_request(noma=person_proposal.registration_id_sent_to_digit, allowed_sql_surplus=1)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+        self.assertEqual(self.results[0].noma_candidat, person_proposal.registration_id_sent_to_digit)
 
     def test_list_with_filter_by_candidate_id(self):
         self.client.force_login(user=self.sic_management_user)
@@ -421,6 +452,74 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         response = self._do_request(types_formation=self.admissions[0].training.education_group_type.name)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
+
+    def test_list_with_filter_by_injection_error(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # Without injection
+        response = self._do_request(injection_en_erreur=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        # With an identification injection
+        identification_injection = EPCInjection(
+            admission=self.admissions[0],
+            type=EPCInjectionType.SIGNALETIQUE.name,
+            status=EPCInjectionStatus.ERROR.name,
+        )
+        response = self._do_request(injection_en_erreur='True')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='False')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        # With an admission injection but without error
+        admission_injection = EPCInjection(
+            admission=self.admissions[0],
+            type=EPCInjectionType.DEMANDE.name,
+            status=EPCInjectionStatus.OK.name,
+        )
+        response = self._do_request(injection_en_erreur='True')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='False')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        # With an admission injection with error
+        admission_injection.status = EPCInjectionStatus.ERROR.name
+        admission_injection.save()
+
+        response = self._do_request(injection_en_erreur='True')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
+        response = self._do_request(injection_en_erreur='False')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.results[0], response.context['object_list'])
 
     def test_list_with_filter_by_training(self):
         self.client.force_login(user=self.sic_management_user)

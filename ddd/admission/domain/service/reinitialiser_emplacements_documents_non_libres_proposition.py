@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,11 +25,9 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
-from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from admission.exports.admission_recap.section import get_sections
 from osis_common.ddd import interface
@@ -50,26 +48,13 @@ class ReinitialiserEmplacementsDocumentsNonLibresPropositionService(interface.Do
             with_free_requestable_documents=False,
         )
 
-        documents = []
+        documents_pertinents = set(
+            f'{onglet.identifier}.{document.identifier}' for onglet in onglets for document in onglet.attachments
+        )
 
         proposition_identity = PropositionIdentity(uuid=resume_dto.proposition.uuid)
 
-        # Création d'un nouvel emplacement de document pour les documents catégorisés obligatoires à remplir
-        for onglet in onglets:
-            for document in onglet.attachments:
-                if document.required and not document.uuids:
-                    documents.append(
-                        EmplacementDocumentBuilder.initialiser_emplacement_document_a_reclamer(
-                            identifiant_emplacement=f'{onglet.identifier}.{document.identifier}',
-                            uuid_proposition=proposition_identity.uuid,
-                            auteur='',
-                            raison='',
-                            # TODO
-                            statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                        )
-                    )
-
         emplacement_document_repository.reinitialiser_emplacements_documents_non_libres(
             proposition_identity=proposition_identity,
-            entities=documents,
+            identifiants_documents_pertinents=documents_pertinents,
         )

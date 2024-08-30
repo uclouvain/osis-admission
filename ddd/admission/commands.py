@@ -48,6 +48,7 @@ class ListerToutesDemandesQuery(SortedQueryRequest):
     bourse_erasmus_mundus: Optional[str] = ''
     bourse_double_diplomation: Optional[str] = ''
     quarantaine: Optional[bool] = None
+    injection_en_erreur: Optional[bool] = None
     demandeur: Optional[str] = ''
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = ''
@@ -149,7 +150,6 @@ class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     date_naissance: str
     lieu_naissance: str
     email: str
-    genre: str
     sex: str
     etat_civil: str
     nationalite: str

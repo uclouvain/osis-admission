@@ -36,6 +36,7 @@ from django.db import transaction
 from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
 from unidecode import unidecode
 
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.contrib.models import Accounting, EPCInjection, AdmissionFormItem
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import (
@@ -46,8 +47,19 @@ from admission.contrib.models.base import (
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as
+    RecalculerEmplacementsDocumentsNonLibresDoctoratCommand
+)
+from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.formation_continue.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresGeneralCommand
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    DROITS_INSCRIPTION_MONTANT_VALEURS, DerogationFinancement, PoursuiteDeCycle,
+    DROITS_INSCRIPTION_MONTANT_VALEURS, PoursuiteDeCycle,
 )
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
@@ -63,6 +75,7 @@ from base.models.person import Person
 from base.models.person_address import PersonAddress
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
+from infrastructure.messages_bus import message_bus_instance
 from osis_common.queue.queue_sender import send_message, logger
 from osis_profile.models import (
     EducationalExperience,
@@ -189,26 +202,48 @@ DOCUMENT_MAPPING = {
 class InjectionEPCAdmission:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
-        donnees = self.recuperer_donnees(admission=admission)
+        try:
+            self._nettoyer_documents_reclames(admission)
+            donnees = self.recuperer_donnees(admission=admission)
+            logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
+            logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
+            transaction.on_commit(
+                lambda: self.envoyer_admission_dans_queue(
+                    donnees=donnees,
+                    admission_uuid=admission.uuid,
+                    admission_reference=str(admission),
+                )
+            )
+            statut = EPCInjectionStatus.PENDING.name
+        except Exception:
+            logger.exception("[INJECTION EPC] Erreur lors de l'injection")
+            donnees = {}
+            statut = EPCInjectionStatus.OSIS_ERROR.name
+
         EPCInjection.objects.get_or_create(
             admission=admission,
             type=EPCInjectionType.DEMANDE.name,
             defaults={
                 "payload": donnees,
-                "status": EPCInjectionStatus.PENDING.name,
+                "status": statut,
                 'last_attempt_date': datetime.now(),
             },
         )
-        logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
-        logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
-        transaction.on_commit(
-            lambda: self.envoyer_admission_dans_queue(
-                donnees=donnees,
-                admission_uuid=admission.uuid,
-                admission_reference=str(admission),
-            )
-        )
         return donnees
+
+    @staticmethod
+    def _nettoyer_documents_reclames(admission):
+        logger.info("[INJECTION EPC] Nettoyage des documents reclames plus necessaires")
+        commands = {
+            CONTEXT_GENERAL: RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
+            CONTEXT_CONTINUING: RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
+            CONTEXT_DOCTORATE: RecalculerEmplacementsDocumentsNonLibresDoctoratCommand
+        }
+        RecalculerEmplacementsDocumentsNonLibresCommand = commands[admission.get_admission_context()]
+        message_bus_instance.invoke(
+            RecalculerEmplacementsDocumentsNonLibresCommand(uuid_proposition=admission.uuid)
+        )
+        admission.refresh_from_db(fields=['requested_documents'])
 
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
@@ -237,7 +272,7 @@ class InjectionEPCAdmission:
                 comptabilite=comptabilite,
             ),
             "inscription_offre": cls._get_inscription_offre(admission=admission),
-            "donnees_comptables": cls._get_donnees_comptables(admission=admission),
+            "donnees_comptables": cls._get_donnees_comptables(admission=admission, comptabilite=comptabilite),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
                 (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
@@ -250,7 +285,10 @@ class InjectionEPCAdmission:
     @classmethod
     def _recuperer_documents_specifiques(cls, admission):
         documents_specifiques = []
-        form_items = AdmissionFormItem.objects.filter(uuid__in=admission.specific_question_answers.keys())
+        form_items = AdmissionFormItem.objects.filter(
+            uuid__in=admission.specific_question_answers.keys(),
+            type=TypeItemFormulaire.DOCUMENT.name
+        )
         for form_item in form_items:
             label = form_item.internal_label.lower()
             if cls.__contient_uuid_valide(label):
@@ -420,6 +458,7 @@ class InjectionEPCAdmission:
         double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
         type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
+        financabilite_checklist = admission.checklist.get('current', {}).get('financabilite', {})
         return {
             "num_offre": num_offre,
             "validite": validite,
@@ -437,7 +476,7 @@ class InjectionEPCAdmission:
             'etat_financabilite': {
                 'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
                 'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
-            }.get(admission.checklist.get('current', {}).get('financabilite', {}).get('statut')),
+            }.get(financabilite_checklist.get('statut')),
             'situation_financabilite': admission_generale.financability_rule if admission_generale else None,
             'utilisateur_financabilite': (
                 admission_generale.financability_rule_established_by.full_name if admission_generale else None
@@ -446,11 +485,7 @@ class InjectionEPCAdmission:
                 admission_generale.financability_rule_established_on.strftime("%d/%m/%Y")
                 if admission_generale else None
             ),
-            'derogation_financabilite': (
-                admission_generale.financability_dispensation_status
-                == DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name
-                if admission_generale else False
-            )
+            'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
         }
 
     @staticmethod
@@ -469,7 +504,7 @@ class InjectionEPCAdmission:
         return num_offre, validite
 
     @staticmethod
-    def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
+    def _get_donnees_comptables(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
         general_admission = getattr(admission, 'generaleducationadmission', None)
         autre_montant = getattr(general_admission, 'tuition_fees_amount_other')
         return {
@@ -480,6 +515,7 @@ class InjectionEPCAdmission:
                  or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
                 if general_admission else None
             ),
+            "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
         }
 
     @staticmethod
@@ -538,7 +574,7 @@ class InjectionDemandeVersEPCException(Exception):
 
 
 def admission_response_from_epc_callback(donnees):
-    donnees = json.loads(donnees.decode("utf-8").replace("'", '"'))
+    donnees = json.loads(donnees.decode("utf-8"))
     dossier_uuid, statut = donnees["dossier_uuid"], donnees["status"]
     logger.info(
         f"[INJECTION EPC - RETOUR] Reception d une reponse d EPC pour l admission avec uuid "

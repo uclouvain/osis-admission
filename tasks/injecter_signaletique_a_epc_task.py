@@ -75,7 +75,7 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
                     f"{str(epc_injection_signaletique.admission)}"
                     f"(Cause: {repr(e)})"
                 )
-                epc_injection_signaletique.status = EPCInjectionStatus.ERROR.name
+                epc_injection_signaletique.status = EPCInjectionStatus.OSIS_ERROR.name
             finally:
                 epc_injection_signaletique.last_attempt_date = datetime.now()
                 epc_injection_signaletique.save()
