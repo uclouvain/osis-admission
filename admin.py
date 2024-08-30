@@ -665,7 +665,7 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                 When(
                     ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
                     | Q(generaleducationadmission__financability_rule='')
-                    | Q(generaleducationadmission__financability_computed_rule_on__isnull=True)
+                    | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
                     | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
                     generaleducationadmission__isnull=False,
                     then=Value(False)
