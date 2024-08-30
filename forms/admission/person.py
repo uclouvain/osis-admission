@@ -340,7 +340,7 @@ class AdmissionPersonForm(AdmissionModelForm):
                 self.add_error('national_number', FIELD_REQUIRED_MESSAGE)
             if not data.get('id_card_expiry_date'):
                 self.add_error('id_card_expiry_date', FIELD_REQUIRED_MESSAGE)
-            if not data.get('id_card'):
+            if 'id_card' in self.fields and not data.get('id_card'):
                 self.add_error('id_card', FIELD_REQUIRED_MESSAGE)
 
         elif data.get('identification_type') == IdentificationType.ID_CARD_NUMBER.name:
@@ -353,7 +353,7 @@ class AdmissionPersonForm(AdmissionModelForm):
                 self.add_error('id_card_number', FIELD_REQUIRED_MESSAGE)
             if not data.get('id_card_expiry_date'):
                 self.add_error('id_card_expiry_date', FIELD_REQUIRED_MESSAGE)
-            if not data.get('id_card'):
+            if 'id_card' in self.fields and not data.get('id_card'):
                 self.add_error('id_card', FIELD_REQUIRED_MESSAGE)
 
         elif data.get('identification_type') == IdentificationType.PASSPORT_NUMBER.name:
@@ -366,7 +366,7 @@ class AdmissionPersonForm(AdmissionModelForm):
                 self.add_error('passport_number', FIELD_REQUIRED_MESSAGE)
             if not data.get('passport_expiry_date'):
                 self.add_error('passport_expiry_date', FIELD_REQUIRED_MESSAGE)
-            if not data.get('passport'):
+            if 'passport' in self.fields and not data.get('passport'):
                 self.add_error('passport', FIELD_REQUIRED_MESSAGE)
 
         else:
