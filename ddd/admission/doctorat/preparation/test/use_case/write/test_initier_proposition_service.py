@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
+from django.test import TestCase
 
 import attr
 

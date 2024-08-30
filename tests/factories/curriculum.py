@@ -54,6 +54,8 @@ class EducationalExperienceYearFactory(factory.django.DjangoModelFactory):
         model = EducationalExperienceYear
 
 
+# TODO: keep only one factory (this one or osis_profile.tests.factories.curriculum.EducationalExperienceFactory)
+# Same for other factories in this file !!!
 class EducationalExperienceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EducationalExperience

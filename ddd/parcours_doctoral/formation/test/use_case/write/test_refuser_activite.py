@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.formation.commands import RefuserActiviteCommand
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, StatutActivite

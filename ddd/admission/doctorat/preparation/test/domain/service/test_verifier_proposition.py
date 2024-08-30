@@ -24,12 +24,12 @@
 #
 # ##############################################################################
 
-from unittest import TestCase
+from django.test import TestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import \
     PropositionAdmissionSC3DPMinimaleFactory
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.doctorat.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )

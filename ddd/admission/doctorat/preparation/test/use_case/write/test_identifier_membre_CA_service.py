@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 from typing import List
-from unittest import TestCase
 
 import attr
+from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import (

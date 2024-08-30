@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat

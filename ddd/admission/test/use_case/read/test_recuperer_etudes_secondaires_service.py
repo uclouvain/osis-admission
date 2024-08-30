@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
+from django.test import TestCase
 
 from admission.ddd.admission.commands import RecupererEtudesSecondairesQuery
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO

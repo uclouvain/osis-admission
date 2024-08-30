@@ -49,6 +49,7 @@ from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 
 from admission.contrib.models import EPCInjection
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
@@ -121,7 +122,8 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverInscriptionTardiveParFaculteCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
     SpecifierDerogationFinancabiliteCommand,
-    NotifierCandidatDerogationFinancabiliteCommand, SpecifierFinancabiliteNonConcerneeCommand,
+    NotifierCandidatDerogationFinancabiliteCommand,
+    SpecifierFinancabiliteNonConcerneeCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -314,13 +316,12 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if person_merge_proposal and (
-                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-                or not person_merge_proposal.validation.get('valid', True)
+            person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+            or not person_merge_proposal.validation.get('valid', True)
         ):
             # Cas display warning when quarantaine
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
             checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
-
 
         if self.proposition.type == TypeDemande.INSCRIPTION.name and self.proposition.est_inscription_tardive:
             checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
@@ -2033,6 +2034,9 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
             for exception in multiple_exceptions.exceptions:
                 form.add_error(None, exception.message)
             return self.form_invalid(form)
+        except FormationNonTrouveeException:
+            form.add_error(None, _('No training found for the specific year.'))
+            return self.form_invalid(form)
         return HttpResponse(headers={'HX-Refresh': 'true'})
 
 
@@ -2730,7 +2734,7 @@ class ChecklistView(
                 EPCInjectionStatus.PENDING.name,
                 EPCInjectionStatus.NO_SENT.name,
                 EPCInjectionStatus.ERROR.name,
-                EPCInjectionStatus.OSIS_ERROR.name
+                EPCInjectionStatus.OSIS_ERROR.name,
             ],
             type=EPCInjectionType.SIGNALETIQUE.name,
         ).first()
