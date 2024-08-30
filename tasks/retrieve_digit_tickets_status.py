@@ -231,7 +231,10 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
 
         proposition_fusion.status = PersonMergeStatus.MERGED.name
         proposition_fusion.selected_global_id = ''
+        if personne_connue:
+            proposition_fusion.original_person = personne_connue
         proposition_fusion.save()
+
     except PersonMergeProposal.DoesNotExist:
         logger.info(
             f"{PREFIX_TASK} No person merge proposal found in valid state for candidate (PK: {candidat.pk})"
