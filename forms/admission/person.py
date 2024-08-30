@@ -35,7 +35,6 @@ from admission.forms import (
     AdmissionModelForm,
     get_year_choices,
 )
-from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from admission.utils import force_title
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
@@ -326,7 +325,7 @@ class AdmissionPersonForm(AdmissionModelForm):
             self.add_error('first_name', _('This field is required if the surname is missing.'))
             self.add_error('last_name', _('This field is required if the first name is missing.'))
 
-        if not data.get('id_photo'):
+        if 'id_photo' in self.fields and not data.get('id_photo'):
             self.add_error('id_photo', FIELD_REQUIRED_MESSAGE)
 
         is_belgian = data.get('country_of_citizenship') and data.get('country_of_citizenship').iso_code == BE_ISO_CODE
