@@ -1794,6 +1794,7 @@ def digit_error_description(error_code):
         "RSTOPDATE0001": "La date de début est null",
         "RSTOPDATE0002": "La date de début est d'un format incorrect",
         "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible",
+        "ABOX0001": "Le numéro de boite est trop long (plus de 12 caractères)",
     }
 
     return error_mapping[error_code]
