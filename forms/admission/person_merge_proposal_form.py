@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 from datetime import datetime
 
 from django.forms import HiddenInput
@@ -49,7 +50,9 @@ class PersonMergeProposalForm(AdmissionPersonForm):
     def clean(self):
         last_registration_id = self.data.get('last_registration_id')
 
-        data = super().clean()
+        with contextlib.suppress(ValueError):
+            data = super().clean()
+
         data['last_registration_id'] = last_registration_id
 
         id_type = self.data.get('identification_type')
