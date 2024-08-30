@@ -138,7 +138,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             return "00345678"
         raise Exception(f"Unknown command {cmd}")
 
-    def test_assert_change_only_global_id_and_external_id(self):
+    def test_assert_change_global_id_and_external_id_and_address_external_id_when_person_is_not_known(self):
         retrieve_digit_tickets_status.run()
 
         # Ticket DigIT
@@ -150,6 +150,21 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertEqual(self.personne_compte_temporaire.external_id, 'osis.person_00345678')
         self.addresse_residentielle_personne_temporaire.refresh_from_db()
         self.assertEqual(self.addresse_residentielle_personne_temporaire.external_id, 'osis.student_address_STUDENT_00345678_RESIDENTIAL')
+
+    def test_assert_do_not_change_global_id_nor_external_id_nor_address_when_known_person_exists(self):
+
+        personne_connue = PersonFactory(global_id='00345678')
+        retrieve_digit_tickets_status.run()
+
+        # Ticket DigIT
+        self.ticket_digit.refresh_from_db()
+        self.assertEqual(self.ticket_digit.status, PersonTicketCreationStatus.DONE.name)
+
+        self.personne_compte_temporaire.refresh_from_db()
+        self.assertEqual(self.personne_compte_temporaire.global_id, '89745632')
+        self.assertFalse(self.personne_compte_temporaire.external_id)
+        self.addresse_residentielle_personne_temporaire.refresh_from_db()
+        self.assertFalse(self.addresse_residentielle_personne_temporaire.external_id)
 
     def test_assert_merge_with_existing_account_and_existing_in_osis(self):
         self.personne_compte_temporaire.global_id = '00345678'   # Set as internal account
