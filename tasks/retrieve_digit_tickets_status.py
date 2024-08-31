@@ -50,7 +50,8 @@ from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tasks import send_pictures_to_card_app
-from osis_profile.models import ProfessionalExperience, EducationalExperience
+from osis_profile.models import ProfessionalExperience, EducationalExperience, BelgianHighSchoolDiploma, \
+    ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
@@ -201,6 +202,18 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                 logger.info(
                     f"{PREFIX_TASK} Link {len(admissions)} instances of {model.__name__} from candidate to known person"
                 )
+            elif model in [BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative]:
+                candidate_high_school_diplomas = model.objects.filter(
+                    **{field_name: proposition_fusion.original_person}
+                )
+                known_person_high_school_diplomas = model.objects.filter(
+                    **{field_name: personne_connue}
+                )
+                if candidate_high_school_diplomas:
+                    known_person_high_school_diplomas.delete()
+                for diploma in candidate_high_school_diplomas:
+                    diploma.person_id = personne_connue.pk
+                    diploma.save()
             elif model in [ProfessionalExperience, EducationalExperience]:
                 experiences = model.objects.filter(**{field_name: proposition_fusion.original_person})
                 logger.info(f"{PREFIX_TASK} {len(experiences)} instances of {model.__name__} of candidate")
