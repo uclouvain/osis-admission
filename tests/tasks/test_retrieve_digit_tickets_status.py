@@ -317,7 +317,6 @@ class TestRetrieveDigitTicketsStatus(TestCase):
 
         # Ticket DigIT
         self.ticket_digit.refresh_from_db()
-        print(self.ticket_digit.errors)
         self.assertEqual(self.ticket_digit.status, PersonTicketCreationStatus.DONE.name)
 
         # Proposition Fusion
