@@ -756,11 +756,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
             Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
         ):
             # Check injection state when it exists
-            try:
-                InjectionEPCAdmission().injecter(demande)
-            except Exception as e:
-                logger = logging.getLogger(settings.DEFAULT_LOGGER)
-                logger.error(e)
+            InjectionEPCAdmission().injecter(demande)
 
     def has_add_permission(self, request):
         return False
@@ -860,8 +856,6 @@ class EPCInjectionAdmin(admin.ModelAdmin):
         ).exclude(
             status=EPCInjectionStatus.OK.name
         ):
-            injection.last_attempt_date = datetime.now()
-            injection.save()
             InjectionEPCAdmission().injecter(injection.admission)
 
 
