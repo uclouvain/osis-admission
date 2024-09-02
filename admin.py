@@ -854,8 +854,6 @@ class EPCInjectionAdmin(admin.ModelAdmin):
         ).exclude(
             status=EPCInjectionStatus.OK.name
         ):
-            injection.last_attempt_date = datetime.now()
-            injection.save()
             InjectionEPCAdmission().injecter(injection.admission)
 
 
