@@ -85,16 +85,10 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             type_demande=TypeDemande.INSCRIPTION.name,
         )
         # Experience professionelle
-        self.experience_professionelle_1 = ProfessionalExperienceFactory(
+        self.experience_professionelle = ProfessionalExperienceFactory(
             start_date=datetime.now() - timedelta(days=20),
             end_date=datetime.now() - timedelta(days=10),
             type=ActivityType.WORK.name,
-            person=self.personne_compte_temporaire,
-        )
-        self.experience_professionelle_2 = ProfessionalExperienceFactory(
-            start_date=datetime.now() - timedelta(days=9),
-            end_date=datetime.now() - timedelta(days=8),
-            type=ActivityType.OTHER.name,
             person=self.personne_compte_temporaire,
         )
         self.experience_academique = EducationalExperienceFactory(person=self.personne_compte_temporaire)
@@ -180,7 +174,23 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         personne_connue = PersonFactory(global_id='00948959')
         personne_connue_address = PersonAddressFactory(person=personne_connue)
 
+
         self.etudes_secondaires_personne_connue = BelgianHighSchoolDiplomaFactory(person=personne_connue)
+        self.experience_professionelle_personne_connue_gardee = ProfessionalExperienceFactory(
+            start_date=datetime.now() - timedelta(days=9),
+            end_date=datetime.now() - timedelta(days=8),
+            type=ActivityType.OTHER.name,
+            person=personne_connue,
+        )
+        self.experience_academique_personne_connue_gardee = EducationalExperienceFactory(person=personne_connue)
+
+        self.experience_professionelle_personne_connue_non_gardee = ProfessionalExperienceFactory(
+            start_date=datetime.now() - timedelta(days=9),
+            end_date=datetime.now() - timedelta(days=8),
+            type=ActivityType.OTHER.name,
+            person=personne_connue,
+        )
+        self.experience_academique_personne_connue_non_gardee = EducationalExperienceFactory(person=personne_connue)
 
         self.person_merge_proposal.status = PersonMergeStatus.IN_PROGRESS.name   # Fusion acceptée par le gestionnaire
         self.person_merge_proposal.selected_global_id = personne_connue.global_id
@@ -204,8 +214,12 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             passport_expiry_date=None,
             emergency_contact_phone='', # champ non modifié par la fusion car pas connu de digit
         )
-        self.person_merge_proposal.professional_curex_to_merge = [str(self.experience_professionelle_1.uuid)]
-        self.person_merge_proposal.educational_curex_to_merge = []
+        self.person_merge_proposal.professional_curex_to_merge = [
+            str(self.experience_professionelle_personne_connue_gardee.uuid)
+        ]
+        self.person_merge_proposal.educational_curex_to_merge = [
+            str(self.experience_academique_personne_connue_gardee.uuid)
+        ]
         self.person_merge_proposal.save()
 
         retrieve_digit_tickets_status.run()
@@ -267,24 +281,45 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         )
 
         # Fusion des experiences
-        self.experience_professionelle_1.refresh_from_db()
+        self.experience_professionelle.refresh_from_db()
         self.assertEqual(
-            self.experience_professionelle_1.person_id,
+            self.experience_professionelle.person_id,
             personne_connue.pk,
-            msg="L'experience professionelle 1 doit être reliée à la personne connue car "
-                "dans 'professional_curex_to_merge' ",
+            msg="L'experience professionelle doit être reliée à la personne connue car vient du candidat",
         )
+
+        self.experience_academique.refresh_from_db()
+        self.assertEqual(
+            self.experience_academique.person_id,
+            personne_connue.pk,
+            msg="L'experience académique doit être reliée à la personne connue car vient du candidat",
+        )
+
+        self.experience_professionelle_personne_connue_gardee.refresh_from_db()
+        self.assertEqual(
+            self.experience_professionelle_personne_connue_gardee.person_id,
+            personne_connue.pk,
+            msg="L'experience professionelle gardée est conservée car dans 'professional_curex_to_merge'",
+        )
+
+        self.experience_academique_personne_connue_gardee.refresh_from_db()
+        self.assertEqual(
+            self.experience_academique_personne_connue_gardee.person_id,
+            personne_connue.pk,
+            msg="L'experience académique gardée est conservée car dans 'educational_curex_to_merge'",
+        )
+
         with self.assertRaises(
             ProfessionalExperience.DoesNotExist,
-            msg="L'experience professionelle 2 doit être effacée car pas dans 'professional_curex_to_merge' "
+            msg="L'experience professionelle non gardée doit être effacée car pas dans 'professional_curex_to_merge' "
         ):
-            self.experience_professionelle_2.refresh_from_db()
+            self.experience_professionelle_personne_connue_non_gardee.refresh_from_db()
 
         with self.assertRaises(
             EducationalExperience.DoesNotExist,
-            msg="L'experience academique doit être effacée car pas dans 'educational_curex_to_merge' "
+            msg="L'experience academique non gardée doit être effacée car pas dans 'educational_curex_to_merge' "
         ):
-            self.experience_academique.refresh_from_db()
+            self.experience_academique_personne_connue_non_gardee.refresh_from_db()
 
         # remplacement des études secondaires de la personne connue par celles du candidat
         self.etudes_secondaires_candidat.refresh_from_db()
@@ -327,8 +362,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             passport_expiry_date=None,
         )
         self.person_merge_proposal.professional_curex_to_merge = [
-            str(self.experience_professionelle_1.uuid),
-            str(self.experience_professionelle_2.uuid),
+            str(self.experience_professionelle.uuid),
         ]
         self.person_merge_proposal.educational_curex_to_merge = [
             str(self.experience_academique.uuid),
@@ -387,28 +421,18 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         )
 
         # Fusion des experiences
-        self.experience_professionelle_1.refresh_from_db()
+        self.experience_professionelle.refresh_from_db()
         self.assertEqual(
-            self.experience_professionelle_1.person_id,
+            self.experience_professionelle.person_id,
             personne_connue_creee.pk,
-            msg="L'experience professionelle 1 doit être reliée à la personne connue car "
-                "dans 'professional_curex_to_merge' ",
-        )
-
-        self.experience_professionelle_2.refresh_from_db()
-        self.assertEqual(
-            self.experience_professionelle_2.person_id,
-            personne_connue_creee.pk,
-            msg="L'experience professionelle 2 doit être reliée à la personne connue car "
-                "dans 'professional_curex_to_merge' ",
+            msg="L'experience professionelle doit être reliée à la personne connue car vient du candidat",
         )
 
         self.experience_academique.refresh_from_db()
         self.assertEqual(
             self.experience_academique.person_id,
             personne_connue_creee.pk,
-            msg="L'experience académique doit être reliée à la personne connue car "
-                "dans 'educational_curex_to_merge' ",
+            msg="L'experience académique doit être reliée à la personne connue car vient du candidat",
         )
 
     def test_assert_in_error_when_internal_global_id_is_different_from_digit_global_id(self):

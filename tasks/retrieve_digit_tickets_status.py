@@ -229,24 +229,31 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     diploma.person_id = personne_connue.pk
                     diploma.save()
             elif model in [ProfessionalExperience, EducationalExperience]:
-                experiences = model.objects.filter(**{field_name: proposition_fusion.original_person})
-                logger.info(f"{PREFIX_TASK} {len(experiences)} instances of {model.__name__} of candidate")
+                candidate_experiences = model.objects.filter(**{field_name: proposition_fusion.original_person})
+                known_person_experiences = model.objects.filter(**{field_name: personne_connue})
+                logger.info(
+                    f"{PREFIX_TASK} {len(candidate_experiences)} instances of {model.__name__} of candidate"
+                )
+                logger.info(
+                    f"{PREFIX_TASK} {len(known_person_experiences)} instances of {model.__name__} of known person"
+                )
                 curex_to_merge = [
                     UUID(experience_uuid) for experience_uuid in
                     (proposition_fusion.professional_curex_to_merge + proposition_fusion.educational_curex_to_merge)
                 ]
 
-                for experience in experiences:
-                    if experience.uuid in curex_to_merge:
-                        logger.info(
-                            f"{PREFIX_TASK} Link instance of {model.__name__} ({experience.uuid}) from candidate "
-                            f"to known person"
-                        )
-                        experience.person_id = personne_connue.pk
-                        experience.save()
-                    else:
+                # always keep curex from candidate and delete known_person curex that has not been selected
+                for experience in known_person_experiences:
+                    if experience.uuid not in curex_to_merge:
                         logger.info(f"{PREFIX_TASK} Removing instance of {model.__name__} ({experience.uuid})")
                         experience.delete()
+                for experience in candidate_experiences:
+                    logger.info(
+                        f"{PREFIX_TASK} Move instance of {model.__name__} ({experience.uuid}) "
+                        f"from candidate to known person "
+                    )
+                    experience.person_id = personne_connue.pk
+                    experience.save()
 
             else:
                 updated_count = model.objects.filter(
