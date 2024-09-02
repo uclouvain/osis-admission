@@ -220,7 +220,7 @@ class InjectionEPCAdmission:
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
 
-        EPCInjection.objects.get_or_create(
+        EPCInjection.objects.update_or_create(
             admission=admission,
             type=EPCInjectionType.DEMANDE.name,
             defaults={

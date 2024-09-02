@@ -38,6 +38,7 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.tasks import retrieve_digit_tickets_status
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory, EducationalExperienceFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -59,6 +60,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             label=PersonAddressType.RESIDENTIAL.name
         )
         self.person_merge_proposal = PersonMergeProposal.objects.create(
+            uuid=uuid.uuid4(),
             original_person=self.personne_compte_temporaire,
             proposal_merge_person=None,
             status=PersonMergeStatus.NO_MATCH.name,
@@ -94,6 +96,9 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             person=self.personne_compte_temporaire,
         )
         self.experience_academique = EducationalExperienceFactory(person=self.personne_compte_temporaire)
+
+        # Etudes secondaires
+        self.etudes_secondaires_candidat = BelgianHighSchoolDiplomaFactory(person=self.personne_compte_temporaire)
 
         self._mock_message_bus()
         self._mock_injection_signaletique()
@@ -172,6 +177,8 @@ class TestRetrieveDigitTicketsStatus(TestCase):
 
         personne_connue = PersonFactory(global_id='00948959')
 
+        self.etudes_secondaires_personne_connue = BelgianHighSchoolDiplomaFactory(person=personne_connue)
+
         self.person_merge_proposal.status = PersonMergeStatus.IN_PROGRESS.name   # Fusion acceptée par le gestionnaire
         self.person_merge_proposal.selected_global_id = personne_connue.global_id
         self.person_merge_proposal.proposal_merge_person = PersonFactory(
@@ -212,6 +219,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="Doit être supprimée car information fusionnée avec la personne connue",
         )
         self.assertEqual(self.person_merge_proposal.selected_global_id, '')
+        self.assertEqual(self.person_merge_proposal.original_person, personne_connue)
 
         # Personne connue
         personne_connue.refresh_from_db()
@@ -274,6 +282,11 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="L'experience academique doit être effacée car pas dans 'educational_curex_to_merge' "
         ):
             self.experience_academique.refresh_from_db()
+
+        # remplacement des études secondaires de la personne connue par celles du candidat
+        self.etudes_secondaires_candidat.refresh_from_db()
+        self.assertEqual(self.etudes_secondaires_candidat.person, personne_connue)
+
 
     def test_assert_merge_with_existing_account_and_but_not_existing_in_osis(self):
         self.personne_compte_temporaire.global_id = '00345678'  # Set as internal account

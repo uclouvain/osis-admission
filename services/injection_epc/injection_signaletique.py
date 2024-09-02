@@ -67,7 +67,7 @@ class InjectionEPCSignaletique:
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
 
-        EPCInjection.objects.get_or_create(
+        EPCInjection.objects.update_or_create(
             admission=admission,
             type=EPCInjectionType.SIGNALETIQUE.name,
             defaults={
