@@ -67,7 +67,7 @@ class InjectionEPCSignaletique:
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
 
-        EPCInjection.objects.get_or_create(
+        EPCInjection.objects.update_or_create(
             admission=admission,
             type=EPCInjectionType.SIGNALETIQUE.name,
             defaults={
@@ -139,10 +139,7 @@ class InjectionEPCSignaletique:
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.TOURNAI.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False
             ),
-            'carte_sport_st_louis': (
-                comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_LOUIS.name] + SPORT_TOUT_CAMPUS
-                if comptabilite else False
-            ),
+            'carte_sport_st_louis': comptabilite.sport_affiliation in SPORT_TOUT_CAMPUS if comptabilite else False,
             'carte_sport_st_gilles': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_GILLES.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False
