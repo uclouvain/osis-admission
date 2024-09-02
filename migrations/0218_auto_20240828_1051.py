@@ -24,7 +24,7 @@ def copier_gestionnaires_iufc(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0216_alter_epcinjection_status'),
+        ('admission', '0217_alter_accounting_sport_affiliation'),
     ]
 
     operations = [
