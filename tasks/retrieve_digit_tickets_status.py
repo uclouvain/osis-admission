@@ -46,6 +46,7 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from backoffice.celery import app
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
@@ -184,6 +185,12 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             )
         _update_non_empty_fields(source_obj=candidat, target_obj=personne_connue)
         _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
+
+        # remove address from personne_connue (will be replaced by candidate addresses)
+        personne_connue.personaddress_set.all().filter(
+            label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name]
+        ).delete()
+
         personne_connue.save()
         proposition_fusion.proposal_merge_person.delete()
         proposition_fusion.proposal_merge_person = None
@@ -241,6 +248,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                 logger.info(
                     f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__} from candidate to known person"
                 )
+
+        for address in candidat.personaddress_set.all():
+            address.external_id = f"osis.student_address_STUDENT_{personne_connue.global_id}_{address.label}"
 
         proposition_fusion.status = PersonMergeStatus.MERGED.name
         proposition_fusion.selected_global_id = ''
