@@ -42,6 +42,7 @@ from admission.tests.factories.secondary_studies import BelgianHighSchoolDiploma
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
+from base.models.person_address import PersonAddress
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.person import PersonFactory
@@ -55,6 +56,7 @@ from osis_profile.models.enums.curriculum import ActivityType
 class TestRetrieveDigitTicketsStatus(TestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
+        self.personne_compte_temporaire_address = PersonAddressFactory(person=self.personne_compte_temporaire)
         self.addresse_residentielle_personne_temporaire = PersonAddressFactory(
             person=self.personne_compte_temporaire,
             label=PersonAddressType.RESIDENTIAL.name
@@ -176,6 +178,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.personne_compte_temporaire.save()
 
         personne_connue = PersonFactory(global_id='00948959')
+        personne_connue_address = PersonAddressFactory(person=personne_connue)
 
         self.etudes_secondaires_personne_connue = BelgianHighSchoolDiplomaFactory(person=personne_connue)
 
@@ -286,6 +289,15 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         # remplacement des études secondaires de la personne connue par celles du candidat
         self.etudes_secondaires_candidat.refresh_from_db()
         self.assertEqual(self.etudes_secondaires_candidat.person, personne_connue)
+
+        # remplacement addresse personne connue par celle du candidat
+        with self.assertRaises(
+            PersonAddress.DoesNotExist,
+            msg="L'adresse de la personne connue doit être effacée pour être remplacée par celle du candidat"
+        ):
+            personne_connue_address.refresh_from_db()
+        self.personne_compte_temporaire_address.refresh_from_db()
+        self.assertEqual(self.personne_compte_temporaire_address.person, personne_connue)
 
 
     def test_assert_merge_with_existing_account_and_but_not_existing_in_osis(self):
