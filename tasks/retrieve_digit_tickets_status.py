@@ -187,9 +187,16 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
 
         # remove address from personne_connue (will be replaced by candidate addresses)
-        personne_connue.personaddress_set.all().filter(
+        known_person_addresses = personne_connue.personaddress_set.filter(
             label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name]
-        ).delete()
+        )
+        for address in known_person_addresses:
+            logger.info(f"{PREFIX_TASK} remove address from known person: {address.location}")
+            address.delete()
+        for address in candidat.personaddress_set.all():
+            logger.info(f"{PREFIX_TASK} add external id to candidate addresses: {address}")
+            address.external_id = f"osis.student_address_STUDENT_{personne_connue.global_id}_{address.label}"
+            address.save()
 
         personne_connue.save()
         proposition_fusion.proposal_merge_person.delete()
@@ -248,9 +255,6 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                 logger.info(
                     f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__} from candidate to known person"
                 )
-
-        for address in candidat.personaddress_set.all():
-            address.external_id = f"osis.student_address_STUDENT_{personne_connue.global_id}_{address.label}"
 
         proposition_fusion.status = PersonMergeStatus.MERGED.name
         proposition_fusion.selected_global_id = ''

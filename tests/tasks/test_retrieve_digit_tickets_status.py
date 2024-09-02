@@ -298,6 +298,7 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             personne_connue_address.refresh_from_db()
         self.personne_compte_temporaire_address.refresh_from_db()
         self.assertEqual(self.personne_compte_temporaire_address.person, personne_connue)
+        self.assertIsNotNone(self.personne_compte_temporaire_address.external_id)
 
 
     def test_assert_merge_with_existing_account_and_but_not_existing_in_osis(self):
