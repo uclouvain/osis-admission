@@ -183,89 +183,95 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             logger.info(
                 f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
             )
-        _update_non_empty_fields(source_obj=candidat, target_obj=personne_connue)
-        _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
 
-        # remove address from personne_connue (will be replaced by candidate addresses)
-        known_person_addresses = personne_connue.personaddress_set.filter(
-            label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name]
-        )
-        for address in known_person_addresses:
-            logger.info(f"{PREFIX_TASK} remove address from known person: {address.location}")
-            address.delete()
-        for address in candidat.personaddress_set.all():
-            logger.info(f"{PREFIX_TASK} add external id to candidate addresses: {address}")
-            address.external_id = f"osis.student_address_STUDENT_{personne_connue.global_id}_{address.label}"
-            address.save()
+        # ne doit pas faire les modifications si le candidat est devenu la personne connue
+        if candidat.global_id != personne_connue.global_id:
 
-        personne_connue.save()
+            _update_non_empty_fields(source_obj=candidat, target_obj=personne_connue)
+            _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=personne_connue)
+
+            # remove address from personne_connue (will be replaced by candidate addresses)
+            known_person_addresses = personne_connue.personaddress_set.filter(
+                label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name]
+            )
+            for address in known_person_addresses:
+                logger.info(f"{PREFIX_TASK} remove address from known person: {address.location}")
+                address.delete()
+            for address in candidat.personaddress_set.all():
+                logger.info(f"{PREFIX_TASK} add external id to candidate addresses: {address}")
+                address.external_id = f"osis.student_address_STUDENT_{personne_connue.global_id}_{address.label}"
+                address.save()
+
+            personne_connue.save()
+
+            models = _find_models_with_fk_to_person()
+            for model, field_name in models:
+                if model == BaseAdmission:
+                    admissions = model.objects.filter(
+                        **{field_name: proposition_fusion.original_person}
+                    )
+                    for admission in admissions:
+                        admission.candidate_id = personne_connue.pk
+                        if admission.valuated_secondary_studies_person_id:
+                            admission.valuated_secondary_studies_person_id = personne_connue.pk
+                        admission.save()
+                    logger.info(
+                        f"{PREFIX_TASK} Link {len(admissions)} instances of {model.__name__}"
+                        f" from candidate to known person"
+                    )
+                elif model in [BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative]:
+                    candidate_high_school_diplomas = model.objects.filter(
+                        **{field_name: proposition_fusion.original_person}
+                    )
+                    known_person_high_school_diplomas = model.objects.filter(
+                        **{field_name: personne_connue}
+                    )
+                    if candidate_high_school_diplomas:
+                        known_person_high_school_diplomas.delete()
+                    for diploma in candidate_high_school_diplomas:
+                        diploma.person_id = personne_connue.pk
+                        diploma.save()
+                elif model in [ProfessionalExperience, EducationalExperience]:
+                    candidate_experiences = model.objects.filter(**{field_name: proposition_fusion.original_person})
+                    known_person_experiences = model.objects.filter(**{field_name: personne_connue})
+                    logger.info(
+                        f"{PREFIX_TASK} {len(candidate_experiences)} instances of {model.__name__} of candidate"
+                    )
+                    logger.info(
+                        f"{PREFIX_TASK} {len(known_person_experiences)} instances of {model.__name__} of known person"
+                    )
+                    curex_to_merge = [
+                        UUID(experience_uuid) for experience_uuid in
+                        (proposition_fusion.professional_curex_to_merge + proposition_fusion.educational_curex_to_merge)
+                    ]
+
+                    # always keep curex from candidate and delete known_person curex that has not been selected
+                    for experience in known_person_experiences:
+                        if experience.uuid not in curex_to_merge:
+                            logger.info(f"{PREFIX_TASK} Removing instance of {model.__name__} ({experience.uuid})")
+                            experience.delete()
+                    for experience in candidate_experiences:
+                        logger.info(
+                            f"{PREFIX_TASK} Move instance of {model.__name__} ({experience.uuid}) "
+                            f"from candidate to known person "
+                        )
+                        experience.person_id = personne_connue.pk
+                        experience.save()
+
+                else:
+                    updated_count = model.objects.filter(
+                        **{field_name: proposition_fusion.original_person}
+                    ).update(**{field_name: personne_connue})
+                    logger.info(
+                        f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__}"
+                        f" from candidate to known person"
+                    )
+
         proposition_fusion.proposal_merge_person.delete()
         proposition_fusion.proposal_merge_person = None
-
-        models = _find_models_with_fk_to_person()
-        for model, field_name in models:
-            if model == BaseAdmission:
-                admissions = model.objects.filter(
-                    **{field_name: proposition_fusion.original_person}
-                )
-                for admission in admissions:
-                    admission.candidate_id = personne_connue.pk
-                    if admission.valuated_secondary_studies_person_id:
-                        admission.valuated_secondary_studies_person_id = personne_connue.pk
-                    admission.save()
-                logger.info(
-                    f"{PREFIX_TASK} Link {len(admissions)} instances of {model.__name__} from candidate to known person"
-                )
-            elif model in [BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative]:
-                candidate_high_school_diplomas = model.objects.filter(
-                    **{field_name: proposition_fusion.original_person}
-                )
-                known_person_high_school_diplomas = model.objects.filter(
-                    **{field_name: personne_connue}
-                )
-                if candidate_high_school_diplomas:
-                    known_person_high_school_diplomas.delete()
-                for diploma in candidate_high_school_diplomas:
-                    diploma.person_id = personne_connue.pk
-                    diploma.save()
-            elif model in [ProfessionalExperience, EducationalExperience]:
-                candidate_experiences = model.objects.filter(**{field_name: proposition_fusion.original_person})
-                known_person_experiences = model.objects.filter(**{field_name: personne_connue})
-                logger.info(
-                    f"{PREFIX_TASK} {len(candidate_experiences)} instances of {model.__name__} of candidate"
-                )
-                logger.info(
-                    f"{PREFIX_TASK} {len(known_person_experiences)} instances of {model.__name__} of known person"
-                )
-                curex_to_merge = [
-                    UUID(experience_uuid) for experience_uuid in
-                    (proposition_fusion.professional_curex_to_merge + proposition_fusion.educational_curex_to_merge)
-                ]
-
-                # always keep curex from candidate and delete known_person curex that has not been selected
-                for experience in known_person_experiences:
-                    if experience.uuid not in curex_to_merge:
-                        logger.info(f"{PREFIX_TASK} Removing instance of {model.__name__} ({experience.uuid})")
-                        experience.delete()
-                for experience in candidate_experiences:
-                    logger.info(
-                        f"{PREFIX_TASK} Move instance of {model.__name__} ({experience.uuid}) "
-                        f"from candidate to known person "
-                    )
-                    experience.person_id = personne_connue.pk
-                    experience.save()
-
-            else:
-                updated_count = model.objects.filter(
-                    **{field_name: proposition_fusion.original_person}
-                ).update(**{field_name: personne_connue})
-                logger.info(
-                    f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__} from candidate to known person"
-                )
-
         proposition_fusion.status = PersonMergeStatus.MERGED.name
         proposition_fusion.selected_global_id = ''
-        if personne_connue:
+        if personne_connue and personne_connue.global_id != candidat.global_id:
             proposition_fusion.original_person = personne_connue
         proposition_fusion.save()
 
