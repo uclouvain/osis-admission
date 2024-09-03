@@ -336,8 +336,8 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertIsNotNone(self.personne_compte_temporaire_address.external_id)
 
 
-    def test_assert_merge_with_existing_account_and_but_not_existing_in_osis(self):
-        self.personne_compte_temporaire.global_id = '00345678'  # Set as internal account
+    def test_assert_merge_with_existing_account_but_not_existing_in_osis(self):
+        self.personne_compte_temporaire.global_id = '00345678'   # Set as internal account
         self.personne_compte_temporaire.save()
 
         self.person_merge_proposal.status = PersonMergeStatus.IN_PROGRESS.name  # Fusion acceptée par le gestionnaire
@@ -434,6 +434,11 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             personne_connue_creee.pk,
             msg="L'experience académique doit être reliée à la personne connue car vient du candidat",
         )
+
+        # Address
+        self.personne_compte_temporaire_address.refresh_from_db()
+        self.assertIsNotNone(self.personne_compte_temporaire_address)
+        self.assertIsNotNone(self.personne_compte_temporaire_address.external_id)
 
     def test_assert_in_error_when_internal_global_id_is_different_from_digit_global_id(self):
         self.personne_compte_temporaire.global_id = '00746799'
