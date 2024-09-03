@@ -60,7 +60,11 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     @cached_property
     def can_access_checklist(self):
         self.permission_required = 'admission.view_checklist'
-        return self.available_checklist_by_context[self.current_context] and super().has_permission()
+        return (
+            self.available_checklist_by_context[self.current_context]
+            and self.admission.submitted_at is not None
+            and super().has_permission()
+        )
 
     @cached_property
     def can_access_documents_management(self):
