@@ -216,7 +216,8 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                             admission.valuated_secondary_studies_person_id = personne_connue.pk
                         admission.save()
                     logger.info(
-                        f"{PREFIX_TASK} Link {len(admissions)} instances of {model.__name__} from candidate to known person"
+                        f"{PREFIX_TASK} Link {len(admissions)} instances of {model.__name__}"
+                        f" from candidate to known person"
                     )
                 elif model in [BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative]:
                     candidate_high_school_diplomas = model.objects.filter(
@@ -262,7 +263,8 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                         **{field_name: proposition_fusion.original_person}
                     ).update(**{field_name: personne_connue})
                     logger.info(
-                        f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__} from candidate to known person"
+                        f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__}"
+                        f" from candidate to known person"
                     )
 
         proposition_fusion.proposal_merge_person.delete()
