@@ -268,6 +268,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     )
             else:
                 _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=candidat)
+                candidat.save()
 
         proposition_fusion.proposal_merge_person.delete()
         proposition_fusion.proposal_merge_person = None
