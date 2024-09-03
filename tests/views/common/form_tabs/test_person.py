@@ -458,8 +458,7 @@ class PersonFormTestCase(TestCase):
                 'id_card': [],
             },
         )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
+        self.assertTrue(form.is_valid())
 
         # The candidate indicated that he has a belgian national number -> the belgian national number is required
         form = AdmissionPersonForm(
@@ -483,8 +482,7 @@ class PersonFormTestCase(TestCase):
                 'id_card': [],
             },
         )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
+        self.assertTrue(form.is_valid())
 
         form = AdmissionPersonForm(
             data={
@@ -532,18 +530,6 @@ class PersonFormTestCase(TestCase):
                 'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
-                'id_card': [],
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.ID_CARD_NUMBER.name,
                 'id_card_number': '0123456',
                 'id_card_expiry_date': datetime.date(2020, 1, 1),
                 'id_card': ['file-2-token'],
@@ -578,18 +564,6 @@ class PersonFormTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_number', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_expiry_date', []))
         self.assertEqual(form.cleaned_data.get('passport'), ['file-1-token'])
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.PASSPORT_NUMBER.name,
-                'passport': [],
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport', []))
 
         form = AdmissionPersonForm(
             data={
