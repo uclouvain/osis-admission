@@ -266,9 +266,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                         f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__}"
                         f" from candidate to known person"
                     )
-            else:
-                _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=candidat)
-                candidat.save()
+        else:
+            _update_non_empty_fields(source_obj=proposition_fusion.proposal_merge_person, target_obj=candidat)
+            candidat.save()
 
         proposition_fusion.proposal_merge_person.delete()
         proposition_fusion.proposal_merge_person = None
