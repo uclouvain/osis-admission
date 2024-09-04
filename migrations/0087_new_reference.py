@@ -6,7 +6,6 @@ from django.db.models import F
 
 from admission.contrib.models.base import REFERENCE_SEQ_NAME
 
-
 OLD_REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
 
@@ -19,8 +18,9 @@ def create_base_admission_reference_sequence(apps, schema_editor: DatabaseSchema
     cursor.execute(schema_editor.sql_delete_sequence % {'sequence': REFERENCE_SEQ_NAME})
 
     # Create the new sequence
-    cursor.execute(schema_editor.sql_create_sequence % {'sequence': REFERENCE_SEQ_NAME})
-    cursor.execute(schema_editor.sql_set_sequence_max % {
+    cursor.execute("CREATE SEQUENCE %(sequence)s" % {'sequence': REFERENCE_SEQ_NAME})
+    sql_set_sequence_max = "SELECT setval('%(sequence)s', MAX(%(column)s)) FROM %(table)s"
+    cursor.execute(sql_set_sequence_max % {
         'sequence': REFERENCE_SEQ_NAME,
         "table": BaseAdmission._meta.db_table,
         "column": 'id',
