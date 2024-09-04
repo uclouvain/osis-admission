@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-import factory
+import factory.fuzzy
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
@@ -61,7 +61,7 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
     education_group_type = factory.SubFactory(
         'base.tests.factories.education_group_type.EducationGroupTypeFactory',
         category=education_group_categories.TRAINING,
-        name=factory.fuzzy.FuzzyChoice(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
+        name=factory.Iterator(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
     )
     main_domain = factory.SubFactory('reference.tests.factories.domain.DomainFactory')
 
