@@ -68,12 +68,11 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
                     admission_reference=str(epc_injection_signaletique.admission)
                 )
                 epc_injection_signaletique.status = EPCInjectionStatus.PENDING.name
-            except Exception as e:
-                logger.info(
+            except Exception:
+                logger.exception(
                     f"{PREFIX_TASK} Une erreur est survenue lors de l'injection "
                     f"vers EPC de la signaletique de la demande avec reference "
                     f"{str(epc_injection_signaletique.admission)}"
-                    f"(Cause: {repr(e)})"
                 )
                 epc_injection_signaletique.status = EPCInjectionStatus.OSIS_ERROR.name
             finally:

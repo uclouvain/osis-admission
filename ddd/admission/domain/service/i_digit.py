@@ -32,9 +32,11 @@ from django.conf import settings
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.service.i_periode_soumission_ticket_digit import \
     IPeriodeSoumissionTicketDigitTranslator
-from admission.ddd.admission.domain.validator.exceptions import NotInAccountCreationPeriodException, \
-    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException, \
-    PropositionDeFusionAvecValidationSyntaxiqueInvalideException
+from admission.ddd.admission.domain.validator.exceptions import (
+    NotInAccountCreationPeriodException,
+    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException,
+    PropositionDeFusionAvecValidationSyntaxiqueInvalideException,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -102,5 +104,5 @@ class IDigitService(interface.DomainService):
                     matricule_candidat=proposition.matricule_candidat,
                 )
         except BusinessException as e:
-            logger.info(f"DIGIT submit ticket canceled: {e.message}")
+            logger.exception(f"DIGIT submit ticket canceled: {e.message}")
             raise e
