@@ -75,6 +75,7 @@ class IDigitService(interface.DomainService):
         try:
             periodes_soumission_ticket_digit = periode_soumission_ticket_digit_translator.get_periodes_actives()
             if proposition.annee_calculee not in [p.annee for p in periodes_soumission_ticket_digit]:
+                logger.error(f"SOUMETTRE TICKET CREATION PERSONNE - NotInAccountCreationPeriodException")
                 raise NotInAccountCreationPeriodException(matricule_candidat=proposition.matricule_candidat)
 
             proposition_fusion = cls.recuperer_proposition_fusion(proposition.matricule_candidat)
@@ -84,6 +85,9 @@ class IDigitService(interface.DomainService):
                 ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE,
                 ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE,
             } and proposition_fusion.statut != [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.REFUSED.name]:
+                logger.error(
+                    f"SOUMETTRE TICKET CREATION PERSONNE - AdmissionDansUnStatutPasAutoriseASInscrireException"
+                )
                 raise AdmissionDansUnStatutPasAutoriseASInscrireException(
                     matricule_candidat=proposition.matricule_candidat
                 )
@@ -94,11 +98,15 @@ class IDigitService(interface.DomainService):
                 PersonMergeStatus.REFUSED.name,
                 PersonMergeStatus.NO_MATCH.name,
             ]:
+                logger.error(f"SOUMETTRE TICKET CREATION PERSONNE - PropositionFusionATraiterException")
                 raise PropositionFusionATraiterException(
                     merge_status=proposition_fusion.statut,
                     matricule_candidat=proposition.matricule_candidat
                 )
             if not proposition_fusion.a_une_syntaxe_valide:
+                logger.error(
+                    f"SOUMETTRE TICKET CREATION PERSONNE - PropositionDeFusionAvecValidationSyntaxiqueInvalideException"
+                )
                 raise PropositionDeFusionAvecValidationSyntaxiqueInvalideException(
                     matricule_candidat=proposition.matricule_candidat,
                 )
