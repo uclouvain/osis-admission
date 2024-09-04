@@ -155,7 +155,11 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
             'end_date': '01/01/2022',
         }
         response = self.client.post(add_url, data)
-        self.assertFormError(response.context['form'], 'start_date', _("The start date can't be later than the end date"))
+        self.assertFormError(
+            response.context['form'],
+            'start_date',
+            _("The start date can't be later than the end date")
+        )
 
     def test_training_restricted(self):
         url = resolve_url(f'admission:doctorate:doctoral-training', uuid=self.restricted_doctorate.uuid)
@@ -450,7 +454,11 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         ]
         response = self.client.post(self.url, {'activity_ids': [activity.uuid for activity in activity_list]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFormError(response.context['form'], None, _("This activity is not complete"))
+        self.assertFormError(
+            response.context['form'],
+            None,
+            [_("This activity is not complete")] * len(activity_list)
+        )
         self.assertEqual(len(response.context['form'].activities_in_error), len(activity_list))
 
     def test_refuse_activity(self):
