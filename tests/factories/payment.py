@@ -24,13 +24,14 @@
 #
 # ##############################################################################
 import factory
+from factory.django import DjangoModelFactory
 
 from admission.contrib.models.online_payment import OnlinePayment, PaymentMethod, PaymentStatus
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 
 
-class OnlinePaymentFactory(factory.django.DjangoModelFactory):
+class OnlinePaymentFactory(DjangoModelFactory):
     admission = factory.SubFactory(GeneralEducationAdmissionFactory)
     payment_id = factory.Sequence(lambda x: f'p_id_{x}')
     method = factory.Iterator(PaymentMethod.get_names())
