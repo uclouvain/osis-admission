@@ -31,7 +31,7 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import OuterRef, Subquery, Prefetch, Q
+from django.db.models import OuterRef, Subquery, Prefetch
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
@@ -140,12 +140,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
             .filter(
                 candidate__global_id=matricule_candidat
-            ).filter(
-                Q(
-                    type_demande=TypeDemande.ADMISSION.name,
-                    status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
-                )
-                | Q(type_demande=TypeDemande.INSCRIPTION.name)
             ).order_by('created_at')
             .first()
         )
