@@ -23,6 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import logging
+
+from django.conf import settings
+
 from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
 from admission.ddd.admission.domain.service.i_client_comptabilite_translator import IClientComptabiliteTranslator
 from admission.ddd.admission.domain.service.i_digit import IDigitService
@@ -34,6 +38,7 @@ from admission.ddd.admission.repository.i_digit import IDigitRepository
 from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
 from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 def soumettre_ticket_creation_personne(
     cmd: 'SoumettreTicketPersonneCommand',
@@ -46,17 +51,27 @@ def soumettre_ticket_creation_personne(
     periode_soumission_ticket_digit_translator: 'IPeriodeSoumissionTicketDigitTranslator'
 ) -> str:
     proposition = proposition_repository.get_first_submitted_proposition(matricule_candidat=cmd.global_id)
+    logger.info(f"SOUMETTRE TICKET CREATION PERSONNE - retrieved first submitted proposition")
+
     digit_service.verifier_peut_soumettre_ticket_creation(proposition, periode_soumission_ticket_digit_translator)
+    logger.info(f"SOUMETTRE TICKET CREATION PERSONNE - can submit ticket")
+
     formation = formation_translator.get(entity_id=proposition.formation_id)
+    logger.info(f"SOUMETTRE TICKET CREATION PERSONNE - retrieved formation")
+
 
     sap_number = client_comptabilite_translator.get_client_number(matricule_candidat=cmd.global_id)
+    logger.info(f"SOUMETTRE TICKET CREATION PERSONNE - retrieved sap_number")
 
     noma = digit_repository.get_registration_id_sent_to_digit(global_id=cmd.global_id)
     if not noma:
+        logger.info(f"SOUMETTRE TICKET CREATION PERSONNE - generating noma")
         noma = NomaGenerateurService.generer_noma(
             compteur=compteur_noma.get_compteur(annee=proposition.annee_calculee).compteur,
             annee=proposition.annee_calculee,
         )
+    logger.info(f"SOUMETTRE TICKET CREATION PERSONNE - retrieved noma: {noma}")
+
     extra_ticket_data = {'program_type': formation.type.name, 'sap_number': sap_number}
     return digit_repository.submit_person_ticket(
         global_id=cmd.global_id, noma=noma, extra_ticket_data=extra_ticket_data
