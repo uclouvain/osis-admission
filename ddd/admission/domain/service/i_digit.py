@@ -84,7 +84,7 @@ class IDigitService(interface.DomainService):
                 ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE,
                 ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE,
                 ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE,
-            } and proposition_fusion.statut != [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.REFUSED.name]:
+            } and proposition_fusion.statut not in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.REFUSED.name]:
                 logger.error(
                     f"SOUMETTRE TICKET CREATION PERSONNE - AdmissionDansUnStatutPasAutoriseASInscrireException"
                 )
