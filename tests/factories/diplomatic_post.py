@@ -25,7 +25,7 @@
 # ##############################################################################
 import factory
 from django.db.models import Max
-from factory import DjangoModelFactory
+from factory.django import DjangoModelFactory
 
 from admission.contrib.models import DiplomaticPost
 
