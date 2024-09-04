@@ -69,7 +69,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
     BesoinDeDerogation,
-    DerogationFinancement,
+    DerogationFinancement, STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -139,7 +139,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'last_update_author',
             )
             .filter(
-                candidate__global_id=matricule_candidat
+                candidate__global_id=matricule_candidat,
+                status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE,
             ).order_by('created_at')
             .first()
         )
