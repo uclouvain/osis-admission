@@ -55,7 +55,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixSousDomaineSciences,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.ddd.admission.doctorat.validation.dtos import DemandeRechercheDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.forms import ALL_EMPTY_CHOICE, ALL_FEMININE_EMPTY_CHOICE
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -1026,7 +1025,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'nationalite': 'FR',
             'cdds': 'unknown_cdd',
         }
-        response = self.client.get(self.url, data, HTTP_HX_REQUEST='true')
+        response = self.client.get(self.url, data, headers={"hx-request": 'true'})
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
