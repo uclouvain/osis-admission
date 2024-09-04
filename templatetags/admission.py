@@ -306,6 +306,9 @@ class Tab:
 
 TAB_TREES = {
     CONTEXT_DOCTORATE: {
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
+        ],
         Tab('documents', _('Documents'), 'folder-open'): [
             Tab('documents', _('Documents'), 'folder-open'),
         ],

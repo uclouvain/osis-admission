@@ -557,6 +557,10 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         for filter_name in ['cotutelle']:
             mapping_filter_key_value[filter_name] = yesno(formatted_filters[filter_name], _('yes,no,'))
 
+        # > "Yes" / ""
+        for filter_name in ['fnrs_fria_fresh']:
+            formatted_filters[filter_name] = _('yes') if formatted_filters[filter_name] else ''
+
         return {
             mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])
             for key, value in formatted_filters.items()

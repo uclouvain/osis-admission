@@ -435,4 +435,10 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         doctorat_translator=_doctorat_translator,
     ),
+    EnvoyerMessageCandidatCommand: lambda msg_bus, cmd: envoyer_message_au_candidat(
+        cmd,
+        proposition_repository=_proposition_repository,
+        notification=_notification,
+        historique=_historique,
+    ),
 }

@@ -320,10 +320,6 @@ class DoctorateAdmission(BaseAdmission):
         default=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
         verbose_name=_("Post-enrolment status"),
     )
-    pre_admission_submission_date = models.DateTimeField(
-        verbose_name=_("Pre-admission submission date"),
-        null=True,
-    )
 
     supervision_group = SignatureProcessField()
 
@@ -561,7 +557,6 @@ class DemandeManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .get_queryset()
             .only(
                 'uuid',
-                'pre_admission_submission_date',
                 'submitted_at',
                 'submitted_profile',
                 'modified_at',

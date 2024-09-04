@@ -55,7 +55,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixSousDomaineSciences,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.ddd.admission.doctorat.validation.dtos import DemandeRechercheDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.forms import ALL_EMPTY_CHOICE, ALL_FEMININE_EMPTY_CHOICE
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -175,6 +174,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             candidate__last_name='Doe',
             last_update_author__first_name='Joe',
             last_update_author__last_name='Cole',
+            is_fnrs_fria_fresh_csc_linked=True,
         )
         cls.admissions: List[DoctorateAdmission] = [
             admission,
@@ -190,11 +190,12 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 other_international_scholarship=BourseRecherche.ARC.name,
                 financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
                 type=ChoixTypeAdmission.ADMISSION.name,
-                submitted_at=datetime.datetime(2021, 1, 2),
+                submitted_at=datetime.datetime(2021, 1, 2, 1, 0, 0),
                 status_cdd=ChoixStatutCDD.TO_BE_VERIFIED.name,
                 status_sic=ChoixStatutSIC.VALID.name,
                 proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
                 last_update_author=cls.promoter,
+                is_fnrs_fria_fresh_csc_linked=False,
                 submitted_profile={
                     "coordinates": {
                         "city": "Louvain-La-Neuves",
@@ -233,6 +234,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 candidate__last_name='Foe',
                 modified_at=datetime.datetime(2021, 1, 2),
                 last_update_author=None,
+                is_fnrs_fria_fresh_csc_linked=None,
             ),
             DoctorateAdmissionFactory(
                 training__management_entity=third_doctoral_commission,
@@ -864,6 +866,41 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 response,
                 [
                     self.admission_references[0],
+                ],
+            )
+
+    def test_filter_by_fnrs_fria_fresh(self):
+        self.client.force_login(user=self.user_with_several_cdds)
+
+        data = {
+            'annee_academique': '2021',
+            'fnrs_fria_fresh': True,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(
+                response,
+                [
+                    self.admission_references[0],
+                ],
+            )
+
+        data = {
+            'annee_academique': '2021',
+            'fnrs_fria_fresh': False,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(
+                response,
+                [
+                    self.admission_references[0],
+                    self.admission_references[1],
+                    self.admission_references[2],
                 ],
             )
 
