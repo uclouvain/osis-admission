@@ -32,6 +32,8 @@ from unittest.mock import patch
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from osis_async.models.enums import TaskState
+from osis_notification.models import EmailNotification
 from rest_framework import status
 
 from admission.contrib.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
@@ -47,8 +49,6 @@ from admission.tests.factories.mail_template import CddMailTemplateFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.program_manager import ProgramManagerFactory
 from infrastructure.messages_bus import message_bus_instance
-from osis_async.models.enums import TaskState
-from osis_notification.models import EmailNotification
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
@@ -302,8 +302,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(
-            response,
-            'form',
+            response.context['form'],
             None,
             [
                 "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
@@ -321,7 +320,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
 
         response = self.client.post(url, {'subject': 'The subject of the message'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFormError(response, 'form', 'body', ['Ce champ est obligatoire.'])
+        self.assertFormError(response.context['form'], 'body', ['Ce champ est obligatoire.'])
 
     def test_get_confirmation_retaking_decision_without_confirmation_paper(self):
         url = reverse(self.retaking_path, args=[self.admission_without_confirmation_paper.uuid])
@@ -414,8 +413,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(
-            response,
-            'form',
+            response.context['form'],
             None,
             [
                 "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
@@ -442,4 +440,4 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFormError(response, 'form', 'date_limite', ['Ce champ est obligatoire.'])
+        self.assertFormError(response.context['form'], 'date_limite', ['Ce champ est obligatoire.'])
