@@ -309,6 +309,12 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="L'experience académique gardée est conservée car dans 'educational_curex_to_merge'",
         )
 
+        # l'expérience gardée de la personne connue est valorisée dans le dossier d'admission
+        for professional_valuated_experience  in self.experience_professionelle_personne_connue_gardee.professional_valuated_experiences.all(): # noqa
+            self.assertEqual(professional_valuated_experience.baseadmission.reference, self.admission.reference)
+        for educational_valuated_experience in self.experience_academique_personne_connue_gardee.educational_valuated_experiences.all(): # noqa
+            self.assertEqual(educational_valuated_experience.baseadmission.reference, self.admission.reference)
+
         with self.assertRaises(
             ProfessionalExperience.DoesNotExist,
             msg="L'experience professionelle non gardée doit être effacée car pas dans 'professional_curex_to_merge' "
