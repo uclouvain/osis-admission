@@ -36,7 +36,8 @@ from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
 from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.base import BaseAdmission, AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
@@ -250,6 +251,18 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                         if experience.uuid not in curex_to_merge:
                             logger.info(f"{PREFIX_TASK} Removing instance of {model.__name__} ({experience.uuid})")
                             experience.delete()
+                        else:
+                            admissions = BaseAdmission.objects.filter(candidate=candidat)
+                            for admission in admissions:
+                                if model == EducationalExperience:
+                                    AdmissionEducationalValuatedExperiences.objects.create(
+                                        baseadmission=admission, educationalexperience=experience
+                                    )
+                                elif model == ProfessionalExperience:
+                                    AdmissionProfessionalValuatedExperiences.objects.create(
+                                        baseadmission=admission, professionalexperience=experience
+                                    )
+
                     for experience in candidate_experiences:
                         logger.info(
                             f"{PREFIX_TASK} Move instance of {model.__name__} ({experience.uuid}) "
