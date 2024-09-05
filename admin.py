@@ -42,7 +42,6 @@ from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
-from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -56,7 +55,15 @@ from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.contrib.models import (
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.enums import CritereItemFormulaireFormation
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
+from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.models import (
     AdmissionTask,
     AdmissionViewer,
     CddMailTemplate,
@@ -67,28 +74,20 @@ from admission.contrib.models import (
     Accounting,
     DiplomaticPost,
 )
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
-from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.checklist import (
+from admission.models.base import BaseAdmission
+from admission.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.cdd_config import CddConfiguration
+from admission.models.checklist import (
     RefusalReasonCategory,
     RefusalReason,
     AdditionalApprovalCondition,
     FreeAdditionalApprovalCondition,
 )
-from admission.contrib.models.doctoral_training import Activity
-from admission.contrib.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
-from admission.contrib.models.online_payment import OnlinePayment
-from admission.contrib.models.working_list import WorkingList
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.enums import CritereItemFormulaireFormation
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
-from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
-from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.models.doctoral_training import Activity
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
+from admission.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.models.online_payment import OnlinePayment
+from admission.models.working_list import WorkingList
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
 from admission.views.mollie_webhook import MollieWebHook
@@ -101,6 +100,7 @@ from base.models.person_merge_proposal import PersonMergeStatus
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
+from osis_document.contrib import FileField
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 

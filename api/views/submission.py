@@ -34,7 +34,7 @@ from rest_framework.settings import api_settings
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import PropositionErrorsSerializer
-from admission.contrib.models import (
+from admission.models import (
     GeneralEducationAdmission,
     ContinuingEducationAdmission,
     DoctorateAdmission,
@@ -44,7 +44,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
     VerifierProjetQuery,
 )
-from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     PoolNonResidentContingenteNonOuvertException,

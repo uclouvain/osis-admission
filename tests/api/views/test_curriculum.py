@@ -37,10 +37,10 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory

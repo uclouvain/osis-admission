@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ from .domain.service.notification import Notification
 from .repository.doctorat import DoctoratRepository
 
 COMMAND_HANDLERS = {
-    RecupererDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
+    RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_admission_doctorat(
         cmd,
         doctorat_repository=DoctoratRepository(),
     ),

@@ -32,14 +32,6 @@ from django.conf import settings
 from django.db import transaction
 from django.utils.dateparse import parse_datetime, parse_date
 
-from admission.contrib.models import (
-    AdmissionFormItem,
-    AdmissionFormItemInstantiation,
-    GeneralEducationAdmission,
-    DoctorateAdmission,
-    ContinuingEducationAdmission,
-)
-from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -60,12 +52,19 @@ from admission.ddd.admission.enums.emplacement_document import (
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
     StatutReclamationEmplacementDocument,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
+from admission.models import (
+    AdmissionFormItem,
+    AdmissionFormItemInstantiation,
+    GeneralEducationAdmission,
+    DoctorateAdmission,
+    ContinuingEducationAdmission,
+)
+from admission.models.base import BaseAdmission
 from base.models.person import Person
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
-from base.tests.models.test_tutor import request
 
 
 class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):

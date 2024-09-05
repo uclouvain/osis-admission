@@ -35,16 +35,6 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import (
-    EPCInjection as AdmissionEPCInjection,
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-)
-from admission.contrib.models.base import (
-    AdmissionProfessionalValuatedExperiences,
-)
-from admission.contrib.models.epc_injection import EPCInjectionType
-from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
@@ -53,6 +43,16 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
+from admission.models import (
+    EPCInjection as AdmissionEPCInjection,
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+)
+from admission.models.base import (
+    AdmissionProfessionalValuatedExperiences,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (

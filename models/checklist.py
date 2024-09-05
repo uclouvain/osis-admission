@@ -33,7 +33,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from ordered_model.models import OrderedModel
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from osis_profile.models import EducationalExperience
 
 

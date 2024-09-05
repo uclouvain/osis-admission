@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 from django.test import TestCase
 
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
@@ -40,14 +40,14 @@ class TestRecupererDoctorat(TestCase):
     def test_should_pas_trouver_si_doctorat_inconnu(self):
         with self.assertRaises(DoctoratNonTrouveException):
             self.message_bus.invoke(
-                RecupererDoctoratQuery(
+                RecupererAdmissionDoctoratQuery(
                     doctorat_uuid='inconnu',
                 )
             )
 
     def test_should_recuperer_doctorat_connu(self):
         doctorat_dto: DoctoratDTO = self.message_bus.invoke(
-            RecupererDoctoratQuery(
+            RecupererAdmissionDoctoratQuery(
                 doctorat_uuid='uuid-SC3DP-promoteurs-membres-deja-approuves',
             )
         )

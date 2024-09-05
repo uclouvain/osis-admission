@@ -31,15 +31,13 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
-    ENTITY_CDE,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import EMPTY_CHOICE_AS_LIST
+from admission.models import GeneralEducationAdmission
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (

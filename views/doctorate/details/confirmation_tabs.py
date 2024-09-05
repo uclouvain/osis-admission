@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ from django.views.generic import FormView
 from django.views.generic.edit import FormMixin
 from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     ConfirmerEchecCommand,

@@ -31,8 +31,8 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import InternalNote
+from admission.models import DoctorateAdmission
+from admission.models.doctorate import InternalNote
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,

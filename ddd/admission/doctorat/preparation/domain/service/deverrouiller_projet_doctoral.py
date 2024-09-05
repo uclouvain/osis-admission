@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from osis_common.ddd import interface
 
 
-class DeverrouillerProjetDoctoral(interface.DomainService):
+class DeverrouillerPropositionProjetDoctoral(interface.DomainService):
     @classmethod
     def deverrouiller_apres_refus(cls, proposition: Proposition, signataire: 'SignataireIdentity') -> None:
         if isinstance(signataire, PromoteurIdentity):

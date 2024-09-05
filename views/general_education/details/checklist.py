@@ -44,16 +44,11 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
-from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 
-from admission.contrib.models import EPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (
@@ -142,6 +137,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
     InformationsDestinatairePasTrouvee,
@@ -196,6 +192,8 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
     ADMISSION_EMAIL_SIC_APPROVAL_EU,
 )
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType, EPCInjection
+from admission.models.online_payment import PaymentStatus, PaymentMethod
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     add_close_modal_into_htmx_response,
@@ -223,6 +221,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParco
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm

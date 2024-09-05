@@ -26,13 +26,12 @@
 import uuid
 
 import freezegun
-from django.test import override_settings
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
@@ -46,6 +45,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixTypeAdresseFacturation,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory

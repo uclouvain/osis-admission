@@ -26,7 +26,7 @@
 import abc
 from typing import List, Optional, Union
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,

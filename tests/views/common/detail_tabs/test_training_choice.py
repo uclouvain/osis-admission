@@ -30,11 +30,11 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, MessageAdmissionFormItemFactory

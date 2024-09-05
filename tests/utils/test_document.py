@@ -30,7 +30,7 @@ from unittest.mock import patch
 from django.test import override_settings
 
 from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES
-from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
+from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,

@@ -29,11 +29,11 @@ from uuid import UUID
 from django.urls import reverse
 from django.utils.functional import cached_property
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionType
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import EPCInjectionType
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType

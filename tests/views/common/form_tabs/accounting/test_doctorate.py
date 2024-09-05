@@ -34,8 +34,6 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.contrib.models import Accounting, DoctorateAdmission
-from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import (
@@ -50,11 +48,10 @@ from admission.ddd.admission.enums import (
     ChoixAssimilation6,
 )
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.accounting import AccountingForm
+from admission.models import Accounting, DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory, CandidateFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -65,7 +62,6 @@ from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
-from program_management.models.education_group_version import EducationGroupVersion
 from reference.services.iban_validator import IBANValidatorException, IBANValidatorRequestException
 from reference.tests.factories.country import CountryFactory
 

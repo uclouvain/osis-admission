@@ -40,8 +40,11 @@ from django.utils.html import format_html
 from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy, pgettext, get_language
 from django.views import View
+from osis_async.models import AsyncTask
+from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
+from osis_export.models import Export
+from osis_export.models.enums.types import ExportTypes
 
-from admission.contrib.models import Scholarship
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -52,28 +55,25 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
-from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
+from admission.models import Scholarship
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from infrastructure.messages_bus import message_bus_instance
-from osis_async.models import AsyncTask
-from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
-from osis_export.models import Export
-from osis_export.models.enums.types import ExportTypes
 
 __all__ = [
     'AdmissionListExcelExportView',

@@ -27,7 +27,7 @@ import uuid
 
 from django.test import TestCase
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (

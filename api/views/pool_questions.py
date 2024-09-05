@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ from rest_framework.settings import api_settings
 from admission.api.schema import ChoicesEnumSchema
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.domain.validator.exceptions import (
     ModificationInscriptionExterneNonConfirmeeException,
     ReorientationInscriptionExterneNonConfirmeeException,

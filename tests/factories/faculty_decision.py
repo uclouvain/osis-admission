@@ -28,7 +28,7 @@ import factory
 from django.db.models import Max
 from factory.fuzzy import FuzzyText
 
-from admission.contrib.models.checklist import (
+from admission.models.checklist import (
     RefusalReason,
     RefusalReasonCategory,
     AdditionalApprovalCondition,

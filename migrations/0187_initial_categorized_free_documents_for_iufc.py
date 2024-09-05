@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from admission.contrib.models.categorized_free_document import TOKEN_ACADEMIC_YEAR
+from admission.models.categorized_free_document import TOKEN_ACADEMIC_YEAR
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 
 

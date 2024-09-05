@@ -35,8 +35,8 @@ from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import Accounting
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models import Accounting
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
