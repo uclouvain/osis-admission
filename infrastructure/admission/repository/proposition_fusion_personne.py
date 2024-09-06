@@ -83,6 +83,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
                 'birth_date': date_naissance,
                 'birth_place': lieu_naissance,
                 'email': email,
+                'private_email': email,
                 'sex': sex,
                 'civil_state': etat_civil,
                 'country_of_citizenship': country_of_citizenship,
