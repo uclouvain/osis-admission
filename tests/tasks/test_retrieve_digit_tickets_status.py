@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import copy
 import uuid
 from datetime import datetime, timedelta
 from unittest import mock
@@ -31,6 +32,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from waffle.testutils import override_switch
 
+from admission.auth.roles.candidate import Candidate
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
@@ -47,6 +49,7 @@ from base.models.person_creation_ticket import PersonTicketCreation, PersonTicke
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
+from base.tests.factories.user import UserFactory
 from osis_profile.models import ProfessionalExperience, EducationalExperience
 from osis_profile.models.enums.curriculum import ActivityType
 
@@ -56,7 +59,10 @@ from osis_profile.models.enums.curriculum import ActivityType
 class TestRetrieveDigitTicketsStatus(TestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
-        self.personne_compte_temporaire_address = PersonAddressFactory(person=self.personne_compte_temporaire)
+        self.personne_compte_temporaire_address = PersonAddressFactory(
+            person=self.personne_compte_temporaire,
+            label = PersonAddressType.RESIDENTIAL.name
+        )
         self.addresse_residentielle_personne_temporaire = PersonAddressFactory(
             person=self.personne_compte_temporaire,
             label=PersonAddressType.RESIDENTIAL.name
@@ -172,7 +178,10 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.personne_compte_temporaire.save()
 
         personne_connue = PersonFactory(global_id='00948959')
-        personne_connue_address = PersonAddressFactory(person=personne_connue)
+        personne_connue_address = PersonAddressFactory(
+            person=personne_connue,
+            label=PersonAddressType.RESIDENTIAL.name
+        )
 
 
         self.etudes_secondaires_personne_connue = BelgianHighSchoolDiplomaFactory(person=personne_connue)
@@ -445,6 +454,84 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.personne_compte_temporaire_address.refresh_from_db()
         self.assertIsNotNone(self.personne_compte_temporaire_address)
         self.assertIsNotNone(self.personne_compte_temporaire_address.external_id)
+
+    def test_assert_merge_with_duplicate_candidate_account_created_by_candidate_and_existing_in_osis(self):
+        self.personne_compte_temporaire.global_id = '00345678'  # Set as internal account
+        self.personne_compte_temporaire.save()
+
+        # on considere que la premiere personne a déjà été mergée
+        self.person_merge_proposal.delete()
+
+
+        # simulate creation of a duplicate account
+        self.doublon_personne_compte_temporaire = copy.deepcopy(self.personne_compte_temporaire)
+        self.doublon_personne_compte_temporaire.global_id = '80000001'
+        self.doublon_personne_compte_temporaire.user = UserFactory()
+        self.doublon_personne_compte_temporaire.pk = None
+        self.doublon_personne_compte_temporaire.uuid = uuid.uuid4()
+        self.doublon_personne_compte_temporaire.save()
+        Candidate.objects.create(person=self.doublon_personne_compte_temporaire)
+
+        self.person_merge_proposal_doublon = PersonMergeProposal.objects.create(
+            uuid=uuid.uuid4(),
+            original_person=self.doublon_personne_compte_temporaire,
+            proposal_merge_person=None,
+            status=PersonMergeStatus.IN_PROGRESS.name,
+            registration_id_sent_to_digit='2456045984',
+            similarity_result=[],
+            last_similarity_result_update=datetime.now(),
+            professional_curex_to_merge=[],
+            educational_curex_to_merge=[],
+            validation={'valid': 'true', 'errors': []}
+        )
+        self.ticket_digit = PersonTicketCreation.objects.create(
+            uuid=uuid.uuid4(),
+            status=PersonTicketCreationStatus.CREATED.name,
+            person=self.doublon_personne_compte_temporaire,
+        )
+
+        # Dossier d'admission
+        self.admission = GeneralEducationAdmissionFactory(
+            candidate=self.doublon_personne_compte_temporaire,
+            type_demande=TypeDemande.INSCRIPTION.name,
+        )
+
+        self.person_merge_proposal_doublon.status = PersonMergeStatus.IN_PROGRESS.name   # Fusion acceptée par le gestionnaire
+        self.person_merge_proposal_doublon.selected_global_id = self.personne_compte_temporaire.global_id
+        self.person_merge_proposal_doublon.original_person = self.doublon_personne_compte_temporaire
+        self.person_merge_proposal_doublon.proposal_merge_person = PersonFactory(
+            global_id='',
+            last_name=self.personne_compte_temporaire.last_name,
+            first_name=self.personne_compte_temporaire.first_name,
+            middle_name='',
+            birth_date=None,
+            birth_place='',
+            email=self.personne_compte_temporaire.email,
+            gender='M',
+            sex='M',
+            civil_state=CivilState.SINGLE.name,
+            country_of_citizenship=None,
+            national_number='',
+            id_card_number='',
+            passport_number='',
+            last_registration_id='',
+            id_card_expiry_date=None,
+            passport_expiry_date=None,
+            emergency_contact_phone='', # champ non modifié par la fusion car pas connu de digit
+        )
+        self.person_merge_proposal_doublon.save()
+
+        self.candidat_original = Candidate.objects.get(person=self.personne_compte_temporaire)
+        self.candidat_doublon = Candidate.objects.get(person=self.doublon_personne_compte_temporaire)
+
+        retrieve_digit_tickets_status.run()
+
+        with self.assertRaises(
+                Candidate.DoesNotExist,
+                msg="Si le rôle candidat existe déjà pour la personne, on supprime celui du candidat"
+        ):
+            self.candidat_doublon.refresh_from_db()
+
 
     def test_assert_in_error_when_internal_global_id_is_different_from_digit_global_id(self):
         self.personne_compte_temporaire.global_id = '00746799'

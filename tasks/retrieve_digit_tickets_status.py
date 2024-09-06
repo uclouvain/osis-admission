@@ -35,6 +35,7 @@ from django.db.models import Q, Model, ForeignKey
 from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
+from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission, AdmissionEducationalValuatedExperiences, \
     AdmissionProfessionalValuatedExperiences
@@ -207,6 +208,19 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
 
             models = _find_models_with_fk_to_person()
             for model, field_name in models:
+                if model == Candidate:
+                    if not model.objects.filter(person=proposition_fusion.original_person).exists():
+                        updated_count = model.objects.filter(person=proposition_fusion.original_person).update(
+                            person=personne_connue
+                        )
+                        logger.info(
+                            f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__}"
+                            f" from candidate to known person"
+                        )
+                    else:
+                        # delete deprecated role candidate
+                        model.objects.get(person=proposition_fusion.original_person).delete()
+
                 if model == BaseAdmission:
                     admissions = model.objects.filter(
                         **{field_name: proposition_fusion.original_person}
