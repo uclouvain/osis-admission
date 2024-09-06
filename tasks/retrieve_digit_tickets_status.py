@@ -53,8 +53,10 @@ from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tasks import send_pictures_to_card_app
-from osis_profile.models import ProfessionalExperience, EducationalExperience, BelgianHighSchoolDiploma, \
-    ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from osis_profile.models import (
+    ProfessionalExperience, EducationalExperience, BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative,
+)
 from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
@@ -89,7 +91,7 @@ def run(request=None):
                 else:
                     logger.info(f"{PREFIX_TASK} ticket in status {status}. No processing ticket response.")
         except Exception as e:
-            logger.info(f"{PREFIX_TASK} An error occured during processing ticket ({repr(e)})")
+            logger.exception(f"{PREFIX_TASK} An error occured during processing ticket")
             PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(
                 status=PersonTicketCreationStatus.ERROR.name,
                 errors=[{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
@@ -183,7 +185,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                 external_id=f"osis.person_{proposition_fusion.selected_global_id}",
                 global_id=proposition_fusion.selected_global_id,
             )
-            logger.info(
+            logger.exception(
                 f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
             )
 
@@ -313,7 +315,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         proposition_fusion.save()
 
     except PersonMergeProposal.DoesNotExist:
-        logger.info(
+        logger.exception(
             f"{PREFIX_TASK} No person merge proposal found in valid state for candidate (PK: {candidat.pk})"
             f"(Status: IN_PROGRESS / selected_global_id not empty / proposal_merge_person exist)"
         )

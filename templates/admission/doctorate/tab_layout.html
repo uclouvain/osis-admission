@@ -127,7 +127,16 @@
       <br>
     {% endif %}
     {% if admission.type_financement == 'SEARCH_SCHOLARSHIP' %}
-      <span class="label label-success">{% translate 'Scholarship' %}</span>
+      {% if admission.bourse_recherche %}
+        <span
+            class="label label-success"
+            title="{{ admission.bourse_recherche }}"
+        >
+        {{ admission.bourse_recherche.nom_court }}
+        </span>
+      {% else %}
+        <span class="label label-success">{% translate 'Scholarship' %}</span>
+      {% endif %}
     {% endif %}
   </div>
   <div class="admission-badges min-width">

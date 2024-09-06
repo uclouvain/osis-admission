@@ -53,6 +53,7 @@ def lister_demandes(
         mode_filtres_etats_checklist=cmd.mode_filtres_etats_checklist,
         filtres_etats_checklist=cmd.filtres_etats_checklist,
         demandeur=cmd.demandeur,
+        fnrs_fria_fresh=cmd.fnrs_fria_fresh,
         tri_inverse=cmd.tri_inverse,
         champ_tri=cmd.champ_tri,
         page=cmd.page,

@@ -314,7 +314,7 @@ def _retrieve_person_ticket_status(request_id: int):
             }
         return response_data
     except Exception as e:
-        logger.info(f"An error occured when try to call DigIT endpoint retrieve person ticket status. {repr(e)}")
+        logger.exception(f"An error occured when try to call DigIT endpoint retrieve person ticket status.")
         return {
             "status": PersonTicketCreationStatus.ERROR.name,
             "errors": [{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
@@ -354,10 +354,8 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra
                 url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}?validateResemblance=false"
             )
             return response.json()
-        except Exception as e:
-            logger.info(
-                f"[Validation syntaxique DigIT - {person.global_id} ] Une erreur est survenue avec DigIT {repr(e)}"
-            )
+        except Exception:
+            logger.exception(f"[Validation syntaxique DigIT - {person.global_id} ] Une erreur est survenue avec DigIT")
             return {"errors": [{"errorCode": "OSIS_CAN_NOT_REACH_DIGIT"}], "valid": False}
 
 

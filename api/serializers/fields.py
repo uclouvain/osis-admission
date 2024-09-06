@@ -185,12 +185,12 @@ DOCTORATE_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'destroy_proposition': {
-        'path_name': 'admission_api_v1:propositions',
+        'path_name': 'admission_api_v1:doctorate_propositions',
         'method': 'DELETE',
         'params': ['uuid'],
     },
-    'retrieve_proposition': {
-        'path_name': 'admission_api_v1:propositions',
+    'retrieve_project': {
+        'path_name': 'admission_api_v1:project',
         'method': 'GET',
         'params': ['uuid'],
     },
@@ -199,8 +199,8 @@ DOCTORATE_ACTION_LINKS = {
         'method': 'POST',
         'params': ['uuid'],
     },
-    'update_proposition': {
-        'path_name': 'admission_api_v1:propositions',
+    'update_project': {
+        'path_name': 'admission_api_v1:project',
         'method': 'PUT',
         'params': ['uuid'],
     },

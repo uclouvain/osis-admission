@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -114,9 +114,6 @@ class DoctorateAPIViewTestCase(APITestCase):
         # Check doctorate links
         self.assertTrue('links' in json_response)
         allowed_actions = [
-            'retrieve_cotutelle',
-            'retrieve_supervision',
-            'retrieve_proposition',
             'retrieve_confirmation',
             'update_confirmation',
             'update_confirmation_extension',
@@ -128,6 +125,9 @@ class DoctorateAPIViewTestCase(APITestCase):
             'list_jury_members',
         ]
         forbidden_actions = [
+            'retrieve_cotutelle',
+            'retrieve_supervision',
+            'retrieve_project',
             'retrieve_complementary_training',
             'assent_training',
             'update_jury_preparation',

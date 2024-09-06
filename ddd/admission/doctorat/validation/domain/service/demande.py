@@ -56,7 +56,6 @@ class DemandeService(interface.DomainService):
         return Demande(
             entity_id=PropositionIdentityTranslator.convertir_en_demande(proposition_id),
             proposition_id=proposition_id,
-            pre_admission_confirmee_le=now() if type_admission == ChoixTypeAdmission.PRE_ADMISSION else None,
             admission_confirmee_le=now(),
             profil_soumis_candidat=profil_soumis_candidat,
         )
