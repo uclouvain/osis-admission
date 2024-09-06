@@ -343,7 +343,7 @@ def _trigger_epc_academic_curriculum_deletion(experience, noma, personne_connue)
         noma=noma,
         user=personne_connue.full_name,
         experience_uuid=experience.uuid,
-        experiences_supprimees=[experience.educationalexperienceyear_set.values_list('uuid', flat=True)],
+        experiences_supprimees=experience.educationalexperienceyear_set.values_list('uuid', flat=True),
     )
 
 
