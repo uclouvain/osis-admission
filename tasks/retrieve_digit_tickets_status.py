@@ -55,6 +55,7 @@ from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeSt
 from base.tasks import send_pictures_to_card_app
 from osis_profile.models import ProfessionalExperience, EducationalExperience, BelgianHighSchoolDiploma, \
     ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
@@ -241,7 +242,8 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     known_person_high_school_diplomas = model.objects.filter(
                         **{field_name: personne_connue}
                     )
-                    if candidate_high_school_diplomas:
+                    if candidate_high_school_diplomas.exists() and known_person_high_school_diplomas.exists():
+                        _trigger_epc_diplomas_deletion(known_person_high_school_diplomas, noma, personne_connue)
                         known_person_high_school_diplomas.delete()
                     for diploma in candidate_high_school_diplomas:
                         diploma.person_id = personne_connue.pk
@@ -264,6 +266,11 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     for experience in known_person_experiences:
                         if experience.uuid not in curex_to_merge:
                             logger.info(f"{PREFIX_TASK} Removing instance of {model.__name__} ({experience.uuid})")
+                            if model == EducationalExperience:
+                                _trigger_epc_academic_curriculum_deletion(experience, noma, personne_connue)
+                                experience.educationalexperienceyear_set.all().delete()
+                            if model == ProfessionalExperience:
+                                _trigger_epc_non_academic_curriculum_deletion(experience, noma, personne_connue)
                             experience.delete()
                         else:
                             admissions = BaseAdmission.objects.filter(candidate=candidat)
@@ -318,6 +325,35 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         send_pictures_to_card_app.run.delay(global_id=digit_matricule)
     logger.info(f"{PREFIX_TASK} send picture to card")
     logger.info(f"{PREFIX_TASK} ####### END PROCESS SUCCESSFUL DIGIT RESPONSE #######")
+
+
+def _trigger_epc_diplomas_deletion(known_person_high_school_diplomas, noma, personne_connue):
+    InjectionEPCCurriculum().injecter_etudes_secondaires(
+        fgs=personne_connue.global_id,
+        noma=noma,
+        user=personne_connue.full_name,
+        alternative_supprimee=True,
+        experiences_supprimees=known_person_high_school_diplomas.values_list('uuid', flat=True),
+    )
+
+
+def _trigger_epc_academic_curriculum_deletion(experience, noma, personne_connue):
+    InjectionEPCCurriculum().injecter_experience_academique(
+        fgs=personne_connue.global_id,
+        noma=noma,
+        user=personne_connue.full_name,
+        experience_uuid=experience.uuid,
+        experiences_supprimees=[experience.educationalexperienceyear_set.values_list('uuid', flat=True)],
+    )
+
+def _trigger_epc_non_academic_curriculum_deletion(experience, noma, personne_connue):
+    InjectionEPCCurriculum().injecter_experience_academique(
+        fgs=personne_connue.global_id,
+        noma=noma,
+        user=personne_connue.full_name,
+        experience_uuid=experience.uuid,
+        experiences_supprimees=[experience.uuid],
+    )
 
 
 def _injecter_signaletique_a_epc(matricule: str):
