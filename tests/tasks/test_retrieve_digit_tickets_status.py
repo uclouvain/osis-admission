@@ -59,7 +59,10 @@ from osis_profile.models.enums.curriculum import ActivityType
 class TestRetrieveDigitTicketsStatus(TestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
-        self.personne_compte_temporaire_address = PersonAddressFactory(person=self.personne_compte_temporaire)
+        self.personne_compte_temporaire_address = PersonAddressFactory(
+            person=self.personne_compte_temporaire,
+            label = PersonAddressType.RESIDENTIAL.name
+        )
         self.addresse_residentielle_personne_temporaire = PersonAddressFactory(
             person=self.personne_compte_temporaire,
             label=PersonAddressType.RESIDENTIAL.name
@@ -175,7 +178,10 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.personne_compte_temporaire.save()
 
         personne_connue = PersonFactory(global_id='00948959')
-        personne_connue_address = PersonAddressFactory(person=personne_connue)
+        personne_connue_address = PersonAddressFactory(
+            person=personne_connue,
+            label=PersonAddressType.RESIDENTIAL.name
+        )
 
 
         self.etudes_secondaires_personne_connue = BelgianHighSchoolDiplomaFactory(person=personne_connue)
