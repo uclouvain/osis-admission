@@ -347,7 +347,7 @@ def _trigger_epc_academic_curriculum_deletion(experience, noma, personne_connue)
     )
 
 def _trigger_epc_non_academic_curriculum_deletion(experience, noma, personne_connue):
-    InjectionEPCCurriculum().injecter_experience_academique(
+    InjectionEPCCurriculum().injecter_experience_non_academique(
         fgs=personne_connue.global_id,
         noma=noma,
         user=personne_connue.full_name,
