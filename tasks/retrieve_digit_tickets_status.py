@@ -346,6 +346,7 @@ def _trigger_epc_academic_curriculum_deletion(experience, noma, personne_connue)
         experiences_supprimees=[experience.educationalexperienceyear_set.values_list('uuid', flat=True)],
     )
 
+
 def _trigger_epc_non_academic_curriculum_deletion(experience, noma, personne_connue):
     InjectionEPCCurriculum().injecter_experience_non_academique(
         fgs=personne_connue.global_id,
