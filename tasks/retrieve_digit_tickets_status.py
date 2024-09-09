@@ -221,8 +221,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                             f" from candidate to known person"
                         )
                     else:
-                        # delete deprecated role candidate
-                        model.objects.get(person=proposition_fusion.original_person).delete()
+                        # delete deprecated role candidate to avoid duplicates
+                        if model.objects.filter(person=personne_connue).exists():
+                            model.objects.get(person=proposition_fusion.original_person).delete()
 
                 if model == BaseAdmission:
                     admissions = model.objects.filter(
