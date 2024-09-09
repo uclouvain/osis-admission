@@ -220,7 +220,7 @@ class InjectionEPCAdmission:
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
 
-        EPCInjection.objects.get_or_create(
+        EPCInjection.objects.update_or_create(
             admission=admission,
             type=EPCInjectionType.DEMANDE.name,
             defaults={
@@ -249,7 +249,9 @@ class InjectionEPCAdmission:
     def recuperer_donnees(cls, admission: BaseAdmission):
         candidat = admission.candidate  # Person
         comptabilite = getattr(admission, "accounting", None)  # type: Accounting
-        adresses = candidat.personaddress_set.select_related("country")
+        adresses = candidat.personaddress_set.select_related("country").exclude(
+            label=PersonAddressType.PROFESSIONAL.name,
+        )
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)

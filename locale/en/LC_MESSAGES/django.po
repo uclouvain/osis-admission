@@ -2894,6 +2894,9 @@ msgstr ""
 msgid "FNRS"
 msgstr ""
 
+msgid "FNRS, FRIA, FRESH"
+msgstr ""
+
 msgid "FR"
 msgstr ""
 
@@ -3340,6 +3343,9 @@ msgid "Grounds for denied"
 msgstr ""
 
 msgid "HTML"
+msgstr ""
+
+msgid "Has the PhD project already started?"
 msgstr ""
 
 msgid ""
@@ -3840,6 +3846,9 @@ msgid "Institution Federation Wallonie-Bruxelles"
 msgstr ""
 
 msgid "Institution contacted"
+msgstr ""
+
+msgid "Institution in which the PhD has been realised / started"
 msgstr ""
 
 msgid "Institution should be set when PhD has been set to yes or partial"
@@ -4715,6 +4724,9 @@ msgid ""
 "No 'ValidationError' exception must be triggered with the the provided data."
 msgstr ""
 
+msgid "No (access to sports facilities on the Saint-Louis campus is free)"
+msgstr ""
+
 msgid "No English studies"
 msgstr ""
 
@@ -5416,9 +5428,6 @@ msgid "Poster"
 msgstr ""
 
 msgid "Pre-admission"
-msgstr ""
-
-msgid "Pre-admission submission date"
 msgstr ""
 
 msgid "Prerequisite courses"
@@ -6233,6 +6242,9 @@ msgid "Send a mail to the candidate"
 msgstr ""
 
 msgid "Send a mail to the faculty"
+msgstr ""
+
+msgid "Send an email"
 msgstr ""
 
 msgid "Send an information email"
@@ -7907,9 +7919,6 @@ msgstr "Yes, only in Mons (€12)"
 
 msgid "Yes, only in Saint-Gilles (E12)"
 msgstr "Yes, only in Saint-Gilles (€12)"
-
-msgid "Yes, only in Saint-Louis (E12)"
-msgstr "Yes, only in Saint-Louis (€12)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"

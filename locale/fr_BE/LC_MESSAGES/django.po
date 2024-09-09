@@ -3153,6 +3153,9 @@ msgstr "FAC"
 msgid "FNRS"
 msgstr "FNRS"
 
+msgid "FNRS, FRIA, FRESH"
+msgstr "FNRS, FRIA, FRESH"
+
 msgid "FR"
 msgstr "FR"
 
@@ -3635,6 +3638,9 @@ msgstr "Motif de refus"
 
 msgid "HTML"
 msgstr "HTML"
+
+msgid "Has the PhD project already started?"
+msgstr "Le projet doctoral a-t-il déjà commencé ?"
 
 msgid ""
 "Has this diploma been recognised as equivalent by the French Community of "
@@ -4269,6 +4275,9 @@ msgstr "Institution de la Federation Wallonie-Bruxelles"
 
 msgid "Institution contacted"
 msgstr "Établissement contacté"
+
+msgid "Institution in which the PhD has been realised / started"
+msgstr "Institution où le PhD a été réalisé/entamé"
 
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
@@ -5256,6 +5265,11 @@ msgstr ""
 "Aucune erreur de validation ne doit être déclenchée avec les données "
 "spécifiées."
 
+msgid "No (access to sports facilities on the Saint-Louis campus is free)"
+msgstr ""
+"Non (l'accès aux infrastructures sportives sur le campus Saint-Louis est "
+"gratuit)"
+
 msgid "No English studies"
 msgstr "Aucune étude en anglais"
 
@@ -5627,7 +5641,7 @@ msgid "PAPER"
 msgstr "Épreuve"
 
 msgid "PARTIAL"
-msgstr "Partiel"
+msgstr "En partie"
 
 msgid "PASSED_CONFIRMATION"
 msgstr "Epreuve de confirmation réussie"
@@ -6015,9 +6029,6 @@ msgstr "Poster"
 
 msgid "Pre-admission"
 msgstr "Pré-admission"
-
-msgid "Pre-admission submission date"
-msgstr "Date de soumission Pré-admission"
 
 msgid "Prerequisite courses"
 msgstr "Compléments de formation"
@@ -6857,6 +6868,9 @@ msgstr "Envoyer un e-mail au candidat"
 
 msgid "Send a mail to the faculty"
 msgstr "Envoyer un e-mail à la Faculté"
+
+msgid "Send an email"
+msgstr "Envoyer un e-mail"
 
 msgid "Send an information email"
 msgstr "Envoyer un e-mail d'information"
@@ -8757,9 +8771,6 @@ msgstr "Oui, sur Mons uniquement (12 EUR)"
 
 msgid "Yes, only in Saint-Gilles (E12)"
 msgstr "Oui, sur Saint-Gilles uniquement (12 EUR)"
-
-msgid "Yes, only in Saint-Louis (E12)"
-msgstr "Oui, sur Saint-Louis uniquement (12 EUR)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Oui, sur Tournai uniquement (12 EUR)"

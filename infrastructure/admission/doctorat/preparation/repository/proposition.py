@@ -516,7 +516,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             elements_confirmation=admission.confirmation_elements,
-            soumise_le=admission.submitted_at or admission.pre_admission_submission_date,
+            soumise_le=admission.submitted_at,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
@@ -567,7 +567,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     admission.cotutelle_other_institution_name or admission.cotutelle_other_institution_address
                 ),
                 autre_institution_nom=admission.cotutelle_other_institution_name,
-                autre_institution_adresse=admission.cotutelle_other_institution_address
+                autre_institution_adresse=admission.cotutelle_other_institution_address,
             )
             if admission.cotutelle
             else None,

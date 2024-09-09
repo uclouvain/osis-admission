@@ -31,7 +31,7 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import OuterRef, Subquery, Prefetch, Q
+from django.db.models import OuterRef, Subquery, Prefetch
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
@@ -69,7 +69,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
     BesoinDeDerogation,
-    DerogationFinancement,
+    DerogationFinancement, STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -139,13 +139,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'last_update_author',
             )
             .filter(
-                candidate__global_id=matricule_candidat
-            ).filter(
-                Q(
-                    type_demande=TypeDemande.ADMISSION.name,
-                    status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
-                )
-                | Q(type_demande=TypeDemande.INSCRIPTION.name)
+                candidate__global_id=matricule_candidat,
+                status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE,
             ).order_by('created_at')
             .first()
         )

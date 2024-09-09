@@ -32,9 +32,11 @@ from django.conf import settings
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.service.i_periode_soumission_ticket_digit import \
     IPeriodeSoumissionTicketDigitTranslator
-from admission.ddd.admission.domain.validator.exceptions import NotInAccountCreationPeriodException, \
-    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException, \
-    PropositionDeFusionAvecValidationSyntaxiqueInvalideException
+from admission.ddd.admission.domain.validator.exceptions import (
+    NotInAccountCreationPeriodException,
+    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException,
+    PropositionDeFusionAvecValidationSyntaxiqueInvalideException,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -75,32 +77,41 @@ class IDigitService(interface.DomainService):
         try:
             periodes_soumission_ticket_digit = periode_soumission_ticket_digit_translator.get_periodes_actives()
             if proposition.annee_calculee not in [p.annee for p in periodes_soumission_ticket_digit]:
+                logger.error(f"SOUMETTRE TICKET CREATION PERSONNE - NotInAccountCreationPeriodException")
                 raise NotInAccountCreationPeriodException(matricule_candidat=proposition.matricule_candidat)
+
+            proposition_fusion = cls.recuperer_proposition_fusion(proposition.matricule_candidat)
 
             if proposition.type_demande == TypeDemande.ADMISSION and proposition.statut not in {
                 ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE,
                 ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE,
                 ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE,
-            }:
+            } and proposition_fusion.statut not in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.REFUSED.name]:
+                logger.error(
+                    f"SOUMETTRE TICKET CREATION PERSONNE - AdmissionDansUnStatutPasAutoriseASInscrireException"
+                )
                 raise AdmissionDansUnStatutPasAutoriseASInscrireException(
                     matricule_candidat=proposition.matricule_candidat
                 )
 
-            proposition_fusion = cls.recuperer_proposition_fusion(proposition.matricule_candidat)
             if proposition_fusion.statut not in [
                 PersonMergeStatus.IN_PROGRESS.name,
                 PersonMergeStatus.MERGED.name,
                 PersonMergeStatus.REFUSED.name,
                 PersonMergeStatus.NO_MATCH.name,
             ]:
+                logger.error(f"SOUMETTRE TICKET CREATION PERSONNE - PropositionFusionATraiterException")
                 raise PropositionFusionATraiterException(
                     merge_status=proposition_fusion.statut,
                     matricule_candidat=proposition.matricule_candidat
                 )
             if not proposition_fusion.a_une_syntaxe_valide:
+                logger.error(
+                    f"SOUMETTRE TICKET CREATION PERSONNE - PropositionDeFusionAvecValidationSyntaxiqueInvalideException"
+                )
                 raise PropositionDeFusionAvecValidationSyntaxiqueInvalideException(
                     matricule_candidat=proposition.matricule_candidat,
                 )
         except BusinessException as e:
-            logger.info(f"DIGIT submit ticket canceled: {e.message}")
+            logger.exception(f"DIGIT submit ticket canceled: {e.message}")
             raise e
