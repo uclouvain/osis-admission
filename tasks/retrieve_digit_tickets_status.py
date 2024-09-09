@@ -245,7 +245,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     )
                     if candidate_high_school_diplomas.exists() and known_person_high_school_diplomas.exists():
                         alternative_suppr = model == HighSchoolDiplomaAlternative
-                        a_supprimer =  list(known_person_high_school_diplomas.values_list('uuid', flat=True))
+                        a_supprimer = list(known_person_high_school_diplomas.values_list('uuid', flat=True))
                         known_person_high_school_diplomas.delete()
                         _trigger_epc_diplomas_deletion(a_supprimer, noma, personne_connue, alternative_suppr)  # noqa
                     for diploma in candidate_high_school_diplomas:
