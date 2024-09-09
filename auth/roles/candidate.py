@@ -36,19 +36,19 @@ _CANDIDATE_RULESET = {
     # Doctorate
     # A candidate can view as long as it's the author
     'view_doctorateadmission': common.is_admission_request_author,
-    'view_admission_project': common.is_admission_request_author,
-    'view_admission_cotutelle': common.is_admission_request_author,
-    'view_admission_supervision': common.is_admission_request_author,
     'view_admission_jury': author_and_enrolled,
-    'view_admission_training_choice': common.is_admission_request_author,
     'download_doctorateadmission_pdf_recap': common.is_admission_request_author,
-    # A candidate can view as long as he's the author and he is being enrolled
-    'view_admission_person': common.is_admission_request_author & doctorate.is_being_enrolled,
-    'view_admission_coordinates': common.is_admission_request_author & doctorate.is_being_enrolled,
-    'view_admission_curriculum': common.is_admission_request_author & doctorate.is_being_enrolled,
-    'view_admission_secondary_studies': common.is_admission_request_author & doctorate.is_being_enrolled,
-    'view_admission_languages': common.is_admission_request_author & doctorate.is_being_enrolled,
-    'view_admission_accounting': common.is_admission_request_author & doctorate.is_being_enrolled,
+    # A candidate can view as long as he's the author and the proposition is not confirmed
+    'view_admission_person': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_coordinates': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_curriculum': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_secondary_studies': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_languages': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_accounting': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_training_choice': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_project': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_cotutelle': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_supervision': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     # Can edit while not confirmed proposition
     'delete_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,

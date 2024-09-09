@@ -26,7 +26,7 @@
 
 from abc import abstractmethod
 from email.message import EmailMessage
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
@@ -72,6 +72,9 @@ class INotification(interface.DomainService):
         proposition: Proposition,
         objet_message: str,
         corps_message: str,
+        matricule_emetteur: Optional[str] = None,
+        cc_promoteurs: bool = False,
+        cc_membres_ca: bool = False,
     ) -> EmailMessage:
         raise NotImplementedError
 

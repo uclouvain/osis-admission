@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.105
+  version: 1.0.106
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -607,7 +607,7 @@ paths:
       - person
   /propositions/doctorate/{uuid}:
     get:
-      operationId: retrieve_proposition
+      operationId: retrieve_doctorate_proposition
       description: Get a single proposition
       parameters:
       - name: uuid
@@ -636,43 +636,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-    put:
-      operationId: update_proposition
-      description: Edit a proposition
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CompleterPropositionCommand'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
     delete:
-      operationId: destroy_proposition
+      operationId: destroy_doctorate_proposition
       description: Soft-Delete a proposition
       parameters:
       - name: uuid
@@ -1191,6 +1156,74 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/doctorate/{uuid}/project:
+    get:
+      operationId: retrieve_project
+      description: 'This method is only used to check the permission.
+
+        We have to return some data as the schema expects a 200 status and the deserializer
+        expects some data.'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_project
+      description: Edit the project
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterPropositionCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/doctorate/{uuid}/verify_project:
     get:
       operationId: retrieve_verify_project
@@ -6161,9 +6194,9 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
-                  retrieve_proposition:
+                  retrieve_project:
                     $ref: '#/components/schemas/ActionLink'
-                  update_proposition:
+                  update_project:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_cotutelle:
                     $ref: '#/components/schemas/ActionLink'
@@ -6673,9 +6706,9 @@ components:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
               $ref: '#/components/schemas/ActionLink'
-            retrieve_proposition:
+            retrieve_project:
               $ref: '#/components/schemas/ActionLink'
-            update_proposition:
+            update_project:
               $ref: '#/components/schemas/ActionLink'
             retrieve_cotutelle:
               $ref: '#/components/schemas/ActionLink'
@@ -7599,9 +7632,9 @@ components:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
               $ref: '#/components/schemas/ActionLink'
-            retrieve_proposition:
+            retrieve_project:
               $ref: '#/components/schemas/ActionLink'
-            update_proposition:
+            update_project:
               $ref: '#/components/schemas/ActionLink'
             retrieve_training_choice:
               $ref: '#/components/schemas/ActionLink'
@@ -8728,7 +8761,7 @@ components:
         links:
           type: object
           properties:
-            retrieve_proposition:
+            retrieve_project:
               $ref: '#/components/schemas/ActionLink'
             retrieve_cotutelle:
               $ref: '#/components/schemas/ActionLink'

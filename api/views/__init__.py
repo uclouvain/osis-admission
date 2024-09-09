@@ -54,7 +54,7 @@ from admission.api.views.person import (
 )
 from admission.api.views.pool_questions import PoolQuestionsView
 from admission.api.views.project import *
-from admission.api.views.proposition import GeneralPropositionView, ContinuingPropositionView
+from admission.api.views.proposition import GeneralPropositionView, ContinuingPropositionView, DoctoratePropositionView
 from admission.api.views.references import (
     ListCampusView,
     RetrieveCampusView,

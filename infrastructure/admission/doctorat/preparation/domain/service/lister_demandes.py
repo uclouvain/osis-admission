@@ -59,11 +59,12 @@ class ListerDemandesService(IListerDemandesService):
         type_financement: Optional[str] = '',
         bourse_recherche: Optional[str] = '',
         cotutelle: Optional[bool] = None,
-        date_soumission_debut: Optional[datetime.datetime] = None,
-        date_soumission_fin: Optional[datetime.datetime] = None,
+        date_soumission_debut: Optional[datetime.date] = None,
+        date_soumission_fin: Optional[datetime.date] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
+        fnrs_fria_fresh: Optional[bool] = None,
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
@@ -136,10 +137,13 @@ class ListerDemandesService(IListerDemandesService):
             qs = qs.filter(submitted_at__gte=date_soumission_debut)
 
         if date_soumission_fin:
-            qs = qs.filter(submitted_at__lte=date_soumission_fin)
+            qs = qs.filter(submitted_at__lt=date_soumission_fin + datetime.timedelta(days=1))
 
         if demandeur:
             qs = qs.filter_according_to_roles(demandeur, permission='admission.view_doctorate_enrolment_applications')
+
+        if fnrs_fria_fresh:
+            qs = qs.filter(is_fnrs_fria_fresh_csc_linked=fnrs_fria_fresh)
 
         country_title = {
             settings.LANGUAGE_CODE_FR: 'name',

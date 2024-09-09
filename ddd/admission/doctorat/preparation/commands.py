@@ -482,11 +482,12 @@ class ListerDemandesQuery(SortedQueryRequest):
     type_financement: Optional[str] = ''
     bourse_recherche: Optional[str] = ''
     cotutelle: Optional[bool] = None
-    date_soumission_debut: Optional[datetime.datetime] = None
-    date_soumission_fin: Optional[datetime.datetime] = None
+    date_soumission_debut: Optional[datetime.date] = None
+    date_soumission_fin: Optional[datetime.date] = None
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = None
     demandeur: Optional[str] = ''
+    fnrs_fria_fresh: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -504,3 +505,13 @@ class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
     justification: str
 
     reponses_questions_specifiques: Dict
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerMessageCandidatCommand(interface.CommandRequest):
+    matricule_emetteur: str
+    proposition_uuid: str
+    sujet: str
+    message: str
+    cc_promoteurs: bool
+    cc_membres_ca: bool
