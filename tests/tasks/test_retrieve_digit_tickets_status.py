@@ -212,7 +212,9 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             person=personne_connue,
         )
         self.experience_academique_personne_connue_non_gardee = EducationalExperienceFactory(person=personne_connue)
-        EducationalExperienceYearFactory(educational_experience=self.experience_academique_personne_connue_non_gardee)
+        self.experience_academique_non_gardee_annualisee = EducationalExperienceYearFactory(
+            educational_experience=self.experience_academique_personne_connue_non_gardee
+        )
 
         self.person_merge_proposal.status = PersonMergeStatus.IN_PROGRESS.name   # Fusion acceptée par le gestionnaire
         self.person_merge_proposal.selected_global_id = personne_connue.global_id
@@ -366,6 +368,13 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.assertTrue(
             self.envoyer_queue_mocked.called,
             msg="Suppression envoyée via la queue car il y a des expériences connues à supprimer"
+        )
+
+        # envoi via queue curriculum_academique vide + experiences_academiques a supprimer
+        self.assertFalse(self.envoyer_queue_mocked.call_args[1]['donnees']['curriculum_academique'])
+        self.assertEqual(
+            self.envoyer_queue_mocked.call_args[1]['donnees']['experiences_academiques_supprimees'],
+            [str(self.experience_academique_non_gardee_annualisee.uuid)]
         )
 
 
