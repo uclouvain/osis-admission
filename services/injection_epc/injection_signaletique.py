@@ -62,8 +62,8 @@ class InjectionEPCSignaletique:
                     lambda: injecter_signaletique_a_epc_task.run.delay(admissions_references=[admission.reference])
                 )
             statut = EPCInjectionStatus.NO_SENT.name
-        except Exception as e:
-            logger.error(f"[INJECTION EPC] Erreur lors de l'injection : {str(e)}")
+        except Exception:
+            logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
 

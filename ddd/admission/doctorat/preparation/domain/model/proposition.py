@@ -478,9 +478,11 @@ class Proposition(interface.RootEntity):
         self.formation_id = formation_id
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionDoctorale.ANNULEE
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def valider_inscription(self):
         self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE

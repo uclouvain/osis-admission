@@ -1093,6 +1093,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'type_financement': ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
                 'bourse_recherche': str(scholarship.uuid),
                 'cotutelle': True,
+                'fnrs_fria_fresh': True,
                 'date_soumission_debut': '2020-01-01',
                 'date_soumission_fin': '2020-01-02',
                 'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
@@ -1113,8 +1114,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         names, values = list(worksheet.iter_cols(values_only=True))
 
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), 21)
+        self.assertEqual(len(values), 21)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -1133,10 +1134,11 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(names[13], _('Funding type'))
         self.assertEqual(names[14], _('Research scholarship'))
         self.assertEqual(names[15], _('Cotutelle'))
-        self.assertEqual(names[16], _('Submitted from'))
-        self.assertEqual(names[17], _('Submitted until'))
-        self.assertEqual(names[18], _('Include or exclude the checklist filters'))
-        self.assertEqual(names[19], _('Checklist filters'))
+        self.assertEqual(names[16], _('FNRS, FRIA, FRESH'))
+        self.assertEqual(names[17], _('Submitted from'))
+        self.assertEqual(names[18], _('Submitted until'))
+        self.assertEqual(names[19], _('Include or exclude the checklist filters'))
+        self.assertEqual(names[20], _('Checklist filters'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '3 Janvier 2023')
@@ -1159,10 +1161,11 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(values[13], ChoixTypeFinancement.SEARCH_SCHOLARSHIP.value)
         self.assertEqual(values[14], scholarship.short_name)
         self.assertEqual(values[15], 'oui')
-        self.assertEqual(values[16], '2020-01-01')
-        self.assertEqual(values[17], '2020-01-02')
-        self.assertEqual(values[18], ModeFiltrageChecklist.INCLUSION.value)
-        self.assertEqual(values[19], '{}')
+        self.assertEqual(values[16], 'oui')
+        self.assertEqual(values[17], '2020-01-01')
+        self.assertEqual(values[18], '2020-01-02')
+        self.assertEqual(values[19], ModeFiltrageChecklist.INCLUSION.value)
+        self.assertEqual(values[20], '{}')
 
         filters = str(
             {
@@ -1179,6 +1182,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'type_financement': '',
                 'bourse_recherche': '',
                 'cotutelle': None,
+                'fnrs_fria_fresh': None,
                 'date_soumission_debut': '',
                 'date_soumission_fin': '',
                 'mode_filtres_etats_checklist': '',
@@ -1199,8 +1203,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         names, values = list(worksheet.iter_cols(values_only=True))
 
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), 21)
+        self.assertEqual(len(values), 21)
 
         # Check the values of the parameters
         self.assertEqual(values[0], '3 Janvier 2023')
@@ -1222,4 +1226,5 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(values[16], '')
         self.assertEqual(values[17], '')
         self.assertEqual(values[18], '')
-        self.assertEqual(values[19], '{}')
+        self.assertEqual(values[19], '')
+        self.assertEqual(values[20], '{}')

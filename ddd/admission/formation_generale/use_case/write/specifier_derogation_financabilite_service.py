@@ -48,6 +48,7 @@ def specifier_derogation_financabilite(
         statut=DerogationFinancement[cmd.statut],
         refus_uuids_motifs=cmd.refus_uuids_motifs,
         refus_autres_motifs=cmd.refus_autres_motifs,
+        auteur_modification=cmd.gestionnaire,
     )
     proposition_repository.save(proposition)
 

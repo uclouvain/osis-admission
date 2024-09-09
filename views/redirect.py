@@ -26,6 +26,7 @@
 from django.utils.functional import cached_property
 from django.views.generic import RedirectView
 
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_SOUMISE
 from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_SOUMISE
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
@@ -33,24 +34,18 @@ from admission.views.common.detail_tabs.documents import DocumentView
 from admission.views.common.detail_tabs.person import AdmissionPersonDetailView
 from admission.views.common.mixins import AdmissionViewMixin
 
-
 __all__ = ['AdmissionRedirectView']
 __namespace__ = False
 
 
 class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     urlpatterns = {
+        '': '<uuid:uuid>/',
         'doctorate': 'doctorate/<uuid:uuid>/',
         'general-education': 'general-education/<uuid:uuid>/',
         'continuing-education': 'continuing-education/<uuid:uuid>/',
     }
 
-    # To change after the implementation of the tabs for the specified context
-    available_checklist_by_context = {
-        'doctorate': False,
-        'general-education': True,
-        'continuing-education': True,
-    }
     submitted_status_by_context = {
         'doctorate': STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
         'general-education': STATUTS_PROPOSITION_GENERALE_SOUMISE,
@@ -60,11 +55,7 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     @cached_property
     def can_access_checklist(self):
         self.permission_required = 'admission.view_checklist'
-        return (
-            self.available_checklist_by_context[self.current_context]
-            and self.admission.submitted_at is not None
-            and super().has_permission()
-        )
+        return self.admission.submitted_at is not None and super().has_permission()
 
     @cached_property
     def can_access_documents_management(self):
@@ -81,7 +72,8 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
 
     @property
     def current_context(self):
-        return self.request.resolver_match.url_name
+        baseadmission = BaseAdmission.objects.get(uuid=self.admission_uuid)
+        return baseadmission.get_admission_context()
 
     @property
     def pattern_name(self):
