@@ -159,11 +159,17 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
         return secondary_school_or_alternative_experiences
 
     def _get_nom_formation_etude_secondaire(self, etude_secondaire: EtudesSecondairesAdmissionDTO):
-        if isinstance(etude_secondaire.experience, DiplomeBelgeEtudesSecondairesDTO):
+        if self.etudes_secondaires_candidat.experience and isinstance(
+                etude_secondaire.experience, DiplomeBelgeEtudesSecondairesDTO
+        ):
             return "CESS"
-        elif isinstance(etude_secondaire.experience, DiplomeEtrangerEtudesSecondairesDTO):
+        elif self.etudes_secondaires_candidat.experience and isinstance(
+                etude_secondaire.experience, DiplomeEtrangerEtudesSecondairesDTO
+        ):
             return ForeignDiplomaTypes[self.etudes_secondaires_candidat.experience.type_diplome].value
-        elif isinstance(etude_secondaire.experience, AlternativeSecondairesDTO):
+        elif self.etudes_secondaires_candidat.experience and isinstance(
+                etude_secondaire.experience, AlternativeSecondairesDTO
+        ):
             return _("Bachelor's course entrance exam")
         elif etude_secondaire.annee_diplome_etudes_secondaires:
             return _("Secondary school")
