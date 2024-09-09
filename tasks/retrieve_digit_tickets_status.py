@@ -268,12 +268,19 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     for experience in known_person_experiences:
                         if experience.uuid not in curex_to_merge:
                             logger.info(f"{PREFIX_TASK} Removing instance of {model.__name__} ({experience.uuid})")
+                            experience_uuid = experience.uuid
                             if model == EducationalExperience:
-                                _trigger_epc_academic_curriculum_deletion(experience, noma, personne_connue)
+                                a_supprimer = list(
+                                    experience.educationalexperienceyear_set.values_list('uuid', flat=True)
+                                )
                                 experience.educationalexperienceyear_set.all().delete()
+                                experience.delete()
+                                _trigger_epc_academic_curriculum_deletion(
+                                    experience_uuid, noma, personne_connue, a_supprimer
+                                )
                             if model == ProfessionalExperience:
-                                _trigger_epc_non_academic_curriculum_deletion(experience, noma, personne_connue)
-                            experience.delete()
+                                _trigger_epc_non_academic_curriculum_deletion(experience_uuid, noma, personne_connue)
+                                experience.delete()
                         else:
                             admissions = BaseAdmission.objects.filter(candidate=candidat)
                             for admission in admissions:
@@ -333,29 +340,29 @@ def _trigger_epc_diplomas_deletion(known_person_high_school_diplomas, noma, pers
     InjectionEPCCurriculum().injecter_etudes_secondaires(
         fgs=personne_connue.global_id,
         noma=noma,
-        user=personne_connue.full_name,
+        user='fusion',
         alternative_supprimee=True,
         experiences_supprimees=known_person_high_school_diplomas.values_list('uuid', flat=True),
     )
 
 
-def _trigger_epc_academic_curriculum_deletion(experience, noma, personne_connue):
+def _trigger_epc_academic_curriculum_deletion(experience_uuid, noma, personne_connue, a_supprimer):
     InjectionEPCCurriculum().injecter_experience_academique(
         fgs=personne_connue.global_id,
         noma=noma,
-        user=personne_connue.full_name,
-        experience_uuid=experience.uuid,
-        experiences_supprimees=experience.educationalexperienceyear_set.values_list('uuid', flat=True),
+        user='fusion',
+        experience_uuid=experience_uuid,
+        experiences_supprimees=a_supprimer,
     )
 
 
-def _trigger_epc_non_academic_curriculum_deletion(experience, noma, personne_connue):
+def _trigger_epc_non_academic_curriculum_deletion(experience_uuid, noma, personne_connue):
     InjectionEPCCurriculum().injecter_experience_non_academique(
         fgs=personne_connue.global_id,
         noma=noma,
-        user=personne_connue.full_name,
-        experience_uuid=experience.uuid,
-        experiences_supprimees=[experience.uuid],
+        user='fusion',
+        experience_uuid=experience_uuid,
+        experiences_supprimees=[experience_uuid],
     )
 
 
