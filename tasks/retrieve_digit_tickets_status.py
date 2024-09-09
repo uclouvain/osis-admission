@@ -244,8 +244,10 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                         **{field_name: personne_connue}
                     )
                     if candidate_high_school_diplomas.exists() and known_person_high_school_diplomas.exists():
-                        _trigger_epc_diplomas_deletion(known_person_high_school_diplomas, noma, personne_connue)
+                        alternative_suppr = model == HighSchoolDiplomaAlternative
+                        a_supprimer =  list(known_person_high_school_diplomas.values_list('uuid', flat=True))
                         known_person_high_school_diplomas.delete()
+                        _trigger_epc_diplomas_deletion(a_supprimer, noma, personne_connue, alternative_suppr)  # noqa
                     for diploma in candidate_high_school_diplomas:
                         diploma.person_id = personne_connue.pk
                         diploma.save()
@@ -335,13 +337,13 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
     logger.info(f"{PREFIX_TASK} ####### END PROCESS SUCCESSFUL DIGIT RESPONSE #######")
 
 
-def _trigger_epc_diplomas_deletion(known_person_high_school_diplomas, noma, personne_connue):
+def _trigger_epc_diplomas_deletion(a_supprimer, noma, personne_connue, alternative_suppr):
     InjectionEPCCurriculum().injecter_etudes_secondaires(
         fgs=personne_connue.global_id,
         noma=noma,
         user='fusion',
-        alternative_supprimee=True,
-        experiences_supprimees=known_person_high_school_diplomas.values_list('uuid', flat=True),
+        alternative_supprimee=alternative_suppr,
+        experiences_supprimees=a_supprimer,
     )
 
 
