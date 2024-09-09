@@ -370,11 +370,22 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="Suppression envoyée via la queue car il y a des expériences connues à supprimer"
         )
 
+        envoi_queue_suppr_etudes_secondaires = self.envoyer_queue_mocked.call_args_list[0][1]
+        envoi_queue_suppr_curriculum_academique = self.envoyer_queue_mocked.call_args_list[2][1]
+
+
         # envoi via queue curriculum_academique vide + experiences_academiques a supprimer
-        self.assertFalse(self.envoyer_queue_mocked.call_args[1]['donnees']['curriculum_academique'])
+        self.assertFalse(envoi_queue_suppr_curriculum_academique['donnees']['curriculum_academique'])
         self.assertEqual(
-            self.envoyer_queue_mocked.call_args[1]['donnees']['experiences_academiques_supprimees'],
+            envoi_queue_suppr_curriculum_academique['donnees']['experiences_academiques_supprimees'],
             [str(self.experience_academique_non_gardee_annualisee.uuid)]
+        )
+
+        # envoi via queue etudes secondaires vide + etudes_secondaires a supprimer
+        self.assertFalse(envoi_queue_suppr_etudes_secondaires['donnees']['etudes_secondaires'])
+        self.assertEqual(
+            envoi_queue_suppr_etudes_secondaires['donnees']['etudes_secondaires_supprimees'],
+            [str(self.etudes_secondaires_personne_connue.uuid)]
         )
 
 
