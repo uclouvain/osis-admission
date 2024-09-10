@@ -37,7 +37,7 @@ from rest_framework import status
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.contrib.models.epc_injection import EPCInjectionType
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -67,7 +67,11 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, Reduction
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -206,6 +210,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             person=self.general_admission.candidate,
             type_experience=ExperienceType.PROFESSIONAL.name,
             experience_uuid=self.experience.uuid,
+            status=CurriculumEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.form_url)
@@ -213,23 +218,38 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         cv_injection.delete()
 
-        # The admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
-            admission=self.general_admission,
+        # The experience has been injected from another admission
+        other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
+
+        other_admission_injection = AdmissionEPCInjection.objects.create(
+            admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission=self.general_admission, educationalexperience=self.experience
+        other_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=self.experience,
         )
 
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        admission_injection.delete()
+        other_admission.delete()
+        other_valuation.delete()
+
+        # The current admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
