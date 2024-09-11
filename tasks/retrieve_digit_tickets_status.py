@@ -44,8 +44,7 @@ from admission.ddd.admission.commands import (
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
 )
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from backoffice.celery import app
 from base.models.enums.person_address_type import PersonAddressType
@@ -370,15 +369,10 @@ def _trigger_epc_non_academic_curriculum_deletion(experience_uuid, noma, personn
 def _injecter_signaletique_a_epc(matricule: str):
     from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 
-    # TODO: Inject also for other admisison type
     demande = GeneralEducationAdmission.objects.filter(
         candidate__global_id=matricule,
     ).filter(
-        Q(
-            type_demande=TypeDemande.ADMISSION.name,
-            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
-        )
-        | Q(type_demande=TypeDemande.INSCRIPTION.name)
+        status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE
     ).order_by('created_at').first()
     InjectionEPCSignaletique().injecter(admission=demande)
 
