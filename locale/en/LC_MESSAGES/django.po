@@ -1785,6 +1785,12 @@ msgstr ""
 msgid "Continuing enrolment applications"
 msgstr ""
 
+msgid "Continuing working list"
+msgstr ""
+
+msgid "Continuing working lists"
+msgstr ""
+
 msgid "Coordinates"
 msgstr ""
 
@@ -3936,6 +3942,10 @@ msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
 
+msgid ""
+"It is not possible to go from the \"To validate IUFC\" status to this status."
+msgstr ""
+
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr ""
 
@@ -4970,10 +4980,6 @@ msgid "Online payment history"
 msgstr ""
 
 msgid "Only one admission"
-msgstr ""
-
-msgid ""
-"Only the \"to be processed\" status is available from the \"closed\" status."
 msgstr ""
 
 msgid "Opinion of the CA following the format provided by the CDD"
@@ -6733,6 +6739,13 @@ msgstr ""
 msgid "The activity title"
 msgstr ""
 
+#, python-format
+msgid ""
+"The applicant is registered in the year %(year)s. Click <a class='bold-text "
+"underline-text' href='%(full_training_choice_url)s'>here</a> to change the "
+"academic year."
+msgstr ""
+
 msgid "The application can only be validated if it was previously approved."
 msgstr ""
 
@@ -7437,6 +7450,9 @@ msgstr ""
 msgid "To the attention of"
 msgstr ""
 
+msgid "To validate IUFC"
+msgstr ""
+
 msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
@@ -7998,6 +8014,11 @@ msgid ""
 msgstr ""
 
 msgid "You can only select courses that are managed by the program manager."
+msgstr ""
+
+msgid ""
+"You can only transition to the \"To validate IUFC\" status from the "
+"\"Approved\" status."
 msgstr ""
 
 msgid ""
