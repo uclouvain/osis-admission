@@ -171,10 +171,7 @@ class ChecklistView(
                 'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
                 'CURRICULUM',
             },
-            OngletsChecklist.choix_formation.name: {
-                'ATTESTATION_INSCRIPTION_REGULIERE',
-                'FORMULAIRE_MODIFICATION_INSCRIPTION',
-            },
+            OngletsChecklist.choix_formation.name: {},
             OngletsChecklist.parcours_anterieur.name: {
                 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
                 'DIPLOME_EQUIVALENCE',

@@ -17,7 +17,7 @@ from admission.mail_templates.checklist.doctorate import (
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0221_add_doctorate_checklist'),
+        ('admission', '0223_add_doctorate_checklist'),
     ]
 
     operations = [

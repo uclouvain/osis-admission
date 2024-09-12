@@ -52,7 +52,7 @@ __namespace__ = False
 
 class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     urlpatterns = 'choix-formation-update'
-    permission_required = 'admission.change_checklist'
+    permission_required = 'admission.checklist_change_training_choice'
     template_name = 'admission/general_education/includes/checklist/choix_formation_form.html'
     form_class = ChoixFormationForm
 
@@ -99,7 +99,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
 
 class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'choix-formation-detail'
-    permission_required = 'admission.change_checklist'
+    permission_required = 'admission.checklist_change_training_choice'
     template_name = 'admission/general_education/includes/checklist/choix_formation_detail.html'
 
     def dispatch(self, request, *args, **kwargs):

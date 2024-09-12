@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('osis_profile', '0029_auto_20240507_1158'),
         ('base', '0700_auto_20240831_0115'),
-        ('admission', '0220_remove_doctorateadmission_pre_admission_submission_date'),
+        ('admission', '0222_default_continuing_workinglists'),
     ]
 
     operations = [
