@@ -179,6 +179,8 @@ class DoctorateAccountingFormViewTestCase(TestCase):
         self.client.force_login(self.program_manager_user)
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.post(self.form_url, data={})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_accounting_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
