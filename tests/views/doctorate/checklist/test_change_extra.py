@@ -66,6 +66,12 @@ class ChangeExtraViewTestCase(TestCase):
             training=self.training,
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
+        self.url = resolve_url(
+            'admission:doctorate:change-checklist-extra',
+            uuid=self.admission.uuid,
+            tab='assimilation',
+        )
+
 
     def test_change_extra_of_assimilation_with_a_bad_request(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -132,6 +138,10 @@ class ChangeExtraViewTestCase(TestCase):
                 'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
             },
         )
+        self.assertEqual(
+            self.admission.last_update_author,
+            self.sic_manager_user.person,
+        )
 
         # Empty checklist
         self.admission.checklist.pop('current', None)
@@ -155,3 +165,10 @@ class ChangeExtraViewTestCase(TestCase):
                 'date_debut': '2021-12-31',
             },
         )
+
+    def test_change_extra_of_assimilation_is_forbidden_for_a_program_manager(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(self.url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
