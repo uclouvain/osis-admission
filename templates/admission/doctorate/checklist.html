@@ -60,6 +60,7 @@
 
     {% can_update_tab 'person' as can_update_person_tab %}
     {% can_update_tab 'coordonnees' as can_update_coordonnees_tab %}
+    {% can_update_tab 'languages' as can_update_languages_tab %}
     {% can_update_tab 'accounting' as can_update_accounting_tab %}
     {% can_update_tab 'training-choice' as can_update_training_choice_tab %}
     {% can_update_tab 'curriculum' as can_update_curriculum %}
@@ -88,6 +89,12 @@
       {% url base_namespace|add:":update:training-choice" view.kwargs.uuid as training_choice_url %}
     {% else %}
       {% url base_namespace|add:":training-choice" view.kwargs.uuid as training_choice_url %}
+    {% endif %}
+
+    {% if can_update_languages_tab %}
+      {% url base_namespace|add:":update:languages" view.kwargs.uuid as languages_url %}
+    {% else %}
+      {% url base_namespace|add:":languages" view.kwargs.uuid as languages_url %}
     {% endif %}
 
     {% concat "#choix_formation" as checklist_training_choice_url %}
@@ -249,9 +256,20 @@
               {% endif %}
             </strong>
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
+
+            <div class="panel panel-default mt-1">
+              <div class="panel-heading flex-content-no-wrap">
+                <div class="panel-title">{% translate 'Knowledge of languages' %}</div>
+                {% concat languages_url next_url as contextual_languages_url %}
+                <span>{{ ''|edit_button:contextual_languages_url|safe }}</span>
+              </div>
+              <div class="panel-body">
+                {% include 'admission/exports/recap/includes/languages.html' with connaissances_langues=resume_proposition.connaissances_langues %}
+              </div>
+            </div>
             <div class="mt-1">
               {% if can_update_curriculum %}
-                {% url 'admission:general-education:update:curriculum' view.kwargs.uuid as global_curriculum_update_url %}
+                {% url 'admission:doctorate:update:curriculum' view.kwargs.uuid as global_curriculum_update_url %}
               {% endif %}
               {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url|add:next_url %}
             </div>
@@ -299,7 +317,7 @@
               {% else %}
                 {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant %}
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True can_update_curriculum=can_update_curriculum can_update_education=can_update_education specific_questions=specific_questions_by_tab can_delete_curriculum=can_delete_curriculum %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True specific_questions=specific_questions_by_tab %}
                 </div>
               {% endif %}
             {% endwith %}
@@ -596,6 +614,8 @@
               })
           });
 
+          let onFirstTabLoad = true;
+
           menuItems.on('shown.bs.tab', function (e) {
               $(this).parents('.list-group-item').find('.sub-items').show();
 
@@ -607,8 +627,18 @@
 
               refreshDocuments(tabPaneId);
 
-              // refresh info viewer (e.target = active && e.relatedTarget = previous)
-              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+              // refresh info viewer
+              if (onFirstTabLoad) {
+                  onFirstTabLoad = false;
+                  if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                      // move info from the current tab to the info viewer
+                      $('#infos-shortcut').click();
+                  } else {
+                      // hide the info viewer
+                      $('#info-viewer-tab').hide();
+                  }
+              } else if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                  // (e.target = active && e.relatedTarget = previous)
                   const $info = $('#info-viewer-tab .info-content');
                   // move old info from info viewer to old tab
                   const oldTabPanel = $($(e.relatedTarget).parent().attr('href')).find('.info-part');
@@ -644,12 +674,6 @@
 
               // Activate tab from hash on first load
               $(`#checklist-menu *[data-toggle="tab"][href="${defaultTab}"]`).click();
-
-              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                  $('#infos-shortcut').click();
-              } else {
-                  $('#info-viewer-tab').hide();
-              }
 
               $('textarea[name="comment"]:visible').each(autogrow);
 
