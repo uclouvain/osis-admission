@@ -30,7 +30,7 @@ from admission.contrib.models.categorized_free_document import CategorizedFreeDo
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 
 
-class CategorizedFreeDocumentFactory(factory.DjangoModelFactory):
+class CategorizedFreeDocumentFactory(factory.django.DjangoModelFactory):
     checklist_tab = factory.Iterator(OngletsChecklist.get_names())
     short_label_fr = FuzzyText(length=10)
     short_label_en = FuzzyText(length=10)

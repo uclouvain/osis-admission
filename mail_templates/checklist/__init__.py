@@ -29,6 +29,7 @@ from osis_mail_template.exceptions import DuplicateMailTemplateIdentifier
 try:
     from .continuing_education import *
     from .general_education import *
+    from .doctorate import *
 except DuplicateMailTemplateIdentifier:
     import sys
 

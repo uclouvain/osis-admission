@@ -87,8 +87,8 @@ from reference.tests.factories.country import CountryFactory
 @freezegun.freeze_time('2022-01-01')
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES_WITHOUT_SEARCH = 25
-    NB_MAX_QUERIES_WITH_SEARCH = 28
+    NB_MAX_QUERIES_WITHOUT_SEARCH = 26
+    NB_MAX_QUERIES_WITH_SEARCH = 29
 
     @classmethod
     def setUpTestData(cls):
@@ -212,6 +212,12 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                         "last_name": "Doe",
                         "first_name": "John",
                         "country_of_citizenship": "BE",
+                    },
+                },
+                checklist={
+                    'initial': {},
+                    'current': {
+                        'decision_sic': {'statut': 'INITIAL_CANDIDAT'},
                     },
                 },
             ),
@@ -985,8 +991,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(proposition.sigle_formation, self.admissions[1].training.acronym)
             self.assertEqual(proposition.code_formation, self.admissions[1].training.partial_acronym)
             self.assertEqual(proposition.intitule_formation, self.admissions[1].training.title)
-            self.assertEqual(proposition.decision_fac, 'TODO')
-            self.assertEqual(proposition.decision_sic, 'TODO')
+            self.assertEqual(proposition.decision_fac, '')
+            self.assertEqual(proposition.decision_sic, gettext('To be processed'))
             self.assertEqual(proposition.date_confirmation, self.admissions[1].submitted_at)
             self.assertEqual(proposition.derniere_modification_le, self.admissions[1].modified_at)
             self.assertEqual(proposition.type_admission, self.admissions[1].type)

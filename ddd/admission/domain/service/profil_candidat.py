@@ -25,7 +25,6 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import (
     VerifierCurriculumDoctorat,
 )
@@ -33,6 +32,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ComptabiliteValidatorList,
     CurriculumValidatorList,
     LanguesConnuesValidatorList,
+    CurriculumPostSoumissionValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
@@ -274,6 +274,51 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
+    def verifier_curriculum_formation_doctorale_apres_soumission(
+        cls,
+        proposition,
+        academic_year_repository: 'IAcademicYearRepository',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
+        curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
+    ) -> None:
+        date_soumission = proposition.soumise_le.date()
+
+        annee_soumission = (
+            GetCurrentAcademicYear().get_starting_academic_year(date_soumission, academic_year_repository).year
+        )
+
+        experiences_parcours_interne = experience_parcours_interne_translator.recuperer(
+            matricule=proposition.matricule_candidat,
+        )
+
+        curriculum = (
+            profil_candidat_translator.get_curriculum(
+                matricule=proposition.matricule_candidat,
+                annee_courante=annee_soumission,
+                uuid_proposition=proposition.entity_id.uuid,
+                experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
+            )
+            if curriculum_dto is None
+            else curriculum_dto
+        )
+
+        experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
+            experiences=curriculum.experiences_academiques,
+            annee_courante=annee_soumission,
+        )
+
+        CurriculumPostSoumissionValidatorList(
+            date_soumission=date_soumission,
+            annee_soumission=annee_soumission,
+            experiences_academiques=curriculum.experiences_academiques,
+            experiences_academiques_incompletes=experiences_academiques_incompletes,
+            annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
+            experiences_non_academiques=curriculum.experiences_non_academiques,
+            experiences_parcours_interne=experiences_parcours_interne,
+        ).validate()
+
+    @classmethod
     def verifier_curriculum_formation_continue(
         cls,
         matricule: str,
@@ -289,7 +334,7 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_comptabilite_doctorat(
         cls,
-        proposition: PropositionDoctorat,
+        proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
     ):

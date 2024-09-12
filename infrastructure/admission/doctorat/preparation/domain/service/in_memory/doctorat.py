@@ -25,7 +25,6 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
@@ -37,6 +36,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import (
     _DoctoratDTOFactory,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import DoctoratEtendu
+from admission.ddd.admission.test.factory.formation import CampusFactory
 
 
 class DoctoratInMemoryTranslator(IDoctoratTranslator):
@@ -115,9 +115,11 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             annee=doctorate.entity_id.annee,
             sigle_entite_gestion=doctorate.entite_ucl_id.code,
             intitule=doctorate.intitule,
-            campus=doctorate.campus,
+            intitule_en=doctorate.intitule,
+            intitule_fr=doctorate.intitule,
+            campus=CampusFactory(nom=doctorate.campus),
             type=doctorate.type,
-            campus_inscription=doctorate.campus_inscription,
+            campus_inscription=CampusFactory(nom=doctorate.campus_inscription),
         )
 
     @classmethod

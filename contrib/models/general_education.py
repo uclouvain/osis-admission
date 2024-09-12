@@ -560,6 +560,10 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
                 "diplomatic_post",
+                "financability_rule_established_by",
+                "financability_dispensation_first_notification_by",
+                "financability_dispensation_last_notification_by",
+                "accounting",
             )
             .annotate_pool_end_date()
         )
@@ -569,7 +573,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             self.get_queryset()
             .select_related(
                 "training__main_domain",
-                "training__enrollment_campus",
+                "training__enrollment_campus__country",
             )
             .annotate_campus()
             .annotate_training_management_entity()

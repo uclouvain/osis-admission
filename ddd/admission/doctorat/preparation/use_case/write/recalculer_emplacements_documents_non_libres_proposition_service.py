@@ -70,16 +70,13 @@ def recalculer_emplacements_documents_non_libres_proposition(
         groupe_supervision_repository=groupe_supervision_repository,
         promoteur_translator=promoteur_translator,
         membre_ca_translator=membre_ca_translator,
-    )
-    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
-        proposition_uuid=cmd.uuid_proposition,
-        type=TypeItemFormulaire.DOCUMENT.name,
+        question_specifique_translator=question_specifique_translator,
     )
 
     # WHEN
     ReinitialiserEmplacementsDocumentsNonLibresPropositionService.reinitialiser_emplacements(
         resume_dto=resume_dto,
-        questions_specifiques=questions_specifiques_dtos,
+        questions_specifiques=resume_dto.questions_specifiques_dtos,
         emplacement_document_repository=emplacement_document_repository,
     )
 
