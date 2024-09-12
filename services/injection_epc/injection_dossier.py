@@ -26,6 +26,7 @@
 
 import json
 import re
+import traceback
 import uuid
 from datetime import datetime
 from typing import Dict, List, Tuple
@@ -202,11 +203,12 @@ DOCUMENT_MAPPING = {
 class InjectionEPCAdmission:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
+        e = ""
         try:
             self._nettoyer_documents_reclames(admission)
             donnees = self.recuperer_donnees(admission=admission)
             logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
-            logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
+            logger.info("[INJECTION EPC] Envoi dans la queue ...")
             transaction.on_commit(
                 lambda: self.envoyer_admission_dans_queue(
                     donnees=donnees,
@@ -215,7 +217,7 @@ class InjectionEPCAdmission:
                 )
             )
             statut = EPCInjectionStatus.PENDING.name
-        except Exception:
+        except Exception as e:
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
@@ -227,6 +229,8 @@ class InjectionEPCAdmission:
                 "payload": donnees,
                 "status": statut,
                 'last_attempt_date': datetime.now(),
+                "osis_error_message": str(e),
+                "osis_stacktrace": traceback.format_exc() if e else ""
             },
         )
         return donnees
