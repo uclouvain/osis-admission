@@ -25,14 +25,13 @@
 # ##############################################################################
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_continue.commands import AnnulerPropositionCommand, ValiderPropositionCommand
+from admission.ddd.admission.formation_continue.commands import MettreAValiderCommand
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    ApprouverPropositionTransitionStatutException,
+    MettreAValiderTransitionStatutException,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -41,35 +40,43 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class ValiderPropositionTestCase(SimpleTestCase):
+class MettreAValiderTestCase(SimpleTestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = ValiderPropositionCommand(
+        self.cmd = MettreAValiderCommand(
             uuid_proposition='uuid-USCC22',
             gestionnaire="gestionnaire",
-            objet_message="objet",
-            corps_message="corps",
         )
 
-    def test_should_valider(self):
+    def test_should_mettre_a_valider_si_statut_approuve_par_fac(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(proposition_id, proposition.entity_id)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE)
-        self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
-    def test_should_valider_si_statut_a_valider(self):
+        self.assertEqual(proposition_id, proposition.entity_id)
+        self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_EN_COURS)
+        self.assertDictEqual(proposition.checklist_actuelle.decision.extra, {'en_cours': 'to_validate'})
+
+    def test_should_renvoyer_erreur_si_statut_a_traiter(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.INITIAL_CANDIDAT
+        proposition.checklist_actuelle.decision.extra = {}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_prise_en_charge(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
         proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_EN_COURS
-        proposition.checklist_actuelle.decision.extra = {'en_cours': 'to_validate'}
+        proposition.checklist_actuelle.decision.extra = {'en_cours': 'taken_in_charge'}
 
-        proposition_id = self.message_bus.invoke(self.cmd)
-        updated_proposition = self.proposition_repository.get(proposition.entity_id)  # type: Proposition
-        self.assertEqual(proposition_id, updated_proposition.entity_id)
-        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE)
-        self.assertEqual(updated_proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)
 
     def test_should_renvoyer_erreur_si_statut_cloture(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -79,7 +86,7 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)
 
     def test_should_renvoyer_erreur_si_statut_valide(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -89,7 +96,17 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_a_valider(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_EN_COURS
+        proposition.checklist_actuelle.decision.extra = {'en_cours': 'to_validate'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)
 
     def test_should_renvoyer_erreur_si_statut_en_attente(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -99,7 +116,7 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)
 
     def test_should_renvoyer_erreur_si_statut_refuse(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -109,7 +126,7 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)
 
     def test_should_renvoyer_erreur_si_statut_annule(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -119,4 +136,4 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+            self.assertIn(MettreAValiderTransitionStatutException, context.exception.exceptions)

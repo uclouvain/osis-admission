@@ -1939,6 +1939,12 @@ msgstr "Admission en formation continue"
 msgid "Continuing enrolment applications"
 msgstr "Demandes d'inscription en formation continue"
 
+msgid "Continuing working list"
+msgstr "Nom de la liste de travail en formation continue"
+
+msgid "Continuing working lists"
+msgstr "Listes de travail en formation continue"
+
 msgid "Coordinates"
 msgstr "Coordonnées"
 
@@ -4368,6 +4374,11 @@ msgstr ""
 "Votre demande d'admission est-elle en lien avec une candidature FNRS, FRIA, "
 "FRESH, CSC"
 
+msgid ""
+"It is not possible to go from the \"To validate IUFC\" status to this status."
+msgstr ""
+"Il n'est pas possible de passer du statut \"A valider IUFC\" à ce statut."
+
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr "Il n'est pas possible de passer du statut \"validé\" à ce statut."
 
@@ -5527,11 +5538,6 @@ msgstr "Historique des paiements en ligne"
 
 msgid "Only one admission"
 msgstr "Une seule admission"
-
-msgid ""
-"Only the \"to be processed\" status is available from the \"closed\" status."
-msgstr ""
-"Seul l'état \"À traiter\" est accessible à partir de l'état \"clôturée\"."
 
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
@@ -7427,6 +7433,16 @@ msgstr "L'acronyme de la bourse d'études"
 msgid "The activity title"
 msgstr "Le titre de l'activité"
 
+#, python-format
+msgid ""
+"The applicant is registered in the year %(year)s. Click <a class='bold-text "
+"underline-text' href='%(full_training_choice_url)s'>here</a> to change the "
+"academic year."
+msgstr ""
+"Le candidat est inscrit dans l’année %(year)s. Cliquez-<a class='bold-"
+"text underline-text' href='%(full_training_choice_url)s'>ici</a> pour modifier l’année "
+"académique."
+
 msgid "The application can only be validated if it was previously approved."
 msgstr ""
 "La demande ne peut être validée que si elle a préalablement été acceptée."
@@ -8251,6 +8267,9 @@ msgstr ""
 msgid "To the attention of"
 msgstr "A l'attention de"
 
+msgid "To validate IUFC"
+msgstr "À valider IUFC"
+
 msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
@@ -8872,6 +8891,13 @@ msgid "You can only select courses that are managed by the program manager."
 msgstr ""
 "Vous ne pouvez sélectionner que les formations gérées par le·la même "
 "responsable de programme."
+
+msgid ""
+"You can only transition to the \"To validate IUFC\" status from the "
+"\"Approved\" status."
+msgstr ""
+"Vous ne pouvez passer à l'état \"À valider IUFC\" qu'à partir de l'état "
+"\"Approuvée\"."
 
 msgid ""
 "You can only transition to the \"Validated\" status from the \"Approved\" "

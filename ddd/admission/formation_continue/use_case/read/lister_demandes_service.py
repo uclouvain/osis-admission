@@ -47,6 +47,8 @@ def lister_demandes(
         inscription_requise=cmd.inscription_requise,
         paye=cmd.paye,
         marque_d_interet=cmd.marque_d_interet,
+        mode_filtres_etats_checklist=cmd.mode_filtres_etats_checklist,
+        filtres_etats_checklist=cmd.filtres_etats_checklist,
         demandeur=cmd.demandeur,
         champ_tri=cmd.champ_tri,
         tri_inverse=cmd.tri_inverse,
