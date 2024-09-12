@@ -217,14 +217,6 @@
 
           <div class="info-part">
             {% field_data _("Proposition submission") admission.soumise_le %}
-            {% if admission.est_inscription_tardive %}<p>{% trans "Late enrollment" %}</p>{% endif %}
-
-            {% if admission.est_reorientation_inscription_externe %}
-              {% field_data _("External reorientation/modification") _("Course change asked by the candidate") %}
-            {% elif admission.est_modification_inscription_externe %}
-              {% field_data _("External reorientation/modification") _("Modification asked by the candidate") %}
-            {% endif %}
-
             {% include 'admission/doctorate/includes/checklist/vip_profile.html' with url=training_choice_url|add:next_url hide_if_empty=True %}
           </div>
         </div>

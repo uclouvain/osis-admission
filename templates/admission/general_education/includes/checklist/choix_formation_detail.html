@@ -24,8 +24,13 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% has_perm 'admission.change_checklist' as can_change_checklist %}
-{% if can_change_checklist %}
+{% if view.is_doctorate %}
+  {% has_perm 'admission.checklist_change_training_choice' as can_change_checklist_training_choice %}
+{% else %}
+  {% has_perm 'admission.change_checklist' as can_change_checklist %}
+{% endif %}
+
+{% if can_change_checklist_training_choice or can_change_checklist %}
   {% url view.base_namespace|add:':choix-formation-update' uuid=view.kwargs.uuid as edit_choix_formation_url %}
 {% endif %}
 
