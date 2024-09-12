@@ -39,7 +39,7 @@ class TestRecupererExperienceNonAcademique(TestCase):
     def test_should_recuperer_experience_non_academique(self):
         cmd = RecupererExperienceNonAcademiqueQuery(
             uuid_proposition='uuid-MASTER-SCI',
-            global_id='0123456789',
+            global_id='0000000001',
             uuid_experience='1cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
         )
         experience = self.message_bus.invoke(cmd)
@@ -48,7 +48,7 @@ class TestRecupererExperienceNonAcademique(TestCase):
     def test_should_lever_exception_si_experience_non_trouvee(self):
         cmd = RecupererExperienceNonAcademiqueQuery(
             uuid_proposition='uuid-MASTER-SCI',
-            global_id='0123456789',
+            global_id='0000000001',
             uuid_experience=str(uuid.uuid4()),
         )
         with self.assertRaises(ExperienceNonTrouveeException):

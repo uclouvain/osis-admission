@@ -1043,6 +1043,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return SicDecisionApprovalDocumentsForm(
             instance=self.admission,
             documents=self.sic_decision_approval_form_requestable_documents,
+            context=self.current_context,
         )
 
     @cached_property
@@ -2008,6 +2009,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['formation'] = self.proposition.formation
+        kwargs['context'] = self.current_context
         return kwargs
 
     def get_initial(self):

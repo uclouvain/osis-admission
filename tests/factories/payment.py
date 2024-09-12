@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 
 
-class OnlinePaymentFactory(factory.DjangoModelFactory):
+class OnlinePaymentFactory(factory.django.DjangoModelFactory):
     admission = factory.SubFactory(GeneralEducationAdmissionFactory)
     payment_id = factory.Sequence(lambda x: f'p_id_{x}')
     method = factory.Iterator(PaymentMethod.get_names())

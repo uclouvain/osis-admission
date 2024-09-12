@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,10 +24,11 @@
 #
 # ##############################################################################
 from .annuler_reclamation_emplacement_document_service import annuler_reclamation_emplacement_document
-from .initialiser_emplacement_document_libre_non_reclamable import initialiser_emplacement_document_libre_non_reclamable
 from .initialiser_emplacement_document_a_reclamer_service import initialiser_emplacement_document_a_reclamer
 from .initialiser_emplacement_document_libre_a_reclamer_service import initialiser_emplacement_document_libre_a_reclamer
+from .initialiser_emplacement_document_libre_non_reclamable import initialiser_emplacement_document_libre_non_reclamable
 from .modifier_reclamation_emplacement_document_service import modifier_reclamation_emplacement_document
 from .remplacer_emplacement_document_service import remplacer_emplacement_document
 from .remplir_emplacement_document_par_gestionnaire_service import remplir_emplacement_document_par_gestionnaire
+from .specifier_experience_en_tant_que_titre_acces_service import specifier_experience_en_tant_que_titre_acces
 from .supprimer_emplacement_document_service import supprimer_emplacement_document

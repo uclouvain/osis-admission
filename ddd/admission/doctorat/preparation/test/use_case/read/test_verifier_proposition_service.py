@@ -28,6 +28,7 @@ import uuid
 
 import freezegun
 import mock
+from celery.worker.consumer.mingle import exception
 from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
@@ -68,6 +69,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     _ComptabiliteFactory,
+    PropositionAdmissionSC3DPConfirmeeFactory,
 )
 from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
@@ -135,9 +137,10 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
-        self.proposition = PropositionInMemoryRepository().get(
-            entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
+        self.proposition = PropositionAdmissionSC3DPConfirmeeFactory(
+            statut=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
         )
+        self.proposition_repository.save(self.proposition)
         self.groupe_supervision = self.groupe_supervision_repository.get_by_proposition_id(self.proposition.entity_id)
         self.candidat = self.candidat_translator.profil_candidats[0]
         self.adresse_domicile_legal = self.candidat_translator.adresses_candidats[0]

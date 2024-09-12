@@ -27,12 +27,15 @@ from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_b
 from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 
 
 def recuperer_proposition_gestionnaire(
     cmd: 'RecupererPropositionGestionnaireQuery',
     proposition_repository: 'IPropositionRepository',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> 'PropositionDTO':
     return proposition_repository.get_dto_for_gestionnaire(
         PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition),
+        unites_enseignement_translator=unites_enseignement_translator,
     )

@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import datetime
+from decimal import Decimal
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
@@ -31,11 +32,18 @@ import attr
 
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
 from admission.ddd.admission.dtos.bourse import BourseDTO
+from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
+from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
+from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
+from .condition_approbation import ConditionComplementaireApprobationDTO
 from .doctorat import DoctoratDTO
 from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+from ..domain.model.enums.checklist import DroitsInscriptionMontant
 
 
 @attr.dataclass(slots=True)
@@ -103,9 +111,52 @@ class PropositionDTO(interface.DTO):
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]
 
+    financabilite_regle_calcule: str
+    financabilite_regle_calcule_situation: str
+    financabilite_regle_calcule_le: Optional[datetime.datetime]
+    financabilite_regle: str
+    financabilite_regle_etabli_par: str
+    financabilite_regle_etabli_le: Optional[datetime.datetime]
+
+    financabilite_derogation_statut: str
+    financabilite_derogation_premiere_notification_le: Optional[datetime.datetime]
+    financabilite_derogation_premiere_notification_par: str
+    financabilite_derogation_derniere_notification_le: Optional[datetime.datetime]
+    financabilite_derogation_derniere_notification_par: str
+
+    certificat_refus_fac: List[str]
+    certificat_approbation_fac: List[str]
+    certificat_approbation_sic: List[str]
+    certificat_approbation_sic_annexe: List[str]
+    certificat_refus_sic: List[str]
+
+    doit_fournir_visa_etudes: Optional[bool]
+    visa_etudes_d: List[str]
+    certificat_autorisation_signe: List[str]
+
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+
+    @property
+    def type(self):
+        return self.type_demande
+
+    @property
+    def formation(self):
+        return self.doctorat
+
+    @property
+    def est_inscription(self):
+        return self.type == TypeDemande.INSCRIPTION.name
+
+    @property
+    def est_admission(self):
+        return self.type == TypeDemande.ADMISSION.name
+
+    @property
+    def candidat_vip(self) -> bool:
+        return bool(self.bourse_recherche)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -127,6 +178,42 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
+    type_de_refus: str
+    motifs_refus: List[MotifRefusDTO]
+
+    autre_formation_choisie_fac: Optional['BaseFormationDTO']
+    avec_conditions_complementaires: Optional[bool]
+    conditions_complementaires: List[ConditionComplementaireApprobationDTO]
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List[Union['PartimSearchDTO', 'LearningUnitSearchDTO']]]
+    commentaire_complements_formation: str
+    nombre_annees_prevoir_programme: Optional[int]
+    nom_personne_contact_programme_annuel_annuel: str
+    email_personne_contact_programme_annuel_annuel: str
+    commentaire_programme_conjoint: str
+    besoin_de_derogation: str
+
+    droits_inscription_montant: str
+    droits_inscription_montant_valeur: Optional[Decimal]
+    droits_inscription_montant_autre: Decimal
+    dispense_ou_droits_majores: str
+    tarif_particulier: str
+    refacturation_ou_tiers_payant: str
+    annee_de_premiere_inscription_et_statut: str
+    est_mobilite: Optional[bool]
+    nombre_de_mois_de_mobilite: str
+    doit_se_presenter_en_sic: Optional[bool]
+    communication_au_candidat: str
+
+    # Titres et condition d'accès
+    condition_acces: str
+    millesime_condition_acces: Optional[int]
+    type_equivalence_titre_acces: str
+    statut_equivalence_titre_acces: str
+    information_a_propos_de_la_restriction: str
+    etat_equivalence_titre_acces: str
+    date_prise_effet_equivalence_titre_acces: Optional[datetime.date]
+
     @property
     def candidat_a_nationalite_ue_5(self):
         return self.nationalite_ue_candidat is True or self.nationalite_candidat_code_iso in PLUS_5_ISO_CODES
@@ -136,5 +223,9 @@ class PropositionGestionnaireDTO(PropositionDTO):
         return self.nationalite_ue_candidat is False and self.nationalite_candidat_code_iso not in PLUS_5_ISO_CODES
 
     @property
-    def formation(self):
-        return self.doctorat
+    def droits_inscription_montant_valeur_calculee(self):
+        return (
+            self.droits_inscription_montant_autre
+            if self.droits_inscription_montant == DroitsInscriptionMontant.AUTRE.name
+            else self.droits_inscription_montant_valeur
+        )
