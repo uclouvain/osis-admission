@@ -32,7 +32,7 @@ from types import SimpleNamespace
 import requests
 from django.conf import settings
 
-from admission.ddd.admission.commands import SoumettreTicketPersonneCommand, ValiderTicketPersonneCommand
+from admission.ddd.admission.commands import ValiderTicketPersonneCommand, SoumettreTicketPersonneCommand
 from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionTrouveeException
 from admission.templatetags.admission import format_matricule
