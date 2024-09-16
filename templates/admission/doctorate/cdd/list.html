@@ -42,7 +42,7 @@
     {% bootstrap_field filter_form.matricule_promoteur form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.type_financement form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.fnrs_fria_fresh form_group_class="form-group col-md-3" %}
   </div>
   <div class="row">
     {% bootstrap_field filter_form.cotutelle form_group_class="form-group col-md-3" %}
@@ -53,6 +53,7 @@
         {% bootstrap_field filter_form.date_soumission_fin form_group_class="form-group col-md-6" %}
       </fieldset>
     </div>
+    {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-3" %}
   </div>
 {% endblock %}
 

@@ -1,6 +1,4 @@
-{% extends "admin/change_list.html" %}
-{% load i18n admin_urls bootstrap3 %}
-
+{% load i18n admission strings %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -8,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -25,11 +23,19 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block object-tools-items %}
-  {{ block.super }}
-  <li>
-    <a href="{% url 'admission:admin:initialize-specific-questions' %}" class="addlink">
-      {% translate 'Initialization of the predefined specific questions' %}
-    </a>
+<ul id="checklist-menu" class="list-group">
+  <li
+      class="list-group-item active"
+      href="#send-email"
+  >
+    <div
+        data-toggle="tab"
+        href="#send-email"
+    >
+      <a>
+        <i class="fa-solid fa-envelope"></i>
+        {% translate "Send an email" %}
+      </a>
+    </div>
   </li>
-{% endblock %}
+</ul>

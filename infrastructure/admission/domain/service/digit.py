@@ -32,7 +32,7 @@ from types import SimpleNamespace
 import requests
 from django.conf import settings
 
-from admission.ddd.admission.commands import ValiderTicketPersonneCommand, SoumettreTicketPersonneCommand
+from admission.ddd.admission.commands import SoumettreTicketPersonneCommand, ValiderTicketPersonneCommand
 from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionTrouveeException
 from admission.templatetags.admission import format_matricule
@@ -118,9 +118,9 @@ class DigitService(IDigitService):
                 similarity_data = response.json()
                 if not isinstance(similarity_data, list) and similarity_data.get('status') == 500:
                     raise Exception(f"Digit internal server error (payload: {str(similarity_data)})")
-            except Exception as e:
-                logger.info(
-                    f"[Recherche doublon potentiel DigIT - {matricule}] Une erreur est survenue avec DigIT {repr(e)}"
+            except Exception:
+                logger.exception(
+                    f"[Recherche doublon potentiel DigIT - {matricule}] Une erreur est survenue avec DigIT"
                 )
                 PersonMergeProposal.objects.update_or_create(
                     original_person=original_person,
