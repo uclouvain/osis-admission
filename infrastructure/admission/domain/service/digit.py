@@ -32,6 +32,7 @@ from types import SimpleNamespace
 import requests
 from django.conf import settings
 
+from admission.ddd.admission.commands import ValiderTicketPersonneCommand, SoumettreTicketPersonneCommand
 from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.validator.exceptions import PasDePropositionDeFusionTrouveeException
 from admission.templatetags.admission import format_matricule
@@ -79,12 +80,12 @@ class DigitService(IDigitService):
                 f"[Recherche doublon potentiel DigIT - {matricule} ] Recherche non effectuée car compte interne"
             )
 
-            # from infrastructure.messages_bus import message_bus_instance
-            # message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=matricule))
-            # message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=matricule))
-            # logger.info(
-            #     f"[Soumission ticket DigIT - {matricule} ] Ticket soumis à DigIT car compte interne"
-            # )
+            from infrastructure.messages_bus import message_bus_instance
+            message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=matricule))
+            message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=matricule))
+            logger.info(
+                f"[Soumission ticket DigIT - {matricule} ] Ticket soumis à DigIT car compte interne"
+            )
             return None
 
         national_number_sanatized = None
