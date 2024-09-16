@@ -37,7 +37,7 @@ from rest_framework import status
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.contrib.models.epc_injection import EPCInjectionType
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -64,7 +64,11 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Reduction
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -192,6 +196,9 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
     def test_delete_experience_from_curriculum_is_not_allowed_for_injected_experiences(self):
         self.client.force_login(self.sic_manager_user)
 
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         # The experience come from EPC
         self.experience.external_id = 'EPC1'
         self.experience.save(update_fields=['external_id'])
@@ -208,6 +215,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             person=self.general_admission.candidate,
             type_experience=ExperienceType.PROFESSIONAL.name,
             experience_uuid=self.experience.uuid,
+            status=CurriculumEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.delete_url)
@@ -215,25 +223,38 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         cv_injection.delete()
 
-        # The admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
-            admission=self.general_admission,
+        # The experience has been injected from another admission
+        other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
+
+        other_admission_injection = AdmissionEPCInjection.objects.create(
+            admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
         )
 
-        valuation = AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission=self.general_admission, educationalexperience=self.experience
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        other_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=self.experience,
         )
 
         response = self.client.get(self.delete_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        valuation.delete()
+        other_admission.delete()
+        other_valuation.delete()
+
+        # The current admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
 
         response = self.client.get(self.delete_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        admission_injection.delete()
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
