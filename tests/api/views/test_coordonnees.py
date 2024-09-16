@@ -44,6 +44,7 @@ from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
 
 
+@freezegun.freeze_time('2023-01-01')
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class CoordonneesTestCase(APITestCase):
     @classmethod
@@ -139,7 +140,6 @@ class CoordonneesTestCase(APITestCase):
         self.assertEqual(address.person.phone_mobile, "+32 490 00 00 01")
         self.assertEqual(address.person.emergency_contact_phone, "+32 490 00 00 02")
 
-    @freezegun.freeze_time('2023-01-01')
     def test_coordonnees_update_candidate_with_admission(self):
         self.client.force_authenticate(self.candidate_user)
         response = self.client.put(self.admission_url, self.updated_data)
