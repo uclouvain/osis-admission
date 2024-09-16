@@ -44,6 +44,13 @@ class EPCInjectionStatus(ChoiceEnum):
     PENDING = "En attente du retour d'EPC"
     OSIS_ERROR = "Erreur OSIS"
 
+    @classmethod
+    def blocking_statuses_for_experience(cls) -> List[str]:
+        return [
+            cls.OK.name,
+            cls.PENDING.name,
+        ]
+
 
 class EPCInjectionType(ChoiceEnum):
     DEMANDE = "Demande"
@@ -87,7 +94,7 @@ class EPCInjection(models.Model):
                 'curriculum_errors': [
                     (error['osis_uuid'], error['message']) for error in errors if error['type'] not in TECHNICAL_ERRORS
                 ],
-                'technical_errors': [error['message'] for error in errors if error['type'] in TECHNICAL_ERRORS]
+                'technical_errors': [error['message'] for error in errors if error['type'] in TECHNICAL_ERRORS],
             }
         return {
             'curriculum_errors': [],

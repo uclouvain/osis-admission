@@ -35,7 +35,7 @@ from django.utils.translation import gettext_lazy
 from rest_framework import status
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
-from admission.contrib.models.epc_injection import EPCInjectionType
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
@@ -74,7 +74,11 @@ from osis_profile.models.enums.education import (
     Equivalence,
     HighSchoolDiplomaTypes,
 )
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import LanguageFactory, FrenchLanguageFactory
@@ -146,6 +150,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         cv_injection = CurriculumEPCInjection.objects.create(
             person=self.general_admission.candidate,
             type_experience=ExperienceType.HIGH_SCHOOL.name,
+            status=CurriculumEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.form_url)
@@ -153,16 +158,29 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         cv_injection.delete()
 
-        # The admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
-            admission=self.general_admission,
+        # The experience has been injected from another admission
+        other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
+
+        other_admission_injection = AdmissionEPCInjection.objects.create(
+            admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        admission_injection.delete()
+        other_admission.delete()
+
+        # The current admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
@@ -851,6 +869,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         cv_injection = CurriculumEPCInjection.objects.create(
             person=self.general_admission.candidate,
             type_experience=ExperienceType.HIGH_SCHOOL.name,
+            status=CurriculumEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.form_url)
@@ -862,6 +881,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         admission_injection = AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
             type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.form_url)
