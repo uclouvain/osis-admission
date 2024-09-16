@@ -75,6 +75,7 @@ from reference.tests.factories.language import LanguageFactory
 
 
 # TODO: Remove duplicate tests with osis_profile
+@freezegun.freeze_time('2024-01-01')
 class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
