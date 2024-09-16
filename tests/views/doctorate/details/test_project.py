@@ -80,7 +80,7 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
         )
         cls.admissions: List[DoctorateAdmission] = [
             admission,

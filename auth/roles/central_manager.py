@@ -74,7 +74,8 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc & ~pending_digit_ticket_response,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
@@ -83,7 +84,8 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc & ~pending_digit_ticket_response,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,
@@ -176,6 +178,7 @@ class CentralManager(EntityRoleModel):
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
             'admission.can_inject_to_epc': ~is_sent_to_epc,
+            'admission.send_message': is_entity_manager,
             # Fusion
             'admission.merge_candidate_with_known_person': is_entity_manager & ~is_sent_to_epc,
         }

@@ -33,6 +33,7 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
+from osis_history.models import HistoryEntry
 from osis_notification.models import WebNotification
 from osis_signature.enums import SignatureState
 from rest_framework import status
@@ -40,19 +41,15 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixCommissionProximiteCDEouCLSM,
-    ChoixCommissionProximiteCDSS,
-    ChoixLangueRedactionThese,
-    ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    AbsenceDeDetteNonCompleteeException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
-    PromoteurManquantException, AbsenceDeDetteNonCompleteeDoctoratException,
+    PromoteurManquantException,
+    AbsenceDeDetteNonCompleteeDoctoratException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -82,6 +79,7 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
+from base.views.learning_achievement import update
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory
 
@@ -314,7 +312,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_coordinates',
             'retrieve_secondary_studies',
             'retrieve_languages',
-            'retrieve_proposition',
+            'retrieve_project',
             'retrieve_cotutelle',
             'retrieve_supervision',
             'retrieve_curriculum',
@@ -324,7 +322,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'update_coordinates',
             'update_secondary_studies',
             'update_languages',
-            'update_proposition',
+            'update_project',
             'update_cotutelle',
             'update_curriculum',
             'update_training_choice',
@@ -434,180 +432,8 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.other_committee_member_user = CaMemberFactory().person.user
         AdmissionAcademicCalendarFactory.produce_all_required()
         # Targeted url
-        cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
-
-    def test_admission_doctorate_cancel_using_api(self):
-        self.client.force_authenticate(user=self.candidate.user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        # This is a soft-delete
-        admissions = DoctorateAdmission.objects.all()
-        self.assertEqual(admissions.count(), 1)
-        admission = admissions.get()
-        self.assertEqual(admission.status, ChoixStatutPropositionDoctorale.ANNULEE.name)
-
-    def test_user_not_logged_assert_cancel_not_authorized(self):
-        self.client.force_authenticate(user=None)
-
-        response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_admission_doctorate_cancel_using_api_no_role(self):
-        self.client.force_authenticate(user=self.no_role_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_cancel_using_api_other_candidate(self):
-        self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_cancel_using_api_promoter(self):
-        self.client.force_authenticate(user=self.promoter_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_cancel_using_api_other_promoter(self):
-        self.client.force_authenticate(user=self.other_promoter_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_cancel_using_api_committee_member(self):
-        self.client.force_authenticate(user=self.committee_member_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_cancel_using_api_other_committee_member(self):
-        self.client.force_authenticate(user=self.other_committee_member_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_get_proximity_commission(self):
-        self.client.force_authenticate(user=self.other_candidate_user)
-        admission = DoctorateAdmissionFactory(
-            candidate=self.other_candidate_user.person,
-            training__management_entity=self.commission,
-            proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
-        )
-        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        # Check response data
-        self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
-
-        admission = DoctorateAdmissionFactory(
-            candidate=self.other_candidate_user.person,
-            training__management_entity=self.commission,
-            proximity_commission=ChoixCommissionProximiteCDSS.ECLI.name,
-        )
-        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        # Check response data
-        self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDSS.ECLI.name)
-
-        admission = DoctorateAdmissionFactory(
-            candidate=self.other_candidate_user.person,
-            training__management_entity=self.commission,
-            training__acronym="SC3DP",
-            proximity_commission=ChoixSousDomaineSciences.CHEMISTRY.name,
-        )
-        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        # Check response data
-        self.assertEqual(response.json()['commission_proximite'], ChoixSousDomaineSciences.CHEMISTRY.name)
-
-    def test_admission_doctorate_get_using_api_candidate(self):
-        self.client.force_authenticate(user=self.candidate.user)
-
-        with self.assertNumQueriesLessThan(17):
-            response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        # Check response data
-        self.assertEqual(
-            response.json()['reponses_questions_specifiques'],
-            {
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
-                'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
-            },
-        )
-        # Check links
-        self.assertTrue('links' in response.data)
-        allowed_actions = [
-            'retrieve_person',
-            'update_person',
-            'retrieve_coordinates',
-            'update_coordinates',
-            'retrieve_secondary_studies',
-            'update_secondary_studies',
-            'retrieve_languages',
-            'update_languages',
-            'destroy_proposition',
-            'retrieve_proposition',
-            'update_proposition',
-            'retrieve_cotutelle',
-            'update_cotutelle',
-            'add_member',
-            'edit_external_member',
-            'remove_member',
-            'set_reference_promoter',
-            'retrieve_supervision',
-            'update_curriculum',
-            'retrieve_curriculum',
-            'retrieve_accounting',
-            'update_accounting',
-            'retrieve_training_choice',
-            'update_training_choice',
-            'request_signatures',
-            'submit_proposition',
-        ]
-        forbidden_actions = [
-            'add_approval',
-            'approve_by_pdf',
-            'retrieve_confirmation',
-            'update_confirmation',
-            'retrieve_doctoral_training',
-            'retrieve_complementary_training',
-            'retrieve_course_enrollment',
-            'retrieve_jury_preparation',
-            'list_jury_members',
-            'retrieve_documents',
-            'update_documents',
-        ]
-        self.assertActionLinks(response.data['links'], allowed_actions, forbidden_actions)
-
-    def test_admission_doctorate_get_using_api_no_role(self):
-        self.client.force_authenticate(user=self.no_role_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_get_using_api_other_candidate(self):
-        self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_get_using_api_promoter(self):
-        self.client.force_authenticate(user=self.promoter_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_admission_doctorate_get_using_api_other_promoter(self):
-        self.client.force_authenticate(user=self.other_promoter_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_get_using_api_committee_member(self):
-        self.client.force_authenticate(user=self.committee_member_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_admission_doctorate_get_using_api_other_committee_member(self):
-        self.client.force_authenticate(user=self.other_committee_member_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_user_not_logged_assert_get_not_authorized(self):
-        self.client.force_authenticate(user=None)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        cls.url = resolve_url("admission_api_v1:project", uuid=cls.admission.uuid)
+        cls.dto_url = resolve_url("admission_api_v1:doctorate_propositions", uuid=cls.admission.uuid)
 
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_admission_doctorate_update_using_api_candidate(self, confirm_upload):
@@ -622,7 +448,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         self.assertEqual(admission.candidate, self.candidate)
         # But all the following should
         self.assertEqual(admission.type, self.update_data["type_admission"])
-        response = self.client.get(self.url, format="json")
+        response = self.client.get(self.dto_url, format="json")
         self.assertEqual(response.json()['doctorat']['sigle'], self.admission.doctorate.acronym)
         self.assertEqual(response.json()['titre_projet'], "A new title")
 
@@ -663,7 +489,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.candidate.user)
-        methods_not_allowed = ['post', 'patch']
+        methods_not_allowed = ['post', 'patch', 'delete']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
@@ -1023,6 +849,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertEqual(updated_admission.status_sic, ChoixStatutCDD.TO_BE_VERIFIED.name)
         self.assertEqual(updated_admission.status_cdd, ChoixStatutSIC.TO_BE_VERIFIED.name)
         self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name)
+        self.assertEqual(updated_admission.last_update_author, self.first_candidate)
 
         self.assertEqual(updated_admission.submitted_at.date(), datetime.date.today())
         self.assertEqual(
@@ -1052,6 +879,10 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertEqual(len(admission_tasks), 2)
         self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.DOCTORATE_MERGE.name)
         self.assertEqual(admission_tasks[1].type, AdmissionTask.TaskType.DOCTORATE_RECAP.name)
+
+        history_entry = HistoryEntry.objects.filter(object_uuid=admission.uuid).first()
+        self.assertIsNotNone(history_entry)
+        self.assertCountEqual(history_entry.tags, ['proposition', 'status-changed', 'soumission'])
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
         DoctorateAdmissionFactory(

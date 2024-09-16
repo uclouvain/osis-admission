@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import logging
 from datetime import datetime
 from typing import Dict
 
@@ -204,7 +203,6 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
     list_filter = ['status', 'type']
     readonly_fields = [
         "detailed_status",
-        "pre_admission_submission_date",
         "submitted_at",
         "last_update_author",
     ]
@@ -556,9 +554,9 @@ class BaseAdmissionStatutFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(
-                Q(generaleducationadmission__status=self.value()) |
-                Q(doctorateadmission__status=self.value()) |
-                Q(continuingeducationadmission__status=self.value())
+                Q(generaleducationadmission__status=self.value())
+                | Q(doctorateadmission__status=self.value())
+                | Q(continuingeducationadmission__status=self.value())
             )
         return queryset
 
@@ -577,9 +575,9 @@ class BaseAdmissionTypeFormationFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(
-                Q(generaleducationadmission__isnull=self.value() != 'general-education') &
-                Q(doctorateadmission__isnull=self.value() != 'doctorate') &
-                Q(continuingeducationadmission__isnull=self.value() != 'continuing-education')
+                Q(generaleducationadmission__isnull=self.value() != 'general-education')
+                & Q(doctorateadmission__isnull=self.value() != 'doctorate')
+                & Q(continuingeducationadmission__isnull=self.value() != 'continuing-education')
             )
         return queryset
 
@@ -599,17 +597,19 @@ class EPCInjectionStatusFilter(SimpleListFilter):
             statut = EPCInjectionStatus[self.value()]
             return queryset.filter(
                 epc_injection__status=statut.name,
-                epc_injection__type=EPCInjectionType.DEMANDE.name
+                epc_injection__type=EPCInjectionType.DEMANDE.name,
             )
         elif self.value() == 'no_epc_injection':
             return queryset.filter(
-                Q(epc_injection__isnull=True) |
-                Q(~Exists(
-                    EPCInjection.objects.filter(
-                        admission_id=OuterRef('pk'),
-                        type=EPCInjectionType.DEMANDE.name,
+                Q(epc_injection__isnull=True)
+                | Q(
+                    ~Exists(
+                        EPCInjection.objects.filter(
+                            admission_id=OuterRef('pk'),
+                            type=EPCInjectionType.DEMANDE.name,
+                        )
                     )
-                ))
+                )
             )
         return queryset
 
@@ -669,9 +669,9 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                     | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
                     | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
                     generaleducationadmission__isnull=False,
-                    then=Value(False)
+                    then=Value(False),
                 ),
-                default=Value(True)
+                default=Value(True),
             )
         )
         if self.value():
@@ -695,9 +695,9 @@ class QuarantaineFilter(admin.SimpleListFilter):
                 When(
                     Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
                     | ~Q(candidate__personmergeproposal__validation__valid=True),
-                    then=Value(True)
+                    then=Value(True),
                 ),
-                default=Value(False)
+                default=Value(False),
             )
         )
         if self.value():
@@ -716,7 +716,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'created_at',
         'statut',
         'type_formation',
-        'noma_sent_to_digit'
+        'noma_sent_to_digit',
     )
     readonly_fields = ['uuid']
     actions = [
@@ -740,8 +740,12 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     sortable_by = ['reference', 'noma_sent_to_digit']
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(
-            _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
+            )
         )
 
     def noma_sent_to_digit(self, obj):
@@ -752,10 +756,9 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
         for demande in queryset.exclude(
-            Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]) &
-            Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
+            Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name])
+            & Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
         ):
-            # Check injection state when it exists
             InjectionEPCAdmission().injecter(demande)
 
     def has_add_permission(self, request):
@@ -845,7 +848,7 @@ class EPCInjectionAdmin(admin.ModelAdmin):
     @admin.action(description="Réinjecter la signalétique dans EPC")
     def reinjecter_la_signaletique_dans_epc(self, request, queryset):
         admissions_references = queryset.filter(
-            type=EPCInjectionType.SIGNALETIQUE.name
+            type=EPCInjectionType.SIGNALETIQUE.name,
         ).values_list('admission__reference', flat=True)
         injecter_signaletique_a_epc_task.run(admissions_references=list(admissions_references))
 
