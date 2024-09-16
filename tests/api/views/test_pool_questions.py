@@ -40,6 +40,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
+@freezegun.freeze_time('2024-01-01')
 class PoolQuestionApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
