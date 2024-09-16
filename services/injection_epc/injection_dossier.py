@@ -28,7 +28,7 @@ import json
 import re
 import uuid
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import pika
 from django.conf import settings
@@ -255,6 +255,7 @@ class InjectionEPCAdmission:
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
+        admission_iufc = getattr(admission, 'continuingeducationadmission', None)
         documents_specifiques = cls._recuperer_documents_specifiques(admission)
         return {
             "dossier_uuid": str(admission.uuid),
@@ -273,11 +274,11 @@ class InjectionEPCAdmission:
                 admission=admission,
                 comptabilite=comptabilite,
             ),
-            "inscription_offre": cls._get_inscription_offre(admission=admission),
+            "inscription_offre": cls._get_inscription_offre(admission=admission, admission_generale=admission_generale),
             "donnees_comptables": cls._get_donnees_comptables(admission=admission, comptabilite=comptabilite),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
-                (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
+                InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc)
                 +
                 documents_specifiques
             ),
@@ -453,10 +454,13 @@ class InjectionEPCAdmission:
         ]
 
     @classmethod
-    def _get_inscription_offre(cls, admission: BaseAdmission) -> Dict:
-        num_offre, validite = cls.__get_validite_num_offre(admission)
+    def _get_inscription_offre(
+        cls,
+        admission: BaseAdmission,
+        admission_generale: Optional[GeneralEducationAdmission],
+    ) -> Dict:
+        num_offre, validite = cls.__get_validite_num_offre(admission, admission_generale)
         groupe_de_supervision = getattr(admission, 'supervision_group', None)
-        admission_generale = getattr(admission, 'generaleducationadmission', None)  # type: GeneralEducationAdmission
         double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
         type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
@@ -491,11 +495,14 @@ class InjectionEPCAdmission:
         }
 
     @staticmethod
-    def __get_validite_num_offre(admission: BaseAdmission) -> Tuple[str, str]:
+    def __get_validite_num_offre(
+        admission: BaseAdmission,
+        admission_generale: Optional[GeneralEducationAdmission],
+    ) -> Tuple[str, str]:
         formation = admission.training  # type: EducationGroupYear
         est_en_bachelier = formation.education_group_type.name == TrainingType.BACHELOR.name
         est_en_premiere_annee_de_bachelier = (
-            est_en_bachelier and admission.generaleducationadmission.cycle_pursuit != PoursuiteDeCycle.YES.name
+            est_en_bachelier and admission_generale.cycle_pursuit != PoursuiteDeCycle.YES.name
         )
         if est_en_premiere_annee_de_bachelier:
             validite, num_offre = formation.cohortyear_set.get(
@@ -506,16 +513,19 @@ class InjectionEPCAdmission:
         return num_offre, validite
 
     @staticmethod
-    def _get_donnees_comptables(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
-        general_admission = getattr(admission, 'generaleducationadmission', None)
-        autre_montant = getattr(general_admission, 'tuition_fees_amount_other')
+    def _get_donnees_comptables(
+        admission: BaseAdmission,
+        comptabilite: Accounting,
+        admission_generale: Optional[GeneralEducationAdmission],
+    ) -> Dict:
+        autre_montant = getattr(admission_generale, 'tuition_fees_amount_other')
         return {
             "annee_academique": admission.training.academic_year.year,
-            "droits_majores": general_admission.tuition_fees_dispensation,
+            "droits_majores": admission_generale.tuition_fees_dispensation,
             "montant_droits_majores": (
                 ((str(autre_montant) if autre_montant else None)
                  or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
-                if general_admission else None
+                if admission_generale else None
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
         }
