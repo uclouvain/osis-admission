@@ -345,7 +345,6 @@
                         {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
                       {% endif %}
                     </p>
-                    {% comment %}
                     {% experience_valuation_url experience=experience as valuate_experience_url %}
                     {% if valuate_experience_url %}
                       {% concat 'valuate-experience-modal-single-' child.extra.identifiant as valuate_modal_id %}
@@ -354,10 +353,9 @@
                         data-toggle="modal"
                         data-target="#{{ valuate_modal_id }}"
                       >
-                        {% translate 'Valuate' %}
+                        {% translate 'Link' %}
                       </button>
                     {% endif %}
-                    {% endcomment %}
                   </div>
                   {% if valuate_experience_url %}
                     {% include 'admission/modal/confirm_modal.html' with confirm_url=valuate_experience_url confirm_message=_('Do you confirm the valuation of this experience?') confirm_id=valuate_modal_id confirm_button_class="btn-success" %}

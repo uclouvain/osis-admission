@@ -4137,6 +4137,9 @@ msgctxt "equivalence_type"
 msgid "Level equivalence"
 msgstr ""
 
+msgid "Link"
+msgstr ""
+
 msgid ""
 "Link to download a copy of the file related to the admission (frontoffice)."
 msgstr ""
