@@ -60,15 +60,21 @@ class EPCInjectionType(ChoiceEnum):
 class EPCInjection(models.Model):
     last_attempt_date = models.DateTimeField(null=True)
     last_response_date = models.DateTimeField(null=True)
+
     admission = models.ForeignKey(
         'admission.BaseAdmission',
         on_delete=models.CASCADE,
         related_name='epc_injection',
     )
+
     type = models.CharField(choices=EPCInjectionType.choices(), null=False, blank=True, default='', max_length=12)
     status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=10)
+
     payload = models.JSONField(default=dict, blank=True)
     epc_responses = models.JSONField(default=list, blank=True)
+
+    osis_error_message = models.CharField(max_length=255, default="", blank=True)
+    osis_stacktrace = models.TextField(default="", blank=True)
 
     @property
     def last_response(self) -> Dict[str, str]:
