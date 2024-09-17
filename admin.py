@@ -79,7 +79,7 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
-from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList
+from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
@@ -90,6 +90,9 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
@@ -202,13 +205,23 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'training',
         'thesis_institute',
         'international_scholarship',
+        'thesis_language',
+        'additional_approval_conditions',
+        'other_training_accepted_by_fac',
+        'prerequisite_courses',
+        'refusal_reasons',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']
-    readonly_fields = [
-        "detailed_status",
-        "submitted_at",
-        "last_update_author",
+    readonly_fields = AdmissionAdminMixin.readonly_fields + [
+        'financability_computed_rule',
+        'financability_computed_rule_situation',
+        'financability_computed_rule_on',
+        'financability_rule_established_by',
+        'financability_dispensation_first_notification_on',
+        'financability_dispensation_first_notification_by',
+        'financability_dispensation_last_notification_on',
+        'financability_dispensation_last_notification_by',
     ]
     exclude = ["valuated_experiences"]
 
@@ -1219,8 +1232,30 @@ class ContinuingWorkingListForm(forms.ModelForm):
         fields = '__all__'
 
 
+class DoctorateWorkingListForm(forms.ModelForm):
+    checklist_filters = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
+        label=_('Checklist filters'),
+        required=False,
+    )
+
+    admission_statuses = forms.TypedMultipleChoiceField(
+        label=_('Admission statuses'),
+        required=False,
+        choices=ChoixStatutPropositionDoctorale.choices(),
+    )
+
+    class Meta:
+        model = DoctorateWorkingList
+        fields = '__all__'
+
+
 class ContinuingWorkingListAdmin(WorkingListAdmin):
     form = ContinuingWorkingListForm
+
+
+class DoctorateWorkingListAdmin(WorkingListAdmin):
+    form = DoctorateWorkingListForm
 
 
 class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
@@ -1244,6 +1279,7 @@ class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
 admin.site.register(CategorizedFreeDocument, CategorizedFreeDocumentAdmin)
 admin.site.register(WorkingList, WorkingListAdmin)
 admin.site.register(ContinuingWorkingList, ContinuingWorkingListAdmin)
+admin.site.register(DoctorateWorkingList, DoctorateWorkingListAdmin)
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
 admin.site.register(Candidate, CandidateAdmin)

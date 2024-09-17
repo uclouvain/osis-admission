@@ -162,6 +162,9 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_select_access_title': is_entity_manager
             & (general.in_sic_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
+            'admission.checklist_change_training_choice': is_entity_manager
+            & doctorate.in_sic_status
+            & ~is_sent_to_epc,
             'admission.checklist_change_sic_comment': is_entity_manager
             & (general.is_submitted | doctorate.is_submitted)
             & ~is_sent_to_epc,

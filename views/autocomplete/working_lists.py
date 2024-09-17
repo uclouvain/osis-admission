@@ -26,19 +26,24 @@
 from dal import autocomplete
 from django.utils.translation import get_language
 
-from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
+from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
 )
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
+)
 
 __namespace__ = False
+
 
 __all__ = [
     'WorkingListAutocomplete',
     'ContinuingWorkingListAutocomplete',
+    'DoctorateWorkingListAutocomplete',
 ]
 
 
@@ -87,6 +92,27 @@ class ContinuingWorkingListAutocomplete(WorkingListAutocomplete):
                     for checklist_tab in ORGANISATION_ONGLETS_CHECKLIST_CONTINUE
                 ],
                 'admission_statuses': result.admission_statuses,
+            }
+            for result in context['object_list']
+        ]
+
+
+class DoctorateWorkingListAutocomplete(WorkingListAutocomplete):
+    model = DoctorateWorkingList
+    urlpatterns = 'doctorate-working-lists'
+
+    def get_results(self, context):
+        return [
+            {
+                'id': result.id,
+                'text': result.name.get(self.current_language),
+                'checklist_filters_mode': result.checklist_filters_mode,
+                'checklist_filters': [
+                    result.checklist_filters.get(checklist_tab.identifiant.name, [])
+                    for checklist_tab in ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING
+                ],
+                'admission_statuses': result.admission_statuses,
+                'admission_type': result.admission_type,
             }
             for result in context['object_list']
         ]

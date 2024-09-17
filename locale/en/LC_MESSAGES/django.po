@@ -2426,6 +2426,18 @@ msgstr ""
 msgid "Doctorate enrolment applications"
 msgstr ""
 
+msgid "Doctorate free additional approval condition"
+msgstr ""
+
+msgid "Doctorate free additional approval conditions"
+msgstr ""
+
+msgid "Doctorate working list"
+msgstr ""
+
+msgid "Doctorate working lists"
+msgstr ""
+
 msgid "Document"
 msgstr ""
 
@@ -2621,10 +2633,23 @@ msgid ""
 "%(author)s."
 msgstr ""
 
+msgid ""
+"Email sent to the EU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+
 msgid "Email sent to the EU+5 candidate when SIC approves an admission."
 msgstr ""
 
+msgid ""
+"Email sent to the NEU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+
 msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2635,6 +2660,11 @@ msgstr ""
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2658,7 +2688,13 @@ msgstr ""
 msgid "Email sent to the candidate when IUFC validate the application."
 msgstr ""
 
+msgid "Email sent to the candidate when SIC approves a doctorate inscription."
+msgstr ""
+
 msgid "Email sent to the candidate when SIC approves an inscription."
+msgstr ""
+
+msgid "Email sent to the candidate when SIC refuses a doctorate admission."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
@@ -2676,10 +2712,20 @@ msgstr ""
 
 msgid ""
 "Email sent to the checkers to inform them to check the background "
+"authentication of the candidate for a doctorate admission."
+msgstr ""
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
 "authentication of the candidate."
 msgstr ""
 
 msgid "Email sent to the faculty when IUFC needs more information."
+msgstr ""
+
+msgid ""
+"Email sent to the faculty when the SIC submits the application during the "
+"faculty decision process for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -5941,6 +5987,9 @@ msgstr ""
 msgid "Research scholarship"
 msgstr ""
 
+msgid "Research scholarship:"
+msgstr ""
+
 msgid "Research seminar"
 msgstr ""
 
@@ -7809,6 +7858,9 @@ msgid "Work contract"
 msgstr ""
 
 msgid "Work contract should be set when funding type is set to work contract"
+msgstr ""
+
+msgid "Work in progress"
 msgstr ""
 
 msgid "Work start date"

@@ -46,7 +46,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistFormationGenerale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorat,
 )
 from admission.forms import (

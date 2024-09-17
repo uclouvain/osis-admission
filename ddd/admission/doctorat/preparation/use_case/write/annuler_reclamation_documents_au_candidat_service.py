@@ -46,7 +46,6 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
@@ -79,16 +78,13 @@ def annuler_reclamation_documents_au_candidat(
         groupe_supervision_repository=groupe_supervision_repository,
         promoteur_translator=promoteur_translator,
         membre_ca_translator=membre_ca_translator,
-    )
-    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
-        proposition_uuid=cmd.uuid_proposition,
-        type=TypeItemFormulaire.DOCUMENT.name,
+        question_specifique_translator=question_specifique_translator,
     )
 
     documents_reclames_dtos = emplacements_documents_demande_translator.recuperer_emplacements_reclames_dto(
         personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
-        questions_specifiques=questions_specifiques_dtos,
+        questions_specifiques=resume_dto.questions_specifiques_dtos,
     )
 
     identifiants_documents_demandes = EmplacementDocumentIdentityBuilder.build_list(
