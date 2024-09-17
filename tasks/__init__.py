@@ -32,6 +32,7 @@ from . import check_academic_calendar
 from . import process_admission_tasks
 from . import retrieve_digit_tickets_status
 from . import retry_digit_duplicates_finding
+from . import verifier_paiements_faits
 
 tasks = {
     'Generate admission files': {
@@ -49,6 +50,10 @@ tasks = {
     '|Admission| Retry digit duplicates finding': {
         'task': 'admission.tasks.retry_digit_duplicates_finding.run',
         'schedule': crontab(minute='*/5'),
+    },
+    '|Admission| Verifier paiements faits': {
+        'task': 'admission.tasks.verifier_paiements_faits.run',
+        'schedule': crontab(minute=0, hour=1),
     },
     # couvre le basculement de la période de création de compte dans DigIT
     # '|Admission| Bulk create digit persons tickets': {
