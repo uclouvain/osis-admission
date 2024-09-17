@@ -4588,6 +4588,9 @@ msgctxt "equivalence_type"
 msgid "Level equivalence"
 msgstr "Equivalence de niveau"
 
+msgid "Link"
+msgstr "Raccrocher"
+
 msgid ""
 "Link to download a copy of the file related to the admission (frontoffice)."
 msgstr "Lien pour télécharger une copie du dossier (back-office)."

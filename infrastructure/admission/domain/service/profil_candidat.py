@@ -411,7 +411,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         educational_experience_years = educational_experience_years.annotate(
             injecte_par_admission=Exists(
                 AdmissionEPCInjection.objects.filter(
-                    admission__uuid=OuterRef('educational_experience__valuated_from_admission__uuid'),
+                    admission__admissioneducationalvaluatedexperiences__educationalexperience_id=OuterRef(
+                        'educational_experience__uuid'
+                    ),
                     type=EPCInjectionType.DEMANDE.name,
                     status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
@@ -647,7 +649,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 ),
                 injecte_par_admission=Exists(
                     AdmissionEPCInjection.objects.filter(
-                        admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                        admission__admissionprofessionalvaluatedexperiences__professionalexperience_id=OuterRef('uuid'),
                         type=EPCInjectionType.DEMANDE.name,
                         status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
