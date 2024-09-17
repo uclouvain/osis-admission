@@ -28,18 +28,22 @@ import uuid
 from datetime import datetime, timedelta
 from unittest import mock
 
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.test.utils import override_settings
 from waffle.testutils import override_switch
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery
+from admission.ddd.admission.commands import (
+    RetrieveListeTicketsEnAttenteQuery,
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
+)
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.tasks import retrieve_digit_tickets_status
-from admission.tests.factories.curriculum import ProfessionalExperienceFactory, EducationalExperienceFactory, \
-    EducationalExperienceYearFactory
+from admission.tests.factories.curriculum import (
+    ProfessionalExperienceFactory, EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
 from base.models.enums.civil_state import CivilState
@@ -57,7 +61,7 @@ from osis_profile.models.enums.curriculum import ActivityType
 
 @override_switch('fusion-digit', active=True)
 @override_settings(USE_CELERY=False)
-class TestRetrieveDigitTicketsStatus(TestCase):
+class TestRetrieveDigitTicketsStatus(TransactionTestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
         self.personne_compte_temporaire_address = PersonAddressFactory(
