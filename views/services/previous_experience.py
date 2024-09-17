@@ -166,7 +166,7 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
         elif self.etudes_secondaires_candidat.experience and isinstance(
                 etude_secondaire.experience, DiplomeEtrangerEtudesSecondairesDTO
         ):
-            return ForeignDiplomaTypes[self.etudes_secondaires_candidat.experience.type_diplome].value
+            return ForeignDiplomaTypes[etude_secondaire.experience.type_diplome].value
         elif self.etudes_secondaires_candidat.experience and isinstance(
                 etude_secondaire.experience, AlternativeSecondairesDTO
         ):
