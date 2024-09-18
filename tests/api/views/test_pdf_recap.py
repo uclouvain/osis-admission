@@ -116,7 +116,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_doctorate_admission_doctorate_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(20):
             response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})

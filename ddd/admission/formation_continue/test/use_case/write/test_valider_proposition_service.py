@@ -60,6 +60,17 @@ class ValiderPropositionTestCase(SimpleTestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE)
         self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
+    def test_should_valider_si_statut_a_valider(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_EN_COURS
+        proposition.checklist_actuelle.decision.extra = {'en_cours': 'to_validate'}
+
+        proposition_id = self.message_bus.invoke(self.cmd)
+        updated_proposition = self.proposition_repository.get(proposition.entity_id)  # type: Proposition
+        self.assertEqual(proposition_id, updated_proposition.entity_id)
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE)
+        self.assertEqual(updated_proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_REUSSITE)
+
     def test_should_renvoyer_erreur_si_statut_cloture(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
         proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE

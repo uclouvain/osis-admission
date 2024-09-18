@@ -58,9 +58,19 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as OngletsChecklistDoctorale,
+)
 from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
@@ -245,8 +255,8 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             if not checklist_statuses:
                 continue
 
-            mapping_filter_key_value['filtres_etats_checklist'][OngletsChecklist.get_value(checklist_tab)] = [
-                ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[checklist_tab][status].libelle
+            mapping_filter_key_value['filtres_etats_checklist'][OngletsChecklistGenerale.get_value(checklist_tab)] = [
+                ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE[checklist_tab][status].libelle
                 for status in checklist_statuses
             ]
 
@@ -390,6 +400,22 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         if trainings_types:
             mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
 
+        # Format the checklist filters mode
+        checklist_mode = formatted_filters.get('mode_filtres_etats_checklist')
+        if checklist_mode:
+            mapping_filter_key_value['mode_filtres_etats_checklist'] = ModeFiltrageChecklist.get_value(checklist_mode)
+
+        # Format the checklist filters
+        mapping_filter_key_value['filtres_etats_checklist'] = {}
+        for checklist_tab, checklist_statuses in formatted_filters.get('filtres_etats_checklist').items():
+            if not checklist_statuses:
+                continue
+
+            mapping_filter_key_value['filtres_etats_checklist'][OngletsChecklistContinue.get_value(checklist_tab)] = [
+                ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE[checklist_tab][status].libelle
+                for status in checklist_statuses
+            ]
+
         return {
             mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])
             for key, value in formatted_filters.items()
@@ -529,7 +555,22 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             for scholarship in scholarships:
                 mapping_filter_key_value[field_name_by_global_id[scholarship.uuid]] = scholarship.short_name
 
+        # Format the checklist filters
+        mapping_filter_key_value['filtres_etats_checklist'] = {}
+        for checklist_tab, checklist_statuses in formatted_filters.get('filtres_etats_checklist').items():
+            if not checklist_statuses:
+                continue
+
+            mapping_filter_key_value['filtres_etats_checklist'][OngletsChecklistDoctorale.get_value(checklist_tab)] = [
+                ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT[checklist_tab][status].libelle
+                for status in checklist_statuses
+            ]
+
         # Format enums
+        checklist_mode = formatted_filters.get('mode_filtres_etats_checklist')
+        if checklist_mode:
+            mapping_filter_key_value['mode_filtres_etats_checklist'] = ModeFiltrageChecklist.get_value(checklist_mode)
+
         statuses = formatted_filters.get('etats')
         if statuses:
             mapping_filter_key_value['etats'] = [

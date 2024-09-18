@@ -41,6 +41,10 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
+)
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -71,8 +75,12 @@ from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import TypeItemFormulaire, Onglets, ChoixAffiliationSport, \
-    LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE
+from admission.ddd.admission.enums import (
+    TypeItemFormulaire,
+    Onglets,
+    ChoixAffiliationSport,
+    LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE,
+)
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -981,6 +989,12 @@ def country_name_from_iso_code(iso_code: str):
 def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+
+
+@register.filter
+def get_ordered_checklist_items_doctorate(checklist_items: dict):
+    """Return the ordered checklist items."""
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]])
 
 
 @register.filter
