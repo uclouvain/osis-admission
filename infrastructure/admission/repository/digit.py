@@ -279,8 +279,9 @@ class DigitRepository(IDigitRepository):
             return student.registration_id
 
         # Check person in EPC
-        return _find_student_registration_id_in_epc(matricule=candidate.global_id)
-
+        noma_from_epc = _find_student_registration_id_in_epc(matricule=candidate.global_id)
+        if noma_from_epc:
+            return noma_from_epc
 
 
 def _retrieve_person_ticket_status(request_id: int):

@@ -132,12 +132,11 @@ class IDigitService(interface.DomainService):
 
     @classmethod
     def _verifier_statut_autorise(cls, logger, proposition, proposition_fusion):
-        if (proposition.type_demande == TypeDemande.ADMISSION and proposition.statut not in {
+        if proposition.type_demande == TypeDemande.ADMISSION and proposition.statut not in {
             ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE,
             ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE,
             ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE,
-        } and proposition_fusion.statut not in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.REFUSED.name]
-                and not cls.correspond_a_compte_temporaire(proposition.matricule_candidat)):
+        } and proposition_fusion.statut not in [PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.REFUSED.name]:
             logger.error(
                 f"SOUMETTRE TICKET CREATION PERSONNE - AdmissionDansUnStatutPasAutoriseASInscrireException"
             )
