@@ -476,7 +476,8 @@ def _find_student_registration_id_in_epc(matricule):
         url = f"{settings.ESB_STUDENT_API}/{matricule}"
         response = requests.get(url, headers={"Authorization": settings.ESB_AUTHORIZATION})
         result = response.json()
-        if response.status_code == 200 and result.get('noma'):
-            return result.get('noma')
-    except (RequestException, ValueError):
+        if response.status_code == 200 and result.get('lireDossierEtudiantResponse'):
+            if result['lireDossierEtudiantResponse'].get('return'):
+                return result['lireDossierEtudiantResponse']['return'].get('noma')
+    except (RequestException, ValueError) as e:
         return None
