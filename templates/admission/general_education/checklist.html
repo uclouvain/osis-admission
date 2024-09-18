@@ -142,7 +142,7 @@
             <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
                 <div class="panel-body bg-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
                     <div>
-                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.status == 'ERROR' %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
+                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.in_error %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
                     </div>
                 </div>
             </div>
