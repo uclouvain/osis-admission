@@ -42,11 +42,11 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
-    def historiser_completion(cls, proposition: Proposition):
+    def historiser_completion(cls, proposition: Proposition, matricule_auteur: str):
         pass
 
     @classmethod
-    def historiser_completion_cotutelle(cls, proposition: Proposition):
+    def historiser_completion_cotutelle(cls, proposition: Proposition, matricule_auteur: str):
         pass
 
     @classmethod
@@ -56,6 +56,7 @@ class HistoriqueInMemory(IHistorique):
         signataire_id: 'SignataireIdentity',
         avis: AvisDTO,
         statut_original_proposition: 'ChoixStatutPropositionDoctorale',
+        matricule_auteur: Optional[str] = '',
     ):
         pass
 
@@ -65,6 +66,7 @@ class HistoriqueInMemory(IHistorique):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
         pass
 
@@ -74,11 +76,38 @@ class HistoriqueInMemory(IHistorique):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
         pass
 
     @classmethod
-    def historiser_demande_signatures(cls, proposition: Proposition):
+    def historiser_modification_membre(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        pass
+
+    @classmethod
+    def historiser_designation_promoteur_reference(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        pass
+
+    @classmethod
+    def historiser_send_back_to_candidate(
+        cls,
+        proposition: Proposition,
+        matricule_gestionnaire: str,
+    ):
+        pass
+
+    @classmethod
+    def historiser_demande_signatures(cls, proposition: Proposition, matricule_auteur: str):
         pass
 
     @classmethod

@@ -39,6 +39,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     SignataireNonTrouveException,
     SignatairePasInviteException,
 )
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -47,6 +48,8 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import \
+    PersonneConnueUclInMemoryTranslator
 
 
 class TestApprouverPropositionService(TestCase):
@@ -55,6 +58,9 @@ class TestApprouverPropositionService(TestCase):
         self.uuid_membre = 'membre-ca-SC3DP-invite'
         self.uuid_proposition = 'uuid-SC3DP-membres-invites'
 
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
+            PersonneConnueUclDTOFactory(matricule="0123456"),
+        )
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.proposition_id = PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition)
@@ -89,6 +95,7 @@ class TestApprouverPropositionService(TestCase):
         cmd = ApprouverPropositionParPdfCommand(
             uuid_proposition=self.uuid_proposition,
             uuid_membre=self.uuid_promoteur,
+            matricule_auteur="0123456",
             pdf=['some-uuid'],
         )
         proposition_id = self.message_bus.invoke(cmd)
@@ -117,6 +124,7 @@ class TestApprouverPropositionService(TestCase):
     def test_should_approuver_membre_ca_par_pdf(self):
         cmd = ApprouverPropositionParPdfCommand(
             uuid_proposition=self.uuid_proposition,
+            matricule_auteur="0123456",
             uuid_membre=self.uuid_membre,
             pdf=['some-uuid'],
         )
