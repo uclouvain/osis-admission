@@ -189,6 +189,7 @@ class ApproveByPdfPropositionAPIView(APIPermissionRequiredMixin, APIView):
         proposition_id = message_bus_instance.invoke(
             ApprouverPropositionParPdfCommand(
                 uuid_proposition=str(kwargs["uuid"]),
+                matricule_auteur=self.get_permission_object().candidate.global_id,
                 **serializer.data,
             ),
         )

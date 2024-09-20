@@ -91,6 +91,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     RefuserParCDDValidatorList,
     GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
     SpecifierNouvellesInformationsDecisionCDDValidatorList,
+    RedonnerLaMainAuCandidatValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
@@ -599,6 +600,12 @@ class Proposition(interface.RootEntity):
 
     def valider_inscription(self):
         self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE
+
+    def redonner_la_main_au_candidat(self):
+        RedonnerLaMainAuCandidatValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
 
     def definir_institut_these(self, institut_these: Optional[str]):
         if institut_these:

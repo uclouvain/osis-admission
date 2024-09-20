@@ -67,24 +67,24 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_completion(cls, proposition: Proposition):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+    def historiser_completion(cls, proposition: Proposition, matricule_auteur: str):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
             proposition.entity_id.uuid,
-            "La proposition a été modifiée (Projet doctoral).",
-            "The proposition has been completed (Doctoral project).",
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "La proposition a été modifiée (Projet de recherche).",
+            "The proposition has been completed (Research project).",
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", 'modification'],
         )
 
     @classmethod
-    def historiser_completion_cotutelle(cls, proposition: Proposition):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+    def historiser_completion_cotutelle(cls, proposition: Proposition, matricule_auteur: str):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
             proposition.entity_id.uuid,
             "La proposition a été modifiée (Cotutelle).",
             "The proposition has been completed (Cotutelle).",
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", 'modification'],
         )
 
@@ -95,9 +95,13 @@ class Historique(IHistorique):
         signataire_id: 'SignataireIdentity',
         avis: AvisDTO,
         statut_original_proposition: 'ChoixStatutPropositionDoctorale',
+        matricule_auteur: Optional[str] = '',
     ):
         signataire = cls.get_signataire(signataire_id)
-        auteur = PersonneConnueUclTranslator().get(proposition.matricule_candidat) if avis.pdf else signataire
+        if matricule_auteur:
+            auteur = PersonneConnueUclTranslator().get(matricule_auteur)
+        else:
+            auteur = signataire
 
         # Basculer en français pour la traduction de l'état
         with translation.override(settings.LANGUAGE_CODE_FR):
@@ -156,8 +160,9 @@ class Historique(IHistorique):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         signataire = cls.get_signataire(signataire_id)
         add_history_entry(
             proposition.entity_id.uuid,
@@ -169,7 +174,7 @@ class Historique(IHistorique):
                 "promoter" if isinstance(signataire_id, PromoteurIdentity) else "CA member",
                 membre=signataire,
             ),
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", "supervision"],
         )
 
@@ -179,8 +184,9 @@ class Historique(IHistorique):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         signataire = cls.get_signataire(signataire_id)
         add_history_entry(
             proposition.entity_id.uuid,
@@ -192,18 +198,63 @@ class Historique(IHistorique):
                 "promoters" if isinstance(signataire_id, PromoteurIdentity) else "CA members",
                 membre=signataire,
             ),
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", "supervision"],
         )
 
     @classmethod
-    def historiser_demande_signatures(cls, proposition: Proposition):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+    def historiser_modification_membre(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
+        signataire = cls.get_signataire(signataire_id)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "{membre.prenom} {membre.nom} a été modifié.".format(membre=signataire),
+            "{membre.prenom} {membre.nom} has been updated.".format(membre=signataire),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
+            tags=["proposition", "supervision"],
+        )
+
+    @classmethod
+    def historiser_designation_promoteur_reference(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
+        signataire = cls.get_signataire(signataire_id)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "{membre.prenom} {membre.nom} a été désigné comme promoteur de référence.".format(membre=signataire),
+            "{membre.prenom} {membre.nom} has been designated as lead supervisor.".format(membre=signataire),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
+            tags=["proposition", "supervision"],
+        )
+
+    @classmethod
+    def historiser_send_back_to_candidate(cls, proposition: Proposition, matricule_gestionnaire: str):
+        gestionnaire = PersonneConnueUclTranslator.get(matricule_gestionnaire)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "La main a été redonné au candidat.",
+            "Proposition was sent back to the candidate.",
+            "{gestionnaire.prenom} {gestionnaire.nom}".format(gestionnaire=gestionnaire),
+            tags=["proposition", "supervision", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_demande_signatures(cls, proposition: Proposition, matricule_auteur: str):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
             proposition.entity_id.uuid,
             "Les demandes de signatures ont été envoyées.",
             "Signing requests have been sent.",
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", "supervision", "status-changed"],
         )
 

@@ -63,7 +63,7 @@
 {% panel _("Research project") %}
   {% field_data _("Project title") proposition.titre_projet %}
   {% field_data _("Project resume") proposition.resume_projet|linebreaks %}
-  {% field_data _("Thesis language") proposition.langue_redaction_these|enum_display:'ChoixLangueRedactionThese' %}
+  {% field_data _("Thesis language") proposition.langue_redaction_these|osis_language_name %}
   {% if proposition.institut_these %}
     {% display proposition.nom_institut_these ' ' '(' proposition.sigle_institut_these ')' as institut_these %}
   {% endif %}

@@ -693,3 +693,11 @@ class TypeCompteBancaireRemboursementNonCompleteDoctoratException(BusinessExcept
     def __init__(self, **kwargs):
         message = _("You haven't answered to the question about your bank account.")
         super().__init__(message, **kwargs)
+
+
+class PropositionNonEnAttenteDeSignatureException(BusinessException):
+    status_code = "DOCTORAT-8"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be in the 'waiting for signature' status.")
+        super().__init__(message, **kwargs)

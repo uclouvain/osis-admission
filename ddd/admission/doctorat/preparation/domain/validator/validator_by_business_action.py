@@ -57,6 +57,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.doctorat.preparation.domain.validator import *
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
+    ShouldStatutEtreEnAttenteDeSignature,
+)
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
@@ -701,4 +705,17 @@ class SpecifierInformationsApprobationInscriptionValidatorList(TwoStepsMultipleB
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldSicPeutDonnerDecision(statut=self.statut),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RedonnerLaMainAuCandidatValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldStatutEtreEnAttenteDeSignature(self.statut),
         ]

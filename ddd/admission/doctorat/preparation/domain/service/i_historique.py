@@ -44,11 +44,11 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def historiser_completion(cls, proposition: Proposition):
+    def historiser_completion(cls, proposition: Proposition, matricule_auteur: str):
         raise NotImplementedError
 
     @classmethod
-    def historiser_completion_cotutelle(cls, proposition: Proposition):
+    def historiser_completion_cotutelle(cls, proposition: Proposition, matricule_auteur: str):
         raise NotImplementedError
 
     @classmethod
@@ -58,6 +58,7 @@ class IHistorique(interface.DomainService):
         signataire_id: 'SignataireIdentity',
         avis: AvisDTO,
         statut_original_proposition: 'ChoixStatutPropositionDoctorale',
+        matricule_auteur: Optional[str] = '',
     ):
         raise NotImplementedError
 
@@ -67,6 +68,7 @@ class IHistorique(interface.DomainService):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
         raise NotImplementedError
 
@@ -76,11 +78,34 @@ class IHistorique(interface.DomainService):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
         raise NotImplementedError
 
     @classmethod
-    def historiser_demande_signatures(cls, proposition: Proposition):
+    def historiser_modification_membre(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_designation_promoteur_reference(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_send_back_to_candidate(cls, proposition: Proposition, matricule_gestionnaire: str):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_demande_signatures(cls, proposition: Proposition, matricule_auteur: str):
         raise NotImplementedError
 
     @classmethod

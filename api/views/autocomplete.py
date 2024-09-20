@@ -346,13 +346,16 @@ class AutocompletePersonView(ListAPIView):
         Person.objects.exclude(
             # Remove unexistent users
             Q(user_id__isnull=True)
-            | Q(global_id=''),
+            | Q(global_id='')
+            | Q(first_name='')
+            | Q(last_name='')
         )
         .alias(
             # Remove students
             is_student=Exists(Student.objects.filter(person=OuterRef('pk'))),
         )
         .filter(is_student=False)
+        .order_by('last_name', 'first_name')
     )
 
 

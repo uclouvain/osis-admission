@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ def identifier_promoteur(
     # THEN
     promoteur_id = groupe_supervision_repository.add_member(
         groupe_id=groupe_de_supervision.entity_id,
+        proposition_status=proposition.statut,
         type=ActorType.PROMOTER,
         matricule=cmd.matricule,
         first_name=cmd.prenom,
@@ -87,6 +88,6 @@ def identifier_promoteur(
         country_code=cmd.pays,
         language=cmd.langue,
     )
-    historique.historiser_ajout_membre(proposition, groupe_de_supervision, promoteur_id)
+    historique.historiser_ajout_membre(proposition, groupe_de_supervision, promoteur_id, cmd.matricule_auteur)
 
     return promoteur_id  # type: ignore[return-value]

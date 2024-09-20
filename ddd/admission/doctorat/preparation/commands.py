@@ -52,6 +52,7 @@ class InitierPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterPropositionCommand(interface.CommandRequest):
     uuid: str
+    matricule_auteur: str
     justification: Optional[str] = ''
     commission_proximite: Optional[str] = ''
     type_financement: Optional[str] = ''
@@ -102,6 +103,7 @@ class RecupererResumePropositionQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierPromoteurCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     matricule: Optional[str]
     prenom: Optional[str]
     nom: Optional[str]
@@ -116,6 +118,7 @@ class IdentifierPromoteurCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     matricule: Optional[str]
     prenom: Optional[str]
     nom: Optional[str]
@@ -130,6 +133,7 @@ class IdentifierMembreCACommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ModifierMembreSupervisionExterneCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     uuid_membre: str
     prenom: Optional[str]
     nom: Optional[str]
@@ -144,6 +148,13 @@ class ModifierMembreSupervisionExterneCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class DemanderSignaturesCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RedonnerLaMainAuCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    matricule_gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -166,18 +177,21 @@ class VerifierProjetQuery(interface.QueryRequest):
 class SupprimerPromoteurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_promoteur: str
+    matricule_auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class DesignerPromoteurReferenceCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_promoteur: str
+    matricule_auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SupprimerMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_membre_ca: str
+    matricule_auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -209,6 +223,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class DefinirCotutelleCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     motivation: Optional[str] = ''
     institution_fwb: Optional[bool] = None
     institution: Optional[str] = ''
@@ -252,6 +267,7 @@ class SupprimerPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionParPdfCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     uuid_membre: str
     pdf: List[str] = attr.Factory(list)
 

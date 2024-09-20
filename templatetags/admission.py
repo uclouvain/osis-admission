@@ -32,6 +32,7 @@ from inspect import getfullargspec
 from typing import Union, Optional, List, Dict
 from urllib.parse import urlencode
 
+import attr
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
@@ -111,12 +112,19 @@ from admission.exports.admission_recap.section import (
     get_secondary_studies_context,
     get_non_educational_experience_context,
 )
+from admission.forms.admission.doctorate.supervision import DoctorateAdmissionMemberSupervisionForm
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import get_access_conditions_url, get_experience_urls
+from admission.utils import (
+    get_access_conditions_url,
+    get_experience_urls,
+    get_superior_institute_queryset,
+    format_school_title,
+)
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.entity_version import EntityVersion
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
@@ -128,6 +136,7 @@ from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
+from reference.models.language import Language
 
 PERMISSION_BY_ADMISSION_CLASS = {
     DoctorateAdmission: 'doctorateadmission',
@@ -362,11 +371,6 @@ TAB_TREES = {
         Tab('experience', _('Previous experience'), 'list-alt'): [
             Tab('curriculum', _('Curriculum')),
             Tab('languages', _('Knowledge of languages')),
-        ],
-        Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
-            Tab('project', _('Research project')),
-            Tab('cotutelle', _('Cotutelle')),
-            Tab('supervision', _('Supervision')),
         ],
         Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
             Tab('project', pgettext('tab', 'Research project')),
@@ -1735,3 +1739,39 @@ def sport_affiliation_value(affiliation: Optional[str], campus_name: Optional[st
         return ChoixAffiliationSport.get_value(affiliation)
 
     return LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE.get(campus_name, ChoixAffiliationSport.NON.value)
+
+
+@register.filter
+def osis_language_name(code):
+    if not code:
+        return ''
+    try:
+        language = Language.objects.get(code=code)
+    except Language.DoesNotExist:
+        return code
+    if get_language() == settings.LANGUAGE_CODE_FR:
+        return language.name
+    else:
+        return language.name_en
+
+
+@register.filter
+def superior_institute_name(organization_uuid):
+    if not organization_uuid:
+        return ''
+    try:
+        institute = get_superior_institute_queryset().get(organization_uuid=organization_uuid)
+    except EntityVersion.DoesNotExist:
+        return organization_uuid
+    return mark_safe(format_school_title(institute))
+
+
+@register.simple_tag(takes_context=True)
+def edit_external_member_form(context, membre):
+    """Get an edit form"""
+    initial = attr.asdict(membre)
+    initial['pays'] = initial['code_pays']
+    return DoctorateAdmissionMemberSupervisionForm(
+        prefix=f"member-{membre.uuid}",
+        initial=initial,
+    )
