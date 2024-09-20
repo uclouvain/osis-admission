@@ -991,10 +991,11 @@
           });
 
           // Pass the ckeditor data to the form data if necessary
-          $(document).on('click', '.ckeditor-form [type="submit"]', function(event) {
-            $(this).closest('form').find("textarea[data-type=ckeditortype]").each(function() {
-              CKEDITOR.instances[$(this).attr('id')].updateElement();
-            })
+          $(document).on('click', '.ckeditor-form [type="submit"], .ckeditor-form [name="save"]', function(event) {
+            $(this).closest('form').find("textarea").each(function() {
+                const editor = CKEDITOR.instances[$(this).attr('id')];
+                if (editor) editor.updateElement();
+            });
           });
 
       })(jQuery)
