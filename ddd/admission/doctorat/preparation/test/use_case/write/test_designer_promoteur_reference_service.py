@@ -33,16 +33,22 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonTrouveeException,
     SignataireNonTrouveException,
 )
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import \
+    PersonneConnueUclInMemoryTranslator
 
 
 class TestDesignerPromoteurDeReferenceService(TestCase):
     def setUp(self) -> None:
         self.uuid_promoteur = 'promoteur-SC3DP'
         self.uuid_proposition = 'uuid-SC3DP-sans-promoteur-reference'
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
+            PersonneConnueUclDTOFactory(matricule="0123456"),
+        )
 
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.proposition_id = PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition)
@@ -51,6 +57,7 @@ class TestDesignerPromoteurDeReferenceService(TestCase):
         self.cmd = DesignerPromoteurReferenceCommand(
             uuid_proposition=self.uuid_proposition,
             uuid_promoteur=self.uuid_promoteur,
+            matricule_auteur="0123456",
         )
         self.addCleanup(self.groupe_de_supervision_repository.reset)
 
@@ -74,6 +81,7 @@ class TestDesignerPromoteurDeReferenceService(TestCase):
             DesignerPromoteurReferenceCommand(
                 uuid_proposition=uuid_proposition,
                 uuid_promoteur="promoteur-SC3DP-deja-approuve",
+                matricule_auteur="0123456",
             )
         )
         self.assertEqual(proposition_id.uuid, uuid_proposition)

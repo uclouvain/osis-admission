@@ -122,6 +122,8 @@ class IdentifierPromoteurCommandSerializer(DTOSerializer):
 
 
 class IdentifierMembreCACommandSerializer(DTOSerializer):
+    matricule_auteur = None
+
     class Meta:
         source = IdentifierMembreCACommand
         extra_kwargs = {
@@ -141,6 +143,8 @@ class IdentifierSupervisionActorSerializer(IdentifierMembreCACommandSerializer):
 
 
 class DesignerPromoteurReferenceCommandSerializer(DTOSerializer):
+    matricule_auteur = None
+
     class Meta:
         source = DesignerPromoteurReferenceCommand
 
@@ -156,6 +160,8 @@ class SupprimerMembreCACommandSerializer(DTOSerializer):
 
 
 class ModifierMembreSupervisionExterneSerializer(DTOSerializer):
+    matricule_auteur = None
+
     class Meta:
         source = ModifierMembreSupervisionExterneCommand
 
