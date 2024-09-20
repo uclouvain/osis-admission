@@ -733,6 +733,7 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
     langue_redaction_these = RelatedLanguageField(required=False)
     institut_these = RelatedInstituteField(required=False)
     type_admission = None
+    matricule_auteur = None
 
     class Meta:
         source = CompleterPropositionCommand
