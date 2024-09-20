@@ -29,6 +29,7 @@ from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_b
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DerogationFinancement
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
