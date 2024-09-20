@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -72,7 +72,12 @@ class RequestSignaturesAPIView(APIPermissionRequiredMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         """Ask for all promoters and members to sign the proposition."""
-        result = message_bus_instance.invoke(DemanderSignaturesCommand(uuid_proposition=str(kwargs["uuid"])))
+        result = message_bus_instance.invoke(
+            DemanderSignaturesCommand(
+                matricule_auteur=self.get_permission_object().candidate.global_id,
+                uuid_proposition=str(kwargs["uuid"]),
+            )
+        )
         self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

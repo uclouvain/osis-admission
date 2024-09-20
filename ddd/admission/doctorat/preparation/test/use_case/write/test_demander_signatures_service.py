@@ -63,6 +63,7 @@ class TestDemanderSignaturesService(TestCase):
             PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP'),
             PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP-unique'),
             PersonneConnueUclDTOFactory(matricule='candidat'),
+            PersonneConnueUclDTOFactory(matricule='0123456'),
         }
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
@@ -70,7 +71,7 @@ class TestDemanderSignaturesService(TestCase):
         self.addCleanup(self.proposition_repository.reset)
 
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = DemanderSignaturesCommand(uuid_proposition=self.uuid_proposition)
+        self.cmd = DemanderSignaturesCommand(uuid_proposition=self.uuid_proposition, matricule_auteur="0123456")
 
     def test_should_demander_signatures(self):
         proposition_id = self.message_bus.invoke(self.cmd)

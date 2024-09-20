@@ -37,10 +37,13 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonTrouveeException,
     SignataireNonTrouveException,
 )
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import \
+    PersonneConnueUclInMemoryTranslator
 
 
 class TestSupprimerPromoteurService(TestCase):
@@ -50,11 +53,15 @@ class TestSupprimerPromoteurService(TestCase):
 
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.proposition_id = PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition)
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
+            PersonneConnueUclDTOFactory(matricule="0123456"),
+        )
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = SupprimerPromoteurCommand(
             uuid_proposition=self.uuid_proposition,
             uuid_promoteur=self.matricule_promoteur,
+            matricule_auteur="0123456",
         )
         self.addCleanup(self.groupe_de_supervision_repository.reset)
 
