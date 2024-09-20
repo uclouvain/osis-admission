@@ -8107,14 +8107,11 @@ msgstr ""
 
 #, python-format
 msgid ""
-"This experience has been added by the applicant in another application, to "
-"proceed to a modification, click on his/her <a href=\"%(admission_url)s\" "
-"target=\"_blank\">other application %(admission_reference)s</a>."
+"This experience has been added by the applicant in <a "
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
 msgstr ""
-"Cette expérience a été ajoutée par le·la candidat·e dans une autre demande, "
-"pour procéder à une modification, cliquez sur son <a "
-"href=\"%(admission_url)s\" target=\"_blank\">autre demande "
-"%(admission_reference)s</a>."
+"Cette expérience a été ajoutée par le·la candidat·e dans une <a "
+"href=\"%(admission_url)s\" target=\"_blank\">autre demande</a>."
 
 msgid "This field is required if the first name is missing."
 msgstr "Ce champ est obligatoire si le prénom est manquant."
@@ -8481,9 +8478,6 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
-
-msgid "Valuate"
-msgstr "Valoriser"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
