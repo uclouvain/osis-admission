@@ -388,7 +388,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.admission.cotutelle = True
         self.admission.cotutelle_motivation = 'My motivation'
         self.admission.cotutelle_institution_fwb = True
-        self.admission.cotutelle_institution = 'Institute'
+        self.admission.cotutelle_institution = '34eab30c-27e3-40db-b92e-0b51546a2448'
         self.admission.cotutelle_opening_request = [uuid.uuid4()]
         self.admission.cotutelle_convention = [uuid.uuid4()]
         self.admission.cotutelle_other_documents = [uuid.uuid4()]
@@ -402,7 +402,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.cotutelle.cotutelle, True)
         self.assertEqual(result.cotutelle.motivation, 'My motivation')
         self.assertEqual(result.cotutelle.institution_fwb, True)
-        self.assertEqual(result.cotutelle.institution, 'Institute')
+        self.assertEqual(str(result.cotutelle.institution), '34eab30c-27e3-40db-b92e-0b51546a2448')
         self.assertEqual([str(result.cotutelle.demande_ouverture[0])], self.admission.cotutelle_opening_request)
         self.assertEqual([str(result.cotutelle.convention[0])], self.admission.cotutelle_convention)
         self.assertEqual([str(result.cotutelle.autres_documents[0])], self.admission.cotutelle_other_documents)
