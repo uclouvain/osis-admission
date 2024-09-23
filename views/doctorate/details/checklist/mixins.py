@@ -25,28 +25,35 @@
 # ##############################################################################
 from typing import List, Set
 
+from django.conf import settings
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override
 from osis_comment.models import CommentEntry
+from osis_mail_template.models import MailTemplate
 
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.doctorat.preparation.commands import VerifierCurriculumApresSoumissionQuery
+from admission.ddd.admission.doctorat.preparation.commands import (
+    VerifierCurriculumApresSoumissionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     OngletsChecklist,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.utils import get_missing_curriculum_periods
-from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC
+from admission.utils import get_portal_admission_list_url, get_portal_admission_url, get_backoffice_admission_url
+from admission.views.common.detail_tabs.comments import COMMENT_TAG_CDD_FOR_SIC
 from admission.views.common.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.entity_version import EntityVersion
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
@@ -80,6 +87,17 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         except MultipleBusinessExceptions as exc:
             return [e.message for e in sorted(exc.exceptions, key=lambda exception: exception.periode[0], reverse=True)]
 
+    @cached_property
+    def management_entity_title(self):
+        entity = EntityVersion.objects.filter(acronym=self.proposition.formation.sigle_entite_gestion).first()
+        return entity.title if entity else ''
+
+    @cached_property
+    def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        return message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         checklist_additional_icons = {}
@@ -90,7 +108,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             has_comment = (
                 CommentEntry.objects.filter(
                     object_uuid=self.admission_uuid,
-                    tags__contains=['decision_facultaire', COMMENT_TAG_FAC],
+                    tags__contains=['decision_facultaire', COMMENT_TAG_CDD_FOR_SIC],
                 )
                 .exclude(content='')
                 .exists()
@@ -167,3 +185,43 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
 def get_internal_experiences(matricule_candidat: str) -> List[ExperienceParcoursInterneDTO]:
     return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(matricule=matricule_candidat))
+
+
+def get_email(template_identifier, language, proposition_dto: PropositionGestionnaireDTO, extra_tokens: dict = None):
+    mail_template = MailTemplate.objects.filter(
+        identifier=template_identifier,
+        language=language,
+    ).first()
+
+    if not mail_template:
+        return '', ''
+
+    if not extra_tokens:
+        extra_tokens = {}
+
+    with override(language):
+        tokens = {
+            'admission_reference': proposition_dto.reference,
+            'candidate_first_name': proposition_dto.prenom_candidat,
+            'candidate_last_name': proposition_dto.nom_candidat,
+            'candidate_nationality_country': {
+                settings.LANGUAGE_CODE_FR: proposition_dto.nationalite_candidat_fr,
+                settings.LANGUAGE_CODE_EN: proposition_dto.nationalite_candidat_en,
+            }[language],
+            'training_acronym': proposition_dto.formation.sigle,
+            'training_title': {
+                settings.LANGUAGE_CODE_FR: proposition_dto.formation.intitule_fr,
+                settings.LANGUAGE_CODE_EN: proposition_dto.formation.intitule_en,
+            }[language],
+            'admissions_link_front': get_portal_admission_list_url(),
+            'admission_link_front': get_portal_admission_url('doctorate', str(proposition_dto.uuid)),
+            'admission_link_back': get_backoffice_admission_url('doctorate', str(proposition_dto.uuid)),
+            'training_campus': proposition_dto.formation.campus.nom,
+            'academic_year': proposition_dto.formation.annee,
+            **extra_tokens,
+        }
+
+        return (
+            mail_template.render_subject(tokens),
+            mail_template.body_as_html(tokens),
+        )

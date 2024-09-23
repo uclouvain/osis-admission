@@ -1567,8 +1567,6 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_regle_etabli_le=None,
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
-            certificat_refus_sic=[],
-            certificat_refus_fac=[],
             certificat_approbation_fac=[],
             doit_fournir_visa_etudes=False,
             visa_etudes_d=['uuid-visa-etudes-d'],

@@ -138,7 +138,6 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             program_planned_years_number=2,
             annual_program_contact_person_name='foo',
             annual_program_contact_person_email='bar@example.org',
-            with_additional_approval_conditions=False,
             tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name,
             tuition_fees_dispensation=DispenseOuDroitsMajores.NON_CONCERNE.name,
             must_report_to_sic=False,

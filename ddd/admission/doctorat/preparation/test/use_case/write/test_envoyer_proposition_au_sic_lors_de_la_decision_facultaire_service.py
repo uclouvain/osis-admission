@@ -134,22 +134,3 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
                 self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
-
-        # Statut de la checklist non conforme
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_BLOCAGE
-        self.proposition.checklist_actuelle.decision_facultaire.extra = {
-            'decision': DecisionFacultaireEnum.EN_DECISION.value
-        }
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
-
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_REUSSITE
-        self.proposition.checklist_actuelle.decision_facultaire.extra = {}
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)

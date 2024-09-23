@@ -619,16 +619,18 @@ class SituationPropositionNonFACException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class MotifRefusFacultaireNonSpecifieException(BusinessException):
-    status_code = "PROPOSITION-69"
+class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException):
+    status_code = "PROPOSITION-70"
 
     def __init__(self, **kwargs):
-        message = _("When refusing a proposition, the reason must be specified.")
+        message = _(
+            "When accepting a proposition, all the required information in the approval form must be specified.",
+        )
         super().__init__(message, **kwargs)
 
 
-class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException):
-    status_code = "PROPOSITION-70"
+class InformationsAcceptationSICNonSpecifieesException(BusinessException):
+    status_code = "PROPOSITION-71"
 
     def __init__(self, **kwargs):
         message = _(

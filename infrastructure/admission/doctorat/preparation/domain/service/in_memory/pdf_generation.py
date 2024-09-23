@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import Optional, List
 
+from admission.ddd.admission.doctorat.preparation.dtos import GroupeDeSupervisionDTO
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
@@ -48,16 +49,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
-    ) -> None:
-        pass
-
-    @classmethod
-    def generer_attestation_refus_facultaire(
-        cls,
-        proposition: Proposition,
-        gestionnaire: PersonneConnueUclDTO,
-        proposition_repository: IPropositionRepository,
-        unites_enseignement_translator: IUnitesEnseignementTranslator,
+        groupe_supervision_dto: GroupeDeSupervisionDTO,
     ) -> None:
         pass
 

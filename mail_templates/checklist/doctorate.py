@@ -360,3 +360,119 @@ templates.register(
         ),
     ],
 )
+
+
+ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE = 'osis-admission-fac-refusal-doctorate'
+templates.register(
+    ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
+    description=_('Email sent to the candidate when the faculty refuses a doctorate admission.'),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
+        ),
+    ],
+)
+
+ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA = (
+    'osis-admission-fac-approval-doctorate-with-belgian-diploma'
+)
+templates.register(
+    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
+    description=_(
+        'Email sent to the candidate when the faculty approves a doctorate admission of a candidate with a '
+        'Belgian diploma.'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
+        ),
+    ],
+)
+
+ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA = (
+    'osis-admission-fac-approval-doctorate-without-belgian-diploma'
+)
+templates.register(
+    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+    description=_(
+        'Email sent to the candidate when the faculty approves a doctorate admission of a candidat without any Belgian '
+        'diploma.'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
+        ),
+    ],
+)

@@ -34,6 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 
 class HistoriqueInMemory(IHistorique):
@@ -97,7 +98,6 @@ class HistoriqueInMemory(IHistorique):
     def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         cls,
         proposition: Proposition,
-        message: Optional[EmailMessage],
         gestionnaire: str,
     ):
         pass
@@ -112,19 +112,15 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
+    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str, message: EmailMessage):
         pass
 
     @classmethod
-    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
-        pass
-
-    @classmethod
-    def historiser_specification_motifs_refus_sic(
+    def historiser_acceptation_fac(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
-        statut_original: ChoixStatutPropositionDoctorale,
+        gestionnaire: PersonneConnueUclDTO,
+        message: EmailMessage,
     ):
         pass
 

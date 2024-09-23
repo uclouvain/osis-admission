@@ -111,6 +111,8 @@ class TestApprouverPropositionParFaculte(TestCase):
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-APPROVED',
             'gestionnaire': '00321234',
+            'objet_message': 'Objet du message',
+            'corps_message': 'Corps du message',
         }
         self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
         self.titre_acces = TitreAccesSelectionnableFactory(
@@ -143,24 +145,6 @@ class TestApprouverPropositionParFaculte(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
                 self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
-
-    def test_should_lever_exception_si_presence_conditions_complementaires_non_specifiee(self):
-        self.proposition.avec_conditions_complementaires = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
-
-    def test_should_lever_exception_si_conditions_complementaires_non_specifiees(self):
-        self.proposition.avec_conditions_complementaires = True
-        self.proposition.conditions_complementaires_existantes = []
-        self.proposition.conditions_complementaires_libres = []
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
 
     def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None

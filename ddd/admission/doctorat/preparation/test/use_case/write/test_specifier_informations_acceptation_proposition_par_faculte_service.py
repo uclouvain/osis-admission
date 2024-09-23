@@ -41,10 +41,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-)
-from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -70,10 +66,6 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-confirmee',
-            'sigle_autre_formation': '',
-            'avec_conditions_complementaires': False,
-            'uuids_conditions_complementaires_existantes': [],
-            'conditions_complementaires_libres': [],
             'avec_complements_formation': False,
             'uuids_complements_formation': [],
             'commentaire_complements_formation': '',
@@ -95,11 +87,10 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_REUSSITE)
-        self.assertEqual(proposition.autre_formation_choisie_fac_id, None)
-        self.assertEqual(proposition.avec_conditions_complementaires, False)
-        self.assertEqual(proposition.conditions_complementaires_existantes, [])
-        self.assertEqual(proposition.conditions_complementaires_libres, [])
+        self.assertEqual(
+            proposition.checklist_actuelle.decision_facultaire.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
         self.assertEqual(proposition.avec_complements_formation, False)
         self.assertEqual(proposition.complements_formation, [])
         self.assertEqual(proposition.commentaire_complements_formation, '')
@@ -116,19 +107,6 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
         resultat = self.message_bus.invoke(
             self.command(
                 uuid_proposition='uuid-SC3DP-confirmee',
-                sigle_autre_formation='BACHELIER-ECO',
-                avec_conditions_complementaires=True,
-                uuids_conditions_complementaires_existantes=['uuid-condition-complementaire-1'],
-                conditions_complementaires_libres=[
-                    {
-                        'name_fr': 'Condition libre 1',
-                        'name_en': 'Free condition 1',
-                        'related_experience_id': self.uuid_experience,
-                    },
-                    {
-                        'name_fr': 'Condition libre 2',
-                    },
-                ],
                 avec_complements_formation=True,
                 uuids_complements_formation=['uuid-complement-formation-1'],
                 commentaire_complements_formation='Mon commentaire concernant les compléments de formation',
@@ -142,31 +120,10 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
 
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_REUSSITE)
         self.assertEqual(
-            proposition.autre_formation_choisie_fac_id,
-            FormationIdentity(
-                sigle='BACHELIER-ECO',
-                annee=2020,
-            ),
+            proposition.checklist_actuelle.decision_facultaire.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
-        self.assertEqual(proposition.avec_conditions_complementaires, True)
-        self.assertEqual(
-            proposition.conditions_complementaires_existantes,
-            [
-                ConditionComplementaireApprobationIdentity(
-                    uuid='uuid-condition-complementaire-1',
-                )
-            ],
-        )
-        self.assertEqual(len(proposition.conditions_complementaires_libres), 2)
-        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_fr, 'Condition libre 1')
-        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_en, 'Free condition 1')
-        self.assertEqual(proposition.conditions_complementaires_libres[0].uuid_experience, self.uuid_experience)
-        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_fr, 'Condition libre 2')
-        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_en, '')
-        self.assertEqual(proposition.conditions_complementaires_libres[1].uuid_experience, '')
-
         self.assertEqual(proposition.avec_complements_formation, True)
         self.assertEqual(
             proposition.complements_formation,

@@ -41,7 +41,6 @@ def envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     proposition.soumettre_au_sic_lors_de_la_decision_facultaire(
-        envoi_par_fac=cmd.envoi_par_fac,
         auteur_modification=cmd.gestionnaire,
     )
 

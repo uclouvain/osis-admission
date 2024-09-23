@@ -29,6 +29,7 @@ from decimal import Decimal
 from typing import Dict, List, Optional, Union
 
 import attr
+from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
@@ -68,7 +69,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DispenseOuDroitsMajores
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DroitsInscriptionMontant
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import MobiliteNombreDeMois
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import TypeDeRefus
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     StatutsChecklistDoctorale,
     StatutChecklist,
@@ -84,25 +84,18 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     SpecifierConditionAccesParcoursAnterieurValidatorList,
     ApprouverParSicAValiderValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
-    RefuserParSicAValiderValidatorList,
-    RefuserParSicValidatorList,
     ApprouverInscriptionParSicValidatorList,
     ApprouverAdmissionParSicValidatorList,
     SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
     ApprouverParFacValidatorList,
     RefuserParFacValidatorList,
-    FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
-    SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
+    GestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-    ConditionComplementaireLibreApprobation,
-)
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -114,6 +107,7 @@ from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import (
@@ -139,8 +133,6 @@ from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAc
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
-from django.utils.translation import gettext_noop as __
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -206,19 +198,12 @@ class Proposition(interface.RootEntity):
 
     # Décision facultaire & sic
     certificat_approbation_fac: List[str] = attr.Factory(list)
-    certificat_refus_fac: List[str] = attr.Factory(list)
     certificat_approbation_sic: List[str] = attr.Factory(list)
     certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
-    certificat_refus_sic: List[str] = attr.Factory(list)
 
-    type_de_refus: Optional['TypeDeRefus'] = None
     motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
     autres_motifs_refus: List[str] = attr.Factory(list)
 
-    autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None
-    avec_conditions_complementaires: Optional[bool] = None
-    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity] = attr.Factory(list)
-    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation] = attr.Factory(list)
     complements_formation: Optional[List[ComplementFormationIdentity]] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     commentaire_complements_formation: str = ''
@@ -231,9 +216,6 @@ class Proposition(interface.RootEntity):
     droits_inscription_montant: Optional['DroitsInscriptionMontant'] = None
     droits_inscription_montant_autre: Optional[Decimal] = None
     dispense_ou_droits_majores: Optional['DispenseOuDroitsMajores'] = None
-    tarif_particulier: str = ''
-    refacturation_ou_tiers_payant: str = ''
-    annee_de_premiere_inscription_et_statut: str = ''
     est_mobilite: Optional[bool] = None
     nombre_de_mois_de_mobilite: Optional['MobiliteNombreDeMois'] = None
     doit_se_presenter_en_sic: Optional[bool] = None
@@ -887,9 +869,6 @@ class Proposition(interface.RootEntity):
     def _specifier_informations_de_base_acceptation_par_sic(
         self,
         auteur_modification: str,
-        avec_conditions_complementaires: Optional[bool],
-        uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[Dict]],
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
@@ -899,24 +878,6 @@ class Proposition(interface.RootEntity):
     ):
         """Spécifier les informations d'acceptation par SIC communes entre les admissions et les inscriptions."""
         self.auteur_derniere_modification = auteur_modification
-
-        self.avec_conditions_complementaires = avec_conditions_complementaires
-        self.conditions_complementaires_existantes = (
-            [
-                ConditionComplementaireApprobationIdentity(uuid=uuid_condition)
-                for uuid_condition in uuids_conditions_complementaires_existantes
-            ]
-            if uuids_conditions_complementaires_existantes
-            else []
-        )
-        self.conditions_complementaires_libres = [
-            ConditionComplementaireLibreApprobation(
-                nom_fr=condition_libre.get('name_fr', ''),
-                nom_en=condition_libre.get('name_en', ''),
-                uuid_experience=condition_libre.get('related_experience_id', ''),
-            )
-            for condition_libre in conditions_complementaires_libres
-        ]
 
         self.avec_complements_formation = avec_complements_formation
         self.complements_formation = (
@@ -935,9 +896,6 @@ class Proposition(interface.RootEntity):
         self,
         auteur_modification: str,
         documents_dto: List[EmplacementDocumentDTO],
-        avec_conditions_complementaires: Optional[bool],
-        uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[Dict]],
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
@@ -947,9 +905,6 @@ class Proposition(interface.RootEntity):
         droits_inscription_montant: str,
         droits_inscription_montant_autre: Optional[float],
         dispense_ou_droits_majores: str,
-        tarif_particulier: str,
-        refacturation_ou_tiers_payant: str,
-        annee_de_premiere_inscription_et_statut: str,
         est_mobilite: Optional[bool],
         nombre_de_mois_de_mobilite: str,
         doit_se_presenter_en_sic: Optional[bool],
@@ -971,9 +926,6 @@ class Proposition(interface.RootEntity):
 
         self._specifier_informations_de_base_acceptation_par_sic(
             auteur_modification=auteur_modification,
-            avec_conditions_complementaires=avec_conditions_complementaires,
-            uuids_conditions_complementaires_existantes=uuids_conditions_complementaires_existantes,
-            conditions_complementaires_libres=conditions_complementaires_libres,
             avec_complements_formation=avec_complements_formation,
             uuids_complements_formation=uuids_complements_formation,
             commentaire_complements_formation=commentaire_complements_formation,
@@ -989,9 +941,6 @@ class Proposition(interface.RootEntity):
         self.dispense_ou_droits_majores = (
             DispenseOuDroitsMajores[dispense_ou_droits_majores] if dispense_ou_droits_majores else None
         )
-        self.tarif_particulier = tarif_particulier
-        self.refacturation_ou_tiers_payant = refacturation_ou_tiers_payant
-        self.annee_de_premiere_inscription_et_statut = annee_de_premiere_inscription_et_statut
         self.est_mobilite = est_mobilite
         self.nombre_de_mois_de_mobilite = (
             MobiliteNombreDeMois[nombre_de_mois_de_mobilite] if nombre_de_mois_de_mobilite else None
@@ -1003,9 +952,6 @@ class Proposition(interface.RootEntity):
     def specifier_informations_acceptation_inscription_par_sic(
         self,
         auteur_modification: str,
-        avec_conditions_complementaires: Optional[bool],
-        uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[Dict]],
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
@@ -1019,9 +965,6 @@ class Proposition(interface.RootEntity):
 
         self._specifier_informations_de_base_acceptation_par_sic(
             auteur_modification=auteur_modification,
-            avec_conditions_complementaires=avec_conditions_complementaires,
-            uuids_conditions_complementaires_existantes=uuids_conditions_complementaires_existantes,
-            conditions_complementaires_libres=conditions_complementaires_libres,
             avec_complements_formation=avec_complements_formation,
             uuids_complements_formation=uuids_complements_formation,
             commentaire_complements_formation=commentaire_complements_formation,
@@ -1029,40 +972,6 @@ class Proposition(interface.RootEntity):
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
         )
-
-    def specifier_motifs_refus_par_sic(
-        self,
-        auteur_modification: str,
-        type_de_refus: str,
-        uuids_motifs: List[str],
-        autres_motifs: List[str],
-    ):
-        RefuserParSicAValiderValidatorList(statut=self.statut).validate()
-        self.statut = ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION
-        self.checklist_actuelle.decision_sic = StatutChecklist(
-            statut=ChoixStatutChecklist.GEST_EN_COURS,
-            libelle=__('Refusal'),
-            extra={'en_cours': "refusal"},
-        )
-        self.auteur_derniere_modification = auteur_modification
-        self.type_de_refus = TypeDeRefus[type_de_refus] if type_de_refus else None
-        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
-        self.autres_motifs_refus = autres_motifs
-
-    def refuser_par_sic(self, auteur_modification: str):
-        RefuserParSicValidatorList(
-            statut=self.statut,
-            motifs_refus=self.motifs_refus,
-            autres_motifs_refus=self.autres_motifs_refus,
-        ).validate()
-
-        self.checklist_actuelle.decision_sic = StatutChecklist(
-            statut=ChoixStatutChecklist.GEST_BLOCAGE,
-            libelle=__('Refusal'),
-            extra={'blocage': 'refusal'},
-        )
-        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
-        self.auteur_derniere_modification = auteur_modification
 
     def approuver_par_sic(
         self,
@@ -1078,18 +987,12 @@ class Proposition(interface.RootEntity):
                 statut=self.statut,
                 checklist=self.checklist_actuelle,
                 besoin_de_derogation=self.besoin_de_derogation,
-                avec_conditions_complementaires=self.avec_conditions_complementaires,
-                conditions_complementaires_existantes=self.conditions_complementaires_existantes,
-                conditions_complementaires_libres=self.conditions_complementaires_libres,
                 documents_dto=documents_dto,
             ).validate()
 
         else:
             ApprouverAdmissionParSicValidatorList(
                 statut=self.statut,
-                avec_conditions_complementaires=self.avec_conditions_complementaires,
-                conditions_complementaires_existantes=self.conditions_complementaires_existantes,
-                conditions_complementaires_libres=self.conditions_complementaires_libres,
                 avec_complements_formation=self.avec_complements_formation,
                 complements_formation=self.complements_formation,
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
@@ -1145,11 +1048,6 @@ class Proposition(interface.RootEntity):
     def approuver_par_fac(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
         ApprouverParFacValidatorList(
             statut=self.statut,
-            avec_conditions_complementaires=self.avec_conditions_complementaires,
-            conditions_complementaires_existantes=self.conditions_complementaires_existantes,
-            conditions_complementaires_libres=self.conditions_complementaires_libres,
-            avec_complements_formation=self.avec_complements_formation,
-            complements_formation=self.complements_formation,
             nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
             titres_selectionnes=titres_selectionnes,
         ).validate()
@@ -1161,46 +1059,20 @@ class Proposition(interface.RootEntity):
     def refuser_par_fac(self, auteur_modification: str):
         RefuserParFacValidatorList(
             statut=self.statut,
-            motifs_refus=self.motifs_refus,
-            autres_motifs_refus=self.autres_motifs_refus,
         ).validate()
 
         self.specifier_refus_par_fac()
-        self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
+        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
         self.auteur_derniere_modification = auteur_modification
 
-    def soumettre_au_sic_lors_de_la_decision_facultaire(self, envoi_par_fac: bool, auteur_modification: str):
-        if envoi_par_fac:
-            FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
-                statut=self.statut,
-                checklist_actuelle=self.checklist_actuelle,
-            ).validate()
-        else:
-            SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(statut=self.statut).validate()
+    def soumettre_au_sic_lors_de_la_decision_facultaire(self, auteur_modification: str):
+        GestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
-        self.auteur_derniere_modification = auteur_modification
-
-    def specifier_motifs_refus_par_fac(
-        self,
-        uuids_motifs: List[str],
-        autres_motifs: List[str],
-        auteur_modification: str,
-    ):
-        SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
-            statut=self.statut,
-        ).validate()
-        self.specifier_refus_par_fac()
-        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
-        self.autres_motifs_refus = autres_motifs
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_informations_acceptation_par_fac(
         self,
         auteur_modification: str,
-        sigle_autre_formation: str,
-        avec_conditions_complementaires: Optional[bool],
-        uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[Dict]],
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
@@ -1212,35 +1084,7 @@ class Proposition(interface.RootEntity):
         SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
             statut=self.statut,
         ).validate()
-        self.specifier_acceptation_par_fac()
         self.auteur_derniere_modification = auteur_modification
-        self.autre_formation_choisie_fac_id = (
-            FormationIdentity(
-                sigle=sigle_autre_formation,
-                annee=self.annee_calculee,
-            )
-            if sigle_autre_formation
-            else None
-        )
-
-        self.avec_conditions_complementaires = avec_conditions_complementaires
-        self.conditions_complementaires_existantes = (
-            [
-                ConditionComplementaireApprobationIdentity(uuid=uuid_condition)
-                for uuid_condition in uuids_conditions_complementaires_existantes
-            ]
-            if uuids_conditions_complementaires_existantes
-            else []
-        )
-
-        self.conditions_complementaires_libres = [
-            ConditionComplementaireLibreApprobation(
-                nom_fr=condition_libre.get('name_fr', ''),
-                nom_en=condition_libre.get('name_en', ''),
-                uuid_experience=condition_libre.get('related_experience_id', ''),
-            )
-            for condition_libre in conditions_complementaires_libres
-        ]
 
         self.avec_complements_formation = avec_complements_formation
         self.complements_formation = (

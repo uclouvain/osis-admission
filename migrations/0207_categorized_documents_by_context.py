@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                             ('financabilite', 'Financeability'),
                             ('choix_formation', 'Course choice'),
                             ('projet_recherche', 'Research project'),
-                            ('decision_facultaire', 'Decision of the faculty'),
+                            ('decision_facultaire', 'Decision of the CDD'),
                             ('decision_sic', 'Decision of SIC'),
                         ),
                     ),
