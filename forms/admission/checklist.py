@@ -88,6 +88,8 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_FAC,
     COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_FAC_FOR_IUFC,
+    COMMENT_TAG_CDD_FOR_SIC,
+    COMMENT_TAG_SIC_FOR_CDD,
 )
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
@@ -137,12 +139,16 @@ class CommentForm(forms.Form):
             COMMENT_TAG_FAC: _('Faculty comment for the SIC'),
             COMMENT_TAG_IUFC_FOR_FAC: _('IUFC comment for the Faculty'),
             COMMENT_TAG_FAC_FOR_IUFC: _('Faculty comment for IUFC'),
+            COMMENT_TAG_CDD_FOR_SIC: _('CDD comment for the SIC'),
+            COMMENT_TAG_SIC_FOR_CDD: _('SIC comment for the CDD'),
             'authentication': _('Comment about the authentication'),
         }
 
         permissions = {
             COMMENT_TAG_SIC: 'admission.checklist_change_sic_comment',
             COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
+            COMMENT_TAG_SIC_FOR_CDD: 'admission.checklist_change_sic_comment',
+            COMMENT_TAG_CDD_FOR_SIC: 'admission.checklist_change_fac_comment',
             COMMENT_TAG_IUFC_FOR_FAC: 'admission.continuing_checklist_change_iufc_comment',
             COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
         }
@@ -520,7 +526,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         *args,
         **kwargs,
     ):
-        instance: Optional[Union[GeneralEducationAdmission, DoctorateAdmission]] = kwargs.get('instance', None)
+        instance: Optional[GeneralEducationAdmission] = kwargs.get('instance', None)
         data = kwargs.get('data', {})
         initial = kwargs.setdefault('initial', {})
 
@@ -675,9 +681,102 @@ class FacDecisionApprovalForm(forms.ModelForm):
         return cleaned_data
 
 
-class DoctorateFacDecisionApprovalForm(FacDecisionApprovalForm):
-    class Meta(FacDecisionApprovalForm.Meta):
+class DoctorateFacDecisionApprovalForm(forms.ModelForm):
+    SEPARATOR = ';'
+
+    prerequisite_courses = MultipleChoiceFieldWithBetterError(
+        label=_('List of LUs of the additional module or others'),
+        widget=Select2MultipleWithTagWhenNoResultWidget(
+            url='admission:autocomplete:learning-unit-years',
+            attrs={
+                'data-token-separators': '[{}]'.format(SEPARATOR),
+                'data-tags': 'true',
+                'data-allow-clear': 'false',
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+            },
+        ),
+        required=False,
+        help_text=_(
+            'You can search for an additional training by name or acronym, or paste in a list of acronyms separated '
+            'by the "%(separator)s" character and ending with the same character.'
+        )
+        % {'separator': SEPARATOR},
+    )
+
+    class Meta:
         model = DoctorateAdmission
+        fields = [
+            'prerequisite_courses',
+            'prerequisite_courses_fac_comment',
+            'program_planned_years_number',
+            'annual_program_contact_person_name',
+            'annual_program_contact_person_email',
+            'join_program_fac_comment',
+            'with_prerequisite_courses',
+        ]
+        labels = {
+            'annual_program_contact_person_name': _('First name and last name'),
+            'annual_program_contact_person_email': pgettext_lazy('admission', 'Email'),
+        }
+        widgets = {
+            'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'join_program_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'program_planned_years_number': forms.Select(
+                choices=EMPTY_CHOICE_AS_LIST
+                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
+            ),
+        }
+
+    def __init__(
+        self,
+        academic_year,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        self.academic_year = academic_year
+        self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
+
+        # Initialize additional trainings fields
+        lue_acronyms = {}
+
+        if self.is_bound:
+            lue_acronyms = {
+                (acronym, academic_year) for acronym in self.data.getlist(self.add_prefix('prerequisite_courses'))
+            }
+
+        elif self.instance:
+            lue_acronyms = set(self.instance.prerequisite_courses.all().values_list('acronym', 'academic_year__year'))
+            self.initial['prerequisite_courses'] = [acronym[0] for acronym in lue_acronyms]
+
+        learning_units = (
+            message_bus_instance.invoke(LearningUnitAndPartimSearchCommand(code_annee_values=lue_acronyms))
+            if lue_acronyms
+            else []
+        )
+
+        self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('with_prerequisite_courses'):
+            if cleaned_data.get('prerequisite_courses'):
+                cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
+                    acronym__in=cleaned_data.get('prerequisite_courses', []),
+                    academic_year__year=self.academic_year,
+                ).values_list('uuid', flat=True)
+
+        else:
+            cleaned_data['prerequisite_courses'] = []
+            cleaned_data['prerequisite_courses_fac_comment'] = ''
+
+        if not cleaned_data.get('program_planned_years_number'):
+            self.add_error('program_planned_years_number', FIELD_REQUIRED_MESSAGE)
+
+        return cleaned_data
 
 
 class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
@@ -1115,9 +1214,179 @@ class SicDecisionApprovalForm(forms.ModelForm):
         return cleaned_data
 
 
-class DoctorateSicDecisionApprovalForm(SicDecisionApprovalForm):
-    class Meta(SicDecisionApprovalForm.Meta):
+class DoctorateSicDecisionApprovalForm(forms.ModelForm):
+    SEPARATOR = ';'
+
+    prerequisite_courses = MultipleChoiceFieldWithBetterError(
+        label=_('List of LUs of the additional module or others'),
+        widget=Select2MultipleWithTagWhenNoResultWidget(
+            url='admission:autocomplete:learning-unit-years',
+            attrs={
+                'data-token-separators': '[{}]'.format(SEPARATOR),
+                'data-tags': 'true',
+                'data-allow-clear': 'false',
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+            },
+        ),
+        required=False,
+        help_text=_(
+            'You can search for an additional training by name or acronym, or paste in a list of acronyms separated '
+            'by the "%(separator)s" character and ending with the same character.'
+        )
+        % {'separator': SEPARATOR},
+    )
+
+    class Media:
+        js = ('js/dependsOn.min.js',)
+
+    class Meta:
         model = DoctorateAdmission
+        fields = [
+            'prerequisite_courses',
+            'prerequisite_courses_fac_comment',
+            'program_planned_years_number',
+            'annual_program_contact_person_name',
+            'annual_program_contact_person_email',
+            'with_prerequisite_courses',
+            'tuition_fees_amount',
+            'tuition_fees_amount_other',
+            'tuition_fees_dispensation',
+            'is_mobility',
+            'mobility_months_amount',
+            'must_report_to_sic',
+            'communication_to_the_candidate',
+            'must_provide_student_visa_d',
+        ]
+        labels = {
+            'annual_program_contact_person_name': _('First name and last name'),
+            'annual_program_contact_person_email': pgettext_lazy('admission', 'Email'),
+        }
+        widgets = {
+            'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'program_planned_years_number': forms.Select(
+                choices=EMPTY_CHOICE_AS_LIST
+                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
+            ),
+            'is_mobility': forms.Select(choices=[(None, '-'), (True, _('Yes')), (False, _('No'))]),
+            'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
+            'must_provide_student_visa_d': forms.CheckboxInput,
+        }
+
+    def __init__(
+        self,
+        academic_year,
+        candidate_nationality_is_no_ue_5: bool,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        # Initialize conditions field
+        self.is_admission = self.instance.type_demande == TypeDemande.ADMISSION.name
+        self.is_hue = not self.instance.candidate.country_of_citizenship.european_union
+        self.is_assimilation = (
+            self.instance.accounting
+            and self.instance.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name
+        )
+        self.academic_year = academic_year
+
+        self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
+
+        # Initialize additional trainings fields
+        lue_acronyms = {}
+
+        if self.is_bound:
+            lue_acronyms = {
+                (acronym, academic_year) for acronym in self.data.getlist(self.add_prefix('prerequisite_courses'))
+            }
+
+        elif self.instance:
+            lue_acronyms = set(self.instance.prerequisite_courses.all().values_list('acronym', 'academic_year__year'))
+            self.initial['prerequisite_courses'] = [acronym[0] for acronym in lue_acronyms]
+
+        learning_units = (
+            message_bus_instance.invoke(LearningUnitAndPartimSearchCommand(code_annee_values=lue_acronyms))
+            if lue_acronyms
+            else []
+        )
+
+        self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
+
+        self.fields['tuition_fees_amount'].required = True
+        self.fields['tuition_fees_amount'].choices = [(None, '-')] + self.fields['tuition_fees_amount'].choices
+
+        self.fields['tuition_fees_dispensation'].required = True
+        self.fields['tuition_fees_dispensation'].choices = [(None, '-')] + self.fields[
+            'tuition_fees_dispensation'
+        ].choices
+        if not self.is_hue or self.is_assimilation:
+            self.initial['tuition_fees_dispensation'] = DispenseOuDroitsMajores.NON_CONCERNE.name
+
+        if not self.is_hue:
+            del self.fields['is_mobility']
+            del self.fields['mobility_months_amount']
+        else:
+            self.fields['is_mobility'].required = False
+            self.fields['mobility_months_amount'].required = False
+
+        if self.is_admission and candidate_nationality_is_no_ue_5:
+            self.initial['must_provide_student_visa_d'] = True
+        else:
+            del self.fields['must_provide_student_visa_d']
+
+        if not self.is_admission:
+            self.fields.pop('tuition_fees_amount', None)
+            self.fields.pop('tuition_fees_amount_other', None)
+            self.fields.pop('tuition_fees_dispensation', None)
+            self.fields.pop('is_mobility', None)
+            self.fields.pop('mobility_months_amount', None)
+            self.fields.pop('must_report_to_sic', None)
+            self.fields.pop('communication_to_the_candidate', None)
+            self.fields.pop('must_provide_student_visa_d', None)
+        else:
+            self.initial['must_report_to_sic'] = False
+            self.fields['must_report_to_sic'].required = True
+            self.fields['program_planned_years_number'].required = True
+            self.fields['communication_to_the_candidate'].required = False
+            self.fields['with_prerequisite_courses'].required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('with_prerequisite_courses'):
+            if cleaned_data.get('prerequisite_courses'):
+                cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
+                    acronym__in=cleaned_data.get('prerequisite_courses', []),
+                    academic_year__year=self.academic_year,
+                ).values_list('uuid', flat=True)
+
+        else:
+            cleaned_data['prerequisite_courses'] = []
+            cleaned_data['prerequisite_courses_fac_comment'] = ''
+
+        if cleaned_data.get('tuition_fees_amount') == DroitsInscriptionMontant.AUTRE.name:
+            if not cleaned_data.get('tuition_fees_amount_other'):
+                self.add_error(
+                    'tuition_fees_amount_other',
+                    ValidationError(
+                        self.fields['tuition_fees_amount_other'].error_messages['required'],
+                        code='required',
+                    ),
+                )
+
+        if cleaned_data.get('is_mobility'):
+            if not cleaned_data.get('mobility_months_amount'):
+                self.add_error(
+                    'mobility_months_amount',
+                    ValidationError(
+                        self.fields['mobility_months_amount'].error_messages['required'],
+                        code='required',
+                    ),
+                )
+
+        return cleaned_data
 
 
 class SicDecisionRefusalForm(FacDecisionRefusalForm):
@@ -1311,3 +1580,23 @@ class SinglePastExperienceAuthenticationForm(forms.Form):
         self.prefix = extra.get('identifiant', '')
 
         self.fields['state'].disabled = not can_edit_experience_authentication(checklist_experience_data)
+
+
+class SendEMailForm(forms.Form):
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+
+    body = AdmissionHTMLCharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                'language': get_language(),
+            }
+        )

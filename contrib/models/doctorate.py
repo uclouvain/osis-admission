@@ -51,7 +51,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     DerogationFinancement,
-    TypeDeRefus,
     BesoinDeDerogation,
     DroitsInscriptionMontant,
     DispenseOuDroitsMajores,
@@ -482,12 +481,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_('Approval certificate of faculty'),
         mimetypes=[PDF_MIME_TYPE],
     )
-    fac_refusal_certificate = FileField(
-        blank=True,
-        upload_to=admission_directory_path,
-        verbose_name=_('Refusal certificate of faculty'),
-        mimetypes=[PDF_MIME_TYPE],
-    )
     sic_approval_certificate = FileField(
         blank=True,
         upload_to=admission_directory_path,
@@ -500,18 +493,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_('Annexe approval certificate from SIC'),
         mimetypes=[PDF_MIME_TYPE],
     )
-    sic_refusal_certificate = FileField(
-        blank=True,
-        upload_to=admission_directory_path,
-        verbose_name=_('Refusal certificate from SIC'),
-        mimetypes=[PDF_MIME_TYPE],
-    )
-    refusal_type = models.CharField(
-        verbose_name=_('Refusal type'),
-        max_length=50,
-        default='',
-        choices=TypeDeRefus.choices(),
-    )
     refusal_reasons = models.ManyToManyField(
         blank=True,
         related_name='+',
@@ -523,25 +504,6 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
         default=list,
         verbose_name=_('Other refusal reasons'),
-    )
-    with_additional_approval_conditions = models.BooleanField(
-        blank=True,
-        null=True,
-        verbose_name=_('Are there any additional conditions (subject to ...)?'),
-    )
-    additional_approval_conditions = models.ManyToManyField(
-        blank=True,
-        related_name='+',
-        to='admission.AdditionalApprovalCondition',
-        verbose_name=_('Additional approval conditions'),
-    )
-    other_training_accepted_by_fac = models.ForeignKey(
-        blank=True,
-        null=True,
-        on_delete=models.PROTECT,
-        related_name='+',
-        to='base.EducationGroupYear',
-        verbose_name=_('Other course accepted by the faculty'),
     )
     with_prerequisite_courses = models.BooleanField(
         blank=True,
@@ -609,21 +571,6 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         choices=DispenseOuDroitsMajores.choices(),
         verbose_name=_("Dispensation or increased fees"),
-    )
-    particular_cost = models.TextField(
-        default='',
-        verbose_name=_("Particular cost"),
-        blank=True,
-    )
-    rebilling_or_third_party_payer = models.TextField(
-        default='',
-        verbose_name=_("Rebilling or third-party payer"),
-        blank=True,
-    )
-    first_year_inscription_and_status = models.TextField(
-        default='',
-        verbose_name=_("First year of inscription + status"),
-        blank=True,
     )
     is_mobility = models.BooleanField(
         null=True,
@@ -908,13 +855,10 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
         return (
             self.get_queryset()
             .select_related(
-                "other_training_accepted_by_fac__academic_year",
                 "admission_requirement_year",
             )
             .prefetch_related(
                 "refusal_reasons",
-                "additional_approval_conditions",
-                "freeadditionalapprovalcondition_set",
                 "prerequisite_courses",
             )
         )
@@ -935,20 +879,13 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "financability_rule_established_by",
                 "financability_dispensation_first_notification_by",
                 "financability_dispensation_last_notification_by",
-                "other_training_accepted_by_fac__academic_year",
                 "admission_requirement_year",
-            )
-            .annotate_campus(
-                training_field='other_training_accepted_by_fac',
-                annotation_name='other_training_accepted_by_fac_teaching_campus',
             )
             .annotate_with_student_registration_id()
             .annotate_several_admissions_in_progress()
             .annotate_submitted_profile_countries_names()
             .annotate_last_status_update()
             .prefetch_related(
-                "additional_approval_conditions",
-                "freeadditionalapprovalcondition_set",
                 'prerequisite_courses__academic_year',
                 Prefetch(
                     'refusal_reasons',

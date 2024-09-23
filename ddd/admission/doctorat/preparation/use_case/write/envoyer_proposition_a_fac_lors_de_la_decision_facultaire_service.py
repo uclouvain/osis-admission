@@ -23,24 +23,18 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.commands import (
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
-    IEmailDestinataireRepository,
-)
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 
 
 def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
     cmd: EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
     proposition_repository: 'IPropositionRepository',
-    email_destinataire_repository: 'IEmailDestinataireRepository',
-    notification: 'INotification',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -49,14 +43,8 @@ def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
 
     proposition_repository.save(entity=proposition)
 
-    message = notification.confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
-        proposition=proposition,
-        email_destinataire_repository=email_destinataire_repository,
-    )
-
     historique.historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         proposition=proposition,
-        message=message,
         gestionnaire=cmd.gestionnaire,
     )
 

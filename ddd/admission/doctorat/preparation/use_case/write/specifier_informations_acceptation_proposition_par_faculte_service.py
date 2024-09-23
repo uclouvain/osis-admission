@@ -41,10 +41,6 @@ def specifier_informations_acceptation_proposition_par_faculte(
     # THEN
     proposition.specifier_informations_acceptation_par_fac(
         auteur_modification=cmd.gestionnaire,
-        sigle_autre_formation=cmd.sigle_autre_formation,
-        avec_conditions_complementaires=cmd.avec_conditions_complementaires,
-        uuids_conditions_complementaires_existantes=cmd.uuids_conditions_complementaires_existantes,
-        conditions_complementaires_libres=cmd.conditions_complementaires_libres,
         avec_complements_formation=cmd.avec_complements_formation,
         uuids_complements_formation=cmd.uuids_complements_formation,
         commentaire_complements_formation=cmd.commentaire_complements_formation,

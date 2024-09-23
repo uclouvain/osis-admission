@@ -1150,6 +1150,9 @@ msgstr ""
 msgid "CDD Mail templates"
 msgstr ""
 
+msgid "CDD comment for the SIC"
+msgstr ""
+
 msgid "CDD configuration"
 msgstr ""
 
@@ -2195,6 +2198,9 @@ msgstr ""
 msgid "Decision of SIC"
 msgstr ""
 
+msgid "Decision of the CDD"
+msgstr ""
+
 msgid "Decision of the faculty"
 msgstr ""
 
@@ -2439,12 +2445,6 @@ msgstr ""
 msgid "Doctorate enrolment applications"
 msgstr ""
 
-msgid "Doctorate free additional approval condition"
-msgstr ""
-
-msgid "Doctorate free additional approval conditions"
-msgstr ""
-
 msgid "Doctorate working list"
 msgstr ""
 
@@ -2481,6 +2481,10 @@ msgstr ""
 msgid ""
 "Documents requested by the SIC are still expected from the candidate. The "
 "application could be sent to the faculty once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the faculty are still expected from the candidate."
 msgstr ""
 
 msgid ""
@@ -2721,6 +2725,20 @@ msgstr ""
 msgid ""
 "Email sent to the candidate when the faculty approve the application without "
 "condition."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate when the faculty approves a doctorate admission "
+"of a candidat without any Belgian diploma."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate when the faculty approves a doctorate admission "
+"of a candidate with a Belgian diploma."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate when the faculty refuses a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -4759,6 +4777,9 @@ msgstr ""
 msgid "Name of the contact person for the design of the annual program"
 msgstr ""
 
+msgid "Name of the doctoral commission"
+msgstr ""
+
 msgid "Name of the management entity"
 msgstr ""
 
@@ -6165,6 +6186,9 @@ msgstr ""
 msgid "SIC Approval"
 msgstr ""
 
+msgid "SIC comment for the CDD"
+msgstr ""
+
 msgid "SIC comment for the faculty"
 msgstr ""
 
@@ -6973,10 +6997,18 @@ msgstr ""
 msgid "The dossier has been confirmed with the following contact address:"
 msgstr ""
 
+msgid "The dossier is currently in CDD"
+msgstr ""
+
 msgid "The dossier is currently in SIC"
 msgstr ""
 
 msgid "The dossier is currently in faculty"
+msgstr ""
+
+#, python-format
+msgid ""
+"The e-mail for the fac decision has been sent on %(sent_at)s by %(sender)s."
 msgstr ""
 
 #, python-format

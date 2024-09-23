@@ -550,20 +550,16 @@ class EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(interface.Command
 class RefuserPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SpecifierMotifsRefusPropositionParFaculteCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    uuids_motifs: List[str] = attr.Factory(list)
-    autres_motifs: List[str] = attr.Factory(list)
+    objet_message: str
+    corps_message: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
+    objet_message: str
+    corps_message: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -580,10 +576,6 @@ class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
 class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    sigle_autre_formation: str = ''
-    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
-    avec_conditions_complementaires: Optional[bool] = None
-    conditions_complementaires_libres: List[Dict] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''
@@ -687,9 +679,6 @@ class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
 class SpecifierInformationsAcceptationPropositionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    avec_conditions_complementaires: Optional[bool] = None
-    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
-    conditions_complementaires_libres: List[Dict] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''
@@ -699,9 +688,6 @@ class SpecifierInformationsAcceptationPropositionParSicCommand(interface.Command
     droits_inscription_montant: str = ''
     droits_inscription_montant_autre: Optional[float] = None
     dispense_ou_droits_majores: str = ''
-    tarif_particulier: str = ''
-    refacturation_ou_tiers_payant: str = ''
-    annee_de_premiere_inscription_et_statut: str = ''
     est_mobilite: Optional[bool] = None
     nombre_de_mois_de_mobilite: str = ''
     doit_se_presenter_en_sic: Optional[bool] = None
@@ -713,40 +699,12 @@ class SpecifierInformationsAcceptationPropositionParSicCommand(interface.Command
 class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    avec_conditions_complementaires: Optional[bool] = None
-    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
-    conditions_complementaires_libres: List[Dict] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''
     nombre_annees_prevoir_programme: Optional[int] = None
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    type_de_refus: str
-    uuids_motifs: List[str] = attr.Factory(list)
-    autres_motifs: List[str] = attr.Factory(list)
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RefuserAdmissionParSicCommand(interface.CommandRequest):
-    uuid_proposition: str
-    auteur: str
-    objet_message: str = ''
-    corps_message: str = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RefuserInscriptionParSicCommand(interface.CommandRequest):
-    uuid_proposition: str
-    auteur: str
-    objet_message: str = ''
-    corps_message: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

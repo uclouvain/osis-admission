@@ -288,30 +288,8 @@ class _PropositionFactory(factory.Factory):
             checklist_actuelle=factory.SubFactory(StatutsChecklistDoctoraleFactory),
             soumise_le=factory.Faker('past_datetime'),
         )
-        est_refusee_par_fac_raison_libre = factory.Trait(
-            autres_motifs_refus=['Ma raison'],
-            certificat_refus_fac=['uuid-certificat_refus_fac'],
-        )
-        est_refusee_par_fac_raison_connue = factory.Trait(
-            motifs_refus=[factory.SubFactory(MotifRefusIdentityFactory)],
-            certificat_refus_fac=['uuid-certificat_refus_fac'],
-        )
         est_approuvee_par_fac = factory.Trait(
             certificat_approbation_fac=['uuid-certificat_approbation_fac'],
-            autre_formation_choisie_fac_id=factory.SubFactory(FormationIdentityFactory),
-            avec_conditions_complementaires=True,
-            conditions_complementaires_existantes=factory.List(
-                params=[
-                    ConditionComplementaireApprobationIdentityFactory(),
-                    ConditionComplementaireApprobationIdentityFactory(),
-                ]
-            ),
-            conditions_complementaires_libres=factory.List(
-                params=[
-                    factory.fuzzy.FuzzyText(),
-                    factory.fuzzy.FuzzyText(),
-                ]
-            ),
             complements_formation=factory.List(
                 params=[
                     ComplementFormationIdentityFactory(),
@@ -329,19 +307,6 @@ class _PropositionFactory(factory.Factory):
             commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
         )
         est_approuvee_par_sic = factory.Trait(
-            avec_conditions_complementaires=True,
-            conditions_complementaires_existantes=factory.List(
-                params=[
-                    ConditionComplementaireApprobationIdentityFactory(),
-                    ConditionComplementaireApprobationIdentityFactory(),
-                ]
-            ),
-            conditions_complementaires_libres=factory.List(
-                params=[
-                    factory.fuzzy.FuzzyText(),
-                    factory.fuzzy.FuzzyText(),
-                ]
-            ),
             complements_formation=factory.List(
                 params=[
                     ComplementFormationIdentityFactory(),

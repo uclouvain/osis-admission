@@ -1276,6 +1276,9 @@ msgstr "Template d'email de CDD"
 msgid "CDD Mail templates"
 msgstr "Templates d'email de CDD"
 
+msgid "CDD comment for the SIC"
+msgstr "Commentaire de la CDD pour le SIC"
+
 msgid "CDD configuration"
 msgstr "Configuration de la CDD"
 
@@ -2410,6 +2413,9 @@ msgstr "Décision confirmant l'octroi de la protection temporaire"
 msgid "Decision of SIC"
 msgstr "Décision en SIC"
 
+msgid "Decision of the CDD"
+msgstr "Décision de la CDD"
+
 msgid "Decision of the faculty"
 msgstr "Décision de la faculté"
 
@@ -2657,12 +2663,6 @@ msgstr "Formation doctorale"
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
-msgid "Doctorate free additional approval condition"
-msgstr "Condition complémentaire d'acceptation libre doctorale"
-
-msgid "Doctorate free additional approval conditions"
-msgstr "Conditions complémentaires d'acceptation libres doctorales"
-
 msgid "Doctorate working list"
 msgstr "Liste de travail doctorale"
 
@@ -2702,6 +2702,11 @@ msgid ""
 msgstr ""
 "Des documents réclamés au candidat par le SIC sont encore attendus. L'envoi "
 "du dossier en faculté pourra être réalisé après leur réception."
+
+msgid ""
+"Documents requested by the faculty are still expected from the candidate."
+msgstr ""
+"Des documents réclamés au candidat par la faculté sont encore attendus."
 
 msgid ""
 "Documents requested by the faculty are still expected from the candidate. "
@@ -2976,6 +2981,26 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat lorsque la faculté approuve une proposition sans "
 "conditions."
+
+msgid ""
+"Email sent to the candidate when the faculty approves a doctorate admission "
+"of a candidat without any Belgian diploma."
+msgstr ""
+"E-mail envoyé au candidat lorsque la faculté approuve une proposition en "
+"formation doctorale d'un candidat n'ayant pas de diplôme belge."
+
+msgid ""
+"Email sent to the candidate when the faculty approves a doctorate admission "
+"of a candidate with a Belgian diploma."
+msgstr ""
+"E-mail envoyé au candidat lorsque la faculté approuve une proposition en "
+"formation doctorale d'un candidat ayant un diplôme belge."
+
+msgid ""
+"Email sent to the candidate when the faculty refuses a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat lorsque la faculté refuse une proposition en "
+"formation doctorale."
 
 msgid ""
 "Email sent to the checkers to inform them to check the background "
@@ -5320,6 +5345,9 @@ msgstr "Nom dans la langue de la manifestation"
 msgid "Name of the contact person for the design of the annual program"
 msgstr "Nom de la personne de contact pour la composition du programme annuel"
 
+msgid "Name of the doctoral commission"
+msgstr "Nom de la commission doctorale"
+
 msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
@@ -6811,6 +6839,9 @@ msgstr "SIC"
 msgid "SIC Approval"
 msgstr "Autorisation SIC"
 
+msgid "SIC comment for the CDD"
+msgstr "Commentaire de SIC pour la CDD"
+
 msgid "SIC comment for the faculty"
 msgstr "Commentaire de SIC pour la Faculté"
 
@@ -7720,11 +7751,21 @@ msgstr "La demande a été confirmée sous le nom :"
 msgid "The dossier has been confirmed with the following contact address:"
 msgstr "La demande a été confirmée avec pour adresse de contact :"
 
+msgid "The dossier is currently in CDD"
+msgstr "Le dossier est actuellement en CDD"
+
 msgid "The dossier is currently in SIC"
 msgstr "Le dossier est actuellement en SIC"
 
 msgid "The dossier is currently in faculty"
 msgstr "Le dossier est actuellement en faculté"
+
+#, python-format
+msgid ""
+"The e-mail for the fac decision has been sent on %(sent_at)s by %(sender)s."
+msgstr ""
+"Le mail de la décision fac a été envoyé au candidat le %(sent_at)s par "
+"%(sender)s."
 
 #, python-format
 msgid "The educational experience '%(education_name)s' is not completed."

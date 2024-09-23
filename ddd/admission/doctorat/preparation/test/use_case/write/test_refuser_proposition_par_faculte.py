@@ -38,10 +38,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonFACException,
-    MotifRefusFacultaireNonSpecifieException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -70,12 +68,12 @@ class TestRefuserPropositionParFaculte(TestCase):
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-confirmee',
             'gestionnaire': '00321234',
+            'objet_message': 'Objet du message',
+            'corps_message': 'Corps du message',
         }
 
-    def test_should_etre_ok_si_traitement_fac_et_motif_connu(self):
+    def test_should_etre_ok_si_traitement_fac(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
-        self.proposition.motifs_refus = [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')]
-        self.proposition.autres_motifs_refus = []
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -84,17 +82,15 @@ class TestRefuserPropositionParFaculte(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE)
         self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_BLOCAGE)
         self.assertEqual(
             proposition.checklist_actuelle.decision_facultaire.extra,
             {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
 
-    def test_should_etre_ok_si_completee_pour_fac_et_motif_libre(self):
+    def test_should_etre_ok_si_completee_pour_fac(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.motifs_refus = []
-        self.proposition.autres_motifs_refus = ['Autre motif']
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -113,12 +109,3 @@ class TestRefuserPropositionParFaculte(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
                 self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
-
-    def test_should_lever_exception_si_aucun_motif_specifie(self):
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.motifs_refus = []
-        self.proposition.autres_motifs_refus = []
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), MotifRefusFacultaireNonSpecifieException)

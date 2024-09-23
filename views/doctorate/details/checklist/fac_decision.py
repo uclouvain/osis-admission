@@ -24,16 +24,13 @@
 #
 # ##############################################################################
 
-from django.db.models import QuerySet
 from django.forms import Form
-from django.forms.formsets import formset_factory
 from django.utils.functional import cached_property
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
-    SpecifierMotifsRefusPropositionParFaculteCommand,
     SpecifierInformationsAcceptationPropositionParFaculteCommand,
     ApprouverPropositionParFaculteCommand,
     RefuserPropositionParFaculteCommand,
@@ -46,26 +43,23 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC,
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
-    InformationsDestinatairePasTrouvee,
-)
-from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from admission.forms.admission.checklist import (
-    FacDecisionRefusalForm,
-    FacDecisionApprovalForm,
     DoctorateFacDecisionApprovalForm,
+    SendEMailForm,
 )
-from admission.forms.admission.checklist import (
-    FreeAdditionalApprovalConditionForm,
+from admission.mail_templates import (
+    ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
+    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
+    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
 )
+from admission.utils import get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import change_admission_status
-from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin, get_email
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile.models import EducationalExperience
 
 __all__ = [
     'FacultyDecisionView',
@@ -73,6 +67,7 @@ __all__ = [
     'FacultyRefusalDecisionView',
     'FacultyApprovalDecisionView',
     'FacultyDecisionSendToSicView',
+    'FacultyApprovalFinalDecisionView',
 ]
 
 
@@ -93,91 +88,107 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         )
         context['is_fac'] = self.is_fac
         context['is_sic'] = self.is_sic
-        context['fac_decision_send_to_fac_history_entry'] = (
+
+        context.setdefault('history_entries', {})
+
+        faculty_decision_history = (
             HistoryEntry.objects.filter(
                 object_uuid=self.admission_uuid,
-                tags__contains=['proposition', 'fac-decision', 'send-to-fac'],
+                tags__contains=['proposition', 'fac-decision', 'message'],
             )
             .order_by('-created')
             .first()
         )
+
+        context['history_entries']['fac_decision'] = faculty_decision_history
+
         context['fac_decision_refusal_form'] = self.fac_decision_refusal_form
         context['fac_decision_approval_form'] = self.fac_decision_approval_form
-        context['fac_decision_free_approval_condition_formset'] = self.fac_decision_free_approval_condition_formset
-        context['program_faculty_email'] = self.program_faculty_email.email if self.program_faculty_email else None
+        context['fac_decision_approval_final_form'] = self.fac_decision_approval_final_form
 
         return context
-
-    @cached_property
-    def program_faculty_email(self):
-        try:
-            return message_bus_instance.invoke(
-                RecupererInformationsDestinataireQuery(
-                    sigle_formation=self.admission.training.acronym,
-                    est_premiere_annee=False,
-                    annee=self.admission.determined_academic_year.year,
-                )
-            )
-        except InformationsDestinatairePasTrouvee:
-            return None
 
     @cached_property
     def fac_decision_refusal_form(self):
         form_kwargs = {
             'prefix': 'fac-decision-refusal',
         }
-        if self.request.method == 'POST':
-            form_kwargs['data'] = self.request.POST
-        else:
+
+        if self.request.method == 'GET':
+            # Load the email template
+            subject, body = get_email(
+                template_identifier=ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
+                language=self.proposition.langue_contact_candidat,
+                proposition_dto=self.proposition,
+                extra_tokens={
+                    'greetings': get_salutation_prefix(self.admission.candidate),
+                    'doctoral_commission': self.management_entity_title,
+                    'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
+                },
+            )
+
             form_kwargs['initial'] = {
-                'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
-                + self.admission.other_refusal_reasons,
+                'subject': subject,
+                'body': body,
             }
 
-        return FacDecisionRefusalForm(**form_kwargs)
+        else:
+            form_kwargs['data'] = self.request.POST
 
-    @property
-    def candidate_cv_program_names_by_experience_uuid(self):
-        experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
-            person=self.admission.candidate
-        )
-        return {
-            str(experience.uuid): experience.program.title if experience.program else experience.education_name
-            for experience in experiences
+        return SendEMailForm(**form_kwargs)
+
+    @cached_property
+    def fac_decision_approval_final_form(self):
+        form_kwargs = {
+            'prefix': 'fac-decision-approval-final',
         }
+
+        if self.request.method == 'GET':
+            # Load the email template
+            subject, body = get_email(
+                template_identifier=ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA
+                if self.proposition_resume.resume.curriculum.a_diplome_belge
+                else ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+                language=self.proposition.langue_contact_candidat,
+                proposition_dto=self.proposition,
+                extra_tokens={
+                    'greetings': get_salutation_prefix(self.admission.candidate),
+                    'doctoral_commission': self.management_entity_title,
+                    'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
+                },
+            )
+
+            form_kwargs['initial'] = {
+                'subject': subject,
+                'body': body,
+            }
+
+        else:
+            form_kwargs['data'] = self.request.POST
+
+        return SendEMailForm(**form_kwargs)
 
     @cached_property
     def fac_decision_approval_form(self):
+        initial = {}
+
+        if (
+            self.request.method == 'GET'
+            and self.proposition_resume.resume.groupe_supervision
+            and self.proposition_resume.resume.groupe_supervision.promoteur_reference_dto
+        ):
+            reference_promoter: PromoteurDTO = self.proposition_resume.resume.groupe_supervision.promoteur_reference_dto
+
+            initial['annual_program_contact_person_name'] = f'{reference_promoter.prenom} {reference_promoter.nom}'
+            initial['annual_program_contact_person_email'] = reference_promoter.email
+
         return DoctorateFacDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
             instance=self.admission if self.request.method != 'POST' else None,
+            initial=initial,
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='fac-decision-approval',
-            educational_experience_program_name_by_uuid=self.candidate_cv_program_names_by_experience_uuid,
-            current_training_uuid=str(self.admission.training.uuid),
         )
-
-    @cached_property
-    def fac_decision_free_approval_condition_formset(self):
-        FreeApprovalConditionFormSet = formset_factory(
-            form=FreeAdditionalApprovalConditionForm,
-            extra=0,
-        )
-
-        formset = FreeApprovalConditionFormSet(
-            prefix='fac-decision',
-            initial=self.admission.freeadditionalapprovalcondition_set.filter(
-                related_experience__isnull=True,
-            ).values('name_fr', 'name_en')
-            if self.request.method != 'POST'
-            else None,
-            data=self.request.POST if self.request.method == 'POST' else None,
-            form_kwargs={
-                'candidate_language': self.admission.candidate.language,
-            },
-        )
-
-        return formset
 
 
 class FacultyDecisionView(
@@ -189,8 +200,8 @@ class FacultyDecisionView(
     name = 'fac-decision-status'
     urlpatterns = {'fac-decision-change-status': 'fac-decision/status-change/<str:status>'}
     permission_required = 'admission.checklist_change_faculty_decision'
-    template_name = 'admission/general_education/includes/checklist/fac_decision.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/fac_decision.html'
+    template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
     form_class = Form
 
     def form_valid(self, form):
@@ -221,8 +232,8 @@ class FacultyDecisionSendToFacultyView(
     name = 'faculty-decision-send-to-faculty'
     urlpatterns = {'fac-decision-send-to-faculty': 'fac-decision/send-to-faculty'}
     permission_required = 'admission.checklist_faculty_decision_transfer_to_fac'
-    template_name = 'admission/general_education/includes/checklist/fac_decision.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/fac_decision.html'
+    template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
     form_class = Form
 
     def form_valid(self, form):
@@ -248,31 +259,15 @@ class FacultyDecisionSendToSicView(
 ):
     name = 'faculty-decision-send-to-sic'
     urlpatterns = {'fac-decision-send-to-sic': 'fac-decision/send-to-sic'}
-    template_name = 'admission/general_education/includes/checklist/fac_decision.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/fac_decision.html'
+    template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
     form_class = Form
-
-    def get_permission_required(self):
-        return (
-            ('admission.checklist_faculty_decision_transfer_to_sic_with_decision',)
-            if (self.request.GET.get('approval') or self.request.GET.get('refusal')) and self.is_fac
-            else ('admission.checklist_faculty_decision_transfer_to_sic_without_decision',)
-        )
+    permission_required = 'admission.checklist_faculty_decision_transfer_to_sic_without_decision'
 
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                ApprouverPropositionParFaculteCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                )
-                if self.request.GET.get('approval') and self.is_fac
-                else RefuserPropositionParFaculteCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                )
-                if self.request.GET.get('refusal') and self.is_fac
-                else EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
+                EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     envoi_par_fac=self.is_fac,
@@ -296,39 +291,24 @@ class FacultyRefusalDecisionView(
 ):
     name = 'fac-decision-refusal'
     urlpatterns = {'fac-decision-refusal': 'fac-decision/fac-decision-refusal'}
-    template_name = 'admission/general_education/includes/checklist/fac_decision_refusal_form.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/fac_decision_refusal_form.html'
-
-    def get_permission_required(self):
-        return (
-            (
-                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
-                if 'save_transfer' in self.request.POST
-                else 'admission.checklist_change_faculty_decision'
-            ),
-        )
+    template_name = 'admission/doctorate/includes/checklist/fac_decision_refusal_form.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision_refusal_form.html'
+    permission_required = 'admission.checklist_change_faculty_decision'
 
     def get_form(self, form_class=None):
         return self.fac_decision_refusal_form
 
     def form_valid(self, form):
-        base_params = {
-            'uuid_proposition': self.admission_uuid,
-            'uuids_motifs': form.cleaned_data['reasons'],
-            'autres_motifs': form.cleaned_data['other_reasons'],
-            'gestionnaire': self.request.user.person.global_id,
-        }
-
         try:
-            message_bus_instance.invoke(SpecifierMotifsRefusPropositionParFaculteCommand(**base_params))
-            if 'save-transfer' in self.request.POST:
-                message_bus_instance.invoke(
-                    RefuserPropositionParFaculteCommand(
-                        uuid_proposition=self.admission_uuid,
-                        gestionnaire=self.request.user.person.global_id,
-                    )
+            message_bus_instance.invoke(
+                RefuserPropositionParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    objet_message=form.cleaned_data['subject'],
+                    corps_message=form.cleaned_data['body'],
                 )
-                self.htmx_refresh = True
+            )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -344,84 +324,61 @@ class FacultyApprovalDecisionView(
 ):
     name = 'fac-decision-approval'
     urlpatterns = {'fac-decision-approval': 'fac-decision/fac-decision-approval'}
-    template_name = 'admission/general_education/includes/checklist/fac_decision_approval_form.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/fac_decision_approval_form.html'
-
-    def get_permission_required(self):
-        return (
-            (
-                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
-                if 'save_transfer' in self.request.POST
-                else 'admission.checklist_change_faculty_decision'
-            ),
-        )
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        formset = self.fac_decision_free_approval_condition_formset
-
-        # Cross validation
-        if form.is_valid() and formset.is_valid():
-            with_additional_conditions = form.cleaned_data['with_additional_approval_conditions']
-
-            if with_additional_conditions and (
-                not form.cleaned_data['additional_approval_conditions']
-                and not form.cleaned_data['cv_experiences_additional_approval_conditions']
-                and not any(subform.is_valid() for subform in formset)
-            ):
-                form.add_error('all_additional_approval_conditions', FIELD_REQUIRED_MESSAGE)
-
-        form.all_required_forms_are_valid = form.is_valid() and (
-            not form.cleaned_data['with_additional_approval_conditions'] or formset.is_valid()
-        )
-
-        if form.all_required_forms_are_valid:
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+    template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_form.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_form.html'
+    permission_required = 'admission.checklist_change_faculty_decision'
 
     def get_form(self, form_class=None):
         return self.fac_decision_approval_form
 
     def form_valid(self, form):
-        base_params = {
-            'uuid_proposition': self.admission_uuid,
-            'sigle_autre_formation': form.cleaned_data['other_training_accepted_by_fac'].acronym
-            if form.cleaned_data['other_training_accepted_by_fac']
-            else '',
-            'avec_conditions_complementaires': form.cleaned_data['with_additional_approval_conditions'],
-            'uuids_conditions_complementaires_existantes': [
-                condition for condition in form.cleaned_data['additional_approval_conditions']
-            ],
-            'conditions_complementaires_libres': (
-                [
-                    sub_form.cleaned_data
-                    for sub_form in self.fac_decision_free_approval_condition_formset.forms
-                    if sub_form.is_valid()
-                ]
-                if form.cleaned_data['with_additional_approval_conditions']
-                else []
-            )
-            + form.cleaned_data['cv_experiences_additional_approval_conditions'],
-            'avec_complements_formation': form.cleaned_data['with_prerequisite_courses'],
-            'uuids_complements_formation': form.cleaned_data['prerequisite_courses'],
-            'commentaire_complements_formation': form.cleaned_data['prerequisite_courses_fac_comment'],
-            'nombre_annees_prevoir_programme': form.cleaned_data['program_planned_years_number'],
-            'nom_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_name'],
-            'email_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_email'],
-            'commentaire_programme_conjoint': form.cleaned_data['join_program_fac_comment'],
-            'gestionnaire': self.request.user.person.global_id,
-        }
         try:
-            message_bus_instance.invoke(SpecifierInformationsAcceptationPropositionParFaculteCommand(**base_params))
-            if 'save-transfer' in self.request.POST:
-                message_bus_instance.invoke(
-                    ApprouverPropositionParFaculteCommand(
-                        uuid_proposition=self.admission_uuid,
-                        gestionnaire=self.request.user.person.global_id,
-                    )
+            message_bus_instance.invoke(
+                SpecifierInformationsAcceptationPropositionParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
+                    uuids_complements_formation=form.cleaned_data['prerequisite_courses'],
+                    commentaire_complements_formation=form.cleaned_data['prerequisite_courses_fac_comment'],
+                    nombre_annees_prevoir_programme=form.cleaned_data['program_planned_years_number'],
+                    nom_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_name'],
+                    email_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_email'],
+                    commentaire_programme_conjoint=form.cleaned_data['join_program_fac_comment'],
+                    gestionnaire=self.request.user.person.global_id,
                 )
-                self.htmx_refresh = True
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class FacultyApprovalFinalDecisionView(
+    FacultyDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'fac-decision-approval-final'
+    urlpatterns = {'fac-decision-approval-final': 'fac-decision/fac-decision-approval-final'}
+    template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_final_form.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_final_form.html'
+    permission_required = 'admission.checklist_change_faculty_decision'
+
+    def get_form(self, form_class=None):
+        return self.fac_decision_approval_final_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ApprouverPropositionParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    objet_message=form.cleaned_data['subject'],
+                    corps_message=form.cleaned_data['body'],
+                )
+            )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)

@@ -32,16 +32,14 @@ import attr
 
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
 from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
 from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
-from .condition_approbation import ConditionComplementaireApprobationDTO
 from .doctorat import DoctoratDTO
+from .motif_refus import MotifRefusDTO
 from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 from ..domain.model.enums.checklist import DroitsInscriptionMontant
 
@@ -124,11 +122,9 @@ class PropositionDTO(interface.DTO):
     financabilite_derogation_derniere_notification_le: Optional[datetime.datetime]
     financabilite_derogation_derniere_notification_par: str
 
-    certificat_refus_fac: List[str]
     certificat_approbation_fac: List[str]
     certificat_approbation_sic: List[str]
     certificat_approbation_sic_annexe: List[str]
-    certificat_refus_sic: List[str]
 
     doit_fournir_visa_etudes: Optional[bool]
     visa_etudes_d: List[str]
@@ -178,12 +174,8 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
-    type_de_refus: str
     motifs_refus: List[MotifRefusDTO]
 
-    autre_formation_choisie_fac: Optional['BaseFormationDTO']
-    avec_conditions_complementaires: Optional[bool]
-    conditions_complementaires: List[ConditionComplementaireApprobationDTO]
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[Union['PartimSearchDTO', 'LearningUnitSearchDTO']]]
     commentaire_complements_formation: str
@@ -197,9 +189,6 @@ class PropositionGestionnaireDTO(PropositionDTO):
     droits_inscription_montant_valeur: Optional[Decimal]
     droits_inscription_montant_autre: Decimal
     dispense_ou_droits_majores: str
-    tarif_particulier: str
-    refacturation_ou_tiers_payant: str
-    annee_de_premiere_inscription_et_statut: str
     est_mobilite: Optional[bool]
     nombre_de_mois_de_mobilite: str
     doit_se_presenter_en_sic: Optional[bool]
