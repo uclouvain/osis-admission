@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,18 +28,22 @@ import uuid
 from datetime import datetime, timedelta
 from unittest import mock
 
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.test.utils import override_settings
 from waffle.testutils import override_switch
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery
+from admission.ddd.admission.commands import (
+    RetrieveListeTicketsEnAttenteQuery,
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
+)
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.tasks import retrieve_digit_tickets_status
-from admission.tests.factories.curriculum import ProfessionalExperienceFactory, EducationalExperienceFactory, \
-    EducationalExperienceYearFactory
+from admission.tests.factories.curriculum import (
+    ProfessionalExperienceFactory, EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
 from base.models.enums.civil_state import CivilState
@@ -57,7 +61,7 @@ from osis_profile.models.enums.curriculum import ActivityType
 
 @override_switch('fusion-digit', active=True)
 @override_settings(USE_CELERY=False)
-class TestRetrieveDigitTicketsStatus(TestCase):
+class TestRetrieveDigitTicketsStatus(TransactionTestCase):
     def setUp(self):
         self.personne_compte_temporaire = PersonFactory(global_id='89745632')
         self.personne_compte_temporaire_address = PersonAddressFactory(
@@ -370,11 +374,22 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             msg="Suppression envoyée via la queue car il y a des expériences connues à supprimer"
         )
 
+        envoi_queue_suppr_etudes_secondaires = self.envoyer_queue_mocked.call_args_list[0][1]
+        envoi_queue_suppr_curriculum_academique = self.envoyer_queue_mocked.call_args_list[2][1]
+
+
         # envoi via queue curriculum_academique vide + experiences_academiques a supprimer
-        self.assertFalse(self.envoyer_queue_mocked.call_args[1]['donnees']['curriculum_academique'])
+        self.assertFalse(envoi_queue_suppr_curriculum_academique['donnees']['curriculum_academique'])
         self.assertEqual(
-            self.envoyer_queue_mocked.call_args[1]['donnees']['experiences_academiques_supprimees'],
+            envoi_queue_suppr_curriculum_academique['donnees']['experiences_academiques_supprimees'],
             [str(self.experience_academique_non_gardee_annualisee.uuid)]
+        )
+
+        # envoi via queue etudes secondaires vide + etudes_secondaires a supprimer
+        self.assertFalse(envoi_queue_suppr_etudes_secondaires['donnees']['etudes_secondaires'])
+        self.assertEqual(
+            envoi_queue_suppr_etudes_secondaires['donnees']['etudes_secondaires_supprimees'],
+            [str(self.etudes_secondaires_personne_connue.uuid)]
         )
 
 
@@ -492,10 +507,6 @@ class TestRetrieveDigitTicketsStatus(TestCase):
         self.personne_compte_temporaire.global_id = '00345678'  # Set as internal account
         self.personne_compte_temporaire.save()
 
-        # on considere que la premiere personne a déjà été mergée
-        self.person_merge_proposal.delete()
-
-
         # simulate creation of a duplicate account
         self.doublon_personne_compte_temporaire = copy.deepcopy(self.personne_compte_temporaire)
         self.doublon_personne_compte_temporaire.global_id = '80000001'
@@ -569,7 +580,6 @@ class TestRetrieveDigitTicketsStatus(TestCase):
             self.envoyer_queue_mocked.called,
             msg="Suppression envoyée via la queue car il y a des expériences connues à supprimer"
         )
-
 
     def test_assert_in_error_when_internal_global_id_is_different_from_digit_global_id(self):
         self.personne_compte_temporaire.global_id = '00746799'

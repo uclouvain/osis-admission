@@ -32,6 +32,10 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_notification 
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.repository.i_digit import IDigitRepository
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 
 
 class NotificationInMemory(INotification):
@@ -74,4 +78,48 @@ class NotificationInMemory(INotification):
         liste_documents_reclames: List[EmplacementDocument],
         liste_documents_dto: List[EmplacementDocumentDTO],
     ):
+        pass
+
+    @classmethod
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+        pass
+
+    @classmethod
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+        pass
+
+    @classmethod
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: IEmailDestinataireRepository,
+    ) -> Optional[EmailMessage]:
+        pass
+
+    @classmethod
+    def refuser_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        pass
+
+    @classmethod
+    def accepter_proposition_par_sic(
+        cls,
+        proposition_uuid: str,
+        objet_message: str,
+        corps_message: str,
+        digit_repository: 'IDigitRepository',
+    ) -> EmailMessage:
+        pass
+
+    @classmethod
+    def notifier_candidat_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
         pass

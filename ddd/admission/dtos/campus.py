@@ -24,9 +24,12 @@
 #
 ##############################################################################
 import uuid
+from typing import Optional, Dict
 
 import attr
 
+from base.models.campus import Campus
+from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from osis_common.ddd import interface
 
 
@@ -46,3 +49,63 @@ class CampusDTO(interface.DTO):
 
     def __str__(self):
         return self.nom
+
+    @classmethod
+    def from_model_object(cls, campus: Optional[Campus]):
+        return (
+            cls(
+                uuid=campus.uuid,
+                nom=campus.name,
+                code_postal=campus.postal_code,
+                ville=campus.city,
+                pays_iso_code=campus.country.iso_code if campus.country else '',
+                nom_pays=campus.country.name if campus.country else '',
+                rue=campus.street,
+                numero_rue=campus.street_number,
+                boite_postale=campus.postal_box,
+                localisation=campus.location,
+                email_inscription_sic=campus.sic_enrollment_email,
+            )
+            if campus
+            else None
+        )
+
+    @classmethod
+    def from_uclouvain_campus_dto(cls, campus: Optional['UclouvainCampusDTO']):
+        return (
+            cls(
+                uuid=uuid.UUID(str(campus.uuid)),
+                nom=campus.name,
+                code_postal=campus.postal_code,
+                ville=campus.city,
+                pays_iso_code=campus.country_iso_code,
+                nom_pays=campus.country_name,
+                rue=campus.street,
+                numero_rue=campus.street_number,
+                boite_postale=campus.postal_box,
+                localisation=campus.location,
+                email_inscription_sic=campus.sic_enrollment_email,
+            )
+            if campus
+            else None
+        )
+
+    @classmethod
+    def from_json_annotation(cls, campus: Optional[Dict[str, str]]):
+        return (
+            cls(
+                uuid=uuid.UUID(campus.get('uuid')),
+                nom=campus.get('name'),
+                code_postal=campus.get('postal_code'),
+                ville=campus.get('city'),
+                pays_iso_code=campus.get('country_code'),
+                nom_pays=campus.get('fr_country_name'),
+                rue=campus.get('street'),
+                numero_rue=campus.get('street_number'),
+                boite_postale=campus.get('postal_box'),
+                localisation=campus.get('location'),
+                email_inscription_sic=campus.get('sic_enrollment_email'),
+            )
+            if campus
+            else None
+        )

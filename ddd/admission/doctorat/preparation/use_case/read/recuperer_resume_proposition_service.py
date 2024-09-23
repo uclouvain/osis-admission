@@ -28,6 +28,9 @@ from admission.ddd.admission.doctorat.preparation.commands import RecupererResum
 from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import IComptabiliteTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -47,6 +50,7 @@ def recuperer_resume_proposition(
     promoteur_translator: 'IPromoteurTranslator',
     membre_ca_translator: 'IMembreCATranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    question_specifique_translator: 'IQuestionSpecifiqueTranslator',
 ) -> 'ResumePropositionDTO':
     # WHEN
     resume_dto = ResumeProposition.get_resume_demande_doctorat(
@@ -58,6 +62,7 @@ def recuperer_resume_proposition(
         groupe_supervision_repository=groupe_supervision_repository,
         promoteur_translator=promoteur_translator,
         membre_ca_translator=membre_ca_translator,
+        question_specifique_translator=question_specifique_translator,
     )
 
     # THEN

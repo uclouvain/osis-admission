@@ -44,6 +44,13 @@ class EPCInjectionStatus(ChoiceEnum):
     PENDING = "En attente du retour d'EPC"
     OSIS_ERROR = "Erreur OSIS"
 
+    @classmethod
+    def blocking_statuses_for_experience(cls) -> List[str]:
+        return [
+            cls.OK.name,
+            cls.PENDING.name,
+        ]
+
 
 class EPCInjectionType(ChoiceEnum):
     DEMANDE = "Demande"
@@ -64,6 +71,10 @@ class EPCInjection(models.Model):
     epc_responses = models.JSONField(default=list, blank=True)
 
     @property
+    def in_error(self):
+        return self.status in [EPCInjectionStatus.OSIS_ERROR.name, EPCInjectionStatus.ERROR.name]
+
+    @property
     def last_response(self) -> Dict[str, str]:
         if self.epc_responses:
             return self.epc_responses[-1]
@@ -72,7 +83,9 @@ class EPCInjection(models.Model):
     def errors_messages(self) -> List[str]:
         messages = [message for _, message in self.experiences_errors]
         if self.classified_errors['technical_errors']:
-            messages.append('Erreur technique')
+            messages.append('Erreur technique EPC')
+        if self.status == EPCInjectionStatus.OSIS_ERROR.name:
+            messages.append('Erreur technique OSIS')
         return messages
 
     @property
@@ -87,7 +100,7 @@ class EPCInjection(models.Model):
                 'curriculum_errors': [
                     (error['osis_uuid'], error['message']) for error in errors if error['type'] not in TECHNICAL_ERRORS
                 ],
-                'technical_errors': [error['message'] for error in errors if error['type'] in TECHNICAL_ERRORS]
+                'technical_errors': [error['message'] for error in errors if error['type'] in TECHNICAL_ERRORS],
             }
         return {
             'curriculum_errors': [],

@@ -49,6 +49,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorale,
 )
 from admission.forms import OTHER_EMPTY_CHOICE

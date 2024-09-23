@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_continue.domain.validator._should_informa
     ShouldPeutAnnulerProposition,
     ShouldPeutApprouverProposition,
     ShouldPeutCloturerProposition,
+    ShouldPeutMettreAValider,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
@@ -129,6 +130,21 @@ class ApprouverPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVal
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldPeutApprouverProposition(
+                checklist_statut=self.checklist_statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class MettreAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    checklist_statut: StatutChecklist
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPeutMettreAValider(
                 checklist_statut=self.checklist_statut,
             ),
         ]

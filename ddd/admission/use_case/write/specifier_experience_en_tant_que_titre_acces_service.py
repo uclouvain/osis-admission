@@ -23,38 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.shortcuts import resolve_url
-from django.views.generic import TemplateView
-
-from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
-from admission.views.common.mixins import LoadDossierViewMixin
-
-__namespace__ = False
-
-__all__ = [
-    'ChecklistView',
-]
+from admission.ddd.admission.commands import SpecifierExperienceEnTantQueTitreAccesCommand
+from admission.ddd.admission.domain.builder.titre_acces_selectionnable_builder import TitreAccesSelectionnableBuilder
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnableIdentity
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 
 
-class CheckListDefaultContextMixin(LoadDossierViewMixin):
-    pass
+def specifier_experience_en_tant_que_titre_acces(
+    cmd: 'SpecifierExperienceEnTantQueTitreAccesCommand',
+    titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+) -> 'TitreAccesSelectionnableIdentity':
+    titre_acces = TitreAccesSelectionnableBuilder.build_from_command(cmd=cmd)
+    titre_acces_selectionnable_repository.save(titre_acces)
 
-
-class ChecklistView(
-    CheckListDefaultContextMixin,
-    TemplateView,
-):
-    urlpatterns = 'checklist'
-    template_name = "admission/doctorate/details/checklist.html"
-    permission_required = 'admission.view_checklist'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Add forms
-        context['send_email_form'] = CddDoctorateSendMailForm(
-            admission=self.admission,
-            view_url=resolve_url('admission:doctorate:send-mail', self.admission_uuid),
-        )
-
-        return context
+    return titre_acces.entity_id

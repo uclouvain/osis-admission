@@ -23,11 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import itertools
 from typing import Dict, Set, List
 
+import attr
 from django.conf import settings
 from django.shortcuts import resolve_url
+from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
@@ -415,14 +417,18 @@ class ChecklistView(
             'fiche_etudiant': {
                 'CARTE_IDENTITE',
                 'PASSEPORT',
+                'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DIPLOME',
             },
             'decision': {
                 'CARTE_IDENTITE',
                 'PASSEPORT',
+                'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DIPLOME',
             },
         }
         return documents_by_tab
@@ -457,21 +463,50 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
+            curriculum_experiences_names_by_uuid = {
+                str(experience.uuid): truncatechars(experience.titre_formate, 50)
+                for experience in itertools.chain(
+                    command_result.resume.curriculum.experiences_academiques,
+                    command_result.resume.curriculum.experiences_non_academiques,
+                )
+            }
+
             # Documents
             admission_documents = command_result.emplacements_documents
 
             documents_by_tab = self.checklist_documents_by_tab(specific_questions=specific_questions)
 
-            context['documents'] = {
-                tab_name: sorted(
-                    [
-                        admission_document
-                        for admission_document in admission_documents
-                        if admission_document.identifiant.split('.')[-1] in tab_documents
-                    ],
-                    key=lambda doc: doc.libelle,
-                )
-                for tab_name, tab_documents in documents_by_tab.items()
-            }
+            context['documents'] = {tab_name: [] for tab_name in documents_by_tab}
+
+            for admission_document in admission_documents:
+                document_identifier = admission_document.identifiant.split('.')
+                added_document = None
+
+                for tab_name, tab_documents in documents_by_tab.items():
+                    document_model_name = document_identifier[-1]
+
+                    if document_model_name in tab_documents:
+                        if not added_document:
+                            experience_name = curriculum_experiences_names_by_uuid.get(document_identifier[1], '')
+
+                            added_document = (
+                                attr.evolve(
+                                    admission_document,
+                                    libelle='{experience_name} > {document_name}'.format(
+                                        experience_name=curriculum_experiences_names_by_uuid.get(
+                                            document_identifier[1],
+                                            '',
+                                        ),
+                                        document_name=admission_document.libelle,
+                                    ),
+                                )
+                                if experience_name
+                                else admission_document
+                            )
+
+                        context['documents'][tab_name].append(added_document)
+
+            for tab_name in context['documents']:
+                context['documents'][tab_name].sort(key=lambda doc: doc.libelle)
 
         return context

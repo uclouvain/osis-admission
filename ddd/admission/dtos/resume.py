@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import Curricu
 from admission.ddd.admission.dtos import IdentificationDTO, CoordonneesDTO
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.formation_continue import dtos as dtos_formation_continue
 from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
 from osis_common.ddd import interface
@@ -71,6 +72,7 @@ class ResumePropositionDTO(ResumeCandidatDTO):
     proposition: AdmissionPropositionDTO
     comptabilite: Optional[AdmissionComptabiliteDTO]
     groupe_supervision: Optional[dtos_doctorat.GroupeDeSupervisionDTO]
+    questions_specifiques_dtos: Optional[List[QuestionSpecifiqueDTO]] = None  # Warning : not always set (TODO)
 
     @cached_property
     def est_proposition_doctorale(self):

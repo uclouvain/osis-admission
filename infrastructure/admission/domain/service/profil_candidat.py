@@ -49,7 +49,7 @@ from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionType
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.contrib.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
@@ -91,7 +91,11 @@ from osis_profile.models import (
     EducationalExperience,
 )
 from osis_profile.models.education import LanguageKnowledge
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 
 
 # TODO: a mettre dans infra/shared_kernel/profil
@@ -407,10 +411,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 AdmissionEPCInjection.objects.filter(
                     admission__uuid=OuterRef('educational_experience__valuated_from_admission__uuid'),
                     type=EPCInjectionType.DEMANDE.name,
+                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
             ),
             injecte_par_cv=Exists(
-                CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('educational_experience__uuid'))
+                CurriculumEPCInjection.objects.filter(
+                    experience_uuid=OuterRef('educational_experience__uuid'),
+                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                )
             ),
         )
         educational_experience_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
@@ -598,12 +606,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     AdmissionEPCInjection.objects.filter(
                         admission__candidate_id=OuterRef('pk'),
                         type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 secondaire_injecte_par_cv=Exists(
                     CurriculumEPCInjection.objects.filter(
                         type_experience=ExperienceType.HIGH_SCHOOL.name,
                         person_id=OuterRef('pk'),
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 **cls.get_secondary_studies_valuation_annotations(),
@@ -637,9 +647,15 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     AdmissionEPCInjection.objects.filter(
                         admission__uuid=OuterRef('valuated_from_admission__uuid'),
                         type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
-                injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+                injecte_par_cv=Exists(
+                    CurriculumEPCInjection.objects.filter(
+                        experience_uuid=OuterRef('uuid'),
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                    )
+                ),
             )
             .order_by('-start_date', '-end_date')
         )
@@ -910,12 +926,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     AdmissionEPCInjection.objects.filter(
                         admission__candidate_id=OuterRef('pk'),
                         type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 secondaire_injecte_par_cv=Exists(
                     CurriculumEPCInjection.objects.filter(
                         type_experience=ExperienceType.HIGH_SCHOOL.name,
                         person_id=OuterRef('pk'),
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 **cls.get_secondary_studies_valuation_annotations(),

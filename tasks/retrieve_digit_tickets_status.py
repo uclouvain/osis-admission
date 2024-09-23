@@ -44,8 +44,7 @@ from admission.ddd.admission.commands import (
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
 )
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
 from backoffice.celery import app
 from base.models.enums.person_address_type import PersonAddressType
@@ -246,8 +245,10 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                         **{field_name: personne_connue}
                     )
                     if candidate_high_school_diplomas.exists() and known_person_high_school_diplomas.exists():
-                        _trigger_epc_diplomas_deletion(known_person_high_school_diplomas, noma, personne_connue)
+                        alternative_suppr = model == HighSchoolDiplomaAlternative
+                        a_supprimer = list(known_person_high_school_diplomas.values_list('uuid', flat=True))
                         known_person_high_school_diplomas.delete()
+                        _trigger_epc_diplomas_deletion(a_supprimer, noma, personne_connue, alternative_suppr)  # noqa
                     for diploma in candidate_high_school_diplomas:
                         diploma.person_id = personne_connue.pk
                         diploma.save()
@@ -319,6 +320,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         proposition_fusion.status = PersonMergeStatus.MERGED.name
         proposition_fusion.selected_global_id = ''
         if personne_connue and personne_connue.global_id != candidat.global_id:
+            prop_a_supprimer = PersonMergeProposal.objects.filter(original_person=personne_connue)
+            if prop_a_supprimer.exists():
+                prop_a_supprimer.delete()
             proposition_fusion.original_person = personne_connue
         proposition_fusion.save()
 
@@ -337,13 +341,13 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
     logger.info(f"{PREFIX_TASK} ####### END PROCESS SUCCESSFUL DIGIT RESPONSE #######")
 
 
-def _trigger_epc_diplomas_deletion(known_person_high_school_diplomas, noma, personne_connue):
+def _trigger_epc_diplomas_deletion(a_supprimer, noma, personne_connue, alternative_suppr):
     InjectionEPCCurriculum().injecter_etudes_secondaires(
         fgs=personne_connue.global_id,
         noma=noma,
         user='fusion',
-        alternative_supprimee=True,
-        experiences_supprimees=known_person_high_school_diplomas.values_list('uuid', flat=True),
+        alternative_supprimee=alternative_suppr,
+        experiences_supprimees=a_supprimer,
     )
 
 
@@ -370,15 +374,10 @@ def _trigger_epc_non_academic_curriculum_deletion(experience_uuid, noma, personn
 def _injecter_signaletique_a_epc(matricule: str):
     from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
 
-    # TODO: Inject also for other admisison type
     demande = GeneralEducationAdmission.objects.filter(
         candidate__global_id=matricule,
     ).filter(
-        Q(
-            type_demande=TypeDemande.ADMISSION.name,
-            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
-        )
-        | Q(type_demande=TypeDemande.INSCRIPTION.name)
+        status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE
     ).order_by('created_at').first()
     InjectionEPCSignaletique().injecter(admission=demande)
 

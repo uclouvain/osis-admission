@@ -27,7 +27,9 @@
 import datetime
 from typing import Optional, Union
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import OngletsChecklist as OngletsChecklistDoctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as OngletsChecklistDoctorat,
+)
 from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
