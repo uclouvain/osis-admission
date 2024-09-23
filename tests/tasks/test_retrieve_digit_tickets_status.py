@@ -507,10 +507,6 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
         self.personne_compte_temporaire.global_id = '00345678'  # Set as internal account
         self.personne_compte_temporaire.save()
 
-        # on considere que la premiere personne a déjà été mergée
-        self.person_merge_proposal.delete()
-
-
         # simulate creation of a duplicate account
         self.doublon_personne_compte_temporaire = copy.deepcopy(self.personne_compte_temporaire)
         self.doublon_personne_compte_temporaire.global_id = '80000001'
@@ -584,7 +580,6 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
             self.envoyer_queue_mocked.called,
             msg="Suppression envoyée via la queue car il y a des expériences connues à supprimer"
         )
-
 
     def test_assert_in_error_when_internal_global_id_is_different_from_digit_global_id(self):
         self.personne_compte_temporaire.global_id = '00746799'

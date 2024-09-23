@@ -320,6 +320,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         proposition_fusion.status = PersonMergeStatus.MERGED.name
         proposition_fusion.selected_global_id = ''
         if personne_connue and personne_connue.global_id != candidat.global_id:
+            prop_a_supprimer = PersonMergeProposal.objects.filter(original_person=personne_connue)
+            if prop_a_supprimer.exists():
+                prop_a_supprimer.delete()
             proposition_fusion.original_person = personne_connue
         proposition_fusion.save()
 
