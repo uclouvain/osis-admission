@@ -135,7 +135,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             code_formation=proposition.doctorat.sigle,
             intitule_formation=proposition.doctorat.intitule,
             type_formation=proposition.doctorat.type,
-            lieu_formation=proposition.doctorat.campus,
+            lieu_formation=proposition.doctorat.campus.nom,
             annee_formation=proposition.doctorat.annee,
             annee_calculee=proposition.annee_calculee,
             nationalite_candidat=proposition.nationalite_candidat,

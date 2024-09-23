@@ -564,6 +564,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
                 'year_formset-2021-registered_credit_number': 20,
             },
         )
+
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         # Check the updated experience

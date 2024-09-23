@@ -1,4 +1,4 @@
-{% load admission i18n bootstrap3 waffle_tags %}
+{% load admission i18n bootstrap3 waffle_tags academic_year_display strings %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -33,7 +33,20 @@
 >
   <div class="modal-body" style="overflow:auto;">
 
-      {% if current.statut != initial.statut and current.extra.en_cours != 'taken_in_charge' %}
+    {% url 'admission:continuing-education:update:training-choice' uuid=view.kwargs.uuid as training_choice_url %}
+    {% url 'admission:continuing-education:checklist' uuid=view.kwargs.uuid as checklist_url %}
+    {% concat training_choice_url '?next=' checklist_url as full_training_choice_url %}
+    <div id="validation-decision-change-year-paragraph">
+      <p class="alert alert-danger">
+        {% blocktranslate with year=admission.annee_calculee|get_short_academic_year trimmed %}
+          The applicant is registered in the year {{ year }}.
+          Click <a class='bold-text underline-text' href='{{ full_training_choice_url }}'>here</a> 
+          to change the academic year.
+        {% endblocktranslate %}
+      </p>
+    </div>
+    
+    {% if current.statut != initial.statut and current.extra.en_cours != 'taken_in_charge' %}
       <div class="alert alert-danger">
         {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}
           {% translate 'An holding mail has already been sent to the candidate.' %}
@@ -46,7 +59,7 @@
           {% translate 'Are you sure you want to change the status?' %}
         {% endif %}
       </div>
-      {% endif %}
+    {% endif %}
     
       <div class="form-group"><strong>{% trans "Contact language" %}</strong> <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language  }}</span></div>
 

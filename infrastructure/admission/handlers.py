@@ -32,18 +32,24 @@ from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read impo
 from admission.ddd.admission.use_case.read import *
 from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
 from admission.ddd.admission.use_case.read.recuperer_matricule_digit import recuperer_matricule_digit
+from admission.ddd.admission.use_case.write import specifier_experience_en_tant_que_titre_acces
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.event_handler import reagir_modification_signaletique_candidat, \
-    reagir_proposition_fusion_initialisee, reagir_refus_proposition_fusion
+from admission.infrastructure.admission.event_handler import (
+    reagir_modification_signaletique_candidat,
+    reagir_proposition_fusion_initialisee,
+    reagir_refus_proposition_fusion,
+)
 from admission.infrastructure.admission.event_handler.reagir_a_proposition_soumise import recherche_et_validation_digit
 from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import (
     PropositionPersonneFusionRepository,
 )
+from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -78,6 +84,17 @@ COMMAND_HANDLERS = {
         query,
         profil_candidat_translator=ProfilCandidatTranslator(),
     ),
+    RecupererTitresAccesSelectionnablesPropositionQuery: (
+        lambda msg_bus, query: recuperer_titres_acces_selectionnables_proposition(
+            query,
+            titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+        )
+    ),
+    SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        cmd,
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
 }
 
 EVENT_HANDLERS = {}
@@ -89,6 +106,11 @@ if 'admission' in settings.INSTALLED_APPS:
         AdmissionApprouveeParSicEvent,
         DonneesIdentificationCandidatModifiee,
         CoordonneesCandidatModifiees,
+    )
+    from admission.ddd.admission.doctorat.events import (
+        PropositionDoctoraleSoumiseEvent,
+        InscriptionDoctoraleApprouveeParSicEvent,
+        AdmissionDoctoraleApprouveeParSicEvent,
     )
     from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import (
         reagir_a_approuver_proposition,
@@ -103,4 +125,7 @@ if 'admission' in settings.INSTALLED_APPS:
         CoordonneesCandidatModifiees: [reagir_modification_signaletique_candidat.process],
         PropositionFusionInitialiseeEvent: [reagir_proposition_fusion_initialisee.process],
         PropositionFusionRefuseeEvent: [reagir_refus_proposition_fusion.process],
+        PropositionDoctoraleSoumiseEvent: [recherche_et_validation_digit],
+        InscriptionDoctoraleApprouveeParSicEvent: [reagir_a_approuver_proposition],
+        AdmissionDoctoraleApprouveeParSicEvent: [reagir_a_approuver_proposition],
     }

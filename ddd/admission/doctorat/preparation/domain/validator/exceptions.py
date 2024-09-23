@@ -477,6 +477,166 @@ class ProcedureDemandeSignatureLanceeException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+class TitreAccesEtreSelectionneException(BusinessException):
+    status_code = "PROPOSITION-53"
+
+    def __init__(self, **kwargs):
+        message = _("You must choose a title of access among the previous experiences of the candidate.")
+        super().__init__(message, **kwargs)
+
+
+class ConditionAccesEtreSelectionneException(BusinessException):
+    status_code = "PROPOSITION-54"
+
+    def __init__(self, **kwargs):
+        message = _("You must choose an admission requirement.")
+        super().__init__(message, **kwargs)
+
+
+class PdfSicInconnu(BusinessException):
+    status_code = "PROPOSITION-55"
+
+    def __init__(self, **kwargs):
+        message = _("Unknown PDF type.")
+        super().__init__(message, **kwargs)
+
+
+class TitreAccesEtreSelectionnePourEnvoyerASICException(BusinessException):
+    status_code = "PROPOSITION-56"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving '
+            'access to the chosen program.'
+        )
+        super().__init__(message, **kwargs)
+
+
+class ParcoursAnterieurNonSuffisantException(BusinessException):
+    status_code = "PROPOSITION-57"
+
+    def __init__(self, **kwargs):
+        message = _('The Previous experience must be in the "Sufficient" status in order to do this action.')
+        super().__init__(message, **kwargs)
+
+
+class DocumentAReclamerImmediatException(BusinessException):
+    status_code = "PROPOSITION-58"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "The authorization can not be done while there is one or more documents to be requested immediately."
+        )
+        super().__init__(message, **kwargs)
+
+
+class InscriptionTardiveAvecConditionAccesException(BusinessException):
+    status_code = "PROPOSITION-59"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be a late enrollment with a defined access condition.")
+        super().__init__(message, **kwargs)
+
+
+class ComplementsFormationEtreVidesSiPasDeComplementsFormationException(BusinessException):
+    status_code = "PROPOSITION-60"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'If the answer to the additional courses question is no, there must be no additional LU and the '
+            'communication relating to the additional courses must be completely empty.'
+        )
+        super().__init__(message, **kwargs)
+
+
+class DemandeDoitEtreAdmissionException(BusinessException):
+    status_code = "PROPOSITION-61"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be an admission.")
+        super().__init__(message, **kwargs)
+
+
+class DemandeDoitEtreInscriptionException(BusinessException):
+    status_code = "PROPOSITION-62"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be an enrollment.")
+        super().__init__(message, **kwargs)
+
+
+class EtatChecklistDecisionSicNonValidePourApprouverUneInscription(BusinessException):
+    status_code = "PROPOSITION-63"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'To approve an enrollment, the status of the checklist for the sic decision must be '
+            '"To be processed" or "Dispensation needed" (with management approval of the dispensation).'
+        )
+        super().__init__(message, **kwargs)
+
+
+class EtatChecklistFinancabiliteNonValidePourApprouverDemande(BusinessException):
+    status_code = "PROPOSITION-64"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'The status of the checklist for the financability must be '
+            '"Not concerned" or "Financable" or "Dispensation granted".'
+        )
+        super().__init__(message, **kwargs)
+
+
+class PremierePropositionSoumisesNonTrouveeException(BusinessException):
+    status_code = "PROPOSITION-65"
+
+    def __init__(self, **kwargs):
+        message = _("First submitted proposition not found (Admission with state 'Application accepted' / Enrolment)")
+        super().__init__(message, **kwargs)
+
+
+class CurriculumNonCompletePourAcceptationException(BusinessException):
+    status_code = "PROPOSITION-66"
+
+    def __init__(self, **kwargs):
+        message = _("The 'Approved' status requires the last 5 years to be justified in the previous experience.")
+        super().__init__(message, **kwargs)
+
+
+class SituationPropositionNonSICException(BusinessException):
+    status_code = "PROPOSITION-67"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be managed by SIC to realized this action.")
+        super().__init__(message, **kwargs)
+
+
+class SituationPropositionNonFACException(BusinessException):
+    status_code = "PROPOSITION-68"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be managed by FAC to realized this action.")
+        super().__init__(message, **kwargs)
+
+
+class MotifRefusFacultaireNonSpecifieException(BusinessException):
+    status_code = "PROPOSITION-69"
+
+    def __init__(self, **kwargs):
+        message = _("When refusing a proposition, the reason must be specified.")
+        super().__init__(message, **kwargs)
+
+
+class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException):
+    status_code = "PROPOSITION-70"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "When accepting a proposition, all the required information in the approval form must be specified.",
+        )
+        super().__init__(message, **kwargs)
+
+
 class MembreNonExterneException(BusinessException):
     status_code = "PROPOSITION-14"
 
