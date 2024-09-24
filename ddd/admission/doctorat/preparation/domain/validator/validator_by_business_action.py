@@ -55,6 +55,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     StatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_peut_demander_candidat_modification_ca import \
+    ShouldPeutDemanderCandidatModificationCaFacultaire
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,

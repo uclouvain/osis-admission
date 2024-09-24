@@ -1,4 +1,5 @@
-{% load admission enums i18n %}
+{% extends "admission/modal/modal.html" %}
+{% load i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -24,4 +25,13 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% include 'admission/includes/admission_status.html' %}
+
+{% block modal_id %}projet-recherche-demander-modification-ca{% endblock %}
+
+{% block modal_title %}{% translate "Ask candidate to modify supervision committee" %}{% endblock %}
+
+{% block modal_class %}admission-modal-lg fac-decision-modal{% endblock %}
+
+{% block modal_content %}
+  {% include 'admission/doctorate/includes/checklist/projet_recherche_demander_modification_form.html' %}
+{% endblock %}

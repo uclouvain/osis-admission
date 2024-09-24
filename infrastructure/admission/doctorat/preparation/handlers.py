@@ -28,6 +28,8 @@ from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import \
+    demander_candidat_modifier_ca
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
@@ -692,5 +694,11 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
+    ),
+    DemanderCandidatModificationCACommand: lambda msg_bus, cmd: demander_candidat_modifier_ca(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        notification=Notification(),
     ),
 }
