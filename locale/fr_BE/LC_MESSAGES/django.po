@@ -9022,9 +9022,6 @@ msgstr ""
 msgid "Work contract type"
 msgstr "Type de contrat de travail"
 
-msgid "Work in progress"
-msgstr "En cours de réalisation"
-
 msgid "Work start date"
 msgstr "Date de début des travaux"
 
