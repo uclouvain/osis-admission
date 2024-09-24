@@ -2478,13 +2478,13 @@ msgstr ""
 msgid "Doctorate free additional approval conditions"
 msgstr ""
 
+msgid "Doctorate thesis field"
+msgstr ""
+
 msgid "Doctorate working list"
 msgstr ""
 
 msgid "Doctorate working lists"
-msgstr ""
-
-msgid "Doctorate thesis field"
 msgstr ""
 
 msgid "Document"
@@ -8033,9 +8033,6 @@ msgid "Work contract"
 msgstr ""
 
 msgid "Work contract should be set when funding type is set to work contract"
-msgstr ""
-
-msgid "Work in progress"
 msgstr ""
 
 msgid "Work contract type"

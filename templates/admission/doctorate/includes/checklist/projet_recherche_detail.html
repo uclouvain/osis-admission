@@ -1,0 +1,149 @@
+{% load admission enums i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% has_perm 'admission.change_admission_project' as can_change_admission_project %}
+{% if can_change_admission_project %}
+  {% url view.base_namespace|add:':update:training-choice' uuid=view.kwargs.uuid as edit_choix_formation_url %}
+  {% url view.base_namespace|add:':update:project' uuid=view.kwargs.uuid as edit_project_url %}
+{% endif %}
+
+{% panel _("Course choice") edit_link_button=edit_choix_formation_url %}
+  {% field_data _("Admission type") admission.type_admission|enum_display:'ChoixTypeAdmission' %}
+  {% if admission.justification %}
+    {% field_data _("Brief justification") admission.justification|linebreaks %}
+  {% endif %}
+  {% field_data _("Sector") admission.intitule_secteur_formation %}
+  {% display admission.doctorat.intitule " (" admission.doctorat.campus ")" as doctorate_title %}
+  {% field_data _("PhD") doctorate_title %}
+  {% if admission.commission_proximite %}
+    {% field_data _("Proximity commission / Subdomain") admission.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
+  {% endif %}
+{% endpanel %}
+
+{% panel _("Funding") edit_link_button=edit_project_url %}
+  {% if admission.type_financement %}
+    {% field_data _("Funding type") admission.type_financement|enum_display:'ChoixTypeFinancement' %}
+    {% if admission.type_financement == "WORK_CONTRACT" %}
+      {% field_data _("Work contract") admission.type_contrat_travail|enum_display:'ChoixTypeContratTravail' %}
+      {% field_data fte_label admission.eft|default_if_none:'' %}
+    {% elif admission.type_financement == "SEARCH_SCHOLARSHIP" %}
+      {% if admission.bourse_recherche %}
+        {% display admission.bourse_recherche.nom_court '-' admission.bourse_recherche.nom_long as nom_bourse %}
+      {% else %}
+        {% display admission.autre_bourse_recherche as nom_bourse %}
+      {% endif %}
+      {% field_data _("Research scholarship") nom_bourse %}
+      {% field_data _("Scholarship start date") admission.bourse_date_debut %}
+      {% field_data _("Scholarship end date") admission.bourse_date_fin %}
+      {% field_data _("Proof of scholarship") admission.bourse_preuve %}
+    {% endif %}
+    {% field_data _("Estimated time to complete the PhD (in months)") admission.duree_prevue|default_if_none:'' %}
+    {% field_data allocated_time_label admission.temps_consacre|default_if_none:'' %}
+    {% field_data _("Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?") admission.est_lie_fnrs_fria_fresh_csc %}
+    {% field_data _("Comment") admission.commentaire_financement|linebreaks %}
+  {% endif %}
+{% endpanel %}
+
+{% panel _("PhD research project") edit_link_button=edit_project_url %}
+  {% field_data _("Project title") admission.titre_projet %}
+  {% field_data _("Project resume") admission.resume_projet|linebreaks %}
+  {% field_data _("Thesis language") admission.langue_redaction_these|osis_language_name %}
+  {% if admission.institut_these %}
+    {% display admission.nom_institut_these ' ' '(' admission.sigle_institut_these ')' as institut_these %}
+  {% endif %}
+  {% field_data _("Research institute") institut_these|default_if_none:'' %}
+  {% field_data _("Thesis location") admission.lieu_these %}
+
+  {% field_data _("PhD research project") admission.documents_projet %}
+  {% field_data _("PhD proposal") admission.proposition_programme_doctoral %}
+  {% field_data _("Complementary training proposition") admission.projet_formation_complementaire %}
+  {% field_data _("Gantt chart") admission.graphe_gantt %}
+  {% field_data _("Letters of recommendation") admission.lettres_recommandation %}
+{% endpanel %}
+
+{% panel _("PhD research experience") edit_link_button=edit_project_url %}
+  {% field_data _("Has your PhD project already started?") admission.projet_doctoral_deja_commence %}
+  {% if admission.projet_doctoral_deja_commence %}
+    {% field_data _("Institution") admission.projet_doctoral_institution %}
+    {% field_data _("Work start date") admission.projet_doctoral_date_debut %}
+  {% endif %}
+  {% field_data _("Have you previously enrolled for a PhD?") admission.doctorat_deja_realise|enum_display:'ChoixDoctoratDejaRealise' %}
+  {% if admission.doctorat_deja_realise != "NO" %}
+    {% field_data _("Institution") admission.institution %}
+    {% field_data _("Thesis field") admission.domaine_these %}
+    {% if admission.date_soutenance %}
+      {% field_data _("Defence date") admission.date_soutenance %}
+    {% elif admission.raison_non_soutenue %}
+      {% field_data _("No defense reason") admission.raison_non_soutenue|linebreaks %}
+    {% endif %}
+  {% endif %}
+{% endpanel %}
+
+{% has_perm 'admission.change_admission_cotutelle' as can_change_admission_cotutelle %}
+{% if can_change_admission_cotutelle %}
+  {% url view.base_namespace|add:':update:cotutelle' uuid=view.kwargs.uuid as edit_cotutelle_url %}
+{% endif %}
+
+{% panel _("Cotutelle") edit_link_button=edit_cotutelle_url %}
+  {% if cotutelle.cotutelle is None %}
+    {% trans "Choice of joint supervision is not yet defined" %}
+  {% elif cotutelle.cotutelle %}
+    {% field_data _("Is it a Wallonia-Brussels Federation institution?") cotutelle.institution_fwb %}
+    {% if cotutelle.institution %}
+      {% field_data _("Partner institution") cotutelle.institution|superior_institute_name %}
+    {% elif cotutelle.autre_institution %}
+      {% field_data _("Institute name") cotutelle.autre_institution_nom %}
+      {% field_data _("Institute address") cotutelle.autre_institution_adresse %}
+    {% endif %}
+    {% field_data _("Motivation for joint supervision") cotutelle.motivation|linebreaks %}
+    {% field_data _("Joint supervision request") cotutelle.demande_ouverture %}
+    {% field_data _("Joint supervision agreement") cotutelle.convention %}
+    {% field_data _("Other documents relating to joint supervision") cotutelle.autres_documents %}
+  {% else %}
+    {% trans "No joint supervision" %}
+  {% endif %}
+{% endpanel %}
+
+{% has_perm 'admission.add_supervision_member' as can_add_supervision_member %}
+{% if can_add_supervision_member %}
+  {% url view.base_namespace|add:':update:supervision' uuid=view.kwargs.uuid as edit_supervision_url %}
+{% endif %}
+
+{% panel _("Promoters") edit_link_button=edit_supervision_url %}
+  {% for signature in groupe_supervision.signatures_promoteurs %}
+    {% include "admission/doctorate/details/includes/supervision_member_entry.html" with type='PROMOTER' member=signature.promoteur supervision=groupe_supervision hide_actions=True %}
+  {% empty %}
+    {% trans "No one invited" %}
+  {% endfor %}
+{% endpanel %}
+
+{% panel _("CA members") edit_link_button=edit_supervision_url %}
+  {% for signature in groupe_supervision.signatures_membres_CA %}
+    {% include "admission/doctorate/details/includes/supervision_member_entry.html" with type='CA_MEMBER' member=signature.membre_CA hide_actions=True %}
+  {% empty %}
+    {% trans "No one invited" %}
+  {% endfor %}
+{% endpanel %}

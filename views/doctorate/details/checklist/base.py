@@ -39,7 +39,10 @@ from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetStatutTicketPersonneQuery, RechercherParcoursAnterieurQuery
-from admission.ddd.admission.doctorat.preparation.commands import RecupererResumeEtEmplacementsDocumentsPropositionQuery
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+    GetGroupeDeSupervisionCommand,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -53,6 +56,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
     OngletsDemande,
+    DocumentsProjetRecherche,
+    DocumentsCotutelle,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -172,6 +177,10 @@ class ChecklistView(
                 'CURRICULUM',
             },
             OngletsChecklist.choix_formation.name: {},
+            OngletsChecklist.projet_recherche.name: {
+                *DocumentsProjetRecherche.keys(),
+                *DocumentsCotutelle.keys(),
+            },
             OngletsChecklist.parcours_anterieur.name: {
                 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
                 'DIPLOME_EQUIVALENCE',
@@ -344,6 +353,18 @@ class ChecklistView(
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()
+
+            # Projet de recherche
+            context['cotutelle'] = self.cotutelle
+            context['groupe_supervision'] = message_bus_instance.invoke(
+                GetGroupeDeSupervisionCommand(uuid_proposition=self.admission_uuid)
+            )
+            # There is a bug with translated strings with percent signs
+            # https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#troubleshooting-gettext-incorrectly-detects-python-format-in-strings-with-percent-signs
+            # xgettext:no-python-format
+            context['fte_label'] = _("Full-time equivalent (as %)")
+            # xgettext:no-python-format
+            context['allocated_time_label'] = _("Time allocated for thesis (in %)")
 
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
