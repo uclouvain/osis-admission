@@ -799,3 +799,11 @@ class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DemanderCandidatModificationCACommand(interface.CommandRequest):
+    uuid_proposition: str
+    auteur: str
+    objet_message: str
+    corps_message: str

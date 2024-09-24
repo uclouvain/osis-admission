@@ -42,6 +42,9 @@ class ChoixStatutPropositionDoctorale(ChoiceEnum):
     COMPLETEE_POUR_FAC = _('Completed for Fac')
     RETOUR_DE_FAC = _('Feedback from Fac')
 
+    CA_A_COMPLETER = _('Supervisory panel to be completed')
+    CA_EN_ATTENTE_DE_SIGNATURE = _('Supervisory panel waiting for signature')
+
     A_COMPLETER_POUR_SIC = _('To be completed for the Enrolment Office (SIC)')
     COMPLETEE_POUR_SIC = _('Completed for SIC')
     ATTENTE_VALIDATION_DIRECTION = _('Awaiting management approval')

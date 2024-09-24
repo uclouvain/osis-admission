@@ -216,3 +216,12 @@ class HistoriqueInMemory(IHistorique):
         message: Optional[EmailMessage] = None,
     ):
         pass
+
+    @classmethod
+    def historiser_demande_candidat_modification_ca(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+    ):
+        pass

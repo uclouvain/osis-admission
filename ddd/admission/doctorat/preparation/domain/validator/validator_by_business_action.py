@@ -833,3 +833,19 @@ class RedonnerLaMainAuCandidatValidatorList(TwoStepsMultipleBusinessExceptionLis
         return [
             ShouldStatutEtreEnAttenteDeSignature(self.statut),
         ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DemanderCandidatModificationCaValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPeutDemanderCandidatModificationCaFacultaire(
+                statut=self.statut,
+            ),
+        ]
+

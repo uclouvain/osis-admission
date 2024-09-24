@@ -240,3 +240,12 @@ class IHistorique(interface.DomainService):
         message: Optional[EmailMessage],
     ):
         raise NotImplementedError
+
+    @classmethod
+    def historiser_demande_candidat_modification_ca(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+    ):
+        raise NotImplementedError

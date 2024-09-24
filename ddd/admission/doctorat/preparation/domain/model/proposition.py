@@ -94,7 +94,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
-    RedonnerLaMainAuCandidatValidatorList,
+    RedonnerLaMainAuCandidatValidatorList, DemanderCandidatModificationCaValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
@@ -1269,3 +1269,9 @@ class Proposition(interface.RootEntity):
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
+
+    def demander_candidat_modification_ca(self):
+        DemanderCandidatModificationCaValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.CA_A_COMPLETER
