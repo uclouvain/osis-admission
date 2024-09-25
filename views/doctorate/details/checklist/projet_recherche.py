@@ -79,7 +79,7 @@ class ProjetRechercheContextMixin(CheckListDefaultContextMixin):
             'training_acronym': self.proposition.formation.sigle,
             'admissions_dashboard_link_front': get_portal_admission_dashboard_url(),
             'sender_name': f'{person.first_name} {person.last_name}',
-            'phd_committee': self.proposition.formation.titre_entite_gestion,
+            'phd_committee': self.proposition.formation.intitule_entite_gestion,
         }
 
         try:

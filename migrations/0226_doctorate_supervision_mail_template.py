@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
 
 <p>Please request signatures for any additional supervisory committee members in the same way as when you compiled your application.</p>
 
-<p>{sender_name} {phd_committee}</p>
+<p>{sender_name} - {phd_committee}</p>
     ''',
                 'fr-be': '''<p>Cher, Chère, Cher.ère, {candidate_first_name} {candidate_last_name},</p>
 
@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
 
 <p>Veuillez demander les signatures pour les éventuels membres du comité d’accompagnement ajoutés, en procédant de la même façon que lors de la constitution de votre dossier.</p>
 
-<p>{sender_name} {phd_committee}</p>
+<p>{sender_name} - {phd_committee}</p>
     ''',
             },
         ),
