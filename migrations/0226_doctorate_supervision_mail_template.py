@@ -20,33 +20,33 @@ class Migration(migrations.Migration):
                 'fr-be': "[OSIS] UCLouvain - suivi de votre demande d'admission - {admission_reference}",
             },
             {
-                'en': '''Dear {candidate_first_name} {candidate_last_name},
+                'en': '''<p>Dear {candidate_first_name} {candidate_last_name},</p>
 
-Thank you for your enrolment application to the {training_title} - {training_acronym} programme for the {academic_year} academic year.
+<p>Thank you for your enrolment application to the {training_title} - {training_acronym} programme for the {academic_year} academic year.</p>
 
-We note that some elements are missing.
+<p>We note that some elements are missing.</p>
 
-Please modify your supervisory committee as follows:
+<p>Please modify your supervisory committee as follows:</p>
 
-------- via your online application dashboard: {admissions_dashboard_link_front}.
+<p><strong>(texte à insérer par gestionnaire)</strong> via your online application dashboard: {admissions_dashboard_link_front}.</p>
 
-Please request signatures for any additional supervisory committee members in the same way as when you compiled your application.
+<p>Please request signatures for any additional supervisory committee members in the same way as when you compiled your application.</p>
 
-{sender_name} {phd_committee}
+<p>{sender_name} {phd_committee}</p>
     ''',
-                'fr-be': '''Cher, Chère, Cher.ère, {candidate_first_name} {candidate_last_name},
+                'fr-be': '''<p>Cher, Chère, Cher.ère, {candidate_first_name} {candidate_last_name},</p>
 
-Votre demande d'inscription au programme {training_title} - {training_acronym} pour l'année académique {academic_year} nous est bien parvenue et nous vous en remercions.
+<p>Votre demande d'inscription au programme {training_title} - {training_acronym} pour l'année académique {academic_year} nous est bien parvenue et nous vous en remercions.</p>
 
-Après vérification, nous constatons qu'il manque encore certains éléments.
+<p>Après vérification, nous constatons qu'il manque encore certains éléments.</p>
 
-Veuillez modifier votre comité d’accompagnement de la manière suivante :
+<p>Veuillez modifier votre comité d’accompagnement de la manière suivante :</p>
 
--------, obligatoirement via votre tableau de bord de votre demande en ligne : {admissions_dashboard_link_front}.
+<p><strong>(texte à insérer par gestionnaire)</strong>, obligatoirement via votre tableau de bord de votre demande en ligne : {admissions_dashboard_link_front}.</p>
 
-Veuillez demander les signatures pour les éventuels membres du comité d’accompagnement ajoutés, en procédant de la même façon que lors de la constitution de votre dossier.
+<p>Veuillez demander les signatures pour les éventuels membres du comité d’accompagnement ajoutés, en procédant de la même façon que lors de la constitution de votre dossier.</p>
 
-{sender_name} {phd_committee}
+<p>{sender_name} {phd_committee}</p>
     ''',
             },
         ),
