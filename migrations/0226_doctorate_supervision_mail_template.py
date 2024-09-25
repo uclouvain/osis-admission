@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         MailTemplateMigration(
             ADMISSION_EMAIL_SUPERVISION_MODIFICATION_DOCTORATE,
             {
-                'en': "[OSIS] UCLouvain - suivi de votre demande d'admission - {admission_reference}",
+                'en': "[OSIS] UCLouvain - follow up of your application - {admission_reference}",
                 'fr-be': "[OSIS] UCLouvain - suivi de votre demande d'admission - {admission_reference}",
             },
             {
