@@ -236,8 +236,12 @@
 
           <button
               class="btn btn-default pull-right"
+              {% if original_admission.status == 'TRAITEMENT_FAC' %}
               data-toggle="modal"
               data-target="#projet-recherche-demander-modification-ca"
+              {% else %}
+              disabled
+              {% endif %}
           >
             {% translate 'Supervision committee modification by candidate' %}
           </button>

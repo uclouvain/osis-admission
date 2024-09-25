@@ -77,10 +77,9 @@ class ProjetRechercheContextMixin(CheckListDefaultContextMixin):
             'academic_year': format_academic_year(self.proposition.formation.annee),
             'training_title': training_title,
             'training_acronym': self.proposition.formation.sigle,
-            'sender_name': f'{person.first_name} {person.last_name}',
             'admissions_dashboard_link_front': get_portal_admission_dashboard_url(),
-
-            'phd_committee': 'TODO',
+            'sender_name': f'{person.first_name} {person.last_name}',
+            'phd_committee': self.proposition.formation.titre_entite_gestion,
         }
 
         try:
@@ -122,7 +121,7 @@ class ProjetRechercheDemanderModificationCAView(
     HtmxPermissionRequiredMixin,
     FormView,
 ):
-    urlpatterns = 'projet-recherche-demand-modification-ca'
+    urlpatterns = 'projet-recherche-demander-modification-ca'
     permission_required = 'admission.change_admission_supervision'
     template_name = 'admission/doctorate/includes/checklist/projet_recherche_demander_modification_form.html'
     htmx_template_name = (
@@ -147,4 +146,5 @@ class ProjetRechercheDemanderModificationCAView(
                 form.add_error(None, exception.message)
             return self.form_invalid(form)
 
+        self.htmx_refresh = True
         return super().form_valid(form)

@@ -40,5 +40,5 @@ class ShouldPeutDemanderCandidatModificationCaFacultaire(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC:
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC:
             raise SituationPropositionNonFACException()
