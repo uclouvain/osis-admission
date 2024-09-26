@@ -23,7 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import itertools
 import uuid
+from typing import Dict, Set
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -41,7 +43,6 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (
@@ -55,6 +56,7 @@ from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.contrib.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+    STATUTS_PROPOSITION_DOCTORALE_PEU_AVANCEE,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -67,6 +69,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
+    ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE,
 )
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
@@ -80,6 +83,9 @@ from base.models.person_merge_proposal import PersonMergeStatus
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
+from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -621,6 +627,54 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     @cached_property
     def is_in_quarantine(self):
         return BaseAdmission.objects.filter(pk=self.pk).filter_in_quarantine().exists()
+
+    @cached_property
+    def other_candidate_trainings(self) -> Dict[str, Set[str]]:
+        # Retrieve the education group types from the admissions
+        admission_training_types = (
+            BaseAdmission.objects.filter(
+                candidate_id=self.candidate_id,
+            )
+            .exclude(
+                Q(pk=self.pk)
+                | Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+                | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+                | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_PEU_AVANCEE),
+            )
+            .values_list(
+                'training__education_group_type__name',
+                flat=True,
+            )
+        )
+
+        # Retrieve the education group types from the internal trainings
+        internal_training_types = (
+            InscriptionProgrammeAnnuel.objects.filter(
+                programme_cycle__etudiant__person_id=self.candidate_id,
+                programme__isnull=False,
+            )
+            .exclude(
+                etat_inscription__in=[
+                    EtatInscriptionFormation.ERREUR.name,
+                    EtatInscriptionFormation.ERREUR_PROCEDURE.name,
+                ]
+            )
+            .values_list(
+                'programme__root_group__education_group_type__name',
+                flat=True,
+            )
+        )
+
+        other_admissions = {
+            CONTEXT_GENERAL: set(),
+            CONTEXT_DOCTORATE: set(),
+            CONTEXT_CONTINUING: set(),
+        }
+
+        for training in itertools.chain(internal_training_types, admission_training_types):
+            other_admissions[ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE[training]].add(training)
+
+        return other_admissions
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):

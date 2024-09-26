@@ -35,11 +35,13 @@ from rest_framework import status
 from admission.constants import CONTEXT_CONTINUING
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
 )
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.campus import Campus
@@ -206,15 +208,49 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             uuid=self.continuing_admission.uuid,
         )
 
-    def test_update_curriculum_is_allowed_for_fac_users(self):
+    def test_update_curriculum_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
+
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            submitted=True,
+        )
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
+
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            submitted=True,
+        )
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_form_initialization(self):
         self.client.force_login(self.sic_manager_user)

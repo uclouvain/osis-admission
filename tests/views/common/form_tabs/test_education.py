@@ -38,10 +38,12 @@ from admission.contrib.models import EPCInjection as AdmissionEPCInjection, Cont
 from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -723,17 +725,69 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
 
-    def test_update_education_is_allowed_for_fac_users(self):
+    def test_update_education_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
-        response = self.client.get(self.form_url)
 
+        response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_update_education_is_allowed_for_sic_users(self):
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_education_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
         response = self.client.get(self.form_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_submit_valid_data(self):
         self.client.force_login(self.sic_manager_user)

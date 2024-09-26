@@ -105,7 +105,7 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -684,15 +684,15 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
                         checklist__current__financanbilite__extra__reussite='financable',
-                        generaleducationadmission__financability_rule=''
+                        generaleducationadmission__financability_rule='',
                     )
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
-                        generaleducationadmission__financability_rule_established_on__isnull=True
+                        generaleducationadmission__financability_rule_established_on__isnull=True,
                     )
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
-                        generaleducationadmission__financability_rule_established_by_id__isnull=True
+                        generaleducationadmission__financability_rule_established_by_id__isnull=True,
                     ),
                     generaleducationadmission__isnull=False,
                     then=Value(False),

@@ -73,7 +73,7 @@ from base.tests.factories.entity_version import EntityVersionFactory, MainEntity
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 
@@ -281,7 +281,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(form['annee_academique'].initial, 2024)
 
     def test_list_central_manager_scoped_not_entity(self):
-        manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name])
+        manager = CentralManagerRoleFactory(scopes=[Scope.GENERAL.name])
         self.client.force_login(user=manager.person.user)
 
         response = self._do_request(allowed_sql_surplus=1)
@@ -289,7 +289,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
     def test_list_central_manager_scoped_on_entity(self):
-        manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name], entity=self.first_entity)
+        manager = CentralManagerRoleFactory(scopes=[Scope.GENERAL.name], entity=self.first_entity)
         self.client.force_login(user=manager.person.user)
 
         response = self._do_request(allowed_sql_surplus=1)
