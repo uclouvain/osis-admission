@@ -482,6 +482,7 @@ def _find_student_registration_id_in_epc(matricule):
     except (RequestException, ValueError) as e:
         return None
 
+
 def _format_registration_id(registration_id):
     prefix_registration_id = (8 - len(registration_id)) * '0'
     registration_id = ''.join([prefix_registration_id, registration_id])
