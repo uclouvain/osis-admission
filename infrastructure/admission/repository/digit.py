@@ -478,6 +478,6 @@ def _find_student_registration_id_in_epc(matricule):
         result = response.json()
         if response.status_code == 200 and result.get('lireDossierEtudiantResponse'):
             if result['lireDossierEtudiantResponse'].get('return'):
-                return result['lireDossierEtudiantResponse']['return'].get('noma')
+                return str(result['lireDossierEtudiantResponse']['return'].get('noma'))
     except (RequestException, ValueError) as e:
         return None
