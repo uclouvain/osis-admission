@@ -53,7 +53,8 @@ from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory, \
+    CentralManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
@@ -125,8 +126,15 @@ class PersonFormTestCase(TestCase):
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
-            candidate=cls.general_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        cls.continuing_with_common_candidate_admission: ContinuingEducationAdmission = (
+            ContinuingEducationAdmissionFactory(
+                training=cls.continuing_admission.training,
+                status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+                candidate=cls.general_admission.candidate,
+            )
         )
 
         cls.continuing_program_manager_user = ProgramManagerRoleFactory(
@@ -136,6 +144,11 @@ class PersonFormTestCase(TestCase):
         cls.continuing_url = resolve_url(
             'admission:continuing-education:update:person',
             uuid=cls.continuing_admission.uuid,
+        )
+
+        cls.continuing_with_common_candidate_url = resolve_url(
+            'admission:continuing-education:update:person',
+            uuid=cls.continuing_with_common_candidate_admission.uuid,
         )
 
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
@@ -845,12 +858,20 @@ class PersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    def test_continuing_person_form_on_post_program_manager_is_allowed(self):
+        response = self.client.get(self.continuing_with_common_candidate_url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_continuing_person_form_on_post_program_manager(self):
         self.client.force_login(user=self.continuing_program_manager_user)
 
         response = self.client.post(self.continuing_url, self.form_data)
 
         self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(self.continuing_with_common_candidate_url, self.form_data)
+
+        self.assertEqual(response.status_code, 403)
 
     def test_continuing_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -50,7 +50,9 @@ def is_continuing(self, user: User, obj: ContinuingEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_('The proposition must be in draft form to realize this action.'))
 def in_progress(self, user: User, obj: ContinuingEducationAdmission):
-    return obj.status == ChoixStatutPropositionContinue.EN_BROUILLON.name
+    return (
+        isinstance(obj, ContinuingEducationAdmission) and obj.status == ChoixStatutPropositionContinue.EN_BROUILLON.name
+    )
 
 
 @predicate(bind=True)

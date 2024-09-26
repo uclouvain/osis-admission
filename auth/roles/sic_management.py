@@ -49,7 +49,7 @@ class SicManagement(EntityRoleModel):
     @classmethod
     def rule_set(cls):
         ruleset = {
-            **CentralManager.rule_set(),
+            **CentralManager.rule_set_without_scope(),
             # Listings
             'admission.checklist_change_sic_decision': rules.always_allow & ~is_sent_to_epc,
             'admission.view_enrolment_applications': rules.always_allow,

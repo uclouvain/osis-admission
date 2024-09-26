@@ -35,6 +35,7 @@ from admission.auth.predicates.common import (
     is_sent_to_epc,
     pending_digit_ticket_response,
     past_experiences_checklist_tab_is_not_sufficient,
+    candidate_has_other_doctorate_or_general_admissions,
 )
 from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -86,7 +87,8 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.change_admission_person': is_part_of_education_group
             & continuing.in_manager_status
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~pending_digit_ticket_response
+            & ~candidate_has_other_doctorate_or_general_admissions,
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.change_admission_coordinates': is_part_of_education_group
             & continuing.in_manager_status
@@ -95,18 +97,26 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_secondary_studies': is_part_of_education_group,
             'admission.change_admission_secondary_studies': is_part_of_education_group
             & continuing.in_manager_status
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & ~candidate_has_other_doctorate_or_general_admissions,
             'admission.view_admission_languages': is_part_of_education_group,
             'admission.change_admission_languages': is_part_of_education_group
             & doctorate.in_fac_status
             & ~is_sent_to_epc,
             'admission.view_admission_curriculum': is_part_of_education_group,
-            'admission.change_admission_curriculum': is_part_of_education_group
+            'admission.change_admission_global_curriculum': is_part_of_education_group
             & (continuing.in_manager_status | doctorate.in_fac_status)
+            & ~is_sent_to_epc,
+            'admission.change_admission_curriculum': is_part_of_education_group
+            & (
+                (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
+                | doctorate.in_fac_status
+            )
             & ~is_sent_to_epc,
             'admission.delete_admission_curriculum': is_part_of_education_group
             & continuing.in_manager_status
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & ~candidate_has_other_doctorate_or_general_admissions,
             # Project
             'admission.view_admission_project': is_part_of_education_group,
             'admission.view_admission_cotutelle': is_part_of_education_group,

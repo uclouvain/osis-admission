@@ -8111,6 +8111,27 @@ msgstr "Données relatives à la thèse"
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
 
+msgid ""
+"This action cannot be performed as another doctorate admission exists for "
+"this candidate."
+msgstr ""
+"Cette action ne peut être réalisée car il existe une autre admission pour ce "
+"candidat en formation doctorale."
+
+msgid ""
+"This action cannot be performed as another general admission exists for this "
+"candidate."
+msgstr ""
+"Cette action ne peut être réalisée car il existe une autre admission pour ce "
+"candidat en formation générale."
+
+msgid ""
+"This action cannot be performed as another general or doctorate admission "
+"exists for this candidate."
+msgstr ""
+"Cette action ne peut être réalisée car il existe une autre admission pour ce "
+"candidat en formation générale ou doctorale."
+
 msgid "This action is limited to a specific admission context."
 msgstr "Cette action est limitée à un contexte d'admission particulier."
 
