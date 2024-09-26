@@ -65,7 +65,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 
 
 class ChecklistViewTestCase(TestCase):
