@@ -583,7 +583,10 @@ class Proposition(interface.RootEntity):
         self.fiche_archive_signatures_envoyees = []
 
     def verrouiller_proposition_pour_signature(self):
-        self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
+        if self.statut == ChoixStatutPropositionDoctorale.CA_A_COMPLETER:
+            self.statut = ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE
+        else:
+            self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
 
     def deverrouiller_projet_doctoral(self):
         self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON

@@ -48,10 +48,10 @@ def supprimer_promoteur(
     promoteur_id = groupe_supervision.get_promoteur(cmd.uuid_promoteur)
 
     # THEN
+    groupe_supervision_repository.remove_member(groupe_supervision.entity_id, promoteur_id)
     notification.notifier_suppression_membre(proposition_candidat, promoteur_id)
     historique.historiser_suppression_membre(
         proposition_candidat, groupe_supervision, promoteur_id, cmd.matricule_auteur
     )
-    groupe_supervision_repository.remove_member(groupe_supervision.entity_id, promoteur_id)
 
     return proposition_id
