@@ -244,13 +244,6 @@ def get_portal_admission_url(context, admission_uuid) -> str:
     )
 
 
-def get_portal_admission_dashboard_url() -> str:
-    return settings.ADMISSION_FRONTEND_LINK.format(
-        context='',
-        uuid='',
-    )[:-2]
-
-
 def get_backoffice_admission_url(context, admission_uuid, sub_namespace='', url_suffix='') -> str:
     """Return the url of the admission in the backoffice."""
     return '{}{}{}'.format(

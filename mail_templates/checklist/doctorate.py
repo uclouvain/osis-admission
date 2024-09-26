@@ -385,7 +385,7 @@ templates.register(
             example="2023-2024",
         ),
         Token(
-            name='admissions_dashboard_link_front',
+            name='admissions_link_front',
             description=_("Link to the admissions dashboard (front-office)"),
             example="http://dev.studies.uclouvain.be/admission/",
         ),

@@ -24,27 +24,18 @@
 #
 # ##############################################################################
 from django.conf import settings
-from django.contrib import messages
-from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.urls import reverse
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, FormView
+from django.views.generic import FormView
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierChecklistChoixFormationCommand, DemanderCandidatModificationCACommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.forms.admission.checklist import (
-    ChoixFormationForm,
+    DemanderCandidatModificationCACommand,
 )
 from admission.forms.admission.doctorate.checklist import ProjetRechercheDemanderModificationCAForm
 from admission.mail_templates import ADMISSION_EMAIL_SUPERVISION_MODIFICATION_DOCTORATE
-from admission.utils import add_messages_into_htmx_response, get_portal_admission_dashboard_url
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.utils import get_portal_admission_url
+from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
@@ -77,7 +68,7 @@ class ProjetRechercheContextMixin(CheckListDefaultContextMixin):
             'academic_year': format_academic_year(self.proposition.formation.annee),
             'training_title': training_title,
             'training_acronym': self.proposition.formation.sigle,
-            'admissions_dashboard_link_front': get_portal_admission_dashboard_url(),
+            'admissions_link_front': get_portal_admission_url('doctorate', str(self.admission_uuid)) + 'supervision/',
             'sender_name': f'{person.first_name} {person.last_name}',
             'phd_committee': self.proposition.formation.intitule_entite_gestion,
         }

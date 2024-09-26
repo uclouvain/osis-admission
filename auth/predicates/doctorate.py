@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT, STATUTS_PROPOSITION_DOCTORALE_CA_A_COMPLETER,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
@@ -80,6 +80,12 @@ def is_jury_in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
 def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_AVANT_SOUMISSION
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The CA is not currently to be completed"))
+def ca_to_be_completed(self, user: User, obj: DoctorateAdmission):
+    return obj.status in STATUTS_PROPOSITION_DOCTORALE_CA_A_COMPLETER
 
 
 @predicate(bind=True)

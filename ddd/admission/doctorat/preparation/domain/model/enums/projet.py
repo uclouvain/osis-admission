@@ -93,6 +93,12 @@ STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS = STATUTS_PROPOSITION_DOC
     ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
 }
 
+# Le candidat doit mettre à jour son CA
+STATUTS_PROPOSITION_DOCTORALE_CA_A_COMPLETER = {
+    ChoixStatutPropositionDoctorale.CA_A_COMPLETER.name,
+    ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name,
+}
+
 # Le gestionnaire SIC a la main
 STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC = {
     ChoixStatutPropositionDoctorale.CONFIRMEE.name,

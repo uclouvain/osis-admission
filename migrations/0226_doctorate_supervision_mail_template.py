@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
 
 <p>Please modify your supervisory committee as follows:</p>
 
-<p><strong>(texte à insérer par gestionnaire)</strong> via your online application dashboard: {admissions_dashboard_link_front}.</p>
+<p><strong>(texte à insérer par gestionnaire)</strong> via your online application dashboard: {admissions_link_front}.</p>
 
 <p>Please request signatures for any additional supervisory committee members in the same way as when you compiled your application.</p>
 
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
 
 <p>Veuillez modifier votre comité d’accompagnement de la manière suivante :</p>
 
-<p><strong>(texte à insérer par gestionnaire)</strong>, obligatoirement via votre tableau de bord de votre demande en ligne : {admissions_dashboard_link_front}.</p>
+<p><strong>(texte à insérer par gestionnaire)</strong>, obligatoirement via votre tableau de bord de votre demande en ligne : {admissions_link_front}.</p>
 
 <p>Veuillez demander les signatures pour les éventuels membres du comité d’accompagnement ajoutés, en procédant de la même façon que lors de la constitution de votre dossier.</p>
 
