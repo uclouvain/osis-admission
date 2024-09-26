@@ -7256,6 +7256,21 @@ msgstr "Données relatives à la thèse"
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
 
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general education."
+msgstr ""
+"Cette action ne peut être réalisée car il existe, pour ce candidat, une "
+"autre admission ou expérience interne relative à une formation générale."
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general or a doctorate education."
+msgstr ""
+"Cette action ne peut être réalisée car il existe, pour ce candidat, une "
+"autre admission ou expérience interne relative à une formation générale ou "
+"doctorale."
+
 msgid "This action is limited to a specific admission context."
 msgstr "Cette action est limitée à un contexte d'admission particulier."
 
