@@ -28,12 +28,15 @@ import datetime
 from django.db import IntegrityError
 from django.test import TestCase
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import admission_directory_path, BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from base.models.enums.education_group_types import TrainingType
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.person import PersonFactory
@@ -171,3 +174,41 @@ class AdmissionInQuarantineTestCase(TestCase):
             admission = BaseAdmission.objects.get(pk=admission.pk)
 
             self.assertTrue(admission.is_in_quarantine)
+
+
+class OtherAdmissionsByContextTestCase(TestCase):
+    def test_other_admissions_by_context_with_admissions(self):
+        admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+        )
+
+        other_general_admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.MASTER_MC.name,
+            candidate=admission.candidate,
+        )
+
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.CERTIFICATE_OF_SUCCESS.name,
+            candidate=admission.candidate,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            training__education_group_type__name=TrainingType.PHD.name,
+            candidate=admission.candidate,
+        )
+
+        other_admissions = admission.other_admissions_by_context
+        self.assertEqual(
+            other_admissions[CONTEXT_GENERAL],
+            {TrainingType.MASTER_MC.name},
+        )
+
+        self.assertEqual(
+            other_admissions[CONTEXT_CONTINUING],
+            {TrainingType.CERTIFICATE_OF_SUCCESS.name},
+        )
+
+        self.assertEqual(
+            other_admissions[CONTEXT_DOCTORATE],
+            {TrainingType.PHD.name},
+        )

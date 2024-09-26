@@ -41,7 +41,6 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (
@@ -67,6 +66,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
+    ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
@@ -80,6 +80,7 @@ from base.models.person_merge_proposal import PersonMergeStatus
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
+from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -613,6 +614,31 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     @cached_property
     def is_in_quarantine(self):
         return BaseAdmission.objects.filter(pk=self.pk).filter_in_quarantine().exists()
+
+    @cached_property
+    def other_admissions_by_context(self):
+        admission_trainings = (
+            BaseAdmission.objects.filter(
+                candidate=self.candidate,
+            )
+            .exclude(pk=self.pk)
+            .values_list(
+                'training__education_group_type__name',
+                flat=True,
+            )
+        )
+
+        other_admissions = {
+            CONTEXT_GENERAL: set(),
+            CONTEXT_DOCTORATE: set(),
+            CONTEXT_CONTINUING: set(),
+        }
+
+        for training in admission_trainings:
+            if (current_context := ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(training)) in other_admissions:
+                other_admissions[current_context].add(training)
+
+        return other_admissions
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):

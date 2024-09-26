@@ -28,9 +28,9 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 from waffle import switch_is_active
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionStatus
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from osis_role.errors import predicate_failed_msg
 
@@ -39,6 +39,31 @@ from osis_role.errors import predicate_failed_msg
 @predicate_failed_msg(message=_("You must be the request author to access this admission"))
 def is_admission_request_author(self, user: User, obj: BaseAdmission):
     return obj.candidate == user.person
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("This action cannot be performed as another general admission exists for this candidate."),
+)
+def candidate_has_other_doctorate_admission(self, user: User, obj: BaseAdmission):
+    return bool(obj.other_admissions_by_context[CONTEXT_GENERAL])
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("This action cannot be performed as another doctorate admission exists for this candidate."),
+)
+def candidate_has_other_doctorate_admission(self, user: User, obj: BaseAdmission):
+    return bool(obj.other_admissions_by_context[CONTEXT_DOCTORATE])
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("This action cannot be performed as another general or doctorate admission exists for this candidate."),
+)
+def candidate_has_other_doctorate_or_general_admissions(self, user: User, obj: BaseAdmission):
+    other_admissions = obj.other_admissions_by_context
+    return bool(other_admissions[CONTEXT_GENERAL]) or bool(other_admissions[CONTEXT_DOCTORATE])
 
 
 @predicate(bind=True)
@@ -138,11 +163,14 @@ def is_sent_to_epc(self, user: User, obj: BaseAdmission):
 
 @predicate(bind=True)
 def pending_digit_ticket_response(self, user: User, obj: BaseAdmission):
-    return obj.candidate.global_id[0] in ['8', '9'] and PersonTicketCreation.objects.filter(
-        person_id=obj.candidate_id,
-        status__in=[
-           PersonTicketCreationStatus.CREATED.name,
-           PersonTicketCreationStatus.IN_PROGRESS.name,
-           PersonTicketCreationStatus.ERROR.name,
-        ]
-    ).exists()
+    return (
+        obj.candidate.global_id[0] in ['8', '9']
+        and PersonTicketCreation.objects.filter(
+            person_id=obj.candidate_id,
+            status__in=[
+                PersonTicketCreationStatus.CREATED.name,
+                PersonTicketCreationStatus.IN_PROGRESS.name,
+                PersonTicketCreationStatus.ERROR.name,
+            ],
+        ).exists()
+    )

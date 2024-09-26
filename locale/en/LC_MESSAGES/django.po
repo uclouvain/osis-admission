@@ -7288,6 +7288,21 @@ msgstr ""
 msgid "This account number has been verified"
 msgstr ""
 
+msgid ""
+"This action cannot be performed as another doctorate admission exists for "
+"this candidate."
+msgstr ""
+
+msgid ""
+"This action cannot be performed as another general admission exists for this "
+"candidate."
+msgstr ""
+
+msgid ""
+"This action cannot be performed as another general or doctorate admission "
+"exists for this candidate."
+msgstr ""
+
 msgid "This action is limited to a specific admission context."
 msgstr ""
 

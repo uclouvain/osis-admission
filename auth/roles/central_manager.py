@@ -93,6 +93,9 @@ class CentralManager(EntityRoleModel):
             & (general.in_sic_status | continuing.in_manager_status)
             & ~is_sent_to_epc,
             'admission.view_admission_curriculum': is_entity_manager,
+            'admission.change_admission_global_curriculum': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
             'admission.change_admission_curriculum': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
@@ -162,9 +165,7 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_select_access_title': is_entity_manager
             & (general.in_sic_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
-            'admission.checklist_change_training_choice': is_entity_manager
-            & doctorate.in_sic_status
-            & ~is_sent_to_epc,
+            'admission.checklist_change_training_choice': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.checklist_change_sic_comment': is_entity_manager
             & (general.is_submitted | doctorate.is_submitted)
             & ~is_sent_to_epc,

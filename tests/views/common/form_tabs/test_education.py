@@ -723,11 +723,16 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
 
-    def test_update_education_is_allowed_for_fac_users(self):
+    def test_update_education_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
-        response = self.client.get(self.form_url)
 
+        response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        GeneralEducationAdmissionFactory(candidate=self.continuing_admission.candidate)
+
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_education_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
