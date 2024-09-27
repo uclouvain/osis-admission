@@ -34,6 +34,7 @@ from admission.auth.predicates.common import (
     is_debug,
     is_sent_to_epc,
     pending_digit_ticket_response,
+    past_experiences_checklist_tab_is_not_sufficient,
 )
 from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -166,6 +167,7 @@ class ProgramManager(EducationGroupRoleModel):
             & ~is_sent_to_epc,
             'admission.checklist_select_access_title': is_part_of_education_group
             & (general.in_fac_status | doctorate.in_fac_status)
+            & past_experiences_checklist_tab_is_not_sufficient
             & ~is_sent_to_epc,
             'admission.checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation_fac': is_part_of_education_group & ~is_sent_to_epc,
