@@ -26,7 +26,6 @@
 import itertools
 from typing import Dict, Optional, Union
 
-from django import forms
 from django.conf import settings
 from django.db.models import QuerySet
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
@@ -43,6 +42,7 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererDocumentsPropositionQuery,
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -62,6 +62,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     onglet_decision_sic,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -115,8 +116,6 @@ __all__ = [
     'SicApprovalEnrolmentDecisionView',
     'SicApprovalFinalDecisionView',
     'SicDecisionApprovalPanelView',
-    'SicRefusalDecisionView',
-    'SicRefusalFinalDecisionView',
     'SicDecisionDispensationView',
     'SicDecisionChangeStatusView',
     'SicDecisionPdfPreviewView',
@@ -132,9 +131,6 @@ ENTITY_SIC = 'SIC'
 class SicDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
-        context['sic_decision_approval_form'] = self.sic_decision_approval_form
-        context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
         context['display_sic_decision_approval_info_panel'] = self.display_sic_decision_approval_info_panel()
 
         # Get information about the decision sending by the SIC if any and only in the final statuses
@@ -174,21 +170,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             initial={
                 'dispensation_needed': self.admission.dispensation_needed,
             },
-        )
-        context['requested_documents'] = {
-            document.identifiant: {
-                'reason': self.proposition.documents_demandes.get(document.identifiant, {}).get('reason', ''),
-                'label': document.libelle_langue_candidat,
-                'tab_label': document.nom_onglet,
-                'candidate_language_tab_label': document.nom_onglet_langue_candidat,
-                'tab': document.onglet,
-            }
-            for document in self.sic_decision_approval_form_requestable_documents
-        }
-        context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
-        context['a_des_documents_requis_immediat'] = any(
-            document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
-            for document in self.sic_decision_approval_form_requestable_documents
         )
 
         if self.request.htmx:
@@ -249,16 +230,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             )
 
         return display_panel
-
-    @property
-    def candidate_cv_program_names_by_experience_uuid(self):
-        experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
-            person=self.admission.candidate
-        )
-        return {
-            str(experience.uuid): experience.program.title if experience.program else experience.education_name
-            for experience in experiences
-        }
 
     @cached_property
     def sic_decision_approval_form_requestable_documents(self):
@@ -394,10 +365,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     prerequisite_courses_detail_paragraph += self.proposition.commentaire_complements_formation
 
                 # Documents
-                documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                    RecupererResumeEtEmplacementsDocumentsPropositionQuery(
-                        uuid_proposition=self.admission_uuid,
-                        avec_document_libres=True,
+                curriculum: CurriculumAdmissionDTO = message_bus_instance.invoke(
+                    RechercherParcoursAnterieurQuery(
+                        global_id=self.proposition.matricule_candidat,
+                        uuid_proposition=self.proposition.uuid,
                     )
                 )
 
@@ -406,41 +377,39 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 ] = {
                     str(experience.uuid): experience
                     for experience in itertools.chain(
-                        documents_resume.resume.curriculum.experiences_non_academiques,
-                        documents_resume.resume.curriculum.experiences_academiques,
+                        curriculum.experiences_non_academiques,
+                        curriculum.experiences_academiques,
                     )
                 }
 
-                documents = documents_resume.emplacements_documents
                 documents_names = []
 
-                for document in documents:
-                    if document.est_a_reclamer:
-                        document_identifier = document.identifiant.split('.')
+                for document in self.sic_decision_approval_form_requestable_documents:
+                    document_identifier = document.identifiant.split('.')
 
-                        if (
-                            document_identifier[0] == OngletsDemande.CURRICULUM.name
-                            and (document_identifier[-1] in CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM)
-                            and document_identifier[1] in experiences_curriculum_par_uuid
-                        ):
-                            # For the curriculum experiences, we would like to get the name of the experience
-                            documents_names.append(
-                                '{document_label} : {cv_xp_label}. {document_communication}'.format(
-                                    document_label=document.libelle_langue_candidat,
-                                    cv_xp_label=experiences_curriculum_par_uuid[
-                                        document_identifier[1]
-                                    ].titre_pdf_decision_sic,
-                                    document_communication=document.justification_gestionnaire,
-                                )
+                    if (
+                        document_identifier[0] == OngletsDemande.CURRICULUM.name
+                        and (document_identifier[-1] in CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM)
+                        and document_identifier[1] in experiences_curriculum_par_uuid
+                    ):
+                        # For the curriculum experiences, we would like to get the name of the experience
+                        documents_names.append(
+                            '{document_label} : {cv_xp_label}. {document_communication}'.format(
+                                document_label=document.libelle_langue_candidat,
+                                cv_xp_label=experiences_curriculum_par_uuid[
+                                    document_identifier[1]
+                                ].titre_pdf_decision_sic,
+                                document_communication=document.justification_gestionnaire,
                             )
+                        )
 
-                        else:
-                            documents_names.append(
-                                '{document_label}. {document_communication}'.format(
-                                    document_label=document.libelle_langue_candidat,
-                                    document_communication=document.justification_gestionnaire,
-                                )
+                    else:
+                        documents_names.append(
+                            '{document_label}. {document_communication}'.format(
+                                document_label=document.libelle_langue_candidat,
+                                document_communication=document.justification_gestionnaire,
                             )
+                        )
 
                 required_documents_paragraph = ''
                 if documents_names:
@@ -500,6 +469,22 @@ class SicApprovalDecisionView(
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_form_for_admission.html'
     permission_required = 'admission.checklist_change_sic_decision'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['requested_documents'] = {
+            document.identifiant: {
+                'reason': self.proposition.documents_demandes.get(document.identifiant, {}).get('reason', ''),
+                'label': document.libelle_langue_candidat,
+                'tab_label': document.nom_onglet,
+                'candidate_language_tab_label': document.nom_onglet_langue_candidat,
+                'tab': document.onglet,
+            }
+            for document in self.sic_decision_approval_form_requestable_documents
+        }
+        context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
+        context['sic_decision_approval_form'] = self.sic_decision_approval_form
+        return context
+
     def get_form(self, form_class=None):
         return self.sic_decision_approval_form
 
@@ -556,34 +541,6 @@ class SicApprovalEnrolmentDecisionView(SicApprovalDecisionView):
         )
 
 
-class SicRefusalDecisionView(
-    SicDecisionMixin,
-    AdmissionFormMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'sic-decision-refusal'
-    urlpatterns = {'sic-decision-refusal': 'sic-decision/sic-decision-refusal'}
-    template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_form.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_form.html'
-    permission_required = 'admission.checklist_change_sic_decision'
-    form_class = forms.Form
-
-
-class SicRefusalFinalDecisionView(
-    SicDecisionMixin,
-    AdmissionFormMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'sic-decision-refusal-final'
-    urlpatterns = {'sic-decision-refusal-final': 'sic-decision/sic-decision-refusal-final'}
-    template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_final_form.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_final_form.html'
-    permission_required = 'admission.checklist_change_sic_decision'
-    form_class = forms.Form
-
-
 class SicApprovalFinalDecisionView(
     SicDecisionMixin,
     AdmissionFormMixin,
@@ -600,6 +557,15 @@ class SicApprovalFinalDecisionView(
         if self.admission.is_in_quarantine:
             return HttpResponseForbidden()
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
+        context['a_des_documents_requis_immediat'] = any(
+            document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            for document in self.sic_decision_approval_form_requestable_documents
+        )
+        return context
 
     def get_form(self, form_class=None):
         return self.sic_decision_approval_final_form
@@ -746,6 +712,11 @@ class SicDecisionApprovalPanelView(HtmxPermissionRequiredMixin, SicDecisionMixin
     template_name = 'admission/general_education/includes/checklist/sic_decision_approval_panel.html'
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_panel.html'
     permission_required = 'admission.view_checklist'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
+        return context
 
 
 class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):

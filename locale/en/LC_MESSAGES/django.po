@@ -6041,9 +6041,6 @@ msgstr ""
 msgid "Research scholarship"
 msgstr ""
 
-msgid "Research scholarship:"
-msgstr ""
-
 msgid "Research seminar"
 msgstr ""
 

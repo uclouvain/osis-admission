@@ -6689,9 +6689,6 @@ msgstr "Rapport de recherche"
 msgid "Research scholarship"
 msgstr "Bourse de recherche"
 
-msgid "Research scholarship:"
-msgstr "Bourse de recherche :"
-
 msgid "Research seminar"
 msgstr "Séminaire de recherche"
 
