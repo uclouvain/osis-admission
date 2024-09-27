@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import json
 import uuid
 from unittest.mock import patch
 from uuid import UUID
@@ -157,6 +158,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
 
+        htmx_info = json.loads(response.headers['HX-Trigger'])
+        self.assertTrue(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
+
     def test_change_the_checklist_status_to_success(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -204,6 +208,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         messages = [m.message for m in response.context['messages']]
         self.assertNotIn(error_message_if_missing_data, messages)
         self.assertIn(gettext('Your data have been saved.'), messages)
+        htmx_info = json.loads(response.headers['HX-Trigger'])
+        self.assertFalse(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
 
         # Check admission
         self.admission.refresh_from_db()
@@ -264,7 +270,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_initialization_of_the_form_with_valid_initial_choices(self):
+    def test_initialization_of_the_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(self.url, **self.default_headers)
@@ -280,11 +286,27 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
         ]
         self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + doctorate_choices)
+        self.assertFalse(form.fields['admission_requirement'].disabled)
+        self.assertFalse(form.fields['admission_requirement_year'].disabled)
+        self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
             doctorate_choices,
         )
+
+        self.admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
+        self.admission.save(update_fields=['checklist'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['past_experiences_admission_requirement_form']
+
+        self.assertTrue(form.fields['admission_requirement'].disabled)
+        self.assertTrue(form.fields['admission_requirement_year'].disabled)
+        self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='frozen_time')
     def test_post_form_with_with_prerequisite_courses(self, frozen_time):
@@ -931,20 +953,43 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         )
         self.url = resolve_url(self.url_name, uuid=self.admission.uuid)
 
-    def test_specify_an_experience_as_access_title_is_forbidden_with_fac_user_if_the_admission_is_in_sic_status(self):
+    def test_specify_an_experience_as_access_title_is_sometimes_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        response = self.client.post(self.url, **self.default_headers)
+        # If the admission is in fac status
+        self.admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.admission.save()
+
+        response = self.client.get(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_specify_an_experience_as_access_title_is_forbidden_with_sic_user_if_the_admission_is_in_fac_status(self):
+        # If the past experience checklist tab status is 'Sufficient'
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
+        self.admission.save(update_fields=['checklist', 'status'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_specify_an_experience_as_access_title_is_sometimes_forbidden_with_sic_user(self):
+        # If the admission is in fac status
         self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
         self.admission.save()
 
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.post(self.url, **self.default_headers)
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # If the past experience checklist tab status is 'Sufficient'
+        self.admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
+        self.admission.save(update_fields=['checklist', 'status'])
+
+        response = self.client.get(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
