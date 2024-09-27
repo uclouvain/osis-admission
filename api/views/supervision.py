@@ -37,7 +37,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     IdentifierPromoteurCommand,
     ModifierMembreSupervisionExterneCommand,
     SupprimerMembreCACommand,
-    SupprimerPromoteurCommand,
+    SupprimerPromoteurCommand, SoumettreCACommand,
 )
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
@@ -46,6 +46,7 @@ from osis_role.contrib.views import APIPermissionRequiredMixin
 __all__ = [
     "SupervisionAPIView",
     "SupervisionSetReferencePromoterAPIView",
+    "SupervisionSubmitCaAPIView",
 ]
 
 
@@ -182,6 +183,39 @@ class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, Generic
             DesignerPromoteurReferenceCommand(
                 matricule_auteur=self.get_permission_object().candidate.global_id,
                 **request.data,
+            )
+        )
+        self.get_permission_object().update_detailed_status(request.user.person)
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SupervisionSubmitCaSchema(ResponseSpecificSchema):
+    serializer_mapping = {
+        'POST': (None, serializers.PropositionIdentityDTOSerializer),
+    }
+
+    def get_operation_id(self, path, method):
+        return 'submit_ca'
+
+
+class SupervisionSubmitCaAPIView(APIPermissionRequiredMixin, GenericAPIView):
+    name = "submit-ca"
+    schema = SupervisionSubmitCaSchema()
+    pagination_class = None
+    filter_backends = []
+    permission_mapping = {
+        'POST': 'admission.change_admission_supervision',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def post(self, request, *args, **kwargs):
+        """Submit the new CA"""
+        result = message_bus_instance.invoke(
+            SoumettreCACommand(
+                uuid_proposition=str(self.kwargs['uuid']),
             )
         )
         self.get_permission_object().update_detailed_status(request.user.person)

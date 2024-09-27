@@ -225,3 +225,10 @@ class HistoriqueInMemory(IHistorique):
         message: EmailMessage,
     ):
         pass
+
+    @classmethod
+    def historiser_soumission_ca(
+        cls,
+        proposition: Proposition,
+    ):
+        pass

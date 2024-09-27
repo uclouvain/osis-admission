@@ -57,6 +57,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_peut_demander_candidat_modification_ca import \
     ShouldPeutDemanderCandidatModificationCaFacultaire
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_proposition_statut_etre_correct_pour_membre_ca import \
+    ShouldPropositionStatutEtreCorrectPourMembreCA
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_proposition_statut_etre_correct_pour_promoteur import \
+    ShouldPropositionStatutEtreCorrectPourPromoteur
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
@@ -141,6 +145,7 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
     groupe_de_supervision: 'GroupeDeSupervision'
     matricule: Optional[str]
     prenom: Optional[str]
@@ -156,6 +161,7 @@ class IdentifierPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVali
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldPropositionStatutEtreCorrectPourPromoteur(self.proposition.statut),
             ShouldGroupeDeSupervisionNonCompletPourPromoteurs(self.groupe_de_supervision),
             ShouldMembreEtreInterneOuExterne(
                 self.matricule,
@@ -172,6 +178,7 @@ class IdentifierPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVali
 
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
     groupe_de_supervision: 'GroupeDeSupervision'
     matricule: Optional[str]
     prenom: Optional[str]
@@ -187,6 +194,7 @@ class IdentifierMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValid
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldPropositionStatutEtreCorrectPourMembreCA(self.proposition.statut),
             ShouldGroupeDeSupervisionNonCompletPourMembresCA(self.groupe_de_supervision),
             ShouldMembreEtreInterneOuExterne(
                 self.matricule,
@@ -216,21 +224,8 @@ class DesignerPromoteurReferenceValidatorList(TwoStepsMultipleBusinessExceptionL
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SupprimerPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    groupe_de_supervision: 'GroupeDeSupervision'
-    promoteur_id: 'PromoteurIdentity'
-
-    def get_data_contract_validators(self) -> List[BusinessValidator]:
-        return []
-
-    def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [
-            ShouldPromoteurEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.promoteur_id),
-        ]
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SupprimerMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class ModifierMembreCAExterneValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
     groupe_de_supervision: 'GroupeDeSupervision'
     membre_CA_id: 'MembreCAIdentity'
 
@@ -239,6 +234,39 @@ class SupprimerMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValida
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldPropositionStatutEtreCorrectPourMembreCA(self.proposition.statut),
+            ShouldMembreCAEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.membre_CA_id),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
+    groupe_de_supervision: 'GroupeDeSupervision'
+    promoteur_id: 'PromoteurIdentity'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPropositionStatutEtreCorrectPourPromoteur(self.proposition.statut),
+            ShouldPromoteurEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.promoteur_id),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
+    groupe_de_supervision: 'GroupeDeSupervision'
+    membre_CA_id: 'MembreCAIdentity'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPropositionStatutEtreCorrectPourMembreCA(self.proposition.statut),
             ShouldMembreCAEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.membre_CA_id),
         ]
 
@@ -847,6 +875,21 @@ class DemanderCandidatModificationCaValidatorList(TwoStepsMultipleBusinessExcept
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldPeutDemanderCandidatModificationCaFacultaire(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPropositionStatutEtreCorrectPourMembreCA(
                 statut=self.statut,
             ),
         ]

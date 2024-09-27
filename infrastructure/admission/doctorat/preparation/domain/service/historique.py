@@ -591,3 +591,17 @@ class Historique(IHistorique):
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
             tags=['proposition', 'supervision', 'status-changed', 'message'],
         )
+
+    @classmethod
+    def historiser_soumission_ca(
+        cls,
+        proposition: Proposition,
+    ):
+        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "Le CA a été soumis.",
+            "The Support committee has been submitted.",
+            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            tags=["proposition", 'supervision', "status-changed"],
+        )

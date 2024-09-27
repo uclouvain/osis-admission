@@ -23,29 +23,20 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import IdentifierPromoteurCommand
+from admission.ddd.admission.doctorat.preparation.commands import SoumettreCACommand
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.membres_groupe_de_supervision import (
-    MembresGroupeDeSupervision,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
-    IdentifierPromoteurValidatorList,
-)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-def identifier_promoteur(
-    cmd: 'IdentifierPromoteurCommand',
+def soumettre_ca(
+    cmd: 'SoumettreCACommand',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
     historique: 'IHistorique',
 ) -> 'PromoteurIdentity':
     # GIVEN
@@ -54,40 +45,10 @@ def identifier_promoteur(
     proposition = proposition_repository.get(proposition_id)
 
     # WHEN
-    IdentifierPromoteurValidatorList(
-        proposition=proposition,
-        groupe_de_supervision=groupe_de_supervision,
-        matricule=cmd.matricule,
-        prenom=cmd.prenom,
-        nom=cmd.nom,
-        email=cmd.email,
-        institution=cmd.institution,
-        ville=cmd.ville,
-        pays=cmd.pays,
-        langue=cmd.langue,
-    ).validate()
-    promoteur_translator.verifier_existence(cmd.matricule)
-    MembresGroupeDeSupervision.verifier_pas_deja_present(
-        groupe_de_supervision.entity_id,
-        groupe_supervision_repository,
-        matricule=cmd.matricule,
-        email=cmd.email,
-    )
+    groupe_de_supervision.verifier_tout_le_monde_a_approuve()
 
     # THEN
-    promoteur_id = groupe_supervision_repository.add_member(
-        groupe_id=groupe_de_supervision.entity_id,
-        type=ActorType.PROMOTER,
-        matricule=cmd.matricule,
-        first_name=cmd.prenom,
-        last_name=cmd.nom,
-        email=cmd.email,
-        is_doctor=cmd.est_docteur,
-        institute=cmd.institution,
-        city=cmd.ville,
-        country_code=cmd.pays,
-        language=cmd.langue,
-    )
-    historique.historiser_ajout_membre(proposition, groupe_de_supervision, promoteur_id, cmd.matricule_auteur)
+    proposition.soumettre_ca()
+    historique.historiser_soumission_ca(proposition)
 
     return promoteur_id  # type: ignore[return-value]

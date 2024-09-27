@@ -48,7 +48,7 @@ _CANDIDATE_RULESET = {
     'view_admission_training_choice': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'view_admission_project': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'view_admission_cotutelle': common.is_admission_request_author & doctorate.unconfirmed_proposition,
-    'view_admission_supervision': common.is_admission_request_author & (doctorate.unconfirmed_proposition | doctorate.ca_to_be_completed),
+    'view_admission_supervision': common.is_admission_request_author & (doctorate.unconfirmed_proposition | doctorate.ca_to_be_completed | doctorate.signing_in_progress),
     # Can edit while not confirmed proposition
     'delete_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,

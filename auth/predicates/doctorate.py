@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT, STATUTS_PROPOSITION_DOCTORALE_CA_A_COMPLETER,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
@@ -61,7 +61,10 @@ def in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations have not been sent"))
 def signing_in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+    return obj.status in [
+        ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+        ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name,
+    ]
 
 
 @predicate(bind=True)
@@ -85,7 +88,7 @@ def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The CA is not currently to be completed"))
 def ca_to_be_completed(self, user: User, obj: DoctorateAdmission):
-    return obj.status in STATUTS_PROPOSITION_DOCTORALE_CA_A_COMPLETER
+    return obj.status == ChoixStatutPropositionDoctorale.CA_A_COMPLETER.name
 
 
 @predicate(bind=True)

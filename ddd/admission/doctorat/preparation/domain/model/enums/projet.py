@@ -42,8 +42,8 @@ class ChoixStatutPropositionDoctorale(ChoiceEnum):
     COMPLETEE_POUR_FAC = _('Completed for Fac')
     RETOUR_DE_FAC = _('Feedback from Fac')
 
-    CA_A_COMPLETER = _('Supervisory panel to be completed')
-    CA_EN_ATTENTE_DE_SIGNATURE = _('Supervisory panel waiting for signature')
+    CA_A_COMPLETER = _('Support committee to be completed')
+    CA_EN_ATTENTE_DE_SIGNATURE = _('Support committee waiting for signature')
 
     A_COMPLETER_POUR_SIC = _('To be completed for the Enrolment Office (SIC)')
     COMPLETEE_POUR_SIC = _('Completed for SIC')
@@ -91,12 +91,6 @@ STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC = {
 # Le gestionnaire FAC a la main ou attend une réponse du candidat
 STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS = STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC | {
     ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
-}
-
-# Le candidat doit mettre à jour son CA
-STATUTS_PROPOSITION_DOCTORALE_CA_A_COMPLETER = {
-    ChoixStatutPropositionDoctorale.CA_A_COMPLETER.name,
-    ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name,
 }
 
 # Le gestionnaire SIC a la main

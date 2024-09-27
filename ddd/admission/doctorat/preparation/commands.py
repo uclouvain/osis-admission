@@ -807,3 +807,8 @@ class DemanderCandidatModificationCACommand(interface.CommandRequest):
     auteur: str
     objet_message: str
     corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreCACommand(interface.QueryRequest):
+    uuid_proposition: str

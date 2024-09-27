@@ -249,3 +249,10 @@ class IHistorique(interface.DomainService):
         message: EmailMessage,
     ):
         raise NotImplementedError
+
+    @classmethod
+    def historiser_soumission_ca(
+        cls,
+        proposition: Proposition,
+    ):
+        raise NotImplementedError

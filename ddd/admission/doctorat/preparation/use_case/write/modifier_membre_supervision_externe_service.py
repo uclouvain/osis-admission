@@ -32,6 +32,8 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur imp
 from admission.ddd.admission.doctorat.preparation.domain.service.membres_groupe_de_supervision import (
     MembresGroupeDeSupervision,
 )
+from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import \
+    ModifierMembreCAExterneValidatorList
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -59,6 +61,11 @@ def modifier_membre_supervision_externe(
         promoteur_translator,
         membre_ca_translator,
     )
+    ModifierMembreCAExterneValidatorList(
+        proposition=proposition,
+        groupe_de_supervision=groupe_de_supervision,
+        membre_CA_id=signataire,
+    ).validate()
 
     # THEN
     groupe_supervision_repository.edit_external_member(
