@@ -97,10 +97,17 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
 
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
-            candidate=cls.general_admission.candidate,
             training__management_entity=entity,
             training__academic_year=cls.academic_years[0],
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        cls.continuing_with_common_candidate_admission: ContinuingEducationAdmission = (
+            ContinuingEducationAdmissionFactory(
+                training=cls.continuing_admission.training,
+                status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+                candidate=cls.general_admission.candidate,
+            )
         )
 
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
@@ -170,6 +177,15 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.continuing_create_url = resolve_url(
             'admission:continuing-education:update:curriculum:non_educational_create',
             uuid=self.continuing_admission.uuid,
+        )
+        self.continuing_with_common_candidate_form_url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational',
+            uuid=self.continuing_with_common_candidate_admission.uuid,
+            experience_uuid=self.experience.uuid,
+        )
+        self.continuing_with_common_candidate_create_url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational_create',
+            uuid=self.continuing_with_common_candidate_admission.uuid,
         )
         self.doctorate_form_url = resolve_url(
             'admission:doctorate:update:curriculum:non_educational',
@@ -535,13 +551,30 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             },
         )
 
-    def test_continuing_update_curriculum_is_allowed_for_fac_users(self):
+    def test_continuing_update_curriculum_for_fac_users(self):
         self.client.force_login(self.continuing_program_manager_user)
+
+        response = self.client.get(self.continuing_with_common_candidate_create_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.get(self.continuing_with_common_candidate_form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.experience.person = self.continuing_admission.candidate
+        self.experience.save(update_fields=['person'])
+
         response = self.client.get(self.continuing_form_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.continuing_create_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_continuing_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
+
+        self.experience.person = self.continuing_admission.candidate
+        self.experience.save(update_fields=['person'])
+
         response = self.client.get(self.continuing_form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -551,6 +584,9 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
 
     def test_continuing_submit_form(self):
         self.client.force_login(self.sic_manager_user)
+
+        self.experience.person = self.continuing_admission.candidate
+        self.experience.save(update_fields=['person'])
 
         response = self.client.post(
             self.continuing_form_url,
