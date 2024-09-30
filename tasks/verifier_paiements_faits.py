@@ -50,7 +50,7 @@ TASK_PREFIX = "[Verification Paiements]"
 @celery_app.task
 def run():  # pragma: no cover
     admissions_en_defaut_de_paiement = BaseAdmission.objects.filter(
-        Q(generaleducationadmission__statut=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name)
+        Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name)
         | Q(checklist__current__frais_dossier__statut=ChoixStatutChecklist.GEST_BLOCAGE.name)
     )
     logger.info(
