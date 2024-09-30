@@ -268,6 +268,8 @@ def panel(
     if edit_link_button:
         context['edit_link_button'] = edit_link_button
         context['edit_link_button_in_new_tab'] = edit_link_button_in_new_tab
+    else:
+        context['edit_link_button'] = None
     context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
     return context
 

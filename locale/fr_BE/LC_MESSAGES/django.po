@@ -2702,14 +2702,14 @@ msgstr "Condition complémentaire d'acceptation libre doctorale"
 msgid "Doctorate free additional approval conditions"
 msgstr "Conditions complémentaires d'acceptation libres doctorales"
 
+msgid "Doctorate thesis field"
+msgstr "Domaine de la thèse de doctorat"
+
 msgid "Doctorate working list"
 msgstr "Liste de travail doctorale"
 
 msgid "Doctorate working lists"
 msgstr "Listes de travail doctorales"
-
-msgid "Doctorate thesis field"
-msgstr "Domaine de la thèse de doctorat"
 
 msgid "Document"
 msgstr "Document"
@@ -8914,9 +8914,6 @@ msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail"
-
-msgid "Work in progress"
-msgstr "En cours de réalisation"
 
 msgid "Work contract type"
 msgstr "Type de contrat de travail"
