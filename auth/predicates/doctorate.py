@@ -177,6 +177,12 @@ def is_doctorate(self, user: User, obj: DoctorateAdmission):
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
+def is_draft(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status == ChoixStatutPropositionDoctorale.EN_BROUILLON.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: DoctorateAdmission):
     return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE
 
