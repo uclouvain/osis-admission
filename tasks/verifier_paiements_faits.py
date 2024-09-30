@@ -45,6 +45,7 @@ from infrastructure.messages_bus import message_bus_instance
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
+TASK_PREFIX = "[Verification Paiements]"
 
 @celery_app.task
 def run():  # pragma: no cover
@@ -52,17 +53,28 @@ def run():  # pragma: no cover
         Q(generaleducationadmission__statut=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name)
         | Q(checklist__current__frais_dossier__statut=ChoixStatutChecklist.GEST_BLOCAGE.name)
     )
+    logger.info(
+        f"{TASK_PREFIX} Verification des paiements pour {admissions_en_defaut_de_paiement.count()} dossiers"
+    )
     for admission in admissions_en_defaut_de_paiement:
         paiements = PaiementEnLigneService.get_all_payments(admission)
+        logger.info(f"{TASK_PREFIX} > Verification du paiement pour le dossier {str(admission)}")
         if paiements.filter(status=PaymentStatus.PAID.name).exists():
+            logger.info(f"{TASK_PREFIX}  > Paiement effectue ({str(admission)}) => Mise a jour de la demande")
             # Update the admission and inform the candidate that the payment is successful
             if payment_needed_after_submission(admission=admission):
+                logger.info(f"{TASK_PREFIX}   > Paiement suite a soumission de la demande ({str(admission)})")
                 # After the submission
                 return message_bus_instance.invoke(
                     PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=admission.uuid)
                 )
             elif payment_needed_after_manager_request(admission=admission):
+                logger.info(f"{TASK_PREFIX}   > Paiement suite a requete du gestionnaire ({str(admission)})")
                 # After a manager request
                 return message_bus_instance.invoke(
                     PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=admission.uuid)
                 )
+            else:
+                logger.info(f"{TASK_PREFIX}   > Technical issue (ne passe pas dans les if/elif) ({str(admission)})")
+        else:
+            logger.info(f"{TASK_PREFIX}  > Paiement non effectue ({str(admission)})")
