@@ -168,7 +168,9 @@ class ProgramManager(EducationGroupRoleModel):
             & (general.in_fac_status | doctorate.in_fac_status)
             & ~is_sent_to_epc,
             'admission.checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
-            'admission.checklist_financability_dispensation_fac': is_part_of_education_group & ~is_sent_to_epc,
+            'admission.checklist_financability_dispensation_fac': general.in_fac_status
+            & is_part_of_education_group
+            & ~is_sent_to_epc,
             'admission.continuing_checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
             'admission.checklist_change_comment': is_part_of_education_group
             & continuing.is_continuing
