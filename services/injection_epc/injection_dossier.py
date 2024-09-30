@@ -229,7 +229,7 @@ class InjectionEPCAdmission:
                 "payload": donnees,
                 "status": statut,
                 'last_attempt_date': datetime.now(),
-                "osis_error_message": str(e),
+                "osis_error_message": str(e) if e else "",
                 "osis_stacktrace": traceback.format_exc() if e else ""
             },
         )
