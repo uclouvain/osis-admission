@@ -65,13 +65,13 @@ def run():  # pragma: no cover
             if payment_needed_after_submission(admission=admission):
                 logger.info(f"{TASK_PREFIX}   > Paiement suite a soumission de la demande ({str(admission)})")
                 # After the submission
-                return message_bus_instance.invoke(
+                message_bus_instance.invoke(
                     PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=admission.uuid)
                 )
             elif payment_needed_after_manager_request(admission=admission):
                 logger.info(f"{TASK_PREFIX}   > Paiement suite a requete du gestionnaire ({str(admission)})")
                 # After a manager request
-                return message_bus_instance.invoke(
+                message_bus_instance.invoke(
                     PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=admission.uuid)
                 )
             else:
