@@ -217,7 +217,8 @@ class InjectionEPCAdmission:
                 )
             )
             statut = EPCInjectionStatus.PENDING.name
-        except Exception as e:
+        except Exception as exception:
+            e = exception
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
