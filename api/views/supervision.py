@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -99,7 +99,11 @@ class SupervisionAPIView(
 
     def put(self, request, *args, **kwargs):
         """Add a supervision group member for a proposition"""
-        data = {'uuid_proposition': str(self.kwargs['uuid']), **request.data}
+        data = {
+            'uuid_proposition': str(self.kwargs['uuid']),
+            'matricule_auteur': self.get_permission_object().candidate.global_id,
+            **request.data,
+        }
         serializers.IdentifierSupervisionActorSerializer(data=data).is_valid(raise_exception=True)
         if data.pop('type') == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.IdentifierMembreCACommandSerializer
@@ -119,6 +123,7 @@ class SupervisionAPIView(
         serializers.SupervisionActorReferenceSerializer(data=request.data).is_valid(raise_exception=True)
         data = {
             'uuid_proposition': str(self.kwargs['uuid']),
+            'matricule_auteur': self.get_permission_object().candidate.global_id,
         }
         if request.data['type'] == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.SupprimerMembreCACommandSerializer
@@ -138,7 +143,12 @@ class SupervisionAPIView(
     def patch(self, request, *args, **kwargs):
         """Edit an external supervision group member for a proposition"""
         serializers.ModifierMembreSupervisionExterneSerializer(data=request.data).is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(ModifierMembreSupervisionExterneCommand(**request.data))
+        result = message_bus_instance.invoke(
+            ModifierMembreSupervisionExterneCommand(
+                matricule_auteur=self.get_permission_object().candidate.global_id,
+                **request.data,
+            )
+        )
         self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -168,7 +178,12 @@ class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, Generic
     def put(self, request, *args, **kwargs):
         """Set a supervision group member as reference promoter"""
         serializers.DesignerPromoteurReferenceCommandSerializer(data=request.data).is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(DesignerPromoteurReferenceCommand(**request.data))
+        result = message_bus_instance.invoke(
+            DesignerPromoteurReferenceCommand(
+                matricule_auteur=self.get_permission_object().candidate.global_id,
+                **request.data,
+            )
+        )
         self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

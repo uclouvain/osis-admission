@@ -351,7 +351,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(form['cotutelle'].value(), None)
         self.assertCountEqual(
             form.fields['cotutelle'].widget.choices,
-            ALL_EMPTY_CHOICE + ((True, 'Yes'), (False, 'No')),
+            ALL_EMPTY_CHOICE + ((True, 'Oui'), (False, 'Non')),
         )
 
         self.assertEqual(form['date_soumission_debut'].value(), None)

@@ -30,12 +30,15 @@ from django.db.models import Q, Exists, OuterRef, F
 
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.candidate import Candidate
+from base.auth.roles.tutor import Tutor
 from base.models.person import Person
 
 __all__ = [
     'CandidatesAutocomplete',
     'PromotersAutocomplete',
     'JuryMembersAutocomplete',
+    'PersonAutocomplete',
+    'TutorAutocomplete',
 ]
 
 __namespace__ = False
@@ -114,6 +117,50 @@ class JuryMembersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetV
             Person.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
             .exclude(Exists(Student.objects.filter(person=OuterRef('pk'))))
             .order_by('last_name', 'first_name')
+            .values(
+                'first_name',
+                'last_name',
+                'global_id',
+            )
+        )
+        return qs if q else []
+
+
+class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
+    urlpatterns = 'person'
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '')
+
+        qs = (
+            Person.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
+            .exclude(Q(user_id__isnull=True) | Q(global_id=''))
+            .exclude(Exists(Student.objects.filter(person=OuterRef('pk'))))
+            .order_by('last_name', 'first_name')
+            .values(
+                'first_name',
+                'last_name',
+                'global_id',
+            )
+        )
+        return qs if q else []
+
+
+class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
+    urlpatterns = 'tutor'
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '')
+
+        qs = (
+            Tutor.objects.annotate(
+                first_name=F("person__first_name"),
+                last_name=F("person__last_name"),
+                global_id=F("person__global_id"),
+            )
+            .filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
+            .exclude(Q(person__user_id__isnull=True) | Q(person__global_id=''))
+            .distinct('global_id')
             .values(
                 'first_name',
                 'last_name',

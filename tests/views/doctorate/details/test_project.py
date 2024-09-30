@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 from typing import List
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.urls import reverse
@@ -122,6 +123,19 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
 
         cls.sic_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.manager = ProgramManagerRoleFactory(education_group=admission.training.education_group).person.user
+
+    def setUp(self):
+        # Mock documents
+        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_remote_metadata",
+            return_value={"name": "myfile", "mimetype": "application/pdf", "size": 1},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_project_detail_manager_admission(self):
         self.client.force_login(user=self.manager)

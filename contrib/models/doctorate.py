@@ -282,10 +282,10 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
         null=True,
     )
-    cotutelle_institution = models.CharField(
-        max_length=255,
+    cotutelle_institution = models.UUIDField(
         verbose_name=_("Institution"),
-        default='',
+        default=None,
+        null=True,
         blank=True,
     )
     cotutelle_other_institution_name = models.CharField(
