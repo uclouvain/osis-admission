@@ -29,6 +29,7 @@ from celery.schedules import crontab
 
 from backoffice.celery import app as celery_app
 from . import check_academic_calendar
+from . import injecter_dossier_a_epc
 from . import process_admission_tasks
 from . import retrieve_digit_tickets_status
 from . import retry_digit_duplicates_finding
@@ -50,6 +51,10 @@ tasks = {
     '|Admission| Retry digit duplicates finding': {
         'task': 'admission.tasks.retry_digit_duplicates_finding.run',
         'schedule': crontab(minute='*/5'),
+    },
+    '|Admission| Injection dossiers valides': {
+        'task': 'admission.tasks.injecter_dossier_a_epc.run',
+        'schedule': crontab(minute=0, hour=3),  # Every day at 3 am
     },
     '|Admission| Verifier paiements faits': {
         'task': 'admission.tasks.verifier_paiements_faits.run',

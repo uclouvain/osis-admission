@@ -221,6 +221,10 @@ COMMAND_HANDLERS = {
         historique=_historique,
         notification=_notification,
     ),
+    MettreAValiderCommand: lambda msg_bus, cmd: mettre_a_valider(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
     ApprouverParFacCommand: lambda msg_bus, cmd: approuver_par_fac(
         cmd,
         proposition_repository=_proposition_repository,

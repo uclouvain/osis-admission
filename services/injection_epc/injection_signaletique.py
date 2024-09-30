@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import json
+import traceback
 from datetime import datetime
 from typing import Dict
 
@@ -55,6 +56,7 @@ SPORT_TOUT_CAMPUS = [
 
 class InjectionEPCSignaletique:
     def injecter(self, admission: BaseAdmission) -> None:
+        e = ""
         try:
             donnees = self.recuperer_donnees(admission=admission)
             if settings.USE_CELERY:
@@ -62,7 +64,7 @@ class InjectionEPCSignaletique:
                     lambda: injecter_signaletique_a_epc_task.run.delay(admissions_references=[admission.reference])
                 )
             statut = EPCInjectionStatus.NO_SENT.name
-        except Exception:
+        except Exception as e:
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
@@ -74,6 +76,8 @@ class InjectionEPCSignaletique:
                 'payload': donnees,
                 'status': statut,
                 'last_attempt_date': None,
+                "osis_error_message": str(e),
+                "osis_stacktrace": traceback.format_exc() if e else ""
             }
         )
 

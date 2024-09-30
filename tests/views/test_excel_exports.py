@@ -54,11 +54,15 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurA
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixEdition
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    OngletsChecklist as OngletsChecklistContinue,
+)
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    OngletsChecklist,
+    OngletsChecklist as OngletsChecklistGenerale,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
@@ -381,8 +385,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             'demandeur': str(self.sic_management_user.person.uuid),
             'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
             'filtres_etats_checklist': {
-                OngletsChecklist.donnees_personnelles.name: ['A_TRAITER'],
-                OngletsChecklist.frais_dossier.name: ['PAYES'],
+                OngletsChecklistGenerale.donnees_personnelles.name: ['A_TRAITER'],
+                OngletsChecklistGenerale.frais_dossier.name: ['PAYES'],
             },
             'quarantaine': 'True',
             'injection_en_erreur': 'True',
@@ -446,8 +450,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             values[17],
             str(
                 {
-                    OngletsChecklist.donnees_personnelles.value: [_('To be processed')],
-                    OngletsChecklist.frais_dossier.value: [_('Payed')],
+                    OngletsChecklistGenerale.donnees_personnelles.value: [_('To be processed')],
+                    OngletsChecklistGenerale.frais_dossier.value: [_('Payed')],
                 }
             ),
         )
@@ -753,6 +757,10 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                 'inscription_requise': True,
                 'paye': False,
                 'marque_d_interet': True,
+                'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
+                'filtres_etats_checklist': {
+                    OngletsChecklistContinue.decision.name: ['A_TRAITER', 'A_VALIDER'],
+                },
                 'demandeur': str(self.sic_management_user.person.uuid),
             }
         )
@@ -768,8 +776,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 14)
-        self.assertEqual(len(values), 14)
+        self.assertEqual(len(names), 16)
+        self.assertEqual(len(values), 16)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -786,6 +794,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(names[11], _('Registration required'))
         self.assertEqual(names[12], _('Paid'))
         self.assertEqual(names[13], _('Interested mark'))
+        self.assertEqual(names[14], _('Include or exclude the checklist filters'))
+        self.assertEqual(names[15], _('Checklist filters'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '3 Janvier 2023')
@@ -806,6 +816,18 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(values[11], 'oui')
         self.assertEqual(values[12], 'non')
         self.assertEqual(values[13], 'oui')
+        self.assertEqual(values[14], ModeFiltrageChecklist.INCLUSION.value)
+        self.assertEqual(
+            values[15],
+            str(
+                {
+                    OngletsChecklistContinue.decision.value: [
+                        _('To be processed'),
+                        _('To validate IUFC'),
+                    ],
+                }
+            ),
+        )
 
 
 @freezegun.freeze_time('2023-01-03')
@@ -986,6 +1008,13 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             last_update_author=self.candidate,
             cotutelle=None,
             type=ChoixTypeAdmission.ADMISSION.name,
+            checklist={
+                'initial': {},
+                'current': {
+                    'decision_sic': {'statut': 'INITIAL_CANDIDAT'},
+                    'decision_facultaire': {'statut': 'GEST_EN_COURS'},
+                },
+            },
         )
 
         results: List[DemandeDoctoraleRechercheDTO] = message_bus_instance.invoke(
@@ -1006,8 +1035,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(row_data[3], result.code_bourse)
         self.assertEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
         self.assertEqual(row_data[5], ChoixStatutPropositionDoctorale.CONFIRMEE.value)
-        self.assertEqual(row_data[6], 'TODO')
-        self.assertEqual(row_data[7], 'TODO')
+        self.assertEqual(row_data[6], _('Taken in charge'))
+        self.assertEqual(row_data[7], _('To be processed'))
         self.assertEqual(row_data[8], '2023/01/01')
         self.assertEqual(row_data[9], '2023/01/03')
         self.assertEqual(

@@ -241,6 +241,10 @@ fieldset.custom-fieldset > legend {
   font-weight: bold;
 }
 
+.underline-text {
+  text-decoration: underline;
+}
+
 .default-cursor {
   cursor: default;
 }
