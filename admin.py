@@ -618,8 +618,7 @@ class EPCInjectionStatusFilter(SimpleListFilter):
             )
         elif self.value() == 'no_epc_injection':
             return queryset.filter(
-                Q(epc_injection__isnull=True)
-                | Q(
+                Q(
                     ~Exists(
                         EPCInjection.objects.filter(
                             admission_id=OuterRef('pk'),
@@ -643,9 +642,9 @@ class EmailInterneFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'yes':
-            return queryset.filter(candidate__email__icontains='uclouvain')
+            return queryset.filter(candidate__email__endswith='uclouvain.be')
         elif self.value() == 'no':
-            return queryset.exclude(candidate__email__icontains='uclouvain')
+            return queryset.exclude(candidate__email__endswith='uclouvain.be')
         return queryset
 
 
