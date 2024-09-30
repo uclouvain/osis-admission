@@ -1785,6 +1785,12 @@ msgstr ""
 msgid "Continuing enrolment applications"
 msgstr ""
 
+msgid "Continuing working list"
+msgstr ""
+
+msgid "Continuing working lists"
+msgstr ""
+
 msgid "Coordinates"
 msgstr ""
 
@@ -2420,6 +2426,18 @@ msgstr ""
 msgid "Doctorate enrolment applications"
 msgstr ""
 
+msgid "Doctorate free additional approval condition"
+msgstr ""
+
+msgid "Doctorate free additional approval conditions"
+msgstr ""
+
+msgid "Doctorate working list"
+msgstr ""
+
+msgid "Doctorate working lists"
+msgstr ""
+
 msgid "Document"
 msgstr ""
 
@@ -2615,10 +2633,23 @@ msgid ""
 "%(author)s."
 msgstr ""
 
+msgid ""
+"Email sent to the EU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+
 msgid "Email sent to the EU+5 candidate when SIC approves an admission."
 msgstr ""
 
+msgid ""
+"Email sent to the NEU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+
 msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2629,6 +2660,11 @@ msgstr ""
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2652,7 +2688,13 @@ msgstr ""
 msgid "Email sent to the candidate when IUFC validate the application."
 msgstr ""
 
+msgid "Email sent to the candidate when SIC approves a doctorate inscription."
+msgstr ""
+
 msgid "Email sent to the candidate when SIC approves an inscription."
+msgstr ""
+
+msgid "Email sent to the candidate when SIC refuses a doctorate admission."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
@@ -2670,10 +2712,20 @@ msgstr ""
 
 msgid ""
 "Email sent to the checkers to inform them to check the background "
+"authentication of the candidate for a doctorate admission."
+msgstr ""
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
 "authentication of the candidate."
 msgstr ""
 
 msgid "Email sent to the faculty when IUFC needs more information."
+msgstr ""
+
+msgid ""
+"Email sent to the faculty when the SIC submits the application during the "
+"faculty decision process for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -3936,6 +3988,10 @@ msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
 
+msgid ""
+"It is not possible to go from the \"To validate IUFC\" status to this status."
+msgstr ""
+
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr ""
 
@@ -4972,10 +5028,6 @@ msgstr ""
 msgid "Only one admission"
 msgstr ""
 
-msgid ""
-"Only the \"to be processed\" status is available from the \"closed\" status."
-msgstr ""
-
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr ""
 
@@ -5935,6 +5987,9 @@ msgstr ""
 msgid "Research scholarship"
 msgstr ""
 
+msgid "Research scholarship:"
+msgstr ""
+
 msgid "Research seminar"
 msgstr ""
 
@@ -6733,6 +6788,13 @@ msgstr ""
 msgid "The activity title"
 msgstr ""
 
+#, python-format
+msgid ""
+"The applicant is registered in the year %(year)s. Click <a class='bold-text "
+"underline-text' href='%(full_training_choice_url)s'>here</a> to change the "
+"academic year."
+msgstr ""
+
 msgid "The application can only be validated if it was previously approved."
 msgstr ""
 
@@ -7437,6 +7499,9 @@ msgstr ""
 msgid "To the attention of"
 msgstr ""
 
+msgid "To validate IUFC"
+msgstr ""
+
 msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
@@ -7795,6 +7860,9 @@ msgstr ""
 msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 
+msgid "Work in progress"
+msgstr ""
+
 msgid "Work start date"
 msgstr ""
 
@@ -7998,6 +8066,11 @@ msgid ""
 msgstr ""
 
 msgid "You can only select courses that are managed by the program manager."
+msgstr ""
+
+msgid ""
+"You can only transition to the \"To validate IUFC\" status from the "
+"\"Approved\" status."
 msgstr ""
 
 msgid ""

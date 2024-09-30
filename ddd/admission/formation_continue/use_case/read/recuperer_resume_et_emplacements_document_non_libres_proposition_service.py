@@ -62,7 +62,7 @@ def recuperer_resume_et_emplacements_documents_non_libres_proposition(
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
-        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
 
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(

@@ -34,6 +34,7 @@ import waffle
 from django.conf import settings
 from django.db.models import QuerySet, Q
 from django.utils.datetime_safe import date
+from requests import RequestException
 
 from admission.ddd.admission.domain.validator.exceptions import ValidationTicketCreationDigitEchoueeException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
@@ -277,6 +278,10 @@ class DigitRepository(IDigitRepository):
         if student is not None and student.registration_id:
             return student.registration_id
 
+        # Check person in EPC
+        noma_from_epc = _find_student_registration_id_in_epc(matricule=candidate.global_id)
+        if noma_from_epc:
+            return noma_from_epc
 
 
 def _retrieve_person_ticket_status(request_id: int):
@@ -464,3 +469,21 @@ def _get_idm_number(program_type):
         "UNIVERSITY_FIRST_CYCLE_CERTIFICATE": 61,
         "UNIVERSITY_SECOND_CYCLE_CERTIFICATE": 61
     }[program_type]
+
+
+def _find_student_registration_id_in_epc(matricule):
+    try:
+        url = f"{settings.ESB_STUDENT_API}/{matricule}"
+        response = requests.get(url, headers={"Authorization": settings.ESB_AUTHORIZATION})
+        result = response.json()
+        if response.status_code == 200 and result.get('lireDossierEtudiantResponse'):
+            if result['lireDossierEtudiantResponse'].get('return'):
+                return _format_registration_id(str(result['lireDossierEtudiantResponse']['return'].get('noma')))
+    except (RequestException, ValueError) as e:
+        return None
+
+
+def _format_registration_id(registration_id):
+    prefix_registration_id = (8 - len(registration_id)) * '0'
+    registration_id = ''.join([prefix_registration_id, registration_id])
+    return registration_id

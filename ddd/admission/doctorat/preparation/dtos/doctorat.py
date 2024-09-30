@@ -23,8 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from datetime import datetime
+from typing import Optional
+
 import attr
 
+from admission.ddd.admission.dtos.campus import CampusDTO
 from osis_common.ddd import interface
 
 
@@ -33,8 +37,19 @@ class DoctoratDTO(interface.DTO):
     sigle: str
     code: str
     annee: int
+    date_debut: Optional[datetime.date]
     intitule: str
+    intitule_fr: str
+    intitule_en: str
     sigle_entite_gestion: str
-    campus: str
+    campus: Optional[CampusDTO]
     type: str
-    campus_inscription: str
+    campus_inscription: Optional[CampusDTO]
+    credits: Optional[int]
+
+    def __str__(self):
+        return f'{self.sigle} - {self.intitule or self.intitule_fr} ({self.campus})'
+
+    @property
+    def nom_complet(self):
+        return f'{self.sigle} - {self.intitule or self.intitule_fr}'

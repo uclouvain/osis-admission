@@ -717,7 +717,9 @@ def get_authorization_attachments(context: ResumePropositionDTO) -> List[Attachm
 
     attachments = []
 
-    if context.est_proposition_generale and context.proposition.type == TypeDemande.ADMISSION.name:
+    if (
+        context.est_proposition_generale or context.est_proposition_doctorale
+    ) and context.proposition.type == TypeDemande.ADMISSION.name:
         if (
             context.proposition.statut == ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
             or context.proposition.certificat_autorisation_signe

@@ -38,7 +38,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
     ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
     ListerPropositionsSuperviseesQuery,
-    SupprimerPropositionCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.ddd.admission.formation_continue.commands import (

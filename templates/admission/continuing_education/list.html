@@ -52,9 +52,35 @@
     {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-4" %}
     {% bootstrap_field filter_form.inscription_requise form_group_class="form-group col-md-2" %}
     {% bootstrap_field filter_form.paye form_group_class="form-group col-md-2" %}
-  </div> 
+  </div>
   <div class="row">
     {% bootstrap_field filter_form.marque_d_interet form_group_class="form-group col-md-12" %}
+  </div>
+
+  <hr>
+  <div>
+    <div class="row flex-content no-space">
+      <div class="col-md-4">
+        {% bootstrap_field filter_form.liste_travail %}
+      </div>
+      <button id="toggle-checklist-filters" type="button" class="btn btn-link nopadding" value="off">
+        {% translate "Show the states of the checklist" %}
+      </button>
+    </div>
+    <div id="checklist-filters-container">
+      <div class="btn-group mt-1" data-toggle="buttons" id="checklist-filters-mode">
+        {% for choice in filter_form.mode_filtres_etats_checklist %}
+          <label
+            for="{{ choice.id_for_label  }}"
+            class="btn btn-primary{% if filter_form.mode_filtres_etats_checklist.value == choice.data.value %} active{% endif %}"
+          >
+            {{ choice.tag }}
+            {{ choice.choice_label }}
+          </label>
+        {% endfor %}
+      </div>
+      {% bootstrap_field filter_form.filtres_etats_checklist label='' form_group_class="form-group mt-1" %}
+    </div>
   </div>
 {% endblock %}
 
@@ -76,6 +102,93 @@
                   $reference.mask(getReferenceMask(cep), options);
               },
           });
+
+          {# Working lists #}
+          const stateInput = $('#id_etats');
+          const typeInput = $('#id_type');
+          const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
+          const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
+          const toggleChecklistFiltersButton = $('#toggle-checklist-filters');
+          let selectWorkListInProgress = false;
+
+          {# Toggle the checklist filters #}
+          toggleChecklistFiltersButton.on('click', function () {
+              if ($(this).val() === 'off') {
+                  $('#checklist-filters-container').show();
+                  $(this).val('on');
+                  $(this)[0].innerText = '{% translate "Hide the states of the checklist" %}';
+              } else {
+                  $('#checklist-filters-container').hide();
+                  $(this).val('off');
+                  $(this)[0].innerText = '{% translate "Show the states of the checklist" %}';
+              }
+          });
+
+          toggleChecklistFiltersButton.val(checklistFiltersInputs.filter(':checked').length > 0 ? 'off' : 'on').trigger('click');
+
+          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
+              {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
+              if (selectWorkListInProgress) return;
+              $('#id_liste_travail').val('').trigger('change');
+          });
+
+          $('#id_liste_travail').on('select2:select', function (event) {
+              {# When selecting a working list, update the dependent inputs #}
+              const data = event.params.data;
+              selectWorkListInProgress = true;
+
+              stateInput.val(data.admission_statuses).trigger('change');
+              typeInput.val([data.admission_type]).trigger('change');
+              if (!data.checklist_filters_mode) {
+                  filterModeInputs.filter(':checked').prop('checked', false).trigger('change');
+                  filterModeInputs.parents('label').removeClass('active');
+              } else {
+                  filterModeInputs.filter(`[value="${data.checklist_filters_mode}"]`).trigger('click');
+              }
+              data.checklist_filters.forEach(function(value, index) {
+                  checklistFiltersInputs.filter(`[name="filtres_etats_checklist_${index}"]`).val(value).trigger('change');
+              });
+              selectWorkListInProgress = false;
+          });
       });
   </script>
+{% endblock %}
+
+{% block style %}
+  {{ block.super }}
+
+  <style>
+    #checklist-filters-container .multi-widget {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+    }
+
+    #checklist-filters-container .multi-widget label.control-label {
+      text-decoration: underline;
+    }
+
+    #checklist-filters-container .multi-widget ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    #checklist-filters-container .multi-widget label:not(.control-label) {
+      font-weight: normal;
+    }
+
+    #checklist-filters-container .multi-widget input[value*="."] {
+      margin-left: 2em;
+    }
+
+    #checklist-filters-container {
+      display: none;
+    }
+
+    #checklist-filters-mode label:not(.active) {
+      background-color: #ddd;
+      border-color: #ddd;
+      color: #337ab7;
+    }
+  </style>
 {% endblock %}

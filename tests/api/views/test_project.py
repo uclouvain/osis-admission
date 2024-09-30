@@ -66,7 +66,11 @@ from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFacto
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+    AdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
@@ -80,6 +84,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from base.views.learning_achievement import update
+from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory
 
@@ -131,6 +136,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         cls.continuing_campus_name = (
             cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
+
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = cls.other_admission.candidate
@@ -359,7 +365,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             supervision_group=self.promoter.process,
         )
         self.client.force_authenticate(user=self.promoter_user)
-        with self.assertNumQueriesLessThan(12):
+        with self.assertNumQueriesLessThan(13):
             response = self.client.get(resolve_url("admission_api_v1:supervised_propositions"), format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
@@ -745,6 +751,9 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
         # Create other users
         cls.no_role_user = PersonFactory(first_name="Joe").user
+
+        # Create required specific questions
+        AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL)
 
         # Targeted urls
         cls.first_admission_with_invitation_url = resolve_url(

@@ -139,10 +139,10 @@
         {% endif %}
 
         {% if injection_signaletique %}
-            <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
-                <div class="panel-body bg-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
+            <div class="panel panel-{% if injection_signaletique.in_error %}danger{% else %}warning{% endif %}">
+                <div class="panel-body bg-{% if injection_signaletique.in_error %}danger{% else %}warning{% endif %}">
                     <div>
-                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.status == 'ERROR' %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
+                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.in_error %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
                     </div>
                 </div>
             </div>
@@ -407,7 +407,7 @@
         </div>
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire next_url=next_base_url|add:'fac_decision' %}
+      {% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire next_url=next_base_url|add:'decision_facultaire' %}
         <div role="tabpanel" class="tab-pane" id="decision_facultaire">
           {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
 
