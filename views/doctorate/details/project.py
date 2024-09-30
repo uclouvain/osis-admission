@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from django.views.generic import TemplateView
+from django.utils.translation import gettext_lazy as _
 
 from admission.views.common.mixins import LoadDossierViewMixin
 
@@ -34,3 +35,15 @@ __all__ = ['DoctorateAdmissionProjectDetailView']
 class DoctorateAdmissionProjectDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/project.html'
     permission_required = 'admission.view_admission_project'
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+
+        # There is a bug with translated strings with percent signs
+        # https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#troubleshooting-gettext-incorrectly-detects-python-format-in-strings-with-percent-signs
+        # xgettext:no-python-format
+        context_data['fte_label'] = _("Full-time equivalent (as %)")
+        # xgettext:no-python-format
+        context_data['allocated_time_label'] = _("Time allocated for thesis (in %)")
+
+        return context_data

@@ -43,17 +43,23 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     GroupeSupervisionCompletPourMembresCAException,
     MembreCANonTrouveException,
 )
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import \
+    PersonneConnueUclInMemoryTranslator
 
 
 class TestIdentifierMembreCAService(TestCase):
     def setUp(self) -> None:
         self.matricule_membre_CA = '00987890'
         self.uuid_proposition = 'uuid-SC3DP'
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
+            PersonneConnueUclDTOFactory(matricule="0123456"),
+        )
 
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.proposition_id = PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition)
@@ -61,6 +67,7 @@ class TestIdentifierMembreCAService(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = IdentifierMembreCACommand(
             uuid_proposition=self.uuid_proposition,
+            matricule_auteur="0123456",
             matricule=self.matricule_membre_CA,
             prenom="",
             nom="",
@@ -96,6 +103,7 @@ class TestIdentifierMembreCAService(TestCase):
             IdentifierPromoteurCommand(
                 uuid_proposition=self.uuid_proposition,
                 matricule=self.matricule_membre_CA,
+                matricule_auteur="0123456",
                 prenom="",
                 nom="",
                 email="",
@@ -121,6 +129,7 @@ class TestIdentifierMembreCAService(TestCase):
                 IdentifierMembreCACommand(
                     uuid_proposition=self.uuid_proposition,
                     matricule='0098789{}'.format(k),
+                    matricule_auteur="0123456",
                     prenom="",
                     nom="",
                     email="",
