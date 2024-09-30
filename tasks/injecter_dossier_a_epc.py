@@ -46,7 +46,6 @@ def run():  # pragma: no cover
     # TODO: compatibilite avec doctorat et iufc
     admissions = BaseAdmission.objects.select_related(
         'generaleducationadmission',
-        'epc_injection',
         'candidate__personmergeproposal',
     ).filter(
         # Dossier doit etre sur la bonne annee
