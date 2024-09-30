@@ -222,6 +222,7 @@ class InjectionEPCAdmission:
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
+            stacktrace = traceback.format_exc()
 
         EPCInjection.objects.update_or_create(
             admission=admission,
@@ -231,7 +232,7 @@ class InjectionEPCAdmission:
                 "status": statut,
                 'last_attempt_date': datetime.now(),
                 "osis_error_message": str(e) if e else "",
-                "osis_stacktrace": traceback.format_exc() if e else ""
+                "osis_stacktrace": stacktrace if e else ""
             },
         )
         return donnees
@@ -280,7 +281,11 @@ class InjectionEPCAdmission:
                 comptabilite=comptabilite,
             ),
             "inscription_offre": cls._get_inscription_offre(admission=admission, admission_generale=admission_generale),
-            "donnees_comptables": cls._get_donnees_comptables(admission=admission, comptabilite=comptabilite),
+            "donnees_comptables": cls._get_donnees_comptables(
+                admission=admission,
+                comptabilite=comptabilite,
+                admission_generale=admission_generale
+            ),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc)
@@ -529,7 +534,7 @@ class InjectionEPCAdmission:
             "droits_majores": admission_generale.tuition_fees_dispensation,
             "montant_droits_majores": (
                 ((str(autre_montant) if autre_montant else None)
-                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
+                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission_generale, "tuition_fees_amount", None)))
                 if admission_generale else None
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
