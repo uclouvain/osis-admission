@@ -1,5 +1,5 @@
 {% extends "admission/doctorate/details/tab_layout.html" %}
-{% load i18n static admission %}
+{% load i18n static admission bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,3 +24,150 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% block actions-group %}
+{% endblock %}
+
+{% block tab_content %}
+  {% panel _("Promoters") %}
+    {% for signature in groupe_supervision.signatures_promoteurs %}
+      {% include "admission/doctorate/details/includes/supervision_member_entry.html" with type='PROMOTER' member=signature.promoteur supervision=groupe_supervision %}
+    {% empty %}
+      {% trans "No one invited" %}
+    {% endfor %}
+  {% endpanel %}
+
+  {% panel _("CA members") %}
+    {% for signature in groupe_supervision.signatures_membres_CA %}
+      {% include "admission/doctorate/details/includes/supervision_member_entry.html" with type='CA_MEMBER' member=signature.membre_CA %}
+    {% empty %}
+      {% trans "No one invited" %}
+    {% endfor %}
+  {% endpanel %}
+
+  {% has_perm 'admission.add_supervision_member' as can_add_supervision_member %}
+  {% if can_add_supervision_member and add_form and add_form.type %}
+    <form class="osis-form" method="post" action="">
+      {% csrf_token %}
+      {% bootstrap_form_errors add_form %}
+      {% panel _("Add a promoter or a CA member") %}
+        <div class="row">
+          <div class="col-md-12">
+            {% bootstrap_field add_form.type %}
+          </div>
+          <div class="col-md-12">
+            {% bootstrap_field add_form.internal_external %}
+          </div>
+          <div id="tutor" class="col-md-6">
+            {% bootstrap_field add_form.tutor %}
+          </div>
+          <div id="person" class="col-md-6">
+            {% bootstrap_field add_form.person %}
+          </div>
+          <div class="col-md-6" id="external-person">
+            <div class="panel panel-default">
+              <div class="panel-body">
+                {% bootstrap_field add_form.prenom %}
+                {% bootstrap_field add_form.nom %}
+                {% bootstrap_field add_form.email %}
+                {% bootstrap_field add_form.est_docteur %}
+                {% bootstrap_field add_form.institution %}
+                {% bootstrap_field add_form.ville %}
+                {% bootstrap_field add_form.pays %}
+                {% bootstrap_field add_form.langue %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <button
+          type="submit" class="btn btn-primary"
+          name="add_member_submit"
+        >{% trans "Add" %}</button>
+      {% endpanel %}
+    </form>
+  {% endif %}
+
+  {% has_perm 'admission.request_signatures' as can_request_signatures %}
+  {% has_perm 'admission.change_admission_project' as can_change_admission_project %}
+  {% if can_request_signatures and admission.statut == "EN_BROUILLON" %}
+    <div class="text-center">
+      <button
+        type="button"
+        class="btn btn-success btn-lg"
+        data-toggle="modal"
+        data-target="#request-signatures-modal"
+      >
+        {% trans "Request signatures" %}
+      </button>
+    </div>
+
+    {% include "admission/doctorate/details/includes/request_signature_modal.html" %}
+  {% elif can_change_admission_project and admission.statut == "EN_ATTENTE_DE_SIGNATURE" %}
+    <div class="text-center">
+      <button
+        type="button"
+        class="btn btn-warning btn-lg"
+        data-toggle="modal"
+        data-target="#send-back-to-candidate-modal"
+      >
+        {% trans "Send back to the candidate" %}
+      </button>
+    </div>
+
+    {% include "admission/doctorate/details/includes/supervision_send_back_to_candidate_modal.html" %}
+  {% endif %}
+{% endblock %}
+
+{% block script %}
+  {{ add_form.media }}
+  {{ approve_by_pdf_form.media }}
+  <script type="application/javascript">
+  $(function () {
+    // Display autocompletion based on member type
+    $('#person').length && $('#person').dependsOn({
+      'input[name=type]': { values: ['CA_MEMBER'] },
+      'input[name=internal_external]': { values: ['INTERNAL'] },
+    }, { duration: 0 });
+    $('#tutor').length && $('#tutor').dependsOn({
+      'input[name=type]': { values: ['MAIN_PROMOTER', 'PROMOTER'] },
+      'input[name=internal_external]': { values: ['INTERNAL'] },
+    }, { duration: 0 });
+
+    $('#external-person').length && $('#external-person').dependsOn({
+      'input[name=internal_external]': { values: ['EXTERNAL'] },
+    }, { duration: 0 });
+
+    // Hide the reason input if the promoter approves the proposition
+    $('#id_motif_refus').length && $('#id_motif_refus').dependsOn({
+      'input[name="decision"]': {
+        values: ['DECLINED'],
+      },
+    }, {
+      duration: 0,
+    });
+    $('#institut_these').length && $('#institut_these').dependsOn({
+      'input[name="decision"]': { not: ['DECLINED'] },
+    }, { duration: 0 });
+
+    document.dispatchEvent(new Event('refreshFormInitial'));
+
+    $('.panel-group .collapse').on('show.bs.collapse', function() {
+      // Collapse siblings
+      $(this).parent('.panel-group').find('.collapse.in').not(this).collapse('hide')
+    })
+  });
+  </script>
+{% endblock %}
+
+{% block style %}
+  {{ block.super }}
+  <style>
+    .flex-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1em;
+    }
+  </style>
+{% endblock %}

@@ -23,14 +23,20 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.shortcuts import resolve_url
+from django.views.generic import RedirectView
 
-from django.views.generic import TemplateView
-
-from admission.views.common.mixins import LoadDossierViewMixin
+from admission.utils import get_cached_admission_perm_obj
+from osis_role.contrib.views import PermissionRequiredMixin
 
 __all__ = ["DoctorateAdmissionSupervisionDetailView"]
 
 
-class DoctorateAdmissionSupervisionDetailView(LoadDossierViewMixin, TemplateView):
-    template_name = 'admission/doctorate/details/supervision.html'
+class DoctorateAdmissionSupervisionDetailView(PermissionRequiredMixin, RedirectView):
     permission_required = 'admission.view_admission_supervision'
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs.get('uuid'))
+
+    def get_redirect_url(self, *args, **kwargs):
+        return resolve_url('admission:doctorate:update:supervision', uuid=self.kwargs['uuid'])

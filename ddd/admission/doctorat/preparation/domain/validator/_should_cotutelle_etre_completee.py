@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -39,12 +39,15 @@ class ShouldCotutelleEtreComplete(BusinessValidator):
     def validate(self, *args, **kwargs):
         champs_obligatoires = [
             "motivation",
-            "institution",
             "demande_ouverture",
         ]
         champs_obligatoires_completes = self.cotutelle and all(
             [getattr(self.cotutelle, champ_obligatoire) for champ_obligatoire in champs_obligatoires]
             + [self.cotutelle.institution_fwb is not None]
+            + [
+                self.cotutelle.institution
+                or (self.cotutelle.autre_institution_nom and self.cotutelle.autre_institution_adresse)
+            ]
         )
         if self.cotutelle != pas_de_cotutelle and not champs_obligatoires_completes:
             raise CotutelleNonCompleteException
