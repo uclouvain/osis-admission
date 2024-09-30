@@ -33,6 +33,7 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candid
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
@@ -700,5 +701,11 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=Historique(),
         notification=Notification(),
+    ),
+    SoumettreCACommand: lambda msg_bus, cmd: soumettre_ca(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        groupe_supervision_repository=GroupeDeSupervisionRepository(),
     ),
 }

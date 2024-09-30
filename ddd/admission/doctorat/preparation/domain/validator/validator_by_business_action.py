@@ -61,6 +61,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator._should_propo
     ShouldPropositionStatutEtreCorrectPourMembreCA
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_proposition_statut_etre_correct_pour_promoteur import \
     ShouldPropositionStatutEtreCorrectPourPromoteur
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_proposition_statut_etre_correct_pour_soumission_ca import \
+    ShouldPropositionStatutEtreCorrectPourSoumissionCA
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
@@ -889,7 +891,7 @@ class SoumettreCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldPropositionStatutEtreCorrectPourMembreCA(
+            ShouldPropositionStatutEtreCorrectPourSoumissionCA(
                 statut=self.statut,
             ),
         ]

@@ -30,19 +30,17 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    PropositionStatutIncorrectPourMembreCAException,
+    PropositionStatutIncorrectPourSoumissionCAException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldPropositionStatutEtreCorrectPourMembreCA(BusinessValidator):
+class ShouldPropositionStatutEtreCorrectPourSoumissionCA(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
         if self.statut not in [
-            ChoixStatutPropositionDoctorale.EN_BROUILLON,
-            ChoixStatutPropositionDoctorale.CA_A_COMPLETER,
-            ChoixStatutPropositionDoctorale.TRAITEMENT_FAC,
+            ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE,
         ]:
-            raise PropositionStatutIncorrectPourMembreCAException()
+            raise PropositionStatutIncorrectPourSoumissionCAException()

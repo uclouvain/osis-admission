@@ -25,7 +25,7 @@
 # ##############################################################################
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import SoumettreCACommand
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
@@ -38,7 +38,7 @@ def soumettre_ca(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     historique: 'IHistorique',
-) -> 'PromoteurIdentity':
+) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
@@ -51,4 +51,4 @@ def soumettre_ca(
     proposition.soumettre_ca()
     historique.historiser_soumission_ca(proposition)
 
-    return promoteur_id  # type: ignore[return-value]
+    return proposition.entity_id  # type: ignore[return-value]
