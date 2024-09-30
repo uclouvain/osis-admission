@@ -26,7 +26,6 @@
 import logging
 
 from django.conf import settings
-from django.db.models import Q
 
 from admission.auth.predicates.general import payment_needed_after_submission, payment_needed_after_manager_request
 from admission.contrib.models.base import BaseAdmission
@@ -37,7 +36,6 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
 )
 from admission.services.paiement_en_ligne import PaiementEnLigneService
 from backoffice.celery import app as celery_app
@@ -50,8 +48,7 @@ TASK_PREFIX = "[Verification Paiements]"
 @celery_app.task
 def run():  # pragma: no cover
     admissions_en_defaut_de_paiement = BaseAdmission.objects.filter(
-        Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name)
-        | Q(checklist__current__frais_dossier__statut=ChoixStatutChecklist.GEST_BLOCAGE.name)
+        generaleducationadmission__status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
     )
     logger.info(
         f"{TASK_PREFIX} Verification des paiements pour {admissions_en_defaut_de_paiement.count()} dossiers"
