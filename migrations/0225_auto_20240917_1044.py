@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0220_remove_doctorateadmission_pre_admission_submission_date'),
+        ('admission', '0224_add_doctorate_checklist_emails'),
     ]
 
     operations = [
