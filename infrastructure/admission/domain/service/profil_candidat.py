@@ -60,6 +60,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
@@ -71,6 +72,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -1002,3 +1004,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ),
             connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
         )
+
+    @classmethod
+    def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
+        try:
+            merge_proposal = PersonMergeProposal.objects.get(original_person__global_id=matricule)
+            return MergeProposalDTO(
+                status=merge_proposal.status,
+                validation=merge_proposal.validation,
+            )
+        except PersonMergeProposal.DoesNotExist:
+            return None
