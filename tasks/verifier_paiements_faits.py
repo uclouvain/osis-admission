@@ -26,7 +26,6 @@
 import logging
 
 from django.conf import settings
-from django.db.models import Q
 
 from admission.auth.predicates.general import payment_needed_after_submission, payment_needed_after_manager_request
 from admission.contrib.models.base import BaseAdmission
@@ -37,7 +36,6 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
 )
 from admission.services.paiement_en_ligne import PaiementEnLigneService
 from backoffice.celery import app as celery_app
@@ -45,24 +43,36 @@ from infrastructure.messages_bus import message_bus_instance
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
+TASK_PREFIX = "[Verification Paiements]"
 
 @celery_app.task
 def run():  # pragma: no cover
     admissions_en_defaut_de_paiement = BaseAdmission.objects.filter(
-        Q(generaleducationadmission__statut=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name)
-        | Q(checklist__current__frais_dossier__statut=ChoixStatutChecklist.GEST_BLOCAGE.name)
+        generaleducationadmission__status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+    )
+    logger.info(
+        f"{TASK_PREFIX} Verification des paiements pour {admissions_en_defaut_de_paiement.count()} dossiers"
     )
     for admission in admissions_en_defaut_de_paiement:
         paiements = PaiementEnLigneService.get_all_payments(admission)
+        logger.info(f"{TASK_PREFIX} > Verification du paiement pour le dossier {str(admission)}")
         if paiements.filter(status=PaymentStatus.PAID.name).exists():
-            # Update the admission and inform the candidate that the payment is successful
-            if payment_needed_after_submission(admission=admission):
-                # After the submission
-                return message_bus_instance.invoke(
-                    PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=admission.uuid)
-                )
-            elif payment_needed_after_manager_request(admission=admission):
-                # After a manager request
-                return message_bus_instance.invoke(
-                    PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=admission.uuid)
-                )
+            logger.info(f"{TASK_PREFIX}  > Paiement effectue ({str(admission)}) => Mise a jour de la demande")
+            try:
+                # Update the admission and inform the candidate that the payment is successful
+                if payment_needed_after_submission(admission=admission):
+                    logger.info(f"{TASK_PREFIX}   > Paiement suite a soumission de la demande ({str(admission)})")
+                    # After the submission
+                    message_bus_instance.invoke(
+                        PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=admission.uuid)
+                    )
+                elif payment_needed_after_manager_request(admission=admission):
+                    logger.info(f"{TASK_PREFIX}   > Paiement suite a requete du gestionnaire ({str(admission)})")
+                    # After a manager request
+                    message_bus_instance.invoke(
+                        PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=admission.uuid)
+                    )
+            except Exception as e:
+                logger.exception(f"{TASK_PREFIX}   > Technical issue : {str(e)} ({str(admission)})")
+        else:
+            logger.info(f"{TASK_PREFIX}  > Paiement non effectue ({str(admission)})")
