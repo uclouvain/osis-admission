@@ -738,7 +738,7 @@ def initialize_iufc_specific_questions(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0224_add_doctorate_checklist_emails'),
+        ('admission', '0225_auto_20240917_1044'),
     ]
 
     operations = [
