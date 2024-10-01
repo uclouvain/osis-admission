@@ -517,3 +517,12 @@ a.no-link {
 .datepicker table {
   width: 100%;
 }
+
+.multi-widget ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.multi-widget ul label {
+  font-weight: normal;
+}
