@@ -7484,6 +7484,13 @@ msgstr ""
 "Le parcours antérieur doit être à l'état \"Suffisant\" pour pouvoir "
 "effectuer cette action."
 
+msgid ""
+"The Previous experience must not be in the \"Sufficient\" status in order to "
+"do this action."
+msgstr ""
+"Le parcours antérieur ne doit pas être à l'état \"Suffisant\" pour pouvoir "
+"effectuer cette action."
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."

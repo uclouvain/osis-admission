@@ -23,12 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Union
+
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from rules import predicate
 from waffle import switch_is_active
 
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.epc_injection import EPCInjectionStatus
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
@@ -138,11 +140,26 @@ def is_sent_to_epc(self, user: User, obj: BaseAdmission):
 
 @predicate(bind=True)
 def pending_digit_ticket_response(self, user: User, obj: BaseAdmission):
-    return obj.candidate.global_id[0] in ['8', '9'] and PersonTicketCreation.objects.filter(
-        person_id=obj.candidate_id,
-        status__in=[
-           PersonTicketCreationStatus.CREATED.name,
-           PersonTicketCreationStatus.IN_PROGRESS.name,
-           PersonTicketCreationStatus.ERROR.name,
-        ]
-    ).exists()
+    return (
+        obj.candidate.global_id[0] in ['8', '9']
+        and PersonTicketCreation.objects.filter(
+            person_id=obj.candidate_id,
+            status__in=[
+                PersonTicketCreationStatus.CREATED.name,
+                PersonTicketCreationStatus.IN_PROGRESS.name,
+                PersonTicketCreationStatus.ERROR.name,
+            ],
+        ).exists()
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("The Previous experience must not be in the \"Sufficient\" status in order to do this action.")
+)
+def past_experiences_checklist_tab_is_not_sufficient(
+    self,
+    user: User,
+    obj: Union[DoctorateAdmission, GeneralEducationAdmission],
+):
+    return obj.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut') != 'GEST_REUSSITE'

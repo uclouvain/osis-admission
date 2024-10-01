@@ -1741,6 +1741,13 @@ class PastExperiencesStatusView(
         super().__init__(*args, **kwargs)
         self.valid_operation = False
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past_experiences_admission_requirement_form'] = PastExperiencesAdmissionRequirementForm(
+            instance=self.admission,
+        )
+        return context
+
     def get_initial(self):
         return self.admission.checklist['current']['parcours_anterieur']['statut']
 
@@ -1759,6 +1766,12 @@ class PastExperiencesStatusView(
                 )
             )
             self.valid_operation = True
+            self.htmx_trigger_form_extra = {
+                'select_access_title_perm': self.request.user.has_perm(
+                    'admission.checklist_select_access_title',
+                    self.admission,
+                ),
+            }
         except MultipleBusinessExceptions:
             return super().form_invalid(form)
 
