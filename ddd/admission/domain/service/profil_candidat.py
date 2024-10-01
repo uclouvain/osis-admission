@@ -258,16 +258,10 @@ class ProfilCandidat(interface.DomainService):
             else curriculum_dto
         )
 
-        experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
-            experiences=curriculum.experiences_academiques,
-            annee_courante=annee_soumission,
-        )
-
         FormationGeneraleCurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
             annee_soumission=annee_soumission,
             experiences_academiques=curriculum.experiences_academiques,
-            experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
@@ -303,16 +297,10 @@ class ProfilCandidat(interface.DomainService):
             else curriculum_dto
         )
 
-        experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
-            experiences=curriculum.experiences_academiques,
-            annee_courante=annee_soumission,
-        )
-
         CurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
             annee_soumission=annee_soumission,
             experiences_academiques=curriculum.experiences_academiques,
-            experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
