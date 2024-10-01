@@ -189,6 +189,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             intitule_formation=cls.admission.training.title,
             type_formation=cls.admission.training.education_group_type.name,
             lieu_formation=teaching_campus,
+            est_inscription_tardive=None,
             nationalite_candidat=cls.admission.candidate.country_of_citizenship.name,
             nationalite_ue_candidat=cls.admission.candidate.country_of_citizenship.european_union,
             vip=any(
