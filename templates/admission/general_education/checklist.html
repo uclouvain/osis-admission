@@ -339,13 +339,13 @@
                       {% if last_valuated_admission %}
                         {% admission_url last_valuated_admission.uuid last_valuated_admission.type_formation as admission_url %}
                         {% blocktranslate trimmed with admission_reference=last_valuated_admission.numero_demande admission_url=admission_url %}
-                          This experience has been added by the applicant in another application, to proceed to a modification,
-                          click on his/her <a href="{{ admission_url }}" target="_blank">other application {{ admission_reference }}</a>.
+                          This experience has been added by the applicant in <a href="{{ admission_url }}" target="_blank">another application</a>.
                         {% endblocktranslate %}
                       {% else %}
                         {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
                       {% endif %}
                     </p>
+                    {% comment %}
                     {% experience_valuation_url experience=experience as valuate_experience_url %}
                     {% if valuate_experience_url %}
                       {% concat 'valuate-experience-modal-single-' child.extra.identifiant as valuate_modal_id %}
@@ -357,6 +357,7 @@
                         {% translate 'Valuate' %}
                       </button>
                     {% endif %}
+                    {% endcomment %}
                   </div>
                   {% if valuate_experience_url %}
                     {% include 'admission/modal/confirm_modal.html' with confirm_url=valuate_experience_url confirm_message=_('Do you confirm the valuation of this experience?') confirm_id=valuate_modal_id confirm_button_class="btn-success" %}
@@ -1061,6 +1062,13 @@
               htmx.trigger('#financabilite-computed-rule', 'financabiliteComputeRule');
           });
 
+          // Pass the ckeditor data to the form data if necessary
+          $(document).on('click', '.ckeditor-form [name="save"]', function(event) {
+            $(this).closest('form').find("textarea").each(function() {
+                const editor = CKEDITOR.instances[$(this).attr('id')];
+                if (editor) editor.updateElement();
+            });
+          });
       })(jQuery)
 
         $('#merge-experience-form').on('submit', (e) => {
