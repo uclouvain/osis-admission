@@ -58,20 +58,21 @@ def run():  # pragma: no cover
         logger.info(f"{TASK_PREFIX} > Verification du paiement pour le dossier {str(admission)}")
         if paiements.filter(status=PaymentStatus.PAID.name).exists():
             logger.info(f"{TASK_PREFIX}  > Paiement effectue ({str(admission)}) => Mise a jour de la demande")
-            # Update the admission and inform the candidate that the payment is successful
-            if payment_needed_after_submission(admission=admission):
-                logger.info(f"{TASK_PREFIX}   > Paiement suite a soumission de la demande ({str(admission)})")
-                # After the submission
-                message_bus_instance.invoke(
-                    PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=admission.uuid)
-                )
-            elif payment_needed_after_manager_request(admission=admission):
-                logger.info(f"{TASK_PREFIX}   > Paiement suite a requete du gestionnaire ({str(admission)})")
-                # After a manager request
-                message_bus_instance.invoke(
-                    PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=admission.uuid)
-                )
-            else:
-                logger.info(f"{TASK_PREFIX}   > Technical issue (ne passe pas dans les if/elif) ({str(admission)})")
+            try:
+                # Update the admission and inform the candidate that the payment is successful
+                if payment_needed_after_submission(admission=admission):
+                    logger.info(f"{TASK_PREFIX}   > Paiement suite a soumission de la demande ({str(admission)})")
+                    # After the submission
+                    message_bus_instance.invoke(
+                        PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=admission.uuid)
+                    )
+                elif payment_needed_after_manager_request(admission=admission):
+                    logger.info(f"{TASK_PREFIX}   > Paiement suite a requete du gestionnaire ({str(admission)})")
+                    # After a manager request
+                    message_bus_instance.invoke(
+                        PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=admission.uuid)
+                    )
+            except Exception as e:
+                logger.exception(f"{TASK_PREFIX}   > Technical issue : {str(e)} ({str(admission)})")
         else:
             logger.info(f"{TASK_PREFIX}  > Paiement non effectue ({str(admission)})")
