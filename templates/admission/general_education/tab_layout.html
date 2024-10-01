@@ -99,6 +99,9 @@
         {{ admission.formation.intitule }} ({{ admission.formation.campus }})
       {% endif %}
       <span class="label label-default">{{ admission.formation.annee|display_as_academic_year }}</span>
+      {% if admission.est_inscription_tardive %}
+        <span class="label label-warning">{% translate 'Late enrollment' %}</span>
+      {% endif %}
     </span>
     <br>
     <span class="bold-text">{{ admission.type|enum_display:'TypeDemande' }} - </span>
@@ -156,9 +159,6 @@
     {% endif %}
     {% if admission.candidat_vip %}
       <span class="label label-success">{% translate 'VIP' %}</span>
-    {% endif %}
-    {% if admission.est_inscription_tardive %}
-      <span class="label label-danger">{% translate 'Late enrollment' %}</span>
     {% endif %}
     {% if admission.est_modification_inscription_externe %}
       <span class="label label-info">{% translate 'External enrollment change' %}</span>

@@ -142,6 +142,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     ),
                     default=Value(''),
                 ),
+                late_enrollment=F('generaleducationadmission__late_enrollment'),
             )
             .select_related(
                 'candidate__country_of_citizenship',
@@ -173,10 +174,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if noma:
             candidate_from_noma = (
                 Person.objects.filter(
-                    Q(student__registration_id=noma)
-                    | Q(personmergeproposal__registration_id_sent_to_digit=noma)
-                )
-                .only('id')
+                    Q(student__registration_id=noma) | Q(personmergeproposal__registration_id_sent_to_digit=noma)
+                ).only('id')
             ).first()
             qs = qs.filter(candidate_id=candidate_from_noma.id) if candidate_from_noma else qs.none()
         if matricule_candidat:
@@ -228,7 +227,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if injection_en_erreur is not None:
             injection_condition = Q(
                 epc_injection__type=EPCInjectionType.DEMANDE.name,
-                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name]
+                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name],
             )
 
             if injection_en_erreur:
@@ -447,6 +446,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             type_formation=admission.training.education_group_type.name,
             annee_formation=admission.training.academic_year.year,
             lieu_formation=admission.teaching_campus,  # From annotation
+            est_inscription_tardive=admission.late_enrollment,  # From annotation
             nationalite_candidat=getattr(
                 admission.candidate.country_of_citizenship,
                 'name' if language_is_french else 'name_en',

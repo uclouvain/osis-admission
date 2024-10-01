@@ -323,7 +323,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
             checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
 
-        if self.proposition.type == TypeDemande.INSCRIPTION.name and self.proposition.est_inscription_tardive:
+        if self.proposition.est_inscription_tardive:
             checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
 
         candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
