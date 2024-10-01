@@ -6774,6 +6774,11 @@ msgid ""
 "this action."
 msgstr ""
 
+msgid ""
+"The Previous experience must not be in the \"Sufficient\" status in order to "
+"do this action."
+msgstr ""
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -7381,9 +7386,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"This experience has been added by the applicant in another application, to "
-"proceed to a modification, click on his/her <a href=\"%(admission_url)s\" "
-"target=\"_blank\">other application %(admission_reference)s</a>."
+"This experience has been added by the applicant in <a "
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
 msgstr ""
 
 msgid "This field is required if the first name is missing."
@@ -7723,9 +7727,6 @@ msgstr ""
 
 msgctxt "decision-checklist"
 msgid "Validated"
-msgstr ""
-
-msgid "Valuate"
 msgstr ""
 
 msgid "Valuated diplomas or experiences:"

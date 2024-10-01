@@ -240,7 +240,15 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 if with_management_faculty
                 else F('sigle_entite_gestion'),
                 # Academic year
-                Mod('training__academic_year__year', 100),
+                Case(
+                    # Before the submission, use the determined academic year if specified
+                    When(
+                        Q(submitted_at__isnull=True) & Q(determined_academic_year__isnull=False),
+                        then=Mod('determined_academic_year__year', 100),
+                    ),
+                    # Otherwise, use the training academic year
+                    default=Mod('training__academic_year__year', 100),
+                ),
                 Value('-'),
                 # Formatted numero (e.g. 12 -> 000.012)
                 Replace(ToChar(F('reference'), Value('fm9999,0000,0000')), Value(','), Value('.')),

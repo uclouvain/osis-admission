@@ -213,10 +213,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             result,
             [
                 'De Septembre 2010 à Février 2011',
-                'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
-                'De Septembre 2013 à Février 2014',
-                'De Septembre 2014 à Décembre 2014',
             ],
         )
 

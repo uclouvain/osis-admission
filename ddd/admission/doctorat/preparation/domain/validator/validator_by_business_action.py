@@ -342,7 +342,6 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
     annee_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
-    experiences_academiques_incompletes: Dict[str, str]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -353,7 +352,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_soumission,
                 experiences_academiques=self.experiences_academiques,
-                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+                experiences_academiques_incompletes={},
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
