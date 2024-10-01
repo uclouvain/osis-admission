@@ -64,10 +64,12 @@ class InjectionEPCSignaletique:
                     lambda: injecter_signaletique_a_epc_task.run.delay(admissions_references=[admission.reference])
                 )
             statut = EPCInjectionStatus.NO_SENT.name
-        except Exception as e:
+        except Exception as exception:
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
+            e = exception
+            stacktrace = traceback.format_exc()
 
         EPCInjection.objects.update_or_create(
             admission=admission,
@@ -76,8 +78,8 @@ class InjectionEPCSignaletique:
                 'payload': donnees,
                 'status': statut,
                 'last_attempt_date': None,
-                "osis_error_message": str(e),
-                "osis_stacktrace": traceback.format_exc() if e else ""
+                "osis_error_message": str(e) if e else "",
+                "osis_stacktrace": stacktrace if e else ""
             }
         )
 
