@@ -266,16 +266,18 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "Le dossier doit être en 'Inscription autorisée'"
         contexte = self.admission.get_admission_context()
         if contexte == CONTEXT_GENERAL:
+            financabilite_checklist = self.admission.checklist.get('current', {}).get('financabilite', {})
             etat_financabilite = {
                 'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
                 'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
-            }.get(self.admission.checklist.get('current', {}).get('financabilite', {}).get('statut'))
+            }.get(financabilite_checklist.get('statut'))
+            a_une_derogation = financabilite_checklist.get('extra', {}).get('reussite') == 'derogation'
             if etat_financabilite is None:
                 return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
             elif (
                 etat_financabilite == EtatFinancabilite.FINANCABLE.name
                 and (
-                    self.admission.financability_rule == ''
+                    (self.admission.financability_rule == '' and not a_une_derogation)
                     or self.admission.financability_rule_established_on is None
                     or self.admission.financability_rule_established_by_id is None
                 )

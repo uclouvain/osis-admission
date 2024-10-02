@@ -683,6 +683,7 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                     ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
+                        checklist__current__financanbilite__extra__reussite='financable',
                         generaleducationadmission__financability_rule=''
                     )
                     | Q(
