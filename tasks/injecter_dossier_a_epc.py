@@ -26,11 +26,11 @@
 import logging
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 
 from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus, EPCInjection
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from backoffice.celery import app as celery_app
 from base.models.person_merge_proposal import PersonMergeStatus
@@ -64,15 +64,20 @@ def run():  # pragma: no cover
         Q(generaleducationadmission__financability_rule='')
         | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
         | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True)
-        # Le dossier ne doit pas avoir ete injecté
-        | Q(
-            epc_injection__type=EPCInjectionType.DEMANDE.name,
-            epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name],
-        )
         # Un noma doit exister
         | Q(candidate__personmergeproposal__registration_id_sent_to_digit='')
         # Aucune erreur avec Digit
         | Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses()),
+    ).annotate(
+        a_ete_injecte=Exists(
+            EPCInjection.objects.filter(
+                admission_id=OuterRef('pk'),
+                type=EPCInjectionType.DEMANDE.name,
+                status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]
+            )
+        )
+    ).exclude(
+        a_ete_injecte=True
     )
     logger.info(f"[TASK - INJECTION EPC] {admissions.count()} dossiers a traiter")
     from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
