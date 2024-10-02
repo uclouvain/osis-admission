@@ -272,8 +272,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             }.get(self.admission.checklist.get('current', {}).get('financabilite', {}).get('statut'))
             if etat_financabilite is None:
                 return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
-            if (
-                etat_financabilite
+            elif (
+                etat_financabilite == EtatFinancabilite.FINANCABLE.name
                 and (
                     self.admission.financability_rule == ''
                     or self.admission.financability_rule_established_on is None
