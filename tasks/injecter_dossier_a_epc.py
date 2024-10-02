@@ -34,7 +34,6 @@ from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectio
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from backoffice.celery import app as celery_app
 from base.models.person_merge_proposal import PersonMergeStatus
-from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
@@ -59,10 +58,7 @@ def run():  # pragma: no cover
         # Aucune erreur syntaxique de signalétique
         candidate__personmergeproposal__validation__valid=True,
         # Doit être financable ou non concerné
-        checklist__current__financabilite__statut__in=[
-            EtatFinancabilite.FINANCABLE.name,
-            EtatFinancabilite.NON_CONCERNE.name
-        ],
+        checklist__current__financabilite__statut__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'],
     ).exclude(
         # Doit avoir une situation de financabilité + une date + un auteur
         Q(generaleducationadmission__financability_rule='')
