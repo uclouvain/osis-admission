@@ -502,6 +502,9 @@ class InjectionEPCAdmission:
                 if admission_generale else None
             ),
             'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
+            'reorientation': bool(admission_generale) and admission_generale.is_external_reorientation,
+            'modification_programme': bool(admission_generale) and admission_generale.is_external_modification,
+            'inscription_tardive': bool(admission_generale) and admission_generale.late_enrollment,
         }
 
     @staticmethod
