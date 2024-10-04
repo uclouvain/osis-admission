@@ -44,8 +44,10 @@ from admission.ddd.admission.commands import (
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
 )
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
+from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import \
+    PeriodeSoumissionTicketDigitTranslator
+from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from backoffice.celery import app
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -373,13 +375,12 @@ def _trigger_epc_non_academic_curriculum_deletion(experience_uuid, noma, personn
 
 def _injecter_signaletique_a_epc(matricule: str):
     from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
-
-    demande = GeneralEducationAdmission.objects.filter(
-        candidate__global_id=matricule,
-    ).filter(
-        status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE
-    ).order_by('created_at').first()
-    InjectionEPCSignaletique().injecter(admission=demande)
+    periodes_actives = PeriodeSoumissionTicketDigitTranslator.get_periodes_actives()
+    demande = PropositionRepository.get_active_period_submitted_proposition(
+        matricule_candidat=matricule, periodes_actives=periodes_actives
+    )
+    admission = GeneralEducationAdmission.objects.get(uuid=demande.entity_id)
+    InjectionEPCSignaletique().injecter(admission=admission)
 
 
 def _update_non_empty_fields(source_obj: Model, target_obj: Model):

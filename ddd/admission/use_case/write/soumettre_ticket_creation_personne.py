@@ -50,7 +50,10 @@ def soumettre_ticket_creation_personne(
     client_comptabilite_translator: 'IClientComptabiliteTranslator',
     periode_soumission_ticket_digit_translator: 'IPeriodeSoumissionTicketDigitTranslator'
 ) -> str:
-    proposition = proposition_repository.get_first_submitted_proposition(matricule_candidat=cmd.global_id)
+    proposition = proposition_repository.get_active_period_submitted_proposition(
+        matricule_candidat=cmd.global_id,
+        periodes_actives=periode_soumission_ticket_digit_translator.get_periodes_actives(),
+    )
     logger.info(f"SOUMETTRE TICKET CREATION PERSONNE - retrieved first submitted proposition")
 
     digit_service.verifier_peut_soumettre_ticket_creation(proposition, periode_soumission_ticket_digit_translator)

@@ -37,8 +37,11 @@ from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
 )
+from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import PeriodeSoumissionTicketDigit
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.tasks import retrieve_digit_tickets_status
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory, EducationalExperienceFactory,
@@ -52,6 +55,7 @@ from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
 from base.tests.factories.user import UserFactory
@@ -95,6 +99,9 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
             candidate=self.personne_compte_temporaire,
             type_demande=TypeDemande.INSCRIPTION.name,
         )
+        self.admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.admission.save()
+
         # Experience professionelle
         self.experience_professionelle = ProfessionalExperienceFactory(
             start_date=datetime.now() - timedelta(days=20),
@@ -107,6 +114,11 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
 
         # Etudes secondaires
         self.etudes_secondaires_candidat = BelgianHighSchoolDiplomaFactory(person=self.personne_compte_temporaire)
+
+        # Periodes actives
+        self.periodes_actives = [
+            PeriodeSoumissionTicketDigit(annee=self.admission.determined_academic_year.year, date_debut='', date_fin='')
+        ]
 
         self._mock_message_bus()
         self._mock_injection_signaletique()
@@ -540,6 +552,7 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
             type_demande=TypeDemande.INSCRIPTION.name,
         )
 
+
         self.person_merge_proposal_doublon.status = PersonMergeStatus.IN_PROGRESS.name   # Fusion acceptée par le gestionnaire
         self.person_merge_proposal_doublon.selected_global_id = self.personne_compte_temporaire.global_id
         self.person_merge_proposal_doublon.original_person = self.doublon_personne_compte_temporaire
@@ -633,3 +646,31 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
             PersonTicketCreationStatus.DONE.name,
             msg="Doit être ok car les tickets antérieurs sont DONE/DONE WITH WARNINGS"
         )
+
+    def test_selection_demande_avec_etat_le_plus_avance_dans_la_periode_active_pour_injection_signaletique(self):
+        admission_autorisee_insc = GeneralEducationAdmissionFactory(
+            candidate=self.personne_compte_temporaire,
+            type_demande=TypeDemande.INSCRIPTION.name,
+            admitted=True,
+        )
+        demande = PropositionRepository.get_active_period_submitted_proposition(
+            matricule_candidat=self.personne_compte_temporaire.global_id, periodes_actives=self.periodes_actives
+        )
+
+        self.assertEqual(demande.reference, admission_autorisee_insc.reference)
+
+
+    def test_selection_demande_sur_annee_academique_en_periode_active_pour_injection_signaletique(self):
+        admission_confirmee_annee_suivante = GeneralEducationAdmissionFactory(
+            candidate=self.personne_compte_temporaire,
+            type_demande=TypeDemande.INSCRIPTION.name,
+            determined_academic_year=AcademicYearFactory(year=self.admission.determined_academic_year.year+1)
+        )
+        admission_confirmee_annee_suivante.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        admission_confirmee_annee_suivante.save()
+
+        demande = PropositionRepository.get_active_period_submitted_proposition(
+            matricule_candidat=self.personne_compte_temporaire.global_id, periodes_actives=self.periodes_actives
+        )
+
+        self.assertEqual(demande.reference, self.admission.reference)
