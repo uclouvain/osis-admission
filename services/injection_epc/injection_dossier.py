@@ -492,11 +492,11 @@ class InjectionEPCAdmission:
             'etat_financabilite': etat_financabilite,
             'situation_financabilite': admission_generale.financability_rule if admission_generale else None,
             'utilisateur_financabilite': (
-                admission_generale.financability_rule_established_by.full_name
+                admission_generale.financability_established_by.full_name
                 if admission_generale and est_financable else None
             ),
             'date_financabilite': (
-                admission_generale.financability_rule_established_on.strftime("%d/%m/%Y")
+                admission_generale.financability_established_on.strftime("%d/%m/%Y")
                 if admission_generale and est_financable else None
             ),
             'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
