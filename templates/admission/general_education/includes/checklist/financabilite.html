@@ -170,7 +170,7 @@
       </div>
       <div class="panel-body {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}bg-danger{% elif current.statut == 'GEST_REUSSITE' %}bg-success{% endif %}">
         {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}
-          {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_rule_established_by %}
+          {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_established_by %}
             Not financeable - {{ rule }} (Established by {{ established_by }})
           {% endblocktrans %}
           {% if can_change_checklist %}
@@ -180,7 +180,7 @@
           {% endif %}
           <br>
         {% elif current.statut == 'GEST_REUSSITE' and current.extra.reussite == 'financable' %}
-          {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_rule_established_by established_on=original_admission.financability_rule_established_on|date:"DATETIME_FORMAT" %}
+          {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_established_by established_on=original_admission.financability_established_on|date:"DATETIME_FORMAT" %}
             Financeable - {{ rule }} (Established by {{ established_by }} the {{ established_on }})
           {% endblocktrans %}
           {% if can_change_checklist %}

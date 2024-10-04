@@ -217,7 +217,7 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'financability_computed_rule',
         'financability_computed_rule_situation',
         'financability_computed_rule_on',
-        'financability_rule_established_by',
+        'financability_established_by',
         'financability_dispensation_first_notification_on',
         'financability_dispensation_first_notification_by',
         'financability_dispensation_last_notification_on',
@@ -259,7 +259,7 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'financability_computed_rule',
         'financability_computed_rule_situation',
         'financability_computed_rule_on',
-        'financability_rule_established_by',
+        'financability_established_by',
         'financability_dispensation_first_notification_on',
         'financability_dispensation_first_notification_by',
         'financability_dispensation_last_notification_on',
@@ -682,8 +682,8 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                 When(
                     ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
                     | Q(generaleducationadmission__financability_rule='')
-                    | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
-                    | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
+                    | Q(generaleducationadmission__financability_established_on__isnull=True)
+                    | Q(generaleducationadmission__financability_established_by_id__isnull=True),
                     generaleducationadmission__isnull=False,
                     then=Value(False),
                 ),

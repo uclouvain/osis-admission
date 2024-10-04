@@ -62,8 +62,8 @@ def run():  # pragma: no cover
     ).exclude(
         # Doit avoir une situation de financabilité + une date + un auteur
         Q(generaleducationadmission__financability_rule='')
-        | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
-        | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True)
+        | Q(generaleducationadmission__financability_established_on__isnull=True)
+        | Q(generaleducationadmission__financability_established_by_id__isnull=True)
         # Un noma doit exister
         | Q(candidate__personmergeproposal__registration_id_sent_to_digit='')
         # Aucune erreur avec Digit

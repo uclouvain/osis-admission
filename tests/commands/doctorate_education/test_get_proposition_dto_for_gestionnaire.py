@@ -142,8 +142,8 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             financability_computed_rule_situation=SituationFinancabilite.REUSSI_1_UE_BLOC_1.name,
             financability_computed_rule_on=datetime.datetime(2020, 1, 1),
             financability_rule=SituationFinancabilite.PLUS_FINANCABLE.name,
-            financability_rule_established_by=PersonFactory(),
-            financability_rule_established_on=datetime.datetime(2020, 1, 2),
+            financability_established_by=PersonFactory(),
+            financability_established_on=datetime.datetime(2020, 1, 2),
             financability_dispensation_status=DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name,
             financability_dispensation_first_notification_on=datetime.datetime(2020, 1, 3),
             financability_dispensation_first_notification_by=PersonFactory(),
@@ -265,8 +265,8 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         )
         self.assertEqual(result.financabilite_regle_calcule_le, self.admission.financability_computed_rule_on)
         self.assertEqual(result.financabilite_regle, self.admission.financability_rule)
-        self.assertEqual(result.financabilite_regle_etabli_par, self.admission.financability_rule_established_by.uuid)
-        self.assertEqual(result.financabilite_regle_etabli_le, self.admission.financability_rule_established_on)
+        self.assertEqual(result.financabilite_etabli_par, self.admission.financability_established_by.global_id)
+        self.assertEqual(result.financabilite_etabli_le, self.admission.financability_established_on)
         self.assertEqual(result.financabilite_derogation_statut, self.admission.financability_dispensation_status)
         self.assertEqual(
             result.financabilite_derogation_premiere_notification_le,
@@ -295,7 +295,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
 
     def test_get_proposition_with_default_values_if_necessary(self):
         self.admission.tuition_fees_amount = ''
-        self.admission.financability_rule_established_by = None
+        self.admission.financability_established_by = None
         self.admission.financability_dispensation_first_notification_by = None
         self.admission.financability_dispensation_last_notification_by = None
 
@@ -305,7 +305,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
 
         self.assertEqual(result.droits_inscription_montant, '')
         self.assertEqual(result.droits_inscription_montant_valeur, None)
-        self.assertEqual(result.financabilite_regle_etabli_par, '')
+        self.assertEqual(result.financabilite_etabli_par, '')
         self.assertEqual(result.financabilite_derogation_premiere_notification_par, '')
         self.assertEqual(result.financabilite_derogation_derniere_notification_par, '')
 
