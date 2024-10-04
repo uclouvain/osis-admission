@@ -3357,14 +3357,14 @@ msgstr "Besoin de dérogation à la financabilité"
 msgid "Financability dispensation status"
 msgstr "Statut de dérogation à la financabilité"
 
+msgid "Financability established by"
+msgstr "Financabilité établi par"
+
+msgid "Financability established on"
+msgstr "Financabilité établi le"
+
 msgid "Financability rule"
 msgstr "Règle de financabilité"
-
-msgid "Financability rule established by"
-msgstr "Règle de financabilité établi par"
-
-msgid "Financability rule established on"
-msgstr "Règle de financabilité établi le"
 
 #, python-format
 msgid "Financable - %(rule)s (Established by %(established_by)s)"

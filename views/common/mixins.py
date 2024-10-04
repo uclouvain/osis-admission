@@ -276,8 +276,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 etat_financabilite
                 and (
                     self.admission.financability_rule == ''
-                    or self.admission.financability_rule_established_on is None
-                    or self.admission.financability_rule_established_by_id is None
+                    or self.admission.financability_established_on is None
+                    or self.admission.financability_established_by_id is None
                 )
             ):
                 return (

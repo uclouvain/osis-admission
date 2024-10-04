@@ -43,7 +43,6 @@ def specifier_financabilite_non_concernee(
 
     # THEN
     proposition.specifier_financabilite_non_concernee(
-        cmd.etabli_par,
         cmd.gestionnaire,
     )
     proposition_repository.save(proposition)

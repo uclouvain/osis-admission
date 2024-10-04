@@ -69,15 +69,18 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
     BesoinDeDerogation,
-    DerogationFinancement, STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    DerogationFinancement,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException, \
-    PremierePropositionSoumisesNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+    PremierePropositionSoumisesNonTrouveeException,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
@@ -141,7 +144,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             .filter(
                 candidate__global_id=matricule_candidat,
                 status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE,
-            ).order_by('created_at')
+            )
+            .order_by('created_at')
             .first()
         )
 
@@ -204,10 +208,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
 
-        financabilite_regle_etabli_par_person = None
-        if entity.financabilite_regle_etabli_par:
+        financabilite_etabli_par_person = None
+        if entity.financabilite_etabli_par:
             with suppress(Person.DoesNotExist):
-                financabilite_regle_etabli_par_person = Person.objects.get(uuid=entity.financabilite_regle_etabli_par)
+                financabilite_etabli_par_person = Person.objects.get(global_id=entity.financabilite_etabli_par)
 
         financabilite_derogation_premiere_notification_par_person = None
         if entity.financabilite_derogation_premiere_notification_par:
@@ -292,8 +296,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 else '',
                 'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
                 'financability_rule': entity.financabilite_regle.name if entity.financabilite_regle else '',
-                'financability_rule_established_by': financabilite_regle_etabli_par_person,
-                'financability_rule_established_on': entity.financabilite_regle_etabli_le,
+                'financability_established_by': financabilite_etabli_par_person,
+                'financability_established_on': entity.financabilite_etabli_le,
                 'financability_dispensation_status': entity.financabilite_derogation_statut.name
                 if entity.financabilite_derogation_statut
                 else '',
@@ -527,10 +531,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             financabilite_regle=SituationFinancabilite[admission.financability_rule]
             if admission.financability_rule
             else '',
-            financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
-            if admission.financability_rule_established_by
+            financabilite_etabli_par=admission.financability_established_by.global_id
+            if admission.financability_established_by
             else None,
-            financabilite_regle_etabli_le=admission.financability_rule_established_on,
+            financabilite_etabli_le=admission.financability_established_on,
             financabilite_derogation_statut=DerogationFinancement[admission.financability_dispensation_status]
             if admission.financability_dispensation_status
             else '',
@@ -732,10 +736,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             financabilite_regle_calcule_situation=admission.financability_computed_rule_situation,
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
             financabilite_regle=admission.financability_rule,
-            financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
-            if admission.financability_rule_established_by
+            financabilite_etabli_par=admission.financability_established_by.global_id
+            if admission.financability_established_by
             else None,
-            financabilite_regle_etabli_le=admission.financability_rule_established_on,
+            financabilite_etabli_le=admission.financability_established_on,
             financabilite_derogation_statut=admission.financability_dispensation_status,
             financabilite_derogation_premiere_notification_le=(
                 admission.financability_dispensation_first_notification_on

@@ -26,12 +26,12 @@
 
 <div hx-swap-oob="true" id="financeabilty-info-container">
   {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}
-    {% blocktrans trimmed with rule='NON_FINANCABLE'|financability_enum_display established_by=original_admission.financability_rule_established_by %}
+    {% blocktrans trimmed with rule='NON_FINANCABLE'|financability_enum_display established_by=original_admission.financability_established_by %}
       {{ rule }} (Established by {{ established_by }})
     {% endblocktrans %}
     <br>
   {% elif current.statut == 'GEST_REUSSITE' and current.extra.reussite == 'financable' %}
-    {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_rule_established_by %}
+    {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_established_by %}
       Financable - {{ rule }} (Established by {{ established_by }})
     {% endblocktrans %}
     <br>
