@@ -26,6 +26,7 @@
 import abc
 from typing import List, Optional
 
+from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import PeriodeSoumissionTicketDigit
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
@@ -68,7 +69,9 @@ class IPropositionRepository(IGlobalPropositionRepository):
 
     @classmethod
     @abc.abstractmethod
-    def get_first_submitted_proposition(cls, matricule_candidat: str) -> 'Proposition':
+    def get_active_period_submitted_proposition(
+            cls, matricule_candidat: str, periodes_actives: List['PeriodeSoumissionTicketDigit']
+    ) -> 'Proposition':
         raise NotImplementedError
 
     @classmethod

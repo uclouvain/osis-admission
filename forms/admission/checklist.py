@@ -690,6 +690,10 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
             type_formation=self.instance.training.education_group_type.name,
         )
 
+        if self.instance.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut') == 'GEST_REUSSITE':
+            self.fields['admission_requirement'].disabled = True
+            self.fields['admission_requirement_year'].disabled = True
+
         for field in self.fields.values():
             field.widget.attrs['class'] = 'past-experiences-admission-requirement-field'
 

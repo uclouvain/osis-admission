@@ -248,6 +248,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         historique=_historique,
         notification=_notification,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
     CloturerPropositionCommand: lambda msg_bus, cmd: cloturer_proposition(
         cmd,

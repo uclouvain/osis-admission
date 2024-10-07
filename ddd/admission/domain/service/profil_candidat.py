@@ -43,6 +43,7 @@ from admission.ddd.admission.domain.service.verifier_curriculum import VerifierC
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
     IdentificationValidatorList,
+    QuarantaineValidatorList,
 )
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
@@ -258,16 +259,10 @@ class ProfilCandidat(interface.DomainService):
             else curriculum_dto
         )
 
-        experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
-            experiences=curriculum.experiences_academiques,
-            annee_courante=annee_soumission,
-        )
-
         FormationGeneraleCurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
             annee_soumission=annee_soumission,
             experiences_academiques=curriculum.experiences_academiques,
-            experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
@@ -303,16 +298,10 @@ class ProfilCandidat(interface.DomainService):
             else curriculum_dto
         )
 
-        experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
-            experiences=curriculum.experiences_academiques,
-            annee_courante=annee_soumission,
-        )
-
         CurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
             annee_soumission=annee_soumission,
             experiences_academiques=curriculum.experiences_academiques,
-            experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
@@ -384,4 +373,15 @@ class ProfilCandidat(interface.DomainService):
             pays_nationalite=identification.pays_nationalite,
             pays_nationalite_europeen=identification.pays_nationalite_europeen,
             pays_residence=identification.pays_residence,
+        ).validate()
+
+    @classmethod
+    def verifier_quarantaine(
+        cls,
+        proposition,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ):
+        merge_proposal = profil_candidat_translator.get_merge_proposal(proposition.matricule_candidat)
+        QuarantaineValidatorList(
+            merge_proposal=merge_proposal,
         ).validate()

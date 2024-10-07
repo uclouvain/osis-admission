@@ -7484,6 +7484,13 @@ msgstr ""
 "Le parcours antérieur doit être à l'état \"Suffisant\" pour pouvoir "
 "effectuer cette action."
 
+msgid ""
+"The Previous experience must not be in the \"Sufficient\" status in order to "
+"do this action."
+msgstr ""
+"Le parcours antérieur ne doit pas être à l'état \"Suffisant\" pour pouvoir "
+"effectuer cette action."
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -7864,6 +7871,9 @@ msgstr "Le paiement n'a pas a été réalisé."
 msgid "The person concerned"
 msgstr "La personne concernée"
 
+msgid "The person is in quarantine."
+msgstr "La personne est en quarantaine."
+
 msgid ""
 "The person whose the secondary studies have been valuated by this admission"
 msgstr ""
@@ -8190,14 +8200,11 @@ msgstr ""
 
 #, python-format
 msgid ""
-"This experience has been added by the applicant in another application, to "
-"proceed to a modification, click on his/her <a href=\"%(admission_url)s\" "
-"target=\"_blank\">other application %(admission_reference)s</a>."
+"This experience has been added by the applicant in <a "
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
 msgstr ""
-"Cette expérience a été ajoutée par le·la candidat·e dans une autre demande, "
-"pour procéder à une modification, cliquez sur son <a "
-"href=\"%(admission_url)s\" target=\"_blank\">autre demande "
-"%(admission_reference)s</a>."
+"Cette expérience a été ajoutée par le·la candidat·e dans une <a "
+"href=\"%(admission_url)s\" target=\"_blank\">autre demande</a>."
 
 msgid "This field is required if the first name is missing."
 msgstr "Ce champ est obligatoire si le prénom est manquant."
@@ -8567,9 +8574,6 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
-
-msgid "Valuate"
-msgstr "Valoriser"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
