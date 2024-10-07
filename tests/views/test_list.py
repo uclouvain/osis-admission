@@ -174,6 +174,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 type_formation=cls.admissions[0].training.education_group_type.name,
                 lieu_formation=teaching_campus,
                 est_inscription_tardive=None,
+                est_modification_inscription_externe=None,
+                est_reorientation_inscription_externe=None,
                 nationalite_candidat=cls.admissions[0].candidate.country_of_citizenship.name,
                 nationalite_ue_candidat=cls.admissions[0].candidate.country_of_citizenship.european_union,
                 vip=any(
