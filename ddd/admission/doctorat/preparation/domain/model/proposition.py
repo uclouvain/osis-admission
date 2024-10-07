@@ -1108,6 +1108,11 @@ class Proposition(interface.RootEntity):
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])
 
+        ProfilCandidatService.verifier_quarantaine(
+            proposition=self,
+            profil_candidat_translator=profil_candidat_translator,
+        )
+
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_REUSSITE,
             libelle=__('Approval'),
