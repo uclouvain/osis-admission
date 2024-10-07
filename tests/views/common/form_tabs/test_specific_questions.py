@@ -291,6 +291,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
+            late_enrollment=True,
         )
 
         url = resolve_url('admission:general-education:update:specific-questions', uuid=general_admission.uuid)
@@ -321,6 +322,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             general_admission.requested_documents,
         )
+        self.assertTrue(general_admission.late_enrollment)
 
         # With data
         response = self.client.post(
@@ -354,6 +356,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.regular_registration_proof, [])
         self.assertEqual(general_admission.is_external_modification, None)
         self.assertEqual(general_admission.registration_change_form, [])
+        self.assertTrue(general_admission.late_enrollment)
 
         # With diplomatic post
         general_admission.candidate.country_of_citizenship = self.ca_country
@@ -388,6 +391,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
+            late_enrollment=True,
         )
 
         url = resolve_url('admission:general-education:update:specific-questions', uuid=general_admission.uuid)
@@ -427,6 +431,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             general_admission.requested_documents,
         )
+        self.assertTrue(general_admission.late_enrollment)
 
         # With data -> modification
         response = self.client.post(
@@ -456,6 +461,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
             general_admission.registration_change_form,
             [self.file_uuids['formulaire_modification_inscription']],
         )
+        self.assertFalse(general_admission.late_enrollment)
 
         # With data -> modification & reorientation
         response = self.client.post(
