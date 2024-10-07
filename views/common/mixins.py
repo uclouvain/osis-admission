@@ -259,11 +259,12 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @property
     def injection_possible(self):
+        # Leave this test first so we are sure the other information are available.
+        if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
+            return False, "Le dossier doit être en 'Inscription autorisée'"
         annee_ouverte = AdmissionDigitTicketSubmissionCalendar().get_target_years_opened()
         if annee_ouverte and self.admission.determined_academic_year.year != annee_ouverte[0]:
             return False, f"Seules les inscriptions en {annee_ouverte} sont autorisées"
-        if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
-            return False, "Le dossier doit être en 'Inscription autorisée'"
         contexte = self.admission.get_admission_context()
         if contexte == CONTEXT_GENERAL:
             etat_financabilite = {
