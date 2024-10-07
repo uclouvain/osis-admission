@@ -7871,6 +7871,9 @@ msgstr "Le paiement n'a pas a été réalisé."
 msgid "The person concerned"
 msgstr "La personne concernée"
 
+msgid "The person is in quarantine."
+msgstr "La personne est en quarantaine."
+
 msgid ""
 "The person whose the secondary studies have been valuated by this admission"
 msgstr ""

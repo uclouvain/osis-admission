@@ -38,6 +38,7 @@ def valider_proposition(
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
     notification: 'INotification',
+    profil_candidat_translator: 'IProfilCandidatTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
@@ -45,6 +46,7 @@ def valider_proposition(
     # WHEN
     proposition.approuver_proposition(
         gestionnaire=cmd.gestionnaire,
+        profil_candidat_translator=profil_candidat_translator,
     )
 
     # THEN

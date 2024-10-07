@@ -40,6 +40,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.civil_state import CivilState
@@ -1241,3 +1242,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
         except StopIteration:
             raise ExperienceNonTrouveeException
+
+    @classmethod
+    def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
+        return None

@@ -33,6 +33,8 @@ from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -375,10 +377,16 @@ class Proposition(interface.RootEntity):
     def approuver_proposition(
         self,
         gestionnaire: str,
+        profil_candidat_translator: IProfilCandidatTranslator,
     ):
         ApprouverPropositionValidatorList(
             checklist_statut=self.checklist_actuelle.decision,
         ).validate()
+
+        ProfilCandidatService.verifier_quarantaine(
+            proposition=self,
+            profil_candidat_translator=profil_candidat_translator,
+        )
 
         self.statut = ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE
         self.checklist_actuelle.decision = StatutChecklist(
