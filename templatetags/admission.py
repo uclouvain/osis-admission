@@ -1259,6 +1259,7 @@ def access_title_checkbox(context, experience_uuid, experience_type, current_yea
             'checked': access_title.selectionne,
             'experience_uuid': experience_uuid,
             'can_choose_access_title': context['can_choose_access_title'],
+            'can_choose_access_title_tooltip': context.get('can_choose_access_title_tooltip'),
         }
 
 
