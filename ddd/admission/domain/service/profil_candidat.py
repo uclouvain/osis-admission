@@ -43,6 +43,7 @@ from admission.ddd.admission.domain.service.verifier_curriculum import VerifierC
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
     IdentificationValidatorList,
+    QuarantaineValidatorList,
 )
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
@@ -372,4 +373,15 @@ class ProfilCandidat(interface.DomainService):
             pays_nationalite=identification.pays_nationalite,
             pays_nationalite_europeen=identification.pays_nationalite_europeen,
             pays_residence=identification.pays_residence,
+        ).validate()
+
+    @classmethod
+    def verifier_quarantaine(
+        cls,
+        proposition,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ):
+        merge_proposal = profil_candidat_translator.get_merge_proposal(proposition.matricule_candidat)
+        QuarantaineValidatorList(
+            merge_proposal=merge_proposal,
         ).validate()

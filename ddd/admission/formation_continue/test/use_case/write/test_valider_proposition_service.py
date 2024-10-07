@@ -23,8 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest.mock import patch
+
 from django.test import SimpleTestCase
 
+from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.formation_continue.commands import AnnulerPropositionCommand, ValiderPropositionCommand
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -34,11 +38,13 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ApprouverPropositionTransitionStatutException,
 )
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.person_merge_proposal import PersonMergeStatus
 
 
 class ValiderPropositionTestCase(SimpleTestCase):
@@ -79,7 +85,7 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+        self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
 
     def test_should_renvoyer_erreur_si_statut_valide(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -89,7 +95,7 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+        self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
 
     def test_should_renvoyer_erreur_si_statut_en_attente(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -99,7 +105,7 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+        self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
 
     def test_should_renvoyer_erreur_si_statut_refuse(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -109,7 +115,7 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+        self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
 
     def test_should_renvoyer_erreur_si_statut_annule(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
@@ -119,4 +125,17 @@ class ValiderPropositionTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+        self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
+
+    def test_should_lever_exception_si_quarantaine(self):
+        with patch.object(
+            ProfilCandidatInMemoryTranslator,
+            'get_merge_proposal',
+            return_value=MergeProposalDTO(
+                status=PersonMergeStatus.ERROR.name,
+                validation={},
+            ),
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), EnQuarantaineException)

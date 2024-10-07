@@ -222,6 +222,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=Historique(),
         notification=Notification(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
     CloturerPropositionCommand: lambda msg_bus, cmd: cloturer_proposition(
         cmd,
