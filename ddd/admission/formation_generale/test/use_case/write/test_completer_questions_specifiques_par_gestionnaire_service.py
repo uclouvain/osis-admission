@@ -25,6 +25,7 @@
 # ##############################################################################
 from django.test import TestCase
 
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesParGestionnaireCommand,
@@ -87,6 +88,44 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
         self.assertEqual(proposition.formulaire_modification_inscription, ['6453f700-9c1a-4f3e-99b4-20ba6e638299'])
         self.assertEqual(proposition.est_reorientation_inscription_externe, True)
         self.assertEqual(proposition.attestation_inscription_reguliere, ['7453f700-9c1a-4f3e-99b4-20ba6e638299'])
+
+    def test_should_completer_et_modifier_inscription_tardive_si_modification(self):
+        proposition = self.proposition_repository.get(PropositionIdentity('uuid-MASTER-SCI'))  # type: Proposition
+        proposition.est_inscription_tardive = True
+
+        self.proposition_repository.save(proposition)
+
+        proposition_id = self.message_bus.invoke(
+            CompleterQuestionsSpecifiquesParGestionnaireCommand(
+                uuid_proposition='uuid-MASTER-SCI',
+                gestionnaire='0123456789',
+                est_modification_inscription_externe=False,
+            )
+        )
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+
+        # Vérifier le retour de la commande
+        self.assertEqual(proposition_id, proposition.entity_id)
+
+        # Vérifier que la proposition a bien été mise à jour
+        self.assertEqual(proposition.est_modification_inscription_externe, False)
+        self.assertTrue(proposition.est_inscription_tardive)
+
+        proposition_id = self.message_bus.invoke(
+            CompleterQuestionsSpecifiquesParGestionnaireCommand(
+                uuid_proposition='uuid-MASTER-SCI',
+                gestionnaire='0123456789',
+                est_modification_inscription_externe=True,
+            )
+        )
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+
+        # Vérifier le retour de la commande
+        self.assertEqual(proposition_id, proposition.entity_id)
+
+        # Vérifier que la proposition a bien été mise à jour
+        self.assertEqual(proposition.est_modification_inscription_externe, True)
+        self.assertFalse(proposition.est_inscription_tardive)
 
     def test_should_lever_exception_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
