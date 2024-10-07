@@ -143,6 +143,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     default=Value(''),
                 ),
                 late_enrollment=F('generaleducationadmission__late_enrollment'),
+                is_external_reorientation=F('generaleducationadmission__is_external_reorientation'),
+                is_external_modification=F('generaleducationadmission__is_external_modification'),
             )
             .select_related(
                 'candidate__country_of_citizenship',
@@ -447,6 +449,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
             annee_formation=admission.training.academic_year.year,
             lieu_formation=admission.teaching_campus,  # From annotation
             est_inscription_tardive=admission.late_enrollment,  # From annotation
+            est_reorientation_inscription_externe=admission.is_external_reorientation,  # From annotation
+            est_modification_inscription_externe=admission.is_external_modification,  # From annotation
             nationalite_candidat=getattr(
                 admission.candidate.country_of_citizenship,
                 'name' if language_is_french else 'name_en',
