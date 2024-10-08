@@ -817,6 +817,9 @@ msgstr ""
 msgid "Approval condition by faculty"
 msgstr ""
 
+msgid "Approval for a course change"
+msgstr ""
+
 msgid "Approval for a late enrolment"
 msgstr ""
 
@@ -7159,6 +7162,11 @@ msgid "The proposition must be managed by SIC to realized this action."
 msgstr ""
 
 msgid "The proposition must be submitted to realize this action."
+msgstr ""
+
+msgid ""
+"The proposition must involve a change of course and must have a defined "
+"access condition."
 msgstr ""
 
 msgid "The proposition must not be cancelled to realize this action."

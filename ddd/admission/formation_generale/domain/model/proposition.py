@@ -99,6 +99,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierConditionAccesParcoursAnterieurValidatorList,
     ApprouverInscriptionParSicValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
+    ApprouverReorientationExterneParFacValidatorList,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -460,6 +461,22 @@ class Proposition(interface.RootEntity):
             statut=self.statut,
             condition_acces=self.condition_acces,
             est_inscription_tardive=self.est_inscription_tardive,
+            titres_selectionnes=titres_selectionnes,
+        ).validate()
+
+        self.specifier_acceptation_par_fac()
+        self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
+        self.auteur_derniere_modification = auteur_modification
+
+    def approuver_reorientation_externe_par_fac(
+        self,
+        auteur_modification: str,
+        titres_selectionnes: List[TitreAccesSelectionnable],
+    ):
+        ApprouverReorientationExterneParFacValidatorList(
+            statut=self.statut,
+            condition_acces=self.condition_acces,
+            est_reorientation_inscription_externe=self.est_reorientation_inscription_externe,
             titres_selectionnes=titres_selectionnes,
         ).validate()
 

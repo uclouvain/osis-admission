@@ -73,6 +73,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     DemandeDoitEtreInscriptionException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
+    ReorientationExterneAvecConditionAccesException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -116,9 +117,8 @@ class ShouldSpecifierInformationsAcceptationFacultaireInscription(BusinessValida
     conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
     def validate(self, *args, **kwargs):
-        if (
-            self.avec_conditions_complementaires
-            and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
+        if self.avec_conditions_complementaires and not (
+            self.conditions_complementaires_libres or self.conditions_complementaires_existantes
         ):
             raise InformationsAcceptationFacultaireNonSpecifieesException
 
@@ -178,6 +178,16 @@ class ShouldPropositionEtreInscriptionTardiveAvecConditionAcces(BusinessValidato
     def validate(self, *args, **kwargs):
         if not self.est_inscription_tardive or not self.condition_acces:
             raise InscriptionTardiveAvecConditionAccesException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldPropositionEtreReorientationExterneAvecConditionAcces(BusinessValidator):
+    condition_acces: Optional[ConditionAcces]
+    est_reorientation_inscription_externe: Optional[bool]
+
+    def validate(self, *args, **kwargs):
+        if not self.est_reorientation_inscription_externe or not self.condition_acces:
+            raise ReorientationExterneAvecConditionAccesException
 
 
 @attr.dataclass(frozen=True, slots=True)
