@@ -24,17 +24,15 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <form
-  hx-post="{% url view.base_namespace|add:':fac-decision-approval-final' uuid=view.kwargs.uuid %}"
+  hx-post="{% url view.base_namespace|add:':cdd-decision-refusal' uuid=view.kwargs.uuid %}"
   hx-target="this"
   hx-swap="outerHTML"
   style="overflow: auto;"
   class="ckeditor-form"
 >
   <div class="modal-body" style="overflow:auto;">
-    {% has_perm 'admission.checklist_change_faculty_decision' as can_change_faculty_decision %}
-
-    {% bootstrap_form_errors fac_decision_approval_final_form %}
-    {% bootstrap_form fac_decision_approval_final_form %}
+    {% bootstrap_form_errors cdd_decision_refusal_form %}
+    {% bootstrap_form cdd_decision_refusal_form %}
   </div>
 
   <div class="modal-footer">
@@ -47,26 +45,17 @@
     <button
       class="btn btn-primary"
       type="submit"
-      name="save"
     >
       {% translate 'Send' context 'admission' %}
     </button>
   </div>
 
   {% if request.htmx %}
-    {% if fac_decision_approval_final_form.is_valid %}
-
-      {# Update the content of the tab #}
-      {% include 'admission/doctorate/includes/checklist/fac_decision.html' %}
-    {% endif %}
-
     <script src="{% static "admission/ckeditor.js" %}"></script>
-
   {% endif %}
-
   <script>
       $(document).ready(function(){
-          initializeCKEditor('id_fac-decision-approval-final-body');
+          initializeCKEditor('id_cdd-decision-refusal-body');
       });
   </script>
 </form>

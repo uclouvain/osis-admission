@@ -50,10 +50,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import E
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
-    DecisionFacultaireEnum,
+    DecisionCDDEnum,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.mail_templates import ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE
+from admission.mail_templates import ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
@@ -73,7 +73,7 @@ from osis_profile.models import (
 )
 
 
-class FacultyDecisionViewTestCase(TestCase):
+class CddDecisionViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -98,7 +98,7 @@ class FacultyDecisionViewTestCase(TestCase):
         )
         self.default_checklist = copy.deepcopy(self.admission.checklist)
         self.url = resolve_url(
-            'admission:doctorate:fac-decision-change-status',
+            'admission:doctorate:cdd-decision-change-status',
             uuid=self.admission.uuid,
             status=ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
@@ -132,7 +132,7 @@ class FacultyDecisionViewTestCase(TestCase):
         # Check that the admission has been updated
         self.admission.refresh_from_db()
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['statut'],
+            self.admission.checklist['current']['decision_cdd']['statut'],
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
 
@@ -143,7 +143,7 @@ class FacultyDecisionViewTestCase(TestCase):
         self.admission.status = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name
         self.admission.save()
 
-        response = self.client.post(self.url + '?decision=1', **self.default_headers)
+        response = self.client.post(self.url + '?decision=EN_DECISION', **self.default_headers)
 
         # Check the response
         self.assertEqual(response.status_code, 200)
@@ -151,19 +151,19 @@ class FacultyDecisionViewTestCase(TestCase):
         # Check that the admission has been updated
         self.admission.refresh_from_db()
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['statut'],
+            self.admission.checklist['current']['decision_cdd']['statut'],
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['extra'],
+            self.admission.checklist['current']['decision_cdd']['extra'],
             {
-                'decision': DecisionFacultaireEnum.EN_DECISION.value,
+                'decision': DecisionCDDEnum.EN_DECISION.name,
             },
         )
 
         # Replace the status and clean the extra data
         url = resolve_url(
-            'admission:doctorate:fac-decision-change-status',
+            'admission:doctorate:cdd-decision-change-status',
             uuid=self.admission.uuid,
             status=ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         )
@@ -176,14 +176,14 @@ class FacultyDecisionViewTestCase(TestCase):
         # Check that the admission has been updated
         self.admission.refresh_from_db()
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['statut'],
+            self.admission.checklist['current']['decision_cdd']['statut'],
             ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         )
-        self.assertEqual(self.admission.checklist['current']['decision_facultaire']['extra'], {})
+        self.assertEqual(self.admission.checklist['current']['decision_cdd']['extra'], {})
 
 
 @override_settings(ADMISSION_BACKEND_LINK_PREFIX='https//example.com')
-class FacultyDecisionSendToFacultyViewTestCase(TestCase):
+class CddDecisionSendToCddViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -210,18 +210,18 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         )
         self.default_checklist = copy.deepcopy(self.admission.checklist)
         self.url = resolve_url(
-            'admission:doctorate:fac-decision-send-to-faculty',
+            'admission:doctorate:cdd-decision-send-to-cdd',
             uuid=self.admission.uuid,
         )
 
-    def test_send_to_faculty_is_forbidden_with_fac_user(self):
+    def test_send_to_cdd_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.post(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, 403)
 
-    def test_send_to_faculty_is_forbidden_with_sic_user_if_the_admission_is_not_in_sic_statuses(self):
+    def test_send_to_cdd_is_forbidden_with_sic_user_if_the_admission_is_not_in_sic_statuses(self):
         self.client.force_login(user=self.sic_manager_user)
 
         invalid_statuses = ChoixStatutPropositionDoctorale.get_names_except(
@@ -239,7 +239,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             self.assertEqual(response.status_code, 403)
 
     @freezegun.freeze_time('2022-01-01')
-    def test_send_to_faculty_with_sic_user_in_valid_sic_statuses(self):
+    def test_send_to_cdd_with_sic_user_in_valid_sic_statuses(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(self.url, **self.default_headers)
@@ -261,12 +261,12 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
         self.assertEqual(
             history_entry.message_fr,
-            'Le dossier a été soumis en faculté le 1 Janvier 2022 00:00.',
+            'Le dossier a été soumis en CDD le 1 Janvier 2022 00:00.',
         )
 
         self.assertEqual(
             history_entry.message_en,
-            'The dossier has been submitted to the faculty on Jan. 1, 2022, midnight.',
+            'The dossier has been submitted to the CDD on Jan. 1, 2022, midnight.',
         )
 
         self.assertEqual(
@@ -277,14 +277,14 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             history_entry.tags,
             [
                 'proposition',
-                'fac-decision',
-                'send-to-fac',
+                'cdd-decision',
+                'send-to-cdd',
                 'status-changed',
             ],
         )
 
     @freezegun.freeze_time('2022-01-01')
-    def test_send_to_faculty_with_sic_user_in_valid_sic_statuses_but_with_invalid_recipient(self):
+    def test_send_to_cdd_with_sic_user_in_valid_sic_statuses_but_with_invalid_recipient(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(self.url, **self.default_headers)
@@ -311,12 +311,12 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
         self.assertEqual(
             history_entry.message_fr,
-            'Le dossier a été soumis en faculté le 1 Janvier 2022 00:00.',
+            'Le dossier a été soumis en CDD le 1 Janvier 2022 00:00.',
         )
 
         self.assertEqual(
             history_entry.message_en,
-            'The dossier has been submitted to the faculty on Jan. 1, 2022, midnight.',
+            'The dossier has been submitted to the CDD on Jan. 1, 2022, midnight.',
         )
 
         self.assertEqual(
@@ -327,8 +327,8 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             history_entry.tags,
             [
                 'proposition',
-                'fac-decision',
-                'send-to-fac',
+                'cdd-decision',
+                'send-to-cdd',
                 'status-changed',
             ],
         )
@@ -336,7 +336,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
 @freezegun.freeze_time('2022-01-01')
-class FacultyDecisionSendToSicViewTestCase(TestCase):
+class CddDecisionSendToSicViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -361,7 +361,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         )
         self.default_checklist = copy.deepcopy(self.admission.checklist)
         self.url = resolve_url(
-            'admission:doctorate:fac-decision-send-to-sic',
+            'admission:doctorate:cdd-decision-send-to-sic',
             uuid=self.admission.uuid,
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
@@ -435,7 +435,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.client.force_login(user=self.fac_manager_user)
 
         self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
-        self.admission.checklist['current']['decision_facultaire']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.save()
 
         response = self.client.post(self.url, **self.default_headers)
@@ -461,13 +461,13 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             f'{self.fac_manager_user.person.first_name} {self.fac_manager_user.person.last_name}',
         )
 
-        self.assertEqual(history_entry.message_fr, 'Le dossier a été soumis au SIC par la faculté.')
+        self.assertEqual(history_entry.message_fr, 'Le dossier a été soumis au SIC par la CDD.')
 
-        self.assertEqual(history_entry.message_en, 'The dossier has been submitted to the SIC by the faculty.')
+        self.assertEqual(history_entry.message_en, 'The dossier has been submitted to the SIC by the CDD.')
 
         self.assertCountEqual(
             history_entry.tags,
-            ['proposition', 'fac-decision', 'send-to-sic', 'status-changed'],
+            ['proposition', 'cdd-decision', 'send-to-sic', 'status-changed'],
         )
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
@@ -475,7 +475,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.client.force_login(user=self.sic_manager_user)
 
         self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
-        self.admission.checklist['current']['decision_facultaire']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.save()
 
         response = self.client.post(self.url, **self.default_headers)
@@ -507,12 +507,12 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertCountEqual(
             history_entry.tags,
-            ['proposition', 'fac-decision', 'send-to-sic', 'status-changed'],
+            ['proposition', 'cdd-decision', 'send-to-sic', 'status-changed'],
         )
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class FacultyRefusalDecisionViewTestCase(TestCase):
+class CddRefusalDecisionViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -544,7 +544,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         )
         self.default_checklist = copy.deepcopy(self.admission.checklist)
         self.url = resolve_url(
-            'admission:doctorate:fac-decision-refusal',
+            'admission:doctorate:cdd-decision-refusal',
             uuid=self.admission.uuid,
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
@@ -624,10 +624,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_refusal_form']
+        form = response.context['cdd_decision_refusal_form']
 
         mail = MailTemplate.objects.get(
-            identifier=ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
+            identifier=ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
             language=settings.LANGUAGE_CODE_FR,
         )
 
@@ -672,7 +672,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_refusal_form']
+        form = response.context['cdd_decision_refusal_form']
 
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('subject', []))
@@ -686,8 +686,8 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                'fac-decision-refusal-subject': 'Subject',
-                'fac-decision-refusal-body': 'Body',
+                'cdd-decision-refusal-subject': 'Subject',
+                'cdd-decision-refusal-body': 'Body',
             },
             **self.default_headers,
         )
@@ -695,7 +695,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         # Check the response
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_refusal_form']
+        form = response.context['cdd_decision_refusal_form']
         self.assertTrue(form.is_valid())
 
         # Check that the admission has been updated
@@ -703,12 +703,12 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name)
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['statut'],
+            self.admission.checklist['current']['decision_cdd']['statut'],
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['extra'],
-            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
+            self.admission.checklist['current']['decision_cdd']['extra'],
+            {'decision': DecisionCDDEnum.EN_DECISION.name},
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
@@ -733,22 +733,22 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertEqual(
             history_entries[0].message_fr,
-            'Le dossier a été refusé par FAC.',
+            'Le dossier a été refusé par la CDD.',
         )
 
         self.assertEqual(
             history_entries[0].message_en,
-            'The dossier has been refused by FAC.',
+            'The dossier has been refused by the CDD.',
         )
 
         self.assertCountEqual(
             history_entries[0].tags,
-            ['proposition', 'fac-decision', 'refusal', 'status-changed'],
+            ['proposition', 'cdd-decision', 'refusal', 'status-changed'],
         )
 
         self.assertCountEqual(
             history_entries[1].tags,
-            ['proposition', 'fac-decision', 'refusal', 'message'],
+            ['proposition', 'cdd-decision', 'refusal', 'message'],
         )
 
         self.assertEqual(
@@ -758,7 +758,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class FacultyApprovalDecisionViewTestCase(TestCase):
+class CddApprovalDecisionViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -795,7 +795,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.experience_uuid = str(self.admission.candidate.educationalexperience_set.first().uuid)
         self.default_checklist = copy.deepcopy(self.admission.checklist)
         self.url = resolve_url(
-            'admission:doctorate:fac-decision-approval',
+            'admission:doctorate:cdd-decision-approval',
             uuid=self.admission.uuid,
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
@@ -885,7 +885,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_approval_form']
+        form = response.context['cdd_decision_approval_form']
 
         self.assertEqual(form.initial.get('with_prerequisite_courses'), None)
         self.assertEqual(form.initial.get('prerequisite_courses'), [])
@@ -909,7 +909,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_approval_form']
+        form = response.context['cdd_decision_approval_form']
 
         # Prerequisite courses
         self.assertEqual(form.initial.get('with_prerequisite_courses'), True)
@@ -944,15 +944,15 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                "fac-decision-approval-prerequisite_courses": [],
-                'fac-decision-approval-with_prerequisite_courses': 'True',
+                "cdd-decision-approval-prerequisite_courses": [],
+                'cdd-decision-approval-with_prerequisite_courses': 'True',
             },
             **self.default_headers,
         )
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_approval_form']
+        form = response.context['cdd_decision_approval_form']
 
         self.assertFalse(form.is_valid())
 
@@ -963,14 +963,14 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                'fac-decision-approval-with_prerequisite_courses': 'False',
+                'cdd-decision-approval-with_prerequisite_courses': 'False',
             },
             **self.default_headers,
         )
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_approval_form']
+        form = response.context['cdd_decision_approval_form']
 
         self.assertFalse(form.is_valid())
 
@@ -981,16 +981,16 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                "fac-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
-                'fac-decision-approval-another_training': True,
-                'fac-decision-approval-with_prerequisite_courses': 'True',
+                "cdd-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
+                'cdd-decision-approval-another_training': True,
+                'cdd-decision-approval-with_prerequisite_courses': 'True',
             },
             **self.default_headers,
         )
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_approval_form']
+        form = response.context['cdd_decision_approval_form']
 
         self.assertFalse(form.is_valid())
 
@@ -1020,15 +1020,15 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                "fac-decision-approval-prerequisite_courses": [
+                "cdd-decision-approval-prerequisite_courses": [
                     prerequisite_courses[0].acronym,
                 ],
-                'fac-decision-approval-with_prerequisite_courses': 'True',
-                'fac-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
-                'fac-decision-approval-program_planned_years_number': 5,
-                'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
-                'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
-                'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
+                'cdd-decision-approval-with_prerequisite_courses': 'True',
+                'cdd-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
+                'cdd-decision-approval-program_planned_years_number': 5,
+                'cdd-decision-approval-annual_program_contact_person_name': 'John Doe',
+                'cdd-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
+                'cdd-decision-approval-join_program_fac_comment': 'Comment about the join program',
             },
             **self.default_headers,
         )
@@ -1036,7 +1036,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         # Check the response
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_approval_form']
+        form = response.context['cdd_decision_approval_form']
 
         self.assertTrue(form.is_valid())
 
@@ -1045,12 +1045,12 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
 
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['statut'],
+            self.admission.checklist['current']['decision_cdd']['statut'],
             ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
-        self.assertEqual(self.admission.fac_approval_certificate, [])
+        self.assertEqual(self.admission.cdd_approval_certificate, [])
         self.assertEqual(self.admission.with_prerequisite_courses, True)
         prerequisite_courses = self.admission.prerequisite_courses.all()
         self.assertEqual(len(prerequisite_courses), 1)
@@ -1067,7 +1067,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
 @freezegun.freeze_time('2022-01-01')
-class FacultyApprovalFinalDecisionViewTestCase(TestCase):
+class CddApprovalFinalDecisionViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -1084,8 +1084,8 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.default_headers = {'HTTP_HX-Request': 'true'}
         cls.default_data = {
-            'fac-decision-approval-final-subject': 'Subject',
-            'fac-decision-approval-final-body': 'Body',
+            'cdd-decision-approval-final-subject': 'Subject',
+            'cdd-decision-approval-final-body': 'Body',
         }
 
     def setUp(self) -> None:
@@ -1098,7 +1098,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
         )
         self.default_checklist = copy.deepcopy(self.admission.checklist)
         self.url = resolve_url(
-            'admission:doctorate:fac-decision-approval-final',
+            'admission:doctorate:cdd-decision-approval-final',
             uuid=self.admission.uuid,
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
@@ -1152,7 +1152,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
         self.get_pdf_from_template_patcher = patcher.start()
         self.addCleanup(patcher.stop)
 
-    def test_fac_approval_final_decision_is_forbidden_with_fac_user_if_the_admission_is_not_in_specific_statuses(self):
+    def test_cdd_approval_final_decision_is_forbidden_with_fac_user_if_the_admission_is_not_in_specific_statuses(self):
         self.client.force_login(user=self.fac_manager_user)
 
         self.admission.status = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name
@@ -1162,7 +1162,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_fac_approval_final_decision_is_forbidden_with_sic_user_if_the_admission_is_not_in_specific_statuses(self):
+    def test_cdd_approval_final_decision_is_forbidden_with_sic_user_if_the_admission_is_not_in_specific_statuses(self):
         self.client.force_login(user=self.sic_manager_user)
 
         self.admission.status = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name
@@ -1173,7 +1173,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
-    def test_fac_approval_final_decision_with_fac_user_in_specific_statuses(self, frozen_time):
+    def test_cdd_approval_final_decision_with_fac_user_in_specific_statuses(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
@@ -1187,7 +1187,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.context['fac_decision_approval_final_form']
+        form = response.context['cdd_decision_approval_final_form']
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('subject', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('body', []))
@@ -1239,14 +1239,14 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
 
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
         self.assertEqual(
-            self.admission.checklist['current']['decision_facultaire']['statut'],
+            self.admission.checklist['current']['decision_cdd']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
 
         # A certificate has been generated
-        self.assertEqual(self.admission.fac_approval_certificate, [self.file_uuid])
+        self.assertEqual(self.admission.cdd_approval_certificate, [self.file_uuid])
 
         # Check the template context
         self.get_pdf_from_template_patcher.assert_called_once()
@@ -1272,17 +1272,17 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
 
         self.assertEqual(
             history_entries[0].message_fr,
-            'La faculté a informé le SIC de son acceptation.',
+            'La CDD a informé le SIC de son acceptation.',
         )
 
         self.assertEqual(
             history_entries[0].message_en,
-            'The faculty informed the SIC of its approval.',
+            'The CDD informed the SIC of its approval.',
         )
 
         self.assertCountEqual(
             history_entries[0].tags,
-            ['proposition', 'fac-decision', 'approval', 'status-changed'],
+            ['proposition', 'cdd-decision', 'approval', 'status-changed'],
         )
 
         self.assertEqual(
@@ -1292,7 +1292,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
 
         self.assertCountEqual(
             history_entries[1].tags,
-            ['proposition', 'fac-decision', 'approval', 'message'],
+            ['proposition', 'cdd-decision', 'approval', 'message'],
         )
 
         # Check that a notication has been planned
@@ -1304,7 +1304,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
         self.assertIn('Body', notifications[0].payload)
 
     @freezegun.freeze_time('2022-01-01')
-    def test_fac_approval_final_decision_with_fac_user_with_secondary_studies_as_access_title(self):
+    def test_cdd_approval_final_decision_with_fac_user_with_secondary_studies_as_access_title(self):
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.post(self.url, data=self.default_data, **self.default_headers)
@@ -1335,7 +1335,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
 
     @freezegun.freeze_time('2022-01-01')
-    def test_fac_approval_final_decision_with_fac_user_with_a_cv_academic_experience_as_access_title(self):
+    def test_cdd_approval_final_decision_with_fac_user_with_a_cv_academic_experience_as_access_title(self):
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.post(self.url, data=self.default_data, **self.default_headers)
@@ -1376,7 +1376,7 @@ class FacultyApprovalFinalDecisionViewTestCase(TestCase):
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
 
     @freezegun.freeze_time('2022-01-01')
-    def test_fac_approval_final_decision_with_fac_user_with_a_cv_non_academic_experience_as_access_title(self):
+    def test_cdd_approval_final_decision_with_fac_user_with_a_cv_non_academic_experience_as_access_title(self):
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.post(self.url, data=self.default_data, **self.default_headers)

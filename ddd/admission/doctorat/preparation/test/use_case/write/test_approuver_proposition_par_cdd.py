@@ -29,20 +29,20 @@ import factory
 import freezegun
 from django.test import TestCase
 
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ApprouverPropositionParCddCommand,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    SituationPropositionNonCddException,
+    TitreAccesEtreSelectionnePourEnvoyerASICException,
+    InformationsAcceptationNonSpecifieesException,
+)
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPFactory,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ApprouverPropositionParFaculteCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
-    InformationsAcceptationFacultaireNonSpecifieesException,
-    TitreAccesEtreSelectionnePourEnvoyerASICException,
-)
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     _PropositionIdentityFactory,
@@ -69,13 +69,13 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 
 
 @freezegun.freeze_time('2021-11-01')
-class TestApprouverPropositionParFaculte(TestCase):
+class TestApprouverPropositionParCdd(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = ApprouverPropositionParFaculteCommand
+        cls.command = ApprouverPropositionParCddCommand
         academic_year_repository = AcademicYearInMemoryRepository()
         for annee in range(2020, 2022):
             academic_year_repository.save(
@@ -132,7 +132,7 @@ class TestApprouverPropositionParFaculte(TestCase):
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_lever_exception_si_statut_non_conforme(self):
         statuts_invalides = ChoixStatutPropositionDoctorale.get_names_except(
@@ -144,14 +144,14 @@ class TestApprouverPropositionParFaculte(TestCase):
             self.proposition.statut = ChoixStatutPropositionDoctorale[statut]
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
 
     def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_lever_exception_si_complements_formation_non_specifiees(self):
         self.proposition.avec_complements_formation = True
@@ -159,15 +159,13 @@ class TestApprouverPropositionParFaculte(TestCase):
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_lever_exception_si_nombre_annees_prevoir_programme_non_specifie(self):
         self.proposition.nombre_annees_prevoir_programme = None
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+            self.assertIsInstance(context.exception.exceptions.pop(), InformationsAcceptationNonSpecifieesException)
 
     def test_should_lever_exception_si_aucun_titre_acces_est_selectionne(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC

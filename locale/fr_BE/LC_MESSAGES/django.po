@@ -921,6 +921,9 @@ msgstr "Certificat d'approbation SIC"
 msgid "Approval certificate of faculty"
 msgstr "Attestation d'accord facultaire"
 
+msgid "Approval certificate of the CDD"
+msgstr "Attestation d'accord de la CDD"
+
 msgid "Approval condition by faculty"
 msgstr "Condition d'acceptation par la faculté"
 
@@ -1276,17 +1279,26 @@ msgstr "Template d'email de CDD"
 msgid "CDD Mail templates"
 msgstr "Templates d'email de CDD"
 
+msgid "CDD comment about the collaborative program"
+msgstr "Commentaire de la CDD concernant le programme conjoint"
+
 msgid "CDD comment for the SIC"
 msgstr "Commentaire de la CDD pour le SIC"
 
 msgid "CDD configuration"
 msgstr "Configuration de la CDD"
 
+msgid "CDD decision"
+msgstr "Décision CDD"
+
 msgid "CDD manager comment"
 msgstr "Commentaire du gestionnaire CDD"
 
 msgid "CDD opinion"
 msgstr "Avis de la CDD"
+
+msgid "CDD process"
+msgstr "Traitement de la CDD"
 
 msgid "CEP"
 msgstr "CEP"
@@ -2696,17 +2708,36 @@ msgstr "Type de document"
 msgid "Documents"
 msgstr "Documents"
 
+msgid "Documents requested by the CDD are still expected from the candidate."
+msgstr "Des documents réclamés au candidat par la CDD sont encore attendus."
+
+msgid ""
+"Documents requested by the CDD are still expected from the candidate. The "
+"application could be sent to the SIC once they have been received."
+msgstr ""
+"Des documents réclamés au candidat par la CDD sont encore attendus. L'envoi "
+"du dossier en SIC pourra être réalisé après leur réception."
+
+msgid ""
+"Documents requested by the CDD are still expected from the candidate. The "
+"application will be sent to the SIC once they have been received."
+msgstr ""
+"Des documents réclamés au candidat par la CDD sont encore attendus. L'envoi "
+"du dossier en SIC pourra être réalisé après leur réception."
+
+msgid ""
+"Documents requested by the SIC are still expected from the candidate. The "
+"application could be sent to the CDD once they have been received."
+msgstr ""
+"Des documents réclamés au candidat par le SIC sont encore attendus. L'envoi "
+"du dossier en CDD pourra être réalisé après leur réception."
+
 msgid ""
 "Documents requested by the SIC are still expected from the candidate. The "
 "application could be sent to the faculty once they have been received."
 msgstr ""
 "Des documents réclamés au candidat par le SIC sont encore attendus. L'envoi "
 "du dossier en faculté pourra être réalisé après leur réception."
-
-msgid ""
-"Documents requested by the faculty are still expected from the candidate."
-msgstr ""
-"Des documents réclamés au candidat par la faculté sont encore attendus."
 
 msgid ""
 "Documents requested by the faculty are still expected from the candidate. "
@@ -2969,6 +3000,25 @@ msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
 
 msgid ""
+"Email sent to the candidate when the CDD approves a doctorate admission of a "
+"candidat without any Belgian diploma."
+msgstr ""
+"E-mail envoyé au candidat lorsque la CDD approuve une proposition en "
+"formation doctorale d'un candidat n'ayant pas de diplôme belge."
+
+msgid ""
+"Email sent to the candidate when the CDD approves a doctorate admission of a "
+"candidate with a Belgian diploma."
+msgstr ""
+"E-mail envoyé au candidat lorsque la CDD approuve une proposition en "
+"formation doctorale d'un candidat ayant un diplôme belge."
+
+msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat lorsque la CDD refuse une proposition en formation "
+"doctorale."
+
+msgid ""
 "Email sent to the candidate when the faculty approve the application with "
 "conditions."
 msgstr ""
@@ -2981,26 +3031,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat lorsque la faculté approuve une proposition sans "
 "conditions."
-
-msgid ""
-"Email sent to the candidate when the faculty approves a doctorate admission "
-"of a candidat without any Belgian diploma."
-msgstr ""
-"E-mail envoyé au candidat lorsque la faculté approuve une proposition en "
-"formation doctorale d'un candidat n'ayant pas de diplôme belge."
-
-msgid ""
-"Email sent to the candidate when the faculty approves a doctorate admission "
-"of a candidate with a Belgian diploma."
-msgstr ""
-"E-mail envoyé au candidat lorsque la faculté approuve une proposition en "
-"formation doctorale d'un candidat ayant un diplôme belge."
-
-msgid ""
-"Email sent to the candidate when the faculty refuses a doctorate admission."
-msgstr ""
-"E-mail envoyé au candidat lorsque la faculté refuse une proposition en "
-"formation doctorale."
 
 msgid ""
 "Email sent to the checkers to inform them to check the background "
@@ -3019,13 +3049,6 @@ msgstr ""
 
 msgid "Email sent to the faculty when IUFC needs more information."
 msgstr "E-mail envoyé à la Faculté lorsque l'IUFC demande plus d'information."
-
-msgid ""
-"Email sent to the faculty when the SIC submits the application during the "
-"faculty decision process for a doctorate admission."
-msgstr ""
-"E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
-"de décision facultaire pour une demande en formation doctorale."
 
 msgid ""
 "Email sent to the faculty when the SIC submits the application during the "
@@ -3297,9 +3320,6 @@ msgstr "Formation FWB équivalente"
 
 msgid "Fac approval"
 msgstr "Accord fac"
-
-msgid "Fac decision"
-msgstr "Décision fac."
 
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
@@ -6840,10 +6860,10 @@ msgid "SIC Approval"
 msgstr "Autorisation SIC"
 
 msgid "SIC comment for the CDD"
-msgstr "Commentaire de SIC pour la CDD"
+msgstr "Commentaire du SIC pour la CDD"
 
 msgid "SIC comment for the faculty"
-msgstr "Commentaire de SIC pour la Faculté"
+msgstr "Commentaire du SIC pour la Faculté"
 
 msgid "SIC decision"
 msgstr "Décision SIC"
@@ -7003,6 +7023,9 @@ msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
 
 msgid "Send the message"
 msgstr "Envoyer le message"
+
+msgid "Send to CDD"
+msgstr "Envoyer à la CDD"
 
 msgid "Send to EPC"
 msgstr "Envoyer à EPC"
@@ -7762,9 +7785,9 @@ msgstr "Le dossier est actuellement en faculté"
 
 #, python-format
 msgid ""
-"The e-mail for the fac decision has been sent on %(sent_at)s by %(sender)s."
+"The e-mail for the CDD decision has been sent on %(sent_at)s by %(sender)s."
 msgstr ""
-"Le mail de la décision fac a été envoyé au candidat le %(sent_at)s par "
+"Le mail de la décision CDD a été envoyé au candidat le %(sent_at)s par "
 "%(sender)s."
 
 #, python-format
@@ -7829,6 +7852,14 @@ msgid ""
 msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "réaliser cette action : "
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following in order "
+"to submit the dossier to the CDD: %(statuses)s."
+msgstr ""
+"Le statut global de la demande doit être l'un des suivants pour pouvoir "
+"envoyer le dossier à la CDD : %(statuses)s."
 
 #, python-format
 msgid ""
@@ -7974,6 +8005,9 @@ msgstr "La proposition doit être gérée par FAC pour réaliser cette action."
 
 msgid "The proposition must be managed by SIC to realized this action."
 msgstr "La proposition doit être gérée par SIC pour réaliser cette action."
+
+msgid "The proposition must be managed by the CDD to realized this action."
+msgstr "La proposition doit être gérée par la CDD pour réaliser cette action."
 
 msgid "The proposition must be submitted to realize this action."
 msgstr "La proposition doit être soumise pour réaliser cette action."
@@ -8947,6 +8981,9 @@ msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 "Vous semblez avoir des modifications non enregistrées, celles-ci seront "
 "perdues."
+
+msgid "You are about to submit the application to the CDD."
+msgstr "Vous êtes sur le point de soumettre le dossier à la CDD."
 
 msgid "You are about to submit the application to the Faculty."
 msgstr "Vous êtes sur le point de soumettre le dossier en Faculté."

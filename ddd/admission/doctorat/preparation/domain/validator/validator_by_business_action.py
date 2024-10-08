@@ -55,7 +55,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     StatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
-from admission.ddd.admission.doctorat.preparation.domain.validator import ShouldSpecifierInformationsAcceptationParSIC
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.validator import (
@@ -467,7 +466,7 @@ class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVal
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -475,16 +474,14 @@ class SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultip
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(
+            ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd(
                 statut=self.statut,
             ),
         ]
 
 
 @attr.dataclass(frozen=True, slots=True)
-class GestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
-    TwoStepsMultipleBusinessExceptionListValidator
-):
+class GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -492,14 +489,14 @@ class GestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaire(
+            ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionCdd(
                 statut=self.statut,
             ),
         ]
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class RefuserParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -507,14 +504,14 @@ class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldFacPeutDonnerDecision(
+            ShouldCddPeutDonnerDecision(
                 statut=self.statut,
             ),
         ]
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class ApprouverParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 
     nombre_annees_prevoir_programme: Optional[int]
@@ -526,10 +523,10 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldFacPeutDonnerDecision(
+            ShouldCddPeutDonnerDecision(
                 statut=self.statut,
             ),
-            ShouldSpecifierInformationsAcceptationFacultaire(
+            ShouldSpecifierInformationsAcceptation(
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
             ),
             ShouldSelectionnerTitreAccesPourEnvoyerASIC(
@@ -561,7 +558,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
             ),
-            ShouldSpecifierInformationsAcceptationParSIC(
+            ShouldSpecifierInformationsAcceptation(
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
             ),
             ShouldParcoursAnterieurEtreSuffisant(
@@ -653,7 +650,7 @@ class SpecifierConditionAccesParcoursAnterieurValidatorList(TwoStepsMultipleBusi
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierNouvellesInformationsDecisionFacultaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class SpecifierNouvellesInformationsDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -661,7 +658,7 @@ class SpecifierNouvellesInformationsDecisionFacultaireValidatorList(TwoStepsMult
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldPeutSpecifierInformationsDecisionFacultaire(
+            ShouldPeutSpecifierInformationsDecisionCdd(
                 statut=self.statut,
             ),
         ]

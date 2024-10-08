@@ -38,9 +38,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    InformationsAcceptationFacultaireNonSpecifieesException,
     ParcoursAnterieurNonSuffisantException,
     DocumentAReclamerImmediatException,
+    InformationsAcceptationNonSpecifieesException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPFactory,
@@ -199,7 +199,8 @@ class TestApprouverAdmissionParSic(TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         self.assertIsInstance(
-            context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+            context.exception.exceptions.pop(),
+            InformationsAcceptationNonSpecifieesException,
         )
 
     def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):

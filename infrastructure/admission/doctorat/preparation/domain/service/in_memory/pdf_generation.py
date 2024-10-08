@@ -39,7 +39,7 @@ from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExpe
 
 class PDFGenerationInMemory(IPDFGeneration):
     @classmethod
-    def generer_attestation_accord_facultaire(
+    def generer_attestation_accord_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,

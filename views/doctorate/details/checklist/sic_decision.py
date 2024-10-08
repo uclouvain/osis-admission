@@ -239,9 +239,9 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             return (
                 display_panel
                 # The faculty does not refuse the enrolment
-                and not ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_facultaire.name][
+                and not ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name][
                     'REFUS'
-                ].matches_dict(current_checklist.get(OngletsChecklist.decision_facultaire.name, {}))
+                ].matches_dict(current_checklist.get(OngletsChecklist.decision_cdd.name, {}))
                 # The enrolment is financeable
                 and not ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.financabilite.name][
                     'NON_FINANCABLE'

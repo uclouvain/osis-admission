@@ -244,7 +244,7 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
+    def historiser_envoi_cdd_par_sic_lors_de_la_decision_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: str,
@@ -261,24 +261,24 @@ class Historique(IHistorique):
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f"Le dossier a été soumis en faculté le {now_fr}.",
-            f"The dossier has been submitted to the faculty on {now_en}.",
+            f"Le dossier a été soumis en CDD le {now_fr}.",
+            f"The dossier has been submitted to the CDD on {now_en}.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "fac-decision", "send-to-fac", "status-changed"],
+            tags=["proposition", "cdd-decision", "send-to-cdd", "status-changed"],
         )
 
     @classmethod
-    def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+    def historiser_envoi_sic_par_cdd_lors_de_la_decision_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: str,
-        envoi_par_fac: bool,
+        envoi_par_cdd: bool,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
 
-        if envoi_par_fac:
-            message_fr = "Le dossier a été soumis au SIC par la faculté."
-            message_en = "The dossier has been submitted to the SIC by the faculty."
+        if envoi_par_cdd:
+            message_fr = "Le dossier a été soumis au SIC par la CDD."
+            message_en = "The dossier has been submitted to the SIC by the CDD."
         else:
             message_fr = "Le dossier a été soumis au SIC par le SIC."
             message_en = "The dossier has been submitted to the SIC by the SIC."
@@ -288,11 +288,11 @@ class Historique(IHistorique):
             message_fr=message_fr,
             message_en=message_en,
             author="{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "fac-decision", "send-to-sic", "status-changed"],
+            tags=["proposition", "cdd-decision", "send-to-sic", "status-changed"],
         )
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO, message: EmailMessage):
+    def historiser_refus_cdd(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO, message: EmailMessage):
         message_a_historiser = get_message_to_historize(message)
         sender = '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire)
 
@@ -301,19 +301,19 @@ class Historique(IHistorique):
             message_a_historiser[settings.LANGUAGE_CODE_FR],
             message_a_historiser[settings.LANGUAGE_CODE_EN],
             sender,
-            tags=['proposition', 'fac-decision', 'refusal', 'message'],
+            tags=['proposition', 'cdd-decision', 'refusal', 'message'],
         )
 
         add_history_entry(
             proposition.entity_id.uuid,
-            'Le dossier a été refusé par FAC.',
-            'The dossier has been refused by FAC.',
+            'Le dossier a été refusé par la CDD.',
+            'The dossier has been refused by the CDD.',
             sender,
-            tags=['proposition', 'fac-decision', 'refusal', 'status-changed'],
+            tags=['proposition', 'cdd-decision', 'refusal', 'status-changed'],
         )
 
     @classmethod
-    def historiser_acceptation_fac(
+    def historiser_acceptation_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
@@ -327,15 +327,15 @@ class Historique(IHistorique):
             message_a_historiser[settings.LANGUAGE_CODE_FR],
             message_a_historiser[settings.LANGUAGE_CODE_EN],
             sender,
-            tags=['proposition', 'fac-decision', 'approval', 'message'],
+            tags=['proposition', 'cdd-decision', 'approval', 'message'],
         )
 
         add_history_entry(
             proposition.entity_id.uuid,
-            'La faculté a informé le SIC de son acceptation.',
-            'The faculty informed the SIC of its approval.',
+            'La CDD a informé le SIC de son acceptation.',
+            'The CDD informed the SIC of its approval.',
             sender,
-            tags=['proposition', 'fac-decision', 'approval', 'status-changed'],
+            tags=['proposition', 'cdd-decision', 'approval', 'status-changed'],
         )
 
     @classmethod

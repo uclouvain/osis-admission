@@ -162,7 +162,7 @@ class PDFGeneration(IPDFGeneration):
 
     @classmethod
     @override(settings.LANGUAGE_CODE)
-    def generer_attestation_accord_facultaire(
+    def generer_attestation_accord_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
@@ -183,21 +183,21 @@ class PDFGeneration(IPDFGeneration):
         )
 
         if proposition.type_admission == ChoixTypeAdmission.ADMISSION:
-            template = 'admission/exports/fac_approval_certificate_admission.html'
+            template = 'admission/exports/cdd_approval_certificate_admission.html'
         else:
-            template = 'admission/exports/fac_approval_certificate_pre_admission.html'
+            template = 'admission/exports/cdd_approval_certificate_pre_admission.html'
 
         # Generate the pdf
         token = admission_generate_pdf(
             admission=None,
             template=template,
-            filename='fac_approval_certificate.pdf',
+            filename='cdd_approval_certificate.pdf',
             context=context,
             author=gestionnaire.matricule,
         )
 
         # Store the token of the pdf
-        proposition.certificat_approbation_fac = [token]
+        proposition.certificat_approbation_cdd = [token]
 
     @classmethod
     def generer_sic_temporaire(

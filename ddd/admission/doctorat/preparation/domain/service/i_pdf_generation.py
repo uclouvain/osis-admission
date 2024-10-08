@@ -41,7 +41,7 @@ from osis_common.ddd.interface import DomainService
 class IPDFGeneration(DomainService):
     @classmethod
     @abstractmethod
-    def generer_attestation_accord_facultaire(
+    def generer_attestation_accord_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,

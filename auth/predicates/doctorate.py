@@ -37,11 +37,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
-    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import (
@@ -188,17 +188,17 @@ def not_cancelled(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC))
+@predicate_failed_msg(not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD))
 def in_fac_status(self, user: User, obj: DoctorateAdmission):
-    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD
 
 
 @predicate(bind=True)
 @predicate_failed_msg(
-    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS)
+    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS)
 )
 def in_fac_status_extended(self, user: User, obj: DoctorateAdmission):
-    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS
 
 
 @predicate(bind=True)
@@ -237,10 +237,10 @@ def in_sic_status_extended(self, user: User, obj: DoctorateAdmission):
 
 @predicate(bind=True)
 @predicate_failed_msg(
-    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION)
+    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION)
 )
 def can_send_to_fac_faculty_decision(self, user: User, obj: DoctorateAdmission):
     return (
         isinstance(obj, DoctorateAdmission)
-        and obj.status in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION
+        and obj.status in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION
     )

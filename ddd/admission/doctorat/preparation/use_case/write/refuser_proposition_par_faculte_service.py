@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RefuserPropositionParFaculteCommand,
+    RefuserPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
@@ -34,8 +34,8 @@ from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def refuser_proposition_par_faculte(
-    cmd: RefuserPropositionParFaculteCommand,
+def refuser_proposition_par_cdd(
+    cmd: RefuserPropositionParCddCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
@@ -43,7 +43,7 @@ def refuser_proposition_par_faculte(
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.refuser_par_fac(auteur_modification=cmd.gestionnaire)
+    proposition.refuser_par_cdd(auteur_modification=cmd.gestionnaire)
 
     # THEN
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
@@ -59,7 +59,7 @@ def refuser_proposition_par_faculte(
         cc_membres_ca=True,
     )
 
-    historique.historiser_refus_fac(
+    historique.historiser_refus_cdd(
         proposition=proposition,
         gestionnaire=gestionnaire_dto,
         message=message,

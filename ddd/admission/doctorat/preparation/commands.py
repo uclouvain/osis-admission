@@ -534,20 +534,20 @@ class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.Comman
 
 
 @attr.dataclass(frozen=True, slots=True)
-class EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(interface.CommandRequest):
+class EnvoyerPropositionACddLorsDeLaDecisionCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(interface.CommandRequest):
+class EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    envoi_par_fac: bool
+    envoi_par_cdd: bool
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RefuserPropositionParFaculteCommand(interface.CommandRequest):
+class RefuserPropositionParCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
     objet_message: str
@@ -555,7 +555,7 @@ class RefuserPropositionParFaculteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
+class ApprouverPropositionParCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
     objet_message: str
@@ -573,7 +573,7 @@ class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.CommandRequest):
+class SpecifierInformationsAcceptationPropositionParCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
     avec_complements_formation: Optional[bool] = None

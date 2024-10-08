@@ -26,98 +26,98 @@
 
 from django.forms import Form
 from django.utils.functional import cached_property
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView
 from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
-    SpecifierInformationsAcceptationPropositionParFaculteCommand,
-    ApprouverPropositionParFaculteCommand,
-    RefuserPropositionParFaculteCommand,
-    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
+    EnvoyerPropositionACddLorsDeLaDecisionCddCommand,
+    EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand,
+    RefuserPropositionParCddCommand,
+    SpecifierInformationsAcceptationPropositionParCddCommand,
+    ApprouverPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS,
-    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from admission.forms.admission.checklist import (
-    DoctorateFacDecisionApprovalForm,
+    DoctorateCddDecisionApprovalForm,
     SendEMailForm,
 )
 from admission.mail_templates import (
-    ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
-    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
-    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
+    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
+    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
 )
 from admission.utils import get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import change_admission_status
-from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin, get_email
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [
-    'FacultyDecisionView',
-    'FacultyDecisionSendToFacultyView',
-    'FacultyRefusalDecisionView',
-    'FacultyApprovalDecisionView',
-    'FacultyDecisionSendToSicView',
-    'FacultyApprovalFinalDecisionView',
+    'CddDecisionView',
+    'CddDecisionSendToCddView',
+    'CddRefusalDecisionView',
+    'CddApprovalDecisionView',
+    'CddDecisionSendToSicView',
+    'CddApprovalFinalDecisionView',
 ]
 
 
 __namespace__ = False
 
 
-# Fac decision
-class FacultyDecisionMixin(CheckListDefaultContextMixin):
+# CDD decision
+class CddDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['in_sic_statuses'] = self.admission.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS
-        context['in_fac_statuses'] = self.admission.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS
+        context['in_cdd_statuses'] = self.admission.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS
         context['sic_statuses_for_transfer'] = ChoixStatutPropositionDoctorale.get_specific_values(
-            STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION
+            STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION
         )
-        context['fac_statuses_for_transfer'] = ChoixStatutPropositionDoctorale.get_specific_values(
-            STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC
+        context['cdd_statuses_for_transfer'] = ChoixStatutPropositionDoctorale.get_specific_values(
+            STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD
         )
-        context['is_fac'] = self.is_fac
         context['is_sic'] = self.is_sic
 
         context.setdefault('history_entries', {})
 
-        faculty_decision_history = (
+        cdd_decision_history = (
             HistoryEntry.objects.filter(
                 object_uuid=self.admission_uuid,
-                tags__contains=['proposition', 'fac-decision', 'message'],
+                tags__contains=['proposition', 'cdd-decision', 'message'],
             )
             .order_by('-created')
             .first()
         )
 
-        context['history_entries']['fac_decision'] = faculty_decision_history
+        context['history_entries']['cdd_decision'] = cdd_decision_history
 
-        context['fac_decision_refusal_form'] = self.fac_decision_refusal_form
-        context['fac_decision_approval_form'] = self.fac_decision_approval_form
-        context['fac_decision_approval_final_form'] = self.fac_decision_approval_final_form
+        context['cdd_decision_refusal_form'] = self.cdd_decision_refusal_form
+        context['cdd_decision_approval_form'] = self.cdd_decision_approval_form
+        context['cdd_decision_approval_final_form'] = self.cdd_decision_approval_final_form
 
         return context
 
     @cached_property
-    def fac_decision_refusal_form(self):
+    def cdd_decision_refusal_form(self):
         form_kwargs = {
-            'prefix': 'fac-decision-refusal',
+            'prefix': 'cdd-decision-refusal',
         }
 
         if self.request.method == 'GET':
             # Load the email template
             subject, body = get_email(
-                template_identifier=ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
+                template_identifier=ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
                 language=self.proposition.langue_contact_candidat,
                 proposition_dto=self.proposition,
                 extra_tokens={
@@ -138,17 +138,17 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         return SendEMailForm(**form_kwargs)
 
     @cached_property
-    def fac_decision_approval_final_form(self):
+    def cdd_decision_approval_final_form(self):
         form_kwargs = {
-            'prefix': 'fac-decision-approval-final',
+            'prefix': 'cdd-decision-approval-final',
         }
 
         if self.request.method == 'GET':
             # Load the email template
             subject, body = get_email(
-                template_identifier=ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA
+                template_identifier=ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA
                 if self.proposition_resume.resume.curriculum.a_diplome_belge
-                else ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+                else ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
                 language=self.proposition.langue_contact_candidat,
                 proposition_dto=self.proposition,
                 extra_tokens={
@@ -169,7 +169,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         return SendEMailForm(**form_kwargs)
 
     @cached_property
-    def fac_decision_approval_form(self):
+    def cdd_decision_approval_form(self):
         initial = {}
 
         if (
@@ -182,26 +182,26 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             initial['annual_program_contact_person_name'] = f'{reference_promoter.prenom} {reference_promoter.nom}'
             initial['annual_program_contact_person_email'] = reference_promoter.email
 
-        return DoctorateFacDecisionApprovalForm(
+        return DoctorateCddDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
             instance=self.admission if self.request.method != 'POST' else None,
             initial=initial,
             data=self.request.POST if self.request.method == 'POST' else None,
-            prefix='fac-decision-approval',
+            prefix='cdd-decision-approval',
         )
 
 
-class FacultyDecisionView(
+class CddDecisionView(
     AdmissionFormMixin,
-    FacultyDecisionMixin,
+    CddDecisionMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):
-    name = 'fac-decision-status'
-    urlpatterns = {'fac-decision-change-status': 'fac-decision/status-change/<str:status>'}
+    name = 'cdd-decision-status'
+    urlpatterns = {'cdd-decision-change-status': 'cdd-decision/status-change/<str:status>'}
     permission_required = 'admission.checklist_change_faculty_decision'
-    template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
-    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
     form_class = Form
 
     def form_valid(self, form):
@@ -212,7 +212,7 @@ class FacultyDecisionView(
             extra['decision'] = self.request.GET['decision']
 
         change_admission_status(
-            tab='decision_facultaire',
+            tab=OngletsChecklist.decision_cdd.name,
             admission_status=self.kwargs['status'],
             extra=extra,
             admission=admission,
@@ -223,23 +223,23 @@ class FacultyDecisionView(
         return super().form_valid(form)
 
 
-class FacultyDecisionSendToFacultyView(
+class CddDecisionSendToCddView(
     AdmissionFormMixin,
-    FacultyDecisionMixin,
+    CddDecisionMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):
-    name = 'faculty-decision-send-to-faculty'
-    urlpatterns = {'fac-decision-send-to-faculty': 'fac-decision/send-to-faculty'}
+    name = 'cdd-decision-send-to-cdd'
+    urlpatterns = {'cdd-decision-send-to-cdd': 'cdd-decision/send-to-cdd'}
     permission_required = 'admission.checklist_faculty_decision_transfer_to_fac'
-    template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
-    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
     form_class = Form
 
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(
+                EnvoyerPropositionACddLorsDeLaDecisionCddCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                 )
@@ -251,26 +251,26 @@ class FacultyDecisionSendToFacultyView(
         return super().form_valid(form)
 
 
-class FacultyDecisionSendToSicView(
+class CddDecisionSendToSicView(
     AdmissionFormMixin,
-    FacultyDecisionMixin,
+    CddDecisionMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):
-    name = 'faculty-decision-send-to-sic'
-    urlpatterns = {'fac-decision-send-to-sic': 'fac-decision/send-to-sic'}
-    template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
-    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision.html'
+    name = 'cdd-decision-send-to-sic'
+    urlpatterns = {'cdd-decision-send-to-sic': 'cdd-decision/send-to-sic'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
     form_class = Form
     permission_required = 'admission.checklist_faculty_decision_transfer_to_sic_without_decision'
 
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
+                EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
-                    envoi_par_fac=self.is_fac,
+                    envoi_par_cdd=self.is_fac,
                 )
             )
 
@@ -283,25 +283,25 @@ class FacultyDecisionSendToSicView(
         return super().form_valid(form)
 
 
-class FacultyRefusalDecisionView(
-    FacultyDecisionMixin,
+class CddRefusalDecisionView(
+    CddDecisionMixin,
     AdmissionFormMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):
-    name = 'fac-decision-refusal'
-    urlpatterns = {'fac-decision-refusal': 'fac-decision/fac-decision-refusal'}
-    template_name = 'admission/doctorate/includes/checklist/fac_decision_refusal_form.html'
-    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision_refusal_form.html'
+    name = 'cdd-decision-refusal'
+    urlpatterns = {'cdd-decision-refusal': 'cdd-decision/cdd-decision-refusal'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision_refusal_form.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision_refusal_form.html'
     permission_required = 'admission.checklist_change_faculty_decision'
 
     def get_form(self, form_class=None):
-        return self.fac_decision_refusal_form
+        return self.cdd_decision_refusal_form
 
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                RefuserPropositionParFaculteCommand(
+                RefuserPropositionParCddCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     objet_message=form.cleaned_data['subject'],
@@ -316,25 +316,25 @@ class FacultyRefusalDecisionView(
         return super().form_valid(form)
 
 
-class FacultyApprovalDecisionView(
-    FacultyDecisionMixin,
+class CddApprovalDecisionView(
+    CddDecisionMixin,
     AdmissionFormMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):
-    name = 'fac-decision-approval'
-    urlpatterns = {'fac-decision-approval': 'fac-decision/fac-decision-approval'}
-    template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_form.html'
-    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_form.html'
+    name = 'cdd-decision-approval'
+    urlpatterns = {'cdd-decision-approval': 'cdd-decision/cdd-decision-approval'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_form.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_form.html'
     permission_required = 'admission.checklist_change_faculty_decision'
 
     def get_form(self, form_class=None):
-        return self.fac_decision_approval_form
+        return self.cdd_decision_approval_form
 
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                SpecifierInformationsAcceptationPropositionParFaculteCommand(
+                SpecifierInformationsAcceptationPropositionParCddCommand(
                     uuid_proposition=self.admission_uuid,
                     avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
                     uuids_complements_formation=form.cleaned_data['prerequisite_courses'],
@@ -353,25 +353,25 @@ class FacultyApprovalDecisionView(
         return super().form_valid(form)
 
 
-class FacultyApprovalFinalDecisionView(
-    FacultyDecisionMixin,
+class CddApprovalFinalDecisionView(
+    CddDecisionMixin,
     AdmissionFormMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):
-    name = 'fac-decision-approval-final'
-    urlpatterns = {'fac-decision-approval-final': 'fac-decision/fac-decision-approval-final'}
-    template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_final_form.html'
-    htmx_template_name = 'admission/doctorate/includes/checklist/fac_decision_approval_final_form.html'
+    name = 'cdd-decision-approval-final'
+    urlpatterns = {'cdd-decision-approval-final': 'cdd-decision/cdd-decision-approval-final'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_final_form.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_final_form.html'
     permission_required = 'admission.checklist_change_faculty_decision'
 
     def get_form(self, form_class=None):
-        return self.fac_decision_approval_final_form
+        return self.cdd_decision_approval_final_form
 
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                ApprouverPropositionParFaculteCommand(
+                ApprouverPropositionParCddCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     objet_message=form.cleaned_data['subject'],

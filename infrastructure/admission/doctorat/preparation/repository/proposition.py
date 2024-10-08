@@ -231,7 +231,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             if admission.financability_dispensation_last_notification_by
             else None
         ),
-        certificat_approbation_fac=admission.fac_approval_certificate,
+        certificat_approbation_cdd=admission.cdd_approval_certificate,
         certificat_approbation_sic=admission.sic_approval_certificate,
         certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
         avec_complements_formation=admission.with_prerequisite_courses,
@@ -459,7 +459,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'financability_dispensation_last_notification_by': (
                     financabilite_derogation_derniere_notification_par_person
                 ),
-                'fac_approval_certificate': entity.certificat_approbation_fac,
+                'cdd_approval_certificate': entity.certificat_approbation_cdd,
                 'sic_approval_certificate': entity.certificat_approbation_sic,
                 'sic_annexe_approval_certificate': entity.certificat_approbation_sic_annexe,
                 'other_refusal_reasons': entity.autres_motifs_refus,
@@ -774,7 +774,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.financability_dispensation_last_notification_by
                 else ''
             ),
-            certificat_approbation_fac=admission.fac_approval_certificate,
+            certificat_approbation_cdd=admission.cdd_approval_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
             doit_fournir_visa_etudes=admission.must_provide_student_visa_d,

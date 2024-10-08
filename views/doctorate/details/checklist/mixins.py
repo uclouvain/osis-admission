@@ -61,8 +61,6 @@ from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
 
-TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {'decision_facultaire'}
-
 
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
     extra_context = {
@@ -108,13 +106,13 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             has_comment = (
                 CommentEntry.objects.filter(
                     object_uuid=self.admission_uuid,
-                    tags__contains=['decision_facultaire', COMMENT_TAG_CDD_FOR_SIC],
+                    tags__contains=['decision_cdd', COMMENT_TAG_CDD_FOR_SIC],
                 )
                 .exclude(content='')
                 .exists()
             )
             if has_comment:
-                checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
+                checklist_additional_icons['decision_cdd'] = 'fa-regular fa-comment'
 
         person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if person_merge_proposal and (

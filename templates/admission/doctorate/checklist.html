@@ -327,12 +327,12 @@
 
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire next_url=next_base_url|add:'decision_facultaire' %}
-        <div role="tabpanel" class="tab-pane" id="decision_facultaire">
-          {% include 'admission/doctorate/includes/checklist/fac_decision.html' %}
+      {% with initial=original_admission.checklist.initial.decision_cdd current=original_admission.checklist.current.decision_cdd next_url=next_base_url|add:'decision_cdd' %}
+        <div role="tabpanel" class="tab-pane" id="decision_cdd">
+          {% include 'admission/doctorate/includes/checklist/cdd_decision.html' %}
 
-          {% bootstrap_form_errors comment_forms.decision_facultaire__SIC_FOR_CDD %}
-          {% bootstrap_field comment_forms.decision_facultaire__SIC_FOR_CDD.comment %}
+          {% bootstrap_form_errors comment_forms.decision_cdd__SIC_FOR_CDD %}
+          {% bootstrap_field comment_forms.decision_cdd__SIC_FOR_CDD.comment %}
 
           <div class="info-part">
             {% if autres_demandes %}
@@ -344,13 +344,13 @@
           </div>
 
           <div class="mt-1">
-            {% bootstrap_form_errors comment_forms.decision_facultaire__CDD_FOR_SIC %}
-            {% bootstrap_field comment_forms.decision_facultaire__CDD_FOR_SIC.comment %}
+            {% bootstrap_form_errors comment_forms.decision_cdd__CDD_FOR_SIC %}
+            {% bootstrap_field comment_forms.decision_cdd__CDD_FOR_SIC.comment %}
           </div>
 
-          {% include 'admission/doctorate/includes/checklist/fac_decision_refusal_modal.html' %}
-          {% include 'admission/doctorate/includes/checklist/fac_decision_approval_modal.html' %}
-          {% include 'admission/doctorate/includes/checklist/fac_decision_approval_final_modal.html' %}
+          {% include 'admission/doctorate/includes/checklist/cdd_decision_refusal_modal.html' %}
+          {% include 'admission/doctorate/includes/checklist/cdd_decision_approval_modal.html' %}
+          {% include 'admission/doctorate/includes/checklist/cdd_decision_approval_final_modal.html' %}
 
         </div>
       {% endwith %}
@@ -448,7 +448,7 @@
   <script src="{% statici18n LANGUAGE_CODE %}"></script>
   <script src="{% static 'js/jquery.formset.js' %}"></script>
   {{ assimilation_form.media.js }}
-  {{ fac_decision_refusal_form.media.js }}
+  {{ cdd_decision_refusal_form.media.js }}
   {{ sic_decision_refusal_form.media.js }}
   {{ sic_decision_approval_form.media.js }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
@@ -859,14 +859,14 @@
               htmxErrorsMessages.classList.add('show');
           });
 
-          // Faculty decision
-          const facultyDecisionContainer = $('#decision_facultaire');
+          // CDD decision
+          const cddDecisionContainer = $('#decision_cdd');
 
-          facultyDecisionContainer.on('change', 'input[name="fac-decision-approval-with_prerequisite_courses"]', function(event){
-              const container = $('#fac-decision-additional-trainings-container');
+          cddDecisionContainer.on('change', 'input[name="cdd-decision-approval-with_prerequisite_courses"]', function(event){
+              const container = $('#cdd-decision-additional-trainings-container');
               $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
           });
-          $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
+          $('input[name="cdd-decision-approval-with_prerequisite_courses"]:checked').change();
 
           {# Access title events #}
           $('.parcours').on('formValidation', function(event) {
@@ -885,7 +885,7 @@
           });
 
           $('#parcours_anterieur').on('formValidation', '.checklist-state-button', function(event) {
-              {# The access titles can be updated only if the fac decision status is not sufficient. #}
+              {# The access titles can be updated only if the cdd decision status is not sufficient. #}
               if (event.originalEvent.detail.select_access_title_perm !== undefined) {
                 const access_titles_checkboxes = $('input[name="access-title"]');
                 access_titles_checkboxes.prop('disabled', event.originalEvent.detail.select_access_title_perm === false);
@@ -975,8 +975,8 @@
 
 {% block style %}
   {{ block.super }}
-  {{ fac_decision_refusal_form.media.css }}
-  {{ fac_decision_approval_form.media.css }}
+  {{ cdd_decision_refusal_form.media.css }}
+  {{ cdd_decision_approval_form.media.css }}
   {{ sic_decision_refusal_form.media.css }}
   {{ sic_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
@@ -1212,13 +1212,13 @@
       margin-bottom: initial;
     }
 
-    .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {
+    .decision-modal .select2-selection--multiple .select2-selection__rendered {
       word-wrap: break-word;
       text-overflow: inherit;
       white-space: normal;
     }
 
-    .fac-decision-modal .select2-selection--multiple .select2-selection__choice {
+    .decision-modal .select2-selection--multiple .select2-selection__choice {
       background-color: rgba(200, 200, 200, 0.1);
       width: 100%;
       display: flex;
@@ -1226,11 +1226,11 @@
       align-items: center;
     }
 
-    .fac-decision-modal {
+    .decision-modal {
       overflow: auto;
     }
 
-    .fac-decision-modal .modal-footer {
+    .decision-modal .modal-footer {
       position: sticky;
       bottom: 0;
       background: white;

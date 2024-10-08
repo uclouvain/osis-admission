@@ -1015,7 +1015,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'initial': {},
                 'current': {
                     'decision_sic': {'statut': 'INITIAL_CANDIDAT'},
-                    'decision_facultaire': {'statut': 'GEST_EN_COURS'},
+                    'decision_cdd': {'statut': 'GEST_EN_COURS'},
                 },
             },
         )

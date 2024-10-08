@@ -80,7 +80,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         cls.files_uuids = {
             name_field: [uuid.uuid4()]
             for name_field in [
-                'fac_approval_certificate',
+                'cdd_approval_certificate',
                 'sic_approval_certificate',
                 'sic_annexe_approval_certificate',
                 'must_provide_student_visa_d',
@@ -128,7 +128,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             financability_dispensation_first_notification_by=PersonFactory(),
             financability_dispensation_last_notification_on=datetime.datetime(2020, 1, 4),
             financability_dispensation_last_notification_by=PersonFactory(),
-            fac_approval_certificate=self.files_uuids['fac_approval_certificate'],
+            cdd_approval_certificate=self.files_uuids['cdd_approval_certificate'],
             sic_approval_certificate=self.files_uuids['sic_approval_certificate'],
             sic_annexe_approval_certificate=self.files_uuids['sic_annexe_approval_certificate'],
             must_provide_student_visa_d=True,
@@ -255,7 +255,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             result.financabilite_derogation_derniere_notification_par,
             self.admission.financability_dispensation_last_notification_by.global_id,
         )
-        self.assertEqual(result.certificat_approbation_fac, self.admission.fac_approval_certificate)
+        self.assertEqual(result.certificat_approbation_cdd, self.admission.cdd_approval_certificate)
         self.assertEqual(result.certificat_approbation_sic, self.admission.sic_approval_certificate)
         self.assertEqual(result.certificat_approbation_sic_annexe, self.admission.sic_annexe_approval_certificate)
         self.assertEqual(result.doit_fournir_visa_etudes, self.admission.must_provide_student_visa_d)
@@ -416,7 +416,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
 
     def test_get_proposition_with_faculty_approval_reason(self):
         # Approval data
-        self.admission.fac_approval_certificate = ['uuid-fac-approval-certificate']
+        self.admission.cdd_approval_certificate = ['uuid-cdd-approval-certificate']
         self.admission.with_prerequisite_courses = True
         self.admission.prerequisite_courses.set(
             [
@@ -433,7 +433,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.admission.save()
 
         result = self._get_command_result()
-        self.assertEqual([str(result.certificat_approbation_fac[0])], self.admission.fac_approval_certificate)
+        self.assertEqual([str(result.certificat_approbation_cdd[0])], self.admission.cdd_approval_certificate)
 
         prerequisite_courses = self.admission.prerequisite_courses.all()
         self.assertEqual(result.avec_complements_formation, self.admission.with_prerequisite_courses)

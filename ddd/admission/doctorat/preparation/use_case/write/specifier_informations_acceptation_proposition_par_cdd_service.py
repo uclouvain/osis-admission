@@ -23,33 +23,33 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.commands import (
-    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
+    SpecifierInformationsAcceptationPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-def envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
-    cmd: EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
+def specifier_informations_acceptation_proposition_par_cdd(
+    cmd: SpecifierInformationsAcceptationPropositionParCddCommand,
     proposition_repository: 'IPropositionRepository',
-    historique: 'IHistorique',
 ) -> PropositionIdentity:
+    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.soumettre_au_sic_lors_de_la_decision_facultaire(
+    # THEN
+    proposition.specifier_informations_acceptation_par_cdd(
         auteur_modification=cmd.gestionnaire,
+        avec_complements_formation=cmd.avec_complements_formation,
+        uuids_complements_formation=cmd.uuids_complements_formation,
+        commentaire_complements_formation=cmd.commentaire_complements_formation,
+        nombre_annees_prevoir_programme=cmd.nombre_annees_prevoir_programme,
+        nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
+        email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
+        commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
     )
 
     proposition_repository.save(entity=proposition)
-
-    historique.historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
-        proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
-        envoi_par_fac=cmd.envoi_par_fac,
-    )
 
     return proposition.entity_id

@@ -26,7 +26,7 @@
 import datetime
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    ApprouverPropositionParFaculteCommand,
+    ApprouverPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.groupe_de_supervision_dto import GroupeDeSupervisionDto
@@ -49,8 +49,8 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
-def approuver_proposition_par_faculte(
-    cmd: ApprouverPropositionParFaculteCommand,
+def approuver_proposition_par_cdd(
+    cmd: ApprouverPropositionParCddCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
     pdf_generation: 'IPDFGeneration',
@@ -90,14 +90,14 @@ def approuver_proposition_par_faculte(
     )
 
     # WHEN
-    proposition.approuver_par_fac(
+    proposition.approuver_par_cdd(
         auteur_modification=cmd.gestionnaire,
         titres_selectionnes=titres_selectionnes,
     )
 
     # THEN
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
-    pdf_generation.generer_attestation_accord_facultaire(
+    pdf_generation.generer_attestation_accord_cdd(
         proposition=proposition,
         gestionnaire=gestionnaire_dto,
         proposition_repository=proposition_repository,
@@ -120,6 +120,6 @@ def approuver_proposition_par_faculte(
         cc_membres_ca=True,
     )
 
-    historique.historiser_acceptation_fac(proposition=proposition, gestionnaire=gestionnaire_dto, message=message)
+    historique.historiser_acceptation_cdd(proposition=proposition, gestionnaire=gestionnaire_dto, message=message)
 
     return proposition.entity_id

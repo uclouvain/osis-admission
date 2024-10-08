@@ -814,6 +814,9 @@ msgstr ""
 msgid "Approval certificate of faculty"
 msgstr ""
 
+msgid "Approval certificate of the CDD"
+msgstr ""
+
 msgid "Approval condition by faculty"
 msgstr ""
 
@@ -1150,16 +1153,25 @@ msgstr ""
 msgid "CDD Mail templates"
 msgstr ""
 
+msgid "CDD comment about the collaborative program"
+msgstr ""
+
 msgid "CDD comment for the SIC"
 msgstr ""
 
 msgid "CDD configuration"
 msgstr ""
 
+msgid "CDD decision"
+msgstr ""
+
 msgid "CDD manager comment"
 msgstr ""
 
 msgid "CDD opinion"
+msgstr ""
+
+msgid "CDD process"
 msgstr ""
 
 msgid "CEP"
@@ -2478,13 +2490,27 @@ msgstr ""
 msgid "Documents"
 msgstr ""
 
-msgid ""
-"Documents requested by the SIC are still expected from the candidate. The "
-"application could be sent to the faculty once they have been received."
+msgid "Documents requested by the CDD are still expected from the candidate."
 msgstr ""
 
 msgid ""
-"Documents requested by the faculty are still expected from the candidate."
+"Documents requested by the CDD are still expected from the candidate. The "
+"application could be sent to the SIC once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the CDD are still expected from the candidate. The "
+"application will be sent to the SIC once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the SIC are still expected from the candidate. The "
+"application could be sent to the CDD once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the SIC are still expected from the candidate. The "
+"application could be sent to the faculty once they have been received."
 msgstr ""
 
 msgid ""
@@ -2718,6 +2744,19 @@ msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr ""
 
 msgid ""
+"Email sent to the candidate when the CDD approves a doctorate admission of a "
+"candidat without any Belgian diploma."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate when the CDD approves a doctorate admission of a "
+"candidate with a Belgian diploma."
+msgstr ""
+
+msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
+msgstr ""
+
+msgid ""
 "Email sent to the candidate when the faculty approve the application with "
 "conditions."
 msgstr ""
@@ -2725,20 +2764,6 @@ msgstr ""
 msgid ""
 "Email sent to the candidate when the faculty approve the application without "
 "condition."
-msgstr ""
-
-msgid ""
-"Email sent to the candidate when the faculty approves a doctorate admission "
-"of a candidat without any Belgian diploma."
-msgstr ""
-
-msgid ""
-"Email sent to the candidate when the faculty approves a doctorate admission "
-"of a candidate with a Belgian diploma."
-msgstr ""
-
-msgid ""
-"Email sent to the candidate when the faculty refuses a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2752,11 +2777,6 @@ msgid ""
 msgstr ""
 
 msgid "Email sent to the faculty when IUFC needs more information."
-msgstr ""
-
-msgid ""
-"Email sent to the faculty when the SIC submits the application during the "
-"faculty decision process for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -3009,9 +3029,6 @@ msgid "FWB equivalent course"
 msgstr ""
 
 msgid "Fac approval"
-msgstr ""
-
-msgid "Fac decision"
 msgstr ""
 
 msgctxt "ways_hear_about_training"
@@ -6351,6 +6368,9 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Send to CDD"
+msgstr ""
+
 msgid "Send to EPC"
 msgstr ""
 
@@ -7008,7 +7028,7 @@ msgstr ""
 
 #, python-format
 msgid ""
-"The e-mail for the fac decision has been sent on %(sent_at)s by %(sender)s."
+"The e-mail for the CDD decision has been sent on %(sent_at)s by %(sender)s."
 msgstr ""
 
 #, python-format
@@ -7067,6 +7087,12 @@ msgstr[1] ""
 msgid ""
 "The global status of the application must be one of the following in order "
 "to realize this action: "
+msgstr ""
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following in order "
+"to submit the dossier to the CDD: %(statuses)s."
 msgstr ""
 
 #, python-format
@@ -7191,6 +7217,9 @@ msgid "The proposition must be managed by FAC to realized this action."
 msgstr ""
 
 msgid "The proposition must be managed by SIC to realized this action."
+msgstr ""
+
+msgid "The proposition must be managed by the CDD to realized this action."
 msgstr ""
 
 msgid "The proposition must be submitted to realize this action."
@@ -8056,6 +8085,9 @@ msgid "Yes,No,Incomplete field"
 msgstr ""
 
 msgid "You appear to have unsaved changes, which will be lost."
+msgstr ""
+
+msgid "You are about to submit the application to the CDD."
 msgstr ""
 
 msgid "You are about to submit the application to the Faculty."

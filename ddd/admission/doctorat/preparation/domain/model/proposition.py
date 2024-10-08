@@ -60,7 +60,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     BesoinDeDerogation,
     OngletsChecklist,
-    DecisionFacultaireEnum,
+    DecisionCDDEnum,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
@@ -86,11 +86,11 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     SpecifierInformationsApprobationInscriptionValidatorList,
     ApprouverInscriptionParSicValidatorList,
     ApprouverAdmissionParSicValidatorList,
-    SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
-    ApprouverParFacValidatorList,
-    RefuserParFacValidatorList,
-    GestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
-    SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
+    ApprouverParCDDValidatorList,
+    RefuserParCDDValidatorList,
+    GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
+    SpecifierNouvellesInformationsDecisionCDDValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
@@ -197,7 +197,7 @@ class Proposition(interface.RootEntity):
     financabilite_derogation_derniere_notification_par: str = ''
 
     # Décision facultaire & sic
-    certificat_approbation_fac: List[str] = attr.Factory(list)
+    certificat_approbation_cdd: List[str] = attr.Factory(list)
     certificat_approbation_sic: List[str] = attr.Factory(list)
     certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
 
@@ -1023,54 +1023,54 @@ class Proposition(interface.RootEntity):
         self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE
         self.auteur_derniere_modification = auteur_modification
 
-    def soumettre_a_fac_lors_de_la_decision_facultaire(self, auteur_modification: str):
-        SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(
+    def soumettre_au_cdd_lors_de_la_decision_cdd(self, auteur_modification: str):
+        SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList(
             statut=self.statut,
         ).validate()
         self.auteur_derniere_modification = auteur_modification
         self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
 
-    def specifier_acceptation_par_fac(self):
-        self.checklist_actuelle.decision_facultaire = StatutChecklist(
+    def specifier_acceptation_par_cdd(self):
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_REUSSITE,
             libelle=__('Approval'),
         )
 
-    def specifier_refus_par_fac(self):
-        self.checklist_actuelle.decision_facultaire = StatutChecklist(
+    def specifier_refus_par_cdd(self):
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             libelle=__('Refusal'),
             extra={
-                'decision': DecisionFacultaireEnum.EN_DECISION.value,
+                'decision': DecisionCDDEnum.EN_DECISION.name,
             },
         )
 
-    def approuver_par_fac(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
-        ApprouverParFacValidatorList(
+    def approuver_par_cdd(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
+        ApprouverParCDDValidatorList(
             statut=self.statut,
             nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
             titres_selectionnes=titres_selectionnes,
         ).validate()
 
-        self.specifier_acceptation_par_fac()
+        self.specifier_acceptation_par_cdd()
         self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
         self.auteur_derniere_modification = auteur_modification
 
-    def refuser_par_fac(self, auteur_modification: str):
-        RefuserParFacValidatorList(
+    def refuser_par_cdd(self, auteur_modification: str):
+        RefuserParCDDValidatorList(
             statut=self.statut,
         ).validate()
 
-        self.specifier_refus_par_fac()
+        self.specifier_refus_par_cdd()
         self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
         self.auteur_derniere_modification = auteur_modification
 
-    def soumettre_au_sic_lors_de_la_decision_facultaire(self, auteur_modification: str):
-        GestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(statut=self.statut).validate()
+    def soumettre_au_sic_lors_de_la_decision_cdd(self, auteur_modification: str):
+        GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
         self.auteur_derniere_modification = auteur_modification
 
-    def specifier_informations_acceptation_par_fac(
+    def specifier_informations_acceptation_par_cdd(
         self,
         auteur_modification: str,
         avec_complements_formation: Optional[bool],
@@ -1081,7 +1081,7 @@ class Proposition(interface.RootEntity):
         email_personne_contact_programme_annuel: str,
         commentaire_programme_conjoint: str,
     ):
-        SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
+        SpecifierNouvellesInformationsDecisionCDDValidatorList(
             statut=self.statut,
         ).validate()
         self.auteur_derniere_modification = auteur_modification

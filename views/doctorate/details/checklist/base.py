@@ -74,7 +74,7 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
 )
 from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.doctorate.details.checklist.fac_decision import FacultyDecisionMixin
+from admission.views.doctorate.details.checklist.cdd_decision import CddDecisionMixin
 from admission.views.doctorate.details.checklist.financeability import FinancabiliteContextMixin
 from admission.views.doctorate.details.checklist.mixins import get_internal_experiences, get_email
 from admission.views.doctorate.details.checklist.past_experiences import PastExperiencesMixin
@@ -91,12 +91,12 @@ __all__ = [
 ]
 
 
-TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {'decision_facultaire'}
+TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {'decision_cdd'}
 
 
 class ChecklistView(
     PastExperiencesMixin,
-    FacultyDecisionMixin,
+    CddDecisionMixin,
     FinancabiliteContextMixin,
     SicDecisionMixin,
     TemplateView,
@@ -136,13 +136,13 @@ class ChecklistView(
                 'ADDITIONAL_DOCUMENTS',
             },
             OngletsChecklist.donnees_personnelles.name: assimilation_documents,
-            OngletsChecklist.decision_facultaire.name: {
-                'ATTESTATION_ACCORD_FACULTAIRE',
+            OngletsChecklist.decision_cdd.name: {
+                'ATTESTATION_ACCORD_CDD',
             },
             OngletsChecklist.decision_sic.name: {
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
-                'ATTESTATION_ACCORD_FACULTAIRE',
+                'ATTESTATION_ACCORD_CDD',
             },
             'send-email': set(),
         }
@@ -444,7 +444,7 @@ class ChecklistView(
             original_admission = self.admission
 
             can_change_checklist = self.request.user.has_perm('admission.change_checklist', original_admission)
-            can_change_faculty_decision = self.request.user.has_perm(
+            can_change_cdd_decision = self.request.user.has_perm(
                 'admission.checklist_change_faculty_decision',
                 original_admission,
             )
@@ -474,8 +474,8 @@ class ChecklistView(
             disable_unavailable_forms(
                 {
                     context['assimilation_form']: can_change_checklist,
-                    context['fac_decision_refusal_form']: can_change_faculty_decision,
-                    context['fac_decision_approval_form']: can_change_faculty_decision,
+                    context['cdd_decision_refusal_form']: can_change_cdd_decision,
+                    context['cdd_decision_approval_form']: can_change_cdd_decision,
                     context['financabilite_approval_form']: can_change_checklist,
                     context['past_experiences_admission_requirement_form']: can_change_past_experiences,
                     context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,

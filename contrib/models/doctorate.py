@@ -474,11 +474,11 @@ class DoctorateAdmission(BaseAdmission):
         editable=False,
     )
 
-    # FAC & SIC approval
-    fac_approval_certificate = FileField(
+    # CDD & SIC approval
+    cdd_approval_certificate = FileField(
         blank=True,
         upload_to=admission_directory_path,
-        verbose_name=_('Approval certificate of faculty'),
+        verbose_name=_('Approval certificate of the CDD'),
         mimetypes=[PDF_MIME_TYPE],
     )
     sic_approval_certificate = FileField(
@@ -545,7 +545,7 @@ class DoctorateAdmission(BaseAdmission):
     join_program_fac_comment = models.TextField(
         blank=True,
         default='',
-        verbose_name=_('Faculty comment about the collaborative program'),
+        verbose_name=_('CDD comment about the collaborative program'),
     )
     dispensation_needed = models.CharField(
         max_length=50,

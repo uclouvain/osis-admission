@@ -26,18 +26,18 @@
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RefuserPropositionParFaculteCommand,
+    RefuserPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
-    DecisionFacultaireEnum,
+    DecisionCDDEnum,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
+    SituationPropositionNonCddException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
@@ -56,7 +56,7 @@ class TestRefuserPropositionParFaculte(TestCase):
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = RefuserPropositionParFaculteCommand
+        cls.command = RefuserPropositionParCddCommand
         for matricule in ['00321234', '00987890']:
             PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
                 PersonneConnueUclDTOFactory(matricule=matricule),
@@ -83,10 +83,10 @@ class TestRefuserPropositionParFaculte(TestCase):
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_BLOCAGE)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_BLOCAGE)
         self.assertEqual(
-            proposition.checklist_actuelle.decision_facultaire.extra,
-            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
+            proposition.checklist_actuelle.decision_cdd.extra,
+            {'decision': DecisionCDDEnum.EN_DECISION.name},
         )
 
     def test_should_etre_ok_si_completee_pour_fac(self):
@@ -108,4 +108,4 @@ class TestRefuserPropositionParFaculte(TestCase):
 
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
