@@ -60,5 +60,6 @@
       {% field_data _("Cycle pursuit") admission.poursuite_de_cycle|enum_display:'PoursuiteDeCycle' %}
       {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' %}</div>{% endif %}
     {% endif %}
+    {% field_data _("Late enrollment") admission.est_inscription_tardive %}
   {% endpanel %}
 </div>
