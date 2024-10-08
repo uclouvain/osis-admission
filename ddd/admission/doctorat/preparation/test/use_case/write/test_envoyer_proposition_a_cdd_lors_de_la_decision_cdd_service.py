@@ -26,7 +26,7 @@
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
+    EnvoyerPropositionACddLorsDeLaDecisionCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     ChoixStatutPropositionDoctorale,
@@ -42,13 +42,13 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestEnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(TestCase):
+class TestEnvoyerPropositionACddLorsDeLaDecisionCddCommand(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand
+        cls.command = EnvoyerPropositionACddLorsDeLaDecisionCddCommand
         cls.parametres_commande_par_defaut = {
             'gestionnaire': '00321234',
             'uuid_proposition': 'uuid-SC3DP-promoteurs-membres-deja-approuves',

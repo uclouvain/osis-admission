@@ -5,26 +5,33 @@ from django.db.migrations import RunPython
 from osis_mail_template import MailTemplateMigration
 
 from admission.mail_templates import (
-    ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
-    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
-    ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
+    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
+    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
 )
 
 
 def remove_unused_emails(apps, schema_editor):
     MailTemplate = apps.get_model('osis_mail_template', 'MailTemplate')
-    MailTemplate.objects.filter(identifier='osis-admission-send-to-fac-at-fac-decision-doctorate').delete()
+    MailTemplate.objects.filter(
+        identifier__in=[
+            'osis-admission-send-to-fac-at-fac-decision-doctorate',
+            'osis-admission-fac-refusal-doctorate',
+            'osis-admission-fac-approval-doctorate-without-belgian-diploma',
+            'osis-admission-fac-approval-doctorate-with-belgian-diploma',
+        ]
+    ).delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0225_doctorate_delete_unused_fields'),
+        ('admission', '0227_doctorate_delete_unused_fields'),
     ]
 
     operations = [
         MailTemplateMigration(
-            identifier=ADMISSION_EMAIL_FAC_REFUSAL_DOCTORATE,
+            identifier=ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
             subjects={
                 'en': "UCLouvain - admission application {admission_reference} follow-up",
                 'fr-be': "UCLouvain - suivi de votre demande d'admission - {admission_reference}",
@@ -57,7 +64,7 @@ class Migration(migrations.Migration):
             },
         ),
         MailTemplateMigration(
-            identifier=ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
+            identifier=ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
             subjects={
                 'en': "UCLouvain - admission application {admission_reference} follow-up",
                 'fr-be': "UCLouvain - suivi de votre demande d'admission - {admission_reference}",
@@ -93,7 +100,7 @@ class Migration(migrations.Migration):
             },
         ),
         MailTemplateMigration(
-            identifier=ADMISSION_EMAIL_FAC_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+            identifier=ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
             subjects={
                 'en': "UCLouvain - admission application {admission_reference} follow-up",
                 'fr-be': "UCLouvain - suivi de votre demande d'admission - {admission_reference}",

@@ -28,14 +28,14 @@ import uuid
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    SpecifierInformationsAcceptationPropositionParFaculteCommand,
+    SpecifierInformationsAcceptationPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
+    SituationPropositionNonCddException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
@@ -48,13 +48,13 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
+class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = SpecifierInformationsAcceptationPropositionParFaculteCommand
+        cls.command = SpecifierInformationsAcceptationPropositionParCddCommand
         cls.uuid_experience = str(uuid.uuid4())
 
     def setUp(self) -> None:
@@ -88,7 +88,7 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
         self.assertEqual(
-            proposition.checklist_actuelle.decision_facultaire.statut,
+            proposition.checklist_actuelle.decision_cdd.statut,
             ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
         self.assertEqual(proposition.avec_complements_formation, False)
@@ -121,7 +121,7 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC)
         self.assertEqual(
-            proposition.checklist_actuelle.decision_facultaire.statut,
+            proposition.checklist_actuelle.decision_cdd.statut,
             ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
         self.assertEqual(proposition.avec_complements_formation, True)
@@ -153,7 +153,7 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
             self.proposition.statut = ChoixStatutPropositionDoctorale[statut]
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
 
     def test_should_etre_ok_si_en_attente_retour_candidat(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC

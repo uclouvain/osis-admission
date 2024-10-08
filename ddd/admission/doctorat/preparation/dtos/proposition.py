@@ -122,7 +122,7 @@ class PropositionDTO(interface.DTO):
     financabilite_derogation_derniere_notification_le: Optional[datetime.datetime]
     financabilite_derogation_derniere_notification_par: str
 
-    certificat_approbation_fac: List[str]
+    certificat_approbation_cdd: List[str]
     certificat_approbation_sic: List[str]
     certificat_approbation_sic_annexe: List[str]
 

@@ -26,12 +26,12 @@
 {% endcomment %}
 
 
-{% block modal_id %}fac-decision-refusal-modal{% endblock %}
+{% block modal_id %}cdd-decision-approval-final-modal{% endblock %}
 
-{% block modal_title %}{% translate "Refusal" %}{% endblock %}
+{% block modal_title %}{% translate "Approval" %}{% endblock %}
 
-{% block modal_class %}admission-modal-lg fac-decision-modal{% endblock %}
+{% block modal_class %}admission-modal-lg decision-modal{% endblock %}
 
 {% block modal_content %}
-  {% include 'admission/doctorate/includes/checklist/fac_decision_refusal_form.html' %}
+  {% include 'admission/doctorate/includes/checklist/cdd_decision_approval_final_form.html' %}
 {% endblock %}

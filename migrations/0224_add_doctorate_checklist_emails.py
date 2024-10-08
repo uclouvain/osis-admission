@@ -6,7 +6,6 @@ from osis_mail_template import MailTemplateMigration
 from admission.mail_templates.checklist.doctorate import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
-    ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_DOCTORATE,
     ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
     ADMISSION_EMAIL_SIC_APPROVAL_DOCTORATE,
     ADMISSION_EMAIL_SIC_APPROVAL_EU_DOCTORATE,
@@ -129,71 +128,6 @@ class Migration(migrations.Migration):
                      Le Service des inscriptions
                  </p>
                  ''',
-            },
-        ),
-        MailTemplateMigration(
-            identifier=ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_DOCTORATE,
-            subjects={
-                'en': 'OSIS [{candidate_last_name}, {candidate_first_name}, {training_acronym}] Application submitted to the '
-                'faculty',
-                'fr-be': "OSIS [{candidate_last_name}, {candidate_first_name}, {training_acronym}] Demande d'inscription "
-                "soumise en faculté",
-            },
-            contents={
-                'en': '''<p>Hello</p>
-
-                        <p>
-                            The Registration Service (SIC) has processed the application of {candidate_last_name}, 
-                            {candidate_first_name}, <a href="{admission_link_back_for_fac_approval_checklist}">
-                            {admission_reference}</a> ({candidate_nationality_country}) and has changed the 
-                            status of the application to "Processing by Fac".
-                        </p>
-
-                        <p>
-                            A user manual for OSIS (Registration requests) is available on the website 
-                            <a href="https://www.uclouvain.be/fare">https://www.uclouvain.be/fare</a> 
-                            (Manuals for faculties > Registration/Admission).
-                        </p>
-
-                        <p>
-                            Thank you for your cooperation.
-                        </p>
-
-                        <p>
-                            The Registration Service.
-                        </p>        
-
-                        <p>
-                            <a href="mailto:{training_enrollment_campus_email}">{training_enrollment_campus_email}</a>
-                        </p>
-
-                        ''',
-                'fr-be': '''<p>Bonjour,</p>
-
-                <p>
-                    Le service des inscriptions (SIC) a traité le dossier d'{application_type} de {candidate_last_name}, 
-                    {candidate_first_name}, <a href="{admission_link_back_for_fac_approval_checklist}">{admission_reference}</a>
-                     ({candidate_nationality_country}) et a passé le dossier dans la situation "Traitement en Fac".
-                </p>
-
-                <p>
-                    Un manuel d'utilisation d'OSIS (Demandes d'inscriptions) est disponible sur le site 
-                    <a href="https://www.uclouvain.be/fare">https://www.uclouvain.be/fare</a> 
-                    (Manuels pour les facultés > Inscription/Admission).
-                </p>
-
-                <p>
-                    Nous vous remercions pour votre bonne collaboration.
-                </p>
-
-                <p>
-                    Le service des inscriptions.
-                </p>
-
-                <p>
-                    <a href="mailto:{training_enrollment_campus_email}">{training_enrollment_campus_email}</a>
-                </p>
-                ''',
             },
         ),
         MailTemplateMigration(

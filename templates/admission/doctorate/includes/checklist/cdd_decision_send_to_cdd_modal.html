@@ -26,20 +26,20 @@
 {% endcomment %}
 
 
-{% block modal_id %}fac-decision-send-to-fac-modal{% endblock %}
+{% block modal_id %}cdd-decision-send-to-cdd-modal{% endblock %}
 
 {% block modal_title %}{% translate "Confirm the submit" %}{% endblock %}
 
 {% block modal_body %}
   <p>
-    {% translate 'You are about to submit the application to the Faculty.' %}
+    {% translate 'You are about to submit the application to the CDD.' %}
   </p>
 {% endblock %}
 
 {% block modal_footer %}
   <button
     class="btn btn-primary"
-    hx-post="{% url view.base_namespace|add:':fac-decision-send-to-faculty' uuid=view.kwargs.uuid %}"
+    hx-post="{% url view.base_namespace|add:':cdd-decision-send-to-cdd' uuid=view.kwargs.uuid %}"
     data-dismiss="modal"
   >
     {% translate 'Confirm' %}

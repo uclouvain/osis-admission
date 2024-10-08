@@ -29,10 +29,10 @@ import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
-    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
@@ -45,9 +45,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     TitreAccesEtreSelectionneException,
     ConditionAccesEtreSelectionneException,
-    InformationsAcceptationFacultaireNonSpecifieesException,
     SituationPropositionNonSICException,
-    SituationPropositionNonFACException,
+    SituationPropositionNonCddException,
     InscriptionTardiveAvecConditionAccesException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
@@ -57,7 +56,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
     DocumentAReclamerImmediatException,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
-    InformationsAcceptationSICNonSpecifieesException,
+    InformationsAcceptationNonSpecifieesException,
 )
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
@@ -74,48 +73,39 @@ from epc.models.enums.condition_acces import ConditionAcces
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldSpecifierInformationsAcceptationParSIC(BusinessValidator):
+class ShouldSpecifierInformationsAcceptation(BusinessValidator):
     nombre_annees_prevoir_programme: Optional[int]
 
     def validate(self, *args, **kwargs):
         if not self.nombre_annees_prevoir_programme:
-            raise InformationsAcceptationSICNonSpecifieesException
+            raise InformationsAcceptationNonSpecifieesException
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldSpecifierInformationsAcceptationFacultaire(BusinessValidator):
-    nombre_annees_prevoir_programme: Optional[int]
-
-    def validate(self, *args, **kwargs):
-        if not self.nombre_annees_prevoir_programme:
-            raise InformationsAcceptationFacultaireNonSpecifieesException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(BusinessValidator):
+class ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION:
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION:
             raise SituationPropositionNonSICException
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
+class ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionCdd(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC:
-            raise SituationPropositionNonFACException
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD:
+            raise SituationPropositionNonCddException
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldFacPeutDonnerDecision(BusinessValidator):
+class ShouldCddPeutDonnerDecision(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC:
-            raise SituationPropositionNonFACException
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD:
+            raise SituationPropositionNonCddException
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -180,12 +170,12 @@ class ShouldDemandeEtreTypeInscription(BusinessValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldPeutSpecifierInformationsDecisionFacultaire(BusinessValidator):
+class ShouldPeutSpecifierInformationsDecisionCdd(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS:
-            raise SituationPropositionNonFACException
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS:
+            raise SituationPropositionNonCddException
 
 
 @attr.dataclass(frozen=True, slots=True)

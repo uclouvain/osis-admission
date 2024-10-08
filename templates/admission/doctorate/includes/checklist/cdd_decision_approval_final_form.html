@@ -24,15 +24,15 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <form
-  hx-post="{% url view.base_namespace|add:':fac-decision-refusal' uuid=view.kwargs.uuid %}"
+  hx-post="{% url view.base_namespace|add:':cdd-decision-approval-final' uuid=view.kwargs.uuid %}"
   hx-target="this"
   hx-swap="outerHTML"
   style="overflow: auto;"
   class="ckeditor-form"
 >
   <div class="modal-body" style="overflow:auto;">
-    {% bootstrap_form_errors fac_decision_refusal_form %}
-    {% bootstrap_form fac_decision_refusal_form %}
+    {% bootstrap_form_errors cdd_decision_approval_final_form %}
+    {% bootstrap_form cdd_decision_approval_final_form %}
   </div>
 
   <div class="modal-footer">
@@ -45,17 +45,26 @@
     <button
       class="btn btn-primary"
       type="submit"
+      name="save"
     >
       {% translate 'Send' context 'admission' %}
     </button>
   </div>
 
   {% if request.htmx %}
+    {% if cdd_decision_approval_final_form.is_valid %}
+
+      {# Update the content of the tab #}
+      {% include 'admission/doctorate/includes/checklist/cdd_decision.html' %}
+    {% endif %}
+
     <script src="{% static "admission/ckeditor.js" %}"></script>
+
   {% endif %}
+
   <script>
       $(document).ready(function(){
-          initializeCKEditor('id_fac-decision-refusal-body');
+          initializeCKEditor('id_cdd-decision-approval-final-body');
       });
   </script>
 </form>

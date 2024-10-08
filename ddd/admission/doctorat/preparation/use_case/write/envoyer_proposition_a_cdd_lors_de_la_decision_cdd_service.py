@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from admission.ddd.admission.doctorat.preparation.commands import (
-    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
+    EnvoyerPropositionACddLorsDeLaDecisionCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
@@ -32,18 +32,18 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 
 
-def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
-    cmd: EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
+def envoyer_proposition_a_cdd_lors_de_la_decision_cdd(
+    cmd: EnvoyerPropositionACddLorsDeLaDecisionCddCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.soumettre_a_fac_lors_de_la_decision_facultaire(auteur_modification=cmd.gestionnaire)
+    proposition.soumettre_au_cdd_lors_de_la_decision_cdd(auteur_modification=cmd.gestionnaire)
 
     proposition_repository.save(entity=proposition)
 
-    historique.historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
+    historique.historiser_envoi_cdd_par_sic_lors_de_la_decision_cdd(
         proposition=proposition,
         gestionnaire=cmd.gestionnaire,
     )

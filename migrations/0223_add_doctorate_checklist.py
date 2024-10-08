@@ -466,7 +466,7 @@ class Migration(migrations.Migration):
             model_name='doctorateadmission',
             name='join_program_fac_comment',
             field=models.TextField(
-                blank=True, default='', verbose_name='Faculty comment about the collaborative program'
+                blank=True, default='', verbose_name='CDD comment about the collaborative program'
             ),
         ),
         migrations.AddField(

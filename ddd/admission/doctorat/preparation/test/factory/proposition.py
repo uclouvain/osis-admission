@@ -204,7 +204,7 @@ class StatutsChecklistDoctoraleFactory(factory.Factory):
     parcours_anterieur = factory.SubFactory(StatutChecklistFactory)
     financabilite = factory.SubFactory(StatutChecklistFactory)
     projet_recherche = factory.SubFactory(StatutChecklistFactory)
-    decision_facultaire = factory.SubFactory(StatutChecklistFactory)
+    decision_cdd = factory.SubFactory(StatutChecklistFactory)
     decision_sic = factory.SubFactory(StatutChecklistFactory)
 
 
@@ -289,7 +289,7 @@ class _PropositionFactory(factory.Factory):
             soumise_le=factory.Faker('past_datetime'),
         )
         est_approuvee_par_fac = factory.Trait(
-            certificat_approbation_fac=['uuid-certificat_approbation_fac'],
+            certificat_approbation_cdd=['uuid-certificat_approbation_cdd'],
             complements_formation=factory.List(
                 params=[
                     ComplementFormationIdentityFactory(),

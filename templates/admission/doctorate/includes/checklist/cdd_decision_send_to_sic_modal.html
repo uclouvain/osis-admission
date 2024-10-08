@@ -1,5 +1,5 @@
 {% extends "admission/modal/modal.html" %}
-{% load i18n %}
+{% load i18n enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,12 +26,27 @@
 {% endcomment %}
 
 
-{% block modal_id %}fac-decision-approval-modal{% endblock %}
+{% block modal_id %}cdd-decision-send-to-sic-modal{% endblock %}
 
-{% block modal_title %}{% translate "Approval" %}{% endblock %}
+{% block modal_title %}{% translate "Confirm the submit" %}{% endblock %}
 
-{% block modal_class %}modal-lg fac-decision-modal{% endblock %}
+{% block modal_body %}
+  <p>
+    {% translate 'Are you confirming that the application will be sent to the SIC?' %}
+  </p>
+{% endblock %}
 
-{% block modal_content %}
-  {% include 'admission/doctorate/includes/checklist/fac_decision_approval_form.html' %}
+{% block modal_footer %}
+  <button
+      class="btn btn-primary"
+      hx-post="{% url view.base_namespace|add:':cdd-decision-send-to-sic' uuid=view.kwargs.uuid %}"
+      data-dismiss="modal"
+  >
+    {% translate 'Confirm' %}
+  </button>
+
+  <button type="button" class="btn btn-default" data-dismiss="modal">
+    {% translate 'Cancel' %}
+  </button>
+
 {% endblock %}

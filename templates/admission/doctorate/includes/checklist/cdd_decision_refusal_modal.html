@@ -26,12 +26,12 @@
 {% endcomment %}
 
 
-{% block modal_id %}financabilite-derogation-modal-REFUS_DE_DEROGATION_FACULTAIRE{% endblock %}
+{% block modal_id %}cdd-decision-refusal-modal{% endblock %}
 
-{% block modal_title %}{% translate "Faculty dispensation refusal" %}{% endblock %}
+{% block modal_title %}{% translate "Refusal" %}{% endblock %}
 
 {% block modal_class %}admission-modal-lg decision-modal{% endblock %}
 
 {% block modal_content %}
-  {% include 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html' %}
+  {% include 'admission/doctorate/includes/checklist/cdd_decision_refusal_form.html' %}
 {% endblock %}

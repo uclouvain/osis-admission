@@ -611,26 +611,16 @@ class SituationPropositionNonSICException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class SituationPropositionNonFACException(BusinessException):
+class SituationPropositionNonCddException(BusinessException):
     status_code = "PROPOSITION-68"
 
     def __init__(self, **kwargs):
-        message = _("The proposition must be managed by FAC to realized this action.")
+        message = _("The proposition must be managed by the CDD to realized this action.")
         super().__init__(message, **kwargs)
 
 
-class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException):
-    status_code = "PROPOSITION-70"
-
-    def __init__(self, **kwargs):
-        message = _(
-            "When accepting a proposition, all the required information in the approval form must be specified.",
-        )
-        super().__init__(message, **kwargs)
-
-
-class InformationsAcceptationSICNonSpecifieesException(BusinessException):
-    status_code = "PROPOSITION-71"
+class InformationsAcceptationNonSpecifieesException(BusinessException):
+    status_code = "PROPOSITION-69"
 
     def __init__(self, **kwargs):
         message = _(

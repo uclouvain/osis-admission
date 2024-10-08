@@ -488,27 +488,27 @@ COMMAND_HANDLERS = {
             pdf_generation=_pdf_generation,
         )
     ),
-    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
-        lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
+    EnvoyerPropositionACddLorsDeLaDecisionCddCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_a_cdd_lors_de_la_decision_cdd(
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique,
         )
     ),
-    RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
+    RefuserPropositionParCddCommand: lambda msg_bus, cmd: refuser_proposition_par_cdd(
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
         notification=_notification,
     ),
-    SpecifierInformationsAcceptationPropositionParFaculteCommand: (
-        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
+    SpecifierInformationsAcceptationPropositionParCddCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_cdd(
             cmd,
             proposition_repository=_proposition_repository,
         )
     ),
-    ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
+    ApprouverPropositionParCddCommand: lambda msg_bus, cmd: approuver_proposition_par_cdd(
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
@@ -524,8 +524,8 @@ COMMAND_HANDLERS = {
         promoteur_translator=_promoteur_translator,
         notification=_notification,
     ),
-    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand: (
-        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
+    EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_cdd(
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique,
