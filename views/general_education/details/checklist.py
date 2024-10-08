@@ -2073,6 +2073,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
             'annee_academique': self.proposition.annee_calculee,
             'formation': self.proposition.formation.sigle,
             'poursuite_cycle': self.proposition.poursuite_de_cycle,
+            'est_inscription_tardive': self.proposition.est_inscription_tardive,
         }
 
     def form_valid(self, form):
@@ -2085,6 +2086,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
                     sigle_formation=form.cleaned_data['formation'],
                     annee_formation=form.cleaned_data['annee_academique'],
                     poursuite_de_cycle=form.cleaned_data['poursuite_cycle'],
+                    est_inscription_tardive=form.cleaned_data['est_inscription_tardive'],
                 )
             )
         except MultipleBusinessExceptions as multiple_exceptions:
