@@ -44,12 +44,10 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
-from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 
 from admission.contrib.models import EPCInjection
 from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
@@ -124,6 +122,7 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierDerogationFinancabiliteCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
     SpecifierFinancabiliteNonConcerneeCommand,
+    ApprouverReorientationExterneParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -142,6 +141,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
     InformationsDestinatairePasTrouvee,
@@ -223,6 +223,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParco
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -239,6 +240,7 @@ __all__ = [
     'FacultyApprovalDecisionView',
     'FacultyDecisionSendToSicView',
     'LateFacultyApprovalDecisionView',
+    'CourseChangeFacultyApprovalDecisionView',
     'PastExperiencesStatusView',
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
@@ -837,8 +839,8 @@ class LateFacultyApprovalDecisionView(
 ):
     name = 'late-fac-decision-approval'
     urlpatterns = {'late-fac-decision-approval': 'fac-decision/late-fac-decision-approval'}
-    template_name = 'admission/general_education/includes/checklist/late_fac_decision_approval_form.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/late_fac_decision_approval_form.html'
+    template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
     permission_required = 'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
     form_class = Form
 
@@ -846,6 +848,37 @@ class LateFacultyApprovalDecisionView(
         try:
             message_bus_instance.invoke(
                 ApprouverInscriptionTardiveParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+            self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class CourseChangeFacultyApprovalDecisionView(
+    FacultyDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'course-change-fac-decision-approval'
+    urlpatterns = {
+        'course-change-fac-decision-approval': 'fac-decision/course-change-fac-decision-approval-decision-approval',
+    }
+    template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
+    permission_required = 'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ApprouverReorientationExterneParFaculteCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                 )
