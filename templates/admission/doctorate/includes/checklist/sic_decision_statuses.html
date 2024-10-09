@@ -1,0 +1,84 @@
+{% load i18n admission %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div
+  id="sic-decision-statuses-container"
+  class="form-group btn-group status-group"
+  role="group"
+  hx-swap-oob="true"
+>
+  {% if not proposition|sic_can_edit %}
+    {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
+  {% elif current|sic_in_final_statut %}
+    {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' open_modal='#sic-decision-confirm-modal-INITIAL_CANDIDAT' %}
+    {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
+  {% else %}
+    {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
+    {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' htmx_post=change_status_url %}
+    {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-to_be_completed' as change_status_url %}
+    {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' htmx_post=change_status_url %}
+    {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-derogation' as change_status_url %}
+    {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' htmx_post=change_status_url %}
+
+    {% if past_experiences_are_sufficient and admission.est_admission %}
+      {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' open_modal='#sic-decision-approval-modal' %}
+    {% else %}
+      {% if admission.est_inscription %}
+        {% translate 'This status is not available for the inscription type admissions.' as approval_to_validate_tooltip %}
+      {% else %}
+        {% translate 'The Previous experience must be in the "Sufficient" status in order to do this action.' as approval_to_validate_tooltip %}
+      {% endif %}
+      {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' open_modal='#sic-decision-approval-modal' tooltip=approval_to_validate_tooltip|force_escape disabled=True %}
+    {% endif %}
+
+    {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-closed' as change_status_url %}
+    {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' htmx_post=change_status_url %}
+  {% endif %}
+  {% if original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}
+    {% translate 'The status of the checklist for the financability must be "Not concerned" or "Financable" or "Dispensation granted".' as approval_disabled_tooltip %}
+    {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
+  {% elif original_admission.is_in_quarantine %}
+    {% translate 'The transition to this status is not possible while the application is in quarantine.' as approval_disabled_tooltip %}
+    {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
+  {% elif admission.est_admission and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' or admission.est_inscription and current.statut == 'INITIAL_CANDIDAT' or admission.est_inscription and current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' and admission.besoin_de_derogation == 'ACCORD_DIRECTION' %}
+    {% if view.missing_curriculum_periods %}
+      {% translate "The 'Approved' status requires the last 5 years to be justified in the previous experience." as approval_disabled_tooltip %}
+      {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
+    {% else %}
+      {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' open_modal='#sic-decision-approval-final-modal' %}
+    {% endif %}
+  {% else %}
+    {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
+  {% endif %}
+</div>
+
