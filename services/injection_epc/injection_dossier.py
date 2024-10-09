@@ -34,7 +34,7 @@ from typing import Dict, List, Tuple, Optional
 import pika
 from django.conf import settings
 from django.db import transaction
-from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
+from django.db.models import QuerySet, Exists, OuterRef
 from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
@@ -388,12 +388,7 @@ class InjectionEPCAdmission:
     def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
         if comptabilite:
             documents = InjectionEPCCurriculum._recuperer_documents(comptabilite)
-            client_sap = candidat.sapclient_set.annotate(
-                priorite=Case(
-                    When(creation_source=SAPClientCreationSource.OSIS.name), then=Value(1),
-                    default=2
-                )
-            ).order_by('priorite').first()
+            client_sap = candidat.sapclient_set.filter(creation_source=SAPClientCreationSource.OSIS.name).first()
             return {
                 "client_sap": client_sap.client_number if client_sap else "",
                 "iban": comptabilite.iban_account_number,
