@@ -110,9 +110,9 @@ class DigitService(IDigitService):
                 similarity_data = response.json()
                 if not isinstance(similarity_data, list) and similarity_data.get('status') == 500:
                     raise Exception(f"Digit internal server error (payload: {str(similarity_data)})")
-            except Exception as e:
-                logger.info(
-                    f"[Recherche doublon potentiel DigIT - {matricule}] Une erreur est survenue avec DigIT {repr(e)}"
+            except Exception:
+                logger.exception(
+                    f"[Recherche doublon potentiel DigIT - {matricule}] Une erreur est survenue avec DigIT"
                 )
                 PersonMergeProposal.objects.update_or_create(
                     original_person=original_person,

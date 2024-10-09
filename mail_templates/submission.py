@@ -24,8 +24,8 @@
 #
 # ##############################################################################
 from django.utils.translation import gettext_lazy as _
-
 from osis_mail_template import Token, templates
+
 from .tokens import CONTINUING_ADMISSION_TAG, DOCTORATE_ADMISSION_TAG, GENERAL_ADMISSION_TAG, admission_common_tokens
 
 __all__ = [
@@ -58,6 +58,11 @@ templates.register(
             name='recap_link',
             description=_("Link to download a copy of the file related to the admission (frontoffice)."),
             example="https://dev.studies.uclouvain.be/somewhere",
+        ),
+        Token(
+            name='salutation',
+            description=_('Mail salutation'),
+            example='Chère',
         ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,

@@ -31,7 +31,7 @@ from django.db.models import Q
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models import EntityProxy, Scholarship
-from admission.contrib.models.working_list import WorkingList
+from admission.contrib.models.working_list import DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -47,6 +47,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeFinancement,
     ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_bourse import TypeBourse
@@ -152,6 +155,10 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         label=_("Research scholarship"),
         required=False,
     )
+    fnrs_fria_fresh = forms.BooleanField(
+        label=_("FNRS, FRIA, FRESH"),
+        required=False,
+    )
     mode_filtres_etats_checklist = forms.ChoiceField(
         choices=ModeFiltrageChecklist.choices(),
         label=_('Include or exclude the checklist filters'),
@@ -160,17 +167,17 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         widget=forms.RadioSelect(),
     )
     filtres_etats_checklist = ChecklistStateFilterField(
-        configurations=[],  # TODO
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
         label=_('Checklist filters'),
         required=False,
     )
     liste_travail = WorkingListField(
         label=_('Working list'),
-        queryset=WorkingList.objects.none(),  # TODO
+        queryset=DoctorateWorkingList.objects.all(),
         required=False,
         empty_label=_('Personalized'),
         widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:working-lists",
+            url="admission:autocomplete:doctorate-working-lists",
             attrs={
                 'data-placeholder': _('Personalized'),
                 'data-allow-clear': 'true',
@@ -220,7 +227,16 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
                     person=self.user.person
                 ).values_list('education_group_id')
             )
-        return qs.filter(conditions).with_acronym().order_by('acronym').values_list('acronym', flat=True)
+        return (
+            qs.filter(conditions)
+            .with_acronym()
+            .distinct('acronym')
+            .order_by('acronym')
+            .values_list(
+                'acronym',
+                flat=True,
+            )
+        )
 
     def get_proximity_commission_choices(self):
         proximity_commission_choices = [ALL_FEMININE_EMPTY_CHOICE[0]]

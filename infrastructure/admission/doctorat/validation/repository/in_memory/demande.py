@@ -100,7 +100,6 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
             uuid=demande.entity_id.uuid,
             statut_cdd=demande.statut_cdd and demande.statut_cdd.name or '',
             statut_sic=demande.statut_sic and demande.statut_sic.name or '',
-            pre_admission_confirmee_le=demande.pre_admission_confirmee_le,
             admission_confirmee_le=demande.admission_confirmee_le,
             pre_admission_acceptee_le=demande.pre_admission_acceptee_le,
             admission_acceptee_le=demande.admission_acceptee_le,

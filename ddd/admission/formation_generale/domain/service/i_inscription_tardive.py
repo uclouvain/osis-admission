@@ -36,7 +36,7 @@ class IInscriptionTardive(interface.DomainService):
         AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE,
         AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
     ]
-    SEUIL_JOURS_INSCRIPTION_TARDIVE = 30
+    SEUIL_JOURS_INSCRIPTION_TARDIVE = 31
 
     @classmethod
     @abstractmethod

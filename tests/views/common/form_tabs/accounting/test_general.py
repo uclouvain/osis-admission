@@ -32,6 +32,7 @@ import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
+from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.contrib.models import Accounting
@@ -91,6 +92,7 @@ class GeneralAccountingFormViewTestCase(TestCase):
         cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
         cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
         cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
+        cls.saint_louis_campus = Campus.objects.get(external_id=CampusFactory(name='Bruxelles Saint-Louis').external_id)
         EntityVersionFactory(entity=cls.first_doctoral_commission)
         cls.default_form_data = {
             'demande_allocation_d_etudes_communaute_francaise_belgique': 'False',
@@ -285,7 +287,7 @@ class GeneralAccountingFormViewTestCase(TestCase):
             },
         )
 
-    def test_general_accounting_form_initialization_with_other_campus(self):
+    def test_general_accounting_form_initialization_of_sport_affiliation_choices(self):
         self.client.force_login(self.sic_manager_user)
 
         # Change teaching campus -> this one has no sport pass so we don't display the related question
@@ -306,6 +308,33 @@ class GeneralAccountingFormViewTestCase(TestCase):
         )
         self.assertEqual(form.fields['affiliation_sport'].required, False)
         self.assertEqual(form.display_sport_question, False)
+
+        # Change teaching campus -> Saint-Louis
+        education_group_version.root_group.main_teaching_campus = self.saint_louis_campus
+        education_group_version.root_group.save()
+
+        response = self.client.get(self.form_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check form initialization
+        form = response.context['form']
+
+        self.assertEqual(
+            form.fields['affiliation_sport'].choices,
+            [
+                (
+                    ChoixAffiliationSport.SAINT_LOUIS_UCL.name,
+                    ChoixAffiliationSport.SAINT_LOUIS_UCL.value,
+                ),
+                (
+                    ChoixAffiliationSport.NON.name,
+                    gettext('No (access to sports facilities on the Saint-Louis campus is free)'),
+                ),
+            ],
+        )
+        self.assertEqual(form.fields['affiliation_sport'].required, True)
+        self.assertEqual(form.display_sport_question, True)
 
     def test_general_accounting_form_initialization_without_assimilation(self):
         self.client.force_login(self.sic_manager_user)

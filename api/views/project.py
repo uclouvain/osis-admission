@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,10 +36,8 @@ from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
-    GetPropositionCommand,
     ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
     ListerPropositionsSuperviseesQuery,
-    SupprimerPropositionCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.ddd.admission.formation_continue.commands import (
@@ -57,7 +55,7 @@ __all__ = [
     "PropositionCreatePermissionsView",
     "PropositionListView",
     "SupervisedPropositionListView",
-    "PropositionViewSet",
+    "ProjectViewSet",
 ]
 
 
@@ -175,12 +173,10 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
         return Response(serializer.data)
 
 
-class PropositionSchema(ResponseSpecificSchema):
-    operation_id_base = '_proposition'
+class ProjectSchema(ResponseSpecificSchema):
+    operation_id_base = '_project'
     serializer_mapping = {
-        'GET': serializers.DoctoratePropositionDTOSerializer,
         'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
-        'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
 
     def map_choicefield(self, field):
@@ -196,49 +192,36 @@ class PropositionSchema(ResponseSpecificSchema):
         return super().map_field(field)
 
 
-class PropositionViewSet(
+class ProjectViewSet(
     APIPermissionRequiredMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     GenericAPIView,
 ):
-    name = "propositions"
-    schema = PropositionSchema()
+    name = "project"
+    schema = ProjectSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
         'GET': 'admission.view_admission_project',
         'PUT': 'admission.change_admission_project',
-        'DELETE': 'admission.delete_doctorateadmission',
     }
 
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
-        """Get a single proposition"""
-        proposition = message_bus_instance.invoke(
-            GetPropositionCommand(uuid_proposition=kwargs.get('uuid')),
-        )
-        serializer = serializers.DoctoratePropositionDTOSerializer(
-            instance=proposition,
-            context=self.get_serializer_context(),
-        )
-        return Response(serializer.data)
+        """
+        This method is only used to check the permission.
+        We have to return some data as the schema expects a 200 status and the deserializer expects some data.
+        """
+        return Response(data={})
 
     def put(self, request, *args, **kwargs):
-        """Edit a proposition"""
+        """Edit the project"""
         serializer = serializers.CompleterPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(CompleterPropositionCommand(**serializer.data))
         self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def delete(self, request, *args, **kwargs):
-        """Soft-Delete a proposition"""
-        proposition_id = message_bus_instance.invoke(
-            SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid')),
-        )
-        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -83,7 +83,7 @@ class MollieService:
             )
             result = response.json()
         except Exception as e:
-            logger.error(
+            logger.exception(
                 f"[MOLLIE] Une erreur est survenue durant la requete a Mollie "
                 f"pour la recuperation du paiement avec mollie_id : {paiement_id}"
             )
@@ -118,7 +118,7 @@ class MollieService:
             )
             result = response.json()
         except Exception as e:
-            logger.error(
+            logger.exception(
                 f"[MOLLIE] Une erreur est survenue durant la requete à Mollie "
                 f"pour la creation d'un paiement pour l'admission avec reference {reference}"
             )

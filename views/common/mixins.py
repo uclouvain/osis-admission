@@ -36,6 +36,7 @@ from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
+from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.contrib.models import (
     DoctorateAdmission,
@@ -258,8 +259,12 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @property
     def injection_possible(self):
+        # Leave this test first so we are sure the other information are available.
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
+        annee_ouverte = AdmissionDigitTicketSubmissionCalendar().get_target_years_opened()
+        if annee_ouverte and self.admission.determined_academic_year.year != annee_ouverte[0]:
+            return False, f"Seules les inscriptions en {annee_ouverte} sont autorisées"
         contexte = self.admission.get_admission_context()
         if contexte == CONTEXT_GENERAL:
             etat_financabilite = {
@@ -269,10 +274,10 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             if etat_financabilite is None:
                 return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
             if (
-                etat_financabilite == EtatFinancabilite.FINANCABLE.name
+                etat_financabilite
                 and (
                     self.admission.financability_rule == ''
-                    or self.admission.financability_computed_rule_on is None
+                    or self.admission.financability_rule_established_on is None
                     or self.admission.financability_rule_established_by_id is None
                 )
             ):

@@ -47,6 +47,8 @@ class IListerDemandesService(interface.DomainService):
         inscription_requise: Optional[bool] = None,
         paye: Optional[bool] = None,
         marque_d_interet: Optional[bool] = None,
+        mode_filtres_etats_checklist: Optional[str] = '',
+        filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,

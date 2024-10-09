@@ -79,7 +79,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     """Change the status of the admission of a specific tab"""
     update_fields = ['checklist', 'last_update_author', 'modified_at']
 
-    if tab in ['donnees_personnelles', 'decision_sic'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
+    if tab in ['decision_sic'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
         # TODO : add intermediary status to support async process (waiting for digit response)
 
         from infrastructure.messages_bus import message_bus_instance

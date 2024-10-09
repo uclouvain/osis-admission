@@ -28,15 +28,18 @@ import uuid
 from contextlib import suppress
 
 from ckeditor.fields import RichTextField
+from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import OuterRef
+from django.db.models import OuterRef, Prefetch
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
+from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -47,13 +50,33 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    DerogationFinancement,
+    TypeDeRefus,
+    BesoinDeDerogation,
+    DroitsInscriptionMontant,
+    DispenseOuDroitsMajores,
+    MobiliteNombreDeMois,
+)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    EtatEquivalenceTitreAcces,
+)
+from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
 from base.utils.cte import CTESubquery
+from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
+from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
@@ -63,8 +86,7 @@ __all__ = [
     "ConfirmationPaper",
 ]
 
-from ...ddd.admission.dtos.conditions import InfosDetermineesDTO
-from ...ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
+from .checklist import RefusalReason
 
 
 class DoctorateAdmission(BaseAdmission):
@@ -320,10 +342,6 @@ class DoctorateAdmission(BaseAdmission):
         default=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
         verbose_name=_("Post-enrolment status"),
     )
-    pre_admission_submission_date = models.DateTimeField(
-        verbose_name=_("Pre-admission submission date"),
-        null=True,
-    )
 
     supervision_group = SignatureProcessField()
 
@@ -381,6 +399,345 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Jury approval"),
         upload_to=admission_directory_path,
     )
+
+    # Financability
+    financability_computed_rule = models.CharField(
+        verbose_name=_('Financability computed rule'),
+        choices=EtatFinancabilite.choices(),
+        max_length=100,
+        default='',
+        editable=False,
+    )
+    financability_computed_rule_situation = models.CharField(
+        verbose_name=_('Financability computed rule situation'),
+        choices=SituationFinancabilite.choices(),
+        max_length=100,
+        default='',
+        editable=False,
+    )
+    financability_computed_rule_on = models.DateTimeField(
+        verbose_name=_('Financability computed rule on'),
+        null=True,
+        editable=False,
+    )
+    financability_rule = models.CharField(
+        verbose_name=_('Financability rule'),
+        choices=SituationFinancabilite.choices(),
+        max_length=100,
+        default='',
+        blank=True,
+    )
+    financability_rule_established_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_('Financability rule established by'),
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        editable=False,
+    )
+    financability_rule_established_on = models.DateTimeField(
+        verbose_name=_('Financability rule established on'),
+        null=True,
+        editable=False,
+    )
+
+    financability_dispensation_status = models.CharField(
+        verbose_name=_('Financability dispensation status'),
+        choices=DerogationFinancement.choices(),
+        max_length=100,
+        default='',
+        blank=True,
+    )
+    financability_dispensation_first_notification_on = models.DateTimeField(
+        verbose_name=_('Financability dispensation first notification on'),
+        null=True,
+        editable=False,
+    )
+    financability_dispensation_first_notification_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_('Financability dispensation first notification by'),
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        editable=False,
+    )
+    financability_dispensation_last_notification_on = models.DateTimeField(
+        verbose_name=_('Financability dispensation last notification on'),
+        null=True,
+        editable=False,
+    )
+    financability_dispensation_last_notification_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_('Financability dispensation last notification by'),
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        editable=False,
+    )
+
+    # FAC & SIC approval
+    fac_approval_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Approval certificate of faculty'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    fac_refusal_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Refusal certificate of faculty'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    sic_approval_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Approval certificate from SIC'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    sic_annexe_approval_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Annexe approval certificate from SIC'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    sic_refusal_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Refusal certificate from SIC'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    refusal_type = models.CharField(
+        verbose_name=_('Refusal type'),
+        max_length=50,
+        default='',
+        choices=TypeDeRefus.choices(),
+    )
+    refusal_reasons = models.ManyToManyField(
+        blank=True,
+        related_name='+',
+        to='admission.RefusalReason',
+        verbose_name=_('Refusal reasons'),
+    )
+    other_refusal_reasons = ArrayField(
+        base_field=models.TextField(),
+        blank=True,
+        default=list,
+        verbose_name=_('Other refusal reasons'),
+    )
+    with_additional_approval_conditions = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Are there any additional conditions (subject to ...)?'),
+    )
+    additional_approval_conditions = models.ManyToManyField(
+        blank=True,
+        related_name='+',
+        to='admission.AdditionalApprovalCondition',
+        verbose_name=_('Additional approval conditions'),
+    )
+    other_training_accepted_by_fac = models.ForeignKey(
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name='+',
+        to='base.EducationGroupYear',
+        verbose_name=_('Other course accepted by the faculty'),
+    )
+    with_prerequisite_courses = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Are there any prerequisite courses?'),
+    )
+    prerequisite_courses = models.ManyToManyField(
+        to='base.LearningUnitYear',
+        blank=True,
+        through='DoctorateAdmissionPrerequisiteCourses',
+        through_fields=(
+            'admission',
+            'course',
+        ),
+        verbose_name=_('Prerequisite courses'),
+    )
+    prerequisite_courses_fac_comment = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Other communication for the candidate about the prerequisite courses'),
+    )
+    program_planned_years_number = models.SmallIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Number of years required for the full program (including prerequisite courses)'),
+        validators=[MinValueValidator(DUREE_MINIMALE_PROGRAMME), MaxValueValidator(DUREE_MAXIMALE_PROGRAMME)],
+    )
+    annual_program_contact_person_name = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Name of the contact person for the design of the annual program'),
+    )
+    annual_program_contact_person_email = models.EmailField(
+        blank=True,
+        default='',
+        verbose_name=_('Email of the contact person for the design of the annual program'),
+    )
+    join_program_fac_comment = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Faculty comment about the collaborative program'),
+    )
+    dispensation_needed = models.CharField(
+        max_length=50,
+        default='',
+        choices=BesoinDeDerogation.choices(),
+        verbose_name=_('Dispensation needed'),
+    )
+    tuition_fees_amount = models.CharField(
+        max_length=50,
+        default='',
+        choices=DroitsInscriptionMontant.choices(),
+        verbose_name=_("Tuition fees amount"),
+    )
+    tuition_fees_amount_other = models.DecimalField(
+        verbose_name=_("Amount (without EUR/)"),
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
+    tuition_fees_dispensation = models.CharField(
+        max_length=50,
+        default='',
+        choices=DispenseOuDroitsMajores.choices(),
+        verbose_name=_("Dispensation or increased fees"),
+    )
+    particular_cost = models.TextField(
+        default='',
+        verbose_name=_("Particular cost"),
+        blank=True,
+    )
+    rebilling_or_third_party_payer = models.TextField(
+        default='',
+        verbose_name=_("Rebilling or third-party payer"),
+        blank=True,
+    )
+    first_year_inscription_and_status = models.TextField(
+        default='',
+        verbose_name=_("First year of inscription + status"),
+        blank=True,
+    )
+    is_mobility = models.BooleanField(
+        null=True,
+        verbose_name=_('The candidate is doing a mobility'),
+    )
+    mobility_months_amount = models.CharField(
+        max_length=50,
+        default='',
+        choices=MobiliteNombreDeMois.choices(),
+        verbose_name=_("Mobility months amount"),
+    )
+    must_report_to_sic = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('The candidate must report to SIC'),
+    )
+    communication_to_the_candidate = models.TextField(
+        default='',
+        verbose_name=_("Communication to the candidate"),
+        blank=True,
+    )
+    must_provide_student_visa_d = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('The candidate must provide a student visa'),
+    )
+    student_visa_d = FileField(
+        verbose_name=_("Student visa D"),
+        upload_to=admission_directory_path,
+        blank=True,
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    signed_enrollment_authorization = FileField(
+        verbose_name=_("Signed enrollment authorization"),
+        upload_to=admission_directory_path,
+        blank=True,
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    diplomatic_post = models.ForeignKey(
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        to='admission.DiplomaticPost',
+        verbose_name=_('Diplomatic post'),
+    )
+    admission_requirement = models.CharField(
+        choices=ConditionAcces.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Admission requirement'),
+    )
+    admission_requirement_year = models.ForeignKey(
+        to="base.AcademicYear",
+        related_name="+",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_('Admission requirement year'),
+    )
+    foreign_access_title_equivalency_type = models.CharField(
+        choices=TypeEquivalenceTitreAcces.choices(),
+        blank=True,
+        default='',
+        max_length=50,
+        verbose_name=_('Foreign access title equivalence type'),
+    )
+    foreign_access_title_equivalency_status = models.CharField(
+        choices=StatutEquivalenceTitreAcces.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Foreign access title equivalence status'),
+    )
+    foreign_access_title_equivalency_restriction_about = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_('Information about the restriction'),
+    )
+    foreign_access_title_equivalency_state = models.CharField(
+        choices=EtatEquivalenceTitreAcces.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Foreign access title equivalence state'),
+    )
+    foreign_access_title_equivalency_effective_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_('Foreign access title equivalence effective date'),
+    )
+
+    def update_financability_computed_rule(self, author: 'Person'):
+        from admission.ddd.admission.doctorat.preparation.commands import (
+            SpecifierFinancabiliteResultatCalculCommand,
+        )
+        from infrastructure.messages_bus import message_bus_instance
+
+        financabilite = message_bus_instance.invoke(
+            DeterminerSiCandidatEstFinancableQuery(
+                matricule_fgs=self.candidate.global_id,
+                sigle_formation=self.training.acronym,
+                annee=self.training.academic_year.year,
+                est_en_reorientation=False,
+            )
+        )
+
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteResultatCalculCommand(
+                uuid_proposition=self.uuid,
+                financabilite_regle_calcule=financabilite.etat,
+                financabilite_regle_calcule_situation=financabilite.situation,
+            )
+        )
 
     # The following properties are here to alias the training_id field to doctorate_id
     @property
@@ -530,18 +887,74 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "candidate__country_of_citizenship",
                 "determined_academic_year",
                 "thesis_institute",
+                "thesis_language",
                 "accounting",
                 "international_scholarship",
                 "last_update_author",
+                "financability_rule_established_by",
+                "financability_dispensation_first_notification_by",
+                "financability_dispensation_last_notification_by",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
                 intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
             )
-            .annotate_campus()
             .annotate_pool_end_date()
             .annotate_training_management_entity()
             .annotate_with_reference(with_management_faculty=False)
+        )
+
+    def for_domain_model(self):
+        return (
+            self.get_queryset()
+            .select_related(
+                "other_training_accepted_by_fac__academic_year",
+                "admission_requirement_year",
+            )
+            .prefetch_related(
+                "refusal_reasons",
+                "additional_approval_conditions",
+                "freeadditionalapprovalcondition_set",
+                "prerequisite_courses",
+            )
+        )
+
+    def for_dto(self):
+        return (
+            self.get_queryset()
+            .select_related(
+                'training__enrollment_campus__country',
+            )
+            .annotate_campus_info()
+        )
+
+    def for_manager_dto(self):
+        return (
+            self.for_dto()
+            .select_related(
+                "financability_rule_established_by",
+                "financability_dispensation_first_notification_by",
+                "financability_dispensation_last_notification_by",
+                "other_training_accepted_by_fac__academic_year",
+                "admission_requirement_year",
+            )
+            .annotate_campus(
+                training_field='other_training_accepted_by_fac',
+                annotation_name='other_training_accepted_by_fac_teaching_campus',
+            )
+            .annotate_with_student_registration_id()
+            .annotate_several_admissions_in_progress()
+            .annotate_submitted_profile_countries_names()
+            .annotate_last_status_update()
+            .prefetch_related(
+                "additional_approval_conditions",
+                "freeadditionalapprovalcondition_set",
+                'prerequisite_courses__academic_year',
+                Prefetch(
+                    'refusal_reasons',
+                    queryset=RefusalReason.objects.select_related('category').order_by('category__order', 'order'),
+                ),
+            )
         )
 
 
@@ -561,7 +974,6 @@ class DemandeManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .get_queryset()
             .only(
                 'uuid',
-                'pre_admission_submission_date',
                 'submitted_at',
                 'submitted_profile',
                 'modified_at',
@@ -615,9 +1027,6 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 'training__academic_year',
                 "training__enrollment_campus",
                 'international_scholarship',
-            )
-            .exclude(
-                post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
             )
             .annotate_training_management_entity()
             .annotate_with_reference(with_management_faculty=False)
@@ -745,3 +1154,18 @@ class InternalNote(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class DoctorateAdmissionPrerequisiteCourses(models.Model):
+    """Prerequisite courses of a doctorate admission."""
+
+    admission = models.ForeignKey(
+        DoctorateAdmission,
+        on_delete=models.CASCADE,
+    )
+    course = models.ForeignKey(
+        'base.LearningUnitYear',
+        on_delete=models.PROTECT,
+        related_name='+',
+        to_field='uuid',
+    )

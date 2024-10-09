@@ -27,7 +27,7 @@
 import datetime
 import json
 from collections import defaultdict
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from ckeditor.widgets import CKEditorWidget
 from dal import forward
@@ -45,9 +45,10 @@ from django.utils.translation import (
     gettext,
     override,
 )
+from osis_document.utils import is_uuid
 
-from admission.constants import CONTEXT_GENERAL
-from admission.contrib.models import GeneralEducationAdmission
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE
+from admission.contrib.models import GeneralEducationAdmission, DoctorateAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import (
     RefusalReason,
@@ -105,7 +106,6 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
 )
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
-from osis_document.utils import is_uuid
 
 FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 
@@ -216,7 +216,6 @@ class ChoixFormationForm(forms.Form):
         label=pgettext_lazy("admission", "Course"),
         widget=autocomplete.ListSelect2(
             forward=['annee_academique'],
-            url="admission:autocomplete:general-education-trainings",
             attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
@@ -228,6 +227,7 @@ class ChoixFormationForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         formation = kwargs.pop('formation')
+        current_context = kwargs.pop('context')
         super().__init__(*args, **kwargs)
         today = datetime.date.today()
         try:
@@ -252,6 +252,11 @@ class ChoixFormationForm(forms.Form):
         else:
             self.fields['formation'].widget.choices = [(formation.sigle, f'{formation.sigle} - {formation.intitule}')]
             self.initial_training_type = formation.type
+
+        self.fields['formation'].widget.url = {
+            CONTEXT_GENERAL: 'admission:autocomplete:general-education-trainings',
+            CONTEXT_DOCTORATE: 'admission:autocomplete:doctorate-trainings',
+        }[current_context]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -511,7 +516,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         *args,
         **kwargs,
     ):
-        instance: Optional[GeneralEducationAdmission] = kwargs.get('instance', None)
+        instance: Optional[Union[GeneralEducationAdmission, DoctorateAdmission]] = kwargs.get('instance', None)
         data = kwargs.get('data', {})
         initial = kwargs.setdefault('initial', {})
 
@@ -666,6 +671,11 @@ class FacDecisionApprovalForm(forms.ModelForm):
         return cleaned_data
 
 
+class DoctorateFacDecisionApprovalForm(FacDecisionApprovalForm):
+    class Meta(FacDecisionApprovalForm.Meta):
+        model = DoctorateAdmission
+
+
 class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
     admission_requirement_year = AcademicYearModelChoiceField(
         past_only=True,
@@ -680,6 +690,10 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
             type_formation=self.instance.training.education_group_type.name,
         )
 
+        if self.instance.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut') == 'GEST_REUSSITE':
+            self.fields['admission_requirement'].disabled = True
+            self.fields['admission_requirement_year'].disabled = True
+
         for field in self.fields.values():
             field.widget.attrs['class'] = 'past-experiences-admission-requirement-field'
 
@@ -693,6 +707,11 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
         widgets = {
             'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
         }
+
+
+class DoctoratePastExperiencesAdmissionRequirementForm(PastExperiencesAdmissionRequirementForm):
+    class Meta(PastExperiencesAdmissionRequirementForm.Meta):
+        model = DoctorateAdmission
 
 
 class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
@@ -767,11 +786,17 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
         return cleaned_data
 
 
+class DoctoratePastExperiencesAdmissionAccessTitleForm(PastExperiencesAdmissionAccessTitleForm):
+    class Meta(PastExperiencesAdmissionAccessTitleForm.Meta):
+        model = DoctorateAdmission
+
+
 class SicDecisionApprovalDocumentsForm(forms.Form):
     def __init__(
         self,
         documents: List[EmplacementDocumentDTO],
-        instance: GeneralEducationAdmission,
+        instance: Union[GeneralEducationAdmission, DoctorateAdmission],
+        context: str,
         *args,
         **kwargs,
     ):
@@ -791,7 +816,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
                     request_status=document.statut_reclamation,
                     proposition_uuid=instance.uuid,
                     only_limited_request_choices=False,
-                    context=CONTEXT_GENERAL,
+                    context=context,
                 )
 
                 self.fields[document.identifiant] = document_field
@@ -894,10 +919,13 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
         # Initialize conditions field
         self.is_admission = self.instance.type_demande == TypeDemande.ADMISSION.name
-        self.is_vip = (
-            self.instance.international_scholarship_id is not None
-            or self.instance.erasmus_mundus_scholarship_id is not None
-            or self.instance.double_degree_scholarship_id is not None
+        self.is_vip = any(
+            getattr(self.instance, field, None) is not None
+            for field in [
+                'international_scholarship_id',
+                'erasmus_mundus_scholarship_id',
+                'double_degree_scholarship_id',
+            ]
         )
         self.is_hue = not self.instance.candidate.country_of_citizenship.european_union
         self.is_assimilation = (
@@ -1083,6 +1111,11 @@ class SicDecisionApprovalForm(forms.ModelForm):
         return cleaned_data
 
 
+class DoctorateSicDecisionApprovalForm(SicDecisionApprovalForm):
+    class Meta(SicDecisionApprovalForm.Meta):
+        model = DoctorateAdmission
+
+
 class SicDecisionRefusalForm(FacDecisionRefusalForm):
     refusal_type = forms.ChoiceField(
         label=_('Refusal type'),
@@ -1177,6 +1210,11 @@ class FinancabiliteApprovalForm(forms.ModelForm):
         self.initial['financability_rule'] = ''
 
 
+class DoctorateFinancabiliteApprovalForm(FinancabiliteApprovalForm):
+    class Meta(FinancabiliteApprovalForm.Meta):
+        model = DoctorateAdmission
+
+
 class FinancabiliteNotFinanceableForm(forms.ModelForm):
     class Meta:
         model = GeneralEducationAdmission
@@ -1193,6 +1231,11 @@ class FinancabiliteNotFinanceableForm(forms.ModelForm):
             and SituationFinancabilite[choice[0]] in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]
         )
         self.initial['financability_rule'] = ''
+
+
+class DoctorateFinancabiliteNotFinanceableForm(FinancabiliteNotFinanceableForm):
+    class Meta(FinancabiliteNotFinanceableForm.Meta):
+        model = DoctorateAdmission
 
 
 class FinancabiliteDispensationForm(forms.Form):

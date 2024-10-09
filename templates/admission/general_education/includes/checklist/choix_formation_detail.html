@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,14 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% has_perm 'admission.change_checklist' as can_change_checklist %}
-{% if can_change_checklist %}
-  {% url 'admission:general-education:choix-formation-update' uuid=view.kwargs.uuid as edit_choix_formation_url %}
+{% if view.is_doctorate %}
+  {% has_perm 'admission.checklist_change_training_choice' as can_change_checklist_training_choice %}
+{% else %}
+  {% has_perm 'admission.change_checklist' as can_change_checklist %}
+{% endif %}
+
+{% if can_change_checklist_training_choice or can_change_checklist %}
+  {% url view.base_namespace|add:':choix-formation-update' uuid=view.kwargs.uuid as edit_choix_formation_url %}
 {% endif %}
 
 <div id="choix-formation-details"

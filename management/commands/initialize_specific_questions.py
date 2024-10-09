@@ -24,8 +24,8 @@
 #
 # ##############################################################################
 import bisect
-
 import itertools
+
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.translation import ngettext
@@ -52,7 +52,7 @@ from base.models.education_group_type import EducationGroupType
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
-from osis_document.enums import ChoiceEnum
+from base.models.utils.utils import ChoiceEnum
 
 
 class SpecificQuestionToInit(ChoiceEnum):

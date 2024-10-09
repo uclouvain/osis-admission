@@ -33,7 +33,13 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from admission.contrib.models import ContinuingEducationAdmission
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixEdition,
+    OngletsChecklist,
+    ChoixStatutChecklist,
+)
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.roles import (
@@ -653,3 +659,224 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0].uuid, self.admissions[1].uuid)
         self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_decision_checklist_status(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        second_admission = ContinuingEducationAdmissionFactory(
+            training__management_entity=self.first_entity,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            determined_academic_year=self.admissions[0].determined_academic_year,
+        )
+
+        default_cmd_params = {
+            'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
+            'numero': str(second_admission),
+        }
+
+        current_checklist = second_admission.checklist['current'][OngletsChecklist.decision.name]
+        current_checklist['statut'] = ChoixStatutChecklist.INITIAL_NON_CONCERNE.name
+        current_checklist['extra'] = {}
+        second_admission.save(update_fields=['checklist'])
+
+        # To be processed
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['A_TRAITER'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
+        current_checklist['extra'] = {}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['A_TRAITER'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # Taken in charge
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['PRISE_EN_CHARGE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        current_checklist['extra'] = {'en_cours': 'taken_in_charge'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['PRISE_EN_CHARGE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # Fac approval
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['ACCORD_FAC'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        current_checklist['extra'] = {'en_cours': 'fac_approval'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['ACCORD_FAC'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # On hold
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['MISE_EN_ATTENTE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        current_checklist['extra'] = {'en_cours': 'on_hold'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['MISE_EN_ATTENTE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # Denied
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['REFUSEE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        current_checklist['extra'] = {'blocage': 'denied'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['REFUSEE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # Canceled
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['ANNULEE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        current_checklist['extra'] = {'blocage': 'canceled'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['ANNULEE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # To validate
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['A_VALIDER'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        current_checklist['extra'] = {'en_cours': 'to_validate'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['A_VALIDER'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # On hold
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['VALIDEE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        current_checklist['extra'] = {}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_0=['VALIDEE'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            filtres_etats_checklist_0=['VALIDEE'],
+            mode_filtres_etats_checklist=ModeFiltrageChecklist.EXCLUSION.name,
+            numero=str(second_admission),
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)

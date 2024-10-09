@@ -48,19 +48,41 @@ from ._should_groupe_de_supervision_avoir_un_promoteur_de_reference import (
 )
 from ._should_groupe_de_supervision_non_complet_pour_membres_CA import ShouldGroupeDeSupervisionNonCompletPourMembresCA
 from ._should_groupe_de_supervision_non_complet_pour_promoteurs import ShouldGroupeDeSupervisionNonCompletPourPromoteurs
+from ._should_informations_checklist_etre_completees import (
+    ShouldSpecifierMotifRefusFacultaire,
+    ShouldSpecifierInformationsAcceptationFacultaire,
+    ShouldSpecifierInformationsAcceptationFacultaireInscription,
+    ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire,
+    ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldFacPeutDonnerDecision,
+    ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
+    ShouldSelectionnerTitreAccesPourEnvoyerASIC,
+    ShouldSicPeutDonnerDecision,
+    ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
+    ShouldDemandeEtreTypeAdmission,
+    ShouldDemandeEtreTypeInscription,
+    ShouldPeutSpecifierInformationsDecisionFacultaire,
+    ShouldTitreAccesEtreSelectionne,
+    ShouldConditionAccesEtreSelectionne,
+    ShouldParcoursAnterieurEtreSuffisant,
+    ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
+    ShouldNePasAvoirDeDocumentReclameImmediat,
+    ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande,
+)
 from ._should_institution_dependre_doctorat_realise import ShouldInstitutionDependreDoctoratRealise
 from ._should_justification_donnee_si_preadmission import ShouldJustificationDonneeSiPreadmission
 from ._should_langues_connues_etre_completees import ShouldLanguesConnuesRequisesEtreSpecifiees
 from ._should_membre_CA_etre_dans_groupe_de_supervision import ShouldMembreCAEtreDansGroupeDeSupervision
+from ._should_membre_etre_interne_ou_externe import ShouldMembreEtreInterneOuExterne
 from ._should_premier_promoteur_renseigner_institut_these import ShouldPromoteurReferenceRenseignerInstitutThese
 from ._should_projet_etre_complet import ShouldProjetEtreComplet
 from ._should_promoteur_etre_dans_groupe_de_supervision import ShouldPromoteurEtreDansGroupeDeSupervision
 from ._should_signataire_etre_dans_groupe_de_supervision import ShouldSignataireEtreDansGroupeDeSupervision
 from ._should_signataire_etre_invite import ShouldSignataireEtreInvite
 from ._should_signataire_pas_invite import ShouldSignatairePasDejaInvite
-from ._should_type_contrat_travail_dependre_type_financement import ShouldTypeContratTravailDependreTypeFinancement
-from ._should_membre_etre_interne_ou_externe import ShouldMembreEtreInterneOuExterne
 from ._should_signatures_pas_etre_envoyees import ShouldSignaturesPasEtreEnvoyees
+from ._should_type_contrat_travail_dependre_type_financement import ShouldTypeContratTravailDependreTypeFinancement
 
 __all__ = [
     "ShouldInstitutionDependreDoctoratRealise",
@@ -93,4 +115,24 @@ __all__ = [
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",
     "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
     "ShouldAssimilationEtreCompletee",
+    "ShouldSpecifierMotifRefusFacultaire",
+    "ShouldSpecifierInformationsAcceptationFacultaire",
+    "ShouldSpecifierInformationsAcceptationFacultaireInscription",
+    "ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire",
+    "ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire",
+    "ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire",
+    "ShouldFacPeutDonnerDecision",
+    "ShouldPropositionEtreInscriptionTardiveAvecConditionAcces",
+    "ShouldSelectionnerTitreAccesPourEnvoyerASIC",
+    "ShouldSicPeutDonnerDecision",
+    "ShouldChecklistEtreDansEtatCorrectPourApprouverInscription",
+    "ShouldDemandeEtreTypeAdmission",
+    "ShouldDemandeEtreTypeInscription",
+    "ShouldPeutSpecifierInformationsDecisionFacultaire",
+    "ShouldTitreAccesEtreSelectionne",
+    "ShouldConditionAccesEtreSelectionne",
+    "ShouldParcoursAnterieurEtreSuffisant",
+    "ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation",
+    "ShouldNePasAvoirDeDocumentReclameImmediat",
+    "ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande",
 ]

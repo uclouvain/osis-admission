@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import json
+import traceback
 from datetime import datetime
 from typing import Dict
 
@@ -55,6 +56,7 @@ SPORT_TOUT_CAMPUS = [
 
 class InjectionEPCSignaletique:
     def injecter(self, admission: BaseAdmission) -> None:
+        e = ""
         try:
             donnees = self.recuperer_donnees(admission=admission)
             if settings.USE_CELERY:
@@ -62,18 +64,22 @@ class InjectionEPCSignaletique:
                     lambda: injecter_signaletique_a_epc_task.run.delay(admissions_references=[admission.reference])
                 )
             statut = EPCInjectionStatus.NO_SENT.name
-        except Exception:
+        except Exception as exception:
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
+            e = exception
+            stacktrace = traceback.format_exc()
 
-        EPCInjection.objects.get_or_create(
+        EPCInjection.objects.update_or_create(
             admission=admission,
             type=EPCInjectionType.SIGNALETIQUE.name,
             defaults={
                 'payload': donnees,
                 'status': statut,
                 'last_attempt_date': None,
+                "osis_error_message": str(e) if e else "",
+                "osis_stacktrace": stacktrace if e else ""
             }
         )
 
@@ -139,10 +145,7 @@ class InjectionEPCSignaletique:
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.TOURNAI.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False
             ),
-            'carte_sport_st_louis': (
-                comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_LOUIS.name] + SPORT_TOUT_CAMPUS
-                if comptabilite else False
-            ),
+            'carte_sport_st_louis': comptabilite.sport_affiliation in SPORT_TOUT_CAMPUS if comptabilite else False,
             'carte_sport_st_gilles': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_GILLES.name] + SPORT_TOUT_CAMPUS
                 if comptabilite else False

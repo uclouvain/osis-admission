@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -151,9 +151,31 @@
       {{ admission.cotutelle|yesno }}
     </p>
     {% if admission.cotutelle %}
-      <p>
-        {% trans "Partner institution" %} :
+      <p style="margin-left: 10px;">
+        ➔ {% trans "Partner institution" %} :
         {{ admission.cotutelle_institution }}
+      </p>
+    {% endif %}
+
+    <p>
+      {% translate "Has the PhD project already started?" %}
+      {{ admission.phd_alread_started|yesno }}
+    </p>
+    {% if admission.phd_alread_started %}
+      <p style="margin-left: 10px;">
+        ➔ {% trans "Partner institution" %} :
+        {{ admission.phd_alread_started_institute|default:_('Not specified') }}
+      </p>
+    {% endif %}
+
+    <p>
+      {% translate "Have you previously enrolled for a PhD?" %}
+      {{ admission.phd_already_done|enum_display:'ChoixDoctoratDejaRealise' }}
+    </p>
+    {% if admission.phd_already_done == 'YES' or admission.phd_already_done == 'PARTIAL' %}
+      <p style="margin-left: 10px;">
+        ➔ {% translate "Institution in which the PhD has been realised / started" %} :
+        {{ admission.phd_already_done_institution|default:_('Not specified') }}
       </p>
     {% endif %}
 

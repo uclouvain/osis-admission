@@ -243,3 +243,17 @@ class RecupererEtudesSecondairesQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererConnaissancesLanguesQuery(interface.QueryRequest):
     matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererTitresAccesSelectionnablesPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+    seulement_selectionnes: Optional[bool] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierExperienceEnTantQueTitreAccesCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    type_experience: str
+    selectionne: bool

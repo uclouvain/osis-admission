@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ from typing import Optional
 
 import attr
 
-from osis_common.ddd import interface
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -55,7 +55,6 @@ class DemandeDTO(interface.DTO):
     pre_admission_acceptee_le: Optional[datetime.datetime]
     admission_acceptee_le: Optional[datetime.datetime]
     derniere_modification: datetime.datetime
-    pre_admission_confirmee_le: Optional[datetime.datetime]
     admission_confirmee_le: Optional[datetime.datetime]
     profil_soumis_candidat: ProfilCandidatDTO
     # TODO only include info about demande
@@ -69,6 +68,5 @@ class RecupererDemandeDTO(interface.DTO):
     derniere_modification: datetime.datetime
     pre_admission_acceptee_le: Optional[datetime.datetime]
     admission_acceptee_le: Optional[datetime.datetime]
-    pre_admission_confirmee_le: Optional[datetime.datetime]
     admission_confirmee_le: Optional[datetime.datetime]
     # TODO include all info about demande (doctorate and persons too)

@@ -387,8 +387,10 @@ class FinancabiliteDerogationViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
         self.assertEqual(
-            self.general_admission.financability_dispensation_status, DerogationFinancement.NON_CONCERNE.name
+            self.general_admission.financability_dispensation_status,
+            DerogationFinancement.NON_CONCERNE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
     def test_abandon_candidat_post(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -408,7 +410,8 @@ class FinancabiliteDerogationViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
         self.assertEqual(
-            self.general_admission.financability_dispensation_status, DerogationFinancement.ABANDON_DU_CANDIDAT.name
+            self.general_admission.financability_dispensation_status,
+            DerogationFinancement.ABANDON_DU_CANDIDAT.name,
         )
 
     def test_refus_post(self):
@@ -459,7 +462,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.general_admission.financability_dispensation_status,
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
         )
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             self.general_admission.refusal_reasons.all(),
             [refusal_reason],
         )

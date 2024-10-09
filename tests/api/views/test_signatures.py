@@ -27,11 +27,12 @@
 from unittest.mock import patch
 
 from django.shortcuts import resolve_url
+from osis_history.models import HistoryEntry
+from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixLangueRedactionThese,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -44,8 +45,6 @@ from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFacto
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
-from osis_notification.models import EmailNotification
-
 from reference.tests.factories.language import FrenchLanguageFactory
 
 
@@ -102,6 +101,10 @@ class RequestSignaturesApiTestCase(APITestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(EmailNotification.objects.count(), 4)
+
+        history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
+        self.assertIsNotNone(history_entry)
+        self.assertCountEqual(history_entry.tags, ['proposition', 'supervision', 'status-changed'])
 
     def test_request_signatures_using_api_without_ca_members_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)

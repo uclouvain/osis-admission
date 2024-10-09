@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from collections import defaultdict
 from typing import List, Optional, Dict
 
 from django.conf import settings
@@ -38,7 +39,12 @@ from django.db.models.functions import Concat
 from django.utils.translation import get_language, gettext
 
 from admission.contrib.models import ContinuingEducationAdmission
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ConfigurationStatutChecklist,
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+)
 from admission.ddd.admission.formation_continue.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
 from admission.infrastructure.utils import get_entities_with_descendants_ids
@@ -60,6 +66,8 @@ class ListerDemandesService(IListerDemandesService):
         inscription_requise: Optional[bool] = None,
         paye: Optional[bool] = None,
         marque_d_interet: Optional[bool] = None,
+        mode_filtres_etats_checklist: Optional[str] = '',
+        filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
@@ -128,6 +136,68 @@ class ListerDemandesService(IListerDemandesService):
         if demandeur:
             qs = qs.filter_according_to_roles(demandeur, permission='admission.view_continuing_enrolment_applications')
 
+        if mode_filtres_etats_checklist and filtres_etats_checklist:
+
+            json_path_to_checks = defaultdict(set)
+            all_checklist_filters = Q()
+
+            for tab_name, status_values in filtres_etats_checklist.items():
+                if not status_values:
+                    continue
+
+                current_tab: Optional[
+                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
+                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+
+                if not current_tab:
+                    continue
+
+                for status_value in status_values:
+                    current_status_filter: Optional[ConfigurationStatutChecklist] = current_tab.get(status_value)
+
+                    if not current_status_filter:
+                        continue
+
+                    current_checklist_filters = Q()
+                    with_json_checklist_filter = False
+
+                    # Filter on the checklist tab status
+                    if current_status_filter.statut:
+                        current_checklist_filters = Q(
+                            **{
+                                f'checklist__current__{tab_name}__statut': current_status_filter.statut.name,
+                            }
+                        )
+                        json_path_to_checks[f'checklist__current__{tab_name}'].add('statut')
+                        with_json_checklist_filter = True
+
+                    # Filter on the checklist tab extra if necessary
+                    if current_status_filter.extra:
+                        current_checklist_filters &= Q(
+                            **{
+                                f'checklist__current__{tab_name}__extra__contains': current_status_filter.extra,
+                            }
+                        )
+                        json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')
+                        with_json_checklist_filter = True
+
+                    if with_json_checklist_filter:
+                        json_path_to_checks['checklist__current'].add(tab_name)
+                        json_path_to_checks['checklist'].add('current')
+
+                    all_checklist_filters |= current_checklist_filters
+
+            if mode_filtres_etats_checklist == ModeFiltrageChecklist.EXCLUSION.name:
+                # We exclude the admissions whose the specific keys have the specified values
+                all_checklist_filters = ~all_checklist_filters
+
+                # We exclude the admissions whose the specific keys are missing (for unconfirmed admission,
+                # other admission contexts etc.)
+                for base_key, missing_keys in json_path_to_checks.items():
+                    all_checklist_filters |= ~Q(**{f'{base_key}__has_keys': missing_keys})
+
+            qs = qs.filter(all_checklist_filters)
+
         # Sort the queryset
         field_order = []
         if champ_tri:
@@ -191,8 +261,10 @@ class ListerDemandesService(IListerDemandesService):
         admission: ContinuingEducationAdmission,
         translated_fields_names: Dict[str, str],
     ) -> DemandeRechercheDTO:
-        if hasattr(admission.candidate, 'personmergeproposal') and \
-                admission.candidate.personmergeproposal.registration_id_sent_to_digit:
+        if (
+            hasattr(admission.candidate, 'personmergeproposal')
+            and admission.candidate.personmergeproposal.registration_id_sent_to_digit
+        ):
             noma_candidat = admission.candidate.personmergeproposal.registration_id_sent_to_digit
         elif admission.candidate.student_set.exists():
             noma_candidat = admission.candidate.student_set.first().registration_id

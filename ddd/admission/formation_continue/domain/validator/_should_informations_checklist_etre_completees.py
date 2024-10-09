@@ -27,7 +27,6 @@
 import attr
 
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import StatutChecklist
@@ -37,6 +36,7 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
     RefuserPropositionTransitionStatutException,
     ApprouverParFacTransitionStatutException,
     MettreEnAttenteTransitionStatutException,
+    MettreAValiderTransitionStatutException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
@@ -94,11 +94,22 @@ class ShouldPeutApprouverProposition(BusinessValidator):
     checklist_statut: StatutChecklist
 
     def validate(self, *args, **kwargs):
+        if self.checklist_statut.statut != ChoixStatutChecklist.GEST_EN_COURS or self.checklist_statut.extra.get(
+            'en_cours'
+        ) not in {'fac_approval', 'to_validate'}:
+            raise ApprouverPropositionTransitionStatutException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldPeutMettreAValider(BusinessValidator):
+    checklist_statut: StatutChecklist
+
+    def validate(self, *args, **kwargs):
         if (
             self.checklist_statut.statut != ChoixStatutChecklist.GEST_EN_COURS
             or self.checklist_statut.extra.get('en_cours') != 'fac_approval'
         ):
-            raise ApprouverPropositionTransitionStatutException
+            raise MettreAValiderTransitionStatutException
 
 
 @attr.dataclass(frozen=True, slots=True)

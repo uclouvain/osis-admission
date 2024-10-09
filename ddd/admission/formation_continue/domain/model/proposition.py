@@ -33,6 +33,8 @@ from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -59,6 +61,7 @@ from admission.ddd.admission.formation_continue.domain.validator.validator_by_bu
     AnnulerPropositionValidatorList,
     ApprouverPropositionValidatorList,
     CloturerPropositionValidatorList,
+    MettreAValiderValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
@@ -374,10 +377,16 @@ class Proposition(interface.RootEntity):
     def approuver_proposition(
         self,
         gestionnaire: str,
+        profil_candidat_translator: IProfilCandidatTranslator,
     ):
         ApprouverPropositionValidatorList(
             checklist_statut=self.checklist_actuelle.decision,
         ).validate()
+
+        ProfilCandidatService.verifier_quarantaine(
+            proposition=self,
+            profil_candidat_translator=profil_candidat_translator,
+        )
 
         self.statut = ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE
         self.checklist_actuelle.decision = StatutChecklist(
@@ -386,6 +395,22 @@ class Proposition(interface.RootEntity):
         )
         self.decision_dernier_mail_envoye_le = now()
         self.decision_dernier_mail_envoye_par = gestionnaire
+        self.auteur_derniere_modification = gestionnaire
+
+    def mettre_a_valider(
+        self,
+        gestionnaire: str,
+    ):
+        MettreAValiderValidatorList(
+            checklist_statut=self.checklist_actuelle.decision,
+        ).validate()
+
+        self.checklist_actuelle.decision = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('To validate IUFC'),
+            extra={'en_cours': 'to_validate'},
+        )
+
         self.auteur_derniere_modification = gestionnaire
 
     def cloturer_proposition(

@@ -51,6 +51,21 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
     def get_specific_values(cls, keys: Iterable[str]):
         return ', '.join([str(getattr(cls, key).value) for key in keys])
 
+    @classmethod
+    def get_status_priorities(cls):
+        return {
+            cls.INSCRIPTION_AUTORISEE.name: 5,
+            cls.ATTENTE_VALIDATION_DIRECTION.name: 4,
+            cls.RETOUR_DE_FAC: 3,
+            cls.COMPLETEE_POUR_FAC: 2,
+            cls.A_COMPLETER_POUR_FAC: 2,
+            cls.TRAITEMENT_FAC: 2,
+            cls.COMPLETEE_POUR_SIC: 2,
+            cls.A_COMPLETER_POUR_SIC: 2,
+            cls.CONFIRMEE: 1,
+            cls.INSCRIPTION_REFUSEE: 1,
+            cls.CLOTUREE: 1,
+        }
 
 STATUTS_PROPOSITION_GENERALE_NON_SOUMISE = {
     ChoixStatutPropositionGenerale.EN_BROUILLON.name,

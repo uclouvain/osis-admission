@@ -120,3 +120,11 @@ class ApprouverPropositionTransitionStatutException(BusinessException):
     def __init__(self, **kwargs):
         message = _('You can only transition to the "Validated" status from the "Approved" status.')
         super().__init__(message, **kwargs)
+
+
+class MettreAValiderTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-12"
+
+    def __init__(self, **kwargs):
+        message = _('You can only transition to the "To validate IUFC" status from the "Approved" status.')
+        super().__init__(message, **kwargs)

@@ -26,9 +26,10 @@
 
 import json
 import re
+import traceback
 import uuid
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import pika
 from django.conf import settings
@@ -202,11 +203,12 @@ DOCUMENT_MAPPING = {
 class InjectionEPCAdmission:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
+        e = ""
         try:
             self._nettoyer_documents_reclames(admission)
             donnees = self.recuperer_donnees(admission=admission)
             logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
-            logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
+            logger.info("[INJECTION EPC] Envoi dans la queue ...")
             transaction.on_commit(
                 lambda: self.envoyer_admission_dans_queue(
                     donnees=donnees,
@@ -215,18 +217,22 @@ class InjectionEPCAdmission:
                 )
             )
             statut = EPCInjectionStatus.PENDING.name
-        except Exception:
+        except Exception as exception:
+            e = exception
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
+            stacktrace = traceback.format_exc()
 
-        EPCInjection.objects.get_or_create(
+        EPCInjection.objects.update_or_create(
             admission=admission,
             type=EPCInjectionType.DEMANDE.name,
             defaults={
                 "payload": donnees,
                 "status": statut,
                 'last_attempt_date': datetime.now(),
+                "osis_error_message": str(e) if e else "",
+                "osis_stacktrace": stacktrace if e else ""
             },
         )
         return donnees
@@ -249,10 +255,13 @@ class InjectionEPCAdmission:
     def recuperer_donnees(cls, admission: BaseAdmission):
         candidat = admission.candidate  # Person
         comptabilite = getattr(admission, "accounting", None)  # type: Accounting
-        adresses = candidat.personaddress_set.select_related("country")
+        adresses = candidat.personaddress_set.select_related("country").exclude(
+            label=PersonAddressType.PROFESSIONAL.name,
+        )
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
+        admission_iufc = getattr(admission, 'continuingeducationadmission', None)
         documents_specifiques = cls._recuperer_documents_specifiques(admission)
         return {
             "dossier_uuid": str(admission.uuid),
@@ -271,11 +280,15 @@ class InjectionEPCAdmission:
                 admission=admission,
                 comptabilite=comptabilite,
             ),
-            "inscription_offre": cls._get_inscription_offre(admission=admission),
-            "donnees_comptables": cls._get_donnees_comptables(admission=admission, comptabilite=comptabilite),
+            "inscription_offre": cls._get_inscription_offre(admission=admission, admission_generale=admission_generale),
+            "donnees_comptables": cls._get_donnees_comptables(
+                admission=admission,
+                comptabilite=comptabilite,
+                admission_generale=admission_generale
+            ),
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
-                (InjectionEPCCurriculum._recuperer_documents(admission_generale) if admission_generale else [])
+                InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc)
                 +
                 documents_specifiques
             ),
@@ -451,10 +464,13 @@ class InjectionEPCAdmission:
         ]
 
     @classmethod
-    def _get_inscription_offre(cls, admission: BaseAdmission) -> Dict:
-        num_offre, validite = cls.__get_validite_num_offre(admission)
+    def _get_inscription_offre(
+        cls,
+        admission: BaseAdmission,
+        admission_generale: Optional[GeneralEducationAdmission],
+    ) -> Dict:
+        num_offre, validite = cls.__get_validite_num_offre(admission, admission_generale)
         groupe_de_supervision = getattr(admission, 'supervision_group', None)
-        admission_generale = getattr(admission, 'generaleducationadmission', None)  # type: GeneralEducationAdmission
         double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
         type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
@@ -486,14 +502,20 @@ class InjectionEPCAdmission:
                 if admission_generale else None
             ),
             'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
+            'reorientation': bool(admission_generale) and admission_generale.is_external_reorientation,
+            'modification_programme': bool(admission_generale) and admission_generale.is_external_modification,
+            'inscription_tardive': bool(admission_generale) and admission_generale.late_enrollment,
         }
 
     @staticmethod
-    def __get_validite_num_offre(admission: BaseAdmission) -> Tuple[str, str]:
+    def __get_validite_num_offre(
+        admission: BaseAdmission,
+        admission_generale: Optional[GeneralEducationAdmission],
+    ) -> Tuple[str, str]:
         formation = admission.training  # type: EducationGroupYear
         est_en_bachelier = formation.education_group_type.name == TrainingType.BACHELOR.name
         est_en_premiere_annee_de_bachelier = (
-            est_en_bachelier and admission.generaleducationadmission.cycle_pursuit != PoursuiteDeCycle.YES.name
+            est_en_bachelier and admission_generale.cycle_pursuit != PoursuiteDeCycle.YES.name
         )
         if est_en_premiere_annee_de_bachelier:
             validite, num_offre = formation.cohortyear_set.get(
@@ -504,16 +526,19 @@ class InjectionEPCAdmission:
         return num_offre, validite
 
     @staticmethod
-    def _get_donnees_comptables(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
-        general_admission = getattr(admission, 'generaleducationadmission', None)
-        autre_montant = getattr(general_admission, 'tuition_fees_amount_other')
+    def _get_donnees_comptables(
+        admission: BaseAdmission,
+        comptabilite: Accounting,
+        admission_generale: Optional[GeneralEducationAdmission],
+    ) -> Dict:
+        autre_montant = getattr(admission_generale, 'tuition_fees_amount_other')
         return {
             "annee_academique": admission.training.academic_year.year,
-            "droits_majores": general_admission.tuition_fees_dispensation,
+            "droits_majores": admission_generale.tuition_fees_dispensation,
             "montant_droits_majores": (
                 ((str(autre_montant) if autre_montant else None)
-                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(general_admission, "tuition_fees_amount", None)))
-                if general_admission else None
+                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission_generale, "tuition_fees_amount", None)))
+                if admission_generale else None
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
         }

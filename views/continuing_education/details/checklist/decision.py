@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.conf import settings
+from django.forms import Form
 from django.http import HttpResponseForbidden
 from django.views.generic import TemplateView, FormView
 from osis_history.utilities import add_history_entry
@@ -40,6 +41,7 @@ from admission.ddd.admission.formation_continue.commands import (
     ApprouverParFacCommand,
     CloturerPropositionCommand,
     AnnulerReclamationDocumentsAuCandidatCommand,
+    MettreAValiderCommand,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -75,6 +77,7 @@ __all__ = [
     'DecisionChangeStatusToBeProcessedView',
     'DecisionChangeStatusTakenInChargeView',
     'SendToFacFormView',
+    'ToValidateFormView',
 ]
 
 
@@ -129,6 +132,30 @@ class HoldFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPermiss
                     corps_message=form.cleaned_data['body'],
                     motif=form.cleaned_data['reason'],
                     autre_motif=form.cleaned_data.get('other_reason', ''),
+                )
+            )
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            return super().form_invalid(form)
+
+        self.htmx_refresh = True
+        return super().form_valid(form)
+
+
+class ToValidateFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPermissionRequiredMixin, FormView):
+    name = 'decision-to-validate'
+    urlpatterns = 'decision-to-validate'
+    template_name = 'admission/empty_template.html'
+    htmx_template_name = 'admission/empty_template.html'
+    permission_required = 'admission.change_checklist_iufc'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                MettreAValiderCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
                 )
             )
         except BusinessException as exception:

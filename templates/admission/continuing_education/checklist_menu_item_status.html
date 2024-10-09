@@ -32,6 +32,8 @@
       <i class="fas fa-circle-arrow-right text-success"></i>
     {% elif extra.en_cours == 'on_hold' %}
       <i class="fas fa-circle-stop text-info"></i>
+    {% elif extra.en_cours == 'to_validate' %}
+      <i class="fas fa-list-check text-info"></i>
     {% else %}
       <i class="fas fa-pencil text-warning"></i>
     {% endif %}

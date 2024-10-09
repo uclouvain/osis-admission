@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -61,6 +61,16 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
             nom="John",
             prenom="Mills",
             email="john.mills@example.org",
+            est_docteur=True,
+            institution="USB",
+            ville="Bruxelles",
+            pays="Belgique",
+        ),
+        Promoteur(
+            PromoteurIdentity('promoteur-SC3DP-deja-approuve'),
+            nom="Jim",
+            prenom="Foe",
+            email="jim.foe@example.org",
             est_docteur=True,
             institution="USB",
             ville="Bruxelles",

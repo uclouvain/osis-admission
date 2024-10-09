@@ -316,6 +316,12 @@ class CloturerPropositionCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class MettreAValiderCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ListerDemandesQuery(SortedQueryRequest):
     annee_academique: Optional[int] = None
     edition: Optional[str] = ''
@@ -327,6 +333,8 @@ class ListerDemandesQuery(SortedQueryRequest):
     sigles_formations: Optional[List[str]] = None
     inscription_requise: Optional[bool] = None
     paye: Optional[bool] = None
+    mode_filtres_etats_checklist: Optional[str] = ''
+    filtres_etats_checklist: Optional[Dict[str, List[str]]] = None
     demandeur: Optional[str] = ''
     marque_d_interet: Optional[bool] = None
 

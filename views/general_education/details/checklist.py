@@ -323,7 +323,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
             checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
 
-        if self.proposition.type == TypeDemande.INSCRIPTION.name and self.proposition.est_inscription_tardive:
+        if self.proposition.est_inscription_tardive:
             checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
 
         candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
@@ -1043,6 +1043,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return SicDecisionApprovalDocumentsForm(
             instance=self.admission,
             documents=self.sic_decision_approval_form_requestable_documents,
+            context=self.current_context,
         )
 
     @cached_property
@@ -1740,6 +1741,13 @@ class PastExperiencesStatusView(
         super().__init__(*args, **kwargs)
         self.valid_operation = False
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past_experiences_admission_requirement_form'] = PastExperiencesAdmissionRequirementForm(
+            instance=self.admission,
+        )
+        return context
+
     def get_initial(self):
         return self.admission.checklist['current']['parcours_anterieur']['statut']
 
@@ -1758,6 +1766,12 @@ class PastExperiencesStatusView(
                 )
             )
             self.valid_operation = True
+            self.htmx_trigger_form_extra = {
+                'select_access_title_perm': self.request.user.has_perm(
+                    'admission.checklist_select_access_title',
+                    self.admission,
+                ),
+            }
         except MultipleBusinessExceptions:
             return super().form_invalid(form)
 
@@ -2008,6 +2022,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['formation'] = self.proposition.formation
+        kwargs['context'] = self.current_context
         return kwargs
 
     def get_initial(self):

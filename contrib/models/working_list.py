@@ -30,12 +30,14 @@ from django.utils.translation import gettext_lazy as _
 from ordered_model.models import OrderedModel
 
 from admission.contrib.models.form_item import TranslatedJSONField
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 
 
-class WorkingList(OrderedModel):
+class CommonWorkingList(OrderedModel):
     name = TranslatedJSONField(
         verbose_name=_('Name of the working list'),
     )
@@ -48,12 +50,28 @@ class WorkingList(OrderedModel):
         blank=True,
     )
 
-    quarantine = models.BooleanField(null=True)
-
     checklist_filters = models.JSONField(
         default=dict,
         verbose_name=_('Checklist filters'),
         blank=True,
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.name.get(settings.LANGUAGE_CODE)
+
+
+class WorkingList(CommonWorkingList):
+    quarantine = models.BooleanField(null=True)
+
+    admission_type = models.CharField(
+        blank=True,
+        verbose_name=_('Admission type'),
+        choices=TypeDemande.choices(),
+        default='',
+        max_length=16,
     )
 
     admission_statuses = ArrayField(
@@ -61,6 +79,38 @@ class WorkingList(OrderedModel):
         verbose_name=_('Admission statuses'),
         base_field=models.CharField(
             choices=CHOIX_STATUT_TOUTE_PROPOSITION,
+            max_length=30,
+        ),
+        blank=True,
+    )
+
+    class Meta(OrderedModel.Meta):
+        verbose_name = _('Working list')
+        verbose_name_plural = _('Working lists')
+
+
+class ContinuingWorkingList(CommonWorkingList):
+    admission_statuses = ArrayField(
+        default=list,
+        verbose_name=_('Admission statuses'),
+        base_field=models.CharField(
+            choices=ChoixStatutPropositionContinue.choices(),
+            max_length=30,
+        ),
+        blank=True,
+    )
+
+    class Meta(OrderedModel.Meta):
+        verbose_name = _('Continuing working list')
+        verbose_name_plural = _('Continuing working lists')
+
+
+class DoctorateWorkingList(CommonWorkingList):
+    admission_statuses = ArrayField(
+        default=list,
+        verbose_name=_('Admission statuses'),
+        base_field=models.CharField(
+            choices=ChoixStatutPropositionDoctorale.choices(),
             max_length=30,
         ),
         blank=True,
@@ -75,8 +125,5 @@ class WorkingList(OrderedModel):
     )
 
     class Meta(OrderedModel.Meta):
-        verbose_name = _('Working list')
-        verbose_name_plural = _('Working lists')
-
-    def __str__(self):
-        return self.name.get(settings.LANGUAGE_CODE)
+        verbose_name = _('Doctorate working list')
+        verbose_name_plural = _('Doctorate working lists')

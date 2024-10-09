@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from admission.ddd.admission.doctorat.preparation.commands import *
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
@@ -43,14 +43,18 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from infrastructure.financabilite.domain.service.financabilite import FinancabiliteFetcher
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
 from .domain.service.lister_demandes import ListerDemandesService
 from .domain.service.membre_CA import MembreCATranslator
 from .domain.service.notification import Notification
+from .domain.service.pdf_generation import PDFGeneration
 from .domain.service.promoteur import PromoteurTranslator
 from .domain.service.question_specifique import QuestionSpecifiqueTranslator
 from .repository.emplacement_document import EmplacementDocumentRepository
@@ -63,6 +67,10 @@ from ...domain.service.emplacements_documents_proposition import EmplacementsDoc
 from ...domain.service.historique import Historique as HistoriqueGlobal
 from ...domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from ...domain.service.titres_acces import TitresAcces
+from ...domain.service.unites_enseignement_translator import UnitesEnseignementTranslator
+from ...repository.digit import DigitRepository
+from ...repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from ...shared_kernel.email_destinataire.repository.email_destinataire import EmailDestinataireRepository
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -171,6 +179,7 @@ COMMAND_HANDLERS = {
         notification=Notification(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
@@ -185,6 +194,7 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscription(),
         element_confirmation=ElementsConfirmation(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        financabilite_fetcher=FinancabiliteFetcher(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -272,6 +282,7 @@ COMMAND_HANDLERS = {
         promoteur_translator=PromoteurTranslator(),
         membre_ca_translator=MembreCATranslator(),
         academic_year_repository=AcademicYearRepository(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
@@ -409,10 +420,267 @@ COMMAND_HANDLERS = {
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
         proposition_repository=PropositionRepository(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
         cmd,
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
+    ),
+    EnvoyerMessageCandidatCommand: lambda msg_bus, cmd: envoyer_message_au_candidat(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        notification=Notification(),
+        historique=Historique(),
+    ),
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_proposition(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            promoteur_translator=PromoteurTranslator(),
+            membre_ca_translator=MembreCATranslator(),
+        )
+    ),
+    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            email_destinataire_repository=EmailDestinataireRepository(),
+            notification=Notification(),
+            historique=Historique(),
+        )
+    ),
+    SpecifierMotifsRefusPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_faculte(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        pdf_generation=PDFGeneration(),
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
+    ),
+    SpecifierInformationsAcceptationPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        pdf_generation=PDFGeneration(),
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+    ),
+    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=Historique(),
+        )
+    ),
+    ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+    ),
+    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+    ),
+    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
+        lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierBesoinDeDerogationSicCommand: (
+        lambda msg_bus, cmd: specifier_besoin_de_derogation(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierFinancabiliteResultatCalculCommand: lambda msg_bus, cmd: specifier_financabilite_resultat_calcul(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    SpecifierFinancabiliteNonConcerneeCommand: lambda msg_bus, cmd: specifier_financabilite_non_concernee(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierInformationsAcceptationPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            historique=Historique(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            promoteur_translator=PromoteurTranslator(),
+            membre_ca_translator=MembreCATranslator(),
+        )
+    ),
+    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            notification=Notification(),
+            historique=Historique(),
+        )
+    ),
+    SpecifierMotifsRefusPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=Historique(),
+        )
+    ),
+    RefuserAdmissionParSicCommand: (
+        lambda msg_bus, cmd: refuser_admission_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            historique=Historique(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
+        )
+    ),
+    RefuserInscriptionParSicCommand: (
+        lambda msg_bus, cmd: refuser_inscription_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            historique=Historique(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
+        )
+    ),
+    ApprouverAdmissionParSicCommand: (
+        lambda msg_bus, cmd: approuver_admission_par_sic(
+            message_bus=msg_bus,
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            historique=Historique(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+            emplacement_document_repository=EmplacementDocumentRepository(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            digit_repository=DigitRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            promoteur_translator=PromoteurTranslator(),
+            membre_ca_translator=MembreCATranslator(),
+        )
+    ),
+    ApprouverInscriptionParSicCommand: (
+        lambda msg_bus, cmd: approuver_inscription_par_sic(
+            message_bus=msg_bus,
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
+            historique=Historique(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            promoteur_translator=PromoteurTranslator(),
+            membre_ca_translator=MembreCATranslator(),
+        )
+    ),
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
+        lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            cmd=cmd,
+            notification=Notification(),
+            historique=Historique(),
+            digit_repository=DigitRepository(),
+        )
+    ),
+    RecupererPdfTemporaireDecisionSicQuery: (
+        lambda msg_bus, cmd: recuperer_pdf_temporaire_decision_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            campus_repository=UclouvainCampusRepository(),
+            pdf_generation=PDFGeneration(),
+        )
+    ),
+    SpecifierInformationsAcceptationInscriptionParSicCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_inscription_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierDerogationFinancabiliteCommand: (
+        lambda msg_bus, cmd: specifier_derogation_financabilite(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=Historique(),
+        )
+    ),
+    NotifierCandidatDerogationFinancabiliteCommand: (
+        lambda msg_bus, cmd: notifier_candidat_derogation_financabilite(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            notification=Notification(),
+            historique=Historique(),
+        )
+    ),
+    VerifierCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+        )
+    ),
+    ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=DoctoratTranslator(),
     ),
 }

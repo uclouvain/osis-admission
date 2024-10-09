@@ -427,9 +427,7 @@ class AccountingForm(forms.Form):
             }
 
         # Only display the sport question for the right campuses
-        self.fields['affiliation_sport'].choices = ChoixAffiliationSport.choices_by_education_site(
-            self.education_site
-        )
+        self.fields['affiliation_sport'].choices = ChoixAffiliationSport.choices_by_education_site(self.education_site)
 
         if self.is_general_admission:
             self.fields['demande_allocation_d_etudes_communaute_francaise_belgique'].required = True

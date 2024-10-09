@@ -45,16 +45,15 @@ from admission.contrib.models.base import (
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
-from admission.contrib.models.epc_injection import EPCInjectionType
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.forms.admission.curriculum import (
-    CurriculumAcademicExperienceAdmissionForm,
-)
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
 from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
@@ -84,7 +83,6 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     template_name = 'admission/forms/curriculum_educational_experience.html'
     permission_required = 'admission.change_admission_curriculum'
     update_admission_author = True
-    base_form = CurriculumAcademicExperienceAdmissionForm
 
     def has_permission(self):
         return super().has_permission() and (
@@ -113,9 +111,15 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                 AdmissionEPCInjection.objects.filter(
                     admission__uuid=OuterRef('valuated_from_admission__uuid'),
                     type=EPCInjectionType.DEMANDE.name,
+                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
             ),
-            'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+            'cv_injection': Exists(
+                CurriculumEPCInjection.objects.filter(
+                    experience_uuid=OuterRef('uuid'),
+                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                )
+            ),
         }
 
     def traitement_specifique_de_creation(self):
@@ -167,19 +171,6 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
 
         return context_data
 
-    @staticmethod
-    def clean_file_fields(
-        form,
-        transcript_is_required,
-        transcript_translation_is_required,
-    ):
-        cleaned_data = form.cleaned_data
-        if transcript_is_required and not cleaned_data.get('transcript'):
-            form.add_error('transcript', FIELD_REQUIRED_MESSAGE)
-
-        if transcript_translation_is_required and not cleaned_data.get('transcript_translation'):
-            form.add_error('transcript_translation', FIELD_REQUIRED_MESSAGE)
-
 
 class CurriculumNonEducationalExperienceFormView(
     AdmissionFormMixin,
@@ -205,9 +196,15 @@ class CurriculumNonEducationalExperienceFormView(
                 AdmissionEPCInjection.objects.filter(
                     admission__uuid=OuterRef('valuated_from_admission__uuid'),
                     type=EPCInjectionType.DEMANDE.name,
+                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
             ),
-            'cv_injection': Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+            'cv_injection': Exists(
+                CurriculumEPCInjection.objects.filter(
+                    experience_uuid=OuterRef('uuid'),
+                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                )
+            ),
         }
 
     def has_permission(self):
@@ -289,9 +286,15 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
                     AdmissionEPCInjection.objects.filter(
                         admission__uuid=OuterRef('valuated_from_admission__uuid'),
                         type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
-                cv_injection=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=self.experience_id)),
+                cv_injection=Exists(
+                    CurriculumEPCInjection.objects.filter(
+                        experience_uuid=self.experience_id,
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                    ),
+                ),
             )
         )
 

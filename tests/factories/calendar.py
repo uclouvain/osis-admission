@@ -26,6 +26,7 @@
 from math import ceil, floor
 
 from admission.calendar.admission_calendar import *
+from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 
@@ -56,5 +57,6 @@ class AdmissionAcademicCalendarFactory(AcademicCalendarFactory):
                 AdmissionPoolNonResidentQuotaCalendar,
                 AdmissionAccessConditionsUrl,
                 GeneralEducationAdmissionCalendar,
+                AdmissionDigitTicketSubmissionCalendar
             ]
         ]

@@ -27,8 +27,10 @@
 from unittest.mock import patch
 
 from django.shortcuts import resolve_url
+from osis_history.models import HistoryEntry
+from osis_signature.enums import SignatureState
+from osis_signature.utils import get_signing_token
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -36,8 +38,6 @@ from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFacto
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.tests.factories.user import UserFactory
-from osis_signature.enums import SignatureState
-from osis_signature.utils import get_signing_token
 
 
 class ApprovalMixin:
@@ -86,6 +86,9 @@ class ApprovalMixin:
 
 
 class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
+    def setUp(self):
+        HistoryEntry.objects.all().delete()
+
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url)
@@ -113,6 +116,10 @@ class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
         self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
         response = self.client.get(self.supervision_url)
         self.assertEqual(response.json()['promoteur_reference'], str(self.promoter.uuid))
+
+        history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
+        self.assertIsNotNone(history_entry)
+        self.assertCountEqual(history_entry.tags, ['proposition', 'supervision'])
 
     def test_supervision_approve_proposition_api_promoter_who_approved(self):
         self.client.force_authenticate(user=self.promoter_who_approved.person.user)
@@ -142,11 +149,19 @@ class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
 
+        history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
+        self.assertIsNotNone(history_entry)
+        self.assertCountEqual(history_entry.tags, ['proposition', 'supervision', 'status-changed'])
+
     def test_supervision_refuse_proposition_api_invited_ca_member(self):
         self.client.force_authenticate(user=self.invited_ca_member.person.user)
         response = self.client.put(self.url, {"uuid_membre": str(self.invited_ca_member.uuid), **self.refused_data})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
+
+        history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
+        self.assertIsNotNone(history_entry)
+        self.assertCountEqual(history_entry.tags, ['proposition', 'supervision'])
 
     def test_supervision_refuse_proposition_api_promoter_who_approved(self):
         self.client.force_authenticate(user=self.promoter_who_approved.person.user)
@@ -265,3 +280,7 @@ class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
         self.client.force_authenticate(user=self.admission.candidate.user)
         response = self.client.post(self.url, {"uuid_membre": str(self.promoter.uuid), **self.approved_data})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+
+        history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
+        self.assertIsNotNone(history_entry)
+        self.assertCountEqual(history_entry.tags, ['proposition', 'supervision'])

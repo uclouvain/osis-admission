@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Dict, List
+
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -30,19 +32,19 @@ from django.test import TestCase
 
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
 )
+from admission.tests.factories.curriculum import AdmissionEducationalValuatedExperiencesFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
+from osis_profile.models import EducationalExperience
 
 
 class ChecklistViewTestCase(TestCase):
@@ -57,9 +59,18 @@ class ChecklistViewTestCase(TestCase):
             academic_year=cls.academic_years[0],
             education_group_type__name=TrainingType.MASTER_MA_120.name,
         )
+        cls.training.specificiufcinformations.registration_required = True
+        cls.training.specificiufcinformations.save()
+
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training=cls.training,
-            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            candidate=CompletePersonFactory(
+                country_of_citizenship__iso_code='BE',
+                country_of_citizenship__european_union=True,
+                id_card_number='123456789',
+                passport_number='',
+                language=settings.LANGUAGE_CODE_FR,
+            ),
             submitted=True,
         )
         cls.candidate = cls.continuing_admission.candidate
@@ -114,3 +125,82 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertContains(response, self.candidate.first_name)
         self.assertContains(response, self.candidate.last_name)
+
+        candidate_experiences = EducationalExperience.objects.filter(
+            person=self.candidate,
+        )
+
+        self.assertEqual(len(candidate_experiences), 1)
+
+        candidate_experiences[0].obtained_diploma = True
+        candidate_experiences[0].save()
+
+        documents: Dict[str, List[EmplacementDocumentDTO]] = response.context['documents']
+
+        self.assertIn('decision', documents)
+        self.assertIn('fiche_etudiant', documents)
+
+        self.assertEqual(documents['decision'], documents['fiche_etudiant'])
+
+        documents_identifiers = [document.identifiant for document in documents['decision']]
+
+        self.assertCountEqual(
+            documents_identifiers,
+            [
+                'IDENTIFICATION.CARTE_IDENTITE',
+                'CURRICULUM.CURRICULUM',
+            ],
+        )
+
+        # Valuation but by another admission -> don't retrieve the related documents
+        educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=ContinuingEducationAdmissionFactory(candidate=self.candidate),
+            educationalexperience=candidate_experiences[0],
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        documents: Dict[str, List[EmplacementDocumentDTO]] = response.context['documents']
+
+        self.assertIn('decision', documents)
+        self.assertIn('fiche_etudiant', documents)
+
+        self.assertEqual(documents['decision'], documents['fiche_etudiant'])
+
+        documents_identifiers = [document.identifiant for document in documents['decision']]
+
+        self.assertCountEqual(
+            documents_identifiers,
+            [
+                'IDENTIFICATION.CARTE_IDENTITE',
+                'CURRICULUM.CURRICULUM',
+            ],
+        )
+
+        # Valuation by the current admission -> retrieve the related documents
+        educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.continuing_admission,
+            educationalexperience=candidate_experiences[0],
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        documents: Dict[str, List[EmplacementDocumentDTO]] = response.context['documents']
+
+        self.assertIn('decision', documents)
+        self.assertIn('fiche_etudiant', documents)
+
+        self.assertEqual(documents['decision'], documents['fiche_etudiant'])
+
+        documents_identifiers = [document.identifiant for document in documents['decision']]
+
+        self.assertCountEqual(
+            documents_identifiers,
+            [
+                'IDENTIFICATION.CARTE_IDENTITE',
+                'CURRICULUM.CURRICULUM',
+                *[f'CURRICULUM.{experience.uuid}.DIPLOME' for experience in candidate_experiences],
+            ],
+        )

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -95,7 +95,6 @@ class InternalNoteTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
         )
         cls.second_admission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
@@ -106,7 +105,6 @@ class InternalNoteTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
         )
 
         # Cdd user
@@ -197,7 +195,7 @@ class InternalNoteTestCase(TestCase):
         response = self.client.post(self.url, data={'text': ''})
 
         self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', 'text', 'Ce champ est obligatoire.')
+        self.assertFormError(response.context['form'], 'text', 'Ce champ est obligatoire.')
 
         self.assertEqual(InternalNote.objects.filter(admission=self.first_admission).count(), 2)
 

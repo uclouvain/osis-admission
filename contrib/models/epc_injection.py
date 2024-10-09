@@ -44,6 +44,13 @@ class EPCInjectionStatus(ChoiceEnum):
     PENDING = "En attente du retour d'EPC"
     OSIS_ERROR = "Erreur OSIS"
 
+    @classmethod
+    def blocking_statuses_for_experience(cls) -> List[str]:
+        return [
+            cls.OK.name,
+            cls.PENDING.name,
+        ]
+
 
 class EPCInjectionType(ChoiceEnum):
     DEMANDE = "Demande"
@@ -53,15 +60,25 @@ class EPCInjectionType(ChoiceEnum):
 class EPCInjection(models.Model):
     last_attempt_date = models.DateTimeField(null=True)
     last_response_date = models.DateTimeField(null=True)
+
     admission = models.ForeignKey(
         'admission.BaseAdmission',
         on_delete=models.CASCADE,
         related_name='epc_injection',
     )
+
     type = models.CharField(choices=EPCInjectionType.choices(), null=False, blank=True, default='', max_length=12)
     status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=10)
+
     payload = models.JSONField(default=dict, blank=True)
     epc_responses = models.JSONField(default=list, blank=True)
+
+    osis_error_message = models.CharField(max_length=255, default="", blank=True)
+    osis_stacktrace = models.TextField(default="", blank=True)
+
+    @property
+    def in_error(self):
+        return self.status in [EPCInjectionStatus.OSIS_ERROR.name, EPCInjectionStatus.ERROR.name]
 
     @property
     def last_response(self) -> Dict[str, str]:
@@ -72,7 +89,9 @@ class EPCInjection(models.Model):
     def errors_messages(self) -> List[str]:
         messages = [message for _, message in self.experiences_errors]
         if self.classified_errors['technical_errors']:
-            messages.append('Erreur technique')
+            messages.append('Erreur technique EPC')
+        if self.status == EPCInjectionStatus.OSIS_ERROR.name:
+            messages.append('Erreur technique OSIS')
         return messages
 
     @property
@@ -87,7 +106,7 @@ class EPCInjection(models.Model):
                 'curriculum_errors': [
                     (error['osis_uuid'], error['message']) for error in errors if error['type'] not in TECHNICAL_ERRORS
                 ],
-                'technical_errors': [error['message'] for error in errors if error['type'] in TECHNICAL_ERRORS]
+                'technical_errors': [error['message'] for error in errors if error['type'] in TECHNICAL_ERRORS],
             }
         return {
             'curriculum_errors': [],

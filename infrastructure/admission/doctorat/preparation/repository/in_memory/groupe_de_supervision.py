@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
     GroupeDeSupervisionSC3DPSansMembresCAFactory,
     GroupeDeSupervisionSC3DPSansPromoteurFactory,
     GroupeDeSupervisionSC3DPSansPromoteurReferenceFactory,
+    GroupeDeSupervisionConfirmeeSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
 from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.membre_CA import (
@@ -101,6 +102,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
             GroupeDeSupervisionPreSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(),
+            GroupeDeSupervisionConfirmeeSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
         ]
 
     @classmethod

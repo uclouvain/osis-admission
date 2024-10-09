@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-import factory
+import factory.fuzzy
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
@@ -61,7 +61,7 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
     education_group_type = factory.SubFactory(
         'base.tests.factories.education_group_type.EducationGroupTypeFactory',
         category=education_group_categories.TRAINING,
-        name=factory.fuzzy.FuzzyChoice(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
+        name=factory.Iterator(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
     )
     main_domain = factory.SubFactory('reference.tests.factories.domain.DomainFactory')
 
@@ -107,7 +107,7 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
     last_update_author = factory.SubFactory(PersonFactory)
     determined_academic_year = factory.SubFactory(AcademicYearFactory, current=True)
-    checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
+    checklist = factory.Dict({'default': True})  # This default value is overridden in a post generation method
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

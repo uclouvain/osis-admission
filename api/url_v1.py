@@ -93,8 +93,9 @@ urlpatterns = [
     path('curriculum', views.PersonCurriculumView),
     # Admission-related
     path('propositions/doctorate', views.DoctorateTrainingChoiceAPIView),
-    path('propositions/doctorate/<uuid:uuid>', views.PropositionViewSet),
+    path('propositions/doctorate/<uuid:uuid>', views.DoctoratePropositionView),
     _path('propositions/doctorate/<uuid:uuid>/', include(person_tabs)),
+    path('propositions/doctorate/<uuid:uuid>/project', views.ProjectViewSet),
     path('propositions/doctorate/<uuid:uuid>/verify_project', admission.api.views.submission.VerifyDoctoralProjectView),
     path('propositions/doctorate/<uuid:uuid>/curriculum', views.DoctorateCurriculumView),
     path('propositions/doctorate/<uuid:uuid>/submit', admission.api.views.submission.SubmitDoctoralPropositionView),
