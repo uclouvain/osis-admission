@@ -64,10 +64,20 @@ def run():  # pragma: no cover
             EtatFinancabilite.NON_CONCERNE.name
         ],
     ).exclude(
-        # Doit avoir une situation de financabilité + une date + un auteur
-        Q(generaleducationadmission__financability_rule='')
-        | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
-        | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True)
+        # Doit avoir une situation de financabilité (si financable) + une date + un auteur (si concerné)
+        Q(
+            checklist__current__financabilite__status='GEST_REUSSITE',
+            checklist__current__financanbilite__extra__reussite='financable',
+            generaleducationadmission__financability_rule=''
+        )
+        | Q(
+            checklist__current__financabilite__status='GEST_REUSSITE',
+            generaleducationadmission__financability_rule_established_on__isnull=True
+        )
+        | Q(
+            checklist__current__financabilite__status='GEST_REUSSITE',
+            generaleducationadmission__financability_rule_established_by_id__isnull=True
+        )
         # Le dossier ne doit pas avoir ete injecté
         | Q(
             epc_injection__type=EPCInjectionType.DEMANDE.name,
