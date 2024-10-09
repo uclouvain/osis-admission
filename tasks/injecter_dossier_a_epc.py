@@ -60,10 +60,20 @@ def run():  # pragma: no cover
         # Doit être financable ou non concerné
         checklist__current__financabilite__statut__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'],
     ).exclude(
-        # Doit avoir une situation de financabilité + une date + un auteur
-        Q(generaleducationadmission__financability_rule='')
-        | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
-        | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True)
+        # Doit avoir une situation de financabilité (si financable) + une date + un auteur (si concerné)
+        Q(
+            checklist__current__financabilite__status='GEST_REUSSITE',
+            checklist__current__financanbilite__extra__reussite='financable',
+            generaleducationadmission__financability_rule=''
+        )
+        | Q(
+            checklist__current__financabilite__status='GEST_REUSSITE',
+            generaleducationadmission__financability_rule_established_on__isnull=True
+        )
+        | Q(
+            checklist__current__financabilite__status='GEST_REUSSITE',
+            generaleducationadmission__financability_rule_established_by_id__isnull=True
+        )
         # Un noma doit exister
         | Q(candidate__personmergeproposal__registration_id_sent_to_digit='')
         # Aucune erreur avec Digit
