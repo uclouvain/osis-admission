@@ -111,7 +111,7 @@ class CategorizedFreeDocumentsAutocompleteTestCase(TestCase):
     def test_get_categorized_free_documents_in_current_language(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(self.url, data={}, HTTP_ACCEPT_LANGUAGE=settings.LANGUAGE_CODE_EN)
+        response = self.client.get(self.url, data={}, headers={"accept-language": settings.LANGUAGE_CODE_EN})
 
         self.assertEqual(response.status_code, 200)
 

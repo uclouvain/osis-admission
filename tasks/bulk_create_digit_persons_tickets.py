@@ -32,8 +32,10 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 from waffle.testutils import override_switch
 
-from admission.ddd.admission.commands import RechercherCompteExistantCommand, SoumettreTicketPersonneCommand, \
-    ValiderTicketPersonneCommand
+from admission.ddd.admission.commands import (
+    RechercherCompteExistantCommand, SoumettreTicketPersonneCommand,
+    ValiderTicketPersonneCommand,
+)
 from backoffice.celery import app
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
@@ -84,4 +86,4 @@ def run(request=None, global_ids=None):
     if request:
         for error in errors:
             messages.add_message(request, messages.ERROR, error)
-        return redirect(request.META.get('HTTP_REFERER'))
+        return redirect(request.headers.get('referer'))

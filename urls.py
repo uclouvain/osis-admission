@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from django.conf import settings
-from django.conf.urls import url
+from django.urls import path
 
 from admission.tasks import retrieve_digit_tickets_status
 from osis_common.utils.file_router import FileRouter
@@ -34,9 +34,7 @@ app_name = 'admission'
 file_router = FileRouter()
 urlpatterns = file_router('admission/views')
 urlpatterns += [
-    url(
-        'retrieve_digit_person_ticket_status',
-        retrieve_digit_tickets_status.force_run,
+    path('retrieve_digit_person_ticket_status', retrieve_digit_tickets_status.force_run,
         name="retrieve_digit_person_ticket_status"
     )
 ]
