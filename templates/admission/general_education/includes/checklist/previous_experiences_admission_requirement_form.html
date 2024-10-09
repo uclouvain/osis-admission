@@ -26,6 +26,9 @@
 
 <div
     id="previous-experiences-admission-requirement-container"
+    {% if with_swap_oob %}
+    hx-swap-oob="true"
+    {% endif %}
 >
   <form
       hx-post="{% url view.base_namespace|add:':past-experiences-admission-requirement' uuid=view.kwargs.uuid %}"
@@ -54,7 +57,7 @@
       </div>
     </div>
   </form>
-  {% if request.htmx %}
+  {% if request.htmx and not with_swap_oob %}
     {# Update the access condition in the header #}
     <span id="header-access-condition" hx-swap-oob="innerHTML">
       {% translate 'Not specified' context "admission-header" as not_specified %}

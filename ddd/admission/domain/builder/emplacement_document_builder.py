@@ -27,7 +27,9 @@
 import datetime
 from typing import Optional, Union
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import OngletsChecklist as OngletsChecklistDoctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as OngletsChecklistDoctorat,
+)
 from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
@@ -38,8 +40,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
 from osis_common.ddd import interface
 from osis_common.ddd.interface import CommandRequest
 

@@ -27,13 +27,13 @@ from django.utils.timezone import now
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.admission.doctorat.validation.domain.service.proposition_identity import (
     PropositionIdentityTranslator,
 )
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from osis_common.ddd import interface
 
 
@@ -56,7 +56,6 @@ class DemandeService(interface.DomainService):
         return Demande(
             entity_id=PropositionIdentityTranslator.convertir_en_demande(proposition_id),
             proposition_id=proposition_id,
-            pre_admission_confirmee_le=now() if type_admission == ChoixTypeAdmission.PRE_ADMISSION else None,
             admission_confirmee_le=now(),
             profil_soumis_candidat=profil_soumis_candidat,
         )

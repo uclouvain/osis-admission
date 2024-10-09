@@ -33,7 +33,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from ordered_model.models import OrderedModel
 
-from admission.contrib.models import GeneralEducationAdmission
 from osis_profile.models import EducationalExperience
 
 
@@ -128,18 +127,12 @@ FREE_ADDITIONAL_APPROVAL_CONDITION_FIELD_BY_LANGUAGE = {
 }
 
 
-class FreeAdditionalApprovalCondition(models.Model):
+class BaseFreeAdditionalApprovalCondition(models.Model):
     uuid = models.UUIDField(
         db_index=True,
         default=uuid.uuid4,
         editable=False,
         primary_key=True,
-    )
-
-    admission = models.ForeignKey(
-        on_delete=models.CASCADE,
-        to=GeneralEducationAdmission,
-        verbose_name=_('Admission'),
     )
 
     name_fr = models.TextField(
@@ -170,5 +163,29 @@ class FreeAdditionalApprovalCondition(models.Model):
         }[settings.LANGUAGE_CODE]
 
     class Meta:
+        abstract = True
+
+
+class FreeAdditionalApprovalCondition(BaseFreeAdditionalApprovalCondition):
+    admission = models.ForeignKey(
+        on_delete=models.CASCADE,
+        to='GeneralEducationAdmission',
+        verbose_name=_('Admission'),
+    )
+
+    class Meta:
         verbose_name = _('Free additional approval condition')
         verbose_name_plural = _('Free additional approval conditions')
+
+
+class DoctorateFreeAdditionalApprovalCondition(BaseFreeAdditionalApprovalCondition):
+    admission = models.ForeignKey(
+        on_delete=models.CASCADE,
+        to='DoctorateAdmission',
+        verbose_name=_('Admission'),
+        related_name='freeadditionalapprovalcondition_set',
+    )
+
+    class Meta:
+        verbose_name = _('Doctorate free additional approval condition')
+        verbose_name_plural = _('Doctorate free additional approval conditions')

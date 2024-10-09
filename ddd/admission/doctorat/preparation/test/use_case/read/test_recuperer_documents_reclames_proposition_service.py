@@ -30,6 +30,11 @@ from unittest.mock import ANY
 import freezegun
 from django.test import SimpleTestCase
 
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererDocumentsPropositionQuery,
+    RecupererDocumentsReclamesPropositionQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
@@ -39,11 +44,9 @@ from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     DocumentsCurriculum,
 )
-from admission.ddd.admission.doctorat.preparation.commands import (
-    RecupererDocumentsPropositionQuery,
-    RecupererDocumentsReclamesPropositionQuery,
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
@@ -68,6 +71,8 @@ class RecupererDocumentsReclamesPropositionTestCase(SimpleTestCase):
                 end_date=datetime.date(2024, 9, 30),
             )
         )
+
+        PropositionInMemoryRepository.reset()
 
         for matricule in ['00321234', '00987890']:
             PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(

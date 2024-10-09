@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from collections import defaultdict
 from typing import Optional, List, Dict
 
 from django.conf import settings
@@ -36,8 +37,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ConfigurationStatutChecklist,
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+    onglet_decision_sic,
+    onglet_decision_facultaire,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.views import PaginatedList
 
@@ -59,11 +68,12 @@ class ListerDemandesService(IListerDemandesService):
         type_financement: Optional[str] = '',
         bourse_recherche: Optional[str] = '',
         cotutelle: Optional[bool] = None,
-        date_soumission_debut: Optional[datetime.datetime] = None,
-        date_soumission_fin: Optional[datetime.datetime] = None,
+        date_soumission_debut: Optional[datetime.date] = None,
+        date_soumission_fin: Optional[datetime.date] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
+        fnrs_fria_fresh: Optional[bool] = None,
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
@@ -136,10 +146,75 @@ class ListerDemandesService(IListerDemandesService):
             qs = qs.filter(submitted_at__gte=date_soumission_debut)
 
         if date_soumission_fin:
-            qs = qs.filter(submitted_at__lte=date_soumission_fin)
+            qs = qs.filter(submitted_at__lt=date_soumission_fin + datetime.timedelta(days=1))
 
         if demandeur:
             qs = qs.filter_according_to_roles(demandeur, permission='admission.view_doctorate_enrolment_applications')
+
+        if fnrs_fria_fresh:
+            qs = qs.filter(is_fnrs_fria_fresh_csc_linked=fnrs_fria_fresh)
+
+        if mode_filtres_etats_checklist and filtres_etats_checklist:
+
+            json_path_to_checks = defaultdict(set)
+            all_checklist_filters = Q()
+
+            for tab_name, status_values in filtres_etats_checklist.items():
+                if not status_values:
+                    continue
+
+                current_tab: Optional[
+                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
+                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+
+                if not current_tab:
+                    continue
+
+                for status_value in status_values:
+                    current_status_filter: Optional[ConfigurationStatutChecklist] = current_tab.get(status_value)
+
+                    if not current_status_filter:
+                        continue
+
+                    current_checklist_filters = Q()
+                    with_json_checklist_filter = False
+
+                    # Filter on the checklist tab status
+                    if current_status_filter.statut:
+                        current_checklist_filters = Q(
+                            **{
+                                f'checklist__current__{tab_name}__statut': current_status_filter.statut.name,
+                            }
+                        )
+                        json_path_to_checks[f'checklist__current__{tab_name}'].add('statut')
+                        with_json_checklist_filter = True
+
+                    # Filter on the checklist tab extra if necessary
+                    if current_status_filter.extra:
+                        current_checklist_filters &= Q(
+                            **{
+                                f'checklist__current__{tab_name}__extra__contains': current_status_filter.extra,
+                            }
+                        )
+                        json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')
+                        with_json_checklist_filter = True
+
+                    if with_json_checklist_filter:
+                        json_path_to_checks['checklist__current'].add(tab_name)
+                        json_path_to_checks['checklist'].add('current')
+
+                    all_checklist_filters |= current_checklist_filters
+
+            if mode_filtres_etats_checklist == ModeFiltrageChecklist.EXCLUSION.name:
+                # We exclude the admissions whose the specific keys have the specified values
+                all_checklist_filters = ~all_checklist_filters
+
+                # We exclude the admissions whose the specific keys are missing (for unconfirmed admission,
+                # other admission contexts etc.)
+                for base_key, missing_keys in json_path_to_checks.items():
+                    all_checklist_filters |= ~Q(**{f'{base_key}__has_keys': missing_keys})
+
+            qs = qs.filter(all_checklist_filters)
 
         country_title = {
             settings.LANGUAGE_CODE_FR: 'name',
@@ -217,6 +292,28 @@ class ListerDemandesService(IListerDemandesService):
             else {}
         )
 
+        status_organization_by_tab = {
+            OngletsChecklist.decision_sic.name: onglet_decision_sic,
+            OngletsChecklist.decision_facultaire.name: onglet_decision_facultaire,
+        }
+
+        status_by_tab = {
+            OngletsChecklist.decision_sic.name: '',
+            OngletsChecklist.decision_facultaire.name: '',
+        }
+
+        if admission.checklist and 'current' in admission.checklist:
+            for tab in status_by_tab:
+                tab_info = admission.checklist['current'].get(tab)
+
+                if tab_info:
+                    tab_status = status_organization_by_tab[tab].get_status(
+                        status=tab_info.get('statut'),
+                        extra=tab_info.get('extra'),
+                    )
+                    if tab_status:
+                        status_by_tab[tab] = tab_status.libelle
+
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
@@ -226,8 +323,8 @@ class ListerDemandesService(IListerDemandesService):
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, training_title),
-            decision_fac='TODO',  # TODO
-            decision_sic='TODO',  # TODO
+            decision_fac=status_by_tab[OngletsChecklist.decision_facultaire.name],
+            decision_sic=status_by_tab[OngletsChecklist.decision_sic.name],
             date_confirmation=admission.submitted_at,
             derniere_modification_le=admission.modified_at,
             type_admission=admission.type,

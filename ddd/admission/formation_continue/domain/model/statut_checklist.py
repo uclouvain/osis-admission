@@ -27,8 +27,9 @@ from enum import Enum
 from typing import List, Optional, Dict
 
 import attr
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutChecklist, OngletsChecklist
 from osis_common.ddd import interface
 
 
@@ -79,4 +80,120 @@ class StatutsChecklistContinue:
 
 INDEX_ONGLETS_CHECKLIST = {
     onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistContinue))  # type: ignore
+}
+
+
+@attr.dataclass
+class ConfigurationStatutChecklist(interface.ValueObject):
+    identifiant: str
+    libelle: str
+    statut: Optional[ChoixStatutChecklist] = None
+    extra: Dict[str, any] = attr.Factory(dict)
+    identifiant_parent: Optional[str] = None
+
+    def matches_dict(self, other_configuration_as_dictionary: Dict[str, any]) -> bool:
+        """
+        Check if this configuration matches the other one.
+        :param other_configuration_as_dictionary: A dictionary containing the other configuration.
+        :return: True if this configuration matches the other one, False otherwise.
+        """
+        return self.matches(
+            other_configuration_as_dictionary.get('statut', ''),
+            other_configuration_as_dictionary.get('extra', {}),
+        )
+
+    def matches(self, status: str, extra: Optional[Dict[str, any]] = None) -> bool:
+        """
+        Check if this configuration matches the given status and extra.
+        :param status: the status to match.
+        :param extra: the extra to match.
+        :return: True if this configuration matches the given status and extra, False otherwise.
+        """
+        if extra is None:
+            extra = {}
+
+        return bool(self.statut) and self.statut.name == status and self.extra.items() <= extra.items()
+
+    def merge_statuses(self, other_status):
+        return ConfigurationStatutChecklist(
+            identifiant=self.identifiant,
+            libelle=self.libelle,
+            statut=self.statut or other_status.statut,
+            extra={**self.extra, **other_status.extra},
+            identifiant_parent=self.identifiant_parent,
+        )
+
+
+@attr.dataclass
+class ConfigurationOngletChecklist(interface.ValueObject):
+    identifiant: OngletsChecklist
+    statuts: List[ConfigurationStatutChecklist]
+
+    def get_status(self, status: str, extra: Optional[Dict[str, any]] = None) -> Optional[ConfigurationStatutChecklist]:
+        return next((statut for statut in self.statuts if statut.matches(status, extra)), None)
+
+
+STATUTS_CHECKLIST_PAR_ONGLET: Dict[str, Dict[str, ConfigurationStatutChecklist]] = {}
+
+
+onglet_decision = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.decision,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='PRISE_EN_CHARGE',
+            libelle=_('Taken in charge'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'taken_in_charge'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='ACCORD_FAC',
+            libelle=_('Fac approval'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'fac_approval'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='MISE_EN_ATTENTE',
+            libelle=_('On hold'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'on_hold'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='REFUSEE',
+            libelle=_('Denied'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'blocage': 'denied'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='ANNULEE',
+            libelle=_('Canceled'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'blocage': 'canceled'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_VALIDER',
+            libelle=_('To validate IUFC'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'to_validate'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDEE',
+            libelle=pgettext_lazy('decision-checklist', 'Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+
+ORGANISATION_ONGLETS_CHECKLIST: List[ConfigurationOngletChecklist] = [
+    onglet_decision,
+]
+
+ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT = {
+    onglet.identifiant.name: {statut.identifiant: statut for statut in onglet.statuts}
+    for onglet in ORGANISATION_ONGLETS_CHECKLIST
 }

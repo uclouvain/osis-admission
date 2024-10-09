@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
 from typing import Dict
 
 from django import forms
@@ -80,13 +79,21 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
-from admission.contrib.models.working_list import WorkingList
+from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
+)
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
+)
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
@@ -199,14 +206,23 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'training',
         'thesis_institute',
         'international_scholarship',
+        'thesis_language',
+        'additional_approval_conditions',
+        'other_training_accepted_by_fac',
+        'prerequisite_courses',
+        'refusal_reasons',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']
-    readonly_fields = [
-        "detailed_status",
-        "pre_admission_submission_date",
-        "submitted_at",
-        "last_update_author",
+    readonly_fields = AdmissionAdminMixin.readonly_fields + [
+        'financability_computed_rule',
+        'financability_computed_rule_situation',
+        'financability_computed_rule_on',
+        'financability_rule_established_by',
+        'financability_dispensation_first_notification_on',
+        'financability_dispensation_first_notification_by',
+        'financability_dispensation_last_notification_on',
+        'financability_dispensation_last_notification_by',
     ]
     exclude = ["valuated_experiences"]
 
@@ -564,9 +580,9 @@ class BaseAdmissionStatutFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(
-                Q(generaleducationadmission__status=self.value()) |
-                Q(doctorateadmission__status=self.value()) |
-                Q(continuingeducationadmission__status=self.value())
+                Q(generaleducationadmission__status=self.value())
+                | Q(doctorateadmission__status=self.value())
+                | Q(continuingeducationadmission__status=self.value())
             )
         return queryset
 
@@ -585,9 +601,9 @@ class BaseAdmissionTypeFormationFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(
-                Q(generaleducationadmission__isnull=self.value() != 'general-education') &
-                Q(doctorateadmission__isnull=self.value() != 'doctorate') &
-                Q(continuingeducationadmission__isnull=self.value() != 'continuing-education')
+                Q(generaleducationadmission__isnull=self.value() != 'general-education')
+                & Q(doctorateadmission__isnull=self.value() != 'doctorate')
+                & Q(continuingeducationadmission__isnull=self.value() != 'continuing-education')
             )
         return queryset
 
@@ -607,17 +623,18 @@ class EPCInjectionStatusFilter(SimpleListFilter):
             statut = EPCInjectionStatus[self.value()]
             return queryset.filter(
                 epc_injection__status=statut.name,
-                epc_injection__type=EPCInjectionType.DEMANDE.name
+                epc_injection__type=EPCInjectionType.DEMANDE.name,
             )
         elif self.value() == 'no_epc_injection':
             return queryset.filter(
-                Q(epc_injection__isnull=True) |
-                Q(~Exists(
-                    EPCInjection.objects.filter(
-                        admission_id=OuterRef('pk'),
-                        type=EPCInjectionType.DEMANDE.name,
+                Q(
+                    ~Exists(
+                        EPCInjection.objects.filter(
+                            admission_id=OuterRef('pk'),
+                            type=EPCInjectionType.DEMANDE.name,
+                        )
                     )
-                ))
+                )
             )
         return queryset
 
@@ -634,9 +651,9 @@ class EmailInterneFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'yes':
-            return queryset.filter(candidate__email__icontains='uclouvain')
+            return queryset.filter(candidate__email__endswith='uclouvain.be')
         elif self.value() == 'no':
-            return queryset.exclude(candidate__email__icontains='uclouvain')
+            return queryset.exclude(candidate__email__endswith='uclouvain.be')
         return queryset
 
 
@@ -674,12 +691,12 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                 When(
                     ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
                     | Q(generaleducationadmission__financability_rule='')
-                    | Q(generaleducationadmission__financability_computed_rule_on__isnull=True)
+                    | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
                     | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
                     generaleducationadmission__isnull=False,
-                    then=Value(False)
+                    then=Value(False),
                 ),
-                default=Value(True)
+                default=Value(True),
             )
         )
         if self.value():
@@ -703,9 +720,9 @@ class QuarantaineFilter(admin.SimpleListFilter):
                 When(
                     Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
                     | ~Q(candidate__personmergeproposal__validation__valid=True),
-                    then=Value(True)
+                    then=Value(True),
                 ),
-                default=Value(False)
+                default=Value(False),
             )
         )
         if self.value():
@@ -725,7 +742,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'created_at',
         'statut',
         'type_formation',
-        'noma_sent_to_digit'
+        'noma_sent_to_digit',
     )
     readonly_fields = ['uuid']
     actions = [
@@ -749,8 +766,12 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     sortable_by = ['reference', 'noma_sent_to_digit']
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(
-            _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                _noma_sent_to_digit=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
+            )
         )
 
     @admin.display(
@@ -763,8 +784,8 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
         for demande in queryset.exclude(
-            Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name]) &
-            Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
+            Q(epc_injection__status__in=[EPCInjectionStatus.OK.name, EPCInjectionStatus.PENDING.name])
+            & Q(epc_injection__type=EPCInjectionType.DEMANDE.name),
         ):
             InjectionEPCAdmission().injecter(demande)
 
@@ -861,19 +882,13 @@ class EPCInjectionAdmin(admin.ModelAdmin):
     @admin.action(description="Réinjecter la signalétique dans EPC")
     def reinjecter_la_signaletique_dans_epc(self, request, queryset):
         admissions_references = queryset.filter(
-            type=EPCInjectionType.SIGNALETIQUE.name
+            type=EPCInjectionType.SIGNALETIQUE.name,
         ).values_list('admission__reference', flat=True)
         injecter_signaletique_a_epc_task.run(admissions_references=list(admissions_references))
 
     @admin.action(description="Réinjecter la demande dans EPC")
     def reinjecter_la_demande_dans_epc(self, request, queryset):
-        for injection in queryset.filter(
-            type=EPCInjectionType.DEMANDE.name
-        ).exclude(
-            status=EPCInjectionStatus.OK.name
-        ):
-            injection.last_attempt_date = datetime.now()
-            injection.save()
+        for injection in queryset.filter(type=EPCInjectionType.DEMANDE.name).exclude(status=EPCInjectionStatus.OK.name):
             InjectionEPCAdmission().injecter(injection.admission)
 
 
@@ -1170,7 +1185,7 @@ class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
 
 class WorkingListForm(forms.ModelForm):
     checklist_filters = ChecklistStateFilterField(
-        configurations=ORGANISATION_ONGLETS_CHECKLIST,
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
         label=_('Checklist filters'),
         required=False,
     )
@@ -1202,6 +1217,52 @@ class WorkingListAdmin(OrderedModelAdmin):
                 'admission/working_list_admin.css',
             ],
         }
+
+
+class ContinuingWorkingListForm(forms.ModelForm):
+    checklist_filters = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+        label=_('Checklist filters'),
+        required=False,
+    )
+
+    admission_statuses = forms.TypedMultipleChoiceField(
+        label=_('Admission statuses'),
+        required=False,
+        choices=ChoixStatutPropositionContinue.choices(),
+    )
+
+    class Meta:
+        model = ContinuingWorkingList
+        fields = '__all__'
+
+
+class DoctorateWorkingListForm(forms.ModelForm):
+    checklist_filters = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
+        label=_('Checklist filters'),
+        required=False,
+    )
+
+    admission_statuses = forms.TypedMultipleChoiceField(
+        label=_('Admission statuses'),
+        required=False,
+        choices=ChoixStatutPropositionDoctorale.choices(),
+    )
+
+    class Meta:
+        model = DoctorateWorkingList
+        fields = '__all__'
+
+
+@admin.register(ContinuingWorkingList)
+class ContinuingWorkingListAdmin(WorkingListAdmin):
+    form = ContinuingWorkingListForm
+
+
+@admin.register(DoctorateWorkingList)
+class DoctorateWorkingListAdmin(WorkingListAdmin):
+    form = DoctorateWorkingListForm
 
 
 @admin.register(CategorizedFreeDocument)

@@ -31,7 +31,7 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import OuterRef, Subquery, Prefetch, Q
+from django.db.models import OuterRef, Subquery, Prefetch, Case, IntegerField, When
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
@@ -54,6 +54,7 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import PeriodeSoumissionTicketDigit
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO, CampusDTO
@@ -69,15 +70,17 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
     BesoinDeDerogation,
-    DerogationFinancement,
+    DerogationFinancement, STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException, \
-    PremierePropositionSoumisesNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+    PremierePropositionSoumisesNonTrouveeException,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
@@ -125,7 +128,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return [cls._load_dto(proposition) for proposition in qs]
 
     @classmethod
-    def get_first_submitted_proposition(cls, matricule_candidat: str) -> 'Proposition':
+    def get_active_period_submitted_proposition(
+            cls,
+            matricule_candidat: str,
+            periodes_actives: List['PeriodeSoumissionTicketDigit']
+    ) -> 'Proposition':
         first_submitted_proposition = (
             GeneralEducationAdmissionProxy.objects.prefetch_related(
                 'additional_approval_conditions',
@@ -139,14 +146,20 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'last_update_author',
             )
             .filter(
-                candidate__global_id=matricule_candidat
-            ).filter(
-                Q(
-                    type_demande=TypeDemande.ADMISSION.name,
-                    status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
+                candidate__global_id=matricule_candidat,
+                status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE,
+                determined_academic_year__year__in=[p.annee for p in periodes_actives],
+            )
+            .annotate(
+                status_priority=Case(
+                    *[
+                        When(status=status, then=priority)
+                        for status, priority in ChoixStatutPropositionGenerale.get_status_priorities().items()
+                    ],
+                    default=0,
+                    output_field=IntegerField(),
                 )
-                | Q(type_demande=TypeDemande.INSCRIPTION.name)
-            ).order_by('created_at')
+            ).order_by('-status_priority', 'created_at')
             .first()
         )
 

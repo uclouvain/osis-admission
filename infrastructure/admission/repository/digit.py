@@ -34,6 +34,7 @@ import waffle
 from django.conf import settings
 from django.db.models import QuerySet, Q
 from django.utils.datetime_safe import date
+from requests import RequestException
 
 from admission.ddd.admission.domain.validator.exceptions import ValidationTicketCreationDigitEchoueeException
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
@@ -261,8 +262,8 @@ class DigitRepository(IDigitRepository):
                 },
                 url=f"{settings.ESB_API_URL}/{settings.DIGIT_REQUEST_MATRICULE_URL}/{noma}"
             )
-            matricule = response.json()['person']['matricule']
-            return format_matricule(matricule)
+            fgs = response.json()['fgs'][0]['sourceId']
+            return format_matricule(fgs)
 
     @classmethod
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
@@ -277,6 +278,10 @@ class DigitRepository(IDigitRepository):
         if student is not None and student.registration_id:
             return student.registration_id
 
+        # Check person in EPC
+        noma_from_epc = _find_student_registration_id_in_epc(matricule=candidate.global_id)
+        if noma_from_epc:
+            return noma_from_epc
 
 
 def _retrieve_person_ticket_status(request_id: int):
@@ -314,7 +319,7 @@ def _retrieve_person_ticket_status(request_id: int):
             }
         return response_data
     except Exception as e:
-        logger.info(f"An error occured when try to call DigIT endpoint retrieve person ticket status. {repr(e)}")
+        logger.exception(f"An error occured when try to call DigIT endpoint retrieve person ticket status.")
         return {
             "status": PersonTicketCreationStatus.ERROR.name,
             "errors": [{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
@@ -354,10 +359,8 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra
                 url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}?validateResemblance=false"
             )
             return response.json()
-        except Exception as e:
-            logger.info(
-                f"[Validation syntaxique DigIT - {person.global_id} ] Une erreur est survenue avec DigIT {repr(e)}"
-            )
+        except Exception:
+            logger.exception(f"[Validation syntaxique DigIT - {person.global_id} ] Une erreur est survenue avec DigIT")
             return {"errors": [{"errorCode": "OSIS_CAN_NOT_REACH_DIGIT"}], "valid": False}
 
 
@@ -466,3 +469,21 @@ def _get_idm_number(program_type):
         "UNIVERSITY_FIRST_CYCLE_CERTIFICATE": 61,
         "UNIVERSITY_SECOND_CYCLE_CERTIFICATE": 61
     }[program_type]
+
+
+def _find_student_registration_id_in_epc(matricule):
+    try:
+        url = f"{settings.ESB_STUDENT_API}/{matricule}"
+        response = requests.get(url, headers={"Authorization": settings.ESB_AUTHORIZATION})
+        result = response.json()
+        if response.status_code == 200 and result.get('lireDossierEtudiantResponse'):
+            if result['lireDossierEtudiantResponse'].get('return'):
+                return _format_registration_id(str(result['lireDossierEtudiantResponse']['return'].get('noma')))
+    except (RequestException, ValueError) as e:
+        return None
+
+
+def _format_registration_id(registration_id):
+    prefix_registration_id = (8 - len(registration_id)) * '0'
+    registration_id = ''.join([prefix_registration_id, registration_id])
+    return registration_id

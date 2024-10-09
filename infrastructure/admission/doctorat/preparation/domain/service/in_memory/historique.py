@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
+from typing import Optional
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     SignataireIdentity,
@@ -47,7 +50,13 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
-    def historiser_avis(cls, proposition: Proposition, signataire_id: 'SignataireIdentity', avis: AvisDTO):
+    def historiser_avis(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        avis: AvisDTO,
+        statut_original_proposition: 'ChoixStatutPropositionDoctorale',
+    ):
         pass
 
     @classmethod
@@ -78,4 +87,103 @@ class HistoriqueInMemory(IHistorique):
 
     @classmethod
     def historiser_suppression(cls, proposition: Proposition):
+        pass
+
+    @classmethod
+    def historiser_message_au_candidat(cls, proposition: Proposition, matricule_emetteur: str, message: EmailMessage):
+        pass
+
+    @classmethod
+    def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        message: Optional[EmailMessage],
+        gestionnaire: str,
+    ):
+        pass
+
+    @classmethod
+    def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        envoi_par_fac: bool,
+    ):
+        pass
+
+    @classmethod
+    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
+        pass
+
+    @classmethod
+    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
+        pass
+
+    @classmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionDoctorale,
+    ):
+        pass
+
+    @classmethod
+    def historiser_specification_informations_acceptation_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionDoctorale,
+    ):
+        pass
+
+    @classmethod
+    def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
+        pass
+
+    @classmethod
+    def historiser_acceptation_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: Optional[EmailMessage] = None,
+    ):
+        pass
+
+    @classmethod
+    def historiser_mail_acceptation_inscription_sic(
+        cls,
+        proposition_uuid: str,
+        gestionnaire: str,
+        message: EmailMessage,
+    ):
+        pass
+
+    @classmethod
+    def historiser_demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        pass
+
+    @classmethod
+    def historiser_information_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        pass
+
+    @classmethod
+    def historiser_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: Optional[EmailMessage] = None,
+    ):
         pass

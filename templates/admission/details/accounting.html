@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -178,7 +178,7 @@
 
   {% panel _('Memberships') %}
     {% if is_general and admission.formation.campus.nom in sport_affiliation_choices_by_campus %}
-      {% field_data _('Would you like to join the sport activities? If so, the cost of membership will be added to your tuition fee.') accounting.affiliation_sport|enum_display:'ChoixAffiliationSport' %}
+      {% field_data _('Would you like to join the sport activities? If so, the cost of membership will be added to your tuition fee.') accounting.affiliation_sport|sport_affiliation_value:admission.formation.campus.nom %}
     {% endif %}
     {% field_data _("Would you like to become a Solidarity Student, that is, a member of a programme proposed by UCLouvain's NGO, Louvain Cooperation? This membership will give you access to a fund for your solidarity projects. If so, the membership cost, which is E12, will be added to your tuition fee.") accounting.etudiant_solidaire %}
   {% endpanel %}

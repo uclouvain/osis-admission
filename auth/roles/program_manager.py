@@ -28,14 +28,15 @@ import rules
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from admission.auth.predicates import general, continuing, doctorate
 from admission.auth.predicates.common import (
     has_education_group_of_types,
     is_part_of_education_group,
     is_debug,
     is_sent_to_epc,
     pending_digit_ticket_response,
+    past_experiences_checklist_tab_is_not_sufficient,
 )
-from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -112,7 +113,8 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_training_choice': is_part_of_education_group,
             'admission.change_admission_training_choice': is_part_of_education_group
             & (continuing.in_manager_status | doctorate.in_fac_status)
-            & ~is_sent_to_epc & ~pending_digit_ticket_response,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_accounting': is_part_of_education_group,
             'admission.view_admission_specific_questions': is_part_of_education_group,
             'admission.change_admission_specific_questions': is_part_of_education_group
@@ -151,6 +153,9 @@ class ProgramManager(EducationGroupRoleModel):
             & continuing.is_continuing
             & continuing.is_submitted
             & ~is_sent_to_epc,
+            'admission.checklist_change_training_choice': is_part_of_education_group
+            & doctorate.in_fac_status
+            & ~is_sent_to_epc,
             'admission.checklist_change_faculty_decision': is_part_of_education_group
             & (general.in_fac_status | doctorate.in_fac_status)
             & ~is_sent_to_epc,
@@ -162,6 +167,7 @@ class ProgramManager(EducationGroupRoleModel):
             & ~is_sent_to_epc,
             'admission.checklist_select_access_title': is_part_of_education_group
             & (general.in_fac_status | doctorate.in_fac_status)
+            & past_experiences_checklist_tab_is_not_sufficient
             & ~is_sent_to_epc,
             'admission.checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation_fac': is_part_of_education_group & ~is_sent_to_epc,
@@ -170,6 +176,7 @@ class ProgramManager(EducationGroupRoleModel):
             & continuing.is_continuing
             & ~is_sent_to_epc,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
+            'admission.send_message': is_part_of_education_group,
             # Exports
             'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,
         }

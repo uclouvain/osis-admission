@@ -30,7 +30,7 @@ from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import CddMailTemplate
-from admission.ddd.parcours_doctoral.commands import EnvoyerMessageDoctorantCommand
+from admission.ddd.admission.doctorat.preparation.commands import EnvoyerMessageCandidatCommand
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
 from admission.infrastructure.parcours_doctoral.domain.service.notification import (
     Notification as NotificationDoctorat,
@@ -57,9 +57,15 @@ class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin,
     def get_success_url(self):
         return self.request.get_full_path()
 
+    def get_extra_form_kwargs(self):
+        return {
+            'admission': self.admission,
+            'view_url': self.request.path,
+        }
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['admission'] = self.admission
+        kwargs.update(self.get_extra_form_kwargs())
         return kwargs
 
     def get_tokens(self, identifier):
@@ -92,9 +98,9 @@ class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin,
 
     def form_valid(self, form: BaseForm):
         message_bus_instance.invoke(
-            EnvoyerMessageDoctorantCommand(
+            EnvoyerMessageCandidatCommand(
                 matricule_emetteur=self.request.user.person.global_id,
-                doctorat_uuid=self.admission.uuid,
+                proposition_uuid=self.admission.uuid,
                 sujet=form.cleaned_data['subject'],
                 message=form.cleaned_data['body'],
                 cc_promoteurs=form.cleaned_data['cc_promoteurs'],
@@ -102,4 +108,4 @@ class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin,
             )
         )
         self.message_on_success = _("Message sent successfully")
-        return super().form_valid(form)
+        return super().form_valid(self.form_class(**self.get_extra_form_kwargs()))

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
         ("base", "0700_auto_20240831_0115"),
         ("epc", "0095_alter_inscriptionprogrammeannuel_admission_uuid"),
         ("reference", "0018_country_active"),
-        ("admission", "0216_alter_epcinjection_status"),
+        ("admission", "0226_initialize_iufc_specific_questions"),
     ]
 
     operations = [

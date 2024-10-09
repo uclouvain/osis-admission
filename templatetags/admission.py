@@ -62,6 +62,9 @@ from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
+)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO, CoordonneesDTO, IdentificationDTO
@@ -71,7 +74,12 @@ from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
+from admission.ddd.admission.enums import (
+    TypeItemFormulaire,
+    Onglets,
+    ChoixAffiliationSport,
+    LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE,
+)
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -305,6 +313,9 @@ class Tab:
 
 TAB_TREES = {
     CONTEXT_DOCTORATE: {
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
+        ],
         Tab('documents', _('Documents'), 'folder-open'): [
             Tab('documents', _('Documents'), 'folder-open'),
         ],
@@ -977,6 +988,12 @@ def country_name_from_iso_code(iso_code: str):
 def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+
+
+@register.filter
+def get_ordered_checklist_items_doctorate(checklist_items: dict):
+    """Return the ordered checklist items."""
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]])
 
 
 @register.filter
@@ -1794,6 +1811,7 @@ def digit_error_description(error_code):
         "RSTOPDATE0001": "La date de début est null",
         "RSTOPDATE0002": "La date de début est d'un format incorrect",
         "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible",
+        "ABOX0001": "Le numéro de boite est trop long (plus de 12 caractères)",
     }
 
     return error_mapping[error_code]
@@ -1838,3 +1856,15 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
         return f'{base_url}?{urlencode(query_params)}'
 
     return base_url
+
+
+@register.filter
+def sport_affiliation_value(affiliation: Optional[str], campus_name: Optional[str]) -> str:
+    """Return the label of the sport affiliation based on the affiliation value and the campus."""
+    if not affiliation:
+        return ''
+
+    if not campus_name or affiliation != ChoixAffiliationSport.NON.name:
+        return ChoixAffiliationSport.get_value(affiliation)
+
+    return LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE.get(campus_name, ChoixAffiliationSport.NON.value)

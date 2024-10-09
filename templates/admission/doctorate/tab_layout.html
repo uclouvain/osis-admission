@@ -88,7 +88,7 @@
     {% url 'admission:access-conditions-url' admission.doctorat.type admission.doctorat.sigle|urlencode:'' admission.doctorat.code as access_conditions_url %}
     <span>
         <a href="{{ access_conditions_url }}" target="_blank">{{ admission.doctorat.sigle }}</a> -
-        {{ admission.doctorat.intitule }} ({{ admission.doctorat.campus }})
+        {{ admission.doctorat.intitule }} ({{ admission.doctorat.campus.nom }})
         <span class="label label-default">{{ admission.doctorat.annee|display_as_academic_year }}</span>
     </span>
     <br>
@@ -127,7 +127,16 @@
       <br>
     {% endif %}
     {% if admission.type_financement == 'SEARCH_SCHOLARSHIP' %}
-      <span class="label label-success">{% translate 'Scholarship' %}</span>
+      {% if admission.bourse_recherche %}
+        <span
+            class="label label-success"
+            title="{{ admission.bourse_recherche }}"
+        >
+        {{ admission.bourse_recherche.nom_court }}
+        </span>
+      {% else %}
+        <span class="label label-success">{% translate 'Scholarship' %}</span>
+      {% endif %}
     {% endif %}
   </div>
   <div class="admission-badges min-width">

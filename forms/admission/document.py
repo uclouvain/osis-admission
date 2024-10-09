@@ -34,7 +34,11 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument, TOKEN_ACADEMIC_YEAR
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as OngletsChecklistDoctorat,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
@@ -46,9 +50,6 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistFormationGenerale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    OngletsChecklist as OngletsChecklistDoctorat,
-)
 from admission.forms import (
     OTHER_EMPTY_CHOICE,
     autocomplete,
@@ -59,7 +60,6 @@ from admission.templatetags.admission import (
     formatted_language,
     document_request_status_css_class,
 )
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.views.autocomplete.categorized_free_documents import CategorizedFreeDocumentsAutocomplete
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE

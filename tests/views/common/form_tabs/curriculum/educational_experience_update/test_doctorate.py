@@ -66,6 +66,7 @@ from reference.tests.factories.language import LanguageFactory
 
 
 # TODO: Remove duplicate tests with osis_profile
+@freezegun.freeze_time('2024-01-01')
 class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -563,7 +564,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
                 'year_formset-2021-registered_credit_number': 20,
             },
         )
-        print(response)
+
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         # Check the updated experience

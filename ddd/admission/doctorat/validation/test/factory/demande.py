@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ import uuid
 import factory
 
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import _PropositionIdentityFactory
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 
 
 class _DemandeIdentityFactory(factory.Factory):
@@ -73,7 +73,6 @@ class DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFact
     statut_cdd = ChoixStatutCDD.ACCEPTED
     statut_sic = ChoixStatutSIC.VALID
     admission_acceptee_le = factory.Faker('past_datetime')
-    pre_admission_confirmee_le = factory.Faker('past_datetime')
 
 
 class DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(_DemandeFactory):

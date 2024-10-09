@@ -808,7 +808,8 @@ class Proposition(interface.RootEntity):
         self.financabilite_regle_calcule = financabilite_regle_calcule
         self.financabilite_regle_calcule_situation = (
             SituationFinancabilite[financabilite_regle_calcule_situation]
-            if financabilite_regle_calcule_situation else ''
+            if financabilite_regle_calcule_situation
+            else ''
         )
         self.financabilite_regle_calcule_le = now()
         if auteur_modification:
@@ -857,7 +858,9 @@ class Proposition(interface.RootEntity):
         statut: DerogationFinancement,
         refus_uuids_motifs: Optional[List[str]],
         refus_autres_motifs: Optional[List[str]],
+        auteur_modification: str,
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.financabilite_derogation_statut = statut
         if statut == DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE:
             self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in refus_uuids_motifs]
@@ -1093,6 +1096,11 @@ class Proposition(interface.RootEntity):
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])
+
+        ProfilCandidatService.verifier_quarantaine(
+            proposition=self,
+            profil_candidat_translator=profil_candidat_translator,
+        )
 
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_REUSSITE,

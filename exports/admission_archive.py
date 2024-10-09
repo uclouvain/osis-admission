@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ import uuid
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from osis_document.api.utils import confirm_remote_upload, launch_post_processing
+from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
+from osis_signature.enums import SignatureState
+from osis_signature.models import StateHistory
 
 from admission.contrib.models import AdmissionTask, DoctorateAdmission, SupervisionActor
 from admission.contrib.models.doctorate import PropositionProxy
@@ -35,33 +39,15 @@ from admission.exceptions import MergePDFException
 from admission.exports.utils import admission_generate_pdf
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
-from base.models.student import Student
-from osis_document.api.utils import confirm_remote_upload, launch_post_processing
-from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
 from osis_profile.models import EducationalExperience
-from osis_signature.enums import SignatureState
-from osis_signature.models import StateHistory
 
 
 def admission_pdf_archive(task_uuid, language=None):
-    admission_task = AdmissionTask.objects.select_related('task', 'admission__candidate').get(task__uuid=task_uuid)
+    admission_task = AdmissionTask.objects.select_related('task', 'admission').get(task__uuid=task_uuid)
 
-    admission: DoctorateAdmission = PropositionProxy.objects.annotate(
-        # Duplicate with annotate_with_student_registration_id (cf. admission/contrib/models/base.py)
-        # TODO: Try to merge logic
-        person_merge_proposal_noma=models.F('candidate__personmergeproposal__registration_id_sent_to_digit'),
-        existing_student_noma=models.Subquery(
-            Student.objects.filter(person_id=models.OuterRef('candidate_id'), ).values(
-                'registration_id'
-            )[:1]
-        ),
-    ).annotate(
-        student_registration_id=models.Case(
-            models.When(person_merge_proposal_noma__isnull=False, then='person_merge_proposal_noma'),
-            models.When(existing_student_noma__isnull=False, then='existing_student_noma'),
-            default=models.Value('')
-        )
-    ).get(uuid=admission_task.admission.uuid)
+    admission: DoctorateAdmission = PropositionProxy.objects.annotate_with_student_registration_id().get(
+        uuid=admission_task.admission.uuid
+    )
     addresses = {
         address.label: address
         for address in PersonAddress.objects.filter(
@@ -102,7 +88,7 @@ def admission_pdf_archive(task_uuid, language=None):
     # Merge project and gantt into PDF
     generated_uuid = confirm_remote_upload(
         token,
-        document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value
+        document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value,
     )
     output = launch_post_processing(
         uuid_list=[

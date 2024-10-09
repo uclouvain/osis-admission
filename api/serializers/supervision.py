@@ -42,6 +42,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer
+from . import DoctoratDTOSerializer
 from .mixins import IncludedFieldsMixin
 
 __all__ = [
@@ -76,6 +77,7 @@ class ExternalDoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePr
     reponses_questions_specifiques = None
     elements_confirmation = None
     documents_demandes = None
+    doctorat = DoctoratDTOSerializer()
 
     class Meta:
         source = PropositionDTO

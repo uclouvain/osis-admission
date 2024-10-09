@@ -87,6 +87,15 @@
     <div class="flex-content-no-wrap">
       {% display admission.nom_candidat ',' admission.prenom_candidat ' ' '(' admission.noma_candidat ')' as candidate_complete_name %}
       {{ candidate_complete_name }}
+      {% if admission.est_reorientation_inscription_externe %}
+        <span class="fa-regular fa-circle-r" title="{% translate "External reorientation" %}"></span>
+      {% endif %}
+      {% if admission.est_modification_inscription_externe %}
+        <span class="fa-regular fa-circle-m" title="{% translate "External enrollment change" %}"></span>
+      {% endif %}
+      {% if admission.est_inscription_tardive %}
+        <span class="fa-regular fa-calendar-clock" title="{% translate "Late enrollment" %}"></span>
+      {% endif %}
       {% if admission.plusieurs_demandes %}
         {% list_other_admissions_url admission.uuid admission.type_formation as list_other_admissions_url %}
         <span

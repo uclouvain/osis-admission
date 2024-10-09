@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,12 +31,10 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import PromoterFactory
@@ -46,7 +44,6 @@ from base.tests.factories.person import PersonFactory
 
 
 class DoctorateAPIViewTestCase(APITestCase):
-    admission: Optional[DoctorateAdmissionFactory] = None
     doctorate: Optional[DoctorateAdmissionFactory] = None
     other_doctorate: Optional[DoctorateAdmissionFactory] = None
     commission: Optional[EntityVersionFactory] = None
@@ -55,7 +52,6 @@ class DoctorateAPIViewTestCase(APITestCase):
     other_student: Optional[CandidateFactory] = None
     no_role_user: Optional[User] = None
     doctorate_url: Optional[str] = None
-    admission_url: Optional[str] = None
     other_doctorate_url: Optional[str] = None
 
     @classmethod
@@ -83,10 +79,6 @@ class DoctorateAPIViewTestCase(APITestCase):
             supervision_group=promoter.process,
             training__enrollment_campus__name='Mons',
         )
-        cls.admission = DoctorateAdmissionFactory(
-            training__management_entity=cls.commission,
-            candidate=cls.doctorate.candidate,
-        )
         cls.other_doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
@@ -99,7 +91,6 @@ class DoctorateAPIViewTestCase(APITestCase):
 
         cls.doctorate_url = resolve_url('admission_api_v1:doctorate', uuid=cls.doctorate.uuid)
         cls.other_doctorate_url = resolve_url('admission_api_v1:doctorate', uuid=cls.other_doctorate.uuid)
-        cls.admission_url = resolve_url('admission_api_v1:doctorate', uuid=cls.admission.uuid)
 
     @freezegun.freeze_time('2023-01-01')
     def test_get_doctorate_student(self):
@@ -114,9 +105,6 @@ class DoctorateAPIViewTestCase(APITestCase):
         # Check doctorate links
         self.assertTrue('links' in json_response)
         allowed_actions = [
-            'retrieve_cotutelle',
-            'retrieve_supervision',
-            'retrieve_proposition',
             'retrieve_confirmation',
             'update_confirmation',
             'update_confirmation_extension',
@@ -128,6 +116,9 @@ class DoctorateAPIViewTestCase(APITestCase):
             'list_jury_members',
         ]
         forbidden_actions = [
+            'retrieve_cotutelle',
+            'retrieve_supervision',
+            'retrieve_project',
             'retrieve_complementary_training',
             'assent_training',
             'update_jury_preparation',
@@ -164,15 +155,8 @@ class DoctorateAPIViewTestCase(APITestCase):
             response = getattr(self.client, method)(self.doctorate_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_get_doctorate_invalid_status(self):
-        self.client.force_authenticate(user=self.student.user)
-        response = self.client.get(self.admission_url, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], DoctoratNonTrouveException.status_code)
-
     def test_get_doctorate_other_student(self):
         self.client.force_authenticate(user=self.other_student.user)
-        response = self.client.get(self.admission_url, format='json')
+        response = self.client.get(self.doctorate_url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
