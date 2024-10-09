@@ -96,29 +96,33 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
+    def historiser_envoi_cdd_par_sic_lors_de_la_decision_cdd(
         cls,
         proposition: Proposition,
-        message: Optional[EmailMessage],
         gestionnaire: str,
     ):
         raise NotImplementedError
 
     @classmethod
-    def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+    def historiser_envoi_sic_par_cdd_lors_de_la_decision_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: str,
-        envoi_par_fac: bool,
+        envoi_par_cdd: bool,
     ):
         raise NotImplementedError
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
+    def historiser_refus_cdd(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO, message: EmailMessage):
         raise NotImplementedError
 
     @classmethod
-    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
+    def historiser_acceptation_cdd(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+        message: EmailMessage,
+    ):
         raise NotImplementedError
 
     @classmethod
@@ -186,15 +190,6 @@ class IHistorique(interface.DomainService):
         gestionnaire: str,
         message: EmailMessage,
         uuid_experience: str,
-    ):
-        raise NotImplementedError
-
-    @classmethod
-    def historiser_specification_motifs_refus_sic(
-        cls,
-        proposition: Proposition,
-        gestionnaire: str,
-        statut_original: ChoixStatutPropositionDoctorale,
     ):
         raise NotImplementedError
 
