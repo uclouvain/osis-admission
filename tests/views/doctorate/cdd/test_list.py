@@ -33,7 +33,7 @@ from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext
+from django.utils.translation import gettext, gettext_lazy
 
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
@@ -351,7 +351,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(form['cotutelle'].value(), None)
         self.assertCountEqual(
             form.fields['cotutelle'].widget.choices,
-            ALL_EMPTY_CHOICE + ((True, 'Yes'), (False, 'No')),
+            ALL_EMPTY_CHOICE + ((True, gettext_lazy('Yes')), (False, gettext_lazy('No'))),
         )
 
         self.assertEqual(form['date_soumission_debut'].value(), None)
