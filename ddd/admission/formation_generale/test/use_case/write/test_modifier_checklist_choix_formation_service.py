@@ -53,6 +53,7 @@ class TestModifierChecklistChoixFormationPropositionService(SimpleTestCase):
             uuid_proposition='uuid-BACHELIER-ECO1',
             type_demande='ADMISSION',
             poursuite_de_cycle='NO',
+            est_inscription_tardive=True,
         )
 
     def test_should_modifier_choix_formation(self):
@@ -61,6 +62,7 @@ class TestModifierChecklistChoixFormationPropositionService(SimpleTestCase):
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.type_demande, TypeDemande[self.cmd.type_demande])
         self.assertEqual(proposition.poursuite_de_cycle, PoursuiteDeCycle[self.cmd.poursuite_de_cycle])
+        self.assertTrue(proposition.est_inscription_tardive)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')

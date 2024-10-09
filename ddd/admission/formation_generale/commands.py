@@ -104,6 +104,7 @@ class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
     sigle_formation: str
     annee_formation: int
     poursuite_de_cycle: str
+    est_inscription_tardive: bool
 
 
 @attr.dataclass(frozen=True, slots=True)
