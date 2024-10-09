@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from unittest.mock import patch
 
 import factory
 import freezegun
@@ -31,6 +32,8 @@ from django.test import TestCase
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     StatutEmplacementDocument,
@@ -53,6 +56,7 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     _PropositionIdentityFactory,
 )
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -61,6 +65,7 @@ from admission.infrastructure.admission.repository.in_memory.emplacement_documen
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
@@ -165,9 +170,9 @@ class TestApprouverAdmissionParSic(TestCase):
         self.proposition.avec_conditions_complementaires = None
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+        self.assertIsInstance(
+            context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+        )
 
     def test_should_lever_exception_si_conditions_complementaires_non_specifiees(self):
         self.proposition.avec_conditions_complementaires = True
@@ -175,9 +180,9 @@ class TestApprouverAdmissionParSic(TestCase):
         self.proposition.conditions_complementaires_libres = []
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+        self.assertIsInstance(
+            context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+        )
 
     def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None
@@ -198,9 +203,9 @@ class TestApprouverAdmissionParSic(TestCase):
         self.proposition.nombre_annees_prevoir_programme = None
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+        self.assertIsInstance(
+            context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+        )
 
     def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):
         self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_EN_COURS
@@ -218,4 +223,17 @@ class TestApprouverAdmissionParSic(TestCase):
         self.proposition_repository.save(self.proposition)
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), DocumentAReclamerImmediatException)
+        self.assertIsInstance(context.exception.exceptions.pop(), DocumentAReclamerImmediatException)
+
+    def test_should_lever_exception_si_quarantaine(self):
+        with patch.object(
+            ProfilCandidatInMemoryTranslator,
+            'get_merge_proposal',
+            return_value=MergeProposalDTO(
+                status=PersonMergeStatus.ERROR.name,
+                validation={},
+            ),
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(context.exception.exceptions.pop(), EnQuarantaineException)

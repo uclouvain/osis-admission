@@ -776,6 +776,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             formation_translator=FormationGeneraleTranslator(),
             client_comptabilite_translator=ClientComptabiliteTranslator(),
+            periode_soumission_ticket_digit_translator=PeriodeSoumissionTicketDigitTranslator(),
         )
     ),
     SpecifierDerogationFinancabiliteCommand: (
