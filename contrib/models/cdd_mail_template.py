@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -36,9 +36,10 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
-from base.models.enums.entity_type import DOCTORAL_COMMISSION
+from base.models.enums.organization_type import MAIN
 from osis_mail_template.models import MailTemplateManager, check_mail_template_identifier
 from osis_mail_template.utils import MissingTokenDict, transform_html_to_text
+
 
 ALLOWED_CUSTOM_IDENTIFIERS = [
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
@@ -101,7 +102,9 @@ class CddMailTemplate(models.Model):
     cdd = models.ForeignKey(
         'base.Entity',
         on_delete=models.CASCADE,
-        limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
+        limit_choices_to={
+            'organization__type': MAIN,
+        },
         related_name='+',
     )
 
