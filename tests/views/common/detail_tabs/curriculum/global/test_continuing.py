@@ -30,9 +30,12 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.contrib.models import ContinuingEducationAdmission, EPCInjection as AdmissionEPCInjection
+from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+
+from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
 )
@@ -62,6 +65,11 @@ from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 
 
 @freezegun.freeze_time('2024-06-01')
@@ -191,8 +199,8 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             is_102_change_of_course=True,
         )
 
-        AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission=self.continuing_admission,
+        other_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=ContinuingEducationAdmissionFactory(candidate=self.continuing_admission.candidate),
             educationalexperience=educational_experience,
         )
 
@@ -233,7 +241,7 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.cycle_formation, '')
         self.assertEqual(experience.type_enseignement, educational_experience.study_system)
         self.assertEqual(experience.injectee, False)
-        self.assertEqual(experience.valorisee_par_admissions, [self.continuing_admission.uuid])
+        self.assertEqual(experience.valorisee_par_admissions, [other_valuation.baseadmission.uuid])
         self.assertEqual(experience.identifiant_externe, None)
 
         self.assertEqual(len(experience.annees), 1)
@@ -295,6 +303,105 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.cycle_formation, self.other_diploma.cycle)
         self.assertEqual(experience.est_autre_formation, False)
 
+        self.assertEqual(len(experience.annees), 1)
+
+        # With valuation by the current admission
+        valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.continuing_admission,
+            educationalexperience=educational_experience,
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_academiques), 1)
+
+        experience = curriculum.experiences_academiques[0]
+
+        self.assertEqual(experience.uuid, educational_experience.uuid)
+        self.assertCountEqual(
+            experience.valorisee_par_admissions,
+            [self.continuing_admission.uuid, other_valuation.baseadmission.uuid],
+        )
+        self.assertEqual(len(experience.annees), 1)
+
+        # Admission injection
+        admission_injection = AdmissionEPCInjection(
+            admission=self.continuing_admission,
+            type=EPCInjectionType.SIGNALETIQUE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_academiques), 1)
+
+        experience = curriculum.experiences_academiques[0]
+
+        self.assertEqual(experience.uuid, educational_experience.uuid)
+        self.assertEqual(experience.injectee, False)
+        self.assertEqual(len(experience.annees), 1)
+
+        admission_injection.type = EPCInjectionType.DEMANDE.name
+        admission_injection.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_academiques), 1)
+
+        experience = curriculum.experiences_academiques[0]
+
+        self.assertEqual(experience.uuid, educational_experience.uuid)
+        self.assertEqual(experience.injectee, True)
+        self.assertEqual(len(experience.annees), 1)
+
+        admission_injection.delete()
+
+        # Curriculum injection
+        curriculum_injection = CurriculumEPCInjection(
+            person=self.continuing_admission.candidate,
+            experience_uuid=educational_experience.uuid,
+            type_experience=ExperienceType.ACADEMIC.name,
+            status=CurriculumEPCInjectionStatus.ERROR.name,
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_academiques), 1)
+
+        experience = curriculum.experiences_academiques[0]
+
+        self.assertEqual(experience.uuid, educational_experience.uuid)
+        self.assertEqual(experience.injectee, False)
+        self.assertEqual(len(experience.annees), 1)
+
+        curriculum_injection.status = CurriculumEPCInjectionStatus.OK.name
+        curriculum_injection.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_academiques), 1)
+
+        experience = curriculum.experiences_academiques[0]
+
+        self.assertEqual(experience.uuid, educational_experience.uuid)
+        self.assertEqual(experience.injectee, True)
+        self.assertEqual(len(experience.annees), 1)
+
     def test_get_curriculum_with_non_academic_experience(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -310,8 +417,8 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             activity='My custom activity',
         )
 
-        AdmissionProfessionalValuatedExperiencesFactory(
-            baseadmission=self.continuing_admission,
+        other_valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=ContinuingEducationAdmissionFactory(candidate=self.continuing_admission.candidate),
             professionalexperience=non_academic_experience,
         )
 
@@ -333,5 +440,97 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.secteur, non_academic_experience.sector)
         self.assertEqual(experience.autre_activite, non_academic_experience.activity)
         self.assertEqual(experience.injectee, False)
-        self.assertEqual(experience.valorisee_par_admissions, [self.continuing_admission.uuid])
+        self.assertEqual(experience.valorisee_par_admissions, [other_valuation.baseadmission.uuid])
         self.assertEqual(experience.identifiant_externe, None)
+
+        # With valuation by the current admission
+        valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.continuing_admission,
+            professionalexperience=non_academic_experience,
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_non_academiques), 1)
+
+        experience = curriculum.experiences_non_academiques[0]
+
+        self.assertEqual(experience.uuid, non_academic_experience.uuid)
+        self.assertCountEqual(
+            experience.valorisee_par_admissions,
+            [self.continuing_admission.uuid, other_valuation.baseadmission.uuid],
+        )
+
+        # Admission injection
+        admission_injection = AdmissionEPCInjection(
+            admission=self.continuing_admission,
+            type=EPCInjectionType.SIGNALETIQUE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_non_academiques), 1)
+
+        experience = curriculum.experiences_non_academiques[0]
+
+        self.assertEqual(experience.uuid, non_academic_experience.uuid)
+        self.assertEqual(experience.injectee, False)
+
+        admission_injection.type = EPCInjectionType.DEMANDE.name
+        admission_injection.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_non_academiques), 1)
+
+        experience = curriculum.experiences_non_academiques[0]
+
+        self.assertEqual(experience.uuid, non_academic_experience.uuid)
+        self.assertEqual(experience.injectee, True)
+
+        admission_injection.delete()
+
+        # Curriculum injection
+        curriculum_injection = CurriculumEPCInjection(
+            person=self.continuing_admission.candidate,
+            experience_uuid=non_academic_experience.uuid,
+            type_experience=ExperienceType.ACADEMIC.name,
+            status=CurriculumEPCInjectionStatus.ERROR.name,
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_non_academiques), 1)
+
+        experience = curriculum.experiences_non_academiques[0]
+
+        self.assertEqual(experience.uuid, non_academic_experience.uuid)
+        self.assertEqual(experience.injectee, False)
+
+        curriculum_injection.status = CurriculumEPCInjectionStatus.OK.name
+        curriculum_injection.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        curriculum = response.context['curriculum']
+
+        self.assertEqual(len(curriculum.experiences_non_academiques), 1)
+
+        experience = curriculum.experiences_non_academiques[0]
+
+        self.assertEqual(experience.uuid, non_academic_experience.uuid)
+        self.assertEqual(experience.injectee, True)
