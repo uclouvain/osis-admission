@@ -29,16 +29,17 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Subquery
 from django.utils.translation import gettext_lazy as _
+from osis_mail_template.models import MailTemplateManager, check_mail_template_identifier
+from osis_mail_template.utils import MissingTokenDict, transform_html_to_text
 
+from admission.admission_utils.entity import get_faculty_id_from_entity_id
 from admission.mail_templates import (
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
-from base.models.enums.entity_type import DOCTORAL_COMMISSION
-from osis_mail_template.models import MailTemplateManager, check_mail_template_identifier
-from osis_mail_template.utils import MissingTokenDict, transform_html_to_text
+from base.models.enums.entity_type import DOCTORAL_COMMISSION, FACULTY
 
 ALLOWED_CUSTOM_IDENTIFIERS = [
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
@@ -62,10 +63,18 @@ class CddMailTemplateManager(MailTemplateManager):
 
     def get_from_identifiers(self, identifiers: List[str], language: str, cdd_id: int):
         """Get a list of mail template instances by identifier and language"""
+        # A mail template can be related to a CDD entity or to the parent faculty entity
+        entities_ids = [cdd_id]
+
+        faculty_id = get_faculty_id_from_entity_id(cdd_id)
+
+        if faculty_id:
+            entities_ids.append(faculty_id)
+
         qs = self.get_queryset().filter(
             identifier__in=identifiers,
             language=language,
-            cdd_id=cdd_id,
+            cdd_id__in=entities_ids,
         )
 
         return list(qs)
@@ -101,7 +110,9 @@ class CddMailTemplate(models.Model):
     cdd = models.ForeignKey(
         'base.Entity',
         on_delete=models.CASCADE,
-        limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
+        limit_choices_to={
+            'entityversion__entity_type__in': [DOCTORAL_COMMISSION, FACULTY],
+        },
         related_name='+',
     )
 

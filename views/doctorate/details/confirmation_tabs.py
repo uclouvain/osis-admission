@@ -111,7 +111,6 @@ class DoctorateAdmissionConfirmationDecisionMixin(
             # Template is a custom one
             mail_template = CddMailTemplate.objects.get(
                 pk=mail_identifier,
-                cdd=self.admission.doctorate.management_entity,
             )
         else:
             # Template is the generic one

@@ -30,7 +30,7 @@ from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from base.models.entity import Entity
-from base.models.enums.entity_type import DOCTORAL_COMMISSION
+from base.models.enums.entity_type import DOCTORAL_COMMISSION, FACULTY
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -46,7 +46,9 @@ class CddConfigurator(EntityRoleModel):
         Entity,
         on_delete=models.CASCADE,
         related_name='+',
-        limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
+        limit_choices_to={
+            'entityversion__entity_type__in': [DOCTORAL_COMMISSION, FACULTY],
+        },
     )
 
     class Meta:
