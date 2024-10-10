@@ -57,8 +57,6 @@ def run():  # pragma: no cover
         candidate__email__endswith='uclouvain.be',
         # Aucune erreur syntaxique de signalétique
         candidate__personmergeproposal__validation__valid=True,
-        # Doit être financable ou non concerné
-        checklist__current__financabilite__statut__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'],
     ).exclude(
         # Un noma doit exister
         Q(candidate__personmergeproposal__registration_id_sent_to_digit='')
