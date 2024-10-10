@@ -340,6 +340,7 @@
                         {% admission_url last_valuated_admission.uuid last_valuated_admission.type_formation as admission_url %}
                         {% blocktranslate trimmed with admission_reference=last_valuated_admission.numero_demande admission_url=admission_url %}
                           This experience has been added by the applicant in <a href="{{ admission_url }}" target="_blank">another application</a>.
+                          You have the option to integrate it in the current application.
                         {% endblocktranslate %}
                       {% else %}
                         {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
@@ -353,12 +354,12 @@
                         data-toggle="modal"
                         data-target="#{{ valuate_modal_id }}"
                       >
-                        {% translate 'Link' %}
+                        {% translate 'Integrate' %}
                       </button>
                     {% endif %}
                   </div>
                   {% if valuate_experience_url %}
-                    {% include 'admission/modal/confirm_modal.html' with confirm_url=valuate_experience_url confirm_message=_('Do you confirm the valuation of this experience?') confirm_id=valuate_modal_id confirm_button_class="btn-success" %}
+                    {% include 'admission/modal/confirm_modal.html' with confirm_title=_('Confirmation') confirm_url=valuate_experience_url confirm_message=_('Do you confirm the integration of this experience into the current application?') confirm_id=valuate_modal_id confirm_button_class="btn-success" %}
                   {% endif %}
                 {% endwith %}
                 <div>
