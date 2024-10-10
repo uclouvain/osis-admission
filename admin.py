@@ -206,8 +206,6 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'thesis_institute',
         'international_scholarship',
         'thesis_language',
-        'additional_approval_conditions',
-        'other_training_accepted_by_fac',
         'prerequisite_courses',
         'refusal_reasons',
     ]

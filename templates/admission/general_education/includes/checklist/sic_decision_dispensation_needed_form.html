@@ -33,7 +33,11 @@
   {% bootstrap_form sic_decision_dispensation_form %}
 
   {% if request.htmx and reload_sic_statuses %}
-    {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% if view.is_doctorate %}
+      {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% else %}
+      {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% endif %}
   {% endif %}
 
 </form>

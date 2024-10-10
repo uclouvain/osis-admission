@@ -79,14 +79,14 @@ STATUTS_PROPOSITION_DOCTORALE_SOUMISE = (
     set(ChoixStatutPropositionDoctorale.get_names()) - STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 )
 
-# Le gestionnaire FAC a la main
-STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC = {
+# Le gestionnaire CDD a la main
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD = {
     ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name,
     ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
 }
 
-# Le gestionnaire FAC a la main ou attend une réponse du candidat
-STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS = STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC | {
+# Le gestionnaire CDD a la main ou attend une réponse du candidat
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS = STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD | {
     ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
 }
 
@@ -101,8 +101,8 @@ STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC = {
     ChoixStatutPropositionDoctorale.CLOTUREE.name,
 }
 
-# Le gestionnaire SIC a la main et peut envoyer le dossier à la faculté pour que celle-ci donne sa décision
-STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION = {
+# Le gestionnaire SIC a la main et peut envoyer le dossier à la CDD pour que celle-ci donne sa décision
+STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION = {
     ChoixStatutPropositionDoctorale.CONFIRMEE.name,
     ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
     ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,

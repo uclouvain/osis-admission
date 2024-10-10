@@ -113,9 +113,10 @@
             </tr>
           {% endfor %}
         </table>
-        {% if sic_decision_approval_form.is_admission %}
+        {% if admission.est_admission %}
           {% field_data _('The candidate must provide a student visa') admission.doit_fournir_visa_etudes %}
         {% endif %}
+        {% if view.is_general %}
         {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
         {% if admission.avec_conditions_complementaires %}
           {% if admission.conditions_complementaires %}
@@ -133,6 +134,7 @@
           {% else %}
             {% field_data _('Additional conditions') '' %}
           {% endif %}
+        {% endif %}
         {% endif %}
 
         {% field_data _('Are there any prerequisite courses?') admission.avec_complements_formation %}
@@ -166,20 +168,20 @@
           {% endif %}
           {% field_data _('Dispensation or increased fees') admission.dispense_ou_droits_majores|enum_display:'DispenseOuDroitsMajores' %}
 
-          {% if sic_decision_approval_form.is_vip %}
+          {% if admission.candidat_vip %}
             {% field_data _('Particular cost') admission.tarif_particulier %}
             {% field_data _('Rebilling or third-party payer') admission.refacturation_ou_tiers_payant %}
             {% field_data _('First year of inscription + status') admission.annee_de_premiere_inscription_et_statut %}
           {% endif %}
 
-          {% if sic_decision_approval_form.is_hue %}
+          {% if not admission.nationalite_ue_candidat %}
             {% field_data _('The candidate is doing a mobility') admission.est_mobilite %}
             {% if admission.est_mobilite %}
               {% field_data _('Mobility months amount') admission.nombre_de_mois_de_mobilite|enum_display:'MobiliteNombreDeMois' %}
             {% endif %}
           {% endif %}
 
-          {% if sic_decision_approval_form.is_admission %}
+          {% if admission.est_admission %}
             {% field_data _('The candidate must report to SIC') admission.doit_se_presenter_en_sic %}
           {% endif %}
           {% field_data _('Communication to the candidate') admission.communication_au_candidat|safe %}
