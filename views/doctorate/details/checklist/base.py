@@ -545,6 +545,14 @@ class ChecklistView(
                 }
             )
             context['can_choose_access_title'] = can_change_access_title
+            context['can_choose_access_title_tooltip'] = (
+                _(
+                    'Changes for the access title are not available when the state of the Previous experience '
+                    'is "Sufficient".'
+                )
+                if context.get('past_experiences_are_sufficient')
+                else ''
+            )
 
             context['digit_ticket'] = message_bus_instance.invoke(
                 GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)

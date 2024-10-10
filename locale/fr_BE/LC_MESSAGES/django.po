@@ -1672,6 +1672,13 @@ msgstr "Modifier la communication de ce séminaire"
 msgid "Change the publication for this conference"
 msgstr "Modifier la publication de cette conférence"
 
+msgid ""
+"Changes for the access title are not available when the state of the "
+"Previous experience is \"Sufficient\"."
+msgstr ""
+"Les changements de titre d’accès ne sont pas disponibles lorsque le parcours "
+"antérieur est à l'état \"Suffisant\"."
+
 msgid "Checklist"
 msgstr "Checklist"
 

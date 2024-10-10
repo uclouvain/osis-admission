@@ -210,6 +210,13 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.assertIn(gettext('Your data have been saved.'), messages)
         htmx_info = json.loads(response.headers['HX-Trigger'])
         self.assertFalse(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
+        self.assertEqual(
+            htmx_info.get('formValidation', {}).get('select_access_title_tooltip'),
+            gettext(
+                'Changes for the access title are not available when the state of the Previous experience '
+                'is "Sufficient".'
+            ),
+        )
 
         # Check admission
         self.admission.refresh_from_db()

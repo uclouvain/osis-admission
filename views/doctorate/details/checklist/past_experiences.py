@@ -28,7 +28,7 @@ from typing import Dict, Optional
 from django.forms import Form
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, gettext
 from django.views.generic import FormView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -45,6 +45,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierAuthentificationExperienceParcoursAnterieurCommand,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.resume import (
@@ -148,6 +149,14 @@ class PastExperiencesStatusView(
                     self.admission,
                 ),
             }
+            if (
+                self.admission.checklist['current']['parcours_anterieur']['statut']
+                == ChoixStatutChecklist.GEST_REUSSITE.name
+            ):
+                self.htmx_trigger_form_extra['select_access_title_tooltip'] = gettext(
+                    'Changes for the access title are not available when the state of the Previous experience '
+                    'is "Sufficient".'
+                )
         except MultipleBusinessExceptions:
             return super().form_invalid(form)
 
