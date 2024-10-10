@@ -924,6 +924,9 @@ msgstr "Attestation d'accord facultaire"
 msgid "Approval condition by faculty"
 msgstr "Condition d'acceptation par la faculté"
 
+msgid "Approval for a course change"
+msgstr "Accord pour une réorientation externe"
+
 msgid "Approval for a late enrolment"
 msgstr "Accord pour une inscription tardive"
 
@@ -7917,6 +7920,13 @@ msgstr "La proposition doit être gérée par SIC pour réaliser cette action."
 
 msgid "The proposition must be submitted to realize this action."
 msgstr "La proposition doit être soumise pour réaliser cette action."
+
+msgid ""
+"The proposition must involve a change of course and must have a defined "
+"access condition."
+msgstr ""
+"La proposition doit concerner une réorientation externe et une condition "
+"d'accès doit être définie."
 
 msgid "The proposition must not be cancelled to realize this action."
 msgstr "La proposition ne doit pas être annulée pour réaliser cette action."

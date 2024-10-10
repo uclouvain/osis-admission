@@ -66,8 +66,9 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
-from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import \
-    specifier_financabilite_non_concernee
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import (
+    specifier_financabilite_non_concernee,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -505,6 +506,14 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
     ApprouverInscriptionTardiveParFaculteCommand: lambda msg_bus, cmd: approuver_inscription_tardive_par_faculte(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=HistoriqueFormationGenerale(),
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+    ),
+    ApprouverReorientationExterneParFaculteCommand: lambda msg_bus, cmd: approuver_reorientation_externe_par_faculte(
         cmd,
         proposition_repository=PropositionRepository(),
         historique=HistoriqueFormationGenerale(),
