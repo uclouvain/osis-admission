@@ -77,7 +77,7 @@ from base.models.person_address import PersonAddress
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
 from infrastructure.messages_bus import message_bus_instance
-from osis_common.queue.queue_sender import send_message, logger
+from osis_common.queue.queue_sender import send_message, logger as queue_logger
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,
@@ -201,7 +201,7 @@ DOCUMENT_MAPPING = {
 
 
 class InjectionEPCAdmission:
-    def injecter(self, admission: BaseAdmission):
+    def injecter(self, admission: BaseAdmission, logger = queue_logger):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
         e = ""
         try:
