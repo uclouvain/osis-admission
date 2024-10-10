@@ -24,7 +24,11 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <form
+    {% if admission.est_reorientation_inscription_externe %}
+    hx-post="{% url view.base_namespace|add:':course-change-fac-decision-approval' uuid=view.kwargs.uuid %}"
+    {% else %}
     hx-post="{% url view.base_namespace|add:':late-fac-decision-approval' uuid=view.kwargs.uuid %}"
+    {% endif %}
     hx-swap="outerHTML"
     id="fac-decision-approval-form"
     style="overflow: auto;"

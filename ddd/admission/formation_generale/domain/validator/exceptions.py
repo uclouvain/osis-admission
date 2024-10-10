@@ -314,3 +314,11 @@ class CurriculumNonCompletePourAcceptationException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The 'Approved' status requires the last 5 years to be justified in the previous experience.")
         super().__init__(message, **kwargs)
+
+
+class ReorientationExterneAvecConditionAccesException(BusinessException):
+    status_code = "FORMATION-GENERALE-35"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must involve a change of course and must have a defined access condition.")
+        super().__init__(message, **kwargs)

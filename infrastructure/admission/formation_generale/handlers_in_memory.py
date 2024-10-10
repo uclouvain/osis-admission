@@ -66,8 +66,9 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
-from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import \
-    specifier_financabilite_non_concernee
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import (
+    specifier_financabilite_non_concernee,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -524,6 +525,14 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     ApprouverInscriptionTardiveParFaculteCommand: lambda msg_bus, cmd: approuver_inscription_tardive_par_faculte(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique_formation_generale,
+        personne_connue_ucl_translator=_personne_connue_ucl_translator,
+        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        experience_parcours_interne_translator=_experience_parcours_interne_translator,
+    ),
+    ApprouverReorientationExterneParFaculteCommand: lambda msg_bus, cmd: approuver_reorientation_externe_par_faculte(
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique_formation_generale,

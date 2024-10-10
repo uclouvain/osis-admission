@@ -53,7 +53,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     BesoinDeDerogation,
-    DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -84,6 +83,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldDemandeEtreTypeAdmission,
     ShouldSpecifierInformationsAcceptationFacultaireInscription,
+    ShouldPropositionEtreReorientationExterneAvecConditionAcces,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
@@ -417,6 +417,33 @@ class ApprouverInscriptionTardiveParFacValidatorList(TwoStepsMultipleBusinessExc
             ),
             ShouldPropositionEtreInscriptionTardiveAvecConditionAcces(
                 est_inscription_tardive=self.est_inscription_tardive,
+                condition_acces=self.condition_acces,
+            ),
+            ShouldSelectionnerTitreAccesPourEnvoyerASIC(
+                titres_selectionnes=self.titres_selectionnes,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverReorientationExterneParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    est_reorientation_inscription_externe: Optional[bool]
+    condition_acces: Optional[ConditionAcces]
+
+    titres_selectionnes: List[TitreAccesSelectionnable]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldFacPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldPropositionEtreReorientationExterneAvecConditionAcces(
+                est_reorientation_inscription_externe=self.est_reorientation_inscription_externe,
                 condition_acces=self.condition_acces,
             ),
             ShouldSelectionnerTitreAccesPourEnvoyerASIC(

@@ -53,6 +53,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
+    ShouldPropositionEtreReorientationExterneAvecConditionAcces,
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
     ShouldSpecifierInformationsAcceptationFacultaireInscription,
 )

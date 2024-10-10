@@ -29,7 +29,9 @@
 {% block modal_id %}fac-decision-approval-modal{% endblock %}
 
 {% block modal_title %}
-  {% if admission.est_inscription_tardive %}
+  {% if admission.est_reorientation_inscription_externe %}
+    {% translate "Approval for a course change" %}
+  {% elif admission.est_inscription_tardive %}
     {% translate "Approval for a late enrolment" %}
   {% else %}
     {% translate "Approval" %}
@@ -39,8 +41,8 @@
 {% block modal_class %}modal-lg fac-decision-modal{% endblock %}
 
 {% block modal_content %}
-  {% if admission.est_inscription_tardive and admission.condition_acces %}
-    {% include 'admission/general_education/includes/checklist/late_fac_decision_approval_form.html' %}
+  {% if admission.est_inscription_tardive and admission.condition_acces or admission.est_reorientation_inscription_externe and admission.condition_acces %}
+    {% include 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html' %}
   {% else %}
     {% include 'admission/general_education/includes/checklist/fac_decision_approval_form.html' %}
   {% endif %}
