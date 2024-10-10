@@ -92,6 +92,6 @@ def run():  # pragma: no cover
     logger.info(f"[TASK - INJECTION EPC] {admissions.count()} dossiers a traiter")
     from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
     for admission in admissions:
-        InjectionEPCAdmission().injecter(admission)
+        InjectionEPCAdmission().injecter(admission, logger=logger)
 
     logger.info(f"[TASK - INJECTION EPC] Traitement termine")
