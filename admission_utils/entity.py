@@ -23,43 +23,30 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import datetime
 
-import rules
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from rules import RuleSet
+from django.db.models import Q
 
-from base.models.entity import Entity
-from base.models.enums.organization_type import MAIN
-from osis_role.contrib.models import EntityRoleModel
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import EntityType
 
 
-class CddConfigurator(EntityRoleModel):
+def get_faculty_id_from_entity_id(entity_id):
     """
-    Configurateur CDD
-
-    Le configurateur CDD met à jour les tables de configuration pour sa CDD
-    (menus "Configuration de la CDD" et "Templates d'email de CDD").
+    From an entity id, get the id of the parent faculty (itself if it's a faculty).
+    :param entity_id: The id of the entity
+    :return: The id of the parent faculty
     """
 
-    entity = models.ForeignKey(
-        Entity,
-        on_delete=models.CASCADE,
-        related_name='+',
-        limit_choices_to={
-            'organization__type': MAIN,
-        },
-    )
+    cte = EntityVersion.objects.with_children(entity_id=entity_id)
 
-    class Meta:
-        verbose_name = _("Role: CDD configurator")
-        verbose_name_plural = _("Role: CDD configurators")
-        group_name = "cdd_configurators"
+    faculty_id = (
+        cte.join(EntityVersion, id=cte.col.id)
+        .with_cte(cte)
+        .filter(Q(entity_type=EntityType.FACULTY.name))
+        .exclude(end_date__lte=datetime.today())
+        .values_list('entity_id', flat=True)
+    )[:1]
 
-    @classmethod
-    def rule_set(cls):
-        ruleset = {
-            'admission.change_cddconfiguration': rules.always_allow,
-            'admission.change_cddmailtemplate': rules.always_allow,
-        }
-        return RuleSet(ruleset)
+    if faculty_id:
+        return faculty_id[0]
