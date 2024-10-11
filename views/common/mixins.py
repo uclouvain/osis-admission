@@ -28,6 +28,7 @@ from typing import Union, Optional
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.http import Http404
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
@@ -96,6 +97,7 @@ from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
 )
+from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from infrastructure.messages_bus import message_bus_instance
@@ -302,7 +304,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "La demande est en quarantaine"
         return True, ''
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
@@ -310,6 +311,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
         context['original_admission'] = self.admission
         context['next_url'] = self.next_url
+
+        # Get the next and previous admissions from the last computed listing
+        cached_admissions_list = cache.get(BaseAdmissionList.cache_key_for_result(user_id=self.request.user.id))
+
+        if cached_admissions_list and self.admission_uuid in cached_admissions_list:
+            current_admission = cached_admissions_list[self.admission_uuid]
+            for key in ['previous', 'next']:
+                if current_admission[key]:
+                    context[f'{key}_admission_url'] = resolve_url('admission:base', uuid=current_admission[key])
 
         if self.specific_questions_tab:
             context['specific_questions'] = self.specific_questions

@@ -59,4 +59,4 @@ class ListerDemandesInMemoryService(IListerDemandesService):
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
-        return PaginatedList()
+        return PaginatedList(id_attribute='uuid')
