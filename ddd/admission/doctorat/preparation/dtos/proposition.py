@@ -150,10 +150,6 @@ class PropositionDTO(interface.DTO):
     def est_admission(self):
         return self.type == TypeDemande.ADMISSION.name
 
-    @property
-    def candidat_vip(self) -> bool:
-        return bool(self.bourse_recherche)
-
 
 @attr.dataclass(frozen=True, slots=True)
 class PropositionGestionnaireDTO(PropositionDTO):
