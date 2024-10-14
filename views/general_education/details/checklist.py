@@ -2326,8 +2326,17 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
         )
 
         admission.financability_rule = ''
-        admission.financability_rule_established_by = None
-        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
+        if status == 'GEST_REUSSITE':
+            admission.financability_established_by = self.request.user.person
+            admission.financability_established_on = timezone.now()
+        else:
+            admission.financability_established_by = None
+            admission.financability_established_on = None
+        admission.save(update_fields=[
+            'financability_rule',
+            'financability_established_by',
+            'financability_established_on',
+        ])
 
         return HttpResponseClientRefresh()
 
@@ -2350,7 +2359,6 @@ class FinancabiliteApprovalSetRuleView(HtmxPermissionRequiredMixin, Financabilit
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=form.cleaned_data['financability_rule'],
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2368,7 +2376,6 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=self.admission.financability_computed_rule_situation,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2394,7 +2401,6 @@ class FinancabiliteNotFinanceableSetRuleView(HtmxPermissionRequiredMixin, Financ
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=form.cleaned_data['financability_rule'],
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2412,7 +2418,6 @@ class FinancabiliteNotFinanceableView(HtmxPermissionRequiredMixin, Financabilite
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=self.admission.financability_computed_rule_situation,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2430,7 +2435,6 @@ class FinancabiliteNotConcernedView(HtmxPermissionRequiredMixin, FinancabiliteCo
         message_bus_instance.invoke(
             SpecifierFinancabiliteNonConcerneeCommand(
                 uuid_proposition=self.admission_uuid,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )

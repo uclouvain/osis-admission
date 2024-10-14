@@ -56,7 +56,6 @@ class TestSpecifierFinancabiliteNonConcernee(TestCase):
 
         self.command = SpecifierFinancabiliteNonConcerneeCommand(
             uuid_proposition='uuid-CERTIFICATE-CONFIRMED',
-            etabli_par='uuid-GESTIONNAIRE',
             gestionnaire='0123456789',
         )
 
@@ -70,5 +69,5 @@ class TestSpecifierFinancabiliteNonConcernee(TestCase):
 
         # Proposition mise à jour
         self.assertIsNone(proposition.financabilite_regle)
-        self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
+        self.assertEqual(proposition.financabilite_etabli_par, '0123456789')
         self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.INITIAL_NON_CONCERNE)

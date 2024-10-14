@@ -279,8 +279,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 etat_financabilite == EtatFinancabilite.FINANCABLE.name
                 and (
                     (self.admission.financability_rule == '' and not a_une_derogation)
-                    or self.admission.financability_rule_established_on is None
-                    or self.admission.financability_rule_established_by_id is None
+                    or self.admission.financability_established_on is None
+                    or self.admission.financability_established_by_id is None
                 )
             ):
                 return (
