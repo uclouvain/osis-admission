@@ -307,8 +307,8 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
         )
 
         admission.financability_rule = ''
-        admission.financability_rule_established_by = None
-        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
+        admission.financability_established_by = None
+        admission.save(update_fields=['financability_rule', 'financability_established_by'])
 
         return HttpResponseClientRefresh()
 
