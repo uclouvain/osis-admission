@@ -681,9 +681,19 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
             financabilite_ok=Case(
                 When(
                     ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
-                    | Q(generaleducationadmission__financability_rule='')
-                    | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
-                    | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True),
+                    | Q(
+                        checklist__current__financabilite__status='GEST_REUSSITE',
+                        checklist__current__financanbilite__extra__reussite='financable',
+                        generaleducationadmission__financability_rule=''
+                    )
+                    | Q(
+                        checklist__current__financabilite__status='GEST_REUSSITE',
+                        generaleducationadmission__financability_rule_established_on__isnull=True
+                    )
+                    | Q(
+                        checklist__current__financabilite__status='GEST_REUSSITE',
+                        generaleducationadmission__financability_rule_established_by_id__isnull=True
+                    ),
                     generaleducationadmission__isnull=False,
                     then=Value(False),
                 ),
