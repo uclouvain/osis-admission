@@ -232,6 +232,13 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
 
         htmx_info = json.loads(response.headers['HX-Trigger'])
         self.assertFalse(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
+        self.assertEqual(
+            htmx_info.get('formValidation', {}).get('select_access_title_tooltip'),
+            gettext(
+                'Changes for the access title are not available when the state of the Previous experience '
+                'is "Sufficient".'
+            ),
+        )
 
 
 @freezegun.freeze_time('2023-01-01')

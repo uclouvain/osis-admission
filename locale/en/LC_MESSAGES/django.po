@@ -1526,6 +1526,11 @@ msgstr ""
 msgid "Change the publication for this conference"
 msgstr ""
 
+msgid ""
+"Changes for the access title are not available when the state of the "
+"Previous experience is \"Sufficient\"."
+msgstr ""
+
 msgid "Checklist"
 msgstr ""
 
