@@ -53,6 +53,7 @@ def modifier_checklist_choix_formation(
         type_demande=TypeDemande[cmd.type_demande],
         formation_id=formation.entity_id,
         poursuite_de_cycle=PoursuiteDeCycle[cmd.poursuite_de_cycle],
+        est_inscription_tardive=cmd.est_inscription_tardive,
     )
 
     # THEN

@@ -274,12 +274,14 @@ class Proposition(interface.RootEntity):
         type_demande: 'TypeDemande',
         formation_id: FormationIdentity,
         poursuite_de_cycle: 'PoursuiteDeCycle',
+        est_inscription_tardive: bool,
     ):
         self.auteur_derniere_modification = auteur_modification
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
         self.poursuite_de_cycle = poursuite_de_cycle
+        self.est_inscription_tardive = est_inscription_tardive
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionGenerale.ANNULEE
