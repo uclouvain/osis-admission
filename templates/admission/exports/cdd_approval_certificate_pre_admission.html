@@ -1,0 +1,120 @@
+{% load i18n static admission strings %}
+<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<head>
+  <meta charset="UTF-8">
+  <title>{{ proposition.reference }}</title>
+  <style>
+      #title {
+          margin-bottom: 3em;
+      }
+
+      #title h1 {
+          font-size: 1em;
+          text-align: center;
+          color: #5db3e6 !important;
+          text-transform: uppercase;
+          font-weight: bold;
+      }
+
+      dl {
+          margin-bottom: 0.75em;
+      }
+
+      dd {
+          margin-left: 0;
+      }
+
+      dt, .bold-text {
+          font-weight: bold;
+      }
+
+      p {
+          margin-top: 1.5em;
+      }
+
+      #signature {
+          margin-top: 4em;
+      }
+
+      .inline-field-data {
+          display: block;
+      }
+
+      .inline-field-data dd, .inline-field-data dt {
+          display: inline;
+      }
+  </style>
+</head>
+
+<body>
+<div>
+  <div id="title">
+    <h1>Document annexe à l'autorisation d'inscription dans le cadre d'une pré-admission</h1>
+  </div>
+
+  {% concat proposition.nom_candidat " " proposition.prenom_candidat as full_name %}
+  {% field_data "Doctorant·e" full_name inline=True %}
+  {% field_data "Noma" proposition.noma_candidat inline=True %}
+  {% field_data "Titre provisoire de la thèse" proposition.titre_projet inline=True %}
+
+  <p>
+    La Commission doctorale de domaine a approuvé votre demande de pré-admission.
+  </p>
+
+  <p>
+    Votre demande d’admission complète devra nous parvenir dans un délai de maximum 12 mois. Pour cela, vous devez dès à présent :
+  </p>
+  <ul>
+    <li>
+      définir et préparer un projet de thèse sous la direction de votre promoteur.trice.
+    </li>
+    <li>
+      définir et proposer un programme de formation doctorale en collaboration avec votre promoteur.trice. Des crédits
+      sont accordés pour les cours et les séminaires de lecture et autres activités de recherche suivis durant la période de pré-admission.</li>
+    <li>
+      identifier et établir une collaboration scientifique avec votre promoteur, y compris les contacts nécessaires
+      pour proposer un comité d’accompagnement.
+    </li>
+  </ul>
+
+  <p>
+    Vous trouverez sur le site de votre Commission doctorale de domaine le règlement doctoral, les dispositions
+    particulières de votre domaine, les étapes du parcours doctoral ainsi que toute autre information utile.
+  </p>
+
+  <div id="signature">
+    <p>
+      {% if cdd_president.function == 'Présidente' %}
+        Votre présidente de CDD : {{ cdd_president.firstname }} {{ cdd_president.lastname }}
+      {% else %}
+        Votre président de CDD : {{ cdd_president.firstname }} {{ cdd_president.lastname }}
+      {% endif %}
+    </p>
+  </div>
+</div>
+</body>
+</html>

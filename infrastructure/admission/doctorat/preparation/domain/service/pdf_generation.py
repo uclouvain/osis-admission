@@ -29,11 +29,19 @@ from typing import Optional, List, Dict, Union
 from django.conf import settings
 from django.utils import translation, timezone
 from django.utils.translation import override
-from osis_comment.models import CommentEntry
-from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import TypeDeRefus
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import IPDFGeneration
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PdfSicInconnu
+from admission.ddd.admission.doctorat.preparation.dtos import GroupeDeSupervisionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
@@ -41,15 +49,6 @@ from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPro
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
 )
-from admission.ddd.admission.doctorat.preparation.commands import (
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import TypeDeRefus
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import IPDFGeneration
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PdfSicInconnu
-from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
@@ -60,13 +59,13 @@ from admission.infrastructure.utils import (
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
-from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
 from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
+from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException
 
 ENTITY_SIC = 'SIC'
 ENTITY_SICB = 'SICB'
@@ -137,39 +136,34 @@ class PDFGeneration(IPDFGeneration):
     def get_base_fac_decision_context(
         cls,
         proposition_id: PropositionIdentity,
-        gestionnaire: PersonneConnueUclDTO,
         proposition_repository: IPropositionRepository,
         unites_enseignement_translator: IUnitesEnseignementTranslator,
+        groupe_supervision_dto: GroupeDeSupervisionDTO,
     ):
         proposition_dto = proposition_repository.get_dto_for_gestionnaire(
             proposition_id,
             unites_enseignement_translator,
         )
 
-        comment = CommentEntry.objects.filter(
-            object_uuid=proposition_dto.uuid,
-            tags=['decision_facultaire', 'FAC'],
-        ).first()
-
-        sic_to_fac_history_entry = (
-            HistoryEntry.objects.filter(
-                object_uuid=proposition_dto.uuid,
-                tags__contains=['proposition', 'fac-decision', 'send-to-fac'],
-            )
-            .order_by('-created')
-            .first()
-        )
+        cdd_president = []
+        if settings.ESB_API_URL:
+            try:
+                cdd_president = MandatesService.get(
+                    function=MandateFunctionEnum.PRESI,
+                    entity_acronym=proposition_dto.formation.sigle_entite_gestion,
+                )
+            except MandatesException:
+                pass
 
         return {
             'proposition': proposition_dto,
-            'fac_decision_comment': comment,
-            'sic_to_fac_history_entry': sic_to_fac_history_entry,
-            'manager': gestionnaire,
+            'groupe_supervision': groupe_supervision_dto,
+            'cdd_president': cdd_president[0] if cdd_president else None,
         }
 
     @classmethod
     @override(settings.LANGUAGE_CODE)
-    def generer_attestation_accord_facultaire(
+    def generer_attestation_accord_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
@@ -179,119 +173,32 @@ class PDFGeneration(IPDFGeneration):
         titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
+        groupe_supervision_dto: GroupeDeSupervisionDTO,
     ) -> None:
         # Get the information to display on the pdf
         context = cls.get_base_fac_decision_context(
             proposition_id=proposition.entity_id,
-            gestionnaire=gestionnaire,
             proposition_repository=proposition_repository,
             unites_enseignement_translator=unites_enseignement_translator,
+            groupe_supervision_dto=groupe_supervision_dto,
         )
 
-        # Get the names of the access titles
-        secondary_studies_dto = None
-        cv_dto = None
-        internal_experiences_dtos = None
-
-        context['access_titles_names'] = []
-
-        for access_title in sorted(titres_selectionnes, key=lambda title: title.annee, reverse=True):
-
-            # Internal experiences
-            if access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE:
-                if internal_experiences_dtos is None:
-                    internal_experiences_dtos = experience_parcours_interne_translator.recuperer(
-                        matricule=proposition.matricule_candidat,
-                    )
-
-                selected_internal_experience = next(
-                    (
-                        experience
-                        for experience in internal_experiences_dtos
-                        if experience.uuid == access_title.entity_id.uuid_experience
-                    ),
-                    None,
-                )
-
-                if selected_internal_experience:
-                    last_experience_year = selected_internal_experience.derniere_annee
-                    context['access_titles_names'].append(
-                        '{year} : {title}'.format(
-                            year=format_academic_year(last_experience_year.annee),
-                            title=last_experience_year.intitule_formation,
-                        )
-                    )
-
-            # Secondary studies
-            elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
-                if secondary_studies_dto is None:
-                    secondary_studies_dto = profil_candidat_translator.get_etudes_secondaires(
-                        matricule=proposition.matricule_candidat,
-                    )
-                context['access_titles_names'].append(secondary_studies_dto.titre_formate)
-
-            # Curriculum experiences
-            else:
-                if cv_dto is None:
-                    cv_dto = profil_candidat_translator.get_curriculum(
-                        matricule=proposition.matricule_candidat,
-                        annee_courante=annee_courante,
-                        uuid_proposition=proposition.entity_id.uuid,
-                    )
-
-                context['access_titles_names'].append(
-                    next(
-                        experience.titre_pdf_decision_fac
-                        for experience in {
-                            TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE: cv_dto.experiences_non_academiques,
-                            TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE: cv_dto.experiences_academiques,
-                        }[access_title.entity_id.type_titre]
-                        if experience.uuid == access_title.entity_id.uuid_experience
-                    )
-                )
+        if proposition.type_admission == ChoixTypeAdmission.ADMISSION:
+            template = 'admission/exports/cdd_approval_certificate_admission.html'
+        else:
+            template = 'admission/exports/cdd_approval_certificate_pre_admission.html'
 
         # Generate the pdf
         token = admission_generate_pdf(
             admission=None,
-            template='admission/exports/fac_approval_certificate.html',
-            filename='fac_approval_certificate.pdf',
+            template=template,
+            filename='cdd_approval_certificate.pdf',
             context=context,
-            stylesheets=WeasyprintStylesheets.get_stylesheets(),
             author=gestionnaire.matricule,
         )
 
         # Store the token of the pdf
-        proposition.certificat_approbation_fac = [token]
-
-    @classmethod
-    @override(settings.LANGUAGE_CODE)
-    def generer_attestation_refus_facultaire(
-        cls,
-        proposition: Proposition,
-        gestionnaire: PersonneConnueUclDTO,
-        proposition_repository: IPropositionRepository,
-        unites_enseignement_translator: IUnitesEnseignementTranslator,
-    ) -> None:
-        # Get the information to display on the pdf
-        context = cls.get_base_fac_decision_context(
-            proposition_id=proposition.entity_id,
-            gestionnaire=gestionnaire,
-            proposition_repository=proposition_repository,
-            unites_enseignement_translator=unites_enseignement_translator,
-        )
-
-        # Generate the pdf
-        token = admission_generate_pdf(
-            admission=None,
-            template='admission/exports/fac_refusal_certificate.html',
-            filename='fac_refusal_certificate.pdf',
-            context=context,
-            stylesheets=WeasyprintStylesheets.get_stylesheets(),
-            author=gestionnaire.matricule,
-        )
-
-        # Store the token of the pdf
-        proposition.certificat_refus_fac = [token]
+        proposition.certificat_approbation_cdd = [token]
 
     @classmethod
     def generer_sic_temporaire(
@@ -393,6 +300,7 @@ class PDFGeneration(IPDFGeneration):
             admission=None,
             template='admission/exports/sic_approval_certificate.html',
             filename=f'Autorisation_inscription_Dossier_{proposition_dto.reference}.pdf',
+            stylesheets=WeasyprintStylesheets.get_stylesheets_bootstrap_5(),
             context={
                 'proposition': proposition_dto,
                 'profil_candidat_identification': documents_resume.resume.identification,
@@ -449,6 +357,7 @@ class PDFGeneration(IPDFGeneration):
                     'rector': cls._get_sic_rector(),
                     'nombre_credits_formation': nombre_credits_formation,
                 },
+                stylesheets=WeasyprintStylesheets.get_stylesheets_bootstrap_5(),
                 author=gestionnaire,
             )
         if temporaire:

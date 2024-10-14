@@ -43,7 +43,7 @@ class PromoteurTranslator(IPromoteurTranslator):
 
     @classmethod
     def get_dto(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurDTO':
-        actor = SupervisionActor.objects.select_related('person__tutor').get(
+        actor = SupervisionActor.objects.select_related('person__tutor', 'country').get(
             type=ActorType.PROMOTER.name,
             uuid=promoteur_id.uuid,
         )

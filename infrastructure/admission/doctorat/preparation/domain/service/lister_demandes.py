@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ConfigurationStatutChecklist,
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     onglet_decision_sic,
-    onglet_decision_facultaire,
+    onglet_decision_cdd,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
@@ -294,12 +294,12 @@ class ListerDemandesService(IListerDemandesService):
 
         status_organization_by_tab = {
             OngletsChecklist.decision_sic.name: onglet_decision_sic,
-            OngletsChecklist.decision_facultaire.name: onglet_decision_facultaire,
+            OngletsChecklist.decision_cdd.name: onglet_decision_cdd,
         }
 
         status_by_tab = {
             OngletsChecklist.decision_sic.name: '',
-            OngletsChecklist.decision_facultaire.name: '',
+            OngletsChecklist.decision_cdd.name: '',
         }
 
         if admission.checklist and 'current' in admission.checklist:
@@ -323,7 +323,7 @@ class ListerDemandesService(IListerDemandesService):
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, training_title),
-            decision_fac=status_by_tab[OngletsChecklist.decision_facultaire.name],
+            decision_fac=status_by_tab[OngletsChecklist.decision_cdd.name],
             decision_sic=status_by_tab[OngletsChecklist.decision_sic.name],
             date_confirmation=admission.submitted_at,
             derniere_modification_le=admission.modified_at,

@@ -121,15 +121,6 @@ class INotification(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
-        cls,
-        proposition: Proposition,
-        email_destinataire_repository: IEmailDestinataireRepository,
-    ) -> Optional[EmailMessage]:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
     def refuser_proposition_par_sic(
         cls,
         proposition: Proposition,
