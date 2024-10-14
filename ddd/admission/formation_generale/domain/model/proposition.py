@@ -815,6 +815,8 @@ class Proposition(interface.RootEntity):
         self.attestation_inscription_reguliere = attestation_inscription_reguliere
         self.est_modification_inscription_externe = est_modification_inscription_externe
         self.formulaire_modification_inscription = formulaire_modification_inscription
+        if self.est_modification_inscription_externe:
+            self.est_inscription_tardive = False
 
     def specifier_financabilite_resultat_calcul(
         self,
