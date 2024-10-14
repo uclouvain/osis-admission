@@ -103,13 +103,9 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     @property
     def educational_experience_annotations(self):
         return {
-            'valuated_from_admissions': ArrayAgg(
-                'valuated_from_admission__uuid',
-                filter=Q(valuated_from_admission__isnull=False),
-            ),
             'admission_injection': Exists(
                 AdmissionEPCInjection.objects.filter(
-                    admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                    admission__admissioneducationalvaluatedexperiences__educationalexperience_id=OuterRef('uuid'),
                     type=EPCInjectionType.DEMANDE.name,
                     status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
@@ -188,13 +184,9 @@ class CurriculumNonEducationalExperienceFormView(
     @property
     def non_educational_experience_annotations(self):
         return {
-            'valuated_from_admissions': ArrayAgg(
-                'valuated_from_admission__uuid',
-                filter=Q(valuated_from_admission__isnull=False),
-            ),
             'admission_injection': Exists(
                 AdmissionEPCInjection.objects.filter(
-                    admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                    admission__admissionprofessionalvaluatedexperiences__professionalexperience_id=OuterRef('uuid'),
                     type=EPCInjectionType.DEMANDE.name,
                     status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
@@ -278,17 +270,6 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
             super()
             .get_queryset()
             .annotate(
-                valuated_from_admissions=ArrayAgg(
-                    'valuated_from_admission__uuid',
-                    filter=Q(valuated_from_admission__isnull=False),
-                ),
-                admission_injection=Exists(
-                    AdmissionEPCInjection.objects.filter(
-                        admission__uuid=OuterRef('valuated_from_admission__uuid'),
-                        type=EPCInjectionType.DEMANDE.name,
-                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
-                    )
-                ),
                 cv_injection=Exists(
                     CurriculumEPCInjection.objects.filter(
                         experience_uuid=self.experience_id,
@@ -361,6 +342,21 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                admission_injection=Exists(
+                    AdmissionEPCInjection.objects.filter(
+                        admission__admissioneducationalvaluatedexperiences__educationalexperience_id=OuterRef('uuid'),
+                        type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
+                    )
+                ),
+            )
+        )
+
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass
 
@@ -376,6 +372,21 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, Delete
 
 class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceNonAcademiqueView):
     urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                admission_injection=Exists(
+                    AdmissionEPCInjection.objects.filter(
+                        admission__admissionprofessionalvaluatedexperiences__professionalexperience_id=OuterRef('uuid'),
+                        type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
+                    )
+                ),
+            )
+        )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass

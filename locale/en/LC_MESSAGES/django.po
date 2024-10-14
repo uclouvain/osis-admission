@@ -1720,6 +1720,9 @@ msgstr ""
 msgid "Confirm the submit"
 msgstr ""
 
+msgid "Confirmation"
+msgstr ""
+
 msgctxt "tab"
 msgid "Confirmation"
 msgstr ""
@@ -2368,13 +2371,15 @@ msgstr ""
 msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
+msgid ""
+"Do you confirm the integration of this experience into the current "
+"application?"
+msgstr ""
+
 #, python-format
 msgid ""
 "Do you confirm the sending of this email to the <a href=\"mailto:"
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
-msgstr ""
-
-msgid "Do you confirm the valuation of this experience?"
 msgstr ""
 
 msgid "Do you have a Belgian National Register Number (NISS)?"
@@ -3915,6 +3920,9 @@ msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Insufficient"
+msgstr ""
+
+msgid "Integrate"
 msgstr ""
 
 msgid "Interested mark"
@@ -7403,7 +7411,8 @@ msgstr ""
 #, python-format
 msgid ""
 "This experience has been added by the applicant in <a "
-"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>. You "
+"have the option to integrate it in the current application."
 msgstr ""
 
 msgid "This field is required if the first name is missing."

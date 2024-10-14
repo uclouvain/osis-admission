@@ -1873,6 +1873,9 @@ msgstr "Confirmer le changement de statut"
 msgid "Confirm the submit"
 msgstr "Confirmer l'envoi"
 
+msgid "Confirmation"
+msgstr "Confirmation"
+
 msgctxt "tab"
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -2583,6 +2586,12 @@ msgstr "Titre du mémoire"
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, et garder le même nombre"
 
+msgid ""
+"Do you confirm the integration of this experience into the current "
+"application?"
+msgstr ""
+"Confirmez-vous l’intégration de cette expérience dans la demande actuelle ?"
+
 #, python-format
 msgid ""
 "Do you confirm the sending of this email to the <a href=\"mailto:"
@@ -2590,9 +2599,6 @@ msgid ""
 msgstr ""
 "Confirmez-vous l'envoi de ce mail à l'adresse <a href=\"mailto:"
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> ?"
-
-msgid "Do you confirm the valuation of this experience?"
-msgstr "Confirmez-vous la valorisation de cette expérience ?"
 
 msgid "Do you have a Belgian National Register Number (NISS)?"
 msgstr "Avez-vous un numéro de registre national belge (NISS) ?"
@@ -4366,6 +4372,9 @@ msgstr ""
 
 msgid "Insufficient"
 msgstr "Insuffisant"
+
+msgid "Integrate"
+msgstr "Intégrer"
 
 msgid "Interested mark"
 msgstr "Marque d'intérêt"
@@ -8218,10 +8227,12 @@ msgstr ""
 #, python-format
 msgid ""
 "This experience has been added by the applicant in <a "
-"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>. You "
+"have the option to integrate it in the current application."
 msgstr ""
 "Cette expérience a été ajoutée par le·la candidat·e dans une <a "
-"href=\"%(admission_url)s\" target=\"_blank\">autre demande</a>."
+"href=\"%(admission_url)s\" target=\"_blank\">autre demande</a>. Vous avez la "
+"possibilité de l'intégrer dans la demande actuelle."
 
 msgid "This field is required if the first name is missing."
 msgstr "Ce champ est obligatoire si le prénom est manquant."
