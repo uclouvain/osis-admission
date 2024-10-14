@@ -145,6 +145,10 @@ class PersonFormTestCase(TestCase):
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+
         cls.doctorate_url = resolve_url('admission:doctorate:update:person', uuid=cls.doctorate_admission.uuid)
 
     def setUp(self) -> None:
@@ -953,3 +957,12 @@ class PersonFormTestCase(TestCase):
         self.client.force_login(user=self.sic_manager_user)
         response = self.client.post(self.doctorate_url, {})
         self.assertEqual(response.status_code, 200)
+
+    def test_doctorate_program_manager_is_forbidden(self):
+        self.client.force_login(user=self.doctorate_program_manager_user)
+
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.post(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)

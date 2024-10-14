@@ -103,13 +103,9 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     @property
     def educational_experience_annotations(self):
         return {
-            'valuated_from_admissions': ArrayAgg(
-                'valuated_from_admission__uuid',
-                filter=Q(valuated_from_admission__isnull=False),
-            ),
             'admission_injection': Exists(
                 AdmissionEPCInjection.objects.filter(
-                    admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                    admission__admissioneducationalvaluatedexperiences__educationalexperience_id=OuterRef('uuid'),
                     type=EPCInjectionType.DEMANDE.name,
                     status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
@@ -143,7 +139,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         if self.next_url:
             return self.next_url
 
-        if self.is_general:
+        if self.is_general or self.is_doctorate:
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:educational',
                 uuid=self.admission_uuid,
@@ -153,7 +149,10 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         return resolve_url(f'{self.base_namespace}:curriculum', uuid=self.admission_uuid)
 
     def delete_url(self):
-        if self.experience_id:
+        if self.experience_id and self.request.user.has_perm(
+            perm='admission.delete_admission_curriculum',
+            obj=self.admission,
+        ):
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:educational_delete',
                 uuid=self.admission_uuid,
@@ -163,7 +162,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.is_continuing or self.is_doctorate:
+        if self.is_continuing:
             context_data['next_url'] = self.get_success_url()
             context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
         else:
@@ -188,13 +187,9 @@ class CurriculumNonEducationalExperienceFormView(
     @property
     def non_educational_experience_annotations(self):
         return {
-            'valuated_from_admissions': ArrayAgg(
-                'valuated_from_admission__uuid',
-                filter=Q(valuated_from_admission__isnull=False),
-            ),
             'admission_injection': Exists(
                 AdmissionEPCInjection.objects.filter(
-                    admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                    admission__admissionprofessionalvaluatedexperiences__professionalexperience_id=OuterRef('uuid'),
                     type=EPCInjectionType.DEMANDE.name,
                     status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
@@ -240,7 +235,7 @@ class CurriculumNonEducationalExperienceFormView(
         if self.next_url:
             return self.next_url
 
-        if self.is_general:
+        if self.is_general or self.is_doctorate:
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:non_educational',
                 uuid=self.admission_uuid,
@@ -250,7 +245,10 @@ class CurriculumNonEducationalExperienceFormView(
         return resolve_url(f'{self.base_namespace}:curriculum', uuid=self.admission_uuid)
 
     def delete_url(self):
-        if self.experience_id:
+        if self.experience_id and self.request.user.has_perm(
+            perm='admission.delete_admission_curriculum',
+            obj=self.admission,
+        ):
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:non_educational_delete',
                 uuid=self.admission_uuid,
@@ -260,7 +258,7 @@ class CurriculumNonEducationalExperienceFormView(
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.is_continuing or self.is_doctorate:
+        if self.is_continuing:
             context_data['next_url'] = self.get_success_url()
             context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
         else:
@@ -278,17 +276,6 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
             super()
             .get_queryset()
             .annotate(
-                valuated_from_admissions=ArrayAgg(
-                    'valuated_from_admission__uuid',
-                    filter=Q(valuated_from_admission__isnull=False),
-                ),
-                admission_injection=Exists(
-                    AdmissionEPCInjection.objects.filter(
-                        admission__uuid=OuterRef('valuated_from_admission__uuid'),
-                        type=EPCInjectionType.DEMANDE.name,
-                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
-                    )
-                ),
                 cv_injection=Exists(
                     CurriculumEPCInjection.objects.filter(
                         experience_uuid=self.experience_id,
@@ -353,13 +340,28 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
         }
         return (
             self.next_url or reverse(f'{self.base_namespace}:checklist', kwargs=kwargs)
-            if self.is_general
+            if self.is_general or self.is_doctorate
             else reverse(f'{self.base_namespace}:curriculum', kwargs=kwargs)
         )
 
 
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                admission_injection=Exists(
+                    AdmissionEPCInjection.objects.filter(
+                        admission__admissioneducationalvaluatedexperiences__educationalexperience_id=OuterRef('uuid'),
+                        type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
+                    )
+                ),
+            )
+        )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass
@@ -376,6 +378,21 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, Delete
 
 class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceNonAcademiqueView):
     urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                admission_injection=Exists(
+                    AdmissionEPCInjection.objects.filter(
+                        admission__admissionprofessionalvaluatedexperiences__professionalexperience_id=OuterRef('uuid'),
+                        type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
+                    )
+                ),
+            )
+        )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
         pass
@@ -506,7 +523,7 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         }
         return (
             self.next_url or reverse(f'{self.base_namespace}:checklist', kwargs=kwargs)
-            if self.is_general
+            if self.is_general or self.is_doctorate
             else reverse(f'{self.base_namespace}:curriculum', kwargs=kwargs)
         )
 

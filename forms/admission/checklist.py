@@ -224,6 +224,10 @@ class ChoixFormationForm(forms.Form):
         choices=PoursuiteDeCycle.choices(),
         required=False,
     )
+    est_inscription_tardive = forms.BooleanField(
+        label=_("Late enrollment"),
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         formation = kwargs.pop('formation')

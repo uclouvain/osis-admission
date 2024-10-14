@@ -262,8 +262,8 @@ class DigitRepository(IDigitRepository):
                 },
                 url=f"{settings.ESB_API_URL}/{settings.DIGIT_REQUEST_MATRICULE_URL}/{noma}"
             )
-            matricule = response.json()['person']['matricule']
-            return format_matricule(matricule)
+            fgs = response.json()['fgs'][0]['sourceId']
+            return format_matricule(fgs)
 
     @classmethod
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:

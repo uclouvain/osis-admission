@@ -379,7 +379,7 @@ def _injecter_signaletique_a_epc(matricule: str):
     demande = PropositionRepository.get_active_period_submitted_proposition(
         matricule_candidat=matricule, periodes_actives=periodes_actives
     )
-    admission = GeneralEducationAdmission.objects.get(uuid=demande.entity_id)
+    admission = GeneralEducationAdmission.objects.get(uuid=demande.entity_id.uuid)
     InjectionEPCSignaletique().injecter(admission=admission)
 
 
