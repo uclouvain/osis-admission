@@ -896,7 +896,9 @@
           $('#parcours_anterieur').on('formValidation', '.checklist-state-button', function(event) {
               {# The access titles can be updated only if the fac decision status is not sufficient. #}
               if (event.originalEvent.detail.select_access_title_perm !== undefined) {
-                $('input[name="access-title"]').prop('disabled', event.originalEvent.detail.select_access_title_perm === false);
+                const access_titles_checkboxes = $('input[name="access-title"]');
+                access_titles_checkboxes.prop('disabled', event.originalEvent.detail.select_access_title_perm === false);
+                access_titles_checkboxes.prop('title', event.originalEvent.detail.select_access_title_tooltip || '');
               }
           });
 
