@@ -39,7 +39,7 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override
+from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override, gettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
@@ -1773,6 +1773,14 @@ class PastExperiencesStatusView(
                     self.admission,
                 ),
             }
+            if (
+                self.admission.checklist['current']['parcours_anterieur']['statut']
+                == ChoixStatutChecklist.GEST_REUSSITE.name
+            ):
+                self.htmx_trigger_form_extra['select_access_title_tooltip'] = gettext(
+                    'Changes for the access title are not available when the state of the Previous experience '
+                    'is "Sufficient".'
+                )
         except MultipleBusinessExceptions:
             return super().form_invalid(form)
 
@@ -3066,6 +3074,14 @@ class ChecklistView(
                 }
             )
             context['can_choose_access_title'] = can_change_access_title
+            context['can_choose_access_title_tooltip'] = (
+                _(
+                    'Changes for the access title are not available when the state of the Previous experience '
+                    'is "Sufficient".'
+                )
+                if context.get('past_experiences_are_sufficient')
+                else ''
+            )
 
             context['digit_ticket'] = message_bus_instance.invoke(
                 GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)

@@ -37,6 +37,7 @@
           checked="checked"
           {% endif %}
           {% if can_choose_access_title is False %}disabled{% endif %}
+          {% if can_choose_access_title_tooltip %}title="{{ can_choose_access_title_tooltip }}"{% endif %}
       />
     </label>
   </div>
