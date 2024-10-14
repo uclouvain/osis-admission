@@ -327,6 +327,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         if self.proposition.est_inscription_tardive:
             checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
+            checklist_additional_icons_title['choix_formation'] = _('Late enrollment')
 
         candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
             ListerToutesDemandesQuery(
