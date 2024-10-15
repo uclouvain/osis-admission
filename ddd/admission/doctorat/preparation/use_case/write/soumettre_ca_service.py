@@ -24,43 +24,32 @@
 #
 # ##############################################################################
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import SupprimerPromoteurCommand
+from admission.ddd.admission.doctorat.preparation.commands import SoumettreCACommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
-    SupprimerPromoteurValidatorList,
-)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-def supprimer_promoteur(
-    cmd: 'SupprimerPromoteurCommand',
+def soumettre_ca(
+    cmd: 'SoumettreCACommand',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     historique: 'IHistorique',
-    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition_candidat = proposition_repository.get(entity_id=proposition_id)
-    groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
-    promoteur_id = groupe_supervision.get_promoteur(cmd.uuid_promoteur)
+    groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
+    proposition = proposition_repository.get(proposition_id)
 
     # WHEN
-    SupprimerPromoteurValidatorList(
-        groupe_de_supervision=groupe_supervision,
-        promoteur_id=promoteur_id,
-    ).validate()
+    groupe_de_supervision.verifier_tout_le_monde_a_approuve()
 
     # THEN
-    notification.notifier_suppression_membre(proposition_candidat, promoteur_id)
-    historique.historiser_suppression_membre(
-        proposition_candidat, groupe_supervision, promoteur_id, cmd.matricule_auteur
-    )
-    groupe_supervision_repository.remove_member(groupe_supervision.entity_id, promoteur_id)
+    proposition.soumettre_ca()
+    proposition_repository.save(proposition)
+    historique.historiser_soumission_ca(proposition)
 
-    return proposition_id
+    return proposition.entity_id  # type: ignore[return-value]

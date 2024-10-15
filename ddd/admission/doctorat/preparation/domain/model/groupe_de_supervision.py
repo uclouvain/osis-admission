@@ -75,6 +75,7 @@ class GroupeDeSupervision(interface.RootEntity):
     signatures_promoteurs: List['SignaturePromoteur'] = attr.Factory(list)
     signatures_membres_CA: List['SignatureMembreCA'] = attr.Factory(list)
     cotutelle: Optional['Cotutelle'] = None
+    # statut_signature is dynamically set during the load and not actually saved directly.
     statut_signature: ChoixStatutSignatureGroupeDeSupervision = ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS
     promoteur_reference_id: Optional['PromoteurIdentity'] = None
 
@@ -121,19 +122,11 @@ class GroupeDeSupervision(interface.RootEntity):
             )
 
     def supprimer_promoteur(self, promoteur_id: 'PromoteurIdentity') -> None:
-        SupprimerPromoteurValidatorList(
-            groupe_de_supervision=self,
-            promoteur_id=promoteur_id,
-        ).validate()
         self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s.promoteur_id != promoteur_id]
         if self.promoteur_reference_id == promoteur_id:
             self.promoteur_reference_id = None
 
     def supprimer_membre_CA(self, membre_CA_id: 'MembreCAIdentity') -> None:
-        SupprimerMembreCAValidatorList(
-            groupe_de_supervision=self,
-            membre_CA_id=membre_CA_id,
-        ).validate()
         self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != membre_CA_id]
 
     def approuver(

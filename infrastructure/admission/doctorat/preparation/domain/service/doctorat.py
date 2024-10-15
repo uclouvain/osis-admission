@@ -91,6 +91,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             intitule_fr=dto.title_fr,
             intitule_en=dto.title_en,
             sigle_entite_gestion=dto.management_entity_acronym,
+            intitule_entite_gestion='',
             campus_inscription=CampusDTO.from_uclouvain_campus_dto(campus_inscription),
             campus=CampusDTO.from_uclouvain_campus_dto(campus),
             type=dto.type,

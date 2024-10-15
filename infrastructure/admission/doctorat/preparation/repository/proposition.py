@@ -683,6 +683,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 intitule_fr=admission.doctorate.title,
                 intitule_en=admission.doctorate.title_english,
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from PropositionManager annotation
+                intitule_entite_gestion=admission.title_entite_gestion,  # from PropositionManager annotation
                 campus=CampusDTO.from_json_annotation(admission.teaching_campus_info),  # from annotation
                 type=admission.doctorate.education_group_type.name,
                 campus_inscription=CampusDTO.from_model_object(admission.training.enrollment_campus),

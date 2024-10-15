@@ -140,7 +140,7 @@ class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModel
     name = "verify-project"
     schema = VerifyProjectSchema()
     permission_mapping = {
-        'GET': 'admission.change_admission_project',
+        'GET': 'admission.change_admission_supervision',
     }
     pagination_class = None
     filter_backends = []

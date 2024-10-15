@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,35 +22,26 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from datetime import datetime
-from typing import Optional
+# ##############################################################################
 
 import attr
 
-from admission.ddd.admission.dtos.campus import CampusDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PropositionStatutIncorrectPourPromoteurException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class DoctoratDTO(interface.DTO):
-    sigle: str
-    code: str
-    annee: int
-    date_debut: Optional[datetime.date]
-    intitule: str
-    intitule_fr: str
-    intitule_en: str
-    sigle_entite_gestion: str
-    intitule_entite_gestion: Optional[str]
-    campus: Optional[CampusDTO]
-    type: str
-    campus_inscription: Optional[CampusDTO]
-    credits: Optional[int]
+class ShouldPropositionStatutEtreCorrectPourPromoteur(BusinessValidator):
+    statut: ChoixStatutPropositionDoctorale
 
-    def __str__(self):
-        return f'{self.sigle} - {self.intitule or self.intitule_fr} ({self.campus})'
-
-    @property
-    def nom_complet(self):
-        return f'{self.sigle} - {self.intitule or self.intitule_fr}'
+    def validate(self, *args, **kwargs):
+        if self.statut not in [
+            ChoixStatutPropositionDoctorale.EN_BROUILLON,
+            ChoixStatutPropositionDoctorale.TRAITEMENT_FAC,
+        ]:
+            raise PropositionStatutIncorrectPourPromoteurException()
