@@ -99,9 +99,6 @@
         {{ admission.formation.intitule }} ({{ admission.formation.campus }})
       {% endif %}
       <span class="label label-default">{{ admission.formation.annee|display_as_academic_year }}</span>
-      {% if admission.est_inscription_tardive %}
-        <span class="label label-warning">{% translate 'Late enrollment' %}</span>
-      {% endif %}
     </span>
     <br>
     <span class="bold-text">{{ admission.type|enum_display:'TypeDemande' }} - </span>
@@ -115,6 +112,9 @@
         <i class="far fa-copy"></i>
       </button>
     </span>
+    {% if admission.est_inscription_tardive %}
+      <span class="label label-warning pull-right">{% translate 'Late enrollment' %}</span>
+    {% endif %}
   </div>
   <div class="min-width">
     {% include 'admission/includes/admission_status.html' with display_on_load=True %}
