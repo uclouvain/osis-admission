@@ -963,6 +963,9 @@ msgid ""
 "inscriptions/demande-en-ligne\" target=\"_blank\">specific platform</a>."
 msgstr ""
 
+msgid "Ask candidate to modify supervision committee"
+msgstr ""
+
 msgid "Assessment test presented"
 msgstr ""
 
@@ -2710,6 +2713,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Email sent to the candidate to inform him that a supervision modification is "
+"needed for a doctorate admission."
+msgstr ""
+
+msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
 msgstr ""
@@ -3360,11 +3368,8 @@ msgctxt "curriculum"
 msgid "Function"
 msgstr ""
 
-#, fuzzy
-#| msgctxt "payment"
-#| msgid "pending"
 msgid "Funding"
-msgstr "Pending"
+msgstr ""
 
 msgctxt "admission"
 msgid "Funding"
@@ -4255,6 +4260,9 @@ msgstr ""
 msgid "Link to the admissions (front-office)"
 msgstr ""
 
+msgid "Link to the admissions dashboard (front-office)"
+msgstr ""
+
 msgid "Link to the application in the back-office"
 msgstr ""
 
@@ -4630,10 +4638,8 @@ msgstr ""
 msgid "Maximum number of documents"
 msgstr ""
 
-#, fuzzy
-#| msgid "Membre CA not found."
 msgid "Member not found"
-msgstr "Supervisory panel member not found."
+msgstr ""
 
 msgid "Member of supervision group already invited."
 msgstr ""
@@ -5402,6 +5408,9 @@ msgid "Personalized"
 msgstr ""
 
 msgid "PhD"
+msgstr ""
+
+msgid "PhD Committee"
 msgstr ""
 
 msgid "PhD already done"
@@ -6766,6 +6775,9 @@ msgstr ""
 msgid "Supervision"
 msgstr ""
 
+msgid "Supervision committee modification by candidate"
+msgstr ""
+
 msgid "Supervision group not found."
 msgstr ""
 
@@ -6789,6 +6801,12 @@ msgid "Supervisory panel report of the confirmation paper"
 msgstr ""
 
 msgid "Support Committee minutes"
+msgstr ""
+
+msgid "Support committee to be completed"
+msgstr ""
+
+msgid "Support committee waiting for signature"
 msgstr ""
 
 msgid "Supporting documents"
@@ -6899,6 +6917,9 @@ msgid ""
 msgstr ""
 
 msgid "The Belgian national register number must consist of 11 digits."
+msgstr ""
+
+msgid "The CA is not currently to be completed"
 msgstr ""
 
 msgid "The CA members"
@@ -7293,6 +7314,19 @@ msgid "The proposition must be concerned by the payment."
 msgstr ""
 
 msgid "The proposition must be in draft form to realize this action."
+msgstr ""
+
+msgid ""
+"The proposition must be in the 'Support committee waiting for signature' "
+"status."
+msgstr ""
+
+msgid "The proposition must be in the 'draft' or 'processed by fac' status."
+msgstr ""
+
+msgid ""
+"The proposition must be in the 'draft', 'Support committee to be completed' "
+"or 'processed by fac' status."
 msgstr ""
 
 msgid "The proposition must be in the 'waiting for signature' status."
@@ -8398,12 +8432,11 @@ msgstr ""
 msgid "You must choose an admission requirement."
 msgstr ""
 
-#, fuzzy
-#| msgid "You must add at least two CA member in order to request signatures."
 msgid "You must correct your application before you can request signatures."
 msgstr ""
-"You must add at least two supervisory panel member in order to request "
-"signatures."
+
+msgid "You must fill the message body first."
+msgstr ""
 
 msgid ""
 "You must have worked in Belgium and your monthly salary must be at least "

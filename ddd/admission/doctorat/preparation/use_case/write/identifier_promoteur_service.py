@@ -55,6 +55,7 @@ def identifier_promoteur(
 
     # WHEN
     IdentifierPromoteurValidatorList(
+        proposition=proposition,
         groupe_de_supervision=groupe_de_supervision,
         matricule=cmd.matricule,
         prenom=cmd.prenom,

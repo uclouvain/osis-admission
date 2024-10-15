@@ -56,6 +56,7 @@ def identifier_membre_ca(
     # WHEN
     membre_ca_translator.verifier_existence(matricule=cmd.matricule)
     IdentifierMembreCAValidatorList(
+        proposition=proposition,
         groupe_de_supervision=groupe_de_supervision,
         matricule=cmd.matricule,
         prenom=cmd.prenom,

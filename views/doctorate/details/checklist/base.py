@@ -88,6 +88,7 @@ from admission.views.doctorate.details.checklist.fac_decision import FacultyDeci
 from admission.views.doctorate.details.checklist.financeability import FinancabiliteContextMixin
 from admission.views.doctorate.details.checklist.mixins import get_internal_experiences
 from admission.views.doctorate.details.checklist.past_experiences import PastExperiencesMixin
+from admission.views.doctorate.details.checklist.projet_recherche import ProjetRechercheContextMixin
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from infrastructure.messages_bus import message_bus_instance
@@ -145,6 +146,7 @@ class ChecklistView(
     FacultyDecisionMixin,
     FinancabiliteContextMixin,
     SicDecisionMixin,
+    ProjetRechercheContextMixin,
     TemplateView,
 ):
     urlpatterns = 'checklist'
