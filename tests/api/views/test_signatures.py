@@ -151,6 +151,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         url = resolve_url("admission_api_v1:request-signatures", uuid=admission.uuid)
 
         promoter = PromoterFactory(is_reference_promoter=True)
+        PromoterFactory(actor_ptr__process=promoter.actor_ptr.process)
         CaMemberFactory(process=promoter.actor_ptr.process)
         admission.supervision_group = promoter.actor_ptr.process
         admission.save()

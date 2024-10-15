@@ -1499,6 +1499,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 type=TrainingType.BACHELOR.name,
                 campus_inscription=cls.mons_campus,
                 sigle_entite_gestion='FFD',
+                intitule_entite_gestion='FFD',
                 code='CFD1',
                 credits=180,
                 date_debut=datetime.date(2023, 1, 1),

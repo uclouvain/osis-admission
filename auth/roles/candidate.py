@@ -49,7 +49,8 @@ _CANDIDATE_RULESET = {
     'view_admission_cotutelle': common.is_admission_request_author
     & doctorate.unconfirmed_proposition
     & doctorate.is_admission,
-    'view_admission_supervision': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_supervision': common.is_admission_request_author
+    & (doctorate.unconfirmed_proposition | doctorate.ca_to_be_completed | doctorate.signing_in_progress),
     # Can edit while not confirmed proposition
     'delete_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
@@ -65,15 +66,20 @@ _CANDIDATE_RULESET = {
     'change_admission_training_choice': common.is_admission_request_author & doctorate.in_progress,
     'change_admission_project': common.is_admission_request_author & doctorate.in_progress,
     'change_admission_cotutelle': common.is_admission_request_author & doctorate.in_progress & doctorate.is_admission,
-    'change_admission_supervision': common.is_admission_request_author & doctorate.in_progress,
-    'request_signatures': common.is_admission_request_author & doctorate.in_progress,
-    'add_supervision_member': common.is_admission_request_author & doctorate.in_progress,
-    'remove_supervision_member': common.is_admission_request_author & doctorate.in_progress,
-    'edit_external_supervision_member': common.is_admission_request_author & doctorate.in_progress,
+    'change_admission_supervision': common.is_admission_request_author
+    & (doctorate.in_progress | doctorate.ca_to_be_completed),
+    'request_signatures': common.is_admission_request_author & (doctorate.in_progress | doctorate.ca_to_be_completed),
+    'add_supervision_member': common.is_admission_request_author
+    & (doctorate.in_progress | doctorate.ca_to_be_completed),
+    'remove_supervision_member': common.is_admission_request_author
+    & (doctorate.in_progress | doctorate.ca_to_be_completed),
+    'edit_external_supervision_member': common.is_admission_request_author
+    & (doctorate.in_progress | doctorate.ca_to_be_completed),
     'set_reference_promoter': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     # Once supervision group is signing, he can
     'approve_proposition_by_pdf': common.is_admission_request_author & doctorate.signing_in_progress,
     'resend_external_invitation': common.is_admission_request_author & doctorate.signing_in_progress,
+    'submit_ca': common.is_admission_request_author & doctorate.signing_in_progress,
     'submit_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     # A candidate can edit some tabs after the proposition has been submitted
     'view_admission_documents': common.is_admission_request_author & doctorate.is_invited_to_complete,
