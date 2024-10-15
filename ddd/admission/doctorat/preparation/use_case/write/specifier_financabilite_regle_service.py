@@ -41,7 +41,6 @@ def specifier_financabilite_regle(
     # THEN
     proposition.specifier_financabilite_regle(
         SituationFinancabilite[cmd.financabilite_regle],
-        cmd.etabli_par,
         cmd.gestionnaire,
     )
     proposition_repository.save(proposition)

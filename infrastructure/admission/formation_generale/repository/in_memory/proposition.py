@@ -299,12 +299,16 @@ class PropositionInMemoryRepository(
             certificat_refus_sic=proposition.certificat_refus_sic,
             documents_additionnels=proposition.documents_additionnels,
             poste_diplomatique=poste_diplomatique,
-            financabilite_regle_calcule=proposition.financabilite_regle_calcule,
-            financabilite_regle_calcule_situation=proposition.financabilite_regle_calcule_situation,
+            financabilite_regle_calcule=proposition.financabilite_regle_calcule.name
+            if proposition.financabilite_regle_calcule
+            else '',
+            financabilite_regle_calcule_situation=proposition.financabilite_regle_calcule_situation.name
+            if proposition.financabilite_regle_calcule_situation
+            else '',
             financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
             financabilite_regle=proposition.financabilite_regle.name if proposition.financabilite_regle else '',
-            financabilite_regle_etabli_par=proposition.financabilite_regle_etabli_par,
-            financabilite_regle_etabli_le=proposition.financabilite_regle_etabli_le,
+            financabilite_etabli_par=proposition.financabilite_etabli_par,
+            financabilite_etabli_le=proposition.financabilite_etabli_le,
             financabilite_derogation_statut=proposition.financabilite_derogation_statut.name
             if proposition.financabilite_derogation_statut
             else '',
