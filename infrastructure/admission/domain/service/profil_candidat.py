@@ -49,6 +49,7 @@ from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
+from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.contrib.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
@@ -1017,3 +1018,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             )
         except PersonMergeProposal.DoesNotExist:
             return None
+
+    @classmethod
+    def get_date_debut_formation(cls, uuid_proposition: str) -> Optional[datetime.date]:
+        dates = BaseAdmission.objects.filter(uuid=uuid_proposition).values('determined_academic_year__start_date')[:1]
+
+        if dates:
+            return dates[0].get('determined_academic_year__start_date')

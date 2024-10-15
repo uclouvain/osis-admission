@@ -284,6 +284,28 @@ class ProfilCandidatTestCase(TestCase):
             )
 
             self.assertEqual(
-                IProfilCandidatTranslator.get_date_maximale_curriculum(date_reference=datetime.date(2022, 2, 1)),
+                IProfilCandidatTranslator.get_date_maximale_curriculum(date_soumission=datetime.date(2022, 2, 1)),
                 datetime.date(2022, 1, 1),
+            )
+
+        with freezegun.freeze_time('2023-11-30'):
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(date_debut_formation=datetime.date(2023, 9, 15)),
+                datetime.date(2023, 8, 1),
+            )
+
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    date_debut_formation=datetime.date(2023, 9, 15),
+                    date_soumission=datetime.date(2023, 10, 30),
+                ),
+                datetime.date(2023, 8, 1),
+            )
+
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    date_debut_formation=datetime.date(2023, 9, 15),
+                    date_soumission=datetime.date(2023, 8, 31),
+                ),
+                datetime.date(2023, 7, 1),
             )

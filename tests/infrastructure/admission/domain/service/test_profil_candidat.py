@@ -32,6 +32,7 @@ from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
     ForeignHighSchoolDiplomaFactory,
 )
+from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -256,3 +257,21 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertTrue(valuation.est_valorise)
+
+
+class ProfilCandidatTestCase(TestCase):
+    def test_get_training_start_date(self):
+        admission = GeneralEducationAdmissionFactory(
+            determined_academic_year=None,
+        )
+        self.assertIsNone(ProfilCandidatTranslator.get_date_debut_formation(uuid_proposition=admission.uuid))
+
+        admission.determined_academic_year = AcademicYearFactory(
+            year=2020,
+        )
+        admission.save(update_fields=['determined_academic_year'])
+
+        self.assertEqual(
+            ProfilCandidatTranslator.get_date_debut_formation(uuid_proposition=admission.uuid),
+            admission.determined_academic_year.start_date,
+        )

@@ -116,6 +116,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     type_formation: TrainingType
     equivalence_diplome: List[str]
     sigle_formation: str
+    date_debut_formation: Optional[datetime.date]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -133,6 +134,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
+                date_debut_formation=self.date_debut_formation,
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
@@ -149,6 +151,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
 class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     annee_soumission: int
     date_soumission: datetime.date
+    date_debut_formation: datetime.date
     annee_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
@@ -166,7 +169,8 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
-                date_reference=self.date_soumission,
+                date_soumission=self.date_soumission,
+                date_debut_formation=self.date_debut_formation,
                 experiences_parcours_interne=self.experiences_parcours_interne,
             ),
         ]

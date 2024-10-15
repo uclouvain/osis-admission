@@ -146,13 +146,16 @@ class IProfilCandidatTranslator(interface.DomainService):
         )
 
     @classmethod
-    def get_date_maximale_curriculum(cls, date_reference: Optional[datetime.date] = None):
+    def get_date_maximale_curriculum(
+        cls,
+        date_soumission: Optional[datetime.date] = None,
+        date_debut_formation: Optional[datetime.date] = None,
+    ):
         """
         Retourne la date de la dernière expérience à remplir dans le CV (mois précédent la date de référence,
         par défaut celle du jour).
         """
-        if not date_reference:
-            date_reference = datetime.date.today()
+        date_reference = min([date for date in [date_soumission, date_debut_formation, datetime.date.today()] if date])
         return (date_reference.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 
     @classmethod
@@ -211,4 +214,9 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_date_debut_formation(cls, uuid_proposition: str) -> Optional[datetime.date]:
         raise NotImplementedError

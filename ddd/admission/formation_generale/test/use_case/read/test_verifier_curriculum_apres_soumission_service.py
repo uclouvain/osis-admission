@@ -273,8 +273,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
         )
 
     def test_should_retourner_erreur_en_fonction_date_soumission_demande(self):
-        # Date de soumission peu avant le début de la période à vérifier
-        self.master_proposition.soumise_le = datetime.datetime(2015, 8, 15)
+        # Date de soumission après la fin de la période à vérifier
+        self.master_proposition.soumise_le = datetime.datetime(2015, 3, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -290,8 +290,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-        # Date de soumission peu après la fin de la période à vérifier
-        self.master_proposition.soumise_le = datetime.datetime(2015, 5, 15)
+        # Date de soumission avant la fin de la période à vérifier
+        self.master_proposition.soumise_le = datetime.datetime(2015, 2, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -303,7 +303,48 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
-                'De Septembre 2014 à Février 2015',
+                'De Septembre 2014 à Janvier 2015',
+            ],
+        )
+
+    def test_should_retourner_erreur_en_fonction_date_debut_formation(self):
+        # Date de début de la formation avant la fin de la période à justifier
+
+        # > et avant la date de soumission
+        self.candidat_translator.date_debut_formation_par_demande[
+            self.master_proposition.entity_id.uuid
+        ] = datetime.date(2015, 1, 15)
+
+        self.master_proposition.soumise_le = datetime.datetime(2015, 2, 15)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
+                'De Septembre 2012 à Février 2013',
+                'De Septembre 2013 à Février 2014',
+                'De Septembre 2014 à Décembre 2014',
+            ],
+        )
+
+        # > et après la date de soumission
+        self.master_proposition.soumise_le = datetime.datetime(2014, 12, 15)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
+                'De Septembre 2012 à Février 2013',
+                'De Septembre 2013 à Février 2014',
+                'De Septembre 2014 à Novembre 2014',
             ],
         )
 

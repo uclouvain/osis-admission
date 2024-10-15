@@ -217,6 +217,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     connaissances_langues: List[ConnaissanceLangue] = []
     diplomes_etudes_secondaires_belges: List[DiplomeEtudeSecondaire] = []
     diplomes_etudes_secondaires_etrangers: List[DiplomeEtudeSecondaire] = []
+    date_debut_formation_par_demande: Dict[str, datetime.date] = {}
     etudes_secondaires = {}
     experiences_academiques: List[ExperienceAcademique] = []
     experiences_non_academiques: List[ExperienceNonAcademique] = []
@@ -866,6 +867,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
         cls.diplomes_etudes_secondaires_belges = []
         cls.diplomes_etudes_secondaires_etrangers = []
+        cls.date_debut_formation_par_demande = {}
         cls.etudes_secondaires = {
             cls.matricule_candidat: _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
@@ -1246,3 +1248,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
         return None
+
+    @classmethod
+    def get_date_debut_formation(cls, uuid_proposition: str) -> Optional[datetime.date]:
+        return cls.date_debut_formation_par_demande.get(uuid_proposition)

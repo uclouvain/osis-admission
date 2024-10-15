@@ -227,6 +227,7 @@ class ProfilCandidat(interface.DomainService):
             type_formation=type_formation,
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
+            date_debut_formation=profil_candidat_translator.get_date_debut_formation(proposition.entity_id.uuid),
         ).validate()
 
     @classmethod
@@ -261,6 +262,7 @@ class ProfilCandidat(interface.DomainService):
 
         FormationGeneraleCurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
+            date_debut_formation=profil_candidat_translator.get_date_debut_formation(proposition.entity_id.uuid),
             annee_soumission=annee_soumission,
             experiences_academiques=curriculum.experiences_academiques,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
