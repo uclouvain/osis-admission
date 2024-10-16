@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import html
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union, Mapping
 
 import phonenumbers
 from dal import forward
@@ -101,10 +101,11 @@ class SelectOrOtherField(forms.MultiValueField):
     widget = SelectOrOtherWidget
     select_class = forms.ChoiceField
 
-    def __init__(self, choices: Optional[List[str]] = None, *args, **kwargs):
+    def __init__(self, choices: Optional[Union[List[str], Mapping[str, str]]] = None, *args, **kwargs):
         select_kwargs = {}
         if choices is not None:
-            select_kwargs['choices'] = self.choices = list(zip(choices, choices)) + [('other', _("Other"))]
+            choices = zip(choices, choices) if not isinstance(choices[0], (list, tuple)) else choices
+            select_kwargs['choices'] = self.choices = list(choices) + [('other', _("Other"))]
         fields = [self.select_class(required=False, **select_kwargs), forms.CharField(required=False)]
         super().__init__(fields, require_all_fields=False, *args, **kwargs)
 
@@ -119,8 +120,10 @@ class SelectOrOtherField(forms.MultiValueField):
 
     def compress(self, data_list):
         # On save, take the other value if "other" is chosen
-        radio, other = data_list
-        return radio if radio != "other" else other
+        if len(data_list) == 2:
+            radio, other = data_list
+            return radio if radio != "other" else other
+        return ''
 
     def clean(self, value):
         # Dispatch the correct values to each field before regular cleaning
@@ -128,6 +131,11 @@ class SelectOrOtherField(forms.MultiValueField):
         if hasattr(self, 'choices') and radio not in self.choices and other is None:
             value = ['other', radio]
         return super().clean(value)
+
+    def widget_attrs(self, widget):
+        if self.help_text:
+            return {'help_text': self.help_text}
+        return super().widget_attrs(widget)
 
 
 class PhoneField(forms.CharField):

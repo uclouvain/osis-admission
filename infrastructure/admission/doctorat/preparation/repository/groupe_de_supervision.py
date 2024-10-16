@@ -100,7 +100,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             cotutelle = Cotutelle(
                 motivation=proposition.cotutelle_motivation,
                 institution_fwb=proposition.cotutelle_institution_fwb,
-                institution=proposition.cotutelle_institution,
+                institution=str(proposition.cotutelle_institution) if proposition.cotutelle_institution else "",
                 autre_institution_nom=proposition.cotutelle_other_institution_name,
                 autre_institution_adresse=proposition.cotutelle_other_institution_address,
                 demande_ouverture=proposition.cotutelle_opening_request,
@@ -221,7 +221,9 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         if entity.cotutelle:
             proposition.cotutelle_motivation = entity.cotutelle.motivation
             proposition.cotutelle_institution_fwb = entity.cotutelle.institution_fwb
-            proposition.cotutelle_institution = entity.cotutelle.institution
+            proposition.cotutelle_institution = (
+                None if not entity.cotutelle.institution else entity.cotutelle.institution
+            )
             proposition.cotutelle_other_institution_name = entity.cotutelle.autre_institution_nom
             proposition.cotutelle_other_institution_address = entity.cotutelle.autre_institution_adresse
             proposition.cotutelle_opening_request = entity.cotutelle.demande_ouverture

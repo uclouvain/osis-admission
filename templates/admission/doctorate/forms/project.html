@@ -1,5 +1,5 @@
 {% extends "admission/doctorate/forms/tab_layout.html" %}
-{% load i18n static admission %}
+{% load i18n static enums admission bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,3 +24,178 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% block form_content %}
+  {% panel _("Course choice") %}
+    <div class="row">
+      <div class="col-md-12">
+        {% field_data _("Admission type") admission.type_admission|enum_display:'AdmissionType' %}
+      </div>
+      {% if admission.type_admission == 'PRE_ADMISSION' %}
+      <div class="col-md-12" id="justification">
+        <p class="well">
+          {% blocktrans trimmed %}
+            Extract from the Doctoral Regulations (Article 2.1):<br />
+            "Pre-admission is an optional stage of the doctoral programme. It aims to allow the candidate to complete
+            the administrative and social formalities that would require a prior registration for the doctorate. [...]
+            Pre-admission is valid for a maximum period of 12 months. Recourse to a pre-admission phase must be
+            justified, the objectives to be achieved planned and the duration of the pre-admission period fixed in
+            accordance with them. Unless exceptionally authorised by the CSD, FRIA or FNRS scholarship holders and, in
+            general, doctoral candidates engaged in a research project that has already been defined, are not
+            authorised to take a pre-admission phase for a doctorate."
+            <br /> Please also consult the special provisions of the field for all pre-admission conditions.
+          {% endblocktrans %}
+        </p>
+        {% bootstrap_field form.justification form_group_class="form-group required_field" %}
+      </div>
+      {% endif %}
+    </div>
+    {% field_data _("Sector") sector_label %}
+    {% display admission.doctorat.intitule " (" admission.doctorat.campus ")" as doctorate_title %}
+    {% field_data _("PhD") doctorate_title %}
+    {% if admission.commission_proximite %}
+      {% field_data _("Proximity commission / Subdomain") admission.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
+    {% endif %}
+  {% endpanel %}
+
+  {% translate "Funding" context "admission" as funding_translation %}
+  {% panel funding_translation %}
+    <div class="row">
+      <div class="col-md-4">
+        {% bootstrap_field_with_tooltip form.type_financement classes="form-group required_field" %}
+      </div>
+    </div>
+    <div class="row" id="work">
+      {% bootstrap_field form.type_contrat_travail show_help=False form_group_class="form-group col-md-4 required_field" %}
+      <div class="col-md-4">
+        {% bootstrap_field form.eft form_group_class="form-group required_field" placeholder="" %}
+      </div>
+    </div>
+    <div id="scholarship">
+      <div class="row">
+        {% bootstrap_field form.bourse_recherche form_group_class="form-group col-md-4 required_field" %}
+        <div id="other-scholarship-container" class="col-md-4 required_field">
+          {% bootstrap_field form.autre_bourse_recherche placeholder="" %}
+        </div>
+      </div>
+      <div class="row">
+        {% bootstrap_field form.bourse_date_debut form_group_class="form-group col-md-5 required_field" %}
+        {% bootstrap_field_with_tooltip form.bourse_date_fin classes="form-group col-md-4 required_field" %}
+      </div>
+      {% bootstrap_field_with_tooltip form.bourse_preuve classes="form-group required_field" %}
+    </div>
+    <div id="financing-details" class="row">
+      <div class="col-md-6">
+        {% bootstrap_field form.duree_prevue placeholder="" form_group_class="form-group required_field" %}
+      </div>
+      <div class="col-md-6">
+        {% bootstrap_field form.temps_consacre placeholder="" form_group_class="form-group required_field" %}
+      </div>
+      <div class="col-md-6">
+        {% bootstrap_field_with_tooltip form.est_lie_fnrs_fria_fresh_csc classes="form-group required_field" %}
+      </div>
+      <div class="col-md-6">
+        {% bootstrap_field form.commentaire_financement form_group_class="form-group" %}
+      </div>
+    </div>
+  {% endpanel %}
+
+  {% panel _("PhD research project") %}
+    {% bootstrap_field form.titre_projet form_group_class="form-group required_field" placeholder="" %}
+    {% bootstrap_field_with_tooltip form.resume_projet classes="form-group required_field" %}
+    <div class="row">
+      <div class="col-md-4">
+        {% bootstrap_field form.langue_redaction_these form_group_class="form-group required_field" %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        {% bootstrap_field_with_tooltip form.lieu_these %}
+      </div>
+    </div>
+    <p>
+      {% blocktrans trimmed %}
+        The format of the documents to be uploaded below may vary from one CDD to another. Find out more on your CDD's
+        website or from your doctoral manager.
+      {% endblocktrans %}
+    </p>
+    {% bootstrap_field form.documents_projet form_group_class="form-group required_field" %}
+    {% if admission.type_admission == 'ADMISSION' %}
+      {% bootstrap_field form.proposition_programme_doctoral form_group_class="form-group required_field" %}
+    {% endif %}
+    {% bootstrap_field_with_tooltip form.projet_formation_complementaire %}
+    {% bootstrap_field form.graphe_gantt %}
+    {% bootstrap_field form.lettres_recommandation %}
+  {% endpanel %}
+
+  {% panel _("PhD research experience") %}
+    {% bootstrap_field form.projet_doctoral_deja_commence form_group_class="form-group required_field" %}
+    <div id="deja_commence">
+      <div class="row">
+        <div class="col-md-6">
+          {% bootstrap_field form.projet_doctoral_institution placeholder="" form_group_class="form-group required_field" %}
+        </div>
+        <div class="col-md-6">
+          {% bootstrap_field form.projet_doctoral_date_debut form_group_class="form-group required_field" %}
+        </div>
+      </div>
+    </div>
+    {% bootstrap_field_with_tooltip form.doctorat_deja_realise %}
+    <div id="previous_experience">
+      <div class="row">
+        <div class="col-md-6">
+          {% bootstrap_field form.institution placeholder="" form_group_class="form-group required_field" %}
+        </div>
+        <div class="col-md-6">
+          {% bootstrap_field form.domaine_these placeholder="" form_group_class="form-group required_field" %}
+        </div>
+      </div>
+      {% bootstrap_field form.non_soutenue %}
+      <div class="row" id="soutenue">
+        <div class="col-md-4">
+          {% bootstrap_field form.date_soutenance %}
+        </div>
+      </div>
+      <div id="non-soutenue">
+        {% bootstrap_field form.raison_non_soutenue form_group_class="form-group required_field" placeholder="" %}
+      </div>
+    </div>
+  {% endpanel %}
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+
+  <script>
+  $(function () {
+    const isFalsy = val => !val;
+
+    $('#work').dependsOn({
+      '#id_type_financement': { values: ['WORK_CONTRACT'] },
+    });
+    $('#scholarship').dependsOn({
+      '#id_type_financement': { values: ['SEARCH_SCHOLARSHIP'] },
+    });
+    $('#other-scholarship-container').dependsOn({
+        "#id_bourse_recherche": { isFalsy },
+    });
+    $('#financing-details').dependsOn({
+      '#id_type_financement': { not: [''] },
+    });
+    $('#previous_experience').dependsOn({
+      '#id_doctorat_deja_realise': { values: ['YES', 'PARTIAL'] },
+    });
+    $('#non-soutenue').dependsOn({
+      '#id_non_soutenue': { checked: true },
+    });
+    $('#soutenue').dependsOn({
+      '#id_non_soutenue': { checked: false },
+    });
+    $('#deja_commence').dependsOn({
+      'input[name=projet_doctoral_deja_commence]': { values: ['True'] },
+    });
+
+    document.dispatchEvent(new Event('refreshFormInitial'));
+  });
+  </script>
+{% endblock %}

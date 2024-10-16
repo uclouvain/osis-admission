@@ -44,6 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
 )
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleFactory,
 )
@@ -52,11 +53,16 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import \
+    PersonneConnueUclInMemoryTranslator
 
 
 class TestCompleterPropositionService(TestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
+            PersonneConnueUclDTOFactory(matricule="0123456"),
+        )
 
         self.addCleanup(self.proposition_repository.reset)
 
@@ -66,6 +72,7 @@ class TestCompleterPropositionService(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = CompleterPropositionCommand(
             uuid=self.proposition_existante.entity_id.uuid,
+            matricule_auteur="0123456",
             commission_proximite=ChoixSousDomaineSciences.BIOLOGY.name,
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
