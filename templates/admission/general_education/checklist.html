@@ -61,8 +61,9 @@
     {% can_update_tab 'accounting' as can_update_accounting_tab %}
     {% can_update_tab 'training-choice' as can_update_training_choice_tab %}
     {% can_update_tab 'specific-questions' as can_update_specific_questions_tab %}
-    {% can_update_tab 'curriculum' as can_update_curriculum %}
+    {% can_update_tab 'curriculum' as can_update_global_curriculum %}
     {% can_update_tab 'education' as can_update_education %}
+    {% has_perm 'admission.change_admission_curriculum' as can_update_curriculum %}
     {% has_perm 'admission.delete_admission_curriculum' as can_delete_curriculum %}
 
     {% if can_update_person_tab %}
@@ -319,7 +320,7 @@
             </strong>
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
             <div class="mt-1">
-              {% if can_update_curriculum %}
+              {% if can_update_global_curriculum %}
                 {% url 'admission:general-education:update:curriculum' view.kwargs.uuid as global_curriculum_update_url %}
               {% endif %}
               {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url|add:next_url %}

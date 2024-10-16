@@ -26,7 +26,7 @@
 {% endcomment %}
 
 
-{% can_update_tab 'curriculum' as can_update_curriculum%}
+{% has_perm 'admission.change_admission_curriculum' as can_update_curriculum %}
 {% url base_namespace|add:':update:curriculum:educational_create' view.kwargs.uuid as curriculum_educational_create_url %}
 {% url base_namespace|add:':update:curriculum:non_educational_create' view.kwargs.uuid as curriculum_professional_create_url %}
 
