@@ -51,6 +51,8 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
     raise_exception = True
     filtering_query_class = None
     htmx_template_name = None
+    parameters_cache_timeout = None
+    result_cache_timeout = 60 * 60 * 24  # 1 day
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -59,7 +61,11 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
 
     @property
     def cache_key(self):
-        return "_".join(['cache_filter', str(self.request.user.id), self.request.path])
+        return f"cache_filter_{self.request.user.id}_{self.request.path}"
+
+    @classmethod
+    def cache_key_for_result(cls, user_id):
+        return f"cache_filter_result_{user_id}"
 
     @staticmethod
     def htmx_render_form_errors(request, form):
@@ -114,7 +120,7 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
             return response
 
         if self.request.GET:
-            cache.set(self.cache_key, self.request.GET, timeout=None)
+            cache.set(self.cache_key, self.request.GET, timeout=self.parameters_cache_timeout)
 
         self.filters = self.form.cleaned_data
 
@@ -131,7 +137,16 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
                 self.filters['tri_inverse'] = ordering_field[0] == '-'
                 self.filters['champ_tri'] = ordering_field.lstrip('-')
 
-        return super().get(request, *args, **kwargs)
+        response = super().get(request, *args, **kwargs)
+
+        if self.request.GET:
+            cache.set(
+                self.cache_key_for_result(user_id=self.request.user.id),
+                self.object_list.sorted_elements,
+                timeout=self.result_cache_timeout,
+            )
+
+        return response
 
     def get_queryset(self):
         return message_bus_instance.invoke(

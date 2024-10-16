@@ -40,7 +40,7 @@ __namespace__ = False
 
 class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     urlpatterns = {
-        '': '<uuid:uuid>/',
+        'base': '<uuid:uuid>/',
         'doctorate': 'doctorate/<uuid:uuid>/',
         'general-education': 'general-education/<uuid:uuid>/',
         'continuing-education': 'continuing-education/<uuid:uuid>/',

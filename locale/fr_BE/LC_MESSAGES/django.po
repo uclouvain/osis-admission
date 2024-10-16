@@ -5350,6 +5350,9 @@ msgstr "Nouveau titre de la thèse (le cas échéant) :"
 msgid "Next"
 msgstr "Suivant"
 
+msgid "Next admission"
+msgstr "Demande suivante"
+
 msgid "No"
 msgstr "Non"
 
@@ -6148,6 +6151,9 @@ msgstr "Prévisualiser"
 #, python-format
 msgid "Preview <em>%(name)s</em> custom mail template"
 msgstr "Prévisualiser le template d'email personnalisé <em>%(name)s</em>"
+
+msgid "Previous admission"
+msgstr "Demande précédente"
 
 msgid "Previous confirmation exams"
 msgstr "Epreuves de confirmation passées"
