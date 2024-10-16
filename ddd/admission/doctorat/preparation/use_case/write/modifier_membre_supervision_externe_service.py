@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ def modifier_membre_supervision_externe(
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     promoteur_translator: 'IPromoteurTranslator',
     membre_ca_translator: 'IMembreCATranslator',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_command(cmd)
@@ -72,5 +73,6 @@ def modifier_membre_supervision_externe(
         country_code=cmd.pays,
         language=cmd.langue,
     )
+    historique.historiser_modification_membre(proposition, signataire, cmd.matricule_auteur)
 
     return proposition_id

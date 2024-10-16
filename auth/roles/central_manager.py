@@ -103,11 +103,8 @@ class CentralManager(EntityRoleModel):
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,
-            'admission.change_admission_project': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_cotutelle': is_entity_manager,
-            'admission.change_admission_cotutelle': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_supervision': is_entity_manager,
-            'admission.change_admission_supervision': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_accounting': is_entity_manager,
             'admission.change_admission_accounting': is_entity_manager
             & (general.in_sic_status | doctorate.in_sic_status)
@@ -118,8 +115,6 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc,
             'admission.view_admission_jury': is_entity_manager,
             'admission.change_admission_jury': is_entity_manager,
-            'admission.add_supervision_member': is_entity_manager,
-            'admission.remove_supervision_member': is_entity_manager,
             'admission.view_internalnote': is_entity_manager,
             'admission.view_debug_info': is_entity_manager & is_debug,
             'admission.view_historyentry': is_entity_manager,
