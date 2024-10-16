@@ -179,7 +179,6 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(len(refusal_reasons), 1)
         self.assertEqual(refusal_reasons[0], refusal_reason)
         self.assertEqual(self.admission.other_refusal_reasons, [])
-        self.assertEqual(self.admission.refusal_type, 'REFUS_DOSSIER_TARDIF')
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name)
         self.assertEqual(
             self.admission.checklist['current']['decision_sic']['statut'],
@@ -238,7 +237,6 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         # Check that the admission has been updated
         self.admission.refresh_from_db()
 
-        self.assertEqual(self.admission.refusal_type, 'REFUS_DOSSIER_TARDIF')
         self.assertFalse(self.admission.refusal_reasons.exists())
         self.assertEqual(self.admission.other_refusal_reasons, ['My other reason'])
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name)

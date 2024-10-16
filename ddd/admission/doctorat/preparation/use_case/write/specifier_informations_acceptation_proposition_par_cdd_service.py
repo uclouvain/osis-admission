@@ -25,35 +25,31 @@
 # ##############################################################################
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.commands import (
-    SpecifierMotifsRefusPropositionParSicCommand,
+    SpecifierInformationsAcceptationPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-def specifier_motifs_refus_proposition_par_sic(
-    cmd: SpecifierMotifsRefusPropositionParSicCommand,
+def specifier_informations_acceptation_proposition_par_cdd(
+    cmd: SpecifierInformationsAcceptationPropositionParCddCommand,
     proposition_repository: 'IPropositionRepository',
-    historique: 'IHistorique',
 ) -> PropositionIdentity:
+    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    statut_original = proposition.statut
-
-    proposition.specifier_motifs_refus_par_sic(
+    # THEN
+    proposition.specifier_informations_acceptation_par_cdd(
         auteur_modification=cmd.gestionnaire,
-        type_de_refus=cmd.type_de_refus,
-        uuids_motifs=cmd.uuids_motifs,
-        autres_motifs=cmd.autres_motifs,
+        avec_complements_formation=cmd.avec_complements_formation,
+        uuids_complements_formation=cmd.uuids_complements_formation,
+        commentaire_complements_formation=cmd.commentaire_complements_formation,
+        nombre_annees_prevoir_programme=cmd.nombre_annees_prevoir_programme,
+        nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
+        email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
+        commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
     )
 
     proposition_repository.save(entity=proposition)
-
-    historique.historiser_specification_motifs_refus_sic(
-        proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
-        statut_original=statut_original,
-    )
 
     return proposition.entity_id

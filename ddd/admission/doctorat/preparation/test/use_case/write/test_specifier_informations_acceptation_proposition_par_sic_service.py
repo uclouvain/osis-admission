@@ -49,9 +49,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -89,9 +86,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-confirmee',
-            'avec_conditions_complementaires': False,
-            'uuids_conditions_complementaires_existantes': [],
-            'conditions_complementaires_libres': [],
             'avec_complements_formation': False,
             'uuids_complements_formation': [],
             'commentaire_complements_formation': '',
@@ -101,9 +95,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             'droits_inscription_montant': '',
             'droits_inscription_montant_autre': None,
             'dispense_ou_droits_majores': '',
-            'tarif_particulier': '',
-            'refacturation_ou_tiers_payant': '',
-            'annee_de_premiere_inscription_et_statut': '',
             'est_mobilite': None,
             'nombre_de_mois_de_mobilite': '',
             'doit_se_presenter_en_sic': None,
@@ -127,9 +118,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             proposition.checklist_actuelle.decision_sic.extra,
             {'en_cours': 'approval'},
         )
-        self.assertEqual(proposition.avec_conditions_complementaires, False)
-        self.assertEqual(proposition.conditions_complementaires_existantes, [])
-        self.assertEqual(proposition.conditions_complementaires_libres, [])
         self.assertEqual(proposition.avec_complements_formation, False)
         self.assertEqual(proposition.complements_formation, [])
         self.assertEqual(proposition.commentaire_complements_formation, '')
@@ -139,9 +127,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.assertIsNone(proposition.droits_inscription_montant)
         self.assertIsNone(proposition.droits_inscription_montant_autre)
         self.assertIsNone(proposition.dispense_ou_droits_majores)
-        self.assertEqual(proposition.tarif_particulier, '')
-        self.assertEqual(proposition.refacturation_ou_tiers_payant, '')
-        self.assertEqual(proposition.annee_de_premiere_inscription_et_statut, '')
         self.assertIsNone(proposition.est_mobilite)
         self.assertIsNone(proposition.nombre_de_mois_de_mobilite)
         self.assertIsNone(proposition.doit_se_presenter_en_sic)
@@ -174,18 +159,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         resultat = self.message_bus.invoke(
             self.command(
                 uuid_proposition='uuid-SC3DP-confirmee',
-                avec_conditions_complementaires=True,
-                uuids_conditions_complementaires_existantes=['uuid-condition-complementaire-1'],
-                conditions_complementaires_libres=[
-                    {
-                        'name_fr': 'Condition libre 1',
-                        'name_en': 'Free condition 1',
-                        'related_experience_id': self.uuid_experience,
-                    },
-                    {
-                        'name_fr': 'Condition libre 2',
-                    },
-                ],
                 avec_complements_formation=True,
                 uuids_complements_formation=['uuid-complement-formation-1'],
                 commentaire_complements_formation='Mon commentaire concernant les compléments de formation',
@@ -195,9 +168,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 droits_inscription_montant='DROITS_MAJORES',
                 droits_inscription_montant_autre=None,
                 dispense_ou_droits_majores='DISPENSE_DUREE',
-                tarif_particulier='Tarif particulier',
-                refacturation_ou_tiers_payant='Refacturation',
-                annee_de_premiere_inscription_et_statut='Premiere inscription',
                 est_mobilite=True,
                 nombre_de_mois_de_mobilite=MobiliteNombreDeMois.SIX.name,
                 doit_se_presenter_en_sic=False,
@@ -212,22 +182,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             proposition.checklist_actuelle.decision_sic.extra,
             {'en_cours': 'approval'},
         )
-        self.assertEqual(proposition.avec_conditions_complementaires, True)
-        self.assertEqual(
-            proposition.conditions_complementaires_existantes,
-            [
-                ConditionComplementaireApprobationIdentity(
-                    uuid='uuid-condition-complementaire-1',
-                )
-            ],
-        )
-        self.assertEqual(len(proposition.conditions_complementaires_libres), 2)
-        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_fr, 'Condition libre 1')
-        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_en, 'Free condition 1')
-        self.assertEqual(proposition.conditions_complementaires_libres[0].uuid_experience, self.uuid_experience)
-        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_fr, 'Condition libre 2')
-        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_en, '')
-        self.assertEqual(proposition.conditions_complementaires_libres[1].uuid_experience, '')
         self.assertEqual(proposition.avec_complements_formation, True)
         self.assertEqual(
             proposition.complements_formation,
@@ -247,9 +201,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.assertEqual(proposition.droits_inscription_montant, DroitsInscriptionMontant.DROITS_MAJORES)
         self.assertIsNone(proposition.droits_inscription_montant_autre)
         self.assertEqual(proposition.dispense_ou_droits_majores, DispenseOuDroitsMajores.DISPENSE_DUREE)
-        self.assertEqual(proposition.tarif_particulier, 'Tarif particulier')
-        self.assertEqual(proposition.refacturation_ou_tiers_payant, 'Refacturation')
-        self.assertEqual(proposition.annee_de_premiere_inscription_et_statut, 'Premiere inscription')
         self.assertIs(proposition.est_mobilite, True)
         self.assertEqual(proposition.nombre_de_mois_de_mobilite, MobiliteNombreDeMois.SIX)
         self.assertIs(proposition.doit_se_presenter_en_sic, False)

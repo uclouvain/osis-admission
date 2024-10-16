@@ -1,5 +1,4 @@
 {% extends base_template %}
-{% load bootstrap3 %}
 {% load i18n static admission bootstrap3 enums osis_document statici18n strings %}
 
 {% comment "License" %}
@@ -224,7 +223,6 @@
 
           <div class="info-part">
             {% field_data _("Proposition submission") admission.soumise_le %}
-            {% include 'admission/doctorate/includes/checklist/vip_profile.html' with url=training_choice_url|add:next_url hide_if_empty=True %}
           </div>
         </div>
       {% endwith %}
@@ -329,34 +327,41 @@
 
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire next_url=next_base_url|add:'decision_facultaire' %}
-        <div role="tabpanel" class="tab-pane" id="decision_facultaire">
-          {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
+      {% with initial=original_admission.checklist.initial.decision_cdd current=original_admission.checklist.current.decision_cdd next_url=next_base_url|add:'decision_cdd' %}
+        <div role="tabpanel" class="tab-pane" id="decision_cdd">
+          {% include 'admission/doctorate/includes/checklist/cdd_decision.html' %}
 
-          {% bootstrap_form_errors comment_forms.decision_facultaire__SIC %}
-          {% bootstrap_field comment_forms.decision_facultaire__SIC.comment %}
+          {% bootstrap_form_errors comment_forms.decision_cdd__SIC_FOR_CDD %}
+          {% bootstrap_field comment_forms.decision_cdd__SIC_FOR_CDD.comment %}
 
           <div class="info-part">
-            {% include 'admission/doctorate/includes/checklist/vip_profile.html' with url=training_choice_url|add:next_url %}
+            {% if autres_demandes %}
+              <dt>{% trans "Other demand(s) by the candidate." %}</dt>
+              <dd>
+                {% include 'admission/includes/lite_admission_list.html' with with_title=True without_admission_url=True %}
+              </dd>
+            {% endif %}
           </div>
 
-          {% bootstrap_form_errors comment_forms.decision_facultaire__FAC %}
-          {% bootstrap_field comment_forms.decision_facultaire__FAC.comment %}
+          <div class="mt-1">
+            {% bootstrap_form_errors comment_forms.decision_cdd__CDD_FOR_SIC %}
+            {% bootstrap_field comment_forms.decision_cdd__CDD_FOR_SIC.comment %}
+          </div>
 
-          {% include 'admission/general_education/includes/checklist/fac_decision_refusal_modal.html' %}
-          {% include 'admission/general_education/includes/checklist/fac_decision_approval_modal.html' %}
+          {% include 'admission/doctorate/includes/checklist/cdd_decision_refusal_modal.html' %}
+          {% include 'admission/doctorate/includes/checklist/cdd_decision_approval_modal.html' %}
+          {% include 'admission/doctorate/includes/checklist/cdd_decision_approval_final_modal.html' %}
 
         </div>
       {% endwith %}
 
       <div role="tabpanel" class="tab-pane" id="decision_sic">
-        {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
+            <p>{% translate 'Work in progress' %}</p>
+            {# {% include 'admission/general_education/includes/checklist/sic_decision.html' %} #}
 
         {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
         {% include 'admission/general_education/includes/checklist/sic_decision_confirm_modal.html' with target_status='INITIAL_CANDIDAT' target_url=change_status_url %}
         {% include "admission/general_education/includes/checklist/sic_decision_approval_modal.html" %}
-        {% include "admission/general_education/includes/checklist/sic_decision_refusal_modal.html" %}
-        {% include "admission/general_education/includes/checklist/sic_decision_refusal_final_modal.html" %}
         {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
 
         <div class="info-part">
@@ -435,11 +440,6 @@
 
   </div>
 
-  <table style="display:none;">
-    {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='fac-decision-additional-approval-conditions-form' form=fac_decision_free_approval_condition_formset.empty_form id='empty-fac-approval-form' %}
-    {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='sic-decision-additional-approval-conditions-form' form=sic_decision_free_approval_condition_formset.empty_form id='empty-sic-approval-form' %}
-  </table>
-
 {% endblock %}
 
 
@@ -448,8 +448,7 @@
   <script src="{% statici18n LANGUAGE_CODE %}"></script>
   <script src="{% static 'js/jquery.formset.js' %}"></script>
   {{ assimilation_form.media.js }}
-  {{ fac_decision_refusal_form.media.js }}
-  {{ fac_decision_refusal_form.media.js }}
+  {{ cdd_decision_refusal_form.media.js }}
   {{ sic_decision_refusal_form.media.js }}
   {{ sic_decision_approval_form.media.js }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
@@ -860,46 +859,14 @@
               htmxErrorsMessages.classList.add('show');
           });
 
-          // SIC & Faculty decisions
-          function toggleOtherApprovalConditions() {
-              if ($(this).val() === 'on') {
-                $(this).val('off');
-                $(this).siblings('.other-approval-conditions').addClass('hidden');
-              } else {
-                $(this).val('on');
-                $(this).siblings('.other-approval-conditions').removeClass('hidden');
-              }
-          }
+          // CDD decision
+          const cddDecisionContainer = $('#decision_cdd');
 
-          // Faculty decision
-          const facultyDecisionContainer = $('#decision_facultaire');
-
-          facultyDecisionContainer.on('change', '#id_fac-decision-approval-another_training', function(event){
-              const container = $('#fac-decision-other-training-container');
-              $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
-          });
-          $('#id_fac-decision-approval-another_training').change();
-
-          facultyDecisionContainer.on('change', 'input[name="fac-decision-approval-with_additional_approval_conditions"]', function(event){
-              const container = $('#fac-decision-additional-approval-conditions-container');
+          cddDecisionContainer.on('change', 'input[name="cdd-decision-approval-with_prerequisite_courses"]', function(event){
+              const container = $('#cdd-decision-additional-trainings-container');
               $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
           });
-          $('input[name="fac-decision-approval-with_additional_approval_conditions"]:checked').change();
-
-          facultyDecisionContainer.on('change', 'input[name="fac-decision-approval-with_prerequisite_courses"]', function(event){
-              const container = $('#fac-decision-additional-trainings-container');
-              $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
-          });
-          $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
-
-          facultyDecisionContainer.on('click', 'button[name^="save"]', function(event){
-              // To send the updated data from ckeditor instances
-              for (const editor in CKEDITOR.instances) {
-                  CKEDITOR.instances[editor].updateElement();
-              }
-          });
-
-          facultyDecisionContainer.on('click', 'button[name="hide-other-approval-conditions"]', toggleOtherApprovalConditions);
+          $('input[name="cdd-decision-approval-with_prerequisite_courses"]:checked').change();
 
           {# Access title events #}
           $('.parcours').on('formValidation', function(event) {
@@ -918,7 +885,7 @@
           });
 
           $('#parcours_anterieur').on('formValidation', '.checklist-state-button', function(event) {
-              {# The access titles can be updated only if the fac decision status is not sufficient. #}
+              {# The access titles can be updated only if the cdd decision status is not sufficient. #}
               if (event.originalEvent.detail.select_access_title_perm !== undefined) {
                 const access_titles_checkboxes = $('input[name="access-title"]');
                 access_titles_checkboxes.prop('disabled', event.originalEvent.detail.select_access_title_perm === false);
@@ -928,14 +895,6 @@
 
           // SIC decision
           const sicDecisionContainer = $('#decision_sic');
-
-          sicDecisionContainer.on('click', 'button[name="hide-other-approval-conditions"]', toggleOtherApprovalConditions);
-
-          sicDecisionContainer.on('change', 'input[name="sic-decision-approval-with_additional_approval_conditions"]', function(event){
-              const container = $('#sic-decision-additional-approval-conditions-container');
-              $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
-          });
-          $('input[name="sic-decision-approval-with_additional_approval_conditions"]:checked').change();
 
           sicDecisionContainer.on('change', 'input[name="sic-decision-approval-with_prerequisite_courses"]', function(event){
               const container = $('#sic-decision-additional-trainings-container');
@@ -991,10 +950,11 @@
           });
 
           // Pass the ckeditor data to the form data if necessary
-          $(document).on('click', '.ckeditor-form [type="submit"]', function(event) {
-            $(this).closest('form').find("textarea[data-type=ckeditortype]").each(function() {
-              CKEDITOR.instances[$(this).attr('id')].updateElement();
-            })
+          $(document).on('click', '.ckeditor-form [type="submit"], .ckeditor-form [name="save"]', function(event) {
+            $(this).closest('form').find("textarea").each(function() {
+                const editor = CKEDITOR.instances[$(this).attr('id')];
+                if (editor) editor.updateElement();
+            });
           });
 
       })(jQuery)
@@ -1015,8 +975,8 @@
 
 {% block style %}
   {{ block.super }}
-  {{ fac_decision_refusal_form.media.css }}
-  {{ fac_decision_approval_form.media.css }}
+  {{ cdd_decision_refusal_form.media.css }}
+  {{ cdd_decision_approval_form.media.css }}
   {{ sic_decision_refusal_form.media.css }}
   {{ sic_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
@@ -1252,43 +1212,13 @@
       margin-bottom: initial;
     }
 
-    .fac-decision-additional-approval-conditions-formset td {
-      padding: 1em;
-    }
-
-    .approval-conditions-fields {
-      flex: 1;
-    }
-
-    .approval-conditions-fields .form-group {
-      display: flex;
-      gap: 1em;
-      align-items: center;
-    }
-
-    .approval-conditions-fields .form-group {
-      margin-bottom: 0;
-    }
-
-    button[name="hide-other-approval-conditions"] {
-      background-color: transparent;
-    }
-
-    button[name="hide-other-approval-conditions"][value="on"] > i.fa-square-chevron-down, button[name="hide-other-approval-conditions"][value="off"] > i.fa-square-chevron-up {
-      display: none;
-    }
-
-    button[name="hide-other-approval-conditions"][value="on"] > i.fa-square-chevron-up, button[name="hide-other-approval-conditions"][value="off"] > i.fa-square-chevron-down {
-      display: initial;
-    }
-
-    .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {
+    .decision-modal .select2-selection--multiple .select2-selection__rendered {
       word-wrap: break-word;
       text-overflow: inherit;
       white-space: normal;
     }
 
-    .fac-decision-modal .select2-selection--multiple .select2-selection__choice {
+    .decision-modal .select2-selection--multiple .select2-selection__choice {
       background-color: rgba(200, 200, 200, 0.1);
       width: 100%;
       display: flex;
@@ -1296,11 +1226,11 @@
       align-items: center;
     }
 
-    .fac-decision-modal {
+    .decision-modal {
       overflow: auto;
     }
 
-    .fac-decision-modal .modal-footer {
+    .decision-modal .modal-footer {
       position: sticky;
       bottom: 0;
       background: white;

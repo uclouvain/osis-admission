@@ -23,45 +23,46 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RefuserPropositionParFaculteCommand,
+    RefuserPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import IPDFGeneration
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def refuser_proposition_par_faculte(
-    cmd: RefuserPropositionParFaculteCommand,
+def refuser_proposition_par_cdd(
+    cmd: RefuserPropositionParCddCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
-    pdf_generation: 'IPDFGeneration',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
+    notification: 'INotification',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.refuser_par_fac(auteur_modification=cmd.gestionnaire)
+    proposition.refuser_par_cdd(auteur_modification=cmd.gestionnaire)
 
     # THEN
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
 
-    pdf_generation.generer_attestation_refus_facultaire(
-        proposition=proposition,
-        gestionnaire=gestionnaire_dto,
-        proposition_repository=proposition_repository,
-        unites_enseignement_translator=unites_enseignement_translator,
-    )
-
     proposition_repository.save(entity=proposition)
 
-    historique.historiser_refus_fac(
+    message = notification.envoyer_message_libre_au_candidat(
+        proposition=proposition,
+        objet_message=cmd.objet_message,
+        corps_message=cmd.corps_message,
+        matricule_emetteur=cmd.gestionnaire,
+        cc_promoteurs=True,
+        cc_membres_ca=True,
+    )
+
+    historique.historiser_refus_cdd(
         proposition=proposition,
         gestionnaire=gestionnaire_dto,
+        message=message,
     )
 
     return proposition.entity_id

@@ -1,0 +1,134 @@
+{% load i18n bootstrap3 admission static %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<form
+  hx-post="{% url view.base_namespace|add:':cdd-decision-approval' uuid=view.kwargs.uuid %}"
+  hx-target="this"
+  hx-swap="outerHTML"
+  id="cdd-decision-approval-form"
+  style="overflow: auto;"
+  class="ckeditor-form"
+>
+  <div class="modal-body">
+
+    {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic_with_decision' as can_transfer_to_sic %}
+    {% has_perm 'admission.checklist_change_faculty_decision' as can_change_cdd_decision %}
+    {% candidate_language admission.langue_contact_candidat as candidate_language_tag %}
+
+    {% bootstrap_form_errors cdd_decision_approval_form %}
+
+    {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to') additional_class='panel-with-default-header-font-size' %}
+      <div id='fac-decision-access-titles' hx-preserve="true">
+        {% if selected_access_titles_names %}
+          <ul>
+            {% for access_title in selected_access_titles_names %}
+              <li>{{ access_title }}</li>
+            {% endfor  %}
+          </ul>
+        {% else %}
+          {% translate 'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving access to the chosen program.' %}
+        {% endif %}
+      </div>
+    {% endpanel %}
+
+    {% bootstrap_field cdd_decision_approval_form.with_prerequisite_courses label=cdd_decision_approval_form.with_prerequisite_courses.label|label_with_user_icon %}
+    <div
+      id="cdd-decision-additional-trainings-container"
+      class="hidden"
+    >
+      {% bootstrap_field cdd_decision_approval_form.prerequisite_courses label=cdd_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
+      {% bootstrap_field cdd_decision_approval_form.prerequisite_courses_fac_comment label=cdd_decision_approval_form.prerequisite_courses_fac_comment.label|add:candidate_language_tag|label_with_user_icon %}
+    </div>
+
+    <div class="required_field">
+      {% bootstrap_field cdd_decision_approval_form.program_planned_years_number label=cdd_decision_approval_form.program_planned_years_number.label|label_with_user_icon %}
+    </div>
+
+    <fieldset class="custom-fieldset" style="margin-bottom: 15px;">
+      <legend>
+        <strong>
+          {% translate 'Contact person for the design of the annual program' %}
+        </strong>
+      </legend>
+      <div class="row">
+        <div class="col-md-6">
+          {% bootstrap_field cdd_decision_approval_form.annual_program_contact_person_name label=cdd_decision_approval_form.annual_program_contact_person_name.label|label_with_user_icon %}
+        </div>
+        <div class="col-md-6">
+          {% bootstrap_field cdd_decision_approval_form.annual_program_contact_person_email label=cdd_decision_approval_form.annual_program_contact_person_email.label|label_with_user_icon %}
+        </div>
+      </div>
+    </fieldset>
+
+    {% bootstrap_field cdd_decision_approval_form.join_program_fac_comment label=cdd_decision_approval_form.join_program_fac_comment.label|add:candidate_language_tag|safe %}
+
+    {% if original_admission.status == 'A_COMPLETER_POUR_FAC' %}
+      <p>
+        {% blocktranslate trimmed %}
+          Documents requested by the CDD are still expected from the candidate. The application will be sent to the SIC
+          once they have been received.
+        {% endblocktranslate %}
+      </p>
+    {% endif %}
+  </div>
+
+  <div class="modal-footer">
+    <button
+      class="btn btn-default"
+      data-dismiss="modal"
+    >
+      {% translate 'Cancel' %}
+    </button>
+    <button
+      class="btn btn-primary"
+      name="save"
+      {% if not can_change_cdd_decision %}disabled{% endif %}
+    >
+      {% translate 'Save' context 'admission' %}
+    </button>
+  </div>
+
+  {% if request.htmx %}
+    {% if cdd_decision_approval_form.is_valid %}
+      {# Update the content of the tab #}
+      {% include 'admission/doctorate/includes/checklist/cdd_decision.html' %}
+    {% endif %}
+    <script src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script>
+        $(document).ready(function(){
+            {# Show / Hide fields depending on other field values #}
+            $('input[name="cdd-decision-approval-with_prerequisite_courses"]:checked').change();
+
+            {# Initialize the custom select2 component #}
+            window.__dal__initialize($('select[data-autocomplete-light-function=select2_tag]'))
+
+            {% if cdd_decision_approval_form.is_valid %}
+                $('#cdd-decision-approval-modal').modal('hide');
+                $('#cdd-decision-approval-final-modal').modal('show');
+            {% endif %}
+        });
+    </script>
+  {% endif %}
+</form>
