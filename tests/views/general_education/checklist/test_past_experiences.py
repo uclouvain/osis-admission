@@ -448,7 +448,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         )
 
         self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
+            recuperer_conditions_acces_par_formation(TrainingType.FORMATION_PHD.name),
             [
                 (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
                 (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
