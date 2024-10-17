@@ -28,13 +28,13 @@ from django.http import HttpResponse
 from rest_framework.parsers import FormParser
 from rest_framework.views import APIView
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 
 from admission.auth.predicates.general import (
     payment_needed_after_submission,
     payment_needed_after_manager_request,
 )
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
     PayerFraisDossierPropositionSuiteSoumissionCommand,

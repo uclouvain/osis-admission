@@ -29,8 +29,8 @@ from osis_signature.enums import SignatureState
 from rules import predicate
 
 from admission.auth.predicates import not_in_doctorate_statuses_predicate_message
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import DoctorateAdmission
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,

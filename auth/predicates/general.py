@@ -29,7 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
 from admission.auth.predicates import not_in_general_statuses_predicate_message
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,

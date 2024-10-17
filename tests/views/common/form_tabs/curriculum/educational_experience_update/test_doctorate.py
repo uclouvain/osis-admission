@@ -34,8 +34,8 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
+from admission.models import DoctorateAdmission
+from admission.models.base import AdmissionEducationalValuatedExperiences
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande

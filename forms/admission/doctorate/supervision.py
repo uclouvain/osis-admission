@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from osis_document.contrib import FileUploadField
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.utils import get_country_initial_choices
 from base.forms.utils import EMPTY_CHOICE
 from osis_profile import BE_ISO_CODE

@@ -30,8 +30,8 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import AdditionalApprovalCondition
+from admission.models import GeneralEducationAdmission
+from admission.models.checklist import AdditionalApprovalCondition
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,

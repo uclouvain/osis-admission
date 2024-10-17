@@ -29,7 +29,7 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererDoctoratQuery(interface.QueryRequest):
+class RecupererAdmissionDoctoratQuery(interface.QueryRequest):
     doctorat_uuid: str
 
 

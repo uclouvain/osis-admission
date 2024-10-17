@@ -32,7 +32,7 @@ from typing import List
 from django.conf import settings
 from django.db import transaction
 
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjection, EPCInjectionStatus
+from admission.models.epc_injection import EPCInjectionType, EPCInjection, EPCInjectionStatus
 from backoffice.celery import app as celery_app
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
@@ -67,7 +67,7 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
                 )
                 InjectionEPCSignaletique().envoyer_signaletique_dans_queue(
                     donnees=epc_injection_signaletique.payload,
-                    admission_reference=str(epc_injection_signaletique.admission)
+                    admission_reference=str(epc_injection_signaletique.admission),
                 )
                 epc_injection_signaletique.status = EPCInjectionStatus.PENDING.name
             except Exception as e:

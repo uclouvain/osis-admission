@@ -41,10 +41,10 @@ from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
 
-from admission.contrib.models import AdmissionTask, SupervisionActor, DoctorateAdmission
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.doctorate import PropositionProxy
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import AdmissionTask, SupervisionActor, DoctorateAdmission
+from admission.models.base import BaseAdmission
+from admission.models.doctorate import PropositionProxy
+from admission.models.enums.actor_type import ActorType
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature

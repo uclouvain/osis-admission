@@ -27,7 +27,7 @@ from django.db import models
 
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models.base import BaseAdmissionQuerySet
+from admission.models.base import BaseAdmissionQuerySet
 
 
 def admission_export_path(task: 'AdmissionTask', filename: str):

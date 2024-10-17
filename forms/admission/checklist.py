@@ -47,9 +47,9 @@ from django.utils.translation import (
 )
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE
-from admission.contrib.models import GeneralEducationAdmission, DoctorateAdmission
-from admission.contrib.models.base import training_campus_subquery
-from admission.contrib.models.checklist import (
+from admission.models import GeneralEducationAdmission, DoctorateAdmission
+from admission.models.base import training_campus_subquery
+from admission.models.checklist import (
     RefusalReason,
     AdditionalApprovalCondition,
 )

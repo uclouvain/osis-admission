@@ -30,7 +30,7 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
-from admission.contrib.models import AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItemInstantiation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,

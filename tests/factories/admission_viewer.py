@@ -26,7 +26,7 @@
 
 import factory
 
-from admission.contrib.models import AdmissionViewer
+from admission.models import AdmissionViewer
 
 
 class AdmissionViewerFactory(factory.django.DjangoModelFactory):
