@@ -25,7 +25,7 @@
 # ##############################################################################
 import factory
 
-from admission.contrib.models import JuryMember
+from admission.models import JuryMember
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury, TitreMembre, GenreMembre
 
 

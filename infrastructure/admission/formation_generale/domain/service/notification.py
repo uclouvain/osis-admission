@@ -42,8 +42,8 @@ from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
-from admission.contrib.models import AdmissionTask, GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission
+from admission.models import AdmissionTask, GeneralEducationAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO

@@ -32,9 +32,9 @@ from osis_document.contrib import FileUploadField
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.doctoral_training import Activity
+from admission.models import DoctorateAdmission
+from admission.models.cdd_config import CddConfiguration
+from admission.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ContexteFormation,

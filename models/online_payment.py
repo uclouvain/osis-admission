@@ -26,7 +26,7 @@
 from django.db import models
 from django.utils.translation import gettext_noop, gettext_lazy, pgettext_lazy
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from base.models.utils.utils import ChoiceEnum
 
 

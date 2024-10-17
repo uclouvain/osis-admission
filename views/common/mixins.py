@@ -37,15 +37,15 @@ from django.views.generic.base import ContextMixin
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
-from admission.contrib.models import (
+from admission.models import (
     DoctorateAdmission,
     GeneralEducationAdmission,
     ContinuingEducationAdmission,
     EPCInjection,
 )
-from admission.contrib.models.base import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.base import AdmissionViewer
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
@@ -73,7 +73,7 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
@@ -180,7 +180,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @cached_property
     def doctorate(self) -> 'DoctoratDTO':
-        return message_bus_instance.invoke(RecupererDoctoratQuery(doctorat_uuid=self.admission_uuid))
+        return message_bus_instance.invoke(RecupererAdmissionDoctoratQuery(doctorat_uuid=self.admission_uuid))
 
     @cached_property
     def last_confirmation_paper(self) -> EpreuveConfirmationDTO:
@@ -264,20 +264,18 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         if contexte == CONTEXT_GENERAL:
             etat_financabilite = {
                 'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
-                'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
+                'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name,
             }.get(self.admission.checklist.get('current', {}).get('financabilite', {}).get('statut'))
             if etat_financabilite is None:
                 return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
-            if (
-                etat_financabilite == EtatFinancabilite.FINANCABLE.name
-                and (
-                    self.admission.financability_rule == ''
-                    or self.admission.financability_computed_rule_on is None
-                    or self.admission.financability_rule_established_by_id is None
-                )
+            if etat_financabilite == EtatFinancabilite.FINANCABLE.name and (
+                self.admission.financability_rule == ''
+                or self.admission.financability_computed_rule_on is None
+                or self.admission.financability_rule_established_by_id is None
             ):
                 return (
-                    False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
+                    False,
+                    "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité",
                 )
         personmergeproposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if not (personmergeproposal and personmergeproposal.registration_id_sent_to_digit):
@@ -294,7 +292,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         ):
             return False, "La demande est en quarantaine"
         return True, ''
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

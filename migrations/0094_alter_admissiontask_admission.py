@@ -3,16 +3,16 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 
 
 def forward(apps, schema_editor):
-    """Remove previous tasks """
+    """Remove previous tasks"""
     AdmissionTask.objects.all().delete()
 
 
 def backward(apps, schema_editor):
-    """Remove previous tasks """
+    """Remove previous tasks"""
     AdmissionTask.objects.all().delete()
 
 

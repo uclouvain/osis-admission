@@ -30,7 +30,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import TypeSituationAssimilation, ChoixAffiliationSport, ChoixTypeCompteBancaire
 from admission.tests.factories import DoctorateAdmissionFactory

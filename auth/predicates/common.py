@@ -28,9 +28,8 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 from waffle import switch_is_active
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionStatus
+from admission.models import DoctorateAdmission
+from admission.models.base import BaseAdmission
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from osis_role.errors import predicate_failed_msg
 
@@ -138,11 +137,14 @@ def is_sent_to_epc(self, user: User, obj: BaseAdmission):
 
 @predicate(bind=True)
 def pending_digit_ticket_response(self, user: User, obj: BaseAdmission):
-    return obj.candidate.global_id[0] in ['8', '9'] and PersonTicketCreation.objects.filter(
-        person_id=obj.candidate_id,
-        status__in=[
-           PersonTicketCreationStatus.CREATED.name,
-           PersonTicketCreationStatus.IN_PROGRESS.name,
-           PersonTicketCreationStatus.ERROR.name,
-        ]
-    ).exists()
+    return (
+        obj.candidate.global_id[0] in ['8', '9']
+        and PersonTicketCreation.objects.filter(
+            person_id=obj.candidate_id,
+            status__in=[
+                PersonTicketCreationStatus.CREATED.name,
+                PersonTicketCreationStatus.IN_PROGRESS.name,
+                PersonTicketCreationStatus.ERROR.name,
+            ],
+        ).exists()
+    )

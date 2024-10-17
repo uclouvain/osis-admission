@@ -3,7 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import osis_mail_template.models
-from admission.contrib.models.cdd_mail_template import ALLOWED_CUSTOM_IDENTIFIERS
+from admission.models.cdd_mail_template import ALLOWED_CUSTOM_IDENTIFIERS
 
 
 class Migration(migrations.Migration):
@@ -18,12 +18,33 @@ class Migration(migrations.Migration):
             name='CddMailTemplate',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('identifier', models.CharField(choices=zip(ALLOWED_CUSTOM_IDENTIFIERS, ALLOWED_CUSTOM_IDENTIFIERS), max_length=255, validators=[osis_mail_template.models.check_mail_template_identifier], verbose_name='Identifier')),
+                (
+                    'identifier',
+                    models.CharField(
+                        choices=zip(ALLOWED_CUSTOM_IDENTIFIERS, ALLOWED_CUSTOM_IDENTIFIERS),
+                        max_length=255,
+                        validators=[osis_mail_template.models.check_mail_template_identifier],
+                        verbose_name='Identifier',
+                    ),
+                ),
                 ('name', models.CharField(max_length=255, verbose_name='Name')),
-                ('language', models.CharField(choices=[('fr-be', 'French'), ('en', 'English')], max_length=25, verbose_name='Language')),
+                (
+                    'language',
+                    models.CharField(
+                        choices=[('fr-be', 'French'), ('en', 'English')], max_length=25, verbose_name='Language'
+                    ),
+                ),
                 ('subject', models.CharField(max_length=255, verbose_name='Subject')),
                 ('body', models.TextField(verbose_name='Body')),
-                ('cdd', models.ForeignKey(limit_choices_to={'entityversion__entity_type': 'DOCTORAL_COMMISSION'}, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Entity')),
+                (
+                    'cdd',
+                    models.ForeignKey(
+                        limit_choices_to={'entityversion__entity_type': 'DOCTORAL_COMMISSION'},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='+',
+                        to='base.Entity',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'CDD Mail template',

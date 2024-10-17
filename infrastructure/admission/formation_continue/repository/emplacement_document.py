@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.infrastructure.admission.repository.emplacement_document import BaseEmplacementDocumentRepository
 
 

@@ -33,7 +33,7 @@ from django.test import TestCase
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,

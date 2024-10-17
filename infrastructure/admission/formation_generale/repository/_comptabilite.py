@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models import GeneralEducationAdmission, Accounting
+from admission.models import GeneralEducationAdmission, Accounting
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
     Comptabilite,
     comptabilite_non_remplie,

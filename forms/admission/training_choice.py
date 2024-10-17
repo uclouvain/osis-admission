@@ -32,7 +32,7 @@ from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     COMMISSIONS_CDE_CLSM,
     COMMISSIONS_CDSS,

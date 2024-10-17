@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.test.factory.paiement import PaiementFactory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepository,

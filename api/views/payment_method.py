@@ -27,22 +27,27 @@ from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from admission.api.serializers.payment_method import PaymentMethodSerializer
-from admission.contrib.models.online_payment import OnlinePayment, PaymentStatus
+from admission.models.online_payment import OnlinePayment, PaymentStatus
 
 
 class PaymentMethodAPIView(generics.RetrieveAPIView):
     """
-       Get the payment method of the application fees
+    Get the payment method of the application fees
     """
+
     name = 'payment-method-application-fees'
     filter_backends = []
     serializer_class = PaymentMethodSerializer
 
     def get_object(self) -> 'OnlinePayment':
         try:
-            return OnlinePayment.objects.filter(
-                admission__candidate__student__registration_id=self.kwargs['noma'],
-                status=PaymentStatus.PAID.name,
-            ).values('method').get()
+            return (
+                OnlinePayment.objects.filter(
+                    admission__candidate__student__registration_id=self.kwargs['noma'],
+                    status=PaymentStatus.PAID.name,
+                )
+                .values('method')
+                .get()
+            )
         except OnlinePayment.DoesNotExist as e:
             raise NotFound(detail=str(e))

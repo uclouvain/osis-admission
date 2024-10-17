@@ -37,7 +37,7 @@ from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetStatutTicketPersonneQuery, RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -92,7 +92,7 @@ from admission.views.doctorate.details.checklist.projet_recherche import ProjetR
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from infrastructure.messages_bus import message_bus_instance
-from admission.contrib.models.epc_injection import EPCInjection
+from admission.models.epc_injection import EPCInjection
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 import datetime
 

@@ -25,7 +25,7 @@
 # ##############################################################################
 from rest_framework import serializers
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,

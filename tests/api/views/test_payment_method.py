@@ -29,7 +29,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.api.serializers.payment_method import PaymentMethodSerializer
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models.online_payment import PaymentStatus
 from admission.tests.factories.payment import OnlinePaymentFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
@@ -85,7 +85,7 @@ class PaymentMethodAPITestCase(APITestCase):
             'admission_api_v1:payment-method-application-fees',
             kwargs={
                 'noma': '0000000000',
-            }
+            },
         )
         response = self.client.get(invalid_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

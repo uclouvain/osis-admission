@@ -40,7 +40,7 @@ from rest_framework.views import APIView
 
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.serializers.fields import RelatedInstituteField, TranslatedField
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.models.enums.entity_type import EntityType

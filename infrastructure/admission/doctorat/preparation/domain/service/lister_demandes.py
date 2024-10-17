@@ -32,7 +32,7 @@ from django.db.models import Q
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixStatutPropositionDoctorale,

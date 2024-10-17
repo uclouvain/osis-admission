@@ -27,8 +27,8 @@ import factory
 from django.conf import settings
 from factory import SubFactory
 
-from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.doctoral_training import Activity
+from admission.models.cdd_config import CddConfiguration
+from admission.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from admission.tests.factories import DoctorateAdmissionFactory
 

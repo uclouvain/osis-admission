@@ -32,8 +32,8 @@ from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.program_manager import ProgramManager
-from admission.contrib.models import ContinuingEducationAdmissionProxy
-from admission.contrib.models.continuing_education import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmissionProxy
+from admission.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.dtos import AdressePersonnelleDTO

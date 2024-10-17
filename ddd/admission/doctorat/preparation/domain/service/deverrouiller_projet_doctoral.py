@@ -30,7 +30,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from osis_common.ddd import interface
 
 
-class DeverrouillerProjetDoctoral(interface.DomainService):
+class DeverrouillerPropositionProjetDoctoral(interface.DomainService):
     @classmethod
     def deverrouiller_apres_refus(cls, proposition: Proposition, signataire: 'SignataireIdentity') -> None:
         if isinstance(signataire, PromoteurIdentity):

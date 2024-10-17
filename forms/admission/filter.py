@@ -29,8 +29,8 @@ from django import forms
 from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy, get_language
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.contrib.models import Scholarship
-from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList
+from admission.models import Scholarship
+from admission.models.working_list import WorkingList, ContinuingWorkingList
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION

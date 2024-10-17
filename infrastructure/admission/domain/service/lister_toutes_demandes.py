@@ -44,9 +44,9 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
+from admission.models import AdmissionViewer
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -173,10 +173,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if noma:
             candidate_from_noma = (
                 Person.objects.filter(
-                    Q(student__registration_id=noma)
-                    | Q(personmergeproposal__registration_id_sent_to_digit=noma)
-                )
-                .only('id')
+                    Q(student__registration_id=noma) | Q(personmergeproposal__registration_id_sent_to_digit=noma)
+                ).only('id')
             ).first()
             qs = qs.filter(candidate_id=candidate_from_noma.id) if candidate_from_noma else qs.none()
         if matricule_candidat:
@@ -228,7 +226,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if injection_en_erreur is not None:
             injection_condition = Q(
                 epc_injection__type=EPCInjectionType.DEMANDE.name,
-                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name]
+                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name],
             )
 
             if injection_en_erreur:

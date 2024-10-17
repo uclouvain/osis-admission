@@ -37,9 +37,9 @@ from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
-from admission.contrib.models.checklist import RefusalReason, FreeAdditionalApprovalCondition
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
+from admission.models.checklist import RefusalReason, FreeAdditionalApprovalCondition
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -69,15 +69,18 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
     BesoinDeDerogation,
-    DerogationFinancement, STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    DerogationFinancement,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException, \
-    PremierePropositionSoumisesNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+    PremierePropositionSoumisesNonTrouveeException,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
@@ -141,7 +144,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             .filter(
                 candidate__global_id=matricule_candidat,
                 status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE,
-            ).order_by('created_at')
+            )
+            .order_by('created_at')
             .first()
         )
 
