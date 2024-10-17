@@ -28,6 +28,13 @@ from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
+    demander_candidat_modifier_ca,
+)
+from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
+    redonner_la_main_au_candidat,
+)
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
@@ -149,6 +156,7 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=_groupe_supervision_repository,
         promoteur_translator=_promoteur_translator,
         membre_ca_translator=_membre_ca_translator,
+        historique=_historique,
     ),
     DemanderSignaturesCommand: lambda msg_bus, cmd: demander_signatures(
         cmd,
@@ -194,6 +202,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
+        historique=_historique,
     ),
     SupprimerMembreCACommand: lambda msg_bus, cmd: supprimer_membre_CA(
         cmd,
@@ -713,5 +722,22 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_doctorat_translator,
+    ),
+    RedonnerLaMainAuCandidatCommand: lambda msg_bus, cmd: redonner_la_main_au_candidat(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+    ),
+    DemanderCandidatModificationCACommand: lambda msg_bus, cmd: demander_candidat_modifier_ca(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+        notification=_notification,
+    ),
+    SoumettreCACommand: lambda msg_bus, cmd: soumettre_ca(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+        groupe_supervision_repository=_groupe_supervision_repository,
     ),
 }

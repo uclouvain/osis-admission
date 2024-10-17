@@ -170,7 +170,12 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
                 .order_by('-start_date')
                 .values("acronym")[:1]
-            )
+            ),
+            title_entite_gestion=models.Subquery(
+                EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
+                .order_by('-start_date')
+                .values("title")[:1]
+            ),
         )
 
     def annotate_last_status_update(self):

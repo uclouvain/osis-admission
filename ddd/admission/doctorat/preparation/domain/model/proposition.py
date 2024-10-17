@@ -94,6 +94,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    RedonnerLaMainAuCandidatValidatorList,
+    DemanderCandidatModificationCaValidatorList,
+    SoumettreCAValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
@@ -582,7 +585,10 @@ class Proposition(interface.RootEntity):
         self.fiche_archive_signatures_envoyees = []
 
     def verrouiller_proposition_pour_signature(self):
-        self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
+        if self.statut == ChoixStatutPropositionDoctorale.CA_A_COMPLETER:
+            self.statut = ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE
+        else:
+            self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
 
     def deverrouiller_projet_doctoral(self):
         self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
@@ -617,6 +623,12 @@ class Proposition(interface.RootEntity):
 
     def valider_inscription(self):
         self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE
+
+    def redonner_la_main_au_candidat(self):
+        RedonnerLaMainAuCandidatValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
 
     def definir_institut_these(self, institut_these: Optional[str]):
         if institut_these:
@@ -1267,3 +1279,15 @@ class Proposition(interface.RootEntity):
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
+
+    def demander_candidat_modification_ca(self):
+        DemanderCandidatModificationCaValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.CA_A_COMPLETER
+
+    def soumettre_ca(self):
+        SoumettreCAValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC

@@ -34,3 +34,8 @@ __all__ = ['DoctorateAdmissionCotutelleDetailView']
 class DoctorateAdmissionCotutelleDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/cotutelle.html'
     permission_required = 'admission.view_admission_cotutelle'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cotutelle'] = self.cotutelle
+        return context

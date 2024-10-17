@@ -53,6 +53,6 @@ def approuver_proposition_par_pdf(
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
-    historique.historiser_avis(proposition, signataire, avis, statut_original_proposition)
+    historique.historiser_avis(proposition, signataire, avis, statut_original_proposition, cmd.matricule_auteur)
 
     return proposition.entity_id

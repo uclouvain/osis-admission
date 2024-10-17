@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@ from admission.ddd.admission.doctorat.preparation.commands import SupprimerPromo
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
+    SupprimerPromoteurValidatorList,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -47,9 +50,18 @@ def supprimer_promoteur(
     groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
     promoteur_id = groupe_supervision.get_promoteur(cmd.uuid_promoteur)
 
+    # WHEN
+    SupprimerPromoteurValidatorList(
+        proposition=proposition_candidat,
+        groupe_de_supervision=groupe_supervision,
+        promoteur_id=promoteur_id,
+    ).validate()
+
     # THEN
-    notification.notifier_suppression_membre(proposition_candidat, promoteur_id)
-    historique.historiser_suppression_membre(proposition_candidat, groupe_supervision, promoteur_id)
     groupe_supervision_repository.remove_member(groupe_supervision.entity_id, promoteur_id)
+    notification.notifier_suppression_membre(proposition_candidat, promoteur_id)
+    historique.historiser_suppression_membre(
+        proposition_candidat, groupe_supervision, promoteur_id, cmd.matricule_auteur
+    )
 
     return proposition_id

@@ -23,16 +23,66 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import attr
+from django.shortcuts import resolve_url
+from django.views.generic import FormView
 
-from django.views.generic import TemplateView
-
+from admission.ddd.admission.doctorat.preparation.commands import DefinirCotutelleCommand
+from admission.forms.admission.doctorate.cotutelle import DoctorateAdmissionCotutelleForm
+from admission.infrastructure.admission.doctorat.preparation.repository.groupe_de_supervision import (
+    GroupeDeSupervisionRepository,
+)
 from admission.views.common.mixins import LoadDossierViewMixin
 
 __all__ = [
     "DoctorateAdmissionCotutelleFormView",
 ]
 
+from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
+from infrastructure.messages_bus import message_bus_instance
 
-class DoctorateAdmissionCotutelleFormView(LoadDossierViewMixin, TemplateView):
+
+class DoctorateAdmissionCotutelleFormView(
+    LoadDossierViewMixin,
+    BusinessExceptionFormViewMixin,
+    FormView,
+):
     template_name = 'admission/doctorate/forms/cotutelle.html'
     permission_required = 'admission.change_admission_cotutelle'
+    form_class = DoctorateAdmissionCotutelleForm
+
+    def get_success_url(self):
+        return resolve_url('admission:doctorate:cotutelle', uuid=self.admission_uuid)
+
+    def get_initial(self):
+        cotutelle = GroupeDeSupervisionRepository.get_cotutelle_dto(self.admission_uuid)
+        initial = attr.asdict(cotutelle)
+        if initial['cotutelle'] is not None:
+            initial['cotutelle'] = 'YES' if initial['cotutelle'] else 'NO'
+            if initial['institution_fwb'] is not None:
+                initial['institution_fwb'] = 'true' if initial['institution_fwb'] else 'false'
+        return initial
+
+    def prepare_data(self, data: dict):
+        if data['cotutelle'] == 'NO':
+            data.update(
+                motivation="",
+                institution_fwb=None,
+                institution="",
+                demande_ouverture=[],
+                convention=[],
+                autres_documents=[],
+            )
+        del data['cotutelle']
+        del data['autre_institution']
+        return data
+
+    def call_command(self, form):
+        # Save the confirmation paper
+        message_bus_instance.invoke(
+            DefinirCotutelleCommand(
+                uuid_proposition=self.admission_uuid,
+                matricule_auteur=self.request.user.person.global_id,
+                **self.prepare_data(form.cleaned_data),
+            )
+        )
