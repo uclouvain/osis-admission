@@ -261,14 +261,23 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
 
 class ProfilCandidatTestCase(TestCase):
     def test_get_training_start_date(self):
+        academic_years = {
+            year: AcademicYearFactory(year=year)
+            for year in range(2019, 2021)
+        }
+
         admission = GeneralEducationAdmissionFactory(
+            training__academic_year=academic_years[2020],
             determined_academic_year=None,
         )
-        self.assertIsNone(ProfilCandidatTranslator.get_date_debut_formation(uuid_proposition=admission.uuid))
 
-        admission.determined_academic_year = AcademicYearFactory(
-            year=2020,
+        self.assertEqual(
+            ProfilCandidatTranslator.get_date_debut_formation(uuid_proposition=admission.uuid),
+            admission.training.academic_year.start_date,
         )
+
+        admission.determined_academic_year = academic_years[2019]
+
         admission.save(update_fields=['determined_academic_year'])
 
         self.assertEqual(

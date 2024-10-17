@@ -45,7 +45,7 @@ from django.db.models import (
     BooleanField,
     QuerySet,
 )
-from django.db.models.functions import ExtractYear, ExtractMonth, Concat
+from django.db.models.functions import ExtractYear, ExtractMonth, Concat, Coalesce
 from django.utils.translation import get_language
 
 from admission.contrib.models import EPCInjection as AdmissionEPCInjection
@@ -1021,7 +1021,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_date_debut_formation(cls, uuid_proposition: str) -> Optional[datetime.date]:
-        dates = BaseAdmission.objects.filter(uuid=uuid_proposition).values('determined_academic_year__start_date')[:1]
+        dates = (
+            BaseAdmission.objects.filter(uuid=uuid_proposition)
+            .annotate(
+                training_start_date=Coalesce(
+                    F('determined_academic_year__start_date'),
+                    F('training__academic_year__start_date'),
+                ),
+            )
+            .values('training_start_date')[:1]
+        )
 
         if dates:
-            return dates[0].get('determined_academic_year__start_date')
+            return dates[0].get('training_start_date')

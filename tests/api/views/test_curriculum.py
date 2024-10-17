@@ -700,13 +700,10 @@ class GeneralEducationCurriculumTestCase(
         # Check response data
         response = response.json()
         self.assertEqual(response.get('minimal_date'), '2016-09-01')
-        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        self.assertEqual(response.get('maximal_date'), '2018-08-01')
         self.assertEqual(
             response.get('incomplete_periods'),
             [
-                'De Septembre 2020 à Octobre 2020',
-                'De Septembre 2019 à Février 2020',
-                'De Septembre 2018 à Février 2019',
                 'De Septembre 2017 à Février 2018',
                 'De Septembre 2016 à Février 2017',
             ],
