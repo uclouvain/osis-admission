@@ -48,7 +48,8 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
     experiences_parcours_interne: Optional[List[ExperienceParcoursInterneDTO]] = None
-    date_reference: Optional[datetime.date] = None
+    date_soumission: Optional[datetime.date] = None
+    date_debut_formation: Optional[datetime.date] = None
 
     def validate(self, *args, **kwargs):
         annee_minimale = IProfilCandidatTranslator.get_annee_minimale_a_completer_cv(
@@ -74,7 +75,10 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
                     if not annee_experience_interne.etat_inscription_en_erreur:
                         annees_valorisees.add(annee_experience_interne.annee)
 
-        dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum(self.date_reference)
+        dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum(
+            date_soumission=self.date_soumission,
+            date_debut_formation=self.date_debut_formation,
+        )
 
         mois_a_valoriser = self._recuperer_tous_les_mois_restant_a_valoriser(
             annee_minimale=annee_minimale,

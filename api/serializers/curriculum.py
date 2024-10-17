@@ -318,6 +318,7 @@ class CurriculumDetailsSerializer(serializers.Serializer):
             current_year=current_year.year,
         ).get('minimal_date')
 
-    @staticmethod
-    def get_maximal_date(_):
-        return ProfilCandidatTranslator.get_date_maximale_curriculum()
+    def get_maximal_date(self, _):
+        return ProfilCandidatTranslator.get_date_maximale_curriculum(
+            date_debut_formation=self.context.get('training_start_date'),
+        )
