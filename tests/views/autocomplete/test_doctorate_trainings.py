@@ -48,21 +48,21 @@ class DoctorateTrainingsAutocompleteTestCase(TestCase):
             acronym='FOOBAR',
             title='wegweij wegioj egewgeg',
             academic_year__year=2023,
-            education_group_type__name=TrainingType.PHD.name,
+            education_group_type__name=TrainingType.FORMATION_PHD.name,
         )
 
         EducationGroupYearFactory(
             acronym='FOOBAR',
             title='wegweij wegioj egewgeg',
             academic_year__year=2024,
-            education_group_type__name=TrainingType.PHD.name,
+            education_group_type__name=TrainingType.FORMATION_PHD.name,
         )
 
         EducationGroupYearFactory(
             acronym='ABCD',
             title='Test title search',
             academic_year__year=2023,
-            education_group_type__name=TrainingType.PHD.name,
+            education_group_type__name=TrainingType.FORMATION_PHD.name,
         )
 
         cls.user = User.objects.create_user(
@@ -84,8 +84,12 @@ class DoctorateTrainingsAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'ABCD', 'text': 'ABCD - Test title search', 'type': TrainingType.PHD.name},
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.PHD.name},
+                    {'id': 'ABCD', 'text': 'ABCD - Test title search', 'type': TrainingType.FORMATION_PHD.name},
+                    {
+                        'id': 'FOOBAR',
+                        'text': 'FOOBAR - wegweij wegioj egewgeg',
+                        'type': TrainingType.FORMATION_PHD.name,
+                    },
                 ],
             },
         )
@@ -107,7 +111,11 @@ class DoctorateTrainingsAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.PHD.name},
+                    {
+                        'id': 'FOOBAR',
+                        'text': 'FOOBAR - wegweij wegioj egewgeg',
+                        'type': TrainingType.FORMATION_PHD.name,
+                    },
                 ],
             },
         )
@@ -129,7 +137,7 @@ class DoctorateTrainingsAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'ABCD', 'text': 'ABCD - Test title search', 'type': TrainingType.PHD.name},
+                    {'id': 'ABCD', 'text': 'ABCD - Test title search', 'type': TrainingType.FORMATION_PHD.name},
                 ],
             },
         )
@@ -151,7 +159,11 @@ class DoctorateTrainingsAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.PHD.name},
+                    {
+                        'id': 'FOOBAR',
+                        'text': 'FOOBAR - wegweij wegioj egewgeg',
+                        'type': TrainingType.FORMATION_PHD.name,
+                    },
                 ],
             },
         )
@@ -162,7 +174,7 @@ class DoctorateTrainingsAutocompleteTestCase(TestCase):
         response = self.client.get(
             self.url,
             {
-                'forward': json.dumps({'annee_academique': '2024', 'type': TrainingType.PHD.name}),
+                'forward': json.dumps({'annee_academique': '2024', 'type': TrainingType.FORMATION_PHD.name}),
                 'q': 'bar',
             },
         )
@@ -174,7 +186,11 @@ class DoctorateTrainingsAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.PHD.name},
+                    {
+                        'id': 'FOOBAR',
+                        'text': 'FOOBAR - wegweij wegioj egewgeg',
+                        'type': TrainingType.FORMATION_PHD.name,
+                    },
                 ],
             },
         )
