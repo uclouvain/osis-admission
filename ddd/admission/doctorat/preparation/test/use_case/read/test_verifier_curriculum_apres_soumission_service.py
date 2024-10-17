@@ -275,7 +275,7 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
         )
 
     def test_should_retourner_erreur_en_fonction_date_soumission_demande(self):
-        # Date de soumission peu avant le début de la période à vérifier
+        # Date de soumission après la fin de la période à vérifier
         self.proposition_doctorale.soumise_le = datetime.datetime(2015, 8, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -292,8 +292,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-        # Date de soumission peu après la fin de la période à vérifier
-        self.proposition_doctorale.soumise_le = datetime.datetime(2015, 5, 15)
+        # Date de soumission avant la fin de la période à vérifier
+        self.proposition_doctorale.soumise_le = datetime.datetime(2015, 2, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -305,7 +305,7 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
-                'De Septembre 2014 à Février 2015',
+                'De Septembre 2014 à Janvier 2015',
             ],
         )
 

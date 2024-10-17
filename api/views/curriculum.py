@@ -60,6 +60,7 @@ from admission.ddd.admission.formation_continue import commands as continuing_co
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
@@ -107,6 +108,9 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
     filter_backends = []
     queryset = []
     check_command_class = None
+
+    def get_additional_serializer_context(self):
+        return {}
 
     def get(self, request, *args, **kwargs):
         """Return the curriculum experiences of a person with the mandatory years to complete."""
@@ -165,6 +169,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
             },
             context={
                 'related_person': current_person,
+                **self.get_additional_serializer_context(),
             },
         )
 
@@ -218,6 +223,11 @@ class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, CurriculumView):
         'PUT': serializers.GeneralEducationCompleterCurriculumCommandSerializer,
         'GET': serializers.CurriculumDetailsSerializer,
     }
+
+    def get_additional_serializer_context(self):
+        context = super().get_additional_serializer_context()
+        context['training_start_date'] = ProfilCandidatTranslator.get_date_debut_formation(self.kwargs.get('uuid'))
+        return context
 
 
 class ContinuingCurriculumView(ContinuingEducationPersonRelatedMixin, CurriculumView):
