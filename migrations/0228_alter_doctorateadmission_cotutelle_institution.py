@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0224_add_doctorate_checklist_emails'),
+        ('admission', '0227_doctorate_supervision_mail_template'),
     ]
 
     operations = [

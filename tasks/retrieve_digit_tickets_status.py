@@ -36,8 +36,8 @@ from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission, AdmissionEducationalValuatedExperiences, \
+from admission.models import GeneralEducationAdmission
+from admission.models.base import BaseAdmission, AdmissionEducationalValuatedExperiences, \
     AdmissionProfessionalValuatedExperiences
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,

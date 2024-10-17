@@ -35,11 +35,11 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, DoctorateAdmission
-from admission.contrib.models.checklist import (
+from admission.models import Accounting, DoctorateAdmission
+from admission.models.checklist import (
     DoctorateFreeAdditionalApprovalCondition,
 )
-from admission.contrib.models.doctorate import PropositionProxy
+from admission.models.doctorate import PropositionProxy
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,

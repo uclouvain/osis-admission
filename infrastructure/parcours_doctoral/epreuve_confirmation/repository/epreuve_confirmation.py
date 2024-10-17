@@ -25,8 +25,8 @@
 # ##############################################################################
 from typing import List
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import ConfirmationPaper
+from admission.models import DoctorateAdmission
+from admission.models.doctorate import ConfirmationPaper
 from admission.ddd.parcours_doctoral.builder.doctorat_identity import DoctoratIdentityBuilder
 from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.parcours_doctoral.epreuve_confirmation.builder.epreuve_confirmation_identity import (

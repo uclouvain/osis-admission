@@ -36,7 +36,7 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import EnvoyerEmailApprobationInscriptionAuCandidatCommand

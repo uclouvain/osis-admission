@@ -28,7 +28,7 @@ from typing import List, Optional
 from django.conf import settings
 from django.utils.translation import get_language
 
-from admission.contrib.models.doctorate import DoctorateAdmission, DoctorateProxy
+from admission.models.doctorate import DoctorateAdmission, DoctorateProxy
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.parcours_doctoral.domain.model._formation import FormationIdentity
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat, DoctoratIdentity

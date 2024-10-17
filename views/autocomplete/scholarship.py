@@ -32,7 +32,7 @@ __all__ = [
     'ScholarshipAutocomplete',
 ]
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 
 
 class ScholarshipAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):

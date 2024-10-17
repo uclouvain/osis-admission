@@ -33,7 +33,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 
-from admission.contrib.models import (
+from admission.models import (
     GeneralEducationAdmission,
     AdmissionFormItem,
     ContinuingEducationAdmission,

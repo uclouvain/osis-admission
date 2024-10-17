@@ -25,7 +25,7 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     ConfirmerEchecCommand,
@@ -64,7 +64,7 @@ class TestConfirmerEchec(TestCase):
         doctorat_id = self.message_bus.invoke(ConfirmerEchecCommand(uuid='c2', **self.parametres_commande_defaut))
 
         doctorat = self.message_bus.invoke(
-            RecupererDoctoratQuery(doctorat_uuid=doctorat_id.uuid),
+            RecupererAdmissionDoctoratQuery(doctorat_uuid=doctorat_id.uuid),
         )
 
         self.assertEqual(doctorat.statut, ChoixStatutDoctorat.NOT_ALLOWED_TO_CONTINUE.name)

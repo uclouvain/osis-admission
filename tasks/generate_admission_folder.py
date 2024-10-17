@@ -25,7 +25,7 @@
 # ##############################################################################
 from django.utils.translation import gettext as _
 
-from admission.contrib.models import (
+from admission.models import (
     AdmissionTask,
     GeneralEducationAdmission,
     ContinuingEducationAdmission,

@@ -32,7 +32,7 @@ from django.test import TestCase, override_settings
 from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO

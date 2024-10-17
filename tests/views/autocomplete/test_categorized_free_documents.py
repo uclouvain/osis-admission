@@ -32,7 +32,7 @@ from django.urls import reverse
 from django.utils.translation import override
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
 )

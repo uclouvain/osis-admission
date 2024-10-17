@@ -31,7 +31,7 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 from rest_framework import status
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import (

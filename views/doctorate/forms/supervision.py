@@ -32,7 +32,7 @@ from django.views.generic.edit import FormView
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.commands import (
     RenvoyerInvitationSignatureExterneCommand,
     DemanderSignaturesCommand,

@@ -26,7 +26,7 @@
 
 import factory
 
-from admission.contrib.models import Accounting
+from admission.models import Accounting
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixTypeCompteBancaire,

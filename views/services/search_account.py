@@ -36,7 +36,7 @@ __all__ = [
     "SearchAccountView",
 ]
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
 from admission.templatetags.admission import format_matricule

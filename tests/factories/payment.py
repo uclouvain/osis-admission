@@ -25,7 +25,7 @@
 # ##############################################################################
 import factory
 
-from admission.contrib.models.online_payment import OnlinePayment, PaymentMethod, PaymentStatus
+from admission.models.online_payment import OnlinePayment, PaymentMethod, PaymentStatus
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 

@@ -29,8 +29,8 @@ from django.conf import settings
 from django.db.models import Q
 
 from admission.auth.predicates.general import payment_needed_after_submission, payment_needed_after_manager_request
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models.base import BaseAdmission
+from admission.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
     PayerFraisDossierPropositionSuiteSoumissionCommand,

@@ -3,7 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import osis_mail_template.models
-from admission.contrib.models.cdd_mail_template import ALLOWED_CUSTOM_IDENTIFIERS
+from admission.models.cdd_mail_template import ALLOWED_CUSTOM_IDENTIFIERS
 
 
 class Migration(migrations.Migration):

@@ -30,7 +30,7 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     CompleterEpreuveConfirmationParPromoteurCommand,
     RecupererDerniereEpreuveConfirmationQuery,
@@ -193,7 +193,7 @@ class LastConfirmationCanvasAPIView(APIPermissionRequiredMixin, mixins.RetrieveM
         """Get the last confirmation paper canvas related to the doctorate"""
         doctorate, confirmation_paper, supervision_group = message_bus_instance.invoke_multiple(
             [
-                RecupererDoctoratQuery(self.kwargs.get('uuid')),
+                RecupererAdmissionDoctoratQuery(self.kwargs.get('uuid')),
                 RecupererDerniereEpreuveConfirmationQuery(doctorat_uuid=kwargs.get('uuid')),
                 GetGroupeDeSupervisionCommand(uuid_proposition=self.kwargs.get('uuid')),
             ]

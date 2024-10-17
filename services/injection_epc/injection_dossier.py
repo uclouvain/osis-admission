@@ -37,16 +37,16 @@ from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
 from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.contrib.models import Accounting, EPCInjection, AdmissionFormItem
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import (
+from admission.models import Accounting, EPCInjection, AdmissionFormItem
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
     BaseAdmission,
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
-from admission.contrib.models.enums.actor_type import ActorType
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.enums.actor_type import ActorType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as
     RecalculerEmplacementsDocumentsNonLibresDoctoratCommand

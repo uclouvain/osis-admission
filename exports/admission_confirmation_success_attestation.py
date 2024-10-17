@@ -28,7 +28,7 @@ from django.db.models import Prefetch
 from django.utils import translation
 
 from admission.exports.utils import admission_generate_pdf
-from admission.contrib.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
+from admission.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException

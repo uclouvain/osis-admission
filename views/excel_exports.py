@@ -41,7 +41,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy, pgettext, get_language
 from django.views import View
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (

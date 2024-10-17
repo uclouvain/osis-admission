@@ -27,8 +27,8 @@ from typing import List
 
 from django.conf import settings
 
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.online_payment import PaymentStatus, OnlinePayment
+from admission.models.base import BaseAdmission
+from admission.models.online_payment import PaymentStatus, OnlinePayment
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException

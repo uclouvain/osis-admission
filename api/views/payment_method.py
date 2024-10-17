@@ -27,7 +27,7 @@ from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from admission.api.serializers.payment_method import PaymentMethodSerializer
-from admission.contrib.models.online_payment import OnlinePayment, PaymentStatus
+from admission.models.online_payment import OnlinePayment, PaymentStatus
 
 
 class PaymentMethodAPIView(generics.RetrieveAPIView):

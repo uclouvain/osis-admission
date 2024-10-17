@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.contrib.models import Accounting
+from admission.models import Accounting
 from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import IComptabiliteTranslator
 from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO
 

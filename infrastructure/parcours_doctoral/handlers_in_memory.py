@@ -37,7 +37,7 @@ _historique = HistoriqueInMemory()
 
 
 COMMAND_HANDLERS = {
-    RecupererDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
+    RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
         cmd,
         doctorat_repository=_doctorat_repository,
     ),

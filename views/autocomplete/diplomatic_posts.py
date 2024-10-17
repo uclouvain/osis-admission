@@ -29,7 +29,7 @@ from django.db.models import ExpressionWrapper, Q, BooleanField
 from django.utils.translation import get_language
 from rules.contrib.views import LoginRequiredMixin
 
-from admission.contrib.models import DiplomaticPost
+from admission.models import DiplomaticPost
 
 
 __all__ = [

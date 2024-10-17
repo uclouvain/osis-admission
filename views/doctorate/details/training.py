@@ -34,7 +34,7 @@ from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin
 
-from admission.contrib.models.doctoral_training import Activity
+from admission.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.commands import (
     RefuserActiviteCommand,
     RevenirSurStatutActiviteCommand,

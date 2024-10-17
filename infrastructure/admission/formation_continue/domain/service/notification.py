@@ -50,8 +50,8 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
 from admission.auth.roles.program_manager import ProgramManager
-from admission.contrib.models import AdmissionTask, ContinuingEducationAdmission
-from admission.contrib.models.base import BaseAdmission
+from admission.models import AdmissionTask, ContinuingEducationAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING

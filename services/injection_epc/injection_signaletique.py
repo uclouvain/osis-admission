@@ -31,11 +31,11 @@ import pika
 from django.conf import settings
 from django.db import transaction
 
-from admission.contrib.models import Accounting, EPCInjection
-from admission.contrib.models.base import (
+from admission.models import Accounting, EPCInjection
+from admission.models.base import (
     BaseAdmission,
 )
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.tasks import injecter_signaletique_a_epc_task
 from base.models.enums.person_address_type import PersonAddressType

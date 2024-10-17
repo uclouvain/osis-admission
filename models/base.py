@@ -50,9 +50,9 @@ from admission.constants import (
     CONTEXT_GENERAL,
     CONTEXT_CONTINUING,
 )
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.form_item import ConfigurableModelFormItemField
-from admission.contrib.models.functions import ToChar
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.form_item import ConfigurableModelFormItemField
+from admission.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
 )

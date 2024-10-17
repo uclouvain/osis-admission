@@ -33,7 +33,7 @@ from django.test import TestCase, override_settings
 from osis_history.models import HistoryEntry
 from django.utils.translation import override
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO

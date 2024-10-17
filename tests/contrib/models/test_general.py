@@ -29,7 +29,7 @@ from unittest.mock import patch
 import freezegun
 from django.test import override_settings
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
