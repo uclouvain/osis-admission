@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -206,7 +206,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             TrainingType.MASTER_MS_120.name,
             TrainingType.MASTER_MS_180_240.name,
             TrainingType.MASTER_M1.name,
-            TrainingType.PHD.name,
+            TrainingType.FORMATION_PHD.name,
             TrainingType.CAPAES.name,
             TrainingType.CERTIFICATE.name,
         ]

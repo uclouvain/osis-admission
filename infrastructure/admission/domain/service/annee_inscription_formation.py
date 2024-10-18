@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,15 +24,15 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional
+from typing import Optional, Dict
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.ddd.admission.domain.enums import TypeFormation
 
 from admission.ddd.admission.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.education_group_types import TrainingType
-
+from base.models.enums.education_group_types import TrainingType, ALL_TYPES, AllTypes
 
 ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT = {
     'general-education': {
@@ -74,7 +74,7 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
             TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.name,
         ],
         TypeFormation.DOCTORAT.name: [
-            TrainingType.PHD.name,
+            TrainingType.FORMATION_PHD.name,
         ],
     }
 
@@ -144,4 +144,17 @@ ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE = {
     for context, admission_types in ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT.items()
     for admission_type in admission_types
     for osis_type in AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[admission_type]
+}
+
+
+doctorate_types_as_set = set(TrainingType.doctorate_types())
+continuing_education_types_as_set = set(TrainingType.continuing_education_types())
+
+ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE: Dict[str, str] = {
+    osis_type: CONTEXT_DOCTORATE
+    if osis_type in doctorate_types_as_set
+    else CONTEXT_CONTINUING
+    if osis_type in continuing_education_types_as_set
+    else CONTEXT_GENERAL
+    for osis_type in AllTypes.get_names()
 }

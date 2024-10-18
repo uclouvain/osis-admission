@@ -29,6 +29,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils.translation import gettext_lazy as _
 
+from admission.auth.scope import Scope
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
@@ -138,6 +139,38 @@ class PersonDetailViewTestCase(TestCase):
         self.assertEqual(response.context['admission'].uuid, self.continuing_admission.uuid)
         self.assertEqual(response.context['person'], self.continuing_admission.candidate)
         self.assertEqual(response.context['contact_language'], _('French'))
+
+    def test_person_detail_depending_on_the_sic_manager_scope(self):
+        entity_manager = CentralManagerRoleFactory(
+            entity=self.continuing_admission.training.management_entity,
+            scopes=[],
+        )
+
+        self.client.force_login(user=entity_manager.person.user)
+
+        for invalid_scope in [
+            [],
+            [Scope.GENERAL.name],
+            [Scope.DOCTORAT.name],
+            [Scope.GENERAL.name, Scope.DOCTORAT.name],
+        ]:
+            entity_manager.scopes = invalid_scope
+            entity_manager.save(update_fields=['scopes'])
+
+            response = self.client.get(self.continuing_url)
+            self.assertEqual(response.status_code, 403)
+
+        for valid_scope in [
+            [Scope.IUFC.name],
+            [Scope.IUFC.name, Scope.GENERAL.name],
+            [Scope.IUFC.name, Scope.DOCTORAT.name],
+            [Scope.IUFC.name, Scope.GENERAL.name, Scope.DOCTORAT.name],
+        ]:
+            entity_manager.scopes = valid_scope
+            entity_manager.save(update_fields=['scopes'])
+
+            response = self.client.get(self.continuing_url)
+            self.assertEqual(response.status_code, 200)
 
     def test_general_person_detail_program_manager(self):
         self.client.force_login(user=self.general_program_manager_user)

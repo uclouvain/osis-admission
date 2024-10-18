@@ -53,7 +53,11 @@ from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    SicManagementRoleFactory,
+    ProgramManagerRoleFactory,
+    CentralManagerRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
@@ -125,7 +129,6 @@ class PersonFormTestCase(TestCase):
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
-            candidate=cls.general_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
 
@@ -141,7 +144,6 @@ class PersonFormTestCase(TestCase):
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
-            candidate=cls.general_admission.candidate,
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
@@ -838,6 +840,35 @@ class PersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.continuing_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.continuing_url)
+
+        self.assertEqual(response.status_code, 403)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.continuing_url)
+
+        self.assertEqual(response.status_code, 403)
+
     def test_continuing_person_form_on_get_program_manager(self):
         self.client.force_login(user=self.continuing_program_manager_user)
 
@@ -845,12 +876,34 @@ class PersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    def test_continuing_person_form_on_post_program_manager_is_allowed(self):
-        self.client.force_login(user=self.continuing_program_manager_user)
+        continuing_admission = ContinuingEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
 
-        response = self.client.post(self.continuing_url, self.form_data)
+        response = self.client.get(self.continuing_url)
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.continuing_url)
+
+        self.assertEqual(response.status_code, 403)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.continuing_url)
+
+        self.assertEqual(response.status_code, 403)
 
     def test_continuing_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -901,13 +954,46 @@ class PersonFormTestCase(TestCase):
         response = self.client.post(self.continuing_url, {})
         self.assertEqual(response.status_code, 200)
 
+    def test_doctorate_person_form_on_get_program_manager(self):
+        self.client.force_login(user=self.doctorate_program_manager_user)
+
+        response = self.client.get(self.doctorate_url)
+
+        self.assertEqual(response.status_code, 403)
+
     def test_doctorate_person_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        # No residential address
         response = self.client.get(self.doctorate_url)
 
         self.assertEqual(response.status_code, 200)
+
+        ContinuingEducationAdmissionFactory(
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.doctorate_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        DoctorateAdmissionFactory(
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.doctorate_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        GeneralEducationAdmissionFactory(
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.doctorate_url)
+
+        self.assertEqual(response.status_code, 403)
 
     def test_doctorate_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)

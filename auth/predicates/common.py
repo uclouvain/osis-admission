@@ -31,9 +31,10 @@ from rules import predicate
 from waffle import switch_is_active
 
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionStatus
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
+from admission.auth.scope import Scope
 from osis_role.errors import predicate_failed_msg
 
 
@@ -41,6 +42,28 @@ from osis_role.errors import predicate_failed_msg
 @predicate_failed_msg(message=_("You must be the request author to access this admission"))
 def is_admission_request_author(self, user: User, obj: BaseAdmission):
     return obj.candidate == user.person
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_(
+        "This action cannot be performed as an admission or an internal experience is related to a general education."
+    ),
+)
+def candidate_has_other_general_admissions(self, user: User, obj: BaseAdmission):
+    return bool(obj.other_candidate_trainings[CONTEXT_GENERAL])
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_(
+        "This action cannot be performed as an admission or an internal experience is related to a general "
+        "or a doctorate education."
+    ),
+)
+def candidate_has_other_doctorate_or_general_admissions(self, user: User, obj: BaseAdmission):
+    other_admissions = obj.other_candidate_trainings
+    return bool(other_admissions[CONTEXT_GENERAL]) or bool(other_admissions[CONTEXT_DOCTORATE])
 
 
 @predicate(bind=True)
@@ -65,6 +88,18 @@ def _build_queryset_cache_key_from_role_qs(role_qs, suffix):
     return f'{role_qs.model.__module__}_{role_qs.model.__name__}_{suffix}'.replace('.', '_')
 
 
+def user_has_scope(context, user, scopes):
+    cache_key = _build_queryset_cache_key_from_role_qs(context['role_qs'], 'admission_scopes')
+
+    if not hasattr(user, cache_key):
+        setattr(
+            user,
+            cache_key,
+            set(scope for scope_list in context['role_qs'].values_list('scopes', flat=True) for scope in scope_list),
+        )
+    return set([s.name for s in scopes]) <= getattr(user, cache_key)
+
+
 def has_scope(*scopes):
     assert len(scopes) > 0, 'You must provide at least one scope name'
 
@@ -72,19 +107,7 @@ def has_scope(*scopes):
 
     @predicate(name, bind=True)
     def fn(self, user):
-        cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], 'admission_scopes')
-
-        if not hasattr(user, cache_key):
-            setattr(
-                user,
-                cache_key,
-                set(
-                    scope
-                    for scope_list in self.context['role_qs'].values_list('scopes', flat=True)
-                    for scope in scope_list
-                ),
-            )
-        return set([s.name for s in scopes]) <= getattr(user, cache_key)
+        return user_has_scope(self.context, user, scopes)
 
     return fn
 
@@ -99,12 +122,35 @@ def is_part_of_education_group(self, user: User, obj: BaseAdmission):
     return obj.training.education_group_id in getattr(user, cache_key)
 
 
-@predicate(bind=True)
-def is_entity_manager(self, user: User, obj: BaseAdmission):
-    cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], 'entities_ids')
+def user_is_entity_manager(context, user: User, obj: BaseAdmission):
+    cache_key = _build_queryset_cache_key_from_role_qs(context['role_qs'], 'entities_ids')
 
     if not hasattr(user, cache_key):
-        setattr(user, cache_key, self.context['role_qs'].get_entities_ids())
+        setattr(user, cache_key, context['role_qs'].get_entities_ids())
+
+    return obj.training.management_entity_id in getattr(user, cache_key)
+
+
+@predicate(bind=True)
+def is_entity_manager(self, user: User, obj: BaseAdmission):
+    return user_is_entity_manager(self.context, user, obj)
+
+
+@predicate(bind=True)
+def is_scoped_entity_manager(self, user: User, obj: BaseAdmission):
+    """
+    Check that the user is a manager of the admission training management entity with the correct scope.
+    """
+    scope = {
+        CONTEXT_GENERAL: Scope.GENERAL,
+        CONTEXT_DOCTORATE: Scope.DOCTORAT,
+        CONTEXT_CONTINUING: Scope.IUFC,
+    }[obj.admission_context]
+
+    cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], f'entities_ids_by_scope_{scope.name}')
+
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, self.context['role_qs'].filter(scopes__contains=[scope.name]).get_entities_ids())
 
     return obj.training.management_entity_id in getattr(user, cache_key)
 
