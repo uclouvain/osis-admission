@@ -49,13 +49,10 @@ from admission.infrastructure.admission.domain.service.periode_soumission_ticket
     PeriodeSoumissionTicketDigitTranslator
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from backoffice.celery import app
-from base.models import picture_to_card_task
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
-from base.models.picture_to_card_task import NoPictureToSendException, PictureAlreadySentException, \
-    PictureBeingSentOrInErrorException
 from base.tasks import send_pictures_to_card_app
 from osis_profile.models import (
     ProfessionalExperience, EducationalExperience, BelgianHighSchoolDiploma,
@@ -384,8 +381,11 @@ def _injecter_signaletique_a_epc(matricule: str):
 
 
 def _injecter_photo_a_card(matricule: str):
+    from base.models.picture_to_card_task import initialiser_call_to_card, NoPictureToSendException, \
+        PictureAlreadySentException, PictureBeingSentOrInErrorException
+
     try:
-        task_uuid = picture_to_card_task.initialiser_call_to_card(matricule)
+        task_uuid = initialiser_call_to_card(matricule)
         if settings.USE_CELERY:
             transaction.on_commit(
                 lambda: send_pictures_to_card_app.run.delay(task_uuid=task_uuid)
