@@ -34,7 +34,7 @@ from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
-    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -420,7 +420,7 @@ class PredicatesTestCase(TestCase):
             admission.status = status
             self.assertEqual(
                 doctorate.can_send_to_fac_faculty_decision(admission.candidate.user, admission),
-                status in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+                status in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
                 status,
             )
 

@@ -1,0 +1,157 @@
+{% load i18n static admission strings %}
+<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<head>
+  <meta charset="UTF-8">
+  <title>{{ proposition.reference }}</title>
+  <style>
+      #title {
+          margin-bottom: 3em;
+      }
+
+      #title h1 {
+          font-size: 1em;
+          text-align: center;
+          color: #5db3e6 !important;
+          text-transform: uppercase;
+          font-weight: bold;
+      }
+
+      dl {
+          margin-bottom: 0.75em;
+      }
+
+      dd {
+          margin-left: 0;
+      }
+
+      dt, .bold-text {
+          font-weight: bold;
+      }
+
+      p {
+          margin-top: 1.5em;
+      }
+
+      #signature {
+          margin-top: 4em;
+      }
+
+      .text-danger {
+          color: #dc3545 !important;
+      }
+
+      .inline-field-data {
+          display: block;
+      }
+
+      .inline-field-data dd, .inline-field-data dt {
+          display: inline;
+      }
+  </style>
+</head>
+
+<body>
+<div>
+  <div id="title">
+    <h1>Document annexe à l'autorisation d'inscription</h1>
+  </div>
+
+  {% concat proposition.nom_candidat " " proposition.prenom_candidat as full_name %}
+  {% field_data "Doctorant·e" full_name inline=True %}
+  {% field_data "Noma" proposition.noma_candidat inline=True %}
+  {% now "d/m/Y" as today_date %}
+  {% field_data "Date d'admission définitive au doctorat" today_date inline=True %}
+  {% field_data "Titre provisoire de la thèse" proposition.titre_projet inline=True %}
+
+  <p>
+    La Commission doctorale de domaine a approuvé votre proposition de <span class="bold-text">promoteur·trice</span>
+    et de <span class="bold-text">comité d’accompagnement</span> constitué de la manière suivante :
+  </p>
+
+  <ul>
+    {% for signature in groupe_supervision.signatures_promoteurs %}
+      <li>
+        {{ signature.promoteur.nom }} {{ signature.promoteur.prenom }}
+        {% if signature.promoteur.est_externe %}
+          {% display ' - ' signature.promoteur.institution ' - ' signature.promoteur.ville ' - ' signature.promoteur.pays %}
+        {% endif %}
+        - Promoteur·trice
+      </li>
+    {% endfor %}
+    {% for signature in groupe_supervision.signatures_membres_CA %}
+      <li>
+        {{ signature.membre_CA.nom }} {{ signature.membre_CA.prenom }}
+        {% if signature.membre_CA.est_externe %}
+          {% display ' - ' signature.membre_CA.institution ' - ' signature.membre_CA.ville ' - ' signature.membre_CA.pays %}
+        {% endif %}
+        - Membre du comité d’accompagnement
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if proposition.cotutelle.cotutelle %}
+    <p>
+      Vous faites votre thèse dans le cadre d’une <span class="bold-text">cotutelle</span>.
+      Veuillez noter que les procédures liées à l’établissement d’une cotutelle (accord de la CDD sur le principe de
+      la cotutelle, contacts avec l’université partenaire, envoi de la fiche d’ouverture) doivent être réalisées dans
+      les douze premiers mois suivant le démarrage de la thèse.
+    </p>
+  {% endif %}
+
+  <p class="text-danger">
+    Le montant des droits d’inscription communiqué par le Service des inscriptions est déterminé en fonction de
+    votre statut.
+  </p>
+
+  <p>
+    Le formulaire de formation doctorale sera accessible lors de votre première connexion à votre bureau virtuel.
+    Ce formulaire doit être tenu à jour tout au long de votre parcours et au minimum avant chaque réunion de/avec
+    votre comité d’accompagnement.
+  </p>
+
+  <p>
+    Nous attirons votre attention sur la nécessite de respecter le délai prévu par le règlement doctoral pour la
+    présentation de votre épreuve de confirmation.
+  </p>
+
+  <p>
+    Vous trouverez sur le site de votre Commission doctorale de domaine le règlement doctoral, les dispositions
+    particulières de votre domaine, les étapes du parcours doctoral ainsi que toute autre information utile.
+  </p>
+
+  <div id="signature">
+    <p>
+      {% if cdd_president.function == 'Présidente' %}
+        Votre présidente de CDD : {{ cdd_president.firstname }} {{ cdd_president.lastname }}
+      {% else %}
+        Votre président de CDD : {{ cdd_president.firstname }} {{ cdd_president.lastname }}
+      {% endif %}
+    </p>
+  </div>
+</div>
+</body>
+</html>

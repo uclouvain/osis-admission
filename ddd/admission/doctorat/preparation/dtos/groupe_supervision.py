@@ -27,6 +27,7 @@ import datetime
 from typing import List, Optional
 
 import attr
+from django.utils.functional import cached_property
 
 from osis_common.ddd import interface
 
@@ -112,3 +113,15 @@ class GroupeDeSupervisionDTO(interface.DTO):
     signatures_membres_CA: List[DetailSignatureMembreCADTO] = attr.Factory(list)
     promoteur_reference: Optional[str] = None
     cotutelle: Optional[CotutelleDTO] = None
+
+    @cached_property
+    def promoteur_reference_dto(self) -> Optional[PromoteurDTO]:
+        if self.promoteur_reference:
+            return next(
+                (
+                    signature.promoteur
+                    for signature in self.signatures_promoteurs
+                    if signature.promoteur.uuid == self.promoteur_reference
+                ),
+                None,
+            )

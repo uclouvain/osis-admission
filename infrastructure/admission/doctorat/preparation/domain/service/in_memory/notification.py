@@ -33,9 +33,6 @@ from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, Propositi
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
-    IEmailDestinataireRepository,
-)
 
 
 class NotificationInMemory(INotification):
@@ -86,14 +83,6 @@ class NotificationInMemory(INotification):
 
     @classmethod
     def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
-        pass
-
-    @classmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
-        cls,
-        proposition: Proposition,
-        email_destinataire_repository: IEmailDestinataireRepository,
-    ) -> Optional[EmailMessage]:
         pass
 
     @classmethod

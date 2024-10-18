@@ -68,12 +68,14 @@ def reagir_a_approuver_proposition(
                     auteur=event.auteur,
                 )
             )
-        elif isinstance(event, InscriptionDoctoraleApprouveeParSicEvent):
-            msg_bus.invoke(
-                EnvoyerEmailApprobationInscriptionDoctoraleAuCandidatCommand(
-                    uuid_proposition=event.entity_id.uuid,
-                    objet_message=event.objet_message,
-                    corps_message=event.corps_message,
-                    auteur=event.auteur,
-                )
+
+    # TODO: to move under the general command when doctorate digit ticket actions will be implemented
+    if isinstance(event, InscriptionDoctoraleApprouveeParSicEvent):
+        msg_bus.invoke(
+            EnvoyerEmailApprobationInscriptionDoctoraleAuCandidatCommand(
+                uuid_proposition=event.entity_id.uuid,
+                objet_message=event.objet_message,
+                corps_message=event.corps_message,
+                auteur=event.auteur,
             )
+        )

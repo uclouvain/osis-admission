@@ -27,24 +27,18 @@ import datetime
 
 import freezegun
 from django.conf import settings
-from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 
 from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.checklist import AdditionalApprovalCondition, DoctorateFreeAdditionalApprovalCondition
+from admission.contrib.models.checklist import AdditionalApprovalCondition
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.faculty_decision import (
-    AdditionalApprovalConditionFactory,
-    DoctorateFreeAdditionalApprovalConditionFactory,
-)
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
@@ -103,9 +97,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.client.force_login(user=self.sic_manager_user)
 
         # No approval data
-        self.admission.with_additional_approval_conditions = None
-        self.admission.additional_approval_conditions.set([])
-        self.admission.freeadditionalapprovalcondition_set.all().delete()
         self.admission.with_prerequisite_courses = None
         self.admission.prerequisite_courses.set([])
         self.admission.prerequisite_courses_fac_comment = ''
@@ -126,16 +117,11 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('program_planned_years_number'), None)
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
-        self.assertEqual(form.initial.get('with_additional_approval_conditions'), None)
-        self.assertEqual(form.initial.get('all_additional_approval_conditions'), [])
 
         for field in [
             'tuition_fees_amount',
             'tuition_fees_amount_other',
             'tuition_fees_dispensation',
-            'particular_cost',
-            'rebilling_or_third_party_payer',
-            'first_year_inscription_and_status',
             'is_mobility',
             'mobility_months_amount',
             'must_report_to_sic',
@@ -157,29 +143,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         ]
         self.admission.prerequisite_courses.set(prerequisite_courses)
         self.admission.with_prerequisite_courses = True
-
-        # Additional approval conditions
-        approval_conditions = [
-            AdditionalApprovalConditionFactory(),
-            AdditionalApprovalConditionFactory(),
-        ]
-        self.admission.additional_approval_conditions.set(approval_conditions)
-        self.admission.with_additional_approval_conditions = True
-
-        free_approval_conditions = [
-            DoctorateFreeAdditionalApprovalConditionFactory(
-                name_fr='Première condition libre',
-                name_en='First free condition',
-                admission=self.admission,
-            ),
-            DoctorateFreeAdditionalApprovalConditionFactory(
-                name_fr='Deuxième condition libre',
-                name_en='Second free condition',
-                admission=self.admission,
-                related_experience=self.admission.candidate.educationalexperience_set.first(),
-            ),
-        ]
-
         self.admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -211,44 +174,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             ],
         )
 
-        # Additional approval conditions
-        self.assertEqual(form.initial.get('with_additional_approval_conditions'), True)
-        self.assertCountEqual(
-            form.initial.get('all_additional_approval_conditions'),
-            [
-                approval_conditions[0].uuid,
-                approval_conditions[1].uuid,
-                free_approval_conditions[1].related_experience_id,
-            ],
-        )
-        self.assertCountEqual(
-            form.fields['all_additional_approval_conditions'].choices,
-            [
-                (
-                    str(free_approval_conditions[1].related_experience_id),
-                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
-                ),
-                (
-                    approval_conditions[0].uuid,
-                    approval_conditions[0].name_fr,
-                ),
-                (
-                    approval_conditions[1].uuid,
-                    approval_conditions[1].name_fr,
-                ),
-            ],
-        )
-
-        formset = response.context['sic_decision_free_approval_condition_formset']
-        self.assertEqual(len(formset.forms), 1)
-        self.assertEqual(
-            formset.forms[0].initial,
-            {
-                'name_fr': free_approval_conditions[0].name_fr,
-                'name_en': free_approval_conditions[0].name_en,
-            },
-        )
-
     def test_approval_decision_form_submitting_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -256,20 +181,11 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             LearningUnitYearFactory(academic_year=self.admission.determined_academic_year),
         ]
 
-        approval_conditions = [
-            AdditionalApprovalConditionFactory(),
-        ]
-
         response = self.client.post(
             self.url,
             data={
                 "sic-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
                 'sic-decision-approval-with_prerequisite_courses': 'True',
-                'sic-decision-approval-with_additional_approval_conditions': 'True',
-                'sic-decision-approval-all_additional_approval_conditions': [
-                    approval_conditions[0].uuid,
-                    'Free condition',
-                ],
                 'sic-decision-approval-program_planned_years_number': '',
             },
             **self.default_headers,
@@ -297,27 +213,11 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             form.errors.get('prerequisite_courses', []),
         )
 
-        # Additional approval conditions
-        self.assertCountEqual(
-            form.fields['all_additional_approval_conditions'].choices,
-            [
-                (approval_conditions[0].uuid, approval_conditions[0].name_fr),
-                (
-                    self.experience_uuid,
-                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
-                ),
-            ],
-        )
-
     def test_approval_decision_form_submitting_with_valid_data(self):
         self.client.force_login(user=self.sic_manager_user)
 
         prerequisite_courses = [
             LearningUnitYearFactory(academic_year=self.admission.determined_academic_year),
-        ]
-
-        approval_conditions = [
-            AdditionalApprovalConditionFactory(),
         ]
 
         data = {
@@ -326,24 +226,11 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
                 prerequisite_courses[0].acronym,
             ],
             'sic-decision-approval-with_prerequisite_courses': 'True',
-            'sic-decision-approval-with_additional_approval_conditions': 'True',
-            'sic-decision-approval-all_additional_approval_conditions': [
-                approval_conditions[0].uuid,
-                self.experience_uuid,
-            ],
             'sic-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
             'sic-decision-approval-program_planned_years_number': 5,
             'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
             'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
             'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
-            'sic-decision-TOTAL_FORMS': '2',
-            'sic-decision-INITIAL_FORMS': '0',
-            'sic-decision-MIN_NUM_FORMS': '0',
-            'sic-decision-MAX_NUM_FORMS': '1000',
-            'sic-decision-0-name_fr': 'Ma première condition',
-            'sic-decision-0-name_en': '',
-            'sic-decision-1-name_fr': 'Ma seconde condition',
-            'sic-decision-1-name_en': 'My second condition',
         }
 
         response = self.client.post(self.url, data=data, **self.default_headers)
@@ -365,10 +252,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             self.admission.status,
             ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
         )
-        self.assertEqual(self.admission.with_additional_approval_conditions, True)
-        approval_conditions_form = self.admission.additional_approval_conditions.all()
-        self.assertEqual(len(approval_conditions), 1)
-        self.assertEqual(approval_conditions[0], approval_conditions_form[0])
         self.assertEqual(self.admission.with_prerequisite_courses, True)
         prerequisite_courses_form = self.admission.prerequisite_courses.all()
         self.assertEqual(len(prerequisite_courses), 1)
@@ -382,18 +265,3 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
-
-        # Check the creation of the free additional conditions
-        conditions: QuerySet[
-            DoctorateFreeAdditionalApprovalCondition
-        ] = DoctorateFreeAdditionalApprovalCondition.objects.filter(admission=self.admission).order_by('name_fr')
-        self.assertEqual(len(conditions), 3)
-        self.assertEqual(conditions[0].name_fr, 'L\'obtention de votre diplôme de Computer science')
-        self.assertEqual(conditions[0].name_en, 'Graduation of Computer science')
-        self.assertEqual(str(conditions[0].related_experience_id), self.experience_uuid)
-        self.assertEqual(conditions[1].name_fr, 'Ma première condition')
-        self.assertEqual(conditions[1].name_en, '')
-        self.assertIsNone(conditions[1].related_experience)
-        self.assertEqual(conditions[2].name_fr, 'Ma seconde condition')
-        self.assertEqual(conditions[2].name_en, 'My second condition')
-        self.assertIsNone(conditions[2].related_experience)

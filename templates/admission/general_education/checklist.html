@@ -528,7 +528,6 @@
   <script src="{% static 'js/jquery.formset.js' %}"></script>
   {{ assimilation_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
-  {{ fac_decision_refusal_form.media.js }}
   {{ sic_decision_refusal_form.media.js }}
   {{ sic_decision_approval_form.media.js }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
@@ -1361,13 +1360,13 @@
       display: initial;
     }
 
-    .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {
+    .decision-modal .select2-selection--multiple .select2-selection__rendered {
       word-wrap: break-word;
       text-overflow: inherit;
       white-space: normal;
     }
 
-    .fac-decision-modal .select2-selection--multiple .select2-selection__choice {
+    .decision-modal .select2-selection--multiple .select2-selection__choice {
       background-color: rgba(200, 200, 200, 0.1);
       width: 100%;
       display: flex;
@@ -1375,11 +1374,11 @@
       align-items: center;
     }
 
-    .fac-decision-modal {
+    .decision-modal {
       overflow: auto;
     }
 
-    .fac-decision-modal .modal-footer {
+    .decision-modal .modal-footer {
       position: sticky;
       bottom: 0;
       background: white;
