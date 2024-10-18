@@ -5349,6 +5349,9 @@ msgstr ""
 msgid "PhD"
 msgstr ""
 
+msgid "PhD Subject Committee annex document link"
+msgstr ""
+
 msgid "PhD already done"
 msgstr ""
 

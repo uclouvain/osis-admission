@@ -73,6 +73,7 @@ templates.register(
 
 EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN = 'LIEN_DOCUMENT_AUTORISATION_INSCRIPTION'
 EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN = 'LIEN_DOCUMENT_DEMANDE_VISA'
+EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN = 'LIEN_DOCUMENT_ANNEXE_CDD'
 
 ADMISSION_EMAIL_SIC_APPROVAL_DOCTORATE = 'osis-admission-sic-approval-doctorate'
 ADMISSION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
@@ -104,6 +105,11 @@ ADMISSION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
     Token(
         name='visa_application_document_link',
         description=_("Visa application document link"),
+        example="https://osis.uclouvain.be/...",
+    ),
+    Token(
+        name='cdd_annex_document_link',
+        description=_("PhD Subject Committee annex document link"),
         example="https://osis.uclouvain.be/...",
     ),
     Token(
