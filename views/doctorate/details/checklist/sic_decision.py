@@ -27,7 +27,6 @@ import itertools
 from typing import Dict, Optional, Union
 
 from django.conf import settings
-from django.db.models import QuerySet
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import resolve_url
 from django.utils import translation, timezone
@@ -45,7 +44,6 @@ from osis_mail_template.models import MailTemplate
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererDocumentsPropositionQuery,
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     SpecifierInformationsAcceptationPropositionParSicCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
     ApprouverAdmissionParSicCommand,
@@ -63,7 +61,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     onglet_decision_sic,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
 )
@@ -88,8 +85,9 @@ from admission.mail_templates import (
     INSCRIPTION_EMAIL_SIC_APPROVAL_DOCTORATE,
 )
 from admission.mail_templates.checklist import (
-    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
-    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
 from admission.utils import (
     get_backoffice_admission_url,
@@ -109,7 +107,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAc
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_document.utils import get_file_url
-from osis_profile.models import EducationalExperience
 
 __all__ = [
     'SicApprovalDecisionView',
@@ -293,8 +290,11 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'academic_year': format_academic_year(self.proposition.formation.annee),
             'academic_year_start_date': date_format(self.proposition.formation.date_debut),
             'admission_email': self.proposition.formation.campus_inscription.email_inscription_sic,
-            'enrollment_authorization_document_link': EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
-            'visa_application_document_link': EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+            'enrollment_authorization_document_link': (
+                EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN
+            ),
+            'visa_application_document_link': EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+            'cdd_annex_document_link': EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
             'greetings': get_salutation_prefix(self.admission.candidate),
             'training_title': training_title,
             'admission_link_front': get_portal_admission_url('doctorate', self.admission_uuid),
