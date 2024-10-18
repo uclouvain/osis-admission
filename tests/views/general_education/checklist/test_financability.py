@@ -462,7 +462,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.general_admission.financability_dispensation_status,
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
         )
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             self.general_admission.refusal_reasons.all(),
             [refusal_reason],
         )
