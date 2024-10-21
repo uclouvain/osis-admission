@@ -1,7 +1,7 @@
 python-dateutil==2.9.0
 img2pdf==0.5.1
-pikepdf==6.2.9
-phonenumberslite==8.13.43
+pikepdf==9.3.0
+phonenumberslite==8.13.47
 
 # For the CI
 inflection==0.5.1

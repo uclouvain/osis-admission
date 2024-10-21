@@ -9,8 +9,9 @@ from admission.contrib.models.base import REFERENCE_SEQ_NAME
 def create_reference_sequence(apps, schema_editor: DatabaseSchemaEditor):
     DoctorateAdmission = apps.get_model('admission', 'DoctorateAdmission')
     cursor = schema_editor.connection.cursor()
-    cursor.execute(schema_editor.sql_create_sequence % {'sequence': REFERENCE_SEQ_NAME})
-    cursor.execute(schema_editor.sql_set_sequence_max % {
+    cursor.execute("CREATE SEQUENCE %(sequence)s" % {'sequence': REFERENCE_SEQ_NAME})
+    sql_set_sequence_max = "SELECT setval('%(sequence)s', MAX(%(column)s)) FROM %(table)s"
+    cursor.execute(sql_set_sequence_max % {
         'sequence': REFERENCE_SEQ_NAME,
         "table": DoctorateAdmission._meta.db_table,
         "column": 'id',

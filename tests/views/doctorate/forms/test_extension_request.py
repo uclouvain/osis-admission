@@ -172,4 +172,4 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             response.wsgi_request.path,
             resolve_url(self.update_path, uuid=self.admission_with_confirmation_papers.uuid),
         )
-        self.assertFormError(response, 'form', None, ['Demande de prolongation non définie.'])
+        self.assertFormError(response.context['form'], None, ['Demande de prolongation non définie.'])
