@@ -67,7 +67,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
     GroupeDeSupervisionSC3DPSansPromoteurReferenceFactory,
     GroupeDeSupervisionConfirmeeSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
-from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from parcours_doctoral.ddd.domain.model.doctorat import DoctoratIdentity
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.membre_CA import (
     MembreCA,
     MembreCAInMemoryTranslator,

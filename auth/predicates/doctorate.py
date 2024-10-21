@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
 )
-from admission.ddd.parcours_doctoral.domain.model.enums import (
+from parcours_doctoral.ddd.domain.model.enums import (
     ChoixStatutDoctorat,
     STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
 )

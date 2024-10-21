@@ -255,15 +255,6 @@ class AdmissionTabsTestCase(TestCase):
         result = update_tab_path_from_detail(context, current_uuid)
         self.assertEqual(result, reverse('admission:doctorate:update:confirmation', args=[current_uuid]))
 
-        # admission:doctorate:confirmation:opinion ->  admission:doctorate:confirmation
-        context = {
-            'request': Mock(
-                resolver_match=Mock(namespaces=['admission', 'doctorate', 'confirmation'], url_name='opinion')
-            )
-        }
-        result = update_tab_path_from_detail(context, current_uuid)
-        self.assertEqual(result, reverse('admission:doctorate:confirmation', args=[current_uuid]))
-
         # admission:doctorate:send-mail ->  admission:doctorate:send-mail
         context = {'request': Mock(resolver_match=Mock(namespaces=['admission', 'doctorate'], url_name='send-mail'))}
         result = update_tab_path_from_detail(context, current_uuid)

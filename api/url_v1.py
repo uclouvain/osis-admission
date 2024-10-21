@@ -115,25 +115,8 @@ urlpatterns = [
     path('propositions/doctorate/<uuid:uuid>/supervision/approve', views.ApprovePropositionAPIView),
     path('propositions/doctorate/<uuid:uuid>/supervision/external/<token>', views.ExternalApprovalPropositionAPIView),
     path('propositions/doctorate/<uuid:uuid>/supervision/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
-    # Submission confirmation
-    path('propositions/doctorate/<uuid:uuid>/confirmation', views.ConfirmationAPIView),
-    path('propositions/doctorate/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
-    path('propositions/doctorate/<uuid:uuid>/confirmation/last/canvas', views.LastConfirmationCanvasAPIView),
-    path('propositions/doctorate/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
-    # Jury
-    path('propositions/doctorate/<uuid:uuid>/jury/preparation', views.JuryPreparationAPIView),
-    path('propositions/doctorate/<uuid:uuid>/jury/members', views.JuryMembersListAPIView),
-    path('propositions/doctorate/<uuid:uuid>/jury/members/<uuid:member_uuid>', views.JuryMemberDetailAPIView),
     # Doctorate
     path('propositions/doctorate/<uuid:uuid>/doctorate', views.DoctorateAPIView),
-    # Training
-    path('propositions/doctorate/<uuid:uuid>/training/config', views.TrainingConfigView),
-    path('propositions/doctorate/<uuid:uuid>/doctoral-training', views.DoctoralTrainingListView),
-    path('propositions/doctorate/<uuid:uuid>/training/submit', views.TrainingSubmitView),
-    path('propositions/doctorate/<uuid:uuid>/training/assent', views.TrainingAssentView),
-    path('propositions/doctorate/<uuid:uuid>/training/<uuid:activity_id>', views.TrainingView),
-    path('propositions/doctorate/<uuid:uuid>/complementary-training', views.ComplementaryTrainingListView),
-    path('propositions/doctorate/<uuid:uuid>/course-enrollment', views.CourseEnrollmentListView),
     # > General education
     path('propositions/general-education', views.GeneralTrainingChoiceAPIView),
     path('propositions/general-education/<uuid:uuid>', views.GeneralPropositionView),

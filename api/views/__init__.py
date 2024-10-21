@@ -26,7 +26,6 @@
 from admission.api.views.accounting import DoctorateAccountingView, GeneralAccountingView
 from admission.api.views.approvals import *
 from admission.api.views.autocomplete import *
-from admission.api.views.confirmation import *
 from admission.api.views.continuing_education import RetrieveContinuingEducationSpecificInformationView
 from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonneesView, ContinuingCoordonneesView
 from admission.api.views.cotutelle import CotutelleAPIView
@@ -38,7 +37,6 @@ from admission.api.views.documents import (
     ContinuingRequestedDocumentListView,
     DoctorateRequestedDocumentListView,
 )
-from admission.api.views.jury import *
 from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
 from admission.api.views.payment import (
     OpenApplicationFeesPaymentView,
@@ -77,7 +75,6 @@ from admission.api.views.specific_questions import (
 )
 from admission.api.views.submission import *
 from admission.api.views.supervision import *
-from admission.api.views.training import *
 from admission.api.views.training_choice import (
     ContinuingTrainingChoiceAPIView,
     ContinuingUpdateTrainingChoiceAPIView,

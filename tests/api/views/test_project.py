@@ -60,7 +60,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
 )
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -337,12 +337,6 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'submit_proposition',
         ]
         forbidden_actions = [
-            'retrieve_confirmation',
-            'update_confirmation',
-            'retrieve_doctoral_training',
-            'retrieve_complementary_training',
-            'retrieve_course_enrollment',
-            'retrieve_jury_preparation',
             'retrieve_documents',
             'update_documents',
         ]

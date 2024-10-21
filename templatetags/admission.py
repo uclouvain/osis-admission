@@ -101,7 +101,7 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionDTO as PropositionGeneraleDTO,
 )
 from admission.ddd.admission.repository.i_proposition import formater_reference
-from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
+from parcours_doctoral.ddd.formation.domain.model.enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,

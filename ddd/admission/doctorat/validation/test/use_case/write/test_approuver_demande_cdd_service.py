@@ -35,8 +35,8 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import Choix
 from admission.ddd.admission.doctorat.validation.domain.service.proposition_identity import (
     PropositionIdentityTranslator,
 )
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.parcours_doctoral.domain.service.demande_identity import DemandeIdentityTranslator
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.domain.service.demande_identity import DemandeIdentityTranslator
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -44,10 +44,10 @@ from admission.infrastructure.admission.doctorat.validation.repository.in_memory
     DemandeInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory import (
+from parcours_doctoral.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory import (
     epreuve_confirmation,
 )
-from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
+from parcours_doctoral.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 
 
 class TestApprouverDemandeCDD(TestCase):

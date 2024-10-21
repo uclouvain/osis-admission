@@ -57,7 +57,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, Memb
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from parcours_doctoral.ddd.domain.model.doctorat import DoctoratIdentity
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_signature.models import Actor, Process, StateHistory

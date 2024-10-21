@@ -27,10 +27,10 @@
 from admission.ddd.admission.doctorat.validation.commands import *
 from admission.ddd.admission.doctorat.validation.use_case.read import *
 from admission.ddd.admission.doctorat.validation.use_case.write import *
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
+from parcours_doctoral.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
     EpreuveConfirmationInMemoryRepository,
 )
-from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
+from parcours_doctoral.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 from .repository.in_memory.demande import DemandeInMemoryRepository
 from ..preparation.repository.in_memory.proposition import PropositionInMemoryRepository
 

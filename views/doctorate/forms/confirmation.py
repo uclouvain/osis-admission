@@ -27,15 +27,16 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
-from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
+from parcours_doctoral.ddd.epreuve_confirmation.commands import (
     ModifierEpreuveConfirmationParCDDCommand,
 )
-from admission.forms.doctorate.confirmation import ConfirmationForm
 from admission.views.doctorate.mixins import DoctorateAdmissionLastConfirmationMixin
 from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
 from infrastructure.messages_bus import message_bus_instance
+from parcours_doctoral.forms.confirmation import ConfirmationForm
 
 __all__ = ["DoctorateAdmissionConfirmationFormView"]
+
 
 
 class DoctorateAdmissionConfirmationFormView(

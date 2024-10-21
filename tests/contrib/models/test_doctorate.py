@@ -28,10 +28,10 @@ import datetime
 from django.core.cache import cache
 from django.test import TestCase
 
-from admission.contrib.models.doctorate import confirmation_paper_directory_path
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from admission.utils import get_cached_admission_perm_obj
+from parcours_doctoral.models.confirmation_paper import confirmation_paper_directory_path
+from parcours_doctoral.tests.factories.confirmation_paper import ConfirmationPaperFactory
 
 
 class ConfirmationPaperTestCase(TestCase):

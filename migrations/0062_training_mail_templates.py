@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from admission.mail_templates import (
+from parcours_doctoral.mail_templates import (
     ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_NEEDS_UPDATE,
     ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_REFUSED,
     ADMISSION_EMAIL_REFERENCE_PROMOTER_DOCTORAL_TRAININGS_SUBMITTED,

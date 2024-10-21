@@ -25,7 +25,7 @@
 # ##############################################################################
 
 try:
-    from .doctorate import DoctorateAdmission, ConfirmationPaper
+    from .doctorate import DoctorateAdmission
     from .actor import SupervisionActor
     from admission.ddd.admission.enums.type_demande import TypeDemande
     from .entity_proxy import EntityProxy
@@ -37,7 +37,6 @@ try:
     from .general_education import GeneralEducationAdmission, GeneralEducationAdmissionProxy
     from .form_item import AdmissionFormItemInstantiation, AdmissionFormItem
     from .base import AdmissionViewer
-    from .jury import JuryMember
     from .visa import DiplomaticPost
     from .epc_injection import EPCInjection
 
@@ -47,7 +46,6 @@ try:
         "SupervisionActor",
         "EntityProxy",
         "CddMailTemplate",
-        "ConfirmationPaper",
         "AdmissionTask",
         "Accounting",
         "Scholarship",
@@ -58,7 +56,6 @@ try:
         "AdmissionFormItem",
         "AdmissionFormItemInstantiation",
         "AdmissionViewer",
-        "JuryMember",
         "DiplomaticPost",
     ]
 

@@ -219,15 +219,9 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctorateProp
                     'retrieve_supervision',
                     'retrieve_curriculum',
                     'update_curriculum',
-                    'retrieve_confirmation',
-                    'update_confirmation',
                     'retrieve_accounting',
                     'update_accounting',
-                    'retrieve_doctoral_training',
-                    'retrieve_complementary_training',
-                    'retrieve_course_enrollment',
                     'destroy_proposition',
-                    'retrieve_jury_preparation',
                     # Documents
                     'retrieve_documents',
                     'update_documents',
@@ -445,19 +439,9 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
             # Curriculum
             'retrieve_curriculum': DOCTORATE_ACTION_LINKS['retrieve_curriculum'],
             'update_curriculum': DOCTORATE_ACTION_LINKS['update_curriculum'],
-            # Confirmation
-            'retrieve_confirmation': DOCTORATE_ACTION_LINKS['retrieve_confirmation'],
-            'update_confirmation': DOCTORATE_ACTION_LINKS['update_confirmation'],
             # Accounting
             'retrieve_accounting': DOCTORATE_ACTION_LINKS['retrieve_accounting'],
             'update_accounting': DOCTORATE_ACTION_LINKS['update_accounting'],
-            # Training
-            'retrieve_doctoral_training': DOCTORATE_ACTION_LINKS['retrieve_doctoral_training'],
-            'retrieve_complementary_training': DOCTORATE_ACTION_LINKS['retrieve_complementary_training'],
-            'retrieve_course_enrollment': DOCTORATE_ACTION_LINKS['retrieve_course_enrollment'],
-            # Jury
-            'retrieve_jury_preparation': DOCTORATE_ACTION_LINKS['retrieve_jury_preparation'],
-            'list_jury_members': DOCTORATE_ACTION_LINKS['list_jury_members'],
             # Documents
             'retrieve_documents': DOCTORATE_ACTION_LINKS['retrieve_documents'],
             'update_documents': DOCTORATE_ACTION_LINKS['update_documents'],

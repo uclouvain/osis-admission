@@ -35,7 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
-from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from parcours_doctoral.ddd.domain.model.doctorat import DoctoratIdentity
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 

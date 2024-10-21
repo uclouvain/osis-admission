@@ -40,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     OngletsChecklist,
 )
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference

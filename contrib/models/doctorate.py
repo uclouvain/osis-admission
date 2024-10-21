@@ -64,8 +64,8 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.jury.domain.model.enums import FormuleDefense
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
@@ -83,7 +83,6 @@ from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 __all__ = [
     "DoctorateAdmission",
     "DoctorateProxy",
-    "ConfirmationPaper",
 ]
 
 from .checklist import RefusalReason
@@ -1040,120 +1039,6 @@ class DoctorateProxy(DoctorateAdmission):
 
     class Meta:
         proxy = True
-
-
-def confirmation_paper_directory_path(confirmation, filename: str):
-    """Return the file upload directory path."""
-    return 'admission/{}/{}/confirmation/{}/{}'.format(
-        confirmation.admission.candidate.uuid,
-        confirmation.admission.uuid,
-        confirmation.uuid,
-        filename,
-    )
-
-
-class ConfirmationPaper(models.Model):
-    uuid = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        unique=True,
-        db_index=True,
-    )
-
-    admission = models.ForeignKey(
-        DoctorateAdmission,
-        verbose_name=_("Admission"),
-        on_delete=models.CASCADE,
-    )
-
-    confirmation_date = models.DateField(
-        verbose_name=_("Confirmation exam date"),
-        null=True,
-        blank=True,
-    )
-    confirmation_deadline = models.DateField(
-        verbose_name=_("Confirmation deadline"),
-        blank=True,
-    )
-    research_report = FileField(
-        verbose_name=_("Research report"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-    supervisor_panel_report = FileField(
-        verbose_name=_("Support Committee minutes"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-    supervisor_panel_report_canvas = FileField(
-        verbose_name=_("Canvas of the report of the supervisory panel"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-    research_mandate_renewal_opinion = FileField(
-        verbose_name=_("Opinion on research mandate renewal"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-
-    # Result of the confirmation
-    certificate_of_failure = FileField(
-        verbose_name=_("Certificate of failure"),
-        upload_to=confirmation_paper_directory_path,
-    )
-    certificate_of_achievement = FileField(
-        verbose_name=_("Certificate of achievement"),
-        upload_to=confirmation_paper_directory_path,
-    )
-
-    # Extension
-    extended_deadline = models.DateField(
-        verbose_name=_("Deadline extended"),
-        null=True,
-        blank=True,
-    )
-    cdd_opinion = models.TextField(
-        default="",
-        verbose_name=_("CDD opinion"),
-        blank=True,
-    )
-    justification_letter = FileField(
-        verbose_name=_("Justification letter"),
-        upload_to=confirmation_paper_directory_path,
-    )
-    brief_justification = models.TextField(
-        default="",
-        verbose_name=_("Brief justification"),
-        blank=True,
-        max_length=2000,
-    )
-
-    class Meta:
-        ordering = ["-id"]
-
-
-class InternalNote(models.Model):
-    admission = models.ForeignKey(
-        BaseAdmission,
-        on_delete=models.CASCADE,
-        verbose_name=_("Admission"),
-    )
-    author = models.ForeignKey(
-        'base.Person',
-        on_delete=models.SET_NULL,
-        verbose_name=_("Author"),
-        null=True,
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_('Created'),
-    )
-    text = RichTextField(
-        verbose_name=_("Text"),
-    )
-
-    class Meta:
-        ordering = ['-created_at']
 
 
 class DoctorateAdmissionPrerequisiteCourses(models.Model):

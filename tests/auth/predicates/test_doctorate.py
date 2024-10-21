@@ -38,7 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory

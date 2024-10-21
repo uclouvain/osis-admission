@@ -30,18 +30,10 @@ from .admission.doctorat.validation import handlers as validation_handlers
 from .admission.formation_continue import handlers as formation_continue_handlers
 from .admission.formation_generale import handlers as formation_generale_handlers
 from .admission.shared_kernel.role import handlers as role_handlers
-from .parcours_doctoral import handlers as doctorat_handlers
-from .parcours_doctoral.epreuve_confirmation import handlers as epreuve_confirmation_handlers
-from .parcours_doctoral.formation import handlers as formation_handlers
-from .parcours_doctoral.jury import handlers as jury_handlers
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
     command_handlers = {
-        **doctorat_handlers.COMMAND_HANDLERS,
-        **epreuve_confirmation_handlers.COMMAND_HANDLERS,
-        **formation_handlers.COMMAND_HANDLERS,
-        **jury_handlers.COMMAND_HANDLERS,
         **preparation_handlers.COMMAND_HANDLERS,
         **validation_handlers.COMMAND_HANDLERS,
         **formation_continue_handlers.COMMAND_HANDLERS,

@@ -30,18 +30,10 @@ from .admission.doctorat.validation import handlers_in_memory as validation_hand
 from .admission.formation_continue import handlers_in_memory as formation_continue_handlers
 from .admission.formation_generale import handlers_in_memory as formation_generale_handlers
 from .admission.shared_kernel.role import handlers_in_memory as role_handlers
-from .parcours_doctoral import handlers_in_memory as doctorat_handlers
-from .parcours_doctoral.epreuve_confirmation import handlers_in_memory as epreuve_confirmation_handlers
-from .parcours_doctoral.formation import handlers_in_memory as formation_handlers
-from .parcours_doctoral.jury import handlers_in_memory as jury_handlers
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     command_handlers = {
-        **doctorat_handlers.COMMAND_HANDLERS,
-        **epreuve_confirmation_handlers.COMMAND_HANDLERS,
-        **formation_handlers.COMMAND_HANDLERS,
-        **jury_handlers.COMMAND_HANDLERS,
         **preparation_handlers.COMMAND_HANDLERS,
         **validation_handlers.COMMAND_HANDLERS,
         **formation_continue_handlers.COMMAND_HANDLERS,

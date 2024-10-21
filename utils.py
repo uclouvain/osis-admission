@@ -57,7 +57,7 @@ from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitre
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.formation_generale.commands import VerifierCurriculumApresSoumissionQuery
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )

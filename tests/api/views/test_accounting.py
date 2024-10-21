@@ -49,7 +49,7 @@ from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory

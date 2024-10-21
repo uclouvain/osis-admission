@@ -31,15 +31,15 @@ from admission.ddd.admission.doctorat.validation.domain.service.proposition_iden
     PropositionIdentityTranslator,
 )
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
-from admission.ddd.parcours_doctoral.domain.service.demande_identity import DemandeIdentityTranslator
-from admission.ddd.parcours_doctoral.domain.service.doctorat import DoctoratService
-from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.service.epreuve_confirmation import (
+from parcours_doctoral.ddd.domain.service.demande_identity import DemandeIdentityTranslator
+from parcours_doctoral.ddd.domain.service.doctorat import DoctoratService
+from parcours_doctoral.ddd.epreuve_confirmation.domain.service.epreuve_confirmation import (
     EpreuveConfirmationService,
 )
-from admission.ddd.parcours_doctoral.epreuve_confirmation.repository.i_epreuve_confirmation import (
+from parcours_doctoral.ddd.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
-from admission.ddd.parcours_doctoral.repository.i_doctorat import IDoctoratRepository
+from parcours_doctoral.ddd.repository.i_doctorat import IDoctoratRepository
 
 
 def approuver_demande_cdd(

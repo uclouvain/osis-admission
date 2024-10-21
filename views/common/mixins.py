@@ -74,18 +74,18 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
-from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
-from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
+from parcours_doctoral.ddd.commands import RecupererDoctoratQuery
+from parcours_doctoral.ddd.domain.validator.exceptions import DoctoratNonTrouveException
+from parcours_doctoral.ddd.dtos import DoctoratDTO
+from parcours_doctoral.ddd.epreuve_confirmation.commands import (
     RecupererDerniereEpreuveConfirmationQuery,
 )
-from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
+from parcours_doctoral.ddd.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from parcours_doctoral.ddd.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
-from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
-from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
+from parcours_doctoral.ddd.jury.commands import RecupererJuryQuery
+from parcours_doctoral.ddd.jury.dtos.jury import JuryDTO
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,

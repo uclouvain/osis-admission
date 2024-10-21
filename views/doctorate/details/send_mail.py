@@ -32,10 +32,10 @@ from osis_mail_template.models import MailTemplate
 from admission.contrib.models import CddMailTemplate
 from admission.ddd.admission.doctorat.preparation.commands import EnvoyerMessageCandidatCommand
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
-from admission.infrastructure.parcours_doctoral.domain.service.notification import (
+from parcours_doctoral.infrastructure.parcours_doctoral.domain.service.notification import (
     Notification as NotificationDoctorat,
 )
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
+from parcours_doctoral.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
     Notification as NotificationEpreuveConfirmation,
 )
 from admission.mail_templates import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
