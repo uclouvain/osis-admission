@@ -24,10 +24,8 @@
 #
 # ##############################################################################
 import datetime
-import uuid
 from contextlib import suppress
 
-from ckeditor.fields import RichTextField
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -43,7 +41,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -63,8 +60,6 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
@@ -81,8 +76,6 @@ from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
 __all__ = [
     "DoctorateAdmission",
-    "DoctorateProxy",
-    "ConfirmationPaper",
 ]
 
 from .checklist import RefusalReason
@@ -335,12 +328,6 @@ class DoctorateAdmission(BaseAdmission):
         max_length=30,
         default=ChoixStatutSIC.TO_BE_VERIFIED.name,
     )
-    post_enrolment_status = models.CharField(
-        choices=ChoixStatutDoctorat.choices(),
-        max_length=30,
-        default=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
-        verbose_name=_("Post-enrolment status"),
-    )
 
     supervision_group = SignatureProcessField()
 
@@ -357,46 +344,6 @@ class DoctorateAdmission(BaseAdmission):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-    )
-
-    # Jury
-    thesis_proposed_title = models.CharField(
-        max_length=255,
-        verbose_name=_("Proposed thesis title"),
-        default='',
-        blank=True,
-    )
-    defense_method = models.CharField(
-        max_length=255,
-        verbose_name=_("Defense method"),
-        choices=FormuleDefense.choices(),
-        default='',
-        blank=True,
-    )
-    defense_indicative_date = models.DateField(
-        verbose_name=_("Defense indicative date"),
-        null=True,
-        blank=True,
-    )
-    defense_language = models.CharField(
-        max_length=255,
-        verbose_name=_("Defense language"),
-        choices=ChoixLangueRedactionThese.choices(),
-        default=ChoixLangueRedactionThese.UNDECIDED.name,
-        blank=True,
-    )
-    comment_about_jury = models.TextField(
-        default="",
-        verbose_name=_("Comment about jury"),
-        blank=True,
-    )
-    accounting_situation = models.BooleanField(
-        null=True,
-        blank=True,
-    )
-    jury_approval = FileField(
-        verbose_name=_("Jury approval"),
-        upload_to=admission_directory_path,
     )
 
     # Financability
@@ -707,14 +654,9 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name = _("Doctorate admission")
         ordering = ('-created_at',)
         permissions = [
-            ('download_jury_approved_pdf', _("Can download jury-approved PDF")),
-            ('upload_jury_approved_pdf', _("Can upload jury-approved PDF")),
             ('upload_signed_scholarship', _("Can upload signed scholarship")),
             ('check_publication_authorisation', _("Can check publication autorisation")),
             ('validate_registration', _("Can validate registration")),
-            ('approve_jury', _("Can approve jury")),
-            ('approve_confirmation_paper', _("Can approve confirmation paper")),
-            ('validate_doctoral_training', _("Can validate doctoral training")),
             ('download_pdf_confirmation', _("Can download PDF confirmation")),
             ('upload_pdf_confirmation', _("Can upload PDF confirmation")),
             ('fill_thesis', _("Can fill thesis")),
@@ -753,13 +695,6 @@ class DoctorateAdmission(BaseAdmission):
             (
                 'change_admission_supervision',
                 _("Can update the information related to the admission supervision"),
-            ),
-            ('view_admission_jury', _("Can view the information related to the admission jury")),
-            ('change_admission_jury', _("Can update the information related to the admission jury")),
-            ('view_admission_confirmation', _("Can view the information related to the confirmation paper")),
-            (
-                'change_admission_confirmation',
-                _("Can update the information related to the confirmation paper"),
             ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
@@ -870,6 +805,9 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 'training__enrollment_campus__country',
             )
             .annotate_campus_info()
+            .annotate_training_management_entity()
+            .annotate_training_management_faculty()
+            .annotate_with_reference()
         )
 
     def for_manager_dto(self):
@@ -948,7 +886,6 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 'training__title',
                 'training__acronym',
                 'training__enrollment_campus__name',
-                'post_enrolment_status',
                 'proximity_commission',
                 'reference',
                 'submitted_profile',
@@ -968,129 +905,6 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_training_management_entity()
             .annotate_with_reference(with_management_faculty=False)
         )
-
-
-class DoctorateProxy(DoctorateAdmission):
-    """Proxy model of base.DoctorateAdmission for Doctorat in doctorat context"""
-
-    objects = DoctorateManager()
-
-    class Meta:
-        proxy = True
-
-
-def confirmation_paper_directory_path(confirmation, filename: str):
-    """Return the file upload directory path."""
-    return 'admission/{}/{}/confirmation/{}/{}'.format(
-        confirmation.admission.candidate.uuid,
-        confirmation.admission.uuid,
-        confirmation.uuid,
-        filename,
-    )
-
-
-class ConfirmationPaper(models.Model):
-    uuid = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        unique=True,
-        db_index=True,
-    )
-
-    admission = models.ForeignKey(
-        DoctorateAdmission,
-        verbose_name=_("Admission"),
-        on_delete=models.CASCADE,
-    )
-
-    confirmation_date = models.DateField(
-        verbose_name=_("Confirmation exam date"),
-        null=True,
-        blank=True,
-    )
-    confirmation_deadline = models.DateField(
-        verbose_name=_("Confirmation deadline"),
-        blank=True,
-    )
-    research_report = FileField(
-        verbose_name=_("Research report"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-    supervisor_panel_report = FileField(
-        verbose_name=_("Support Committee minutes"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-    supervisor_panel_report_canvas = FileField(
-        verbose_name=_("Canvas of the report of the supervisory panel"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-    research_mandate_renewal_opinion = FileField(
-        verbose_name=_("Opinion on research mandate renewal"),
-        upload_to=confirmation_paper_directory_path,
-        max_files=1,
-    )
-
-    # Result of the confirmation
-    certificate_of_failure = FileField(
-        verbose_name=_("Certificate of failure"),
-        upload_to=confirmation_paper_directory_path,
-    )
-    certificate_of_achievement = FileField(
-        verbose_name=_("Certificate of achievement"),
-        upload_to=confirmation_paper_directory_path,
-    )
-
-    # Extension
-    extended_deadline = models.DateField(
-        verbose_name=_("Deadline extended"),
-        null=True,
-        blank=True,
-    )
-    cdd_opinion = models.TextField(
-        default="",
-        verbose_name=_("CDD opinion"),
-        blank=True,
-    )
-    justification_letter = FileField(
-        verbose_name=_("Justification letter"),
-        upload_to=confirmation_paper_directory_path,
-    )
-    brief_justification = models.TextField(
-        default="",
-        verbose_name=_("Brief justification"),
-        blank=True,
-        max_length=2000,
-    )
-
-    class Meta:
-        ordering = ["-id"]
-
-
-class InternalNote(models.Model):
-    admission = models.ForeignKey(
-        BaseAdmission,
-        on_delete=models.CASCADE,
-        verbose_name=_("Admission"),
-    )
-    author = models.ForeignKey(
-        'base.Person',
-        on_delete=models.SET_NULL,
-        verbose_name=_("Author"),
-        null=True,
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_('Created'),
-    )
-    text = RichTextField(
-        verbose_name=_("Text"),
-    )
-
-    class Meta:
-        ordering = ['-created_at']
 
 
 class DoctorateAdmissionPrerequisiteCourses(models.Model):

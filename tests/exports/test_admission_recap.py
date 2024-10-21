@@ -56,7 +56,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     CotutelleDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
-    DoctoratDTO,
+    DoctoratFormationDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
@@ -1485,7 +1485,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
-            doctorat=DoctoratDTO(
+            doctorat=DoctoratFormationDTO(
                 sigle='FD1',
                 annee=2023,
                 intitule='Doctorate 1',

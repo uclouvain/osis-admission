@@ -32,7 +32,6 @@ from osis_async.utils import update_task
 from admission.models import AdmissionTask
 from admission.exports.admission_archive import admission_pdf_archive
 from admission.exports.admission_canvas import admission_pdf_canvas
-from admission.exports.admission_confirmation_success_attestation import admission_confirmation_success_attestation
 from admission.exports.admission_recap.admission_async_recap import (
     general_education_admission_pdf_recap_from_task,
     continuing_education_admission_pdf_recap_from_task,
@@ -55,7 +54,6 @@ class Command(BaseCommand):
         # Doctorate
         AdmissionTask.TaskType.ARCHIVE.name: admission_pdf_archive,
         AdmissionTask.TaskType.CANVAS.name: admission_pdf_canvas,
-        AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name: admission_confirmation_success_attestation,
         # Generate the recap of the proposition when the proposition is submitted
         AdmissionTask.TaskType.GENERAL_RECAP.name: general_education_admission_pdf_recap_from_task,
         AdmissionTask.TaskType.CONTINUING_RECAP.name: continuing_education_admission_pdf_recap_from_task,

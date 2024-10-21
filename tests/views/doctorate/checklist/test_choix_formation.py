@@ -33,7 +33,7 @@ from django.test import TestCase
 from django.utils.translation import gettext
 
 from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.tests.factories import DoctorateAdmissionFactory

@@ -62,8 +62,6 @@ _CANDIDATE_RULESET = {
     'change_admission_secondary_studies': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_admission_languages': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_admission_accounting': common.is_admission_request_author & doctorate.unconfirmed_proposition,
-    # Can edit while the jury is not submitted
-    'change_admission_jury': author_and_enrolled & doctorate.is_jury_in_progress,
     # Project tabs and supervision group edition are accessible as long as signing has not begun
     'change_admission_training_choice': common.is_admission_request_author & doctorate.in_progress,
     'change_admission_project': common.is_admission_request_author & doctorate.in_progress,
@@ -84,17 +82,20 @@ _CANDIDATE_RULESET = {
     # Once the candidate is enrolling, he can
     'view_admission_confirmation': author_and_enrolled,
     'view_doctoral_training': author_and_enrolled & ~doctorate.is_pre_admission,
-    'view_complementary_training': author_and_enrolled & doctorate.complementary_training_enabled,
-    'view_course_enrollment': author_and_enrolled,
-    'add_training': author_and_enrolled,
-    'update_training': author_and_enrolled,
-    'submit_training': author_and_enrolled,
-    'view_training': author_and_enrolled,
-    'delete_training': author_and_enrolled,
-    # Once the confirmation paper is in progress, he can
-    'change_admission_confirmation': common.is_admission_request_author & doctorate.confirmation_paper_in_progress,
-    'change_admission_confirmation_extension': common.is_admission_request_author
-    & doctorate.confirmation_paper_in_progress,
+    # TODO parcours_doctoral
+    # # Can edit while the jury is not submitted
+    # 'change_admission_jury': author_and_enrolled & doctorate.is_jury_in_progress,
+    # 'view_complementary_training': author_and_enrolled & doctorate.complementary_training_enabled,
+    # 'view_course_enrollment': author_and_enrolled,
+    # 'add_training': author_and_enrolled,
+    # 'update_training': author_and_enrolled,
+    # 'submit_training': author_and_enrolled,
+    # 'view_training': author_and_enrolled,
+    # 'delete_training': author_and_enrolled,
+    # # Once the confirmation paper is in progress, he can
+    # 'change_admission_confirmation': common.is_admission_request_author & doctorate.confirmation_paper_in_progress,
+    # 'change_admission_confirmation_extension': common.is_admission_request_author
+    # & doctorate.confirmation_paper_in_progress,
     # Future
     'download_pdf_confirmation': common.is_admission_request_author,
     'upload_pdf_confirmation': common.is_admission_request_author,

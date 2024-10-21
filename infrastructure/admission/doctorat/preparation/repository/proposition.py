@@ -80,7 +80,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonTrouveeException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    DoctoratDTO,
+    DoctoratFormationDTO,
     PropositionDTO,
     CotutelleDTO,
 )
@@ -667,7 +667,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             uuid=admission.uuid,
             reference=admission.formatted_reference,  # from annotation
             type_admission=admission.type,
-            doctorat=DoctoratDTO(
+            doctorat=DoctoratFormationDTO(
                 sigle=admission.doctorate.acronym,
                 code=admission.doctorate.partial_acronym,
                 annee=admission.doctorate.academic_year.year,

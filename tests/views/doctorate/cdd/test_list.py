@@ -37,7 +37,7 @@ from django.utils.translation import gettext, gettext_lazy
 
 from admission.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
     SIGLE_SCIENCES,

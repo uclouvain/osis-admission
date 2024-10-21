@@ -33,7 +33,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeContratTravail,

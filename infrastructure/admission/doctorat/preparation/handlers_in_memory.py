@@ -27,6 +27,7 @@
 from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
+from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
@@ -65,6 +66,7 @@ from .domain.service.in_memory.notification import NotificationInMemory
 from .domain.service.in_memory.pdf_generation import PDFGenerationInMemory
 from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
 from .domain.service.in_memory.question_specifique import QuestionSpecifiqueInMemoryTranslator
+from .repository.doctorat import DoctoratRepository
 from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
@@ -89,6 +91,7 @@ _academic_year_repository = AcademicYearInMemoryRepository()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _promoteur_translator = PromoteurInMemoryTranslator()
 _doctorat_translator = DoctoratInMemoryTranslator()
+_doctorat_repository = DoctoratRepository()
 _bourse_translator = BourseInMemoryTranslator()
 _historique = HistoriqueInMemory()
 _notification = NotificationInMemory()
@@ -689,5 +692,9 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
+    ),
+    RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
+        cmd,
+        doctorat_repository=_doctorat_repository,
     ),
 }

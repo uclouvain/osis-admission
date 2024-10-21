@@ -47,7 +47,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -253,7 +253,7 @@ class Proposition(interface.RootEntity):
 
     def completer(
         self,
-        doctorat: Doctorat,
+        doctorat: DoctoratFormation,
         justification: Optional[str],
         commission_proximite: Optional[str],
         type_financement: Optional[str],
@@ -616,7 +616,7 @@ class Proposition(interface.RootEntity):
 
     def modifier_type_admission(
         self,
-        doctorat: Doctorat,
+        doctorat: DoctoratFormation,
         type_admission: str,
         justification: Optional[str],
         reponses_questions_specifiques: Dict,
@@ -637,7 +637,7 @@ class Proposition(interface.RootEntity):
 
     def modifier_choix_formation_gestionnaire(
         self,
-        doctorat: Doctorat,
+        doctorat: DoctoratFormation,
         type_admission: str,
         justification: Optional[str],
         reponses_questions_specifiques: Dict,
