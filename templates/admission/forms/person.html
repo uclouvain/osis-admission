@@ -26,7 +26,7 @@
 {% endcomment %}
 
 {% block form %}
-  {% if proposition_fusion %}
+  {% if proposition_fusion and proposition_fusion.status == 'PENDING' %}
     <div class="alert alert-warning">
       {% trans 'A merger proposal is currently being resolved. Saving the tab will cause a merge reset' %}
     </div>
