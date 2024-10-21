@@ -55,6 +55,7 @@ from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
+from base.models.picture_to_card_task import PictureSentToCardTask
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
@@ -404,7 +405,6 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
             [str(self.etudes_secondaires_personne_connue.uuid)]
         )
 
-
     def test_assert_merge_with_existing_account_but_not_existing_in_osis(self):
         self.personne_compte_temporaire.global_id = '00345678'   # Set as internal account
         self.personne_compte_temporaire.save()
@@ -674,3 +674,17 @@ class TestRetrieveDigitTicketsStatus(TransactionTestCase):
         )
 
         self.assertEqual(demande.reference, self.admission.reference)
+
+    def test_assert_picture_to_card_task_row_is_created_when_candidate_have_a_picture(self):
+        self.personne_compte_temporaire.id_photo = [uuid.uuid4()]
+        self.personne_compte_temporaire.save()
+
+        retrieve_digit_tickets_status.run()
+
+        # Ticket DigIT
+        self.ticket_digit.refresh_from_db()
+        self.assertEqual(self.ticket_digit.status, PersonTicketCreationStatus.DONE.name)
+
+        self.personne_compte_temporaire.refresh_from_db()
+
+        self.assertTrue(PictureSentToCardTask.objects.filter(person__id=self.personne_compte_temporaire.pk).exists())
