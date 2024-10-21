@@ -37,7 +37,7 @@ from base.models.enums.state_iufc import StateIUFC
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.user import UserFactory
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 from program_management.models.education_group_version import EducationGroupVersion
 
 

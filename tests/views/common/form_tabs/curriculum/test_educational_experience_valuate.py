@@ -32,15 +32,17 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, ContinuingEducationAdmission
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
 )
@@ -71,6 +73,12 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
             submitted=True,
         )
 
+        cls.other_continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training__management_entity=entity,
+            training__academic_year=cls.academic_years[0],
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
         # Create users
         cls.sic_manager_user = SicManagementRoleFactory(entity=entity).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
@@ -78,6 +86,9 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         ).person.user
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+        cls.other_continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.other_continuing_admission.training.education_group,
         ).person.user
 
     def setUp(self):
@@ -224,3 +235,95 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         response = self.client.post(f'{self.doctorate_valuate_url}?next={admission_url}&next_hash_url=custom_hash')
 
         self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+    def test_valuate_experience_from_continuing_curriculum_for_fac_users(self):
+        self.client.force_login(self.other_continuing_program_manager_user)
+
+        experience = EducationalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational_valuate',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.post(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:checklist',
+            uuid=self.other_continuing_admission.uuid,
+        )
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=base_curriculum_url,
+        )
+
+    def test_valuate_experience_from_continuing_curriculum_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+
+        experience = EducationalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational_valuate',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.post(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:checklist',
+            uuid=self.other_continuing_admission.uuid,
+        )
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=base_curriculum_url,
+        )
