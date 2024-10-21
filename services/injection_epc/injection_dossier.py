@@ -34,7 +34,7 @@ from typing import Dict, List, Tuple, Optional
 import pika
 from django.conf import settings
 from django.db import transaction
-from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
+from django.db.models import QuerySet, Exists, OuterRef
 from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
@@ -388,12 +388,7 @@ class InjectionEPCAdmission:
     def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
         if comptabilite:
             documents = InjectionEPCCurriculum._recuperer_documents(comptabilite)
-            client_sap = candidat.sapclient_set.annotate(
-                priorite=Case(
-                    When(creation_source=SAPClientCreationSource.OSIS.name), then=Value(1),
-                    default=2
-                )
-            ).order_by('priorite').first()
+            client_sap = candidat.sapclient_set.filter(creation_source=SAPClientCreationSource.OSIS.name).first()
             return {
                 "client_sap": client_sap.client_number if client_sap else "",
                 "iban": comptabilite.iban_account_number,
@@ -475,6 +470,11 @@ class InjectionEPCAdmission:
         type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
         type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
         financabilite_checklist = admission.checklist.get('current', {}).get('financabilite', {})
+        etat_financabilite = {
+            'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
+            'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
+        }.get(financabilite_checklist.get('statut'))
+        est_financable = etat_financabilite == EtatFinancabilite.FINANCABLE.name
         return {
             "num_offre": num_offre,
             "validite": validite,
@@ -489,17 +489,15 @@ class InjectionEPCAdmission:
             'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
             'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,
             'complement_de_formation': admission_generale.with_prerequisite_courses if admission_generale else False,
-            'etat_financabilite': {
-                'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
-                'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
-            }.get(financabilite_checklist.get('statut')),
+            'etat_financabilite': etat_financabilite,
             'situation_financabilite': admission_generale.financability_rule if admission_generale else None,
             'utilisateur_financabilite': (
-                admission_generale.financability_rule_established_by.full_name if admission_generale else None
+                admission_generale.financability_rule_established_by.full_name
+                if admission_generale and est_financable else None
             ),
             'date_financabilite': (
                 admission_generale.financability_rule_established_on.strftime("%d/%m/%Y")
-                if admission_generale else None
+                if admission_generale and est_financable else None
             ),
             'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
             'reorientation': bool(admission_generale) and admission_generale.is_external_reorientation,

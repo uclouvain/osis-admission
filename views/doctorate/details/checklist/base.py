@@ -160,8 +160,6 @@ class ChecklistView(
         for document in DocumentsAssimilation:
             assimilation_documents.add(document)
 
-        secondary_studies_attachments = set(DocumentsEtudesSecondaires.keys())
-
         documents_by_tab = {
             OngletsChecklist.assimilation.name: assimilation_documents,
             OngletsChecklist.financabilite.name: {
@@ -177,16 +175,12 @@ class ChecklistView(
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
                 'ADDITIONAL_DOCUMENTS',
-                *secondary_studies_attachments,
             },
             OngletsChecklist.donnees_personnelles.name: assimilation_documents,
             OngletsChecklist.decision_facultaire.name: {
                 'ATTESTATION_ACCORD_FACULTAIRE',
                 'ATTESTATION_REFUS_FACULTAIRE',
             },
-            f'{OngletsChecklist.parcours_anterieur.name}__{OngletsDemande.ETUDES_SECONDAIRES.name}': (
-                secondary_studies_attachments
-            ),
             OngletsChecklist.decision_sic.name: {
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
@@ -200,9 +194,6 @@ class ChecklistView(
         # Add documents from the specific questions
         checklist_target_tab_by_specific_question_tab = {
             Onglets.CURRICULUM.name: OngletsChecklist.parcours_anterieur.name,
-            Onglets.ETUDES_SECONDAIRES.name: (
-                f'{OngletsChecklist.parcours_anterieur.name}__{OngletsDemande.ETUDES_SECONDAIRES.name}'
-            ),
         }
 
         for specific_question in specific_questions:
@@ -377,6 +368,7 @@ class ChecklistView(
                 if experience_id:
                     context['all_experience_authentication_history_entries'].setdefault(experience_id, entry)
 
+            # Past experiences
             children_by_identifier = {
                 child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
             }
@@ -545,6 +537,14 @@ class ChecklistView(
                 }
             )
             context['can_choose_access_title'] = can_change_access_title
+            context['can_choose_access_title_tooltip'] = (
+                _(
+                    'Changes for the access title are not available when the state of the Previous experience '
+                    'is "Sufficient".'
+                )
+                if context.get('past_experiences_are_sufficient')
+                else ''
+            )
 
             context['digit_ticket'] = message_bus_instance.invoke(
                 GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
@@ -592,7 +592,6 @@ class ChecklistView(
             experiences[str(experience_academique.uuid)] = experience_academique
         for experience_non_academique in resume.curriculum.experiences_non_academiques:
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
-        experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
         return experiences
 
 

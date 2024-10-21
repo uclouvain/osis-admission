@@ -104,6 +104,7 @@ class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
     sigle_formation: str
     annee_formation: int
     poursuite_de_cycle: str
+    est_inscription_tardive: bool
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -445,6 +446,12 @@ class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverInscriptionTardiveParFaculteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverReorientationExterneParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
 

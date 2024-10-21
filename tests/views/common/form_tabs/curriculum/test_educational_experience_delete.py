@@ -371,6 +371,5 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.assertRedirects(
             response=response,
             fetch_redirect_response=False,
-            expected_url=resolve_url('admission:doctorate:curriculum', uuid=self.doctorate_admission.uuid),
+            expected_url=resolve_url('admission:doctorate:checklist', uuid=self.doctorate_admission.uuid),
         )
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)

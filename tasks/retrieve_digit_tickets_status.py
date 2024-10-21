@@ -334,12 +334,8 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             f"(Status: IN_PROGRESS / selected_global_id not empty / proposal_merge_person exist)"
         )
 
-    logger.info(f"{PREFIX_TASK} send signaletique into EPC")
     _injecter_signaletique_a_epc(digit_matricule)
-    if settings.USE_CELERY:
-        # TODO refactor to create a model which monitor sending picture to card
-        send_pictures_to_card_app.run.delay(global_id=digit_matricule)
-    logger.info(f"{PREFIX_TASK} send picture to card")
+    _injecter_photo_a_card(digit_matricule)
     logger.info(f"{PREFIX_TASK} ####### END PROCESS SUCCESSFUL DIGIT RESPONSE #######")
 
 
@@ -374,13 +370,33 @@ def _trigger_epc_non_academic_curriculum_deletion(experience_uuid, noma, personn
 
 
 def _injecter_signaletique_a_epc(matricule: str):
+    logger.info(f"{PREFIX_TASK} send signaletique into EPC")
     from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
     periodes_actives = PeriodeSoumissionTicketDigitTranslator.get_periodes_actives()
     demande = PropositionRepository.get_active_period_submitted_proposition(
         matricule_candidat=matricule, periodes_actives=periodes_actives
     )
-    admission = GeneralEducationAdmission.objects.get(uuid=demande.entity_id)
+    admission = GeneralEducationAdmission.objects.get(uuid=demande.entity_id.uuid)
     InjectionEPCSignaletique().injecter(admission=admission)
+
+
+def _injecter_photo_a_card(matricule: str):
+    from base.models.picture_to_card_task import initialiser_call_to_card, NoPictureToSendException, \
+        PictureAlreadySentException, PictureBeingSentOrInErrorException
+
+    try:
+        task_uuid = initialiser_call_to_card(matricule)
+        if settings.USE_CELERY:
+            transaction.on_commit(
+                lambda: send_pictures_to_card_app.run.delay(task_uuid=task_uuid)
+            )
+        logger.info(f"{PREFIX_TASK} send picture to card")
+    except NoPictureToSendException:
+        logger.info(f"{PREFIX_TASK} No picture to send to card")
+    except PictureAlreadySentException:
+        logger.info(f"{PREFIX_TASK} picture already sent to card")
+    except PictureBeingSentOrInErrorException:
+        logger.info(f"{PREFIX_TASK} picture being sent to card or in error state")
 
 
 def _update_non_empty_fields(source_obj: Model, target_obj: Model):
