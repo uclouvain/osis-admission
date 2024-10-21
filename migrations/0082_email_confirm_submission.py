@@ -18,11 +18,6 @@ def replace_in_templates(from_str, to_str):
             subject=Replace('subject', Value(from_str), Value(to_str)),
             body=Replace('body', Value(from_str), Value(to_str)),
         )
-        CddMailTemplate = apps.get_model('admission', 'CddMailTemplate')
-        CddMailTemplate.objects.update(
-            subject=Replace('subject', Value(from_str), Value(to_str)),
-            body=Replace('body', Value(from_str), Value(to_str)),
-        )
 
     return fn
 

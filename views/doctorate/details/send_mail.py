@@ -29,16 +29,10 @@ from django.utils.translation import gettext_lazy as _, override
 from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
-from admission.models import CddMailTemplate
 from admission.ddd.admission.doctorat.preparation.commands import EnvoyerMessageCandidatCommand
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
-from admission.infrastructure.parcours_doctoral.domain.service.notification import (
-    Notification as NotificationDoctorat,
-)
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
-    Notification as NotificationEpreuveConfirmation,
-)
-from admission.mail_templates import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
+from admission.infrastructure.admission.doctorat.preparation.domain.service.notification import Notification
+from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
@@ -60,7 +54,6 @@ class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin,
     def get_extra_form_kwargs(self):
         return {
             'admission': self.admission,
-            'view_url': self.request.path,
         }
 
     def get_form_kwargs(self):
@@ -68,33 +61,19 @@ class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin,
         kwargs.update(self.get_extra_form_kwargs())
         return kwargs
 
-    def get_tokens(self, identifier):
-        if identifier in CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS:
-            return NotificationEpreuveConfirmation.get_common_tokens(self.admission, self.last_confirmation_paper)
-        return NotificationDoctorat.get_common_tokens(self.admission)
-
     def get_initial(self):
-        identifier = self.request.GET.get('template')
-        if identifier:
-            if identifier.isnumeric():
-                # Template is a custom one
-                mail_template = CddMailTemplate.objects.get(pk=identifier)
-                identifier = mail_template.identifier
-            else:
-                # Template is a generic one
-                mail_template = MailTemplate.objects.get(
-                    identifier=identifier,
-                    language=self.admission.candidate.language,
-                )
-            tokens = self.get_tokens(identifier)
+        mail_template = MailTemplate.objects.get(
+            identifier=ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
+            language=self.admission.candidate.language,
+        )
+        tokens = Notification.get_common_tokens(self.proposition, self.admission.candidate)
 
-            with override(language=self.admission.candidate.language):
-                return {
-                    **self.request.GET,
-                    'subject': mail_template.render_subject(tokens),
-                    'body': mail_template.body_as_html(tokens),
-                }
-        return super().get_initial()
+        with override(language=self.admission.candidate.language):
+            return {
+                **self.request.GET,
+                'subject': mail_template.render_subject(tokens),
+                'body': mail_template.body_as_html(tokens),
+            }
 
     def form_valid(self, form: BaseForm):
         message_bus_instance.invoke(

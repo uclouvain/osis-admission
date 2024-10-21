@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
@@ -110,21 +110,30 @@ class Notification(INotification):
         return lazy(lambda: doctorate_title[get_language()], str)()
 
     @classmethod
-    def get_common_tokens(cls, proposition, candidat):
+    def get_common_tokens(cls, proposition: Union[PropositionDTO, Proposition], candidat):
         """Return common tokens about a submission"""
-        frontend_link = get_portal_admission_url(context='doctorate', admission_uuid=proposition.entity_id.uuid)
+        if isinstance(proposition, PropositionDTO):
+            uuid = proposition.uuid
+            reference = proposition.reference
+            formation_id = proposition.formation
+        else:
+            uuid = proposition.entity_id.uuid
+            reference = proposition.reference
+            formation_id = proposition.formation_id
+
+        frontend_link = get_portal_admission_url(context='doctorate', admission_uuid=uuid)
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
-            "training_title": cls._get_doctorate_title_translation(proposition.formation_id),
+            "training_title": cls._get_doctorate_title_translation(formation_id),
             "admission_link_front": frontend_link,
             "admission_link_front_supervision": "{}supervision".format(frontend_link),
             "admission_link_back": get_backoffice_admission_url(
                 context='doctorate',
-                admission_uuid=proposition.entity_id.uuid,
+                admission_uuid=uuid,
                 url_suffix='project',
             ),
-            "reference": proposition.reference,
+            "reference": reference,
         }
 
     @classmethod
