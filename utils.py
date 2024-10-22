@@ -267,6 +267,23 @@ class WeasyprintStylesheets:
             )
         return getattr(cls, '_stylesheet')
 
+    @classmethod
+    def get_stylesheets_bootstrap_5(cls):
+        """Get the stylesheets needed to generate the pdf"""
+        # Load the stylesheets once and cache them
+        if not hasattr(cls, '_stylesheet_bs5'):
+            setattr(
+                cls,
+                '_stylesheet_bs5',
+                [
+                    weasyprint.CSS(filename=os.path.join(settings.BASE_DIR, file_path))
+                    for file_path in [
+                        'base/static/css/bootstrap5/bootstrap.min.css',
+                    ]
+                ],
+            )
+        return getattr(cls, '_stylesheet_bs5')
+
 
 def get_salutation_prefix(person: Person) -> str:
     with override(language=person.language):

@@ -80,6 +80,7 @@ from admission.mail_templates import (
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
 from admission.utils import (
     get_admission_cdd_managers,
@@ -623,52 +624,39 @@ class Notification(INotification):
         corps_message: str,
         digit_repository: 'IDigitRepository',
     ) -> EmailMessage:
+        certificate_fields = {
+            'cdd_approval_certificate': EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
+            'sic_approval_certificate': EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+            'sic_annexe_approval_certificate': EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+        }
         admission = (
             DoctorateAdmission.objects.filter(uuid=proposition_uuid)
             .only(
-                'sic_approval_certificate',
-                'sic_annexe_approval_certificate',
                 'candidate',
+                *certificate_fields,
             )
             .select_related('candidate')
             .first()
         )
 
-        sic_annexe_approval_certificate_url = ''
-        sic_approval_certificate_url = ''
-
         document_uuids = {
             field: str(getattr(admission, field)[0]) if getattr(admission, field) else ''
-            for field in ['sic_annexe_approval_certificate', 'sic_approval_certificate']
+            for field in certificate_fields
         }
 
         document_uuids_list = [document for document in document_uuids.values() if document]
+        document_urls = {field: '' for field in certificate_fields}
 
         if document_uuids_list:
             document_tokens = get_remote_tokens(document_uuids_list, custom_ttl=ONE_YEAR_SECONDS)
 
             if document_tokens:
-                if document_uuids['sic_approval_certificate'] and document_tokens.get(
-                    document_uuids['sic_approval_certificate']
-                ):
-                    sic_approval_certificate_url = get_file_url(
-                        document_tokens[document_uuids['sic_approval_certificate']]
-                    )
-                if document_uuids['sic_annexe_approval_certificate'] and document_tokens.get(
-                    document_uuids['sic_annexe_approval_certificate']
-                ):
-                    sic_annexe_approval_certificate_url = get_file_url(
-                        document_tokens[document_uuids['sic_annexe_approval_certificate']]
-                    )
+                for field in certificate_fields:
+                    if document_uuids[field] and document_tokens.get(document_uuids[field]):
+                        document_urls[field] = get_file_url(document_tokens[document_uuids[field]])
 
-        corps_message = corps_message.replace(
-            EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
-            sic_approval_certificate_url,
-        )
-        corps_message = corps_message.replace(
-            EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
-            sic_annexe_approval_certificate_url,
-        )
+        for field_name, token in certificate_fields.items():
+            corps_message = corps_message.replace(token, document_urls[field_name])
 
         if EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN in corps_message:
             noma_genere = digit_repository.get_registration_id_sent_to_digit(global_id=admission.candidate.global_id)
