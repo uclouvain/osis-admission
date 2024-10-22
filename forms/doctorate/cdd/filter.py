@@ -196,7 +196,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
 
     def get_doctorate_queryset(self):
         """Used to determine which training to filter on"""
-        qs = EducationGroupYear.objects.filter(education_group_type__name=TrainingType.PHD.name)
+        qs = EducationGroupYear.objects.filter(education_group_type__name=TrainingType.FORMATION_PHD.name)
         conditions = Q()
         for entity_aware_role in [r for r in self.relevant_roles if issubclass(r, EntityRoleModel)]:
             conditions |= Q(

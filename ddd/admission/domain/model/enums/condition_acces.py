@@ -111,7 +111,7 @@ CHOIX_PAR_FORMATION: Dict[str, List[ConditionAcces]] = {
     TrainingType.CERTIFICATE.name: CHOIX_POUR_CERTIFICAT,
     TrainingType.AGGREGATION.name: CHOIX_POUR_AGGREGATION,
     TrainingType.CAPAES.name: CHOIX_POUR_CAPAES,
-    TrainingType.PHD.name: CHOIX_POUR_DOCTORAT,
+    TrainingType.FORMATION_PHD.name: CHOIX_POUR_DOCTORAT,
 }
 
 
