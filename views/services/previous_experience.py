@@ -131,19 +131,22 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
         return context
 
     def get_secondary_school_or_alternative_experiences(self):
-        secondary_school_or_alternative_experiences = [
-            SimpleNamespace(
-                uuid=self.etudes_secondaires_candidat.uuid,
-                annees=self.etudes_secondaires_candidat.annee_diplome_etudes_secondaires,
-                nom_formation=self._get_nom_formation_etude_secondaire(self.etudes_secondaires_candidat),
-                nom_institut=self._get_nom_institut_etude_secondaire(self.etudes_secondaires_candidat),
-                est_experience_belge=isinstance(
-                    self.etudes_secondaires_candidat.experience, DiplomeBelgeEtudesSecondairesDTO
-                ),
-                source='CANDIDAT',
+        secondary_school_or_alternative_experiences = []
+        if self.etudes_secondaires_candidat.experience is not None:
+            secondary_school_or_alternative_experiences.append(
+                SimpleNamespace(
+                    uuid=self.etudes_secondaires_candidat.uuid,
+                    annees=self.etudes_secondaires_candidat.annee_diplome_etudes_secondaires,
+                    nom_formation=self._get_nom_formation_etude_secondaire(self.etudes_secondaires_candidat),
+                    nom_institut=self._get_nom_institut_etude_secondaire(self.etudes_secondaires_candidat),
+                    est_experience_belge=isinstance(
+                        self.etudes_secondaires_candidat.experience, DiplomeBelgeEtudesSecondairesDTO
+                    ),
+                    source='CANDIDAT',
+                    is_checked=True,
+                )
             )
-        ]
-        if self.etudes_secondaires_personne_connue:
+        if self.etudes_secondaires_personne_connue and self.etudes_secondaires_personne_connue.experience is not None:
             secondary_school_or_alternative_experiences.append(
                 SimpleNamespace(
                     uuid=self.etudes_secondaires_personne_connue.uuid,
@@ -154,6 +157,7 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
                         self.etudes_secondaires_candidat.experience, DiplomeBelgeEtudesSecondairesDTO
                     ),
                     source='PERSONNE_CONNUE',
+                    is_checked=len(secondary_school_or_alternative_experiences) == 0,
                 )
             )
         return secondary_school_or_alternative_experiences
@@ -180,15 +184,57 @@ class SearchPreviousExperienceView(HtmxMixin, HtmxPermissionRequiredMixin, Templ
         return getattr(etude_secondaire.experience, 'pays_nom', '')
 
     def get_professional_experiences(self):
-        professional_experiences = self.curriculum_candidat.experiences_non_academiques
+        professional_experiences = [
+            SimpleNamespace(
+                uuid=experience_non_academique.uuid,
+                date_debut=experience_non_academique.date_debut,
+                date_fin=experience_non_academique.date_fin,
+                type=experience_non_academique.type,
+                secteur=experience_non_academique.secteur,
+                autre_activite=experience_non_academique.autre_activite,
+                fonction=experience_non_academique.fonction,
+                employeur=experience_non_academique.employeur,
+                source='CANDIDAT',
+            ) for experience_non_academique in self.curriculum_candidat.experiences_non_academiques
+        ]
         if self.curriculum_personne_connue:
-            professional_experiences += self.curriculum_personne_connue.experiences_non_academiques
+            professional_experiences += [
+                SimpleNamespace(
+                    uuid=experience_non_academique.uuid,
+                    date_debut=experience_non_academique.date_debut,
+                    date_fin=experience_non_academique.date_fin,
+                    type=experience_non_academique.type,
+                    secteur=experience_non_academique.secteur,
+                    autre_activite=experience_non_academique.autre_activite,
+                    fonction=experience_non_academique.fonction,
+                    employeur=experience_non_academique.employeur,
+                    source='PERSONNE_CONNUE',
+                ) for experience_non_academique in self.curriculum_personne_connue.experiences_non_academiques
+            ]
         return sorted(professional_experiences, key=lambda exp: (exp.date_debut, exp.date_fin), reverse=True)
 
     def get_educational_experiences(self):
-        educational_experiences = self.curriculum_candidat.experiences_academiques
+        educational_experiences = [
+            SimpleNamespace(
+                uuid=educational_experiences.uuid,
+                titre_formate=educational_experiences.titre_formate,
+                annees=educational_experiences.annees,
+                nom_formation=educational_experiences.nom_formation,
+                nom_institut=educational_experiences.nom_institut,
+                source='CANDIDAT',
+            ) for educational_experiences in self.curriculum_candidat.experiences_academiques
+        ]
         if self.curriculum_personne_connue:
-            educational_experiences += self.curriculum_personne_connue.experiences_academiques
+            educational_experiences += [
+                SimpleNamespace(
+                    uuid=educational_experiences.uuid,
+                    titre_formate=educational_experiences.titre_formate,
+                    annees=educational_experiences.annees,
+                    nom_formation=educational_experiences.nom_formation,
+                    nom_institut=educational_experiences.nom_institut,
+                    source='PERSONNE_CONNUE',
+                ) for educational_experiences in self.curriculum_personne_connue.experiences_academiques
+            ]
         return sorted(educational_experiences, key=lambda exp: exp.titre_formate, reverse=True)
 
     def get_mergeable_experiences_uuids(self):
