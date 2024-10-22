@@ -28,11 +28,15 @@
   {% for autre_demande in autres_demandes %}
     <tr>
       <td style="white-space: nowrap; vertical-align: baseline;">
-        {% admission_url autre_demande.uuid autre_demande.type_formation as autre_demande_url %}
-        {% if autre_demande_url %}
-          <a target="_blank" href="{{ autre_demande_url }}">{{ autre_demande.numero_demande }}</a>
-        {% else %}
+        {% if without_admission_url %}
           {{ autre_demande.numero_demande }}
+        {% else %}
+          {% admission_url autre_demande.uuid autre_demande.type_formation as autre_demande_url %}
+          {% if autre_demande_url %}
+            <a target="_blank" href="{{ autre_demande_url }}">{{ autre_demande.numero_demande }}</a>
+          {% else %}
+            {{ autre_demande.numero_demande }}
+          {% endif %}
         {% endif %}
       </td>
       <td style="padding-left: 1em">

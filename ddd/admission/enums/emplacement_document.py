@@ -131,6 +131,7 @@ DocumentsIdentification = {
 
 
 DocumentsSystemeFAC = {
+    'ATTESTATION_ACCORD_CDD': _('Approval certificate of the CDD'),
     'ATTESTATION_ACCORD_FACULTAIRE': _('Approval certificate of faculty'),
     'ATTESTATION_REFUS_FACULTAIRE': _('Refusal certificate of faculty'),
 }
