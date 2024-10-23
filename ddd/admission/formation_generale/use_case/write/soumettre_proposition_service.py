@@ -54,7 +54,6 @@ from admission.ddd.admission.formation_generale.events import PropositionSoumise
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.financabilite.domain.service.financabilite import Financabilite
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
@@ -165,6 +164,10 @@ def soumettre_proposition(
         est_en_reorientation=proposition.est_reorientation_inscription_externe,
         etat_financabilite_2023=etat_financabilite_2023,
     ).determiner()
+
+    proposition.nettoyer_reponses_questions_specifiques(
+        questions_specifiques=questions_specifiques,
+    )
 
     proposition.soumettre(
         formation_id=formation_id,

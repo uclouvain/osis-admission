@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -49,43 +49,49 @@ class AdmissionFormItemFactory(factory.django.DjangoModelFactory):
 
 class MessageAdmissionFormItemFactory(AdmissionFormItemFactory):
     type = TypeItemFormulaire.MESSAGE.name
-    text = {'en': 'My very short message.', 'fr-be': 'Mon très court message.'}
+    text = factory.LazyFunction(lambda: {'en': 'My very short message.', 'fr-be': 'Mon très court message.'})
 
 
 class TextAdmissionFormItemFactory(AdmissionFormItemFactory):
     type = TypeItemFormulaire.TEXTE.name
-    title = {'en': 'Text field', 'fr-be': 'Champ texte'}
-    text = {'en': 'Detailed data.', 'fr-be': 'Données détaillées.'}
-    help_text = {'en': 'Write here', 'fr-be': 'Ecrivez ici'}
+    title = factory.LazyFunction(lambda: {'en': 'Text field', 'fr-be': 'Champ texte'})
+    text = factory.LazyFunction(lambda: {'en': 'Detailed data.', 'fr-be': 'Données détaillées.'})
+    help_text = factory.LazyFunction(lambda: {'en': 'Write here', 'fr-be': 'Ecrivez ici'})
 
 
 class DocumentAdmissionFormItemFactory(AdmissionFormItemFactory):
     type = TypeItemFormulaire.DOCUMENT.name
-    title = {'en': 'Document field', 'fr-be': 'Champ document'}
-    text = {'en': 'Detailed data.', 'fr-be': 'Données détaillées.'}
+    title = factory.LazyFunction(lambda: {'en': 'Document field', 'fr-be': 'Champ document'})
+    text = factory.LazyFunction(lambda: {'en': 'Detailed data.', 'fr-be': 'Données détaillées.'})
 
 
 class SelectionAdmissionFormItemFactory(AdmissionFormItemFactory):
     type = TypeItemFormulaire.SELECTION.name
-    title = {'en': 'Selection field', 'fr-be': 'Champ de sélection'}
-    text = {'en': 'Detailed data.', 'fr-be': 'Données détaillées.'}
-    values = [
-        {'key': '1', 'en': 'One', 'fr-be': 'Un'},
-        {'key': '2', 'en': 'Two', 'fr-be': 'Deux'},
-        {'key': '3', 'en': 'Three', 'fr-be': 'Trois'},
-    ]
+    title = factory.LazyFunction(lambda: {'en': 'Selection field', 'fr-be': 'Champ de sélection'})
+    text = factory.LazyFunction(lambda: {'en': 'Detailed data.', 'fr-be': 'Données détaillées.'})
+    values = factory.LazyFunction(
+        lambda: [
+            {'key': '1', 'en': 'One', 'fr-be': 'Un'},
+            {'key': '2', 'en': 'Two', 'fr-be': 'Deux'},
+            {'key': '3', 'en': 'Three', 'fr-be': 'Trois'},
+        ]
+    )
 
 
 class RadioButtonSelectionAdmissionFormItemFactory(SelectionAdmissionFormItemFactory):
-    configuration = {
-        'TYPE_SELECTION': 'BOUTONS_RADIOS',
-    }
+    configuration = factory.LazyFunction(
+        lambda: {
+            'TYPE_SELECTION': 'BOUTONS_RADIOS',
+        }
+    )
 
 
 class CheckboxSelectionAdmissionFormItemFactory(SelectionAdmissionFormItemFactory):
-    configuration = {
-        'TYPE_SELECTION': 'CASES_A_COCHER',
-    }
+    configuration = factory.LazyFunction(
+        lambda: {
+            'TYPE_SELECTION': 'CASES_A_COCHER',
+        }
+    )
 
 
 class AdmissionFormItemInstantiationFactory(factory.django.DjangoModelFactory):

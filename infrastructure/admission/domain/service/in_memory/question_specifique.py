@@ -118,7 +118,7 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             formation=FormationIdentity(sigle='MASTER-SCI', annee=2021),
         ),
         QuestionSpecifiqueEtendue(
-            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f145'),
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f149'),
             type=TypeItemFormulaire.MESSAGE,
             requis=True,
             configuration={},
@@ -262,7 +262,6 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             for question in cls._extended_search_by_proposition(
                 proposition_uuid=proposition_uuid,
                 onglets=onglets,
-                requis=True,
             )
         ]
 
