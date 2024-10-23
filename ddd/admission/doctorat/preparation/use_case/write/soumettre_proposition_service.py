@@ -93,10 +93,7 @@ def soumettre_proposition(
     )
     questions_specifiques = questions_specifiques_translator.search_by_proposition(
         cmd.uuid_proposition,
-        onglets=[
-            Onglets.CURRICULUM.name,
-            Onglets.ETUDES_SECONDAIRES.name,
-        ],
+        onglets=Onglets.get_names(),
     )
     identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
     formation = doctorat_translator.get(proposition.formation_id.sigle, proposition.formation_id.annee)
@@ -166,6 +163,8 @@ def soumettre_proposition(
         est_en_reorientation=False,
         etat_financabilite_2023=etat_financabilite_2023,
     ).determiner()
+
+    proposition.nettoyer_reponses_questions_specifiques(questions_specifiques)
 
     proposition.finaliser(
         formation_id=formation_id,

@@ -66,3 +66,50 @@ class TestSoumettrePropositionContinue(TestCase):
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionContinue.CONFIRMEE)
         self.assertEqual(updated_proposition.auteur_derniere_modification, proposition.matricule_candidat)
+
+    def test_should_soumettre_proposition_en_nettoyant_reponses_questions_specifiques(self):
+        proposition = self.proposition_repository.get(PropositionIdentityBuilder.build_from_uuid("uuid-USCC1"))
+
+        proposition.reponses_questions_specifiques = {
+            '26de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+            # A default value will be set
+            # '26de0c3d-3c06-4c93-8eb4-c8648f04f141': 'My response 1',
+            '26de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+            '26de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
+            '26de0c3d-3c06-4c93-8eb4-c8648f04f145': ['24de0c3d-3c06-4c93-8eb4-c8648f04f144'],
+            # Will be deleted as it's a readonly element
+            '26de0c3d-3c06-4c93-8eb4-c8648f04f142': 'MESSAGE',
+            # Will be deleted as it's not interesting for this admission
+            '36de0c3d-3c06-4c93-8eb4-c8648f04f140': 'Not interesting response 0',
+            '36de0c3d-3c06-4c93-8eb4-c8648f04f141': 'Not interesting response 1',
+        }
+
+        self.proposition_repository.save(proposition)
+
+        proposition_id = self.message_bus.invoke(
+            SoumettrePropositionCommand(
+                uuid_proposition="uuid-USCC1",
+                pool=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
+                annee=2020,
+                elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(proposition),
+            ),
+        )
+
+        updated_proposition = self.proposition_repository.get(proposition_id)
+
+        # Command result
+        self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
+
+        # Updated proposition
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionContinue.CONFIRMEE)
+
+        self.assertEqual(
+            updated_proposition.reponses_questions_specifiques,
+            {
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f141': '',
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f145': ['24de0c3d-3c06-4c93-8eb4-c8648f04f144'],
+            },
+        )
