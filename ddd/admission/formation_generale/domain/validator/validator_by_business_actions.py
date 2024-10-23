@@ -133,6 +133,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
+                mois_debut_annee_academique_courante_facultatif=True,
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
@@ -166,7 +167,8 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
-                date_reference=self.date_soumission,
+                date_soumission=self.date_soumission,
+                mois_debut_annee_academique_courante_facultatif=True,
                 experiences_parcours_interne=self.experiences_parcours_interne,
             ),
         ]

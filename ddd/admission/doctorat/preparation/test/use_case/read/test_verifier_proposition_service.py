@@ -28,11 +28,9 @@ import uuid
 
 import freezegun
 import mock
-from celery.worker.consumer.mingle import exception
 from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
@@ -1029,6 +1027,23 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertCountEqual(messages, messages_renvoyes)
 
     def test_should_retourner_erreur_si_5_dernieres_annees_curriculum_non_saisies(self):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2016 à Février 2017',
+                'De Septembre 2017 à Février 2018',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
+
+    def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_demande_soumise(self):
+        self.proposition.soumise_le = datetime.date(2020, 10, 1)
+
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
