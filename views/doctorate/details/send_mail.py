@@ -29,7 +29,6 @@ from django.utils.translation import gettext_lazy as _, override
 from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models import CddMailTemplate
 from admission.ddd.admission.doctorat.preparation.commands import EnvoyerMessageCandidatCommand
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
 from parcours_doctoral.infrastructure.parcours_doctoral.domain.service.notification import (
@@ -38,7 +37,6 @@ from parcours_doctoral.infrastructure.parcours_doctoral.domain.service.notificat
 from parcours_doctoral.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
     Notification as NotificationEpreuveConfirmation,
 )
-from admission.mail_templates import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
@@ -46,6 +44,9 @@ from osis_common.utils.htmx import HtmxMixin
 __all__ = [
     "DoctorateSendMailView",
 ]
+
+from parcours_doctoral.mail_templates.confirmation_paper import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
+from parcours_doctoral.models.cdd_mail_template import CddMailTemplate
 
 
 class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin, FormView):

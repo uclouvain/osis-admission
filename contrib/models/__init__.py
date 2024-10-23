@@ -29,7 +29,6 @@ try:
     from .actor import SupervisionActor
     from admission.ddd.admission.enums.type_demande import TypeDemande
     from .entity_proxy import EntityProxy
-    from .cdd_mail_template import CddMailTemplate
     from .task import AdmissionTask
     from .accounting import Accounting
     from .scholarship import Scholarship
@@ -45,7 +44,6 @@ try:
         "TypeDemande",
         "SupervisionActor",
         "EntityProxy",
-        "CddMailTemplate",
         "AdmissionTask",
         "Accounting",
         "Scholarship",

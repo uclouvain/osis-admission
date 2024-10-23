@@ -82,7 +82,6 @@ from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
 __all__ = [
     "DoctorateAdmission",
-    "DoctorateProxy",
 ]
 
 from .checklist import RefusalReason
@@ -1030,15 +1029,6 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_training_management_entity()
             .annotate_with_reference(with_management_faculty=False)
         )
-
-
-class DoctorateProxy(DoctorateAdmission):
-    """Proxy model of base.DoctorateAdmission for Doctorat in doctorat context"""
-
-    objects = DoctorateManager()
-
-    class Meta:
-        proxy = True
 
 
 class DoctorateAdmissionPrerequisiteCourses(models.Model):

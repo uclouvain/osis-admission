@@ -31,12 +31,13 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import CddMailTemplate
 from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.tests.factories.program_manager import ProgramManagerFactory
 from osis_notification.models import EmailNotification
+
+from parcours_doctoral.models.cdd_mail_template import CddMailTemplate
 
 
 class SendMailDoctorateStudentTestCase(TestCase):

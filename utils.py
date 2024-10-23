@@ -62,7 +62,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
 )
 from backoffice.settings.rest_framework.exception_handler import get_error_data
@@ -85,6 +84,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_common.ddd.interface import BusinessException, QueryRequest
+from parcours_doctoral.mail_templates.confirmation_paper import ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 

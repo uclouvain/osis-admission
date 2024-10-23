@@ -58,7 +58,6 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import (
     AdmissionTask,
     AdmissionViewer,
-    CddMailTemplate,
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
@@ -92,7 +91,6 @@ from admission.ddd.admission.formation_continue.domain.model.statut_checklist im
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
-from parcours_doctoral.ddd.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
@@ -304,23 +302,6 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
                     len(not_achieved_admissions_ids),
                 ).format(', '.join(map(str, not_achieved_admissions_ids))),
             )
-
-
-class CddMailTemplateAdmin(MailTemplateAdmin):
-    list_display = ('name', 'identifier', 'language', 'cdd')
-    search_fields = [
-        'cdd__acronym',
-        'idenfier',
-    ]
-    list_filter = [
-        'cdd',
-        'language',
-        'identifier',
-    ]
-
-    @staticmethod
-    def view_on_site(obj):
-        return resolve_url(f'admission:config:cdd-mail-template:preview', identifier=obj.identifier, pk=obj.pk)
 
 
 class ScholarshipAdmin(admin.ModelAdmin):
@@ -906,7 +887,6 @@ class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
-admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(Scholarship, ScholarshipAdmin)
 admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
 admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)

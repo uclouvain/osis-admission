@@ -29,11 +29,11 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from parcours_doctoral.ddd.commands import RecupererDoctoratQuery
 
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from parcours_doctoral.ddd.commands import RecupererDoctoratQuery
 
 
 class DoctorateSchema(ResponseSpecificSchema):
