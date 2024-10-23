@@ -96,6 +96,8 @@ def soumettre_proposition(
     )
 
     # THEN
+    proposition.nettoyer_reponses_questions_specifiques(questions_specifiques)
+
     proposition.soumettre(
         formation_id=formation_id,
         pool=AcademicCalendarTypes[cmd.pool],

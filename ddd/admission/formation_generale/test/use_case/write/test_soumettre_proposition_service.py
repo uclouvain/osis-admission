@@ -30,6 +30,7 @@ import freezegun
 import mock
 from django.test import TestCase
 
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
@@ -46,6 +47,8 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
+from ddd.logic.financabilite.dtos.catalogue import FormationDTO
 from ddd.logic.financabilite.dtos.parcours import (
     ParcoursDTO,
     ParcoursAcademiqueInterneDTO,
@@ -244,3 +247,83 @@ class TestSoumettrePropositionGenerale(TestCase):
 
         updated_proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(updated_proposition.est_inscription_tardive, False)
+
+    @freezegun.freeze_time('22/09/2021')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
+    def test_should_soumettre_proposition_en_nettoyant_reponses_questions_specifiques(self):
+        proposition = self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI"))
+
+        elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
+            proposition,
+            FormationGeneraleInMemoryTranslator(),
+        )
+
+        self.financabilite_fetcher.save(
+            ParcoursDTO(
+                matricule_fgs='0000000001',
+                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                annee_diplome_etudes_secondaires=2015,
+                nombre_tentative_de_passer_concours_pass_et_las=0,
+            )
+        )
+
+        self.financabilite_fetcher.formations.append(
+            FormationDTO(
+                sigle='MASTER-SCI',
+                annee=2021,
+                type=TrainingType.MASTER_MC.name,
+                grade_academique=TrainingType.MASTER_MC.name,
+                credits=60,
+                cycle=2,
+            ),
+        )
+
+        proposition.reponses_questions_specifiques = {
+            '16de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+            # A default value will be set
+            # '16de0c3d-3c06-4c93-8eb4-c8648f04f141': 'My response 1',
+            '16de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+            '16de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+            '16de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
+            '16de0c3d-3c06-4c93-8eb4-c8648f04f145': ['24de0c3d-3c06-4c93-8eb4-c8648f04f144'],
+            # A default value will be set
+            # '16de0c3d-3c06-4c93-8eb4-c8648f04f146': ['24de0c3d-3c06-4c93-8eb4-c8648f04f145'],
+            # Will be deleted as it's a readonly element
+            '16de0c3d-3c06-4c93-8eb4-c8648f04f149': 'MESSAGE',
+            # Will be deleted as it's not interesting for this admission
+            '26de0c3d-3c06-4c93-8eb4-c8648f04f140': 'Not interesting response 0',
+            '26de0c3d-3c06-4c93-8eb4-c8648f04f141': 'Not interesting response 1',
+        }
+
+        self.proposition_repository.save(proposition)
+
+        proposition_id = self.message_bus.invoke(
+            SoumettrePropositionCommand(
+                uuid_proposition="uuid-MASTER-SCI",
+                pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
+                annee=2021,
+                elements_confirmation=elements_confirmation,
+            ),
+        )
+
+        updated_proposition = self.proposition_repository.get(proposition_id)
+
+        # Command result
+        self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
+
+        # Updated proposition
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)
+
+        self.assertEqual(
+            updated_proposition.reponses_questions_specifiques,
+            {
+                '16de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+                '16de0c3d-3c06-4c93-8eb4-c8648f04f141': '',
+                '16de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+                '16de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+                '16de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
+                '16de0c3d-3c06-4c93-8eb4-c8648f04f145': ['24de0c3d-3c06-4c93-8eb4-c8648f04f144'],
+                '16de0c3d-3c06-4c93-8eb4-c8648f04f146': [],
+            },
+        )

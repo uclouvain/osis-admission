@@ -229,3 +229,48 @@ class TestVerifierPropositionServiceCommun(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.base_cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), IdentificationNonCompleteeException)
+
+    def test_should_soumettre_proposition_en_nettoyant_reponses_questions_specifiques(self):
+        proposition = self.proposition_repository.get(self.proposition.entity_id)
+
+        proposition.reponses_questions_specifiques = {
+            '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+            # A default value will be set
+            # '06de0c3d-3c06-4c93-8eb4-c8648f04f141': 'My response 1',
+            '06de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+            '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+            # Will be deleted as it's a readonly element
+            '06de0c3d-3c06-4c93-8eb4-c8648f04f145': 'MESSAGE',
+            # Will be deleted as it's not interesting for this admission
+            '36de0c3d-3c06-4c93-8eb4-c8648f04f140': 'Not interesting response 0',
+            '36de0c3d-3c06-4c93-8eb4-c8648f04f141': 'Not interesting response 1',
+        }
+
+        self.proposition_repository.save(proposition)
+
+        proposition_id = self.message_bus.invoke(
+            SoumettrePropositionCommand(
+                uuid_proposition=self.proposition.entity_id.uuid,
+                pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
+                annee=2020,
+                elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(proposition),
+            ),
+        )
+
+        updated_proposition = self.proposition_repository.get(proposition_id)
+
+        # Command result
+        self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
+
+        # Updated proposition
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
+        self.maxDiff = None
+        self.assertEqual(
+            updated_proposition.reponses_questions_specifiques,
+            {
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f141': '',
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+            },
+        )
