@@ -46,7 +46,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DerogationFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.doctorat.preparation.dtos.condition_approbation import (
     ConditionComplementaireApprobationDTO,
 )
@@ -186,7 +186,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.uuid, self.admission.uuid)
         self.assertEqual(
             result.doctorat,
-            DoctoratDTO(
+            DoctoratFormationDTO(
                 sigle=self.admission.training.acronym,
                 code=self.admission.training.partial_acronym,
                 annee=self.admission.training.academic_year.year,

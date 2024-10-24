@@ -24,10 +24,8 @@
 #
 # ##############################################################################
 import datetime
-import uuid
 from contextlib import suppress
 
-from ckeditor.fields import RichTextField
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -43,7 +41,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -64,7 +61,6 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from parcours_doctoral.ddd.jury.domain.model.enums import FormuleDefense
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
@@ -349,46 +345,6 @@ class DoctorateAdmission(BaseAdmission):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-    )
-
-    # Jury
-    thesis_proposed_title = models.CharField(
-        max_length=255,
-        verbose_name=_("Proposed thesis title"),
-        default='',
-        blank=True,
-    )
-    defense_method = models.CharField(
-        max_length=255,
-        verbose_name=_("Defense method"),
-        choices=FormuleDefense.choices(),
-        default='',
-        blank=True,
-    )
-    defense_indicative_date = models.DateField(
-        verbose_name=_("Defense indicative date"),
-        null=True,
-        blank=True,
-    )
-    defense_language = models.CharField(
-        max_length=255,
-        verbose_name=_("Defense language"),
-        choices=ChoixLangueRedactionThese.choices(),
-        default=ChoixLangueRedactionThese.UNDECIDED.name,
-        blank=True,
-    )
-    comment_about_jury = models.TextField(
-        default="",
-        verbose_name=_("Comment about jury"),
-        blank=True,
-    )
-    accounting_situation = models.BooleanField(
-        null=True,
-        blank=True,
-    )
-    jury_approval = FileField(
-        verbose_name=_("Jury approval"),
-        upload_to=admission_directory_path,
     )
 
     # Financability
@@ -751,14 +707,9 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name = _("Doctorate admission")
         ordering = ('-created_at',)
         permissions = [
-            ('download_jury_approved_pdf', _("Can download jury-approved PDF")),
-            ('upload_jury_approved_pdf', _("Can upload jury-approved PDF")),
             ('upload_signed_scholarship', _("Can upload signed scholarship")),
             ('check_publication_authorisation', _("Can check publication autorisation")),
             ('validate_registration', _("Can validate registration")),
-            ('approve_jury', _("Can approve jury")),
-            ('approve_confirmation_paper', _("Can approve confirmation paper")),
-            ('validate_doctoral_training', _("Can validate doctoral training")),
             ('download_pdf_confirmation', _("Can download PDF confirmation")),
             ('upload_pdf_confirmation', _("Can upload PDF confirmation")),
             ('fill_thesis', _("Can fill thesis")),
@@ -797,13 +748,6 @@ class DoctorateAdmission(BaseAdmission):
             (
                 'change_admission_supervision',
                 _("Can update the information related to the admission supervision"),
-            ),
-            ('view_admission_jury', _("Can view the information related to the admission jury")),
-            ('change_admission_jury', _("Can update the information related to the admission jury")),
-            ('view_admission_confirmation', _("Can view the information related to the confirmation paper")),
-            (
-                'change_admission_confirmation',
-                _("Can update the information related to the confirmation paper"),
             ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),

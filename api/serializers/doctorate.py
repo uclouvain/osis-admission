@@ -26,7 +26,7 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import DOCTORATE_ACTION_LINKS
-from parcours_doctoral.ddd.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
 

@@ -45,7 +45,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO, PropositionDTO as DoctoratPropositionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
@@ -174,7 +174,7 @@ class DoctoratDTOSerializer(DTOSerializer):
     credits = None
 
     class Meta:
-        source = DoctoratDTO
+        source = DoctoratFormationDTO
 
 
 class FormationGeneraleDTOSerializer(DTOSerializer):

@@ -35,7 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
-from parcours_doctoral.ddd.domain.model.doctorat import DoctoratIdentity
+from parcours_doctoral.ddd.domain.model.parcours_doctoral import ParcoursDoctoralIdentity
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 
@@ -53,7 +53,7 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
-    def get_by_doctorat_id(cls, doctorat_id: 'DoctoratIdentity') -> 'GroupeDeSupervision':
+    def get_by_doctorat_id(cls, doctorat_id: 'ParcoursDoctoralIdentity') -> 'GroupeDeSupervision':
         raise NotImplementedError
 
     @classmethod

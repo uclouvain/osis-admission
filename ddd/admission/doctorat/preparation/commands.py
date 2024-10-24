@@ -783,3 +783,8 @@ class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDoctoratQuery(interface.QueryRequest):
+    doctorat_uuid: str

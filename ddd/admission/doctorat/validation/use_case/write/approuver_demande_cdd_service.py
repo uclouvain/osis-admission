@@ -39,7 +39,7 @@ from parcours_doctoral.ddd.epreuve_confirmation.domain.service.epreuve_confirmat
 from parcours_doctoral.ddd.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
-from parcours_doctoral.ddd.repository.i_doctorat import IDoctoratRepository
+from parcours_doctoral.ddd.repository.i_doctorat import IParcoursDoctoralRepository
 
 
 def approuver_demande_cdd(
@@ -47,7 +47,7 @@ def approuver_demande_cdd(
     demande_repository: 'IDemandeRepository',
     proposition_repository: 'IPropositionRepository',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
-    doctorat_repository: 'IDoctoratRepository',
+    doctorat_repository: 'IParcoursDoctoralRepository',
 ) -> 'DemandeIdentity':
     # GIVEN
     demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.uuid)

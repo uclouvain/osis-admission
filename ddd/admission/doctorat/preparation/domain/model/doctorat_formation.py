@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,33 +23,38 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
-
 import attr
 
-from admission.ddd.admission.dtos.bourse import BourseDTO
+from admission.ddd.admission.domain.model.formation import FormationIdentity
+from base.models.enums.education_group_types import TrainingType
+from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity
 from osis_common.ddd import interface
 
+ENTITY_CDE = 'CDE'
+ENTITY_CDSS = 'CDSS'
+ENTITY_CLSM = 'CLSM'
+ENTITY_SCIENCES = 'CDSC'
+SIGLE_SCIENCES = 'SC3DP'
 
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratDTO(interface.DTO):
-    uuid: str
-    reference: str
+COMMISSIONS_CDE_CLSM = {ENTITY_CDE, ENTITY_CLSM}
+COMMISSIONS_CDSS = {ENTITY_CDSS}
+SIGLES_SCIENCES = {SIGLE_SCIENCES}
 
-    sigle_formation: str
-    annee_formation: int
-    intitule_formation: str
 
-    type_admission: str
-    titre_these: str
-    type_financement: str
-    bourse_recherche: Optional[BourseDTO]
-    autre_bourse_recherche: Optional[str]
-    admission_acceptee_le: Optional[datetime.datetime]
+@attr.dataclass(slots=True)
+class DoctoratFormation(interface.Entity):
+    entity_id: 'FormationIdentity'
+    entite_ucl_id: 'UCLEntityIdentity'
+    type: 'TrainingType'
 
-    matricule_doctorant: str
-    noma_doctorant: str
-    genre_doctorant: str
-    prenom_doctorant: str
-    nom_doctorant: str
+    def est_entite_CDE(self):
+        return self.entite_ucl_id.code == ENTITY_CDE
+
+    def est_entite_CDSS(self):
+        return self.entite_ucl_id.code == ENTITY_CDSS
+
+    def est_entite_CLSM(self):
+        return self.entite_ucl_id.code == ENTITY_CLSM
+
+    def est_domaine_des_sciences(self):
+        return self.entity_id.sigle == SIGLE_SCIENCES

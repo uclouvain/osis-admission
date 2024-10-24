@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
     PropositionGestionnaireDTO as PropositionDoctoraleDTO,
 )
@@ -402,7 +402,7 @@ class DoctorateTrainingChoiceForm(BaseTrainingChoiceForm):
     )
 
     @classmethod
-    def get_proximity_commission_field(cls, training: DoctoratDTO) -> Optional[str]:
+    def get_proximity_commission_field(cls, training: DoctoratFormationDTO) -> Optional[str]:
         """Determine the proximity commission field name for a given training."""
         if training.sigle_entite_gestion in COMMISSIONS_CDE_CLSM:
             return 'proximity_commission_cde'

@@ -74,9 +74,9 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from parcours_doctoral.ddd.commands import RecupererDoctoratQuery
+from parcours_doctoral.ddd.commands import RecupererParcoursDoctoralQuery
 from parcours_doctoral.ddd.domain.validator.exceptions import DoctoratNonTrouveException
-from parcours_doctoral.ddd.dtos import DoctoratDTO
+from parcours_doctoral.ddd.dtos import ParcoursDoctoralDTO
 from parcours_doctoral.ddd.epreuve_confirmation.commands import (
     RecupererDerniereEpreuveConfirmationQuery,
 )
@@ -180,8 +180,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         return message_bus_instance.invoke(RecupererDemandeQuery(uuid=self.admission_uuid))
 
     @cached_property
-    def doctorate(self) -> 'DoctoratDTO':
-        return message_bus_instance.invoke(RecupererDoctoratQuery(doctorat_uuid=self.admission_uuid))
+    def doctorate(self) -> 'ParcoursDoctoralDTO':
+        return message_bus_instance.invoke(RecupererParcoursDoctoralQuery(parcours_doctoral_uuid=self.admission_uuid))
 
     @cached_property
     def last_confirmation_paper(self) -> EpreuveConfirmationDTO:

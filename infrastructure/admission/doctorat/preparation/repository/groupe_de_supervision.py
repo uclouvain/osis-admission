@@ -57,7 +57,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, Memb
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from parcours_doctoral.ddd.domain.model.doctorat import DoctoratIdentity
+from parcours_doctoral.ddd.domain.model.parcours_doctoral import ParcoursDoctoralIdentity
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_signature.models import Actor, Process, StateHistory
@@ -165,7 +165,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         return cls._load(proposition)
 
     @classmethod
-    def get_by_doctorat_id(cls, doctorat_id: 'DoctoratIdentity') -> 'GroupeDeSupervision':
+    def get_by_doctorat_id(cls, doctorat_id: 'ParcoursDoctoralIdentity') -> 'GroupeDeSupervision':
         return cls.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(doctorat_id.uuid))
 
     @classmethod

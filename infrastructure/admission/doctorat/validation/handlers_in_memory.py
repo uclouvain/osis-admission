@@ -30,14 +30,14 @@ from admission.ddd.admission.doctorat.validation.use_case.write import *
 from parcours_doctoral.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
     EpreuveConfirmationInMemoryRepository,
 )
-from parcours_doctoral.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
+from parcours_doctoral.infrastructure.parcours_doctoral.repository.in_memory.parcours_doctoral import ParcoursDoctoralInMemoryRepository
 from .repository.in_memory.demande import DemandeInMemoryRepository
 from ..preparation.repository.in_memory.proposition import PropositionInMemoryRepository
 
 _proposition_repository = PropositionInMemoryRepository()
 _demande_repository = DemandeInMemoryRepository()
 _epreuve_confirmation_repository = EpreuveConfirmationInMemoryRepository()
-_doctorat_repository = DoctoratInMemoryRepository()
+_doctorat_repository = ParcoursDoctoralInMemoryRepository()
 
 
 COMMAND_HANDLERS = {

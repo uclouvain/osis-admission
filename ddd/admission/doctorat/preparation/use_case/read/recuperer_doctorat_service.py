@@ -23,33 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
-
-import attr
-
-from admission.ddd.admission.dtos.bourse import BourseDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.doctorat.preparation.builder.doctorat_identity import DoctoratIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import RecupererDoctoratQuery
+from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_doctorat import IDoctoratRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratDTO(interface.DTO):
-    uuid: str
-    reference: str
-
-    sigle_formation: str
-    annee_formation: int
-    intitule_formation: str
-
-    type_admission: str
-    titre_these: str
-    type_financement: str
-    bourse_recherche: Optional[BourseDTO]
-    autre_bourse_recherche: Optional[str]
-    admission_acceptee_le: Optional[datetime.datetime]
-
-    matricule_doctorant: str
-    noma_doctorant: str
-    genre_doctorant: str
-    prenom_doctorant: str
-    nom_doctorant: str
+def recuperer_doctorat(
+    cmd: 'RecupererDoctoratQuery',
+    doctorat_repository: 'IDoctoratRepository',
+) -> DoctoratDTO:
+    # GIVEN
+    doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
+    # THEN
+    return doctorat_repository.get_dto(doctorat_id)

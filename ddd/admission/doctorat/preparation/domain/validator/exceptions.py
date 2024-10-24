@@ -701,3 +701,11 @@ class TypeCompteBancaireRemboursementNonCompleteDoctoratException(BusinessExcept
     def __init__(self, **kwargs):
         message = _("You haven't answered to the question about your bank account.")
         super().__init__(message, **kwargs)
+
+
+class DoctoratNonTrouveException(BusinessException):
+    status_code = "DOCTORAT-8"
+
+    def __init__(self, **kwargs):
+        message = _("No doctorate found.")
+        super().__init__(message, **kwargs)

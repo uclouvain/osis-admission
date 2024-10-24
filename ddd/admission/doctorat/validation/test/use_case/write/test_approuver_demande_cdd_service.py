@@ -47,7 +47,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from parcours_doctoral.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory import (
     epreuve_confirmation,
 )
-from parcours_doctoral.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
+from parcours_doctoral.infrastructure.parcours_doctoral.repository.in_memory.parcours_doctoral import ParcoursDoctoralInMemoryRepository
 
 
 class TestApprouverDemandeCDD(TestCase):
@@ -75,7 +75,7 @@ class TestApprouverDemandeCDD(TestCase):
 
         # Update doctorat
         doctorat_id = DemandeIdentityTranslator.convertir_en_doctorat(demande_a_approuver_entity_id)
-        doctorat = DoctoratInMemoryRepository.get(doctorat_id)
+        doctorat = ParcoursDoctoralInMemoryRepository.get(doctorat_id)
         self.assertEqual(doctorat.statut, ChoixStatutParcoursDoctoral.ADMITTED)
 
         # New confirmation paper

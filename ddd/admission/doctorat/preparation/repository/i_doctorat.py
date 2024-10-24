@@ -23,33 +23,38 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
 
-import attr
+import abc
+from typing import List, Optional
 
-from admission.ddd.admission.dtos.bourse import BourseDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
+from osis_common.ddd.interface import ApplicationService, EntityIdentity, RootEntity
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratDTO(interface.DTO):
-    uuid: str
-    reference: str
+class IDoctoratRepository(IGlobalPropositionRepository):
+    @classmethod
+    def get(cls, entity_id: 'DoctoratIdentity') -> 'Doctorat':  # type: ignore[override]
+        raise NotImplementedError
 
-    sigle_formation: str
-    annee_formation: int
-    intitule_formation: str
+    @classmethod
+    def save(cls, entity: 'Doctorat') -> None:  # type: ignore[override]
+        raise NotImplementedError
 
-    type_admission: str
-    titre_these: str
-    type_financement: str
-    bourse_recherche: Optional[BourseDTO]
-    autre_bourse_recherche: Optional[str]
-    admission_acceptee_le: Optional[datetime.datetime]
+    @classmethod
+    def delete(cls, entity_id: EntityIdentity, **kwargs: ApplicationService) -> None:
+        raise NotImplementedError
 
-    matricule_doctorant: str
-    noma_doctorant: str
-    genre_doctorant: str
-    prenom_doctorant: str
-    nom_doctorant: str
+    @classmethod
+    def search(cls, entity_ids: Optional[List[EntityIdentity]] = None, **kwargs) -> List[RootEntity]:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def verifier_existence(cls, entity_id: 'DoctoratIdentity') -> None:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_dto(cls, entity_id: 'DoctoratIdentity') -> 'DoctoratDTO':  # type: ignore[override]
+        raise NotImplementedError

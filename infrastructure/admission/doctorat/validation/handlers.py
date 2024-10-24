@@ -30,7 +30,7 @@ from admission.ddd.admission.doctorat.validation.use_case.write import *
 from parcours_doctoral.infrastructure.parcours_doctoral.epreuve_confirmation.repository.epreuve_confirmation import (
     EpreuveConfirmationRepository,
 )
-from parcours_doctoral.infrastructure.parcours_doctoral.repository.doctorat import DoctoratRepository
+from parcours_doctoral.infrastructure.parcours_doctoral.repository.parcours_doctoral import ParcoursDoctoralRepository
 from .repository.demande import DemandeRepository
 from ..preparation.repository.proposition import PropositionRepository
 
@@ -53,6 +53,6 @@ COMMAND_HANDLERS = {
         demande_repository=DemandeRepository(),
         proposition_repository=PropositionRepository(),
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
-        doctorat_repository=DoctoratRepository(),
+        doctorat_repository=ParcoursDoctoralRepository(),
     ),
 }
