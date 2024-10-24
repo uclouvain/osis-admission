@@ -44,10 +44,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
 )
-from parcours_doctoral.ddd.domain.model.enums import (
-    ChoixStatutDoctorat,
-    STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
-)
 from osis_role.cache import predicate_cache
 from osis_role.errors import predicate_failed_msg
 
@@ -68,13 +64,6 @@ def signing_in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("You must be invited to complete this admission."))
 def is_invited_to_complete(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT
-
-
-@predicate(bind=True)
-@predicate_failed_msg(message=_("The jury is not in progress"))
-def is_jury_in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.post_enrolment_status == ChoixStatutDoctorat.PASSED_CONFIRMATION.name
-
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
@@ -98,27 +87,6 @@ def is_pre_admission(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("Must be in the process of the enrolment"))
 def is_being_enrolled(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION
-
-
-@predicate(bind=True)
-@predicate_failed_msg(message=_("The confirmation paper is not in progress"))
-def confirmation_paper_in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.post_enrolment_status in STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS
-
-
-@predicate(bind=True)
-@predicate_failed_msg(message=_("The confirmation paper is not in progress"))
-def submitted_confirmation_paper(self, user: User, obj: DoctorateAdmission):
-    return obj.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name
-
-
-@predicate(bind=True)
-@predicate_failed_msg(message=_("Complementary training not enabled"))
-def complementary_training_enabled(self, user: User, obj: DoctorateAdmission):
-    return (
-        hasattr(obj.doctorate.management_entity, 'admission_config')
-        and obj.doctorate.management_entity.admission_config.is_complementary_training_enabled
-    )
 
 
 @predicate(bind=True)

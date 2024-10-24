@@ -35,7 +35,7 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import Choix
 from admission.ddd.admission.doctorat.validation.domain.service.proposition_identity import (
     PropositionIdentityTranslator,
 )
-from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
+from parcours_doctoral.ddd.domain.model.enums import ChoixStatutParcoursDoctoral
 from parcours_doctoral.ddd.domain.service.demande_identity import DemandeIdentityTranslator
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -76,7 +76,7 @@ class TestApprouverDemandeCDD(TestCase):
         # Update doctorat
         doctorat_id = DemandeIdentityTranslator.convertir_en_doctorat(demande_a_approuver_entity_id)
         doctorat = DoctoratInMemoryRepository.get(doctorat_id)
-        self.assertEqual(doctorat.statut, ChoixStatutDoctorat.ADMITTED)
+        self.assertEqual(doctorat.statut, ChoixStatutParcoursDoctoral.ADMITTED)
 
         # New confirmation paper
         epreuves_confirmations = epreuve_confirmation.EpreuveConfirmationInMemoryRepository.search_by_doctorat_identity(

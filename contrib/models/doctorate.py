@@ -64,7 +64,6 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from parcours_doctoral.ddd.jury.domain.model.enums import FormuleDefense
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
@@ -333,12 +332,6 @@ class DoctorateAdmission(BaseAdmission):
         choices=ChoixStatutSIC.choices(),
         max_length=30,
         default=ChoixStatutSIC.TO_BE_VERIFIED.name,
-    )
-    post_enrolment_status = models.CharField(
-        choices=ChoixStatutDoctorat.choices(),
-        max_length=30,
-        default=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
-        verbose_name=_("Post-enrolment status"),
     )
 
     supervision_group = SignatureProcessField()
@@ -1009,7 +1002,6 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 'training__title',
                 'training__acronym',
                 'training__enrollment_campus__name',
-                'post_enrolment_status',
                 'proximity_commission',
                 'reference',
                 'submitted_profile',

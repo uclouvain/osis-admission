@@ -57,12 +57,8 @@ from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitre
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.formation_generale.commands import VerifierCurriculumApresSoumissionQuery
-from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
-)
-from admission.mail_templates import (
-    ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
 )
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
@@ -84,7 +80,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_common.ddd.interface import BusinessException, QueryRequest
-from parcours_doctoral.mail_templates.confirmation_paper import ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 
@@ -147,15 +142,6 @@ def get_missing_curriculum_periods(proposition_uuid: str):
         return []
     except MultipleBusinessExceptions as exc:
         return [e.message for e in sorted(exc.exceptions, key=lambda exception: exception.periode[0], reverse=True)]
-
-
-def get_mail_templates_from_admission(admission: DoctorateAdmission):
-    allowed_templates = []
-    if admission.post_enrolment_status != ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
-        allowed_templates.append(ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED)
-        if admission.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
-            allowed_templates.append(ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT)
-    return allowed_templates
 
 
 def takewhile_return_attribute_values(predicate, iterable, attribute):

@@ -40,7 +40,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     OngletsChecklist,
 )
-from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference
@@ -168,7 +167,6 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
         )
         admitted = factory.Trait(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             submitted_profile={
                 "coordinates": {
                     "city": "Louvain-la-Neuve",
@@ -189,7 +187,6 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
         )
         passed_confirmation = factory.Trait(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
-            post_enrolment_status=ChoixStatutDoctorat.PASSED_CONFIRMATION.name,
             submitted_profile={
                 "coordinates": {
                     "city": "Louvain-La-Neuves",
@@ -225,7 +222,7 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def create_student_if_admitted(self, create, extracted, **kwargs):
-        if self.post_enrolment_status != ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
+        if self.status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
             StudentFactory(person=self.candidate)
 
     @factory.post_generation

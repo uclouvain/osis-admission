@@ -30,7 +30,6 @@ from django.test import TestCase
 from osis_signature.enums import SignatureState
 
 from admission.auth.predicates import doctorate
-from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
@@ -38,7 +37,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from parcours_doctoral.ddd.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -187,34 +185,6 @@ class PredicatesTestCase(TestCase):
             admission.status = status
             self.assertFalse(
                 doctorate.is_being_enrolled(admission.candidate.user, admission),
-                'This status must not be accepted: {}'.format(status),
-            )
-
-    def test_confirmation_paper_in_progress(self):
-        admission = DoctorateAdmissionFactory()
-
-        valid_status = [
-            ChoixStatutDoctorat.ADMITTED.name,
-            ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
-            ChoixStatutDoctorat.CONFIRMATION_TO_BE_REPEATED.name,
-        ]
-        invalid_status = [
-            ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
-            ChoixStatutDoctorat.PASSED_CONFIRMATION.name,
-            ChoixStatutDoctorat.NOT_ALLOWED_TO_CONTINUE.name,
-        ]
-
-        for status in valid_status:
-            admission.post_enrolment_status = status
-            self.assertTrue(
-                doctorate.confirmation_paper_in_progress(admission.candidate.user, admission),
-                'This status must be accepted: {}'.format(status),
-            )
-
-        for status in invalid_status:
-            admission.post_enrolment_status = status
-            self.assertFalse(
-                doctorate.confirmation_paper_in_progress(admission.candidate.user, admission),
                 'This status must not be accepted: {}'.format(status),
             )
 
