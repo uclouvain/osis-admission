@@ -273,8 +273,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
         )
 
     def test_should_retourner_erreur_en_fonction_date_soumission_demande(self):
-        # Date de soumission peu avant le début de la période à vérifier
-        self.master_proposition.soumise_le = datetime.datetime(2015, 8, 15)
+        # Date de soumission après la fin de la période à vérifier
+        self.master_proposition.soumise_le = datetime.datetime(2015, 3, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -290,8 +290,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-        # Date de soumission peu après la fin de la période à vérifier
-        self.master_proposition.soumise_le = datetime.datetime(2015, 5, 15)
+        # Date de soumission avant la fin de la période à vérifier
+        self.master_proposition.soumise_le = datetime.datetime(2015, 2, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -303,7 +303,39 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
-                'De Septembre 2014 à Février 2015',
+                'De Septembre 2014 à Janvier 2015',
+            ],
+        )
+
+        # Date de soumission au mois d'octobre -> le dernier mois de septembre n'est pas à valoriser
+        self.master_proposition.soumise_le = datetime.datetime(2014, 10, 31)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
+                'De Septembre 2012 à Février 2013',
+                'De Septembre 2013 à Février 2014',
+            ],
+        )
+
+        self.master_proposition.soumise_le = datetime.datetime(2014, 11, 1)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
+                'De Septembre 2012 à Février 2013',
+                'De Septembre 2013 à Février 2014',
+                'De Septembre 2014 à Octobre 2014',
             ],
         )
 

@@ -276,6 +276,12 @@ class ProfilCandidatTestCase(TestCase):
                 IProfilCandidatTranslator.get_date_maximale_curriculum(),
                 datetime.date(2023, 3, 1),
             )
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    mois_debut_annee_academique_courante_facultatif=True,
+                ),
+                datetime.date(2023, 3, 1),
+            )
 
         with freezegun.freeze_time('2023-01-31'):
             self.assertEqual(
@@ -284,6 +290,30 @@ class ProfilCandidatTestCase(TestCase):
             )
 
             self.assertEqual(
-                IProfilCandidatTranslator.get_date_maximale_curriculum(date_reference=datetime.date(2022, 2, 1)),
+                IProfilCandidatTranslator.get_date_maximale_curriculum(date_soumission=datetime.date(2022, 2, 1)),
                 datetime.date(2022, 1, 1),
             )
+
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    date_soumission=datetime.date(2022, 2, 1),
+                    mois_debut_annee_academique_courante_facultatif=True,
+                ),
+                datetime.date(2022, 1, 1),
+            )
+
+        with freezegun.freeze_time('2023-10-01'):
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    mois_debut_annee_academique_courante_facultatif=True,
+                ),
+                datetime.date(2023, 8, 1),
+            )
+
+        self.assertEqual(
+            IProfilCandidatTranslator.get_date_maximale_curriculum(
+                date_soumission=datetime.date(2022, 10, 1),
+                mois_debut_annee_academique_courante_facultatif=True,
+            ),
+            datetime.date(2022, 8, 1),
+        )
