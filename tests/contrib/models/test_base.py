@@ -29,19 +29,29 @@ import freezegun
 from django.db import IntegrityError
 from django.test import TestCase
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.contrib.models import AdmissionViewer, ContinuingEducationAdmissionProxy
 from admission.contrib.models.base import admission_directory_path, BaseAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    continuing_education_types_as_set,
+    doctorate_types_as_set,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.entity_version import EntityVersion
+from base.models.enums.education_group_types import TrainingType, AllTypes
 from base.models.enums.entity_type import EntityType
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity_version import MainEntityVersionFactory, EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 
 
 class BaseTestCase(TestCase):
@@ -264,3 +274,152 @@ class AdmissionFormattedReferenceTestCase(TestCase):
         admission = BaseAdmission.objects.with_training_management_and_reference().get(uuid=created_admission.uuid)
 
         self.assertEqual(admission.formatted_reference, reference % {'year': '21'})
+
+
+class OtherCandidateTrainingsTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+        )
+
+    def setUp(self):
+        try:
+            delattr(self.admission, 'other_candidate_trainings')
+        except AttributeError:
+            pass
+
+    def test_by_excluding_the_current_admission(self):
+        # Don't use the current admission
+        other_contexts = self.admission.other_candidate_trainings
+
+        self.assertEqual(other_contexts[CONTEXT_GENERAL], set())
+        self.assertEqual(other_contexts[CONTEXT_CONTINUING], set())
+        self.assertEqual(other_contexts[CONTEXT_DOCTORATE], set())
+
+    def test_with_general_admission(self):
+        excluding_statuses = {
+            ChoixStatutPropositionGenerale.EN_BROUILLON,
+            ChoixStatutPropositionGenerale.ANNULEE,
+        }
+
+        other_admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.MASTER_MC.name,
+            candidate=self.admission.candidate,
+        )
+
+        for status in ChoixStatutPropositionGenerale:
+            other_admission.status = status.name
+            other_admission.save(update_fields=['status'])
+
+            other_contexts = self.admission.other_candidate_trainings
+
+            self.assertEqual(
+                other_contexts[CONTEXT_GENERAL],
+                {TrainingType.MASTER_MC.name} if status not in excluding_statuses else set(),
+            )
+            self.assertEqual(other_contexts[CONTEXT_CONTINUING], set())
+            self.assertEqual(other_contexts[CONTEXT_DOCTORATE], set())
+
+            delattr(self.admission, 'other_candidate_trainings')
+
+    def test_with_doctorate_admission(self):
+        excluding_statuses = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON,
+            ChoixStatutPropositionDoctorale.ANNULEE,
+        }
+
+        other_admission = DoctorateAdmissionFactory(
+            training__education_group_type__name=TrainingType.PHD.name,
+            candidate=self.admission.candidate,
+        )
+
+        for status in ChoixStatutPropositionDoctorale:
+            other_admission.status = status.name
+            other_admission.save(update_fields=['status'])
+
+            other_contexts = self.admission.other_candidate_trainings
+
+            self.assertEqual(
+                other_contexts[CONTEXT_DOCTORATE],
+                {TrainingType.PHD.name} if status not in excluding_statuses else set(),
+            )
+            self.assertEqual(other_contexts[CONTEXT_GENERAL], set())
+            self.assertEqual(other_contexts[CONTEXT_CONTINUING], set())
+
+            delattr(self.admission, 'other_candidate_trainings')
+
+    def test_with_continuing_admission(self):
+        excluding_statuses = {
+            ChoixStatutPropositionContinue.EN_BROUILLON,
+            ChoixStatutPropositionContinue.ANNULEE,
+        }
+
+        other_admission = ContinuingEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.CERTIFICATE_OF_SUCCESS.name,
+            candidate=self.admission.candidate,
+        )
+
+        for status in ChoixStatutPropositionContinue:
+            other_admission.status = status.name
+            other_admission.save(update_fields=['status'])
+
+            other_contexts = self.admission.other_candidate_trainings
+
+            self.assertEqual(
+                other_contexts[CONTEXT_CONTINUING],
+                {TrainingType.CERTIFICATE_OF_SUCCESS.name} if status not in excluding_statuses else set(),
+            )
+            self.assertEqual(other_contexts[CONTEXT_GENERAL], set())
+            self.assertEqual(other_contexts[CONTEXT_DOCTORATE], set())
+
+            delattr(self.admission, 'other_candidate_trainings')
+
+    def test_with_internal_experiences(self):
+        internal_experience = InscriptionProgrammeAnnuelFactory(
+            programme_cycle__etudiant__person=self.admission.candidate,
+            programme__root_group__education_group_type__name=TrainingType.MASTER_M1.name,
+        )
+
+        other_contexts = self.admission.other_candidate_trainings
+        self.assertEqual(other_contexts[CONTEXT_CONTINUING], set())
+        self.assertEqual(other_contexts[CONTEXT_GENERAL], {TrainingType.MASTER_M1.name})
+        self.assertEqual(other_contexts[CONTEXT_DOCTORATE], set())
+
+        delattr(self.admission, 'other_candidate_trainings')
+
+        internal_experience.programme = None
+        internal_experience.save(update_fields=['programme'])
+
+        other_contexts = self.admission.other_candidate_trainings
+        self.assertEqual(other_contexts[CONTEXT_CONTINUING], set())
+        self.assertEqual(other_contexts[CONTEXT_GENERAL], set())
+        self.assertEqual(other_contexts[CONTEXT_DOCTORATE], set())
+
+    def test_right_context_by_training_type(self):
+        internal_experience = InscriptionProgrammeAnnuelFactory(
+            programme_cycle__etudiant__person=self.admission.candidate,
+        )
+
+        root_group = internal_experience.programme.root_group
+
+        for training_type in AllTypes.get_names():
+            root_group.education_group_type = EducationGroupTypeFactory(name=training_type)
+            root_group.save(update_fields=['education_group_type'])
+
+            other_contexts = self.admission.other_candidate_trainings
+
+            if training_type in continuing_education_types_as_set:
+                self.assertEqual(other_contexts[CONTEXT_CONTINUING], {training_type})
+                self.assertEqual(other_contexts[CONTEXT_GENERAL], set())
+                self.assertEqual(other_contexts[CONTEXT_DOCTORATE], set())
+            elif training_type in doctorate_types_as_set:
+                self.assertEqual(other_contexts[CONTEXT_DOCTORATE], {training_type})
+                self.assertEqual(other_contexts[CONTEXT_GENERAL], set())
+                self.assertEqual(other_contexts[CONTEXT_CONTINUING], set())
+            else:
+                self.assertEqual(other_contexts[CONTEXT_GENERAL], {training_type})
+                self.assertEqual(other_contexts[CONTEXT_CONTINUING], set())
+                self.assertEqual(other_contexts[CONTEXT_DOCTORATE], set())
+
+            delattr(self.admission, 'other_candidate_trainings')

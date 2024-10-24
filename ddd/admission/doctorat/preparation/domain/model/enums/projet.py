@@ -79,6 +79,11 @@ STATUTS_PROPOSITION_DOCTORALE_SOUMISE = (
     set(ChoixStatutPropositionDoctorale.get_names()) - STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 )
 
+STATUTS_PROPOSITION_DOCTORALE_PEU_AVANCEE = {
+    ChoixStatutPropositionDoctorale.ANNULEE.name,
+    ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+}
+
 # Le gestionnaire FAC a la main
 STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC = {
     ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name,

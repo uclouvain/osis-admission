@@ -35,18 +35,24 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
+from admission.contrib.models import (
+    EPCInjection as AdmissionEPCInjection,
+    DoctorateAdmission,
+    ContinuingEducationAdmission,
+)
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -104,6 +110,12 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             submitted=True,
         )
 
+        cls.other_continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=cls.academic_years[0],
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
         # Create users
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
@@ -111,6 +123,9 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         ).person.user
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+        cls.other_continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.other_continuing_admission.training.education_group,
         ).person.user
         cls.first_cycle_diploma = DiplomaTitleFactory(
             cycle=Cycle.FIRST_CYCLE.name,
@@ -364,12 +379,103 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_delete_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
+    def test_delete_experience_from_doctorate_curriculum_is_not_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
         response = self.client.delete(self.doctorate_delete_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_experience_from_continuing_curriculum_for_fac_users(self):
+        self.client.force_login(self.other_continuing_program_manager_user)
+
+        experience = EducationalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational_delete',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.delete(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:curriculum',
+            uuid=self.other_continuing_admission.uuid,
+        )
 
         self.assertRedirects(
             response=response,
             fetch_redirect_response=False,
-            expected_url=resolve_url('admission:doctorate:checklist', uuid=self.doctorate_admission.uuid),
+            expected_url=base_curriculum_url,
         )
+
+        self.assertFalse(EducationalExperience.objects.filter(uuid=experience.uuid).exists())
+
+    def test_delete_experience_from_continuing_curriculum_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+
+        experience = EducationalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational_delete',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.delete(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:curriculum',
+            uuid=self.other_continuing_admission.uuid,
+        )
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=base_curriculum_url,
+        )
+
+        self.assertFalse(EducationalExperience.objects.filter(uuid=experience.uuid).exists())

@@ -175,7 +175,7 @@ class DoctorateAdmissionCalendar(PoolCalendar):
     @classmethod
     def matches_criteria(cls, training_type: TrainingType, **kwargs) -> bool:
         """Candidat inscrit en doctorat"""
-        return training_type == TrainingType.PHD
+        return training_type == TrainingType.FORMATION_PHD
 
 
 class GeneralEducationAdmissionCalendar(AcademicEventSessionCalendarHelper):
