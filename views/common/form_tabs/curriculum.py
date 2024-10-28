@@ -139,7 +139,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         if self.next_url:
             return self.next_url
 
-        if self.is_general:
+        if self.is_general or self.is_doctorate:
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:educational',
                 uuid=self.admission_uuid,
@@ -149,7 +149,10 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         return resolve_url(f'{self.base_namespace}:curriculum', uuid=self.admission_uuid)
 
     def delete_url(self):
-        if self.experience_id:
+        if self.experience_id and self.request.user.has_perm(
+            perm='admission.delete_admission_curriculum',
+            obj=self.admission,
+        ):
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:educational_delete',
                 uuid=self.admission_uuid,
@@ -159,7 +162,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.is_continuing or self.is_doctorate:
+        if self.is_continuing:
             context_data['next_url'] = self.get_success_url()
             context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
         else:
@@ -232,7 +235,7 @@ class CurriculumNonEducationalExperienceFormView(
         if self.next_url:
             return self.next_url
 
-        if self.is_general:
+        if self.is_general or self.is_doctorate:
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:non_educational',
                 uuid=self.admission_uuid,
@@ -242,7 +245,10 @@ class CurriculumNonEducationalExperienceFormView(
         return resolve_url(f'{self.base_namespace}:curriculum', uuid=self.admission_uuid)
 
     def delete_url(self):
-        if self.experience_id:
+        if self.experience_id and self.request.user.has_perm(
+            perm='admission.delete_admission_curriculum',
+            obj=self.admission,
+        ):
             return resolve_url(
                 f'{self.base_namespace}:update:curriculum:non_educational_delete',
                 uuid=self.admission_uuid,
@@ -252,7 +258,7 @@ class CurriculumNonEducationalExperienceFormView(
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.is_continuing or self.is_doctorate:
+        if self.is_continuing:
             context_data['next_url'] = self.get_success_url()
             context_data['prevent_quitting_template'] = 'admission/includes/back_to_cv_overview_link.html'
         else:
@@ -334,7 +340,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
         }
         return (
             self.next_url or reverse(f'{self.base_namespace}:checklist', kwargs=kwargs)
-            if self.is_general
+            if self.is_general or self.is_doctorate
             else reverse(f'{self.base_namespace}:curriculum', kwargs=kwargs)
         )
 
@@ -517,7 +523,7 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         }
         return (
             self.next_url or reverse(f'{self.base_namespace}:checklist', kwargs=kwargs)
-            if self.is_general
+            if self.is_general or self.is_doctorate
             else reverse(f'{self.base_namespace}:curriculum', kwargs=kwargs)
         )
 

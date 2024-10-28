@@ -27,7 +27,7 @@ import contextlib
 import json
 import logging
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import requests
 import waffle
@@ -52,6 +52,7 @@ from base.models.student import Student
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 ADDRESS_TYPE_LEGAL = "LEG"
+VALIDATION_ERRORS_TO_IGNORE = ['INISS0007']
 
 
 class DigitRepository(IDigitRepository):
@@ -269,6 +270,10 @@ class DigitRepository(IDigitRepository):
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
         candidate = Person.objects.get(global_id=global_id)
 
+        # prevent concurrential access to resource PersonMergeProposal
+        with contextlib.suppress(PersonMergeProposal.DoesNotExist):
+            PersonMergeProposal.objects.select_for_update().get(original_person=candidate)
+
         # Check if already a personmergeproposal with generated noma
         if hasattr(candidate, 'personmergeproposal') and candidate.personmergeproposal.registration_id_sent_to_digit:
             return candidate.personmergeproposal.registration_id_sent_to_digit
@@ -325,6 +330,7 @@ def _retrieve_person_ticket_status(request_id: int):
             "errors": [{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
         }
 
+
 def _request_person_ticket_creation(person: Person, noma: str, addresses: QuerySet, extra_ticket_data: dict):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"requestId": "1", "status": "CREATED"}
@@ -358,10 +364,23 @@ def _request_person_ticket_validation(person: Person, addresses: QuerySet, extra
                 data=payload,
                 url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_VALIDATION_URL}?validateResemblance=false"
             )
-            return response.json()
+            return _sanitize_validation_ticket_response(response_json=response.json())
         except Exception:
             logger.exception(f"[Validation syntaxique DigIT - {person.global_id} ] Une erreur est survenue avec DigIT")
             return {"errors": [{"errorCode": "OSIS_CAN_NOT_REACH_DIGIT"}], "valid": False}
+
+
+def _sanitize_validation_ticket_response(response_json) -> Dict:
+    # Check response format
+    if not response_json.keys() >= {'errors', 'valid'}:
+        return {"errors": [{"errorCode": "DIGIT_RETURN_BAD_FORMAT"}], "valid": False}
+
+    # Ignore some errors
+    errors_sinitized = [
+        digit_error for digit_error in response_json['errors']
+        if digit_error.get('errorCode') not in VALIDATION_ERRORS_TO_IGNORE
+    ]
+    return {"errors": errors_sinitized, "valid": len(errors_sinitized) == 0}
 
 
 def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_type: str = None, sap_number: str = None):
