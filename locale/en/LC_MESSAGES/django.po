@@ -4827,6 +4827,9 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
+msgid "Next admission"
+msgstr ""
+
 msgid "No"
 msgstr ""
 
@@ -5564,6 +5567,9 @@ msgstr ""
 
 #, python-format
 msgid "Preview <em>%(name)s</em> custom mail template"
+msgstr ""
+
+msgid "Previous admission"
 msgstr ""
 
 msgid "Previous confirmation exams"

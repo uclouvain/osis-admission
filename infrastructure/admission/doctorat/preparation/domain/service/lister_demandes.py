@@ -247,15 +247,14 @@ class ListerDemandesService(IListerDemandesService):
 
         qs = qs.order_by(*field_order, 'id')
 
-        result = PaginatedList()
-
+        # Paginate the queryset
         if page and taille_page:
-            result.total_count = qs.count()
+            result = PaginatedList(complete_list=qs.all().values_list('uuid', flat=True))
             bottom = (page - 1) * taille_page
             top = page * taille_page
             qs = qs[bottom:top]
         else:
-            result.total_count = len(qs)
+            result = PaginatedList(id_attribute='uuid')
 
         for admission in qs:
             result.append(cls.load_dto_from_model(admission, current_language))
