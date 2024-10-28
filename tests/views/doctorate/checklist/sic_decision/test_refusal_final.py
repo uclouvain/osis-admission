@@ -157,7 +157,6 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             submitted=True,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
-            refusal_type=TypeDeRefus.REFUS_AGREGATION.name,
         )
         cls.admission.refusal_reasons.add(RefusalReasonFactory())
         cls.url = resolve_url(
@@ -447,9 +446,6 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
 
     def test_refusal_final_decision_form_submitting_without_email(self):
         self.client.force_login(user=self.sic_manager_user)
-
-        self.admission.refusal_type = TypeDeRefus.REFUS_LIBRE.name
-        self.admission.save(update_fields=['refusal_type'])
 
         # Choose an existing reason
         response = self.client.post(

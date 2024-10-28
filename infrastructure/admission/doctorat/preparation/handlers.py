@@ -70,7 +70,6 @@ from ...domain.service.titres_acces import TitresAcces
 from ...domain.service.unites_enseignement_translator import UnitesEnseignementTranslator
 from ...repository.digit import DigitRepository
 from ...repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
-from ...shared_kernel.email_destinataire.repository.email_destinataire import EmailDestinataireRepository
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -448,36 +447,27 @@ COMMAND_HANDLERS = {
             membre_ca_translator=MembreCATranslator(),
         )
     ),
-    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
-        lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
+    EnvoyerPropositionACddLorsDeLaDecisionCddCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_a_cdd_lors_de_la_decision_cdd(
             cmd,
             proposition_repository=PropositionRepository(),
-            email_destinataire_repository=EmailDestinataireRepository(),
-            notification=Notification(),
             historique=Historique(),
         )
     ),
-    SpecifierMotifsRefusPropositionParFaculteCommand: (
-        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_faculte(
-            cmd,
-            proposition_repository=PropositionRepository(),
-        )
-    ),
-    RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
+    RefuserPropositionParCddCommand: lambda msg_bus, cmd: refuser_proposition_par_cdd(
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
-        pdf_generation=PDFGeneration(),
         personne_connue_ucl_translator=PersonneConnueUclTranslator(),
-        unites_enseignement_translator=UnitesEnseignementTranslator(),
+        notification=Notification(),
     ),
-    SpecifierInformationsAcceptationPropositionParFaculteCommand: (
-        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
+    SpecifierInformationsAcceptationPropositionParCddCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_cdd(
             cmd,
             proposition_repository=PropositionRepository(),
         )
     ),
-    ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
+    ApprouverPropositionParCddCommand: lambda msg_bus, cmd: approuver_proposition_par_cdd(
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
@@ -488,9 +478,13 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+        groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        promoteur_translator=PromoteurTranslator(),
+        membre_ca_translator=MembreCATranslator(),
+        notification=Notification(),
     ),
-    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand: (
-        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
+    EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_cdd(
             cmd,
             proposition_repository=PropositionRepository(),
             historique=Historique(),
@@ -560,35 +554,6 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=Historique(),
-        )
-    ),
-    SpecifierMotifsRefusPropositionParSicCommand: (
-        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            historique=Historique(),
-        )
-    ),
-    RefuserAdmissionParSicCommand: (
-        lambda msg_bus, cmd: refuser_admission_par_sic(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
-            historique=Historique(),
-            notification=Notification(),
-            pdf_generation=PDFGeneration(),
-            campus_repository=UclouvainCampusRepository(),
-        )
-    ),
-    RefuserInscriptionParSicCommand: (
-        lambda msg_bus, cmd: refuser_inscription_par_sic(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
-            historique=Historique(),
-            notification=Notification(),
-            pdf_generation=PDFGeneration(),
-            campus_repository=UclouvainCampusRepository(),
         )
     ),
     ApprouverAdmissionParSicCommand: (

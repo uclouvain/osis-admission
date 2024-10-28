@@ -176,16 +176,3 @@ class FreeAdditionalApprovalCondition(BaseFreeAdditionalApprovalCondition):
     class Meta:
         verbose_name = _('Free additional approval condition')
         verbose_name_plural = _('Free additional approval conditions')
-
-
-class DoctorateFreeAdditionalApprovalCondition(BaseFreeAdditionalApprovalCondition):
-    admission = models.ForeignKey(
-        on_delete=models.CASCADE,
-        to='DoctorateAdmission',
-        verbose_name=_('Admission'),
-        related_name='freeadditionalapprovalcondition_set',
-    )
-
-    class Meta:
-        verbose_name = _('Doctorate free additional approval condition')
-        verbose_name_plural = _('Doctorate free additional approval conditions')

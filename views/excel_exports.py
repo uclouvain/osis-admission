@@ -615,7 +615,7 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Scholarship'),
             pgettext('admission', 'Course'),
             _('Dossier status'),
-            _('Fac decision'),
+            _('CDD decision'),
             _('SIC decision'),
             _('Submission date'),
             _('Last modification'),
