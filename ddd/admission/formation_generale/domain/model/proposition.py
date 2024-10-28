@@ -167,8 +167,8 @@ class Proposition(interface.RootEntity):
     financabilite_regle_calcule_situation: SituationFinancabilite = ''
     financabilite_regle_calcule_le: Optional[datetime.datetime] = None
     financabilite_regle: SituationFinancabilite = ''
-    financabilite_regle_etabli_par: str = ''
-    financabilite_regle_etabli_le: Optional[datetime.datetime] = None
+    financabilite_etabli_par: str = ''
+    financabilite_etabli_le: Optional[datetime.datetime] = None
 
     financabilite_derogation_statut: DerogationFinancement = ''
     financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
@@ -839,12 +839,11 @@ class Proposition(interface.RootEntity):
     def specifier_financabilite_regle(
         self,
         financabilite_regle: SituationFinancabilite,
-        etabli_par: str,
         auteur_modification: str,
     ):
         self.financabilite_regle = financabilite_regle
-        self.financabilite_regle_etabli_par = etabli_par
-        self.financabilite_regle_etabli_le = now()
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = now()
         self.auteur_derniere_modification = auteur_modification
 
         if financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]:
@@ -862,12 +861,11 @@ class Proposition(interface.RootEntity):
 
     def specifier_financabilite_non_concernee(
         self,
-        etabli_par: str,
         auteur_modification: str,
     ):
         self.financabilite_regle = None
-        self.financabilite_regle_etabli_par = etabli_par
-        self.financabilite_regle_etabli_le = now()
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = now()
         self.auteur_derniere_modification = auteur_modification
         self.checklist_actuelle.financabilite = StatutChecklist(
             statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,

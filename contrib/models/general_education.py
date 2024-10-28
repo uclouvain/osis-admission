@@ -172,16 +172,16 @@ class GeneralEducationAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    financability_rule_established_by = models.ForeignKey(
+    financability_established_by = models.ForeignKey(
         'base.Person',
-        verbose_name=_('Financability rule established by'),
+        verbose_name=_('Financability established by'),
         on_delete=models.PROTECT,
         related_name='+',
         null=True,
         editable=False,
     )
-    financability_rule_established_on = models.DateTimeField(
-        verbose_name=_('Financability rule established on'),
+    financability_established_on = models.DateTimeField(
+        verbose_name=_('Financability established on'),
         null=True,
         editable=False,
     )
@@ -560,7 +560,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
                 "diplomatic_post",
-                "financability_rule_established_by",
+                "financability_established_by",
                 "financability_dispensation_first_notification_by",
                 "financability_dispensation_last_notification_by",
                 "accounting",
