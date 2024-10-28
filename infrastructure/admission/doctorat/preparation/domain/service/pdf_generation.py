@@ -56,6 +56,7 @@ from admission.infrastructure.admission.domain.service.unites_enseignement_trans
 from admission.infrastructure.utils import (
     CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM,
 )
+from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
@@ -299,6 +300,7 @@ class PDFGeneration(IPDFGeneration):
             admission=None,
             template='admission/exports/sic_approval_certificate.html',
             filename=f'Autorisation_inscription_Dossier_{proposition_dto.reference}.pdf',
+            stylesheets=WeasyprintStylesheets.get_stylesheets_bootstrap_5(),
             context={
                 'proposition': proposition_dto,
                 'profil_candidat_identification': documents_resume.resume.identification,
@@ -355,6 +357,7 @@ class PDFGeneration(IPDFGeneration):
                     'rector': cls._get_sic_rector(),
                     'nombre_credits_formation': nombre_credits_formation,
                 },
+                stylesheets=WeasyprintStylesheets.get_stylesheets_bootstrap_5(),
                 author=gestionnaire,
             )
         if temporaire:

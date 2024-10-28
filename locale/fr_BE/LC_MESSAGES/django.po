@@ -5944,6 +5944,9 @@ msgstr "Personnalisée"
 msgid "PhD"
 msgstr "Doctorat"
 
+msgid "PhD Subject Committee annex document link"
+msgstr "Lien du document de l'annexe de la Commission doctorale de domaine"
+
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
@@ -6694,9 +6697,6 @@ msgstr "Rapport de recherche"
 
 msgid "Research scholarship"
 msgstr "Bourse de recherche"
-
-msgid "Research scholarship:"
-msgstr "Bourse de recherche :"
 
 msgid "Research seminar"
 msgstr "Séminaire de recherche"

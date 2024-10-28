@@ -5352,6 +5352,9 @@ msgstr ""
 msgid "PhD"
 msgstr ""
 
+msgid "PhD Subject Committee annex document link"
+msgstr ""
+
 msgid "PhD already done"
 msgstr ""
 
@@ -6045,9 +6048,6 @@ msgid "Research report"
 msgstr ""
 
 msgid "Research scholarship"
-msgstr ""
-
-msgid "Research scholarship:"
 msgstr ""
 
 msgid "Research seminar"

@@ -1128,16 +1128,12 @@ class SicDecisionApprovalForm(CommonSicDecisionApprovalForm):
         self.fields['all_additional_approval_conditions'].choices = all_additional_approval_conditions_choices
         self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
 
-        if not self.is_vip:
+        if not self.is_vip or not self.is_admission:
             del self.fields['particular_cost']
             del self.fields['rebilling_or_third_party_payer']
             del self.fields['first_year_inscription_and_status']
 
-        if not self.is_admission:
-            self.fields.pop('particular_cost', None)
-            self.fields.pop('rebilling_or_third_party_payer', None)
-            self.fields.pop('first_year_inscription_and_status', None)
-        else:
+        if self.is_admission:
             self.fields['with_additional_approval_conditions'].required = True
 
     def clean_all_additional_approval_conditions(self):

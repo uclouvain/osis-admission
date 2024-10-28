@@ -29,7 +29,11 @@
       id="sic-decision-container"
       hx-swap-oob="true"
   >
+    {% if view.is_doctorate %}
+    {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=resume_proposition.proposition current=current  %}
+    {% else %}
     {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=resume_proposition.proposition current=current  %}
+    {% endif %}
     {% has_perm 'admission.checklist_change_sic_decision' as can_change_sic_decision %}
 
     {% if sic_decision_sent_at and sic_decision_sent_by %}
@@ -60,6 +64,7 @@
       </dl>
     {% endif %}
 
+    {% if view.is_general %}
     {# Refusal panel #}
     {% if current.extra.en_cours == 'refusal' or current.extra.blocage == 'refusal' %}
       <div class="panel panel-default">
@@ -108,6 +113,7 @@
           </dl>
         </div>
       </div>
+    {% endif %}
     {% endif %}
 
     {# Approval panel #}
