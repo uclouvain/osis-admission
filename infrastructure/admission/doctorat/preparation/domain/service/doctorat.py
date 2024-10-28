@@ -132,7 +132,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
+            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.FORMATION_PHD.name)
         )
         if dtos:
             return cls._build_dto(dtos[0])
@@ -143,7 +143,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
+            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.FORMATION_PHD.name)
         )
         if dtos:
             dto: TrainingDto = dtos[0]
@@ -172,7 +172,7 @@ class DoctoratTranslator(IDoctoratTranslator):
                 annee=annee,
                 sigle_entite_gestion=sigle_secteur_entite_gestion,
                 inclure_entites_gestion_subordonnees=True,
-                type=TrainingType.PHD.name,
+                type=TrainingType.FORMATION_PHD.name,
                 campus=campus,
                 terme_de_recherche=terme_de_recherche,
                 est_inscriptible=True,
@@ -220,7 +220,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
                 sigles_annees=[(sigle, annee)],
-                type=TrainingType.PHD.name,
+                type=TrainingType.FORMATION_PHD.name,
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,

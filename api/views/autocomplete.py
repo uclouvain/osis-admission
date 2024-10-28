@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ class AutocompleteSectorView(ListAPIView):
         ).filter(
             academic_year__year=year,
             education_group_type__category=Categories.TRAINING.name,
-            education_group_type__name=TrainingType.PHD.name,
+            education_group_type__name=TrainingType.FORMATION_PHD.name,
         )
         doctorate_paths = doctorate_qs.values_list('path_as_string', flat=True)
         # Get all sectors
