@@ -41,11 +41,6 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
-
-from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
-)
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -65,6 +60,9 @@ from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmi
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -126,6 +124,7 @@ from ddd.logic.financabilite.domain.model.enums.situation import SituationFinanc
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -333,11 +332,6 @@ TAB_TREES = {
         ],
         Tab('doctorate-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
-        ],
-        # TODO Education choice
-        Tab('experience', _('Previous experience'), 'list-alt'): [
-            Tab('curriculum', _('Curriculum')),
-            Tab('languages', _('Knowledge of languages')),
         ],
         Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
             Tab('project', _('Research project')),
@@ -1045,7 +1039,8 @@ def checklist_state_button(context, **kwargs):
 def edit_button(string, url):
     return (
         str(string)
-        + f'<a class="btn btn-default" href="{url}"><i class="fas fa-{"edit" if "update" in url else "eye"}"></i></a>'
+        + f'<a class="btn btn-default btn-sm" href="{url}"><i class="fas fa-{"edit" if "update" in url else "eye"}">'
+        f'</i></a>'
     )
 
 
@@ -1343,9 +1338,6 @@ def experience_details_template(
     specific_questions: Dict[str, List[QuestionSpecifiqueDTO]] = None,
     with_edit_link_button=True,
     hide_files=True,
-    can_update_curriculum=False,
-    can_update_education=False,
-    can_delete_curriculum=False,
 ):
     """
     Return the template used to render the experience details.
@@ -1355,9 +1347,6 @@ def experience_details_template(
     :param specific_questions: The specific questions related to the experience (only used for secondary studies)
     :param with_edit_link_button: Specify if the edit link button should be displayed
     :param hide_files: Specify if the files should be hidden
-    :param can_update_curriculum: Specify if the user can update the curriculum
-    :param can_update_education: Specify if the user can update the education
-    :param can_delete_curriculum: Specify if the user can delete an experience from the curriculum
     :return: The rendered template
     """
     next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
@@ -1369,110 +1358,48 @@ def experience_details_template(
         'formation': resume_proposition.proposition.formation,
         'hide_files': hide_files,
         'checklist_display': True,
+        'curex_link_button': '',
         'edit_link_button': '',
         'duplicate_link_button': '',
         'delete_link_button': '',
         'edit_link_button_in_new_tab': experience.epc_experience,
     }
 
+    if with_edit_link_button:
+        experience_urls = get_experience_urls(
+            user=context['request'].user,
+            admission=context['view'].admission,
+            experience=experience,
+            candidate_noma=context['view'].proposition.noma_candidat,
+        )
+
+        if experience_urls['curex_url']:
+            res_context['curex_link_button'] = experience_urls['curex_url']
+
+        elif experience_urls['edit_url']:
+            res_context['edit_link_button'] = experience_urls['edit_url'] + next_url_suffix
+
+        if experience_urls['delete_url']:
+            res_context['delete_link_button'] = experience_urls['delete_url'] + delete_next_url_suffix
+
+        if experience_urls['duplicate_url']:
+            res_context['duplicate_link_button'] = experience_urls['duplicate_url'] + next_url_suffix
+
     if experience.__class__ == ExperienceAcademiqueDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
         res_context['title'] = _('Academic experience')
         res_context['with_single_header_buttons'] = True
-
-        if with_edit_link_button and can_update_curriculum:
-            if not experience.epc_experience:
-                res_context['duplicate_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:curriculum:educational_duplicate',
-                        args=[resume_proposition.proposition.uuid, experience.uuid],
-                    )
-                    + next_url_suffix
-                )
-                res_context['edit_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:curriculum:educational',
-                        args=[resume_proposition.proposition.uuid, experience.uuid],
-                    )
-                    + next_url_suffix
-                )
-                if can_delete_curriculum:
-                    res_context['delete_link_button'] = (
-                        reverse(
-                            'admission:general-education:update:curriculum:educational_delete',
-                            args=[resume_proposition.proposition.uuid, experience.uuid],
-                        )
-                        + delete_next_url_suffix
-                    )
-
-            elif context['admission'].noma_candidat:
-                res_context['curex_link_button'] = resolve_url(
-                    'parcours-externe-view',
-                    noma=context['admission'].noma_candidat,
-                )
-
         res_context.update(get_educational_experience_context(resume_proposition, experience))
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
         res_context['title'] = _('Non-academic activity')
         res_context['with_single_header_buttons'] = True
-
-        if with_edit_link_button and can_update_curriculum:
-            if not experience.epc_experience:
-                res_context['edit_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:curriculum:non_educational',
-                        args=[resume_proposition.proposition.uuid, experience.uuid],
-                    )
-                    + next_url_suffix
-                )
-
-                if can_delete_curriculum:
-                    res_context['delete_link_button'] = (
-                        reverse(
-                            'admission:general-education:update:curriculum:non_educational_delete',
-                            args=[resume_proposition.proposition.uuid, experience.uuid],
-                        )
-                        + delete_next_url_suffix
-                    )
-
-            elif context['admission'].noma_candidat:
-                res_context['edit_link_button'] = resolve_url(
-                    'edit-experience-non-academique-view',
-                    noma=context['admission'].noma_candidat,
-                    experience_uuid=experience.uuid,
-                )
-
-            res_context['duplicate_link_button'] = (
-                reverse(
-                    'admission:general-education:update:curriculum:non_educational_duplicate',
-                    args=[resume_proposition.proposition.uuid, experience.uuid],
-                )
-                + next_url_suffix
-            )
-
         res_context.update(get_non_educational_experience_context(experience))
 
     elif experience.__class__ == EtudesSecondairesAdmissionDTO:
         res_context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
         res_context['etudes_secondaires'] = experience
-
-        if with_edit_link_button and can_update_education:
-            if not experience.epc_experience:
-                res_context['edit_link_button'] = (
-                    reverse(
-                        'admission:general-education:update:education',
-                        args=[resume_proposition.proposition.uuid],
-                    )
-                ) + next_url_suffix
-
-            elif context['admission'].noma_candidat:
-                res_context['edit_link_button'] = resolve_url(
-                    'edit-etudes-secondaires-view',
-                    noma=context['admission'].noma_candidat,
-                )
-
         res_context.update(
             get_secondary_studies_context(
                 resume_proposition,
@@ -1497,9 +1424,7 @@ def checklist_experience_action_links_context(
     parcours_tab_id='',
 ):
     next_url_suffix = f'?next={context["request"].path}&next_hash_url={parcours_tab_id}'
-    base_namespace = context['view'].base_namespace
     proposition_uuid = context['view'].kwargs['uuid']
-    proposition_uuid_str = str(proposition_uuid)
 
     result_context = {
         'prefix': prefix,
@@ -1513,90 +1438,29 @@ def checklist_experience_action_links_context(
     if experience.__class__ == ExperienceParcoursInterneDTO:
         return result_context
 
-    elif experience.__class__ == EtudesSecondairesAdmissionDTO:
-        if not experience.epc_experience:
-            result_context['update_url'] = (
-                resolve_url(
-                    f'{base_namespace}:update:education',
-                    uuid=proposition_uuid_str,
-                )
-                + next_url_suffix
-            )
-        elif context['admission'].noma_candidat:
-            result_context['update_url'] = resolve_url(
-                'edit-etudes-secondaires-view',
-                noma=context['admission'].noma_candidat,
-            )
     elif (
-        experience.valorisee_par_admissions
+        experience.__class__ == EtudesSecondairesAdmissionDTO
+        or experience.valorisee_par_admissions
         and proposition_uuid in experience.valorisee_par_admissions
         and experience.derniere_annee == current_year
     ):
-        if experience.__class__ == ExperienceAcademiqueDTO:
-            if not experience.epc_experience:
-                result_context['duplicate_url'] = resolve_url(
-                    f'{base_namespace}:update:curriculum:educational_duplicate',
-                    uuid=proposition_uuid_str,
-                    experience_uuid=experience.uuid,
-                )
-                result_context['update_url'] = (
-                    resolve_url(
-                        f'{base_namespace}:update:curriculum:educational',
-                        uuid=proposition_uuid_str,
-                        experience_uuid=experience.uuid,
-                    )
-                    + next_url_suffix
-                )
+        experience_urls = get_experience_urls(
+            user=context['request'].user,
+            admission=context['view'].admission,
+            experience=experience,
+            candidate_noma=context['view'].proposition.noma_candidat,
+        )
 
-                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
-                if can_delete_curriculum:
-                    result_context['delete_url'] = (
-                        resolve_url(
-                            f'{base_namespace}:update:curriculum:educational_delete',
-                            uuid=proposition_uuid_str,
-                            experience_uuid=experience.uuid,
-                        )
-                        + next_url_suffix
-                    )
-            elif context['admission'].noma_candidat:
-                result_context['curex_url'] = resolve_url(
-                    'parcours-externe-view',
-                    noma=context['admission'].noma_candidat,
-                )
+        if experience_urls['curex_url']:
+            result_context['curex_url'] = experience_urls['curex_url']
 
-        elif experience.__class__ == ExperienceNonAcademiqueDTO:
-            result_context['duplicate_url'] = resolve_url(
-                f'{base_namespace}:update:curriculum:non_educational_duplicate',
-                uuid=proposition_uuid_str,
-                experience_uuid=experience.uuid,
-            )
+        elif experience_urls['edit_url']:
+            result_context['update_url'] = experience_urls['edit_url'] + next_url_suffix
 
-            if not experience.epc_experience:
-                result_context['update_url'] = (
-                    resolve_url(
-                        f'{base_namespace}:update:curriculum:non_educational',
-                        uuid=proposition_uuid_str,
-                        experience_uuid=experience.uuid,
-                    )
-                    + next_url_suffix
-                )
+        if experience_urls['delete_url']:
+            result_context['delete_url'] = experience_urls['delete_url'] + next_url_suffix
 
-                can_delete_curriculum = has_perm(context, 'admission.delete_admission_curriculum')
-                if can_delete_curriculum:
-                    result_context['delete_url'] = (
-                        resolve_url(
-                            f'{base_namespace}:update:curriculum:non_educational_delete',
-                            uuid=proposition_uuid_str,
-                            experience_uuid=experience.uuid,
-                        )
-                        + next_url_suffix
-                    )
-            elif context['admission'].noma_candidat:
-                result_context['update_url'] = resolve_url(
-                    'edit-experience-non-academique-view',
-                    noma=context['admission'].noma_candidat,
-                    experience_uuid=experience.uuid,
-                )
+        result_context['duplicate_url'] = experience_urls['duplicate_url']
 
     return result_context
 

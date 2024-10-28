@@ -24,12 +24,11 @@
 #
 # ##############################################################################
 import itertools
-import json
 import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Union, Iterable, List, Optional
+from typing import Dict, Union, Iterable, List
 
 import weasyprint
 from django.conf import settings
@@ -61,7 +60,6 @@ from admission.ddd.admission.formation_generale.commands import VerifierCurricul
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
-    AnneeInscriptionFormationTranslator,
 )
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
@@ -525,10 +523,30 @@ def get_experience_urls(
         'delete_url': '',
         'duplicate_url': '',
         'details_url': '',
+        'curex_url': '',
         'edit_new_link_tab': False,
     }
 
-    can_update_curriculum_via_admission = user.has_perm(perm='admission.change_admission_curriculum', obj=admission)
+    if not getattr(user, '_computed_permissions', None):
+        computed_permissions = {
+            'admission.change_admission_curriculum': user.has_perm(
+                perm='admission.change_admission_curriculum',
+                obj=admission,
+            ),
+            'admission.change_admission_secondary_studies': user.has_perm(
+                perm='admission.change_admission_secondary_studies',
+                obj=admission,
+            ),
+            'admission.delete_admission_curriculum': user.has_perm(
+                perm='admission.delete_admission_curriculum',
+                obj=admission,
+            ),
+            'profil.can_edit_parcours_externe': user.has_perm(perm='profil.can_edit_parcours_externe'),
+            'profil.can_see_parcours_externe': user.has_perm(perm='profil.can_see_parcours_externe'),
+        }
+        setattr(user, '_computed_permissions', computed_permissions)
+    else:
+        computed_permissions = getattr(user, '_computed_permissions')
 
     if isinstance(experience, ExperienceAcademiqueDTO):
         res_context['details_url'] = resolve_url(
@@ -537,38 +555,38 @@ def get_experience_urls(
             experience_uuid=experience.uuid,
         )
 
-        if not can_update_curriculum_via_admission:
+        if not computed_permissions['admission.change_admission_curriculum']:
             return res_context
 
-        res_context['duplicate_url'] = resolve_url(
-            f'{base_namespace}:update:curriculum:educational_duplicate',
-            uuid=admission.uuid,
-            experience_uuid=experience.uuid,
-        )
-
         if experience.epc_experience:
-            can_update_curriculum_via_profile = user.has_perm(perm='profil.can_edit_parcours_externe')
-
-            if can_update_curriculum_via_profile and candidate_noma:
-                res_context['edit_url'] = resolve_url(
-                    'edit-experience-academique-view',
-                    noma=candidate_noma,
-                    experience_uuid=experience.annees[0].uuid,
-                )
-                res_context['edit_new_link_tab'] = True
+            if candidate_noma:
+                if computed_permissions['profil.can_see_parcours_externe']:
+                    res_context['curex_url'] = resolve_url(
+                        'parcours-externe-view',
+                        noma=candidate_noma,
+                    )
+                if computed_permissions['profil.can_edit_parcours_externe']:
+                    res_context['edit_url'] = resolve_url(
+                        'edit-experience-academique-view',
+                        noma=candidate_noma,
+                        experience_uuid=experience.annees[0].uuid,
+                    )
+                    res_context['edit_new_link_tab'] = True
 
         else:
+            res_context['duplicate_url'] = resolve_url(
+                f'{base_namespace}:update:curriculum:educational_duplicate',
+                uuid=admission.uuid,
+                experience_uuid=experience.uuid,
+            )
+
             res_context['edit_url'] = resolve_url(
                 f'{base_namespace}:update:curriculum:educational',
                 uuid=admission.uuid,
                 experience_uuid=experience.uuid,
             )
 
-            can_delete_curriculum_via_admission = user.has_perm(
-                perm='admission.delete_admission_curriculum',
-                obj=admission,
-            )
-            if can_delete_curriculum_via_admission:
+            if computed_permissions['admission.delete_admission_curriculum']:
                 res_context['delete_url'] = resolve_url(
                     f'{base_namespace}:update:curriculum:educational_delete',
                     uuid=admission.uuid,
@@ -582,7 +600,7 @@ def get_experience_urls(
             experience_uuid=experience.uuid,
         )
 
-        if not can_update_curriculum_via_admission:
+        if not computed_permissions['admission.change_admission_curriculum']:
             return res_context
 
         res_context['duplicate_url'] = resolve_url(
@@ -592,15 +610,14 @@ def get_experience_urls(
         )
 
         if experience.epc_experience:
-            can_update_curriculum_via_profile = user.has_perm(perm='profil.can_edit_parcours_externe')
-
-            if can_update_curriculum_via_profile and candidate_noma:
-                res_context['edit_url'] = resolve_url(
-                    'edit-experience-non-academique-view',
-                    noma=candidate_noma,
-                    experience_uuid=experience.uuid,
-                )
-                res_context['edit_new_link_tab'] = True
+            if candidate_noma:
+                if computed_permissions['profil.can_edit_parcours_externe']:
+                    res_context['edit_url'] = resolve_url(
+                        'edit-experience-non-academique-view',
+                        noma=candidate_noma,
+                        experience_uuid=experience.uuid,
+                    )
+                    res_context['edit_new_link_tab'] = True
 
         else:
             res_context['edit_url'] = resolve_url(
@@ -609,11 +626,7 @@ def get_experience_urls(
                 experience_uuid=experience.uuid,
             )
 
-            can_delete_curriculum_via_admission = user.has_perm(
-                perm='admission.delete_admission_curriculum',
-                obj=admission,
-            )
-            if can_delete_curriculum_via_admission:
+            if computed_permissions['admission.delete_admission_curriculum']:
                 res_context['delete_url'] = resolve_url(
                     f'{base_namespace}:update:curriculum:non_educational_delete',
                     uuid=admission.uuid,
@@ -626,18 +639,17 @@ def get_experience_urls(
             uuid=admission.uuid,
         )
 
-        if not can_update_curriculum_via_admission:
+        if not computed_permissions['admission.change_admission_secondary_studies']:
             return res_context
 
         if experience.epc_experience:
-            can_update_curriculum_via_profile = user.has_perm(perm='profil.can_edit_parcours_externe')
-
-            if can_update_curriculum_via_profile and candidate_noma:
-                res_context['edit_url'] = resolve_url(
-                    'edit-etudes-secondaires-view',
-                    noma=candidate_noma,
-                )
-                res_context['edit_new_link_tab'] = True
+            if candidate_noma:
+                if computed_permissions['profil.can_edit_parcours_externe']:
+                    res_context['edit_url'] = resolve_url(
+                        'edit-etudes-secondaires-view',
+                        noma=candidate_noma,
+                    )
+                    res_context['edit_new_link_tab'] = True
 
         else:
             res_context['edit_url'] = resolve_url(
