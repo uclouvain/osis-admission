@@ -107,6 +107,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
     filter_backends = []
     queryset = []
     check_command_class = None
+    extra_serializer_context = {}
 
     def get(self, request, *args, **kwargs):
         """Return the curriculum experiences of a person with the mandatory years to complete."""
@@ -165,6 +166,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
             },
             context={
                 'related_person': current_person,
+                **self.extra_serializer_context,
             },
         )
 
@@ -217,6 +219,9 @@ class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, CurriculumView):
     serializer_mapping = {
         'PUT': serializers.GeneralEducationCompleterCurriculumCommandSerializer,
         'GET': serializers.CurriculumDetailsSerializer,
+    }
+    extra_serializer_context = {
+        'current_academic_year_start_month_is_facultative': True,
     }
 
 

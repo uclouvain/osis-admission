@@ -106,6 +106,39 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             ],
         )
 
+    def test_with_submission_date(self):
+        self.admission.determined_academic_year = self.academic_years[2015]
+        self.admission.submitted_at = datetime.date(2014, 11, 1)
+        self.admission.save()
+
+        result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
+
+        self.assertCountEqual(
+            result,
+            [
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
+                'De Septembre 2012 à Février 2013',
+                'De Septembre 2013 à Février 2014',
+                'De Septembre 2014 à Octobre 2014',
+            ],
+        )
+
+        self.admission.submitted_at = datetime.date(2014, 10, 31)
+        self.admission.save()
+
+        result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
+
+        self.assertCountEqual(
+            result,
+            [
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
+                'De Septembre 2012 à Février 2013',
+                'De Septembre 2013 à Février 2014',
+            ],
+        )
+
     def test_with_secondary_studies(self):
         self.admission.candidate.graduated_from_high_school = GotDiploma.YES.name
         self.admission.candidate.graduated_from_high_school_year = self.academic_years[2012]
