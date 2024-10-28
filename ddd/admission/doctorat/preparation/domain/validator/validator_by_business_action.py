@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Optional, Union, Dict
 
 import attr
@@ -338,7 +338,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 @attr.dataclass(frozen=True, slots=True)
 class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     annee_soumission: int
-    date_soumission: datetime.date
+    date_soumission: date
     annee_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
@@ -356,7 +356,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
-                date_reference=self.date_soumission,
+                date_soumission=self.date_soumission,
                 experiences_parcours_interne=self.experiences_parcours_interne,
             ),
         ]

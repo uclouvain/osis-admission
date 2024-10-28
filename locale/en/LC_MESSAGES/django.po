@@ -3093,13 +3093,13 @@ msgstr ""
 msgid "Financability dispensation status"
 msgstr ""
 
+msgid "Financability established by"
+msgstr ""
+
+msgid "Financability established on"
+msgstr ""
+
 msgid "Financability rule"
-msgstr ""
-
-msgid "Financability rule established by"
-msgstr ""
-
-msgid "Financability rule established on"
 msgstr ""
 
 #, python-format

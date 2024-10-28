@@ -195,8 +195,8 @@ class Proposition(interface.RootEntity):
     financabilite_regle_calcule_situation: Optional[SituationFinancabilite] = None
     financabilite_regle_calcule_le: Optional[datetime.datetime] = None
     financabilite_regle: Optional[SituationFinancabilite] = None
-    financabilite_regle_etabli_par: str = ''
-    financabilite_regle_etabli_le: Optional[datetime.datetime] = None
+    financabilite_etabli_par: str = ''
+    financabilite_etabli_le: Optional[datetime.datetime] = None
 
     financabilite_derogation_statut: Optional[DerogationFinancement] = None
     financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
@@ -823,12 +823,11 @@ class Proposition(interface.RootEntity):
     def specifier_financabilite_regle(
         self,
         financabilite_regle: SituationFinancabilite,
-        etabli_par: str,
         auteur_modification: str,
     ):
         self.financabilite_regle = financabilite_regle
-        self.financabilite_regle_etabli_par = etabli_par
-        self.financabilite_regle_etabli_le = datetime.datetime.now()
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = datetime.datetime.now()
         self.auteur_derniere_modification = auteur_modification
 
         if financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]:
@@ -846,12 +845,11 @@ class Proposition(interface.RootEntity):
 
     def specifier_financabilite_non_concernee(
         self,
-        etabli_par: str,
         auteur_modification: str,
     ):
         self.financabilite_regle = None
-        self.financabilite_regle_etabli_par = etabli_par
-        self.financabilite_regle_etabli_le = datetime.datetime.now()
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = datetime.datetime.now()
         self.auteur_derniere_modification = auteur_modification
         self.checklist_actuelle.financabilite = StatutChecklist(
             statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
@@ -865,6 +863,8 @@ class Proposition(interface.RootEntity):
         refus_autres_motifs: Optional[List[str]],
         auteur_modification: str,
     ):
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = datetime.datetime.now()
         self.auteur_derniere_modification = auteur_modification
         self.financabilite_derogation_statut = statut
         if statut == DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE:
