@@ -144,6 +144,11 @@ class CommentForm(forms.Form):
             'authentication': _('Comment about the authentication'),
         }
 
+        labels_from_prefix = {
+            'financabilite__derogation': _('Faculty comment about financability dispensation'),
+            'decision_sic__derogation': _('Comment about dispensation'),
+        }
+
         permissions = {
             COMMENT_TAG_SIC: 'admission.checklist_change_sic_comment',
             COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
@@ -153,7 +158,10 @@ class CommentForm(forms.Form):
             COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
         }
 
-        self.fields['comment'].label = labels.get(comment_type, label or _('Comment'))
+        if self.prefix in labels_from_prefix:
+            self.fields['comment'].label = labels_from_prefix[self.prefix]
+        else:
+            self.fields['comment'].label = labels.get(comment_type, label or _('Comment'))
 
         if permission is not None:
             self.permission = permission

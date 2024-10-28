@@ -122,7 +122,6 @@ class ChecklistView(
         documents_by_tab = {
             OngletsChecklist.assimilation.name: assimilation_documents,
             OngletsChecklist.financabilite.name: {
-                'DIPLOME_EQUIVALENCE',
                 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
                 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
                 'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
@@ -131,9 +130,7 @@ class ChecklistView(
             OngletsChecklist.choix_formation.name: {},
             OngletsChecklist.parcours_anterieur.name: {
                 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
-                'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
-                'ADDITIONAL_DOCUMENTS',
             },
             OngletsChecklist.donnees_personnelles.name: assimilation_documents,
             OngletsChecklist.decision_cdd.name: {
@@ -210,10 +207,6 @@ class ChecklistView(
             tab_names.append('decision_sic__derogation')
             tab_names.append('financabilite__derogation')
 
-            comments_labels = {
-                'decision_sic__derogation': _('Comment about dispensation'),
-                'financabilite__derogation': _('Faculty comment about financability dispensation'),
-            }
             comments_permissions = {
                 'financabilite__derogation': 'admission.checklist_change_fac_comment',
             }
@@ -229,7 +222,6 @@ class ChecklistView(
                     comment=comments.get(tab_name, None),
                     form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                     prefix=tab_name,
-                    label=comments_labels.get(tab_name, None),
                     permission=comments_permissions.get(tab_name, None),
                 )
                 for tab_name in tab_names

@@ -207,6 +207,6 @@ class IHistorique(interface.DomainService):
         cls,
         proposition: Proposition,
         gestionnaire: str,
-        message: Optional[EmailMessage],
+        message: Optional[EmailMessage] = None,
     ):
         raise NotImplementedError

@@ -1069,7 +1069,7 @@
           });
 
           // Pass the ckeditor data to the form data if necessary
-          $(document).on('click', '.ckeditor-form [name="save"]', function(event) {
+          $(document).on('click', '.ckeditor-form [type="submit"], .ckeditor-form [name="save"]', function(event) {
             $(this).closest('form').find("textarea").each(function() {
                 const editor = CKEDITOR.instances[$(this).attr('id')];
                 if (editor) editor.updateElement();
