@@ -13,7 +13,7 @@ from admission.mail_templates import (
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0228_doctorate_faculty_decision_emails'),
+        ('admission', '0229_merge_20241028_1046'),
     ]
 
     operations = [
