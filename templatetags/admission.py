@@ -1734,3 +1734,8 @@ def sport_affiliation_value(affiliation: Optional[str], campus_name: Optional[st
         return ChoixAffiliationSport.get_value(affiliation)
 
     return LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE.get(campus_name, ChoixAffiliationSport.NON.value)
+
+
+@register.simple_tag
+def institution_logo_url():
+    return settings.LOGO_INSTITUTION_URL
