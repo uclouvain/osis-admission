@@ -1775,3 +1775,8 @@ def edit_external_member_form(context, membre):
         prefix=f"member-{membre.uuid}",
         initial=initial,
     )
+
+
+@register.simple_tag
+def institution_logo_url():
+    return settings.LOGO_INSTITUTION_URL
