@@ -35,7 +35,7 @@
       {% block header %}
         <div class="header-container">
           <div>
-            <img src="{% static 'img/logo_uclouvain.png' %}" alt="{% translate "UCLouvain logo"%}"/>
+            <img src="{% institution_logo_url %}" alt="{% translate "UCLouvain logo"%}"/>
           </div>
           <div>
             <p>{% translate 'Candidate:' %} {{ proposition.prenom_candidat }} {{ proposition.nom_candidat }}</p>

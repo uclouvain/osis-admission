@@ -139,7 +139,7 @@
 
   <div class="row mb-0">
     <div class="col-6">
-      <img id="logo" src="{% static "img/logo_uclouvain.png" %}">
+      <img id="logo" src="{% institution_logo_url %}">
     </div>
     <div class="col-6 text-end">
       <strong>{% blocktrans with academic_year=proposition.formation.annee|get_academic_year trimmed %}
