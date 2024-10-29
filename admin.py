@@ -319,6 +319,9 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
         'language',
         'identifier',
     ]
+    autocomplete_fields = [
+        'cdd',
+    ]
 
     @staticmethod
     def view_on_site(obj):
@@ -907,9 +910,15 @@ class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
     ]
 
 
+class CddConfigurationAdmin(admin.ModelAdmin):
+    autocomplete_fields = [
+        'cdd',
+    ]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
-admin.site.register(CddConfiguration)
+admin.site.register(CddConfiguration, CddConfigurationAdmin)
 admin.site.register(Scholarship, ScholarshipAdmin)
 admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
 admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)
@@ -1077,6 +1086,9 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
         'person__first_name',
         'person__last_name',
         'entity__entityversion__acronym',
+    ]
+    autocomplete_fields = [
+        'entity',
     ]
 
     @admin.display(description=pgettext_lazy('admission', 'Entity'))
