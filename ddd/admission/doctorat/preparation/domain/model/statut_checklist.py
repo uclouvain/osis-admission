@@ -374,7 +374,23 @@ onglet_choix_formation = ConfigurationOngletChecklist(
 
 onglet_projet_recherche = ConfigurationOngletChecklist(
     identifiant=OngletsChecklist.projet_recherche,
-    statuts=[],
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDE',
+            libelle=_('Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
 )
 
 onglet_decision_cdd = ConfigurationOngletChecklist(

@@ -8117,9 +8117,6 @@ msgstr ""
 msgid "Work contract type"
 msgstr ""
 
-msgid "Work in progress"
-msgstr ""
-
 msgid "Work start date"
 msgstr ""
 
