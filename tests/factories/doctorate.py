@@ -140,7 +140,7 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
             cotutelle=True,
             cotutelle_motivation="Very motivated",
             cotutelle_institution_fwb=False,
-            cotutelle_institution="Somewhere",
+            cotutelle_institution="34eab30c-27e3-40db-b92e-0b51546a2448",
             cotutelle_opening_request=factory.LazyFunction(generate_token),  # This is to overcome circular import
             cotutelle_convention=factory.LazyFunction(generate_token),
             cotutelle_other_documents=factory.LazyFunction(generate_token),

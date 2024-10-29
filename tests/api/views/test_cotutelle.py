@@ -48,7 +48,7 @@ class CotutelleApiTestCase(APITestCase):
         cls.updated_data = {
             'motivation': "A good motive",
             'institution_fwb': False,
-            'institution': "Famous institution",
+            'institution': "5c2f68f3-f834-4638-8047-a507d7f26ba6",
             'demande_ouverture': [],
             'convention': [],
             'autres_documents': [],
@@ -109,10 +109,10 @@ class CotutelleApiTestCase(APITestCase):
 
         admission = DoctorateAdmission.objects.get()
         self.assertTrue(admission.cotutelle)
-        self.assertEqual(admission.cotutelle_institution, "Famous institution")
+        self.assertEqual(str(admission.cotutelle_institution), "5c2f68f3-f834-4638-8047-a507d7f26ba6")
 
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['institution'], "Famous institution")
+        self.assertEqual(response.json()['institution'], "5c2f68f3-f834-4638-8047-a507d7f26ba6")
 
     def test_cotutelle_get_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)

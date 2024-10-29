@@ -29,6 +29,7 @@ from typing import List, Optional, Union
 from django.db.models import F, Prefetch
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language, gettext_lazy as _
+from osis_signature.enums import SignatureState
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
@@ -100,7 +101,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             cotutelle = Cotutelle(
                 motivation=proposition.cotutelle_motivation,
                 institution_fwb=proposition.cotutelle_institution_fwb,
-                institution=proposition.cotutelle_institution,
+                institution=str(proposition.cotutelle_institution) if proposition.cotutelle_institution else "",
                 autre_institution_nom=proposition.cotutelle_other_institution_name,
                 autre_institution_adresse=proposition.cotutelle_other_institution_address,
                 demande_ouverture=proposition.cotutelle_opening_request,
@@ -221,7 +222,9 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         if entity.cotutelle:
             proposition.cotutelle_motivation = entity.cotutelle.motivation
             proposition.cotutelle_institution_fwb = entity.cotutelle.institution_fwb
-            proposition.cotutelle_institution = entity.cotutelle.institution
+            proposition.cotutelle_institution = (
+                None if not entity.cotutelle.institution else entity.cotutelle.institution
+            )
             proposition.cotutelle_other_institution_name = entity.cotutelle.autre_institution_nom
             proposition.cotutelle_other_institution_address = entity.cotutelle.autre_institution_adresse
             proposition.cotutelle_opening_request = entity.cotutelle.demande_ouverture
@@ -276,6 +279,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     def add_member(
         cls,
         groupe_id: 'GroupeDeSupervisionIdentity',
+        proposition_status: 'ChoixStatutPropositionDoctorale',
         type: Optional[ActorType] = None,
         matricule: Optional[str] = '',
         first_name: Optional[str] = '',
@@ -308,6 +312,8 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         else:
             group_name, model = 'committee_members', CommitteeMember
             signataire_id = MembreCAIdentity(str(new_actor.uuid))
+        if proposition_status != ChoixStatutPropositionDoctorale.EN_BROUILLON:
+            new_actor.switch_state(SignatureState.INVITED)
         # Make sure the person has relevant role and group
         if person and group_name not in _get_roles_assigned_to_user(person.user):
             model.objects.update_or_create(person=person)

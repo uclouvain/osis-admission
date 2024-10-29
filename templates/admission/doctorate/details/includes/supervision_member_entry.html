@@ -1,0 +1,190 @@
+{% load i18n admission enums bootstrap3 %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% url 'admission:doctorate:update:remove-actor' view.kwargs.uuid type member.uuid as remove_url %}
+{% url 'admission:doctorate:update:set-reference-promoter' view.kwargs.uuid member.uuid as set_reference_promoter_url %}
+
+<div
+  class="signature-item flex-container"
+  style="flex-wrap: wrap"
+  cy-matricule="{{ member.matricule }}"
+  cy-state="{{ signature.statut }}"
+>
+  <div style="flex: 1;">
+    <div>
+      <strong>
+        {% if member.est_docteur %}{% trans "Dr" %} {% endif %}
+        {{ member.prenom }} {{ member.nom }}
+      </strong>
+      ({{ member.email }})
+      {% if member.institution %} - {{ member.institution }} {% endif %}
+      {% if member.ville %} - {{ member.ville }} {% endif %}
+      {% if member.pays %}({{ member.pays }}){% endif %}
+    </div>
+    <em>
+      {% if signature.date %}
+        {% blocktrans with state=signature.statut|enum_display:'ChoixEtatSignature' date=signature.date trimmed %}
+          {{ state }} on {{ date }}
+        {% endblocktrans %}
+      {% else %}
+        {{ signature.statut|enum_display:'ChoixEtatSignature' }}
+      {% endif %}
+      {% if member.uuid == supervision.promoteur_reference %}
+        - {% trans "Lead supervisor" %}
+      {% endif %}
+    </em>
+  </div>
+
+  {% has_perm 'admission.set_reference_promoter' as can_set_reference_promoter %}
+  {% if can_set_reference_promoter and type == 'PROMOTER' and member.matricule and member.uuid != supervision.promoteur_reference and admission.statut != "EN_ATTENTE_DE_SIGNATURE" %}
+    <form method="post" action="{{ set_reference_promoter_url }}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-default" name="set_reference_promoter">
+        <i class="fas fa-angles-up"></i>
+        {% trans "Designate as lead supervisor" %}
+      </button>
+    </form>
+  {% endif %}
+
+  {% has_perm 'admission.edit_external_supervision_member' as can_edit_external_supervision_member %}
+  {% if can_edit_external_supervision_member and member.est_externe and admission.statut != "EN_ATTENTE_DE_SIGNATURE" %}
+    <button
+      type="button"
+      class="btn btn-default pull-right"
+      data-toggle="collapse"
+      data-target="#edit_external_member_form-{{ member.uuid }}"
+    >
+      <i class="fas fa-pencil"></i>
+      {% trans "Edit" %}
+    </button>
+  {% endif %}
+
+  {% has_perm 'admission.remove_supervision_member' as can_remove_supervision_member %}
+  {% if can_remove_supervision_member and admission.statut != "EN_ATTENTE_DE_SIGNATURE" %}
+    <a href="{{ remove_url }}" class="btn btn-danger pull-right">
+      <i class="fas fa-trash-alt"></i>
+      {% trans "Remove" context "admission" %}
+    </a>
+  {% endif %}
+
+  {# Action buttons #}
+  {% has_perm 'admission.approve_proposition_by_pdf' as can_approve_proposition_by_pdf %}
+  {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' %}
+    {% if type != 'PROMOTER' or member.est_externe or admission.statut != "BROUILLON" %}
+      <button
+        class="btn btn-default pull-right"
+        data-toggle="collapse"
+        data-target="#approve-by-pdf-{{ member.uuid }}"
+      >
+        <i class="fas fa-file-circle-check"></i>
+        {% trans "Approve by PDF" %}
+      </button>
+    {% endif %}
+  {% endif %}
+
+  {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' and not member.matricule and admission.statut == "EN_BROUILLON" %}
+    <button
+      class="btn btn-default pull-right"
+      data-toggle="collapse"
+      data-target="#resend-invite-{{ member.uuid }}"
+    >
+      <i class="fas fa-envelope-open-text"></i>
+      {% trans "Resend invitation" %}
+    </button>
+  {% endif %}
+
+
+  {# Action buttons #}
+  <div class="panel-group" style="flex-basis: 100%;">
+    {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' %}
+      {% if type != 'PROMOTER' or member.est_externe or admission.statut != "BROUILLON" %}
+        {% panel _("Approve by PDF") id="approve-by-pdf-"|add:member.uuid additional_class="collapse" %}
+          <form action="{% url 'admission:doctorate:update:approve-by-pdf' uuid=admission.uuid %}" method="post">
+            {% csrf_token %}
+            {{ approve_by_pdf_form.pdf }}
+            <input type="hidden" name="uuid_membre" value="{{ member.uuid }}" />
+            <button type="submit" class="btn btn-primary pull-right">
+              {% blocktrans with first_name=member.prenom last_name=member.nom trimmed %}
+                Approve on behalf of {{ first_name }} {{ last_name }}
+              {% endblocktrans %}
+            </button>
+          </form>
+        {% endpanel %}
+      {% endif %}
+    {% endif %}
+
+    {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' and not member.matricule and admission.statut == "EN_BROUILLON" %}
+      {% panel _("Resend invitation") id="resend-invite-"|add:member.uuid additional_class="collapse" %}
+        <form action="{% url 'admission:doctorate:update:resend-invite' uuid=admission.uuid uuid_membre=member.uuid %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="uuid_membre" value="{{ member.uuid }}" />
+          <button type="submit" class="btn btn-primary pull-right">
+            {% trans "Confirm" %}
+          </button>
+        </form>
+      {% endpanel %}
+    {% endif %}
+
+    {% if can_edit_external_supervision_member and member.est_externe and admission.statut != "EN_ATTENTE_DE_SIGNATURE" %}
+      {% url 'admission:doctorate:update:edit-external-member' uuid=admission.uuid uuid_membre=member.uuid as edit_external_member_url %}
+      <form method="post" action="{{ edit_external_member_url }}" id="edit_external_member_form-{{ member.uuid }}" class="collapse">
+        {% csrf_token %}
+        {% edit_external_member_form member as edit_external_member_form %}
+        <div class="">
+          <div class="panel panel-default col-md-6">
+            <div class="panel-body">
+              {% bootstrap_form edit_external_member_form %}
+              <button type="submit" class="btn btn-primary pull-right" name="edit_external_member_form">
+                {% trans "Save" context 'admission'  %}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    {% endif %}
+
+    {% if signature.motif_refus and signature.statut == 'DECLINED' %}
+      <blockquote><strong>{% trans "Grounds for denied" %}</strong>
+        {{ signature.motif_refus|linebreaks }}</blockquote>
+    {% endif %}
+
+    {% if signature.commentaire_externe %}
+      <blockquote><strong>{% trans "Comment to the candidate:" %}</strong>
+        {{ signature.commentaire_externe|linebreaks }}</blockquote>
+    {% endif %}
+
+    {% if member.matricule == user.person.global_id and signature.commentaire_interne %}
+      <blockquote><strong>{% trans "Internal comment:" %}</strong>
+        {{ signature.commentaire_interne|linebreaks }}</blockquote>
+    {% endif %}
+  </div>
+</div>
+
+{% if signature.pdf and signature.statut == 'APPROVED' %}
+  {% field_data _("Approbation by pdf") signature.pdf %}
+{% endif %}
+
+{% if not forloop.last %}
+  <hr />
+{% endif %}
