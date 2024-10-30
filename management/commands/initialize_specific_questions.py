@@ -30,7 +30,7 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.translation import ngettext
 
-from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import (
     TypeItemFormulaire,

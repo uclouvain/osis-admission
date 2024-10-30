@@ -31,7 +31,7 @@ __all__ = [
     'EPCInjectionView',
 ]
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 
 from base.utils.htmx import HtmxPermissionRequiredMixin

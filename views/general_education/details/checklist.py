@@ -49,9 +49,9 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models import EPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
+from admission.models import EPCInjection
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (

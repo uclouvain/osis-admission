@@ -29,8 +29,8 @@ from datetime import datetime
 
 import factory
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import DoctorateAdmissionPrerequisiteCourses
+from admission.models import DoctorateAdmission
+from admission.models.doctorate import DoctorateAdmissionPrerequisiteCourses
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeFinancement,

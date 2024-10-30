@@ -43,8 +43,8 @@ from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import (
+from admission.models import GeneralEducationAdmission
+from admission.models.checklist import (
     AdditionalApprovalCondition,
     RefusalReasonCategory,
     FreeAdditionalApprovalCondition,

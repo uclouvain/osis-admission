@@ -30,7 +30,7 @@ import uuid
 import factory
 from dateutil.relativedelta import relativedelta
 
-from admission.contrib.models.base import (
+from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )

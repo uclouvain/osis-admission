@@ -28,7 +28,7 @@ from admission.ddd.admission.doctorat.preparation.commands import RefuserProposi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.avis import Avis
 from admission.ddd.admission.doctorat.preparation.domain.service.deverrouiller_projet_doctoral import (
-    DeverrouillerProjetDoctoral,
+    DeverrouillerPropositionProjetDoctoral,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
@@ -55,7 +55,7 @@ def refuser_proposition(
 
     # WHEN
     groupe_de_supervision.refuser(signataire_id, cmd.commentaire_interne, cmd.commentaire_externe, cmd.motif_refus)
-    DeverrouillerProjetDoctoral().deverrouiller_apres_refus(proposition_candidat, signataire_id)
+    DeverrouillerPropositionProjetDoctoral().deverrouiller_apres_refus(proposition_candidat, signataire_id)
 
     # THEN
     historique.historiser_avis(proposition_candidat, signataire_id, avis, statut_original_proposition)

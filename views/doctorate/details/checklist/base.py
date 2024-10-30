@@ -36,8 +36,7 @@ from django.views.generic import TemplateView, FormView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.contrib.models.epc_injection import EPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetStatutTicketPersonneQuery, RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,

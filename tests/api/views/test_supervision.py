@@ -30,7 +30,7 @@ from osis_signature.models import StateHistory
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     MembreCANonTrouveException,

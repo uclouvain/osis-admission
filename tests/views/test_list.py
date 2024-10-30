@@ -35,13 +35,13 @@ from django.shortcuts import resolve_url
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.contrib.models import (
+from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
     EPCInjection,
 )
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist

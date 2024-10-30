@@ -27,7 +27,7 @@
 import uuid
 from typing import List, Optional, Union
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity

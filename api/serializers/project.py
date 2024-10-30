@@ -35,7 +35,7 @@ from admission.api.serializers.fields import (
     RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
+from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,

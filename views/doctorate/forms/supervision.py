@@ -32,7 +32,7 @@ from django.views.generic.edit import FormView
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.commands import (
     RenvoyerInvitationSignatureExterneCommand,
     DemanderSignaturesCommand,
@@ -209,10 +209,13 @@ class DoctorateAdmissionEditExternalMemberFormView(PermissionRequiredMixin, Busi
         return resolve_url('admission:doctorate:supervision', uuid=self.kwargs['uuid'])
 
     def form_invalid(self, form):
-        display_error_messages(self.request, (
-            _("Please correct the errors below"),
-            str(form.errors),
-        ))
+        display_error_messages(
+            self.request,
+            (
+                _("Please correct the errors below"),
+                str(form.errors),
+            ),
+        )
         return redirect('admission:doctorate:supervision', uuid=self.kwargs['uuid'])
 
 

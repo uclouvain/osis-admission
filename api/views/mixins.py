@@ -29,7 +29,7 @@ from django.utils.functional import cached_property
 from rest_framework.generics import get_object_or_404
 
 from admission.api.schema import ChoicesEnumSchema, ResponseSpecificSchema
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,

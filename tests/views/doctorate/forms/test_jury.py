@@ -31,7 +31,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
 )

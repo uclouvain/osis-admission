@@ -26,8 +26,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import DoctorateAdmission
+from admission.models.enums.actor_type import ActorType
 from osis_document.contrib import FileField
 from osis_signature.models import Actor
 

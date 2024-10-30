@@ -27,7 +27,7 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import DoctorateAdmission, JuryMember
+from admission.models import DoctorateAdmission, JuryMember
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.jury import JuryMemberFactory

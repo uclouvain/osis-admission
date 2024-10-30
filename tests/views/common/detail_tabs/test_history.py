@@ -26,7 +26,7 @@
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory

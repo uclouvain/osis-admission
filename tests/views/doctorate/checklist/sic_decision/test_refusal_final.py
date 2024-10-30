@@ -34,7 +34,7 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import TypeDeRefus, ChoixStatutChecklist

@@ -42,8 +42,8 @@ from osis_history.models import HistoryEntry
 from osis_mail_template.models import MailTemplate
 from osis_notification.models import EmailNotification
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.checklist import (
+from admission.models import DoctorateAdmission
+from admission.models.checklist import (
     AdditionalApprovalCondition,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
