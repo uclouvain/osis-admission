@@ -31,7 +31,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue

@@ -26,7 +26,7 @@
 from django.conf import settings
 from django.test import TransactionTestCase
 
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
 from admission.tests.factories.mail_template import CddMailTemplateFactory
 from base.models.enums.entity_type import EntityType

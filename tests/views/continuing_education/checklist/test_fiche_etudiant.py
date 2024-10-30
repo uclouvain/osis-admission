@@ -28,7 +28,7 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,

@@ -25,7 +25,7 @@
 # ##############################################################################
 from rest_framework import serializers
 
-from admission.contrib.models import DiplomaticPost
+from admission.models import DiplomaticPost
 
 
 class DiplomaticPostSerializer(serializers.ModelSerializer):

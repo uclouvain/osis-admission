@@ -26,7 +26,7 @@
 
 from django.test import TestCase
 
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
@@ -40,14 +40,14 @@ class TestRecupererDoctorat(TestCase):
     def test_should_pas_trouver_si_doctorat_inconnu(self):
         with self.assertRaises(DoctoratNonTrouveException):
             self.message_bus.invoke(
-                RecupererDoctoratQuery(
+                RecupererAdmissionDoctoratQuery(
                     doctorat_uuid='inconnu',
                 )
             )
 
     def test_should_recuperer_doctorat_connu(self):
         doctorat_dto: DoctoratDTO = self.message_bus.invoke(
-            RecupererDoctoratQuery(
+            RecupererAdmissionDoctoratQuery(
                 doctorat_uuid='uuid-SC3DP-promoteurs-membres-deja-approuves',
             )
         )

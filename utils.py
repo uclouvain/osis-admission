@@ -47,7 +47,7 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_GENERAL, CONTEXT_DOCTORATE
-from admission.contrib.models import (
+from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,

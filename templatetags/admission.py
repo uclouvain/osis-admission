@@ -57,8 +57,8 @@ from admission.constants import (
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE_AFTER_ENROLMENT,
 )
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )

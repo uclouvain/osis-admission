@@ -28,7 +28,7 @@ from typing import List, Optional
 
 from django.db.models import QuerySet, Max, Q, F
 
-from admission.contrib.models.base import (
+from admission.models.base import (
     BaseAdmission,
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,

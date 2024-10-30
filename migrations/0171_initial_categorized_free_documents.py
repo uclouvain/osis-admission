@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from admission.contrib.models.categorized_free_document import TOKEN_ACADEMIC_YEAR
+from admission.models.categorized_free_document import TOKEN_ACADEMIC_YEAR
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 
 
@@ -269,7 +269,7 @@ def initialize_categorized_free_documents(apps, schema_editor):
             short_label_fr="Attestation de réussite",
             with_academic_year=True,
             long_label_fr=f"Une copie de l'attestation de réussite de votre diplôme obtenu en {TOKEN_ACADEMIC_YEAR}",
-            long_label_en=f"A copy of the certificate of course completion for your diploma in {TOKEN_ACADEMIC_YEAR}."
+            long_label_en=f"A copy of the certificate of course completion for your diploma in {TOKEN_ACADEMIC_YEAR}.",
         ),
         CategorizedFreeDocument(
             checklist_tab=OngletsChecklist.parcours_anterieur.name,

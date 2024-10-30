@@ -32,7 +32,7 @@ import freezegun
 from django.test import TestCase, override_settings
 from osis_history.models import HistoryEntry
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale

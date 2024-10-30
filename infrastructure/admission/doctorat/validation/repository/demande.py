@@ -25,8 +25,8 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import DemandeProxy
+from admission.models import DoctorateAdmission
+from admission.models.doctorate import DemandeProxy
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC

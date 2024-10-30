@@ -79,7 +79,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     ModifierTypeAdmissionValidatorList,
-    ProjetDoctoralValidatorList,
+    PropositionProjetDoctoralValidatorList,
     ModifierStatutChecklistParcoursAnterieurValidatorList,
     SpecifierConditionAccesParcoursAnterieurValidatorList,
     ApprouverParSicAValiderValidatorList,
@@ -572,7 +572,7 @@ class Proposition(interface.RootEntity):
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
-        ProjetDoctoralValidatorList(
+        PropositionProjetDoctoralValidatorList(
             self.type_admission,
             self.projet,
             self.financement,

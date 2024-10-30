@@ -29,7 +29,7 @@ from django.db import models
 from django.db.models import CheckConstraint, Q
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury, TitreMembre, GenreMembre
 
 __all__ = ['JuryMember']

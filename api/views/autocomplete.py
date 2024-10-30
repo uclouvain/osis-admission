@@ -37,7 +37,7 @@ from rules.contrib.views import LoginRequiredMixin
 from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema, ResponseSpecificSchema, BetterChoicesSchema
 from admission.api.serializers import PersonSerializer
-from admission.contrib.models import EntityProxy, Scholarship, DiplomaticPost
+from admission.models import EntityProxy, Scholarship, DiplomaticPost
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
 from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery

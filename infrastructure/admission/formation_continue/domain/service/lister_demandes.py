@@ -38,7 +38,7 @@ from django.db.models.fields import CharField
 from django.db.models.functions import Concat
 from django.utils.translation import get_language, gettext
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (

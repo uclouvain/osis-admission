@@ -35,7 +35,7 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext, gettext_lazy
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,

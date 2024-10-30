@@ -31,12 +31,12 @@ from django.utils.translation import override
 from osis_document.utils import save_raw_content_remotely
 from pikepdf import Pdf, OutlineItem, PdfError, PasswordError
 
-from admission.contrib.models import (
+from admission.models import (
     ContinuingEducationAdmission,
     GeneralEducationAdmission,
     DoctorateAdmission,
 )
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands

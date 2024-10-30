@@ -28,8 +28,8 @@ from typing import Optional, List
 from django.db import transaction
 from django.db.models import Prefetch, Q
 
-from admission.contrib.models import DoctorateAdmission, JuryMember, SupervisionActor
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import DoctorateAdmission, JuryMember, SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury
 from admission.ddd.parcours_doctoral.jury.domain.model.jury import Jury, JuryIdentity, MembreJury
 from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO, MembreJuryDTO

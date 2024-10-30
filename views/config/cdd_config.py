@@ -30,7 +30,7 @@ from django.views import generic
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.roles.cdd_configurator import CddConfigurator
-from admission.contrib.models.cdd_config import CddConfiguration
+from admission.models.cdd_config import CddConfiguration
 from admission.forms.cdd_config import CddConfigForm
 from base.models.entity_version import EntityVersion
 from osis_role.contrib.views import PermissionRequiredMixin

@@ -33,8 +33,8 @@ from osis_signature.enums import SignatureState
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
-from admission.contrib.models import DoctorateAdmission, SupervisionActor
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import DoctorateAdmission, SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity

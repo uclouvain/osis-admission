@@ -27,7 +27,7 @@
 from django.utils import translation
 
 from admission.exports.utils import admission_generate_pdf
-from admission.contrib.models import ConfirmationPaper
+from admission.models import ConfirmationPaper
 
 
 def admission_pdf_confirmation_canvas(admission, language, context):

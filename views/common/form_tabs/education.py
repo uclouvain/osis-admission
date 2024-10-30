@@ -29,8 +29,8 @@ from uuid import UUID
 from django.urls import reverse
 from django.utils.functional import cached_property
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
