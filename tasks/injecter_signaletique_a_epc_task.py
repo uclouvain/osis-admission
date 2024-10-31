@@ -79,7 +79,6 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
                 epc_injection_signaletique.status = EPCInjectionStatus.OSIS_ERROR.name
             finally:
                 epc_injection_signaletique.last_attempt_date = datetime.now()
-                epc_injection_signaletique.osis_error_message = str(e)
                 epc_injection_signaletique.osis_stacktrace = traceback.format_exc() if e else ""
                 epc_injection_signaletique.save()
     logger.info(f"{PREFIX_TASK} Fin des injections vers EPC de la signaletique dans la queue ")

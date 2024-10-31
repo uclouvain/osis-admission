@@ -35,19 +35,10 @@ import pika
 from django.conf import settings
 from django.db import transaction
 from django.db.models import QuerySet, Exists, OuterRef
+from osis_history.models.history_entry import HistoryEntry
 from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.models import Accounting, EPCInjection, AdmissionFormItem
-from admission.models import GeneralEducationAdmission
-from admission.models.base import (
-    BaseAdmission,
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
-from admission.models.categorized_free_document import CategorizedFreeDocument
-from admission.models.enums.actor_type import ActorType
-from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
@@ -62,9 +53,20 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.historique import TAGS_AUTORISATION_SIC
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
 )
+from admission.models import Accounting, EPCInjection, AdmissionFormItem
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
+    BaseAdmission,
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
+from admission.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.enums.actor_type import ActorType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.services.injection_epc.injection_signaletique import (
     InjectionEPCSignaletique,
 )
@@ -231,7 +233,6 @@ class InjectionEPCAdmission:
                 "payload": donnees,
                 "status": statut,
                 'last_attempt_date': datetime.now(),
-                "osis_error_message": str(e) if e else "",
                 "osis_stacktrace": stacktrace if e else ""
             },
         )
@@ -261,8 +262,13 @@ class InjectionEPCAdmission:
         admission_generale = getattr(admission, 'generaleducationadmission', None)
         admission_iufc = getattr(admission, 'continuingeducationadmission', None)
         documents_specifiques = cls._recuperer_documents_specifiques(admission)
+        auteur_autorisation_sic = HistoryEntry.objects.filter(
+            tags__contains=TAGS_AUTORISATION_SIC,
+            object_uuid=admission.uuid
+        ).order_by('-created').first().author
         return {
             "dossier_uuid": str(admission.uuid),
+            'auteur_autorisation_sic': auteur_autorisation_sic,
             "signaletique": InjectionEPCSignaletique._get_signaletique(
                 candidat=candidat,
                 adresse_domicile=adresse_domicile,
