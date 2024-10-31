@@ -49,14 +49,14 @@ from admission.ddd.admission.domain.service.i_elements_confirmation import IElem
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.domain.service.profil_soumis_candidat import (
     ProfilSoumisCandidatTranslator,
 )
+from admission.ddd.admission.enums.question_specifique import Onglets
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.service.financabilite import Financabilite
-from ddd.logic.financabilite.domain.service.i_financabilite import IFinancabiliteFetcher
+from ddd.logic.financabilite.domain.service.algorithmes.v2024.algorithme import Algorithme2024
+from ddd.logic.financabilite.domain.service.i_fetcher import IFetcher
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -77,7 +77,7 @@ def soumettre_proposition(
     calendrier_inscription: 'ICalendrierInscription',
     element_confirmation: 'IElementsConfirmation',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
-    financabilite_fetcher: 'IFinancabiliteFetcher',
+    financabilite_fetcher: 'IFetcher',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -160,7 +160,7 @@ def soumettre_proposition(
     )
 
     # THEN
-    financabilite = Financabilite(
+    financabilite = Algorithme2024(
         parcours=parcours,
         formation=formation_dto,
         est_en_reorientation=False,
