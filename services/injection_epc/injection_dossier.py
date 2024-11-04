@@ -38,6 +38,25 @@ from django.db.models import QuerySet, Exists, OuterRef
 from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
+    as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
+)
+from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.formation_continue.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
+    as RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    DROITS_INSCRIPTION_MONTANT_VALEURS,
+    PoursuiteDeCycle,
+)
+from admission.infrastructure.utils import (
+    CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
+)
 from admission.models import Accounting, EPCInjection, AdmissionFormItem
 from admission.models import GeneralEducationAdmission
 from admission.models.base import (
@@ -48,23 +67,6 @@ from admission.models.base import (
 from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.models.enums.actor_type import ActorType
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.ddd.admission.doctorat.preparation.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
-)
-from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.formation_continue.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
-)
-from admission.ddd.admission.formation_generale.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    DROITS_INSCRIPTION_MONTANT_VALEURS,
-    PoursuiteDeCycle,
-)
-from admission.infrastructure.utils import (
-    CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
-)
 from admission.services.injection_epc.injection_signaletique import (
     InjectionEPCSignaletique,
 )
