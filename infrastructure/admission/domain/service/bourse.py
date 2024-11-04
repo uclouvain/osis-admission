@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List, Dict
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 from admission.ddd.admission.domain.builder.bourse_identity import BourseIdentityBuilder
 
 from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator, BourseIdentity

@@ -83,6 +83,6 @@ def completer_proposition(
 
     # THEN
     proposition_repository.save(proposition_candidat)
-    historique.historiser_completion(proposition_candidat)
+    historique.historiser_completion(proposition_candidat, cmd.matricule_auteur)
 
     return entity_id

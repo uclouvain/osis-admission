@@ -38,45 +38,6 @@ CHECKLIST_TOKENS = admission_common_tokens + [
 ]
 
 
-ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_DOCTORATE = 'osis-admission-send-to-fac-at-fac-decision-doctorate'
-templates.register(
-    ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_DOCTORATE,
-    description=_(
-        'Email sent to the faculty when the SIC submits the application during the faculty decision process '
-        'for a doctorate admission.',
-    ),
-    tag=DOCTORATE_ADMISSION_TAG,
-    tokens=CHECKLIST_TOKENS
-    + [
-        Token(
-            name='admission_link_back_for_fac_approval_checklist',
-            description=_("Link to the page of the faculty decision in the checklist of the admission (back-office)"),
-            example="http://dev.studies.uclouvain.be/somewhere",
-        ),
-        Token(
-            name='training_enrollment_campus_email',
-            description=_("Email of the enrollment campus"),
-            example="inscription-lln@uclouvain.be",
-        ),
-        Token(
-            name='candidate_nationality_country',
-            description=_("Candidate's country of nationality"),
-            example="Belgique",
-        ),
-        Token(
-            name='training_acronym',
-            description=_('Acronym of the training'),
-            example='SPRI2MS/DI',
-        ),
-        Token(
-            name='application_type',
-            description=_('Type of the application'),
-            example='admission',
-        ),
-    ],
-)
-
-
 ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE = 'osis-admission-sic-refusal-doctorate'
 templates.register(
     ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
@@ -112,6 +73,7 @@ templates.register(
 
 EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN = 'LIEN_DOCUMENT_AUTORISATION_INSCRIPTION'
 EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN = 'LIEN_DOCUMENT_DEMANDE_VISA'
+EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN = 'LIEN_DOCUMENT_ANNEXE_CDD'
 
 ADMISSION_EMAIL_SIC_APPROVAL_DOCTORATE = 'osis-admission-sic-approval-doctorate'
 ADMISSION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
@@ -143,6 +105,11 @@ ADMISSION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
     Token(
         name='visa_application_document_link',
         description=_("Visa application document link"),
+        example="https://osis.uclouvain.be/...",
+    ),
+    Token(
+        name='cdd_annex_document_link',
+        description=_("PhD Subject Committee annex document link"),
         example="https://osis.uclouvain.be/...",
     ),
     Token(
@@ -207,6 +174,11 @@ INSCRIPTION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
     Token(
         name='visa_application_document_link',
         description=_("Visa application document link"),
+        example="https://osis.uclouvain.be/...",
+    ),
+    Token(
+        name='cdd_annex_document_link',
+        description=_("PhD Subject Committee annex document link"),
         example="https://osis.uclouvain.be/...",
     ),
     Token(
@@ -357,6 +329,122 @@ templates.register(
             name='contact_link',
             description=_("Contact link"),
             example="https://osis.uclouvain.be/...",
+        ),
+    ],
+)
+
+
+ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE = 'osis-admission-cdd-refusal-doctorate'
+templates.register(
+    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
+    description=_('Email sent to the candidate when the CDD refuses a doctorate admission.'),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
+        ),
+    ],
+)
+
+ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA = (
+    'osis-admission-cdd-approval-doctorate-with-belgian-diploma'
+)
+templates.register(
+    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
+    description=_(
+        'Email sent to the candidate when the CDD approves a doctorate admission of a candidate with a '
+        'Belgian diploma.'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
+        ),
+    ],
+)
+
+ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA = (
+    'osis-admission-cdd-approval-doctorate-without-belgian-diploma'
+)
+templates.register(
+    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+    description=_(
+        'Email sent to the candidate when the CDD approves a doctorate admission of a candidat without any Belgian '
+        'diploma.'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
         ),
     ],
 )

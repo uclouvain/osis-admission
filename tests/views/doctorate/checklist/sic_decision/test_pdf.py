@@ -29,7 +29,7 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -86,7 +86,6 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             program_planned_years_number=2,
             annual_program_contact_person_name='foo',
             annual_program_contact_person_email='bar@example.org',
-            with_additional_approval_conditions=False,
             tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name,
             tuition_fees_dispensation=DispenseOuDroitsMajores.NON_CONCERNE.name,
             must_report_to_sic=False,

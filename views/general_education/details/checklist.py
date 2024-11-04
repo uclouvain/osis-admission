@@ -49,9 +49,9 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models import EPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
+from admission.models import EPCInjection
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (
@@ -2243,16 +2243,17 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
         context['financability_dispensation_notification_form'] = self.financability_dispensation_notification_form
 
         if self.request.htmx:
-            comment = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags__contains=['financabilite']
-            ).first()
-            comment_derogation = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags__contains=['financabilite__derogation']
-            ).first()
+            comments = {
+                ('__'.join(c.tags)): c
+                for c in CommentEntry.objects.filter(
+                    object_uuid=self.admission_uuid,
+                    tags__contains=['financabilite'],
+                )
+            }
 
             context['comment_forms'] = {
                 'financabilite': CommentForm(
-                    comment=comment,
+                    comment=comments.get('financabilite'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
@@ -2261,7 +2262,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     prefix='financabilite',
                 ),
                 'financabilite__derogation': CommentForm(
-                    comment=comment_derogation,
+                    comment=comments.get('financabilite__derogation'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='financabilite__derogation'
                     ),
@@ -2326,8 +2327,17 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
         )
 
         admission.financability_rule = ''
-        admission.financability_rule_established_by = None
-        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
+        if status == 'GEST_REUSSITE':
+            admission.financability_established_by = self.request.user.person
+            admission.financability_established_on = timezone.now()
+        else:
+            admission.financability_established_by = None
+            admission.financability_established_on = None
+        admission.save(update_fields=[
+            'financability_rule',
+            'financability_established_by',
+            'financability_established_on',
+        ])
 
         return HttpResponseClientRefresh()
 
@@ -2350,7 +2360,6 @@ class FinancabiliteApprovalSetRuleView(HtmxPermissionRequiredMixin, Financabilit
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=form.cleaned_data['financability_rule'],
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2368,7 +2377,6 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=self.admission.financability_computed_rule_situation,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2394,7 +2402,6 @@ class FinancabiliteNotFinanceableSetRuleView(HtmxPermissionRequiredMixin, Financ
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=form.cleaned_data['financability_rule'],
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2412,7 +2419,6 @@ class FinancabiliteNotFinanceableView(HtmxPermissionRequiredMixin, Financabilite
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=self.admission.financability_computed_rule_situation,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2430,7 +2436,6 @@ class FinancabiliteNotConcernedView(HtmxPermissionRequiredMixin, FinancabiliteCo
         message_bus_instance.invoke(
             SpecifierFinancabiliteNonConcerneeCommand(
                 uuid_proposition=self.admission_uuid,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )

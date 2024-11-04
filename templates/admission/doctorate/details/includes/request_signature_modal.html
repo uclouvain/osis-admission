@@ -1,0 +1,108 @@
+{% load bootstrap3 i18n static admission %}
+
+{% comment "License" %}
+    * OSIS stands for Open Student Information System. It's an application
+    * designed to manage the core business of higher education institutions,
+    * such as universities, faculties, institutes and professional schools.
+    * The core business involves the administration of students, teachers,
+    * courses, programs and so on.
+    *
+    * Copyright (C) 2015-2024 Université catholique de Louvain
+    (http://www.uclouvain.be)
+    *
+    * This program is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    * GNU General Public License for more details.
+    *
+    * A copy of this license - GNU General Public License - is available
+    * at the root of the source code of this program.  If not,
+    * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div
+    class="modal fade"
+    id="request-signatures-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="request-signatures-label"
+>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="request-signatures-label">
+                    {% trans "Request signatures" %}
+                </h4>
+            </div>
+
+            {% if signature_conditions %}
+                <div class="modal-body">
+                    <p>
+                        {% trans "You must correct your application before you can request signatures." %}
+                    </p>
+                    <div class="alert alert-danger" role="alert">
+                        <ul>
+                            {% for error in signature_conditions %}
+                                <li> {{ error.detail }} </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-default"
+                        data-dismiss="modal"
+                    >
+                        {% trans "Close" %}
+                    </button>
+                </div>
+            {% else %}
+                <form
+                    class="osis-form"
+                    id="request-signatures-form"
+                    method="post"
+                    action="{% url 'admission:doctorate:update:request-signatures' view.kwargs.uuid %}"
+                >
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>
+                            {% trans "Are you sure you want to request signatures for this admission?" %}
+                        </p>
+                        <div class="alert alert-warning flex-container-align-no-wrap">
+                          <i class="fa fa-solid fa-warning" aria-hidden="true"></i>
+                          <p>
+                            {% translate 'Once the signatures request is sent, you will not be able to change anything in the application for admission.' %}
+                          </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">
+                            {% trans "Confirm" %}
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-default"
+                            data-dismiss="modal"
+                        >
+                            {% trans "Close" %}
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>

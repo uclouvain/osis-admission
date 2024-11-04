@@ -31,7 +31,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils import timezone
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -72,7 +72,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             submitted=True,
             financability_rule=SituationFinancabilite.PLUS_FINANCABLE.name,
-            financability_rule_established_by=CompletePersonFactory(),
+            financability_established_by=CompletePersonFactory(),
         )
         cls.default_headers = {'HTTP_HX-Request': 'true'}
         cls.url = resolve_url(
@@ -97,7 +97,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
         self.assertEqual(self.admission.financability_rule, '')
-        self.assertIsNone(self.admission.financability_rule_established_by)
+        self.assertIsNone(self.admission.financability_established_by)
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -151,7 +151,7 @@ class FinancabiliteApprovalSetRuleViewTestCase(TestCase):
             SituationFinancabilite.ACQUIS_100_POURCENT_EN_N_MOINS_1.name,
         )
         self.assertEqual(
-            self.admission.financability_rule_established_by,
+            self.admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -212,7 +212,7 @@ class FinancabiliteApprovalViewTestCase(TestCase):
             SituationFinancabilite.FINANCABLE_D_OFFICE.name,
         )
         self.assertEqual(
-            self.admission.financability_rule_established_by,
+            self.admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -221,6 +221,17 @@ class FinancabiliteApprovalViewTestCase(TestCase):
         )
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+
+    def test_post_with_faculty_manager(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -272,7 +283,7 @@ class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
             SituationFinancabilite.PLUS_FINANCABLE.name,
         )
         self.assertEqual(
-            self.admission.financability_rule_established_by,
+            self.admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -281,6 +292,17 @@ class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
         )
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+
+    def test_post_with_faculty_manager(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -333,7 +355,7 @@ class FinancabiliteNotFinanceableViewTestCase(TestCase):
             SituationFinancabilite.PLUS_FINANCABLE.name,
         )
         self.assertEqual(
-            self.admission.financability_rule_established_by,
+            self.admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -342,6 +364,17 @@ class FinancabiliteNotFinanceableViewTestCase(TestCase):
         )
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+
+    def test_post_with_faculty_manager(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
 
 
 class FinancabiliteDerogationViewTestCase(TestCase):
@@ -389,6 +422,20 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             DerogationFinancement.NON_CONCERNE.name,
         )
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(
+            self.admission.financability_established_by,
+            self.sic_manager_user.person,
+        )
+
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
 
     def test_abandon_candidat_post(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -411,6 +458,20 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.admission.financability_dispensation_status,
             DerogationFinancement.ABANDON_DU_CANDIDAT.name,
         )
+        self.assertEqual(
+            self.admission.financability_established_by,
+            self.sic_manager_user.person,
+        )
+
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
 
     def test_refus_post(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -434,6 +495,20 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.admission.financability_dispensation_status,
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
         )
+        self.assertEqual(
+            self.admission.financability_established_by,
+            self.sic_manager_user.person,
+        )
+
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
 
     def test_refus_post_with_other_reasons(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -468,6 +543,10 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.admission.other_refusal_reasons,
             ['Autre'],
         )
+        self.assertEqual(
+            self.admission.financability_established_by,
+            self.sic_manager_user.person,
+        )
 
     def test_accord_post(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -490,6 +569,20 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.admission.financability_dispensation_status,
             DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name,
         )
+        self.assertEqual(
+            self.admission.financability_established_by,
+            self.sic_manager_user.person,
+        )
+
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
 
     def test_notification_candidat(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -515,6 +608,16 @@ class FinancabiliteDerogationViewTestCase(TestCase):
         self.assertEqual(self.admission.financability_dispensation_status, DerogationFinancement.CANDIDAT_NOTIFIE.name)
         self.assertEqual(self.admission.financability_dispensation_first_notification_by, self.sic_manager_user.person)
 
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)
+
 
 @freezegun.freeze_time('2022-01-01')
 class FinancabiliteNotConcernedViewTestCase(TestCase):
@@ -531,6 +634,7 @@ class FinancabiliteNotConcernedViewTestCase(TestCase):
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
@@ -562,7 +666,7 @@ class FinancabiliteNotConcernedViewTestCase(TestCase):
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.financability_rule, '')
         self.assertEqual(
-            self.admission.financability_rule_established_by,
+            self.admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -571,3 +675,14 @@ class FinancabiliteNotConcernedViewTestCase(TestCase):
         )
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+
+    def test_post_with_faculty_manager(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 403)

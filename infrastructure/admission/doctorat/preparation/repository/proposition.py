@@ -29,17 +29,13 @@ from typing import List, Optional, Union
 
 import attrs
 from django.conf import settings
-from django.db import transaction
 from django.db.models import OuterRef, Subquery
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, DoctorateAdmission
-from admission.contrib.models.checklist import (
-    DoctorateFreeAdditionalApprovalCondition,
-)
-from admission.contrib.models.doctorate import PropositionProxy
+from admission.models import Accounting, DoctorateAdmission
+from admission.models.doctorate import PropositionProxy
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
@@ -65,7 +61,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    TypeDeRefus,
     DerogationFinancement,
     BesoinDeDerogation,
     DROITS_INSCRIPTION_MONTANT_VALEURS,
@@ -90,21 +85,13 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     CotutelleDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
-from admission.ddd.admission.doctorat.preparation.dtos.condition_approbation import (
-    ConditionComplementaireApprobationDTO,
-)
 from admission.ddd.admission.doctorat.preparation.dtos.motif_refus import MotifRefusDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-    ConditionComplementaireLibreApprobation,
-)
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -114,7 +101,6 @@ from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
@@ -124,7 +110,6 @@ from admission.infrastructure.admission.domain.service.bourse import BourseTrans
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
 from base.models.academic_year import AcademicYear
-from base.models.campus import Campus
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -215,7 +200,6 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         else None,
         checklist_initiale=checklist_initiale and StatutsChecklistDoctorale.from_dict(checklist_initiale),
         checklist_actuelle=checklist_actuelle and StatutsChecklistDoctorale.from_dict(checklist_actuelle),
-        type_de_refus=TypeDeRefus[admission.refusal_type] if admission.refusal_type else None,
         motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
         autres_motifs_refus=admission.other_refusal_reasons,
         financabilite_regle_calcule=EtatFinancabilite[admission.financability_computed_rule]
@@ -228,10 +212,10 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         financabilite_regle=SituationFinancabilite[admission.financability_rule]
         if admission.financability_rule
         else None,
-        financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
-        if admission.financability_rule_established_by
+        financabilite_etabli_par=admission.financability_established_by.global_id
+        if admission.financability_established_by
         else None,
-        financabilite_regle_etabli_le=admission.financability_rule_established_on,
+        financabilite_etabli_le=admission.financability_established_on,
         financabilite_derogation_statut=DerogationFinancement[admission.financability_dispensation_status]
         if admission.financability_dispensation_status
         else None,
@@ -247,30 +231,9 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             if admission.financability_dispensation_last_notification_by
             else None
         ),
-        certificat_refus_fac=admission.fac_refusal_certificate,
-        certificat_approbation_fac=admission.fac_approval_certificate,
+        certificat_approbation_cdd=admission.cdd_approval_certificate,
         certificat_approbation_sic=admission.sic_approval_certificate,
         certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
-        certificat_refus_sic=admission.sic_refusal_certificate,
-        autre_formation_choisie_fac_id=FormationIdentityBuilder.build(
-            sigle=admission.other_training_accepted_by_fac.acronym,
-            annee=admission.other_training_accepted_by_fac.academic_year.year,
-        )
-        if admission.other_training_accepted_by_fac_id
-        else None,
-        avec_conditions_complementaires=admission.with_additional_approval_conditions,
-        conditions_complementaires_existantes=[
-            ConditionComplementaireApprobationIdentity(uuid=condition.uuid)
-            for condition in admission.additional_approval_conditions.all()
-        ],
-        conditions_complementaires_libres=[
-            ConditionComplementaireLibreApprobation(
-                nom_fr=condition.name_fr,
-                nom_en=condition.name_en,
-                uuid_experience=str(condition.related_experience_id) if condition.related_experience_id else '',
-            )
-            for condition in admission.freeadditionalapprovalcondition_set.all()
-        ],
         avec_complements_formation=admission.with_prerequisite_courses,
         complements_formation=[
             ComplementFormationIdentity(uuid=admission_training.uuid)
@@ -304,9 +267,6 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         dispense_ou_droits_majores=DispenseOuDroitsMajores[admission.tuition_fees_dispensation]
         if admission.tuition_fees_dispensation
         else None,
-        tarif_particulier=admission.particular_cost,
-        refacturation_ou_tiers_payant=admission.rebilling_or_third_party_payer,
-        annee_de_premiere_inscription_et_statut=admission.first_year_inscription_and_status,
         est_mobilite=admission.is_mobility,
         nombre_de_mois_de_mobilite=MobiliteNombreDeMois[admission.mobility_months_amount]
         if admission.mobility_months_amount
@@ -361,15 +321,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             academic_year__year=entity.annee,
         )
 
-        other_training = (
-            EducationGroupYear.objects.get(
-                acronym=entity.autre_formation_choisie_fac_id.sigle,
-                academic_year__year=entity.autre_formation_choisie_fac_id.annee,
-            )
-            if entity.autre_formation_choisie_fac_id
-            else None
-        )
-
         persons = {
             person.global_id: person
             for person in Person.objects.filter(
@@ -404,10 +355,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None
         )
 
-        financabilite_regle_etabli_par_person = None
-        if entity.financabilite_regle_etabli_par:
-            financabilite_regle_etabli_par_person = Person.objects.filter(
-                uuid=entity.financabilite_regle_etabli_par,
+        financabilite_etabli_par_person = None
+        if entity.financabilite_etabli_par:
+            financabilite_etabli_par_person = Person.objects.filter(
+                global_id=entity.financabilite_etabli_par,
             ).first()
 
         years = [year for year in [entity.annee_calculee, entity.millesime_condition_acces] if year]
@@ -491,8 +442,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 else '',
                 'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
                 'financability_rule': entity.financabilite_regle.name if entity.financabilite_regle else '',
-                'financability_rule_established_by': financabilite_regle_etabli_par_person,
-                'financability_rule_established_on': entity.financabilite_regle_etabli_le,
+                'financability_established_by': financabilite_etabli_par_person,
+                'financability_established_on': entity.financabilite_etabli_le,
                 'financability_dispensation_status': entity.financabilite_derogation_statut.name
                 if entity.financabilite_derogation_statut
                 else '',
@@ -508,14 +459,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'financability_dispensation_last_notification_by': (
                     financabilite_derogation_derniere_notification_par_person
                 ),
-                'fac_approval_certificate': entity.certificat_approbation_fac,
-                'fac_refusal_certificate': entity.certificat_refus_fac,
+                'cdd_approval_certificate': entity.certificat_approbation_cdd,
                 'sic_approval_certificate': entity.certificat_approbation_sic,
                 'sic_annexe_approval_certificate': entity.certificat_approbation_sic_annexe,
-                'sic_refusal_certificate': entity.certificat_refus_sic,
                 'other_refusal_reasons': entity.autres_motifs_refus,
-                'other_training_accepted_by_fac': other_training,
-                'with_additional_approval_conditions': entity.avec_conditions_complementaires,
                 'with_prerequisite_courses': entity.avec_complements_formation,
                 'prerequisite_courses_fac_comment': entity.commentaire_complements_formation,
                 'program_planned_years_number': entity.nombre_annees_prevoir_programme,
@@ -543,16 +490,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'tuition_fees_dispensation': entity.dispense_ou_droits_majores.name
                 if entity.dispense_ou_droits_majores
                 else '',
-                'particular_cost': entity.tarif_particulier,
-                'rebilling_or_third_party_payer': entity.refacturation_ou_tiers_payant,
-                'first_year_inscription_and_status': entity.annee_de_premiere_inscription_et_statut,
                 'is_mobility': entity.est_mobilite,
                 'mobility_months_amount': entity.nombre_de_mois_de_mobilite.name
                 if entity.nombre_de_mois_de_mobilite
                 else '',
                 'must_report_to_sic': entity.doit_se_presenter_en_sic,
                 'communication_to_the_candidate': entity.communication_au_candidat,
-                'refusal_type': entity.type_de_refus.name if entity.type_de_refus else '',
                 'must_provide_student_visa_d': entity.doit_fournir_visa_etudes,
                 'student_visa_d': entity.visa_etudes_d,
                 'signed_enrollment_authorization': entity.certificat_autorisation_signe,
@@ -562,22 +505,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         cls._sauvegarder_comptabilite(admission, entity)
 
-        admission.additional_approval_conditions.set([c.uuid for c in entity.conditions_complementaires_existantes])
         admission.prerequisite_courses.set([training.uuid for training in entity.complements_formation])
         admission.refusal_reasons.set([motif.uuid for motif in entity.motifs_refus])
-        with transaction.atomic():
-            admission.freeadditionalapprovalcondition_set.all().delete()
-            DoctorateFreeAdditionalApprovalCondition.objects.bulk_create(
-                [
-                    DoctorateFreeAdditionalApprovalCondition(
-                        name_fr=condition.nom_fr,
-                        name_en=condition.nom_en,
-                        related_experience_id=condition.uuid_experience,
-                        admission=admission,
-                    )
-                    for condition in entity.conditions_complementaires_libres
-                ],
-            )
 
     @classmethod
     def _serialize(cls, inst, field, value):
@@ -824,10 +753,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             financabilite_regle_calcule_situation=admission.financability_computed_rule_situation,
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
             financabilite_regle=admission.financability_rule,
-            financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
-            if admission.financability_rule_established_by
+            financabilite_etabli_par=admission.financability_established_by.global_id
+            if admission.financability_established_by
             else '',
-            financabilite_regle_etabli_le=admission.financability_rule_established_on,
+            financabilite_etabli_le=admission.financability_established_on,
             financabilite_derogation_statut=admission.financability_dispensation_status,
             financabilite_derogation_premiere_notification_le=(
                 admission.financability_dispensation_first_notification_on
@@ -845,11 +774,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.financability_dispensation_last_notification_by
                 else ''
             ),
-            certificat_refus_fac=admission.fac_refusal_certificate,
-            certificat_approbation_fac=admission.fac_approval_certificate,
+            certificat_approbation_cdd=admission.cdd_approval_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
-            certificat_refus_sic=admission.sic_refusal_certificate,
             doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
             visa_etudes_d=admission.student_visa_d,
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
@@ -911,7 +838,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
             if admission.submitted_profile
             else None,
-            type_de_refus=admission.refusal_type,
             motifs_refus=[
                 MotifRefusDTO(motif=mark_safe(reason.name), categorie=reason.category.name)
                 for reason in admission.refusal_reasons.all()
@@ -919,37 +845,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             + [
                 MotifRefusDTO(motif=reason, categorie=pgettext('admission', 'Other reasons'))
                 for reason in admission.other_refusal_reasons
-            ],
-            autre_formation_choisie_fac=BaseFormationDTO(
-                sigle=admission.other_training_accepted_by_fac.acronym,
-                annee=admission.other_training_accepted_by_fac.academic_year.year,
-                uuid=admission.other_training_accepted_by_fac.uuid,
-                intitule=admission.other_training_accepted_by_fac.title
-                if get_language() == settings.LANGUAGE_CODE_FR
-                else admission.other_training_accepted_by_fac.title_english,
-                lieu_enseignement=admission.other_training_accepted_by_fac_teaching_campus,  # From annotation
-            )
-            if admission.other_training_accepted_by_fac_id
-            else None,
-            avec_conditions_complementaires=admission.with_additional_approval_conditions,
-            conditions_complementaires=[
-                ConditionComplementaireApprobationDTO(
-                    uuid=condition.uuid,
-                    nom_fr=mark_safe(condition.name_fr),
-                    nom_en=mark_safe(condition.name_en),
-                    libre=False,
-                )
-                for condition in admission.additional_approval_conditions.all()
-            ]
-            + [
-                ConditionComplementaireApprobationDTO(
-                    uuid=condition.uuid,
-                    nom_fr=mark_safe(condition.name_fr),
-                    nom_en=mark_safe(condition.name_en),
-                    libre=True,
-                    uuid_experience=str(condition.related_experience_id) if condition.related_experience_id else '',
-                )
-                for condition in admission.freeadditionalapprovalcondition_set.all()
             ],
             avec_complements_formation=admission.with_prerequisite_courses,
             complements_formation=prerequisite_courses,
@@ -972,9 +867,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             droits_inscription_montant_valeur=DROITS_INSCRIPTION_MONTANT_VALEURS.get(admission.tuition_fees_amount),
             droits_inscription_montant_autre=admission.tuition_fees_amount_other,
             dispense_ou_droits_majores=admission.tuition_fees_dispensation,
-            tarif_particulier=admission.particular_cost,
-            refacturation_ou_tiers_payant=admission.rebilling_or_third_party_payer,
-            annee_de_premiere_inscription_et_statut=admission.first_year_inscription_and_status,
             est_mobilite=admission.is_mobility,
             nombre_de_mois_de_mobilite=admission.mobility_months_amount,
             doit_se_presenter_en_sic=admission.must_report_to_sic,

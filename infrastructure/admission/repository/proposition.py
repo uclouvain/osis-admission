@@ -27,7 +27,7 @@ from abc import ABCMeta
 
 from django.db import connection
 
-from admission.contrib.models.base import REFERENCE_SEQ_NAME
+from admission.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
 
 

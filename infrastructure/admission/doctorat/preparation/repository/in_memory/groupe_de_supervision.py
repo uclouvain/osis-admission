@@ -27,13 +27,15 @@
 import uuid
 from typing import List, Optional, Union
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale, \
+    ChoixEtatSignature
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
@@ -150,6 +152,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
     def add_member(
         cls,
         groupe_id: 'GroupeDeSupervisionIdentity',
+        proposition_status: 'ChoixStatutPropositionDoctorale',
         type: ActorType,
         matricule: Optional[str] = '',
         first_name: Optional[str] = '',
@@ -162,9 +165,12 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
         language: Optional[str] = '',
     ) -> 'SignataireIdentity':
         groupe: GroupeDeSupervision = cls.get(groupe_id)
+        signature_etat = ChoixEtatSignature.NOT_INVITED
+        if proposition_status != ChoixStatutPropositionDoctorale.EN_BROUILLON:
+            signature_etat = ChoixEtatSignature.INVITED
         if type == ActorType.PROMOTER:
             signataire_id = PromoteurIdentity(str(uuid.uuid4()))
-            groupe.signatures_promoteurs.append(SignaturePromoteur(promoteur_id=signataire_id))
+            groupe.signatures_promoteurs.append(SignaturePromoteur(promoteur_id=signataire_id, etat=signature_etat))
             PromoteurInMemoryTranslator.promoteurs.append(
                 Promoteur(
                     signataire_id,
@@ -180,7 +186,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             )
         else:
             signataire_id = MembreCAIdentity(str(uuid.uuid4()))
-            groupe.signatures_membres_CA.append(SignatureMembreCA(membre_CA_id=signataire_id))
+            groupe.signatures_membres_CA.append(SignatureMembreCA(membre_CA_id=signataire_id, etat=signature_etat))
             MembreCAInMemoryTranslator.membres_CA.append(
                 MembreCA(
                     signataire_id,

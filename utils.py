@@ -36,7 +36,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F
 from django.shortcuts import resolve_url
 from django.utils import timezone
 from django.utils.translation import pgettext, override, get_language, gettext
@@ -47,7 +47,12 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_GENERAL, CONTEXT_DOCTORATE
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+    Scholarship,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
@@ -68,9 +73,12 @@ from admission.mail_templates import (
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.forms.utils import EMPTY_CHOICE
 from base.models.academic_calendar import AcademicCalendar
+from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
@@ -86,6 +94,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
+from reference.models.country import Country
+from reference.models.language import Language
 
 
 def get_cached_admission_perm_obj(admission_uuid):
@@ -267,6 +277,23 @@ class WeasyprintStylesheets:
             )
         return getattr(cls, '_stylesheet')
 
+    @classmethod
+    def get_stylesheets_bootstrap_5(cls):
+        """Get the stylesheets needed to generate the pdf"""
+        # Load the stylesheets once and cache them
+        if not hasattr(cls, '_stylesheet_bs5'):
+            setattr(
+                cls,
+                '_stylesheet_bs5',
+                [
+                    weasyprint.CSS(filename=os.path.join(settings.BASE_DIR, file_path))
+                    for file_path in [
+                        'base/static/css/bootstrap5/bootstrap.min.css',
+                    ]
+                ],
+            )
+        return getattr(cls, '_stylesheet_bs5')
+
 
 def get_salutation_prefix(person: Person) -> str:
     with override(language=person.language):
@@ -295,7 +322,7 @@ def get_training_url(training_type, training_acronym, partial_training_acronym, 
     from admission.constants import CONTEXT_GENERAL
     from admission.constants import CONTEXT_DOCTORATE
 
-    if training_type == TrainingType.PHD.name:
+    if training_type == TrainingType.FORMATION_PHD.name:
         return (
             "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
             if get_language() == settings.LANGUAGE_CODE_EN
@@ -658,3 +685,85 @@ def get_experience_urls(
             )
 
     return res_context
+
+
+def format_address(street='', street_number='', postal_code='', city='', country=''):
+    """Return the concatenation of the specified street, street number, postal code, city and country."""
+    address_parts = [
+        f'{street} {street_number}',
+        f'{postal_code} {city}',
+        country,
+    ]
+    return ', '.join(filter(lambda part: part and len(part) > 1, address_parts))
+
+
+def format_school_title(school):
+    """Return the concatenation of the school name and city."""
+    return '{} <span class="school-address">{}</span>'.format(
+        school.name,
+        format_address(
+            street=school.street,
+            street_number=school.street_number,
+            postal_code=school.zipcode,
+            city=school.city,
+        ),
+    )
+
+
+def get_superior_institute_queryset():
+    return EntityVersion.objects.filter(
+        entity__organization__establishment_type__in=[
+            EstablishmentTypeEnum.UNIVERSITY.name,
+            EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
+        ],
+        parent__isnull=True,
+    ).annotate(
+        organization_id=F('entity__organization_id'),
+        organization_uuid=F('entity__organization__uuid'),
+        organization_acronym=F('entity__organization__acronym'),
+        organization_community=F('entity__organization__community'),
+        organization_establishment_type=F('entity__organization__establishment_type'),
+        name=F('entity__organization__name'),
+        city=F('entityversionaddress__city'),
+        street=F('entityversionaddress__street'),
+        street_number=F('entityversionaddress__street_number'),
+        zipcode=F('entityversionaddress__postal_code'),
+    )
+
+
+def get_thesis_location_initial_choices(value):
+    return EMPTY_CHOICE if not value else EMPTY_CHOICE + ((value, value),)
+
+
+def get_scholarship_initial_choices(uuid):
+    if not uuid:
+        return EMPTY_CHOICE
+    try:
+        scholarship = Scholarship.objects.get(uuid=uuid)
+    except Scholarship.DoesNotExist:
+        return EMPTY_CHOICE
+    return EMPTY_CHOICE + ((uuid, scholarship.long_name or scholarship.short_name),)
+
+
+def get_language_initial_choices(code):
+    if not code:
+        return EMPTY_CHOICE
+    try:
+        language = Language.objects.get(code=code)
+    except Language.DoesNotExist:
+        return EMPTY_CHOICE
+    return EMPTY_CHOICE + (
+        (language.code, language.name if get_language() == settings.LANGUAGE_CODE_FR else language.name_en),
+    )
+
+
+def get_country_initial_choices(iso_code):
+    if not iso_code:
+        return EMPTY_CHOICE
+    try:
+        country = Country.objects.get(iso_code=iso_code)
+    except Country.DoesNotExist:
+        return EMPTY_CHOICE
+    return EMPTY_CHOICE + (
+        (country.iso_code, country.name if get_language() == settings.LANGUAGE_CODE_FR else country.name_en),
+    )

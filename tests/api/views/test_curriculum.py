@@ -37,10 +37,10 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -669,6 +669,44 @@ class GeneralEducationCurriculumTestCase(
 
         self.assertEqual(updated_admission.modified_at, datetime.datetime.now())
         self.assertEqual(updated_admission.last_update_author, self.user.person)
+
+    def test_get_curriculum_maximal_date_according_to_the_current_month(self):
+        self.client.force_authenticate(user=self.user)
+
+        with freezegun.freeze_time('2020-11-01'):
+            response = self.client.get(self.url)
+
+            # Check response data
+            response = response.json()
+            self.assertEqual(response.get('minimal_date'), '2016-09-01')
+            self.assertEqual(response.get('maximal_date'), '2020-10-01')
+            self.assertEqual(
+                response.get('incomplete_periods'),
+                [
+                    'De Septembre 2020 à Octobre 2020',
+                    'De Septembre 2019 à Février 2020',
+                    'De Septembre 2018 à Février 2019',
+                    'De Septembre 2017 à Février 2018',
+                    'De Septembre 2016 à Février 2017',
+                ],
+            )
+
+        with freezegun.freeze_time('2020-10-31'):
+            response = self.client.get(self.url)
+
+            # Check response data
+            response = response.json()
+            self.assertEqual(response.get('minimal_date'), '2016-09-01')
+            self.assertEqual(response.get('maximal_date'), '2020-08-01')
+            self.assertEqual(
+                response.get('incomplete_periods'),
+                [
+                    'De Septembre 2019 à Février 2020',
+                    'De Septembre 2018 à Février 2019',
+                    'De Septembre 2017 à Février 2018',
+                    'De Septembre 2016 à Février 2017',
+                ],
+            )
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')

@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
 
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.categorized_free_document import CategorizedFreeDocument
 
 __all__ = [
     'CategorizedFreeDocumentsAutocomplete',

@@ -32,7 +32,7 @@ from django.db.models import Q
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixStatutPropositionDoctorale,
@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ConfigurationStatutChecklist,
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     onglet_decision_sic,
-    onglet_decision_facultaire,
+    onglet_decision_cdd,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
@@ -247,15 +247,14 @@ class ListerDemandesService(IListerDemandesService):
 
         qs = qs.order_by(*field_order, 'id')
 
-        result = PaginatedList()
-
+        # Paginate the queryset
         if page and taille_page:
-            result.total_count = qs.count()
+            result = PaginatedList(complete_list=qs.all().values_list('uuid', flat=True))
             bottom = (page - 1) * taille_page
             top = page * taille_page
             qs = qs[bottom:top]
         else:
-            result.total_count = len(qs)
+            result = PaginatedList(id_attribute='uuid')
 
         for admission in qs:
             result.append(cls.load_dto_from_model(admission, current_language))
@@ -294,12 +293,12 @@ class ListerDemandesService(IListerDemandesService):
 
         status_organization_by_tab = {
             OngletsChecklist.decision_sic.name: onglet_decision_sic,
-            OngletsChecklist.decision_facultaire.name: onglet_decision_facultaire,
+            OngletsChecklist.decision_cdd.name: onglet_decision_cdd,
         }
 
         status_by_tab = {
             OngletsChecklist.decision_sic.name: '',
-            OngletsChecklist.decision_facultaire.name: '',
+            OngletsChecklist.decision_cdd.name: '',
         }
 
         if admission.checklist and 'current' in admission.checklist:
@@ -323,7 +322,7 @@ class ListerDemandesService(IListerDemandesService):
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, training_title),
-            decision_fac=status_by_tab[OngletsChecklist.decision_facultaire.name],
+            decision_fac=status_by_tab[OngletsChecklist.decision_cdd.name],
             decision_sic=status_by_tab[OngletsChecklist.decision_sic.name],
             date_confirmation=admission.submitted_at,
             derniere_modification_le=admission.modified_at,

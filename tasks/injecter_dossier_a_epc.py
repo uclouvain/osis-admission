@@ -29,8 +29,8 @@ from django.conf import settings
 from django.db.models import Q, Exists, OuterRef, When, Case, Value
 
 from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus, EPCInjection
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus, EPCInjection
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from backoffice.celery import app as celery_app
 from base.models.person_merge_proposal import PersonMergeStatus
@@ -99,6 +99,7 @@ def run():  # pragma: no cover
     )
     logger.info(f"[TASK - INJECTION EPC] {admissions.count()} dossiers a traiter")
     from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
+
     for admission in admissions:
         InjectionEPCAdmission().injecter(admission)
 

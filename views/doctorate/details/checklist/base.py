@@ -23,28 +23,27 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import List, Dict, Set
 
 import attr
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
-from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView, FormView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
-from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetStatutTicketPersonneQuery, RechercherParcoursAnterieurQuery
-from admission.ddd.admission.doctorat.preparation.commands import RecupererResumeEtEmplacementsDocumentsPropositionQuery
+from admission.ddd.admission.doctorat.preparation.commands import (
+    GetGroupeDeSupervisionCommand,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumePropositionDTO,
     ResumeCandidatDTO,
 )
@@ -53,6 +52,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
     OngletsDemande,
+    DocumentsProjetRecherche,
+    DocumentsCotutelle,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -65,31 +66,26 @@ from admission.forms.admission.checklist import (
 )
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
-    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
 )
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
-    get_portal_admission_list_url,
-    get_portal_admission_url,
-    get_backoffice_admission_url,
     get_access_titles_names,
 )
-from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+from admission.views.common.detail_tabs.comments import (
+    COMMENT_TAG_SIC_FOR_CDD,
+    COMMENT_TAG_CDD_FOR_SIC,
+)
 from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.doctorate.details.checklist.fac_decision import FacultyDecisionMixin
+from admission.views.doctorate.details.checklist.cdd_decision import CddDecisionMixin
 from admission.views.doctorate.details.checklist.financeability import FinancabiliteContextMixin
-from admission.views.doctorate.details.checklist.mixins import get_internal_experiences
+from admission.views.doctorate.details.checklist.mixins import get_internal_experiences, get_email
 from admission.views.doctorate.details.checklist.past_experiences import PastExperiencesMixin
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from infrastructure.messages_bus import message_bus_instance
-from admission.contrib.models.epc_injection import EPCInjection
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
-import datetime
-
 
 __namespace__ = False
 
@@ -99,45 +95,12 @@ __all__ = [
 ]
 
 
-TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {'decision_facultaire'}
-
-
-def get_email(template_identifier, language, proposition_dto: PropositionGestionnaireDTO):
-    mail_template = MailTemplate.objects.get(
-        identifier=template_identifier,
-        language=language,
-    )
-
-    # Needed to get the complete reference
-    with translation.override(language):
-        tokens = {
-            'admission_reference': proposition_dto.reference,
-            'candidate_first_name': proposition_dto.prenom_candidat,
-            'candidate_last_name': proposition_dto.nom_candidat,
-            'candidate_nationality_country': {
-                settings.LANGUAGE_CODE_FR: proposition_dto.nationalite_candidat_fr,
-                settings.LANGUAGE_CODE_EN: proposition_dto.nationalite_candidat_en,
-            }[language],
-            'training_acronym': proposition_dto.formation.sigle,
-            'training_title': {
-                settings.LANGUAGE_CODE_FR: proposition_dto.formation.intitule_fr,
-                settings.LANGUAGE_CODE_EN: proposition_dto.formation.intitule_en,
-            }[language],
-            'admissions_link_front': get_portal_admission_list_url(),
-            'admission_link_front': get_portal_admission_url('doctorate', str(proposition_dto.uuid)),
-            'admission_link_back': get_backoffice_admission_url('doctorate', str(proposition_dto.uuid)),
-            'training_campus': proposition_dto.formation.campus.nom,
-        }
-
-        return (
-            mail_template.render_subject(tokens),
-            mail_template.body_as_html(tokens),
-        )
+TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {'decision_cdd'}
 
 
 class ChecklistView(
     PastExperiencesMixin,
-    FacultyDecisionMixin,
+    CddDecisionMixin,
     FinancabiliteContextMixin,
     SicDecisionMixin,
     TemplateView,
@@ -163,30 +126,28 @@ class ChecklistView(
         documents_by_tab = {
             OngletsChecklist.assimilation.name: assimilation_documents,
             OngletsChecklist.financabilite.name: {
-                'DIPLOME_EQUIVALENCE',
                 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
                 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
                 'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
                 'CURRICULUM',
             },
             OngletsChecklist.choix_formation.name: {},
+            OngletsChecklist.projet_recherche.name: {
+                *DocumentsProjetRecherche.keys(),
+                *DocumentsCotutelle.keys(),
+            },
             OngletsChecklist.parcours_anterieur.name: {
                 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
-                'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
-                'ADDITIONAL_DOCUMENTS',
             },
             OngletsChecklist.donnees_personnelles.name: assimilation_documents,
-            OngletsChecklist.decision_facultaire.name: {
-                'ATTESTATION_ACCORD_FACULTAIRE',
-                'ATTESTATION_REFUS_FACULTAIRE',
+            OngletsChecklist.decision_cdd.name: {
+                'ATTESTATION_ACCORD_CDD',
             },
             OngletsChecklist.decision_sic.name: {
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
-                'ATTESTATION_REFUS_SIC',
-                'ATTESTATION_ACCORD_FACULTAIRE',
-                'ATTESTATION_REFUS_FACULTAIRE',
+                'ATTESTATION_ACCORD_CDD',
             },
             'send-email': set(),
         }
@@ -232,9 +193,7 @@ class ChecklistView(
 
         if not self.request.htmx:
             # Retrieve data related to the proposition
-            command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
-            )
+            command_result = self.proposition_resume
 
             context['resume_proposition'] = command_result.resume
 
@@ -252,14 +211,10 @@ class ChecklistView(
 
             for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
                 tab_names.remove(tab)
-                tab_names += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
+                tab_names += [f'{tab}__{COMMENT_TAG_SIC_FOR_CDD}', f'{tab}__{COMMENT_TAG_CDD_FOR_SIC}']
             tab_names.append('decision_sic__derogation')
             tab_names.append('financabilite__derogation')
 
-            comments_labels = {
-                'decision_sic__derogation': _('Comment about dispensation'),
-                'financabilite__derogation': _('Faculty comment about financability dispensation'),
-            }
             comments_permissions = {
                 'financabilite__derogation': 'admission.checklist_change_fac_comment',
             }
@@ -275,7 +230,6 @@ class ChecklistView(
                     comment=comments.get(tab_name, None),
                     form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                     prefix=tab_name,
-                    label=comments_labels.get(tab_name, None),
                     permission=comments_permissions.get(tab_name, None),
                 )
                 for tab_name in tab_names
@@ -335,6 +289,18 @@ class ChecklistView(
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()
+
+            # Projet de recherche
+            context['cotutelle'] = self.cotutelle
+            context['groupe_supervision'] = message_bus_instance.invoke(
+                GetGroupeDeSupervisionCommand(uuid_proposition=self.admission_uuid)
+            )
+            # There is a bug with translated strings with percent signs
+            # https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#troubleshooting-gettext-incorrectly-detects-python-format-in-strings-with-percent-signs
+            # xgettext:no-python-format
+            context['fte_label'] = _("Full-time equivalent (as %)")
+            # xgettext:no-python-format
+            context['allocated_time_label'] = _("Time allocated for thesis (in %)")
 
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
@@ -490,7 +456,7 @@ class ChecklistView(
             original_admission = self.admission
 
             can_change_checklist = self.request.user.has_perm('admission.change_checklist', original_admission)
-            can_change_faculty_decision = self.request.user.has_perm(
+            can_change_cdd_decision = self.request.user.has_perm(
                 'admission.checklist_change_faculty_decision',
                 original_admission,
             )
@@ -520,8 +486,8 @@ class ChecklistView(
             disable_unavailable_forms(
                 {
                     context['assimilation_form']: can_change_checklist,
-                    context['fac_decision_refusal_form']: can_change_faculty_decision,
-                    context['fac_decision_approval_form']: can_change_faculty_decision,
+                    context['cdd_decision_refusal_form']: can_change_cdd_decision,
+                    context['cdd_decision_approval_form']: can_change_cdd_decision,
                     context['financabilite_approval_form']: can_change_checklist,
                     context['past_experiences_admission_requirement_form']: can_change_past_experiences,
                     context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,

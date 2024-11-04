@@ -30,7 +30,7 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.tests.factories import DoctorateAdmissionFactory

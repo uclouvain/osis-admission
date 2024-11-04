@@ -70,7 +70,7 @@ class _DoctoratFactory(factory.Factory):
     intitule_secteur = factory.Faker('sentence')
     sigle = factory.Faker('word')
     code_secteur = factory.Faker('word')
-    type = TrainingType.PHD
+    type = TrainingType.FORMATION_PHD
 
 
 class _DoctoratDTOFactory(factory.Factory):
@@ -85,7 +85,7 @@ class _DoctoratDTOFactory(factory.Factory):
     campus = CampusFactory()
     campus_inscription = CampusFactory()
     date_debut = factory.Faker('date')
-    type = TrainingType.PHD.name
+    type = TrainingType.FORMATION_PHD.name
     credits = 180
 
 

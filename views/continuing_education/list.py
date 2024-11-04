@@ -24,16 +24,10 @@
 #
 # ##############################################################################
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.utils.functional import cached_property
-from django.views.generic import ListView
-
-from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery
 from admission.forms.admission.filter import ContinuingAdmissionsFilterForm
 from admission.views import ListPaginator
 from admission.views.list import BaseAdmissionList
-from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
     "ContinuingAdmissionList",

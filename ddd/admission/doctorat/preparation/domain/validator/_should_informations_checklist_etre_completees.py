@@ -29,14 +29,13 @@ import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
-    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
-    DecisionFacultaireEnum,
     BesoinDeDerogation,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
@@ -46,10 +45,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     TitreAccesEtreSelectionneException,
     ConditionAccesEtreSelectionneException,
-    MotifRefusFacultaireNonSpecifieException,
-    InformationsAcceptationFacultaireNonSpecifieesException,
     SituationPropositionNonSICException,
-    SituationPropositionNonFACException,
+    SituationPropositionNonCddException,
     InscriptionTardiveAvecConditionAccesException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
@@ -59,13 +56,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
     DocumentAReclamerImmediatException,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
+    InformationsAcceptationNonSpecifieesException,
 )
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-    ConditionComplementaireLibreApprobation,
-)
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
@@ -80,94 +73,39 @@ from epc.models.enums.condition_acces import ConditionAcces
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldSpecifierMotifRefusFacultaire(BusinessValidator):
-    motifs_refus: List[MotifRefusIdentity]
-    autres_motifs_refus: List[str]
-
-    def validate(self, *args, **kwargs):
-        if not self.motifs_refus and not self.autres_motifs_refus:
-            raise MotifRefusFacultaireNonSpecifieException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldSpecifierInformationsAcceptationFacultaire(BusinessValidator):
-    avec_conditions_complementaires: Optional[bool]
-    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
-
-    avec_complements_formation: Optional[bool]
-    complements_formation: Optional[List[ComplementFormationIdentity]]
-
+class ShouldSpecifierInformationsAcceptation(BusinessValidator):
     nombre_annees_prevoir_programme: Optional[int]
 
     def validate(self, *args, **kwargs):
-        if (
-            self.avec_conditions_complementaires is None
-            or self.avec_conditions_complementaires
-            and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
-            or not self.nombre_annees_prevoir_programme
-        ):
-            raise InformationsAcceptationFacultaireNonSpecifieesException
+        if not self.nombre_annees_prevoir_programme:
+            raise InformationsAcceptationNonSpecifieesException
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldSpecifierInformationsAcceptationFacultaireInscription(BusinessValidator):
-    avec_conditions_complementaires: Optional[bool]
-    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
-
-    def validate(self, *args, **kwargs):
-        if self.avec_conditions_complementaires and not (
-            self.conditions_complementaires_libres or self.conditions_complementaires_existantes
-        ):
-            raise InformationsAcceptationFacultaireNonSpecifieesException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(BusinessValidator):
+class ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_FAC_POUR_DECISION:
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION:
             raise SituationPropositionNonSICException
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
+class ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionCdd(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
-    checklist_actuelle: StatutsChecklistDoctorale
 
     def validate(self, *args, **kwargs):
-        if (
-            self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC
-            or self.checklist_actuelle.decision_facultaire.statut
-            not in {
-                ChoixStatutChecklist.INITIAL_CANDIDAT,
-                ChoixStatutChecklist.GEST_EN_COURS,
-                ChoixStatutChecklist.GEST_BLOCAGE,
-            }
-            or self.checklist_actuelle.decision_facultaire.extra.get('decision')
-            == DecisionFacultaireEnum.EN_DECISION.value
-        ):
-            raise SituationPropositionNonFACException
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD:
+            raise SituationPropositionNonCddException
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
+class ShouldCddPeutDonnerDecision(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC:
-            raise SituationPropositionNonFACException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldFacPeutDonnerDecision(BusinessValidator):
-    statut: ChoixStatutPropositionDoctorale
-
-    def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC:
-            raise SituationPropositionNonFACException
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD:
+            raise SituationPropositionNonCddException
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -232,12 +170,12 @@ class ShouldDemandeEtreTypeInscription(BusinessValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldPeutSpecifierInformationsDecisionFacultaire(BusinessValidator):
+class ShouldPeutSpecifierInformationsDecisionCdd(BusinessValidator):
     statut: ChoixStatutPropositionDoctorale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_FAC_ETENDUS:
-            raise SituationPropositionNonFACException
+        if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS:
+            raise SituationPropositionNonCddException
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -27,7 +27,7 @@ from django.shortcuts import resolve_url
 from django.views import generic
 from django.views.generic.edit import FormMixin
 
-from admission.contrib.models.doctoral_training import Activity
+from admission.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.commands import AccepterActivitesCommand, SoumettreActivitesCommand
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import StatutActivite
 from admission.forms.doctorate.training.activity import get_category_labels

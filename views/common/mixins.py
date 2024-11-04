@@ -28,6 +28,7 @@ from typing import Union, Optional
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.http import Http404
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
@@ -38,15 +39,15 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
-from admission.contrib.models import (
+from admission.models import (
     DoctorateAdmission,
     GeneralEducationAdmission,
     ContinuingEducationAdmission,
     EPCInjection,
 )
-from admission.contrib.models.base import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.base import AdmissionViewer
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
@@ -74,7 +75,7 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
@@ -96,6 +97,7 @@ from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
 )
+from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from infrastructure.messages_bus import message_bus_instance
@@ -181,7 +183,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @cached_property
     def doctorate(self) -> 'DoctoratDTO':
-        return message_bus_instance.invoke(RecupererDoctoratQuery(doctorat_uuid=self.admission_uuid))
+        return message_bus_instance.invoke(RecupererAdmissionDoctoratQuery(doctorat_uuid=self.admission_uuid))
 
     @cached_property
     def last_confirmation_paper(self) -> EpreuveConfirmationDTO:
@@ -279,12 +281,13 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 etat_financabilite == EtatFinancabilite.FINANCABLE.name
                 and (
                     (self.admission.financability_rule == '' and not a_une_derogation)
-                    or self.admission.financability_rule_established_on is None
-                    or self.admission.financability_rule_established_by_id is None
+                    or self.admission.financability_established_on is None
+                    or self.admission.financability_established_by_id is None
                 )
             ):
                 return (
-                    False, "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité"
+                    False,
+                    "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité",
                 )
         personmergeproposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if not (personmergeproposal and personmergeproposal.registration_id_sent_to_digit):
@@ -302,7 +305,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "La demande est en quarantaine"
         return True, ''
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
@@ -310,6 +312,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
         context['original_admission'] = self.admission
         context['next_url'] = self.next_url
+
+        # Get the next and previous admissions from the last computed listing
+        cached_admissions_list = cache.get(BaseAdmissionList.cache_key_for_result(user_id=self.request.user.id))
+
+        if cached_admissions_list and self.admission_uuid in cached_admissions_list:
+            current_admission = cached_admissions_list[self.admission_uuid]
+            for key in ['previous', 'next']:
+                if current_admission[key]:
+                    context[f'{key}_admission_url'] = resolve_url('admission:base', uuid=current_admission[key])
 
         if self.specific_questions_tab:
             context['specific_questions'] = self.specific_questions

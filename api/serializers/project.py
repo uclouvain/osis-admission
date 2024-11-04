@@ -35,7 +35,7 @@ from admission.api.serializers.fields import (
     RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
+from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -733,6 +733,7 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
     langue_redaction_these = RelatedLanguageField(required=False)
     institut_these = RelatedInstituteField(required=False)
     type_admission = None
+    matricule_auteur = None
 
     class Meta:
         source = CompleterPropositionCommand

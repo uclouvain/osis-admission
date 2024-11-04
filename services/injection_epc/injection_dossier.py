@@ -38,33 +38,35 @@ from django.db.models import QuerySet, Exists, OuterRef
 from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.contrib.models import Accounting, EPCInjection, AdmissionFormItem
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import (
-    BaseAdmission,
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
-from admission.contrib.models.enums.actor_type import ActorType
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as
-    RecalculerEmplacementsDocumentsNonLibresDoctoratCommand
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
+    as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_continue.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresGeneralCommand
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
+    as RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    DROITS_INSCRIPTION_MONTANT_VALEURS, PoursuiteDeCycle,
+    DROITS_INSCRIPTION_MONTANT_VALEURS,
+    PoursuiteDeCycle,
 )
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
 )
+from admission.models import Accounting, EPCInjection, AdmissionFormItem
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
+    BaseAdmission,
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
+from admission.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.enums.actor_type import ActorType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.services.injection_epc.injection_signaletique import (
     InjectionEPCSignaletique,
 )
@@ -196,7 +198,7 @@ DOCUMENT_MAPPING = {
     "TRADUCTION_RELEVE_NOTES": "TRANSCRIPT_TRANSLATION",
     "TRADUCTION_RELEVE_NOTES_ANNUEL": "TRANSCRIPT_TRANSLATION_YEAR",
     "VISA_D'ETUDES": "STUDENT_VISA_D",
-    "VISA_ETUDES": "STUDENT_VISA_D"
+    "VISA_ETUDES": "STUDENT_VISA_D",
 }
 
 
@@ -243,12 +245,10 @@ class InjectionEPCAdmission:
         commands = {
             CONTEXT_GENERAL: RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
             CONTEXT_CONTINUING: RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
-            CONTEXT_DOCTORATE: RecalculerEmplacementsDocumentsNonLibresDoctoratCommand
+            CONTEXT_DOCTORATE: RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
         }
         RecalculerEmplacementsDocumentsNonLibresCommand = commands[admission.get_admission_context()]
-        message_bus_instance.invoke(
-            RecalculerEmplacementsDocumentsNonLibresCommand(uuid_proposition=admission.uuid)
-        )
+        message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresCommand(uuid_proposition=admission.uuid))
         admission.refresh_from_db(fields=['requested_documents'])
 
     @classmethod
@@ -289,8 +289,7 @@ class InjectionEPCAdmission:
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc)
-                +
-                documents_specifiques
+                + documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
         }
@@ -299,18 +298,19 @@ class InjectionEPCAdmission:
     def _recuperer_documents_specifiques(cls, admission):
         documents_specifiques = []
         form_items = AdmissionFormItem.objects.filter(
-            uuid__in=admission.specific_question_answers.keys(),
-            type=TypeItemFormulaire.DOCUMENT.name
+            uuid__in=admission.specific_question_answers.keys(), type=TypeItemFormulaire.DOCUMENT.name
         )
         for form_item in form_items:
             label = form_item.internal_label.lower()
             if cls.__contient_uuid_valide(label):
                 document = CategorizedFreeDocument.objects.filter(long_label_fr=form_item.title['fr-be']).first()
                 label = document.short_label_fr.lower() if document else "Label du document non trouve"
-            documents_specifiques.append({
-                "type": re.sub(r'[\W_]+', '_', unidecode(label)).strip('_'),
-                "documents": admission.specific_question_answers[str(form_item.uuid)]
-            })
+            documents_specifiques.append(
+                {
+                    "type": re.sub(r'[\W_]+', '_', unidecode(label)).strip('_'),
+                    "documents": admission.specific_question_answers[str(form_item.uuid)],
+                }
+            )
         return documents_specifiques
 
     @classmethod
@@ -318,8 +318,8 @@ class InjectionEPCAdmission:
         documents = []
         for type_document_compose, details in admission.requested_documents.items():
             if details.get('request_status'):
-                annee, label_document, uuid_experience = (
-                    cls._recuperer_informations_utiles_documents_manquants(type_document_compose)
+                annee, label_document, uuid_experience = cls._recuperer_informations_utiles_documents_manquants(
+                    type_document_compose
                 )
                 type_document = DOCUMENT_MAPPING.get(label_document, "CANDIDATE_FREE")
                 documents.append(
@@ -344,7 +344,7 @@ class InjectionEPCAdmission:
             document = CategorizedFreeDocument.objects.filter(
                 long_label_en__in=[
                     question.title['en'],
-                    f"{question.title['en'].split(':')[0]}: " + "{annee_academique}"
+                    f"{question.title['en'].split(':')[0]}: " + "{annee_academique}",
                 ]
             ).first()
             type_document = (
@@ -365,9 +365,13 @@ class InjectionEPCAdmission:
             # type_document_compose = ONGLET.uuid.annee.TYPE_DOCUMENT (Annuel)
             _, uuid_experience, annee, type_document = parties_type_document
         if uuid_experience and type_document not in CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE:
-            uuid_experience = EducationalExperienceYear.objects.filter(
-                educational_experience__uuid=uuid_experience,
-            ).latest('academic_year__year').uuid
+            uuid_experience = (
+                EducationalExperienceYear.objects.filter(
+                    educational_experience__uuid=uuid_experience,
+                )
+                .latest('academic_year__year')
+                .uuid
+            )
         elif uuid_experience:
             uuid_experience = ProfessionalExperience.objects.get(uuid=uuid_experience).uuid
         return annee, type_document, str(uuid_experience)
@@ -407,19 +411,16 @@ class InjectionEPCAdmission:
 
     @classmethod
     def _get_curriculum_academique(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
-        experiences_educatives = candidat.educationalexperience_set.annotate(
-            valorisee_par_dossier=Exists(
-                AdmissionEducationalValuatedExperiences.objects.filter(
-                    baseadmission_id=admission.uuid,
-                    educationalexperience_id=OuterRef('uuid')
+        experiences_educatives = (
+            candidat.educationalexperience_set.annotate(
+                valorisee_par_dossier=Exists(
+                    AdmissionEducationalValuatedExperiences.objects.filter(
+                        baseadmission_id=admission.uuid, educationalexperience_id=OuterRef('uuid')
+                    )
                 )
             )
-        ).filter(
-            valorisee_par_dossier=True
-        ).select_related(
-            'institute',
-            'country',
-            'program'
+            .filter(valorisee_par_dossier=True)
+            .select_related('institute', 'country', 'program')
         )  # type: QuerySet[EducationalExperience]
         experiences = []
 
@@ -442,16 +443,17 @@ class InjectionEPCAdmission:
 
     @classmethod
     def _get_curriculum_autres_activites(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
-        experiences_professionnelles = candidat.professionalexperience_set.annotate(
-            valorisee_par_dossier=Exists(
-                AdmissionProfessionalValuatedExperiences.objects.filter(
-                    baseadmission_id=admission.uuid,
-                    professionalexperience_id=OuterRef('uuid')
+        experiences_professionnelles = (
+            candidat.professionalexperience_set.annotate(
+                valorisee_par_dossier=Exists(
+                    AdmissionProfessionalValuatedExperiences.objects.filter(
+                        baseadmission_id=admission.uuid, professionalexperience_id=OuterRef('uuid')
+                    )
                 )
             )
-        ).filter(
-            valorisee_par_dossier=True
-        ).order_by('start_date')  # type: QuerySet[ProfessionalExperience]
+            .filter(valorisee_par_dossier=True)
+            .order_by('start_date')
+        )  # type: QuerySet[ProfessionalExperience]
 
         return [
             InjectionEPCCurriculum._build_curriculum_autre_activite(experience_pro)
@@ -492,11 +494,11 @@ class InjectionEPCAdmission:
             'etat_financabilite': etat_financabilite,
             'situation_financabilite': admission_generale.financability_rule if admission_generale else None,
             'utilisateur_financabilite': (
-                admission_generale.financability_rule_established_by.full_name
+                admission_generale.financability_established_by.full_name
                 if admission_generale and est_financable else None
             ),
             'date_financabilite': (
-                admission_generale.financability_rule_established_on.strftime("%d/%m/%Y")
+                admission_generale.financability_established_on.strftime("%d/%m/%Y")
                 if admission_generale and est_financable else None
             ),
             'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
@@ -516,9 +518,9 @@ class InjectionEPCAdmission:
             est_en_bachelier and admission_generale.cycle_pursuit != PoursuiteDeCycle.YES.name
         )
         if est_en_premiere_annee_de_bachelier:
-            validite, num_offre = formation.cohortyear_set.get(
-                name=CohortName.FIRST_YEAR.name,
-            ).external_id.split('_')[3:5]
+            validite, num_offre = formation.cohortyear_set.get(name=CohortName.FIRST_YEAR.name,).external_id.split(
+                '_'
+            )[3:5]
         else:
             validite, num_offre = formation.external_id.split('_')[4:6]
         return num_offre, validite
@@ -559,10 +561,7 @@ class InjectionEPCAdmission:
 
     @staticmethod
     def envoyer_admission_dans_queue(donnees: Dict, admission_uuid: str, admission_reference: str):
-        credentials = pika.PlainCredentials(
-            settings.QUEUES.get('QUEUE_USER'),
-            settings.QUEUES.get('QUEUE_PASSWORD')
-        )
+        credentials = pika.PlainCredentials(settings.QUEUES.get('QUEUE_USER'), settings.QUEUES.get('QUEUE_PASSWORD'))
         rabbit_settings = pika.ConnectionParameters(
             settings.QUEUES.get("QUEUE_URL"),
             settings.QUEUES.get("QUEUE_PORT"),

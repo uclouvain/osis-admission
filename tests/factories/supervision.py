@@ -28,8 +28,8 @@ import factory
 from django.conf import settings
 from osis_signature.models import Actor, Process
 
-from admission.contrib.models import SupervisionActor
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from ..factories.roles import CaMemberRoleFactory, PromoterRoleFactory
 
 
