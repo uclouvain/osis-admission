@@ -29,8 +29,8 @@ from datetime import datetime
 
 import factory
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import DoctorateAdmissionPrerequisiteCourses
+from admission.models import DoctorateAdmission
+from admission.models.doctorate import DoctorateAdmissionPrerequisiteCourses
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeFinancement,
@@ -68,7 +68,7 @@ class DoctorateFactory(EducationGroupYearFactory):
 
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     management_entity = factory.SubFactory(EntityWithVersionFactory)
-    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
+    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.FORMATION_PHD.name)
     primary_language = None
 
     @factory.post_generation
@@ -140,7 +140,7 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
             cotutelle=True,
             cotutelle_motivation="Very motivated",
             cotutelle_institution_fwb=False,
-            cotutelle_institution="Somewhere",
+            cotutelle_institution="34eab30c-27e3-40db-b92e-0b51546a2448",
             cotutelle_opening_request=factory.LazyFunction(generate_token),  # This is to overcome circular import
             cotutelle_convention=factory.LazyFunction(generate_token),
             cotutelle_other_documents=factory.LazyFunction(generate_token),

@@ -29,7 +29,7 @@ import freezegun
 from django.test import override_settings
 from osis_async.models import AsyncTask
 
-from admission.contrib.models import AdmissionTask, GeneralEducationAdmission
+from admission.models import AdmissionTask, GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE

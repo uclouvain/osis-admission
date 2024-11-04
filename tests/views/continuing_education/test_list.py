@@ -32,7 +32,7 @@ from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,

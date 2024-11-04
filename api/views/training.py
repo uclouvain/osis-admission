@@ -38,8 +38,8 @@ from admission.api.serializers.activity import (
     DoctoralTrainingBatchSerializer,
     DoctoralTrainingConfigSerializer,
 )
-from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.doctoral_training import Activity
+from admission.models.cdd_config import CddConfiguration
+from admission.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.commands import (
     DonnerAvisSurActiviteCommand,
     SoumettreActivitesCommand,

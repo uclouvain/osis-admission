@@ -26,7 +26,7 @@
 
 import factory
 
-from admission.contrib.models import ConfirmationPaper
+from admission.models import ConfirmationPaper
 
 
 class ConfirmationPaperFactory(factory.django.DjangoModelFactory):

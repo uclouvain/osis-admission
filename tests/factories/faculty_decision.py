@@ -28,12 +28,11 @@ import factory
 from django.db.models import Max
 from factory.fuzzy import FuzzyText
 
-from admission.contrib.models.checklist import (
+from admission.models.checklist import (
     RefusalReason,
     RefusalReasonCategory,
     AdditionalApprovalCondition,
     FreeAdditionalApprovalCondition,
-    DoctorateFreeAdditionalApprovalCondition,
 )
 
 
@@ -75,14 +74,6 @@ class AdditionalApprovalConditionFactory(factory.django.DjangoModelFactory):
 class FreeAdditionalApprovalConditionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FreeAdditionalApprovalCondition
-
-    name_fr = FuzzyText(length=10)
-    name_en = FuzzyText(length=10)
-
-
-class DoctorateFreeAdditionalApprovalConditionFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = DoctorateFreeAdditionalApprovalCondition
 
     name_fr = FuzzyText(length=10)
     name_en = FuzzyText(length=10)

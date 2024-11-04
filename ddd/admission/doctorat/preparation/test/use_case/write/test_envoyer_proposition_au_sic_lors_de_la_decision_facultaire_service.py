@@ -28,15 +28,15 @@ import factory
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
+    EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
-    DecisionFacultaireEnum,
+    DecisionCDDEnum,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
+    SituationPropositionNonCddException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPFactory,
@@ -56,17 +56,17 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
+class TestEnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand
+        cls.command = EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand
         cls.parametres_commande_par_defaut = {
             'gestionnaire': '00321234',
             'uuid_proposition': '',
-            'envoi_par_fac': True,
+            'envoi_par_cdd': True,
         }
 
     def setUp(self) -> None:
@@ -91,7 +91,7 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
     def test_should_etre_ok_si_proposition_avec_les_bons_statuts_proposition_et_checklist(self):
         # Proposition: TRAITEMENT_FAC et checklist: INITIAL_CANDIDAT
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.INITIAL_CANDIDAT
+        self.proposition.checklist_actuelle.decision_cdd.statut = ChoixStatutChecklist.INITIAL_CANDIDAT
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         # Vérifier résultat de la commande
@@ -103,7 +103,7 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
 
         # Proposition: COMPLETEE_POUR_FAC et checklist: GEST_EN_COURS
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_EN_COURS
+        self.proposition.checklist_actuelle.decision_cdd.statut = ChoixStatutChecklist.GEST_EN_COURS
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         # Vérifier résultat de la commande
@@ -111,9 +111,9 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
 
         # Proposition: COMPLETEE_POUR_FAC et checklist: GEST_BLOCAGE sans decision
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_BLOCAGE
-        self.proposition.checklist_actuelle.decision_facultaire.extra = {
-            'decision': DecisionFacultaireEnum.HORS_DECISION.value,
+        self.proposition.checklist_actuelle.decision_cdd.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        self.proposition.checklist_actuelle.decision_cdd.extra = {
+            'decision': DecisionCDDEnum.HORS_DECISION.name,
         }
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -121,7 +121,7 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
         self.assertEqual(resultat, self.proposition.entity_id)
 
     def test_should_lever_exception_si_statuts_non_conformes(self):
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_EN_COURS
+        self.proposition.checklist_actuelle.decision_cdd.statut = ChoixStatutChecklist.GEST_EN_COURS
 
         # Statut de la proposition non conforme
         statuts_invalides = ChoixStatutPropositionDoctorale.get_names_except(
@@ -133,23 +133,4 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
             self.proposition.statut = ChoixStatutPropositionDoctorale[statut]
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
-
-        # Statut de la checklist non conforme
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_BLOCAGE
-        self.proposition.checklist_actuelle.decision_facultaire.extra = {
-            'decision': DecisionFacultaireEnum.EN_DECISION.value
-        }
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
-
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_REUSSITE
-        self.proposition.checklist_actuelle.decision_facultaire.extra = {}
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)

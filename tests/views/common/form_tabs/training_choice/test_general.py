@@ -31,7 +31,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
 )

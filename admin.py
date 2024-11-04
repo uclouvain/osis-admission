@@ -55,7 +55,7 @@ from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.contrib.models import (
+from admission.models import (
     AdmissionTask,
     AdmissionViewer,
     CddMailTemplate,
@@ -66,20 +66,20 @@ from admission.contrib.models import (
     Accounting,
     DiplomaticPost,
 )
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
-from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.checklist import (
+from admission.models.base import BaseAdmission
+from admission.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.cdd_config import CddConfiguration
+from admission.models.checklist import (
     RefusalReasonCategory,
     RefusalReason,
     AdditionalApprovalCondition,
     FreeAdditionalApprovalCondition,
 )
-from admission.contrib.models.doctoral_training import Activity
-from admission.contrib.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
-from admission.contrib.models.online_payment import OnlinePayment
-from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
+from admission.models.doctoral_training import Activity
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
+from admission.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.models.online_payment import OnlinePayment
+from admission.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
@@ -206,8 +206,6 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'thesis_institute',
         'international_scholarship',
         'thesis_language',
-        'additional_approval_conditions',
-        'other_training_accepted_by_fac',
         'prerequisite_courses',
         'refusal_reasons',
     ]
@@ -320,6 +318,9 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
         'cdd',
         'language',
         'identifier',
+    ]
+    autocomplete_fields = [
+        'cdd',
     ]
 
     @staticmethod
@@ -909,9 +910,15 @@ class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
     ]
 
 
+class CddConfigurationAdmin(admin.ModelAdmin):
+    autocomplete_fields = [
+        'cdd',
+    ]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
-admin.site.register(CddConfiguration)
+admin.site.register(CddConfiguration, CddConfigurationAdmin)
 admin.site.register(Scholarship, ScholarshipAdmin)
 admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
 admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)
@@ -1079,6 +1086,9 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
         'person__first_name',
         'person__last_name',
         'entity__entityversion__acronym',
+    ]
+    autocomplete_fields = [
+        'entity',
     ]
 
     @admin.display(description=pgettext_lazy('admission', 'Entity'))

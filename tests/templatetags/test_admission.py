@@ -41,7 +41,7 @@ from django.utils.translation import gettext as _, pgettext
 from django.views import View
 
 from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
-from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
+from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
@@ -1316,7 +1316,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 
     def test_admission_training_type(self):
         self.assertEqual(
-            admission_training_type(TrainingType.PHD.name),
+            admission_training_type(TrainingType.FORMATION_PHD.name),
             TypeFormation.DOCTORAT.name,
         )
 
@@ -1571,7 +1571,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 class AdmissionTagsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.doctorate_training_type = TrainingType.PHD.name
+        cls.doctorate_training_type = TrainingType.FORMATION_PHD.name
         cls.general_training_type = TrainingType.BACHELOR.name
         cls.continuing_training_type = TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name
         cls.admission_uuid = str(uuid.uuid4())

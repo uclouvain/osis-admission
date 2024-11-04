@@ -28,8 +28,8 @@ import logging
 from django.conf import settings
 
 from admission.auth.predicates.general import payment_needed_after_submission, payment_needed_after_manager_request
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.online_payment import PaymentStatus
+from admission.models import GeneralEducationAdmission
+from admission.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
     PayerFraisDossierPropositionSuiteSoumissionCommand,

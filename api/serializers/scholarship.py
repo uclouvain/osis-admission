@@ -25,7 +25,7 @@
 # ##############################################################################
 from rest_framework.serializers import ModelSerializer
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 
 
 class ScholarshipSerializer(ModelSerializer):

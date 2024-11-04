@@ -29,7 +29,7 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums.emplacement_document import (

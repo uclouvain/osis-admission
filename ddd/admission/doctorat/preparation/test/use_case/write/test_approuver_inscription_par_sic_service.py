@@ -43,10 +43,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    InformationsAcceptationFacultaireNonSpecifieesException,
     ParcoursAnterieurNonSuffisantException,
     DocumentAReclamerImmediatException,
-    SituationPropositionNonSICException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
@@ -180,24 +178,6 @@ class TestApprouverInscriptionParSic(TestCase):
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         self.assertEqual(resultat, self.proposition.entity_id)
-
-    def test_should_lever_exception_si_conditions_complementaires_non_specifiees(self):
-        self.proposition.avec_conditions_complementaires = True
-        self.proposition.conditions_complementaires_existantes = []
-        self.proposition.conditions_complementaires_libres = []
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-        self.assertIsInstance(
-            context.exception.exceptions.pop(),
-            InformationsAcceptationFacultaireNonSpecifieesException,
-        )
-
-    def test_should_etre_ok_si_presence_conditions_complementaires_non_specifiee(self):
-        self.proposition.avec_conditions_complementaires = None
-        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-        proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE)
-        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_etre_ok_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None

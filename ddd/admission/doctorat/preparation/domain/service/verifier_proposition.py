@@ -62,7 +62,10 @@ class VerifierProposition(interface.DomainService):
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         doctorat_id = proposition_candidat.formation_id
-        titres = titres_acces.recuperer_titres_access(proposition_candidat.matricule_candidat, TrainingType.PHD)
+        titres = titres_acces.recuperer_titres_access(
+            proposition_candidat.matricule_candidat,
+            TrainingType.FORMATION_PHD,
+        )
         execute_functions_and_aggregate_exceptions(
             partial(
                 profil_candidat_service.verifier_identification,
@@ -114,7 +117,7 @@ class VerifierProposition(interface.DomainService):
                 proposition=None,
                 matricule_candidat=proposition_candidat.matricule_candidat,
                 titres_acces=titres,
-                type_formation=TrainingType.PHD,
+                type_formation=TrainingType.FORMATION_PHD,
                 profil_candidat_translator=profil_candidat_translator,
                 formation_translator=formation_translator,
                 annee_soumise=annee_soumise,

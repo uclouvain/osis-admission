@@ -67,24 +67,24 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_completion(cls, proposition: Proposition):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+    def historiser_completion(cls, proposition: Proposition, matricule_auteur: str):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
             proposition.entity_id.uuid,
-            "La proposition a été modifiée (Projet doctoral).",
-            "The proposition has been completed (Doctoral project).",
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "La proposition a été modifiée (Projet de recherche).",
+            "The proposition has been completed (Research project).",
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", 'modification'],
         )
 
     @classmethod
-    def historiser_completion_cotutelle(cls, proposition: Proposition):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+    def historiser_completion_cotutelle(cls, proposition: Proposition, matricule_auteur: str):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
             proposition.entity_id.uuid,
             "La proposition a été modifiée (Cotutelle).",
             "The proposition has been completed (Cotutelle).",
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", 'modification'],
         )
 
@@ -95,9 +95,13 @@ class Historique(IHistorique):
         signataire_id: 'SignataireIdentity',
         avis: AvisDTO,
         statut_original_proposition: 'ChoixStatutPropositionDoctorale',
+        matricule_auteur: Optional[str] = '',
     ):
         signataire = cls.get_signataire(signataire_id)
-        auteur = PersonneConnueUclTranslator().get(proposition.matricule_candidat) if avis.pdf else signataire
+        if matricule_auteur:
+            auteur = PersonneConnueUclTranslator().get(matricule_auteur)
+        else:
+            auteur = signataire
 
         # Basculer en français pour la traduction de l'état
         with translation.override(settings.LANGUAGE_CODE_FR):
@@ -156,8 +160,9 @@ class Historique(IHistorique):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         signataire = cls.get_signataire(signataire_id)
         add_history_entry(
             proposition.entity_id.uuid,
@@ -169,7 +174,7 @@ class Historique(IHistorique):
                 "promoter" if isinstance(signataire_id, PromoteurIdentity) else "CA member",
                 membre=signataire,
             ),
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", "supervision"],
         )
 
@@ -179,8 +184,9 @@ class Historique(IHistorique):
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
         signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
     ):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         signataire = cls.get_signataire(signataire_id)
         add_history_entry(
             proposition.entity_id.uuid,
@@ -192,18 +198,63 @@ class Historique(IHistorique):
                 "promoters" if isinstance(signataire_id, PromoteurIdentity) else "CA members",
                 membre=signataire,
             ),
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", "supervision"],
         )
 
     @classmethod
-    def historiser_demande_signatures(cls, proposition: Proposition):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+    def historiser_modification_membre(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
+        signataire = cls.get_signataire(signataire_id)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "{membre.prenom} {membre.nom} a été modifié.".format(membre=signataire),
+            "{membre.prenom} {membre.nom} has been updated.".format(membre=signataire),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
+            tags=["proposition", "supervision"],
+        )
+
+    @classmethod
+    def historiser_designation_promoteur_reference(
+        cls,
+        proposition: Proposition,
+        signataire_id: 'SignataireIdentity',
+        matricule_auteur: str,
+    ):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
+        signataire = cls.get_signataire(signataire_id)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "{membre.prenom} {membre.nom} a été désigné comme promoteur de référence.".format(membre=signataire),
+            "{membre.prenom} {membre.nom} has been designated as lead supervisor.".format(membre=signataire),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
+            tags=["proposition", "supervision"],
+        )
+
+    @classmethod
+    def historiser_send_back_to_candidate(cls, proposition: Proposition, matricule_gestionnaire: str):
+        gestionnaire = PersonneConnueUclTranslator.get(matricule_gestionnaire)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "La main a été redonné au candidat.",
+            "Proposition was sent back to the candidate.",
+            "{gestionnaire.prenom} {gestionnaire.nom}".format(gestionnaire=gestionnaire),
+            tags=["proposition", "supervision", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_demande_signatures(cls, proposition: Proposition, matricule_auteur: str):
+        auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
             proposition.entity_id.uuid,
             "Les demandes de signatures ont été envoyées.",
             "Signing requests have been sent.",
-            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", "supervision", "status-changed"],
         )
 
@@ -244,48 +295,41 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
+    def historiser_envoi_cdd_par_sic_lors_de_la_decision_cdd(
         cls,
         proposition: Proposition,
-        message: Optional[EmailMessage],
         gestionnaire: str,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
-        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
 
-        if message:
-            recipient = message['To']
-            fr_message = (
-                f'Un mail informant de la soumission du dossier en faculté a été envoyé à "{recipient}" le {now}.'
-            )
-            en_message = (
-                f'An e-mail notifying that the dossier has been submitted to the faculty was sent to "{recipient}" on '
-                f'{now}.'
-            )
-        else:
-            fr_message = f"Le dossier a été soumis en faculté le {now}."
-            en_message = f"The dossier has been submitted to the faculty on {now}."
+        now = datetime.datetime.now()
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            now_fr = formats.date_format(now, "DATETIME_FORMAT")
+
+        with translation.override(settings.LANGUAGE_CODE_EN):
+            now_en = formats.date_format(now, "DATETIME_FORMAT")
 
         add_history_entry(
             proposition.entity_id.uuid,
-            fr_message,
-            en_message,
+            f"Le dossier a été soumis en CDD le {now_fr}.",
+            f"The dossier has been submitted to the CDD on {now_en}.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "fac-decision", "send-to-fac", "status-changed"],
+            tags=["proposition", "cdd-decision", "send-to-cdd", "status-changed"],
         )
 
     @classmethod
-    def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+    def historiser_envoi_sic_par_cdd_lors_de_la_decision_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: str,
-        envoi_par_fac: bool,
+        envoi_par_cdd: bool,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
 
-        if envoi_par_fac:
-            message_fr = "Le dossier a été soumis au SIC par la faculté."
-            message_en = "The dossier has been submitted to the SIC by the faculty."
+        if envoi_par_cdd:
+            message_fr = "Le dossier a été soumis au SIC par la CDD."
+            message_en = "The dossier has been submitted to the SIC by the CDD."
         else:
             message_fr = "Le dossier a été soumis au SIC par le SIC."
             message_en = "The dossier has been submitted to the SIC by the SIC."
@@ -295,27 +339,54 @@ class Historique(IHistorique):
             message_fr=message_fr,
             message_en=message_en,
             author="{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "fac-decision", "send-to-sic", "status-changed"],
+            tags=["proposition", "cdd-decision", "send-to-sic", "status-changed"],
         )
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
+    def historiser_refus_cdd(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO, message: EmailMessage):
+        message_a_historiser = get_message_to_historize(message)
+        sender = '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire)
+
         add_history_entry(
             proposition.entity_id.uuid,
-            "La faculté a informé le SIC de son refus.",
-            "The faculty informed the SIC of its refusal.",
-            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire),
-            tags=["proposition", "fac-decision", "refusal-send-to-sic", "status-changed"],
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
+            sender,
+            tags=['proposition', 'cdd-decision', 'refusal', 'message'],
+        )
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'Le dossier a été refusé par la CDD.',
+            'The dossier has been refused by the CDD.',
+            sender,
+            tags=['proposition', 'cdd-decision', 'refusal', 'status-changed'],
         )
 
     @classmethod
-    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
+    def historiser_acceptation_cdd(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+        message: EmailMessage,
+    ):
+        message_a_historiser = get_message_to_historize(message)
+        sender = '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire)
+
         add_history_entry(
             proposition.entity_id.uuid,
-            "La faculté a informé le SIC de son acceptation.",
-            "The faculty informed the SIC of its approval.",
-            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire),
-            tags=["proposition", "fac-decision", "approval-send-to-sic", "status-changed"],
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
+            sender,
+            tags=['proposition', 'cdd-decision', 'approval', 'message'],
+        )
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'La CDD a informé le SIC de son acceptation.',
+            'The CDD informed the SIC of its approval.',
+            sender,
+            tags=['proposition', 'cdd-decision', 'approval', 'status-changed'],
         )
 
     @classmethod
@@ -389,26 +460,6 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_specification_motifs_refus_sic(
-        cls,
-        proposition: Proposition,
-        gestionnaire: str,
-        statut_original: ChoixStatutPropositionDoctorale,
-    ):
-        if statut_original == proposition.statut:
-            return
-
-        gestionnaire_dto = PersonneConnueUclTranslator().get(matricule=gestionnaire)
-
-        add_history_entry(
-            proposition.entity_id.uuid,
-            'Des motifs de refus ont été spécifiés par SIC.',
-            'Refusal reasons have been specified by SIC.',
-            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
-            tags=['proposition', 'sic-decision', 'specify-refusal-reasons', 'status-changed'],
-        )
-
-    @classmethod
     def historiser_specification_informations_acceptation_sic(
         cls,
         proposition: Proposition,
@@ -439,15 +490,22 @@ class Historique(IHistorique):
         manager_dto = PersonneConnueUclTranslator().get(gestionnaire)
         manager_name = f"{manager_dto.prenom} {manager_dto.nom}"
 
-        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        now = datetime.datetime.now()
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            now_fr = formats.date_format(now, "DATETIME_FORMAT")
+
+        with translation.override(settings.LANGUAGE_CODE_EN):
+            now_en = formats.date_format(now, "DATETIME_FORMAT")
+
         recipient = message['To']
         message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f'Mail envoyé à "{recipient}" le {now} par {manager_name}.\n\n'
+            f'Mail envoyé à "{recipient}" le {now_fr} par {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
-            f'Mail sent to "{recipient}" on {now} by {manager_name}.\n\n'
+            f'Mail sent to "{recipient}" on {now_en} by {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_EN]}',
             manager_name,
             tags=['proposition', 'experience-authentication', 'authentication-request', 'message'],
@@ -465,14 +523,21 @@ class Historique(IHistorique):
         manager_dto = PersonneConnueUclTranslator().get(gestionnaire)
         manager_name = f"{manager_dto.prenom} {manager_dto.nom}"
 
-        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        now = datetime.datetime.now()
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            now_fr = formats.date_format(now, "DATETIME_FORMAT")
+
+        with translation.override(settings.LANGUAGE_CODE_EN):
+            now_en = formats.date_format(now, "DATETIME_FORMAT")
+
         message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f'Mail envoyé à le/la candidat·e le {now} par {manager_name}.\n\n'
+            f'Mail envoyé à le/la candidat·e le {now_fr} par {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
-            f'Mail sent to the candidate on {now} by {manager_name}.\n\n'
+            f'Mail sent to the candidate on {now_en} by {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_EN]}',
             manager_name,
             tags=['proposition', 'experience-authentication', 'institute-contact', 'message'],
@@ -487,7 +552,15 @@ class Historique(IHistorique):
         message: Optional[EmailMessage] = None,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
-        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+
+        now = datetime.datetime.now()
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            now_fr = formats.date_format(now, "DATETIME_FORMAT")
+
+        with translation.override(settings.LANGUAGE_CODE_EN):
+            now_en = formats.date_format(now, "DATETIME_FORMAT")
+
         status = proposition.financabilite_derogation_statut.value
 
         if message is not None:
@@ -503,9 +576,9 @@ class Historique(IHistorique):
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f'Le statut de besoin de dérogation à la financabilité est passé à {status} par {gestionnaire_dto.prenom} '
-            f'{gestionnaire_dto.nom}.',
-            f'Status of financability dispensation needs changed to {status} on {now} by {gestionnaire_dto.prenom} '
+            f'Le statut de besoin de dérogation à la financabilité est passé à {status} le {now_fr} par '
+            f'{gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Status of financability dispensation needs changed to {status} on {now_en} by {gestionnaire_dto.prenom} '
             f'{gestionnaire_dto.nom}.',
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
             tags=['proposition', 'financabilite', 'financabilite-derogation'],

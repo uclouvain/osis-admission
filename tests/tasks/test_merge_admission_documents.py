@@ -34,7 +34,7 @@ from osis_document.enums import PostProcessingType
 from rest_framework.test import APITestCase
 
 from admission.constants import PNG_MIME_TYPE
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 from admission.ddd.admission.enums import (
     CleConfigurationItemFormulaire,
     Onglets,

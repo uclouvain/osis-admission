@@ -1,3 +1,4 @@
+
 {% extends "layout.html" %}
 {% load bootstrap3 i18n static admission enums %}
 
@@ -57,6 +58,12 @@
 
   <div class="panel panel-default">
     <div id="admission-panel-header-container" class="panel-heading flex-content">
+      <a
+        title="{% translate 'Previous admission' %}"
+        class="btn btn-default admission-navigation-button {% if not previous_admission_url %} disabled{% endif %}"
+        href="{{ previous_admission_url }}">
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+      </a>
       <div id="admission-panel-header">
         {% block panel-heading %}
           <div>
@@ -126,6 +133,12 @@
           </div>
         {% endblock %}
       </div>
+      <a
+        title="{% translate 'Next admission' %}"
+        class="btn btn-default admission-navigation-button {% if not next_admission_url %} disabled{% endif %}"
+        href="{{ next_admission_url }}">
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </a>
     </div>
     <div class="panel-body">
     {% if injection_inscription %}

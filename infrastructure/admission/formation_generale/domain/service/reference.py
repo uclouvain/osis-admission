@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_reference import IReferenceTranslator
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException

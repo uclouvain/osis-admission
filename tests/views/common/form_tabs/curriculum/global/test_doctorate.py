@@ -30,7 +30,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import Onglets

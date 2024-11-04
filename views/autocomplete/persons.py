@@ -30,12 +30,15 @@ from django.db.models import Q, Exists, OuterRef, F
 
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.candidate import Candidate
+from base.auth.roles.tutor import Tutor
 from base.models.person import Person
 
 __all__ = [
     'CandidatesAutocomplete',
     'PromotersAutocomplete',
     'JuryMembersAutocomplete',
+    'PersonAutocomplete',
+    'TutorAutocomplete',
 ]
 
 __namespace__ = False
@@ -121,3 +124,58 @@ class JuryMembersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetV
             )
         )
         return qs if q else []
+
+
+class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
+    urlpatterns = 'person'
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '')
+        qs = Person.objects
+        if q:
+            qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
+        qs = (
+            qs
+            .exclude(
+                Q(user_id__isnull=True)
+                | Q(global_id='')
+                | Q(first_name='')
+                | Q(last_name='')
+            )
+            .exclude(Exists(Student.objects.filter(person=OuterRef('pk'))))
+            .order_by('last_name', 'first_name')
+            .values(
+                'first_name',
+                'last_name',
+                'global_id',
+            )
+        )
+        return qs
+
+
+class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
+    urlpatterns = 'tutor'
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '')
+
+        qs = Tutor.objects
+        if q:
+            qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
+        qs = (
+            qs
+            .annotate(
+                first_name=F("person__first_name"),
+                last_name=F("person__last_name"),
+                global_id=F("person__global_id"),
+            )
+            .exclude(Q(person__user_id__isnull=True) | Q(person__global_id=''))
+            .distinct()
+            .values(
+                'first_name',
+                'last_name',
+                'global_id',
+            )
+            .order_by('last_name', 'first_name')
+        )
+        return qs
