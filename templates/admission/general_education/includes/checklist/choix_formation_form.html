@@ -28,7 +28,7 @@
   {% panel _("Proposition features") %}
     {% bootstrap_form_errors form %}
     <form
-        hx-post="{% url 'admission:general-education:choix-formation-update' uuid=view.kwargs.uuid %}"
+        hx-post="{% url view.base_namespace|add:':choix-formation-update' uuid=view.kwargs.uuid %}"
         hx-target="#choix-formation-form"
         hx-swap="outerHTML"
     >
@@ -42,9 +42,22 @@
       >
         {% bootstrap_field form.poursuite_cycle %}
       </div>
+      <dl>
+        <dd>
+          <label for="{{ form.est_inscription_tardive.id_for_label }}">
+            {{ form.est_inscription_tardive.label }}
+          </label>
+        </dd>
+        <dt>
+          <label class="switch" for="{{ form.est_inscription_tardive.id_for_label }}">
+            {{ form.est_inscription_tardive }}
+            <span class="slider round"></span>
+          </label>
+        </dt>
+      </dl>
       {% translate 'Save' context 'admission' as save_label %}
       {% bootstrap_button save_label button_type="submit" button_class='btn-primary pull-right' %}
-      <a class="btn btn-secondary pull-right" hx-swap="outerHTML" hx-target="#choix-formation-form" hx-push-url="false" hx-get="{% url 'admission:general-education:choix-formation-detail' uuid=view.kwargs.uuid %}">{% trans "Cancel" %}</a>
+      <a class="btn btn-secondary pull-right" hx-swap="outerHTML" hx-target="#choix-formation-form" hx-push-url="false" hx-get="{% url view.base_namespace|add:':choix-formation-detail' uuid=view.kwargs.uuid %}">{% trans "Cancel" %}</a>
     </form>
   {% endpanel %}
   {{ form.media }}

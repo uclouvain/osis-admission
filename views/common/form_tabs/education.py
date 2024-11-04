@@ -29,14 +29,18 @@ from uuid import UUID
 from django.urls import reverse
 from django.utils.functional import cached_property
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionType
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 from osis_profile.views.edit_etudes_secondaires import EditEtudesSecondairesView
 
 __all__ = [
@@ -114,10 +118,12 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         admission_injections = AdmissionEPCInjection.objects.filter(
             admission__candidate_id=self.person.pk,
             type=EPCInjectionType.DEMANDE.name,
+            status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
         )
         cv_injections = CurriculumEPCInjection.objects.filter(
             person_id=self.person.pk,
             type_experience=ExperienceType.HIGH_SCHOOL.name,
+            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
         )
 
         return not (

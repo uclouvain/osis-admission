@@ -108,6 +108,13 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
                 ('ATTESTATION_ACCORD_ANNEXE_SIC', resume_dto.proposition.certificat_approbation_sic_annexe),
                 ('ATTESTATION_REFUS_SIC', resume_dto.proposition.certificat_refus_sic),
             )
+        elif resume_dto.est_proposition_doctorale:
+            documents_systeme = (
+                ('DOSSIER_ANALYSE', resume_dto.proposition.pdf_recapitulatif),
+                ('ATTESTATION_ACCORD_CDD', resume_dto.proposition.certificat_approbation_cdd),
+                ('ATTESTATION_ACCORD_SIC', resume_dto.proposition.certificat_approbation_sic),
+                ('ATTESTATION_ACCORD_ANNEXE_SIC', resume_dto.proposition.certificat_approbation_sic_annexe),
+            )
         else:
             documents_systeme = (('DOSSIER_ANALYSE', resume_dto.proposition.pdf_recapitulatif),)
 

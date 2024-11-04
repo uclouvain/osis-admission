@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from admission.ddd.admission.doctorat.preparation.commands import RefuserProposi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.avis import Avis
 from admission.ddd.admission.doctorat.preparation.domain.service.deverrouiller_projet_doctoral import (
-    DeverrouillerProjetDoctoral,
+    DeverrouillerPropositionProjetDoctoral,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
@@ -48,16 +48,17 @@ def refuser_proposition(
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
+    statut_original_proposition = proposition_candidat.statut
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
     signataire_id = groupe_de_supervision.get_signataire(cmd.uuid_membre)
     avis = Avis.construire_refus(cmd.commentaire_interne, cmd.commentaire_externe, cmd.motif_refus)
 
     # WHEN
     groupe_de_supervision.refuser(signataire_id, cmd.commentaire_interne, cmd.commentaire_externe, cmd.motif_refus)
-    DeverrouillerProjetDoctoral().deverrouiller_apres_refus(proposition_candidat, signataire_id)
+    DeverrouillerPropositionProjetDoctoral().deverrouiller_apres_refus(proposition_candidat, signataire_id)
 
     # THEN
-    historique.historiser_avis(proposition_candidat, signataire_id, avis)
+    historique.historiser_avis(proposition_candidat, signataire_id, avis, statut_original_proposition)
     notification.notifier_avis(proposition_candidat, signataire_id, avis)
     groupe_supervision_repository.save(groupe_de_supervision)
     proposition_repository.save(proposition_candidat)

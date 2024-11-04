@@ -32,7 +32,7 @@ from .domain.service.notification import Notification
 from .repository.doctorat import DoctoratRepository
 
 COMMAND_HANDLERS = {
-    RecupererDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
+    RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
         cmd,
         doctorat_repository=DoctoratRepository(),
     ),

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
-from admission.contrib.models import ConfirmationPaper
+from admission.models import ConfirmationPaper
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
@@ -62,7 +62,7 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
             admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
@@ -72,7 +72,7 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
             admitted=True,
         )
 

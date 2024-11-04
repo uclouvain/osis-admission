@@ -25,13 +25,20 @@
 # ##############################################################################
 
 import uuid
+from datetime import datetime
 
 import factory
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
+from admission.models.doctorate import DoctorateAdmissionPrerequisiteCourses
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeFinancement,
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+    OngletsChecklist,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories.accounting import AccountingFactory
@@ -44,8 +51,10 @@ from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.learning_unit_year import LearningUnitYearFullFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
+from program_management.ddd.domain.program_tree_version import NOT_A_TRANSITION, STANDARD
 from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
@@ -59,18 +68,38 @@ class DoctorateFactory(EducationGroupYearFactory):
 
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     management_entity = factory.SubFactory(EntityWithVersionFactory)
-    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
+    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.FORMATION_PHD.name)
     primary_language = None
 
     @factory.post_generation
     def create_related_group_version_factory(self, create, extracted, **kwargs):
-        EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
+        EducationGroupVersionFactory(
+            offer=self,
+            root_group__academic_year__year=self.academic_year.year,
+            version_name=STANDARD,
+            transition_name=NOT_A_TRANSITION,
+        )
 
 
 def generate_token():
     from admission.tests.factories import WriteTokenFactory
 
     return WriteTokenFactory().token
+
+
+def get_checklist():
+    default_content = {
+        'libelle': '',
+        'enfants': [],
+        'extra': {},
+        'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+    }
+    return {
+        onglet.name: default_content.copy()
+        for onglet in OngletsChecklist.get_except(
+            OngletsChecklist.experiences_parcours_anterieur.name,
+        )
+    }
 
 
 class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
@@ -104,18 +133,21 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     last_update_author = factory.SubFactory(PersonFactory)
 
+    checklist = factory.Dict({'default': True})  # This default value is overridden in a post generation method
+
     class Params:
         with_cotutelle = factory.Trait(
             cotutelle=True,
             cotutelle_motivation="Very motivated",
             cotutelle_institution_fwb=False,
-            cotutelle_institution="Somewhere",
+            cotutelle_institution="34eab30c-27e3-40db-b92e-0b51546a2448",
             cotutelle_opening_request=factory.LazyFunction(generate_token),  # This is to overcome circular import
             cotutelle_convention=factory.LazyFunction(generate_token),
             cotutelle_other_documents=factory.LazyFunction(generate_token),
         )
         submitted = factory.Trait(
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            submitted_at=factory.LazyAttribute(lambda obj: datetime(obj.determined_academic_year.year, 1, 1)),
             submitted_profile={
                 "coordinates": {
                     "city": "Louvain-la-Neuve",
@@ -204,3 +236,25 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
             sport_affiliation='',
             is_staff_child=None,
         )
+
+    @factory.post_generation
+    def initialize_checklist(self, create, extracted, **kwargs):
+        if self.checklist != {'default': True}:
+            return
+
+        self.checklist = (
+            {}
+            if self.status in STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+            else {
+                'initial': get_checklist(),
+                'current': get_checklist(),
+            }
+        )
+
+
+class DoctorateAdmissionPrerequisiteCoursesFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = DoctorateAdmissionPrerequisiteCourses
+
+    admission = factory.SubFactory(DoctorateAdmissionFactory)
+    course = factory.SubFactory(LearningUnitYearFullFactory)

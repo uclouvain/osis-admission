@@ -30,7 +30,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -53,6 +53,7 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.models.campus import Campus
 from base.models.enums.entity_type import EntityType
 from base.models.enums.organization_type import MAIN
@@ -142,6 +143,10 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
             },
         )
 
+        root_group = self.doctorate_admission.training.educationgroupversion_set.first().root_group
+        root_group.main_teaching_campus = self.first_campus
+        root_group.save()
+
         self.doctorate_url = resolve_url(
             'admission:doctorate:update:training-choice',
             uuid=self.doctorate_admission.uuid,
@@ -188,15 +193,11 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
 
         form = response.context['form']
 
-        teaching_campus_name = (
-            self.doctorate_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
-        )
-
         # Check form fields
 
         # Initial values
         self.assertEqual(form['training_type'].value(), TypeFormation.DOCTORAT.name)
-        self.assertEqual(form['campus'].value(), 'CAMPUS')
+        self.assertEqual(form['campus'].value(), self.first_campus.uuid)
         self.assertEqual(form['doctorate_training'].value(), self.doctorate_admission.training.acronym)
         self.assertEqual(form['admission_type'].value(), self.doctorate_admission.type)
         self.assertEqual(form['justification'].value(), self.doctorate_admission.comment)
@@ -209,7 +210,14 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         # Choices
         self.assertCountEqual(form.fields['training_type'].choices, TypeFormation.choices())
 
-        self.assertCountEqual(form.fields['campus'].choices, [['CAMPUS', teaching_campus_name]])
+        self.assertEqual(form.initial['campus'], self.first_campus.uuid)
+        self.assertCountEqual(
+            form.fields['campus'].choices,
+            [
+                ('', BLANK_CHOICE_DISPLAY),
+                *[(campus.uuid, campus.name) for campus in self.all_campuses],
+            ],
+        )
         self.assertCountEqual(
             form.fields['doctorate_training'].choices,
             [
@@ -217,7 +225,7 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
                     self.doctorate_admission.training.acronym,
                     '{} ({}) <span class="training-acronym">{}</span>'.format(
                         self.doctorate_admission.training.title,
-                        teaching_campus_name,
+                        self.first_campus.name,
                         self.doctorate_admission.training.acronym,
                     ),
                 ]

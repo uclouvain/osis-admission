@@ -34,7 +34,9 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as ProgramManagerAdmission
 from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery, RecupererEtudesSecondairesQuery
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import OngletsChecklist as DoctoratOngletsChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as DoctoratOngletsChecklist,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as ContinueOngletsChecklist
@@ -60,10 +62,9 @@ COMMENT_TAG_SIC = 'SIC'
 COMMENT_TAG_FAC = 'FAC'
 COMMENT_TAG_IUFC_FOR_FAC = 'IUFC_for_FAC'
 COMMENT_TAG_FAC_FOR_IUFC = 'FAC_for_IUFC'
+COMMENT_TAG_SIC_FOR_CDD = 'SIC_FOR_CDD'
+COMMENT_TAG_CDD_FOR_SIC = 'CDD_FOR_SIC'
 COMMENT_TAG_GLOBAL = 'GLOBAL'
-CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS = {
-    'decision_facultaire',
-}
 
 
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
@@ -80,13 +81,16 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
         context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
 
         if self.is_general or self.is_doctorate:
-            context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS
-
-            context['checklist_tags'] = (
-                DoctoratOngletsChecklist.choices_except(DoctoratOngletsChecklist.experiences_parcours_anterieur)
-                if self.is_doctorate
-                else GeneralOngletsChecklist.choices_except(GeneralOngletsChecklist.experiences_parcours_anterieur)
-            )
+            if self.is_doctorate:
+                context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = {DoctoratOngletsChecklist.decision_cdd.name}
+                context['checklist_tags'] = DoctoratOngletsChecklist.choices_except(
+                    DoctoratOngletsChecklist.experiences_parcours_anterieur
+                )
+            else:
+                context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = {GeneralOngletsChecklist.decision_facultaire.name}
+                context['checklist_tags'] = GeneralOngletsChecklist.choices_except(
+                    GeneralOngletsChecklist.experiences_parcours_anterieur
+                )
 
             # Get the names of every experience
             curriculum: CurriculumAdmissionDTO = message_bus_instance.invoke(

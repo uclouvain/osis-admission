@@ -25,70 +25,35 @@
 # ##############################################################################
 
 from dal import autocomplete
-from django.db.models import F
 
-from base.models.entity_version import EntityVersion
-from base.models.enums.establishment_type import EstablishmentTypeEnum
+from admission.utils import get_superior_institute_queryset, format_school_title
+from base.utils.eval import eval_bool
+from osis_profile import BE_ISO_CODE
 from reference.api.views.university import UniversityFilter
+
+__namespace__ = False
 
 __all__ = [
     'SuperiorInstituteAutocomplete',
+    'SuperiorInstituteUuidAutocomplete',
 ]
-
-
-def format_address(street='', street_number='', postal_code='', city='', country=''):
-    """Return the concatenation of the specified street, street number, postal code, city and country."""
-    address_parts = [
-        f'{street} {street_number}',
-        f'{postal_code} {city}',
-        country,
-    ]
-    return ', '.join(filter(lambda part: part and len(part) > 1, address_parts))
-
-
-def format_school_title(school):
-    """Return the concatenation of the school name and city."""
-    return '{} <span class="school-address">{}</span>'.format(
-        school.name,
-        format_address(
-            street=school.street,
-            street_number=school.street_number,
-            postal_code=school.zipcode,
-            city=school.city,
-        ),
-    )
 
 
 class SuperiorInstituteAutocomplete(autocomplete.Select2QuerySetView):
     urlpatterns = 'superior-institute'
 
     def get_queryset(self):
-        queryset = EntityVersion.objects.filter(
-            entity__organization__establishment_type__in=[
-                EstablishmentTypeEnum.UNIVERSITY.name,
-                EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
-            ],
-            parent__isnull=True,
-        ).annotate(
-            organization_id=F('entity__organization_id'),
-            organization_uuid=F('entity__organization__uuid'),
-            organization_acronym=F('entity__organization__acronym'),
-            organization_community=F('entity__organization__community'),
-            organization_establishment_type=F('entity__organization__establishment_type'),
-            name=F('entity__organization__name'),
-            city=F('entityversionaddress__city'),
-            street=F('entityversionaddress__street'),
-            street_number=F('entityversionaddress__street_number'),
-            zipcode=F('entityversionaddress__postal_code'),
-        )
+        queryset = get_superior_institute_queryset()
 
         queryset = UniversityFilter.filter_by_active(queryset, None, True)
         queryset = UniversityFilter.search_method(queryset, None, self.q)
 
         country = self.forwarded.get('country')
-
+        is_belgian = eval_bool(self.forwarded.get('is_belgian'))
         if country:
             queryset = queryset.filter(entityversionaddress__country__iso_code=country)
+        elif is_belgian:
+            queryset = queryset.filter(entityversionaddress__country__iso_code=BE_ISO_CODE)
 
         queryset = queryset.order_by('name', 'organization_uuid', '-start_date',).distinct(
             'name',
@@ -113,3 +78,10 @@ class SuperiorInstituteAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_result_value(self, result):
         return result.organization_id
+
+
+class SuperiorInstituteUuidAutocomplete(SuperiorInstituteAutocomplete):
+    urlpatterns = 'superior-institute-uuid'
+
+    def get_result_value(self, result):
+        return result.organization_uuid

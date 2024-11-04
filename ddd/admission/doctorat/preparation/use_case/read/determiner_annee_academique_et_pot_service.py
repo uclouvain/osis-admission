@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,11 +46,11 @@ def determiner_annee_academique_et_pot(
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     # THEN
-    titres = titres_acces.recuperer_titres_access(proposition.matricule_candidat, TrainingType.PHD)
+    titres = titres_acces.recuperer_titres_access(proposition.matricule_candidat, TrainingType.FORMATION_PHD)
     return calendrier_inscription.determiner_annee_academique_et_pot(
         formation_id=proposition.formation_id,
         matricule_candidat=proposition.matricule_candidat,
         titres_acces=titres,
-        type_formation=TrainingType.PHD,
+        type_formation=TrainingType.FORMATION_PHD,
         profil_candidat_translator=profil_candidat_translator,
     )

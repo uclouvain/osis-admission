@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import json
 import uuid
 from unittest.mock import patch
 from uuid import UUID
@@ -36,8 +37,8 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import (
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
@@ -169,6 +170,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
+        htmx_info = json.loads(response.headers['HX-Trigger'])
+        self.assertTrue(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
+
     def test_change_the_checklist_status_to_success(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -226,6 +230,16 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
+        htmx_info = json.loads(response.headers['HX-Trigger'])
+        self.assertFalse(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
+        self.assertEqual(
+            htmx_info.get('formValidation', {}).get('select_access_title_tooltip'),
+            gettext(
+                'Changes for the access title are not available when the state of the Previous experience '
+                'is "Sufficient".'
+            ),
+        )
+
 
 @freezegun.freeze_time('2023-01-01')
 class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
@@ -276,7 +290,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_initialization_of_the_form_with_valid_initial_choices(self):
+    def test_initialization_of_the_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(self.url, **self.default_headers)
@@ -295,6 +309,9 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
         ]
         self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + bachelor_choices)
+        self.assertFalse(form.fields['admission_requirement'].disabled)
+        self.assertFalse(form.fields['admission_requirement_year'].disabled)
+        self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.BACHELOR.name),
@@ -431,7 +448,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         )
 
         self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
+            recuperer_conditions_acces_par_formation(TrainingType.FORMATION_PHD.name),
             [
                 (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
                 (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
@@ -439,6 +456,19 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
                 (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
             ],
         )
+
+        self.general_admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
+        self.general_admission.save(update_fields=['checklist'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['past_experiences_admission_requirement_form']
+
+        self.assertTrue(form.fields['admission_requirement'].disabled)
+        self.assertTrue(form.fields['admission_requirement_year'].disabled)
+        self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='frozen_time')
     def test_post_form_with_with_prerequisite_courses(self, frozen_time):
@@ -1089,20 +1119,43 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         )
         self.url = resolve_url(self.url_name, uuid=self.general_admission.uuid)
 
-    def test_specify_an_experience_as_access_title_is_forbidden_with_fac_user_if_the_admission_is_in_sic_status(self):
+    def test_specify_an_experience_as_access_title_is_sometimes_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        response = self.client.post(self.url, **self.default_headers)
+        # If the admission is in fac status
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save()
+
+        response = self.client.get(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_specify_an_experience_as_access_title_is_forbidden_with_sic_user_if_the_admission_is_in_fac_status(self):
+        # If the past experience checklist tab status is 'Sufficient'
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
+        self.general_admission.save(update_fields=['checklist', 'status'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_specify_an_experience_as_access_title_is_sometimes_forbidden_with_sic_user(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        # If the admission is in fac status
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
         self.general_admission.save()
 
-        self.client.force_login(user=self.sic_manager_user)
+        response = self.client.get(self.url, **self.default_headers)
 
-        response = self.client.post(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # If the past experience checklist tab status is 'Sufficient'
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
+        self.general_admission.save(update_fields=['checklist', 'status'])
+
+        response = self.client.get(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

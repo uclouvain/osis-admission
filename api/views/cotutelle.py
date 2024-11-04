@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -70,6 +70,7 @@ class CotutelleAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mi
         result = message_bus_instance.invoke(
             DefinirCotutelleCommand(
                 uuid_proposition=str(kwargs['uuid']),
+                matricule_auteur=self.get_permission_object().candidate.global_id,
                 **serializer.data,
             )
         )

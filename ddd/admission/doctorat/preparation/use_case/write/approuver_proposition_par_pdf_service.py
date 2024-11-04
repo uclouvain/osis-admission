@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ def approuver_proposition_par_pdf(
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=entity_id)
+    statut_original_proposition = proposition.statut
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
     signataire = groupe_de_supervision.get_signataire(cmd.uuid_membre)
     avis = Avis.construire_avis_pdf(cmd.pdf)
@@ -52,6 +53,6 @@ def approuver_proposition_par_pdf(
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
-    historique.historiser_avis(proposition, signataire, avis)
+    historique.historiser_avis(proposition, signataire, avis, statut_original_proposition, cmd.matricule_auteur)
 
     return proposition.entity_id

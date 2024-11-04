@@ -25,17 +25,22 @@
 # ##############################################################################
 import datetime
 
+import freezegun
 from django.db import IntegrityError
 from django.test import TestCase
 
-from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import admission_directory_path, BaseAdmission
+from admission.models import AdmissionViewer, ContinuingEducationAdmissionProxy
+from admission.models.base import admission_directory_path, BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import EntityType
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.entity_version import MainEntityVersionFactory, EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -171,3 +176,91 @@ class AdmissionInQuarantineTestCase(TestCase):
             admission = BaseAdmission.objects.get(pk=admission.pk)
 
             self.assertTrue(admission.is_in_quarantine)
+
+
+@freezegun.freeze_time('2023-01-01')
+class AdmissionFormattedReferenceTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.academic_years = {
+            academic_year.year: academic_year
+            for academic_year in AcademicYearFactory.produce(
+                base_year=2022,
+                number_past=2,
+                number_future=2,
+            )
+        }
+
+        root = MainEntityVersionFactory(parent=None, entity_type='')
+
+        cls.faculty = EntityVersionFactory(
+            entity_type=EntityType.FACULTY.name,
+            acronym='FFC',
+            parent=root.entity,
+            end_date=datetime.date(2023, 1, 2),
+        )
+
+        cls.school = EntityVersionFactory(
+            entity_type=EntityType.SCHOOL.name,
+            acronym='SFC',
+            parent=root.entity,
+            end_date=datetime.date(2023, 1, 2),
+        )
+
+    def test_get_formatted_reference_depending_on_management_entity(self):
+        created_admission = ContinuingEducationAdmissionFactory(training__management_entity=self.school.entity)
+
+        # With school as management entity
+        admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
+        self.assertEqual(admission.sigle_entite_gestion, 'SFC')
+        self.assertEqual(admission.training_management_faculty, None)
+        self.assertEqual(admission.formatted_reference, f'M-SFC22-{str(admission)}')
+
+        # With faculty as parent entity of the school
+        self.school.parent = self.faculty.entity
+        self.school.save()
+        EntityVersion.objects.filter(uuid=self.school.uuid).update(parent=self.faculty.entity)
+        admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
+        self.assertEqual(admission.sigle_entite_gestion, 'SFC')
+        self.assertEqual(admission.training_management_faculty, 'FFC')
+        self.assertEqual(admission.formatted_reference, f'M-FFC22-{str(admission)}')
+
+    def test_get_formatted_reference_depending_on_academic_year(self):
+        created_admission = ContinuingEducationAdmissionFactory(
+            training__management_entity=self.school.entity,
+            training__academic_year=self.academic_years[2021],
+            submitted_at=datetime.date(2022, 1, 1),
+            determined_academic_year=AcademicYearFactory.create(year=2023),
+        )
+
+        reference = 'M-SFC%(year)s-' + str(created_admission)
+
+        # The admission has been submitted, only use the training academic year
+        admission = BaseAdmission.objects.with_training_management_and_reference().get(uuid=created_admission.uuid)
+
+        self.assertEqual(admission.formatted_reference, reference % {'year': '21'})
+
+        created_admission.determined_academic_year = None
+        created_admission.save()
+
+        admission = BaseAdmission.objects.with_training_management_and_reference().get(uuid=created_admission.uuid)
+
+        self.assertEqual(admission.formatted_reference, reference % {'year': '21'})
+
+        # The admission has not been submitted
+        created_admission.submitted_at = None
+        created_admission.determined_academic_year = self.academic_years[2023]
+        created_admission.save()
+
+        # > use the determined academic year if specified
+        admission = BaseAdmission.objects.with_training_management_and_reference().get(uuid=created_admission.uuid)
+
+        self.assertEqual(admission.formatted_reference, reference % {'year': '23'})
+
+        # > else use training academic year
+        created_admission.determined_academic_year = None
+        created_admission.save()
+
+        admission = BaseAdmission.objects.with_training_management_and_reference().get(uuid=created_admission.uuid)
+
+        self.assertEqual(admission.formatted_reference, reference % {'year': '21'})

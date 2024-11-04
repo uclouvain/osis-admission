@@ -39,7 +39,7 @@
           {% if field.label %}
             <div class="label-container">
               <label for="{{ widget.attrs.id }}" class="control-label">
-                {{ field.label }}
+                {{ field.label|linebreaksbr }}
               </label>
               {% if field.help_text %}
                 <a

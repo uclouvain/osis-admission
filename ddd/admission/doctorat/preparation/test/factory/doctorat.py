@@ -33,7 +33,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import D
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory, CampusFactory
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
 
@@ -70,7 +70,7 @@ class _DoctoratFactory(factory.Factory):
     intitule_secteur = factory.Faker('sentence')
     sigle = factory.Faker('word')
     code_secteur = factory.Faker('word')
-    type = TrainingType.PHD
+    type = TrainingType.FORMATION_PHD
 
 
 class _DoctoratDTOFactory(factory.Factory):
@@ -80,9 +80,13 @@ class _DoctoratDTOFactory(factory.Factory):
 
     code = factory.Sequence(lambda n: 'CODE%02d' % n)
     intitule = factory.Faker('sentence')
-    campus = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
-    campus_inscription = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
-    type = TrainingType.PHD.name
+    intitule_fr = factory.Faker('sentence')
+    intitule_en = factory.Faker('sentence')
+    campus = CampusFactory()
+    campus_inscription = CampusFactory()
+    date_debut = factory.Faker('date')
+    type = TrainingType.FORMATION_PHD.name
+    credits = 180
 
 
 class DoctoratCDEFactory(_DoctoratFactory):

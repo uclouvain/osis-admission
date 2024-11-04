@@ -40,6 +40,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.civil_state import CivilState
@@ -817,7 +818,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 personne=cls.matricule_candidat,
                 date_debut=datetime.date(2019, 5, 1),
                 date_fin=datetime.date(2019, 8, 31),
-                uuid='1cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
+                uuid='0cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
                 employeur='UCL',
                 type=ActivityType.WORK.name,
                 certificat=['uuid-certificate'],
@@ -829,7 +830,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 personne=cls.matricule_candidat,
                 date_debut=datetime.date(2018, 7, 1),
                 date_fin=datetime.date(2019, 4, 30),
-                uuid='1cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
+                uuid='0cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                 employeur='',
                 type=ActivityType.OTHER.name,
                 certificat=[],
@@ -1241,3 +1242,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
         except StopIteration:
             raise ExperienceNonTrouveeException
+
+    @classmethod
+    def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
+        return None

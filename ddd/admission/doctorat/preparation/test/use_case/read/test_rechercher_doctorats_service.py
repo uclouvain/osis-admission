@@ -55,3 +55,13 @@ class TestRechercherDoctoratService(SimpleTestCase):
         # Un campus
         results = self.message_bus.invoke(RechercherDoctoratQuery(sigle_secteur_entite_gestion='SSS', campus='Mons'))
         self.assertEqual(len(results), 1)
+
+    @freezegun.freeze_time("2020-11-1")
+    def test_should_rechercher_par_sigle_secteur_entite_gestion_et_par_terme_recherche(self):
+        results = self.message_bus.invoke(
+            RechercherDoctoratQuery(
+                sigle_secteur_entite_gestion='SST',
+                terme_de_recherche='Doctorat en sciences',
+            )
+        )
+        self.assertEqual(len(results), 1)

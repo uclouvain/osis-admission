@@ -25,13 +25,14 @@
 # ##############################################################################
 import json
 import logging
+import traceback
 from datetime import datetime
 from typing import List
 
 from django.conf import settings
 from django.db import transaction
 
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjection, EPCInjectionStatus
+from admission.models.epc_injection import EPCInjectionType, EPCInjection, EPCInjectionStatus
 from backoffice.celery import app as celery_app
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
@@ -59,24 +60,26 @@ def run(admissions_references: List[str] = None):  # pragma: no cover
     for epc_injection_signaletique in epc_injections_signaletique_to_send:
         with transaction.atomic():
             try:
+                e = ""
                 logger.info(
                     f"{PREFIX_TASK} Injection vers EPC de la signaletique dans la queue. "
                     f"{json.dumps(epc_injection_signaletique.payload, indent=4)}"
                 )
                 InjectionEPCSignaletique().envoyer_signaletique_dans_queue(
                     donnees=epc_injection_signaletique.payload,
-                    admission_reference=str(epc_injection_signaletique.admission)
+                    admission_reference=str(epc_injection_signaletique.admission),
                 )
                 epc_injection_signaletique.status = EPCInjectionStatus.PENDING.name
             except Exception as e:
-                logger.info(
+                logger.exception(
                     f"{PREFIX_TASK} Une erreur est survenue lors de l'injection "
                     f"vers EPC de la signaletique de la demande avec reference "
                     f"{str(epc_injection_signaletique.admission)}"
-                    f"(Cause: {repr(e)})"
                 )
                 epc_injection_signaletique.status = EPCInjectionStatus.OSIS_ERROR.name
             finally:
                 epc_injection_signaletique.last_attempt_date = datetime.now()
+                epc_injection_signaletique.osis_error_message = str(e)
+                epc_injection_signaletique.osis_stacktrace = traceback.format_exc() if e else ""
                 epc_injection_signaletique.save()
     logger.info(f"{PREFIX_TASK} Fin des injections vers EPC de la signaletique dans la queue ")

@@ -52,6 +52,13 @@
   {% if request.htmx %}
     {# Update the checklist menu item status #}
     {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='parcours_anterieur' %}
+    {% if view.is_doctorate %}
+    {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% else %}
     {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% endif %}
+
+    {# Update the access condition form #}
+    {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' with with_swap_oob=True %}
   {% endif %}
 {% endwith %}

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import migrations, models
 from django.db.models import Value, QuerySet
 
-from admission.contrib.models.checklist import FREE_ADDITIONAL_APPROVAL_CONDITION_FIELD_BY_LANGUAGE
+from admission.models.checklist import FREE_ADDITIONAL_APPROVAL_CONDITION_FIELD_BY_LANGUAGE
 
 
 def initialize_translated_conditions(apps, schema_editor):

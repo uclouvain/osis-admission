@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.translation import ngettext
 
-from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import (
     TypeItemFormulaire,
@@ -52,7 +52,7 @@ from base.models.education_group_type import EducationGroupType
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
-from osis_document.enums import ChoiceEnum
+from base.models.utils.utils import ChoiceEnum
 
 
 class SpecificQuestionToInit(ChoiceEnum):
@@ -228,7 +228,7 @@ class Command(BaseCommand):
             },
         )
 
-        # > All masters, specialized masters, PHD, CAPAES and certificates
+        # > All masters, specialized masters, FORMATION_PHD, CAPAES and certificates
         for education_type in (
             AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[TypeFormation.MASTER.name]
             + AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[TypeFormation.DOCTORAT.name]

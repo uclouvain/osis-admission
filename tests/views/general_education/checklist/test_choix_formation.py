@@ -32,7 +32,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils.translation import gettext
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -122,6 +122,7 @@ class ChoixFormationFormViewTestCase(TestCase):
             'annee_academique': cls.training.academic_year.year,
             'formation': cls.training.acronym,
             'poursuite_cycle': 'YES',
+            'est_inscription_tardive': 'on',
         }
 
         cls.default_headers = {'HTTP_HX-Request': 'true'}
@@ -149,6 +150,7 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(self.general_admission.cycle_pursuit, 'YES')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertTrue(self.general_admission.late_enrollment)
 
     def test_get_without_htmx(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -213,6 +215,7 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(master_general_admission.cycle_pursuit, PoursuiteDeCycle.TO_BE_DETERMINED.name)
         self.assertEqual(master_general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(master_general_admission.modified_at, datetime.datetime.today())
+        self.assertFalse(master_general_admission.late_enrollment)
 
         master_general_admission.cycle_pursuit = PoursuiteDeCycle.YES.name
         master_general_admission.save()

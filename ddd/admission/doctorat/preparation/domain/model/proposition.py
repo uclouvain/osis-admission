@@ -25,9 +25,11 @@
 # ##############################################################################
 import datetime
 import uuid
+from decimal import Decimal
 from typing import Dict, List, Optional, Union
 
 import attr
+from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
@@ -55,15 +57,60 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    BesoinDeDerogation,
+    OngletsChecklist,
+    DecisionCDDEnum,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+    DerogationFinancement,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DispenseOuDroitsMajores
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DroitsInscriptionMontant
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import MobiliteNombreDeMois
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    StatutsChecklistDoctorale,
+    StatutChecklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    CurriculumNonCompletePourAcceptationException,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     ModifierTypeAdmissionValidatorList,
-    ProjetDoctoralValidatorList,
+    PropositionProjetDoctoralValidatorList,
+    ModifierStatutChecklistParcoursAnterieurValidatorList,
+    SpecifierConditionAccesParcoursAnterieurValidatorList,
+    ApprouverParSicAValiderValidatorList,
+    SpecifierInformationsApprobationInscriptionValidatorList,
+    ApprouverInscriptionParSicValidatorList,
+    ApprouverAdmissionParSicValidatorList,
+    SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
+    ApprouverParCDDValidatorList,
+    RefuserParCDDValidatorList,
+    GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
+    SpecifierNouvellesInformationsDecisionCDDValidatorList,
+    RedonnerLaMainAuCandidatValidatorList,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    EtatEquivalenceTitreAcces,
+)
 from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
+from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -75,7 +122,17 @@ from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.utils import initialiser_checklist_experience
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.domain.model.enums.situation import (
+    SituationFinancabilite,
+    SITUATION_FINANCABILITE_PAR_ETAT,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
 
@@ -110,6 +167,7 @@ class Proposition(interface.RootEntity):
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
+    soumise_le: Optional[datetime.datetime] = None
 
     profil_soumis_candidat: ProfilCandidat = None
 
@@ -117,8 +175,64 @@ class Proposition(interface.RootEntity):
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     curriculum: List[str] = attr.Factory(list)
+
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
     documents_demandes: Dict = attr.Factory(dict)
+
+    # Checklist
+    checklist_initiale: Optional[StatutsChecklistDoctorale] = None
+    checklist_actuelle: Optional[StatutsChecklistDoctorale] = None
+
+    # Financabilite
+    financabilite_regle_calcule: Optional[EtatFinancabilite] = None
+    financabilite_regle_calcule_situation: Optional[SituationFinancabilite] = None
+    financabilite_regle_calcule_le: Optional[datetime.datetime] = None
+    financabilite_regle: Optional[SituationFinancabilite] = None
+    financabilite_etabli_par: str = ''
+    financabilite_etabli_le: Optional[datetime.datetime] = None
+
+    financabilite_derogation_statut: Optional[DerogationFinancement] = None
+    financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
+    financabilite_derogation_premiere_notification_par: str = ''
+    financabilite_derogation_derniere_notification_le: Optional[datetime.datetime] = None
+    financabilite_derogation_derniere_notification_par: str = ''
+
+    # Décision facultaire & sic
+    certificat_approbation_cdd: List[str] = attr.Factory(list)
+    certificat_approbation_sic: List[str] = attr.Factory(list)
+    certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
+
+    motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
+    autres_motifs_refus: List[str] = attr.Factory(list)
+
+    complements_formation: Optional[List[ComplementFormationIdentity]] = attr.Factory(list)
+    avec_complements_formation: Optional[bool] = None
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel_annuel: str = ''
+    email_personne_contact_programme_annuel_annuel: str = ''
+    commentaire_programme_conjoint: str = ''
+    besoin_de_derogation: Optional['BesoinDeDerogation'] = None
+
+    droits_inscription_montant: Optional['DroitsInscriptionMontant'] = None
+    droits_inscription_montant_autre: Optional[Decimal] = None
+    dispense_ou_droits_majores: Optional['DispenseOuDroitsMajores'] = None
+    est_mobilite: Optional[bool] = None
+    nombre_de_mois_de_mobilite: Optional['MobiliteNombreDeMois'] = None
+    doit_se_presenter_en_sic: Optional[bool] = None
+    communication_au_candidat: str = ''
+    doit_fournir_visa_etudes: Optional[bool] = None
+    visa_etudes_d: List[str] = attr.Factory(list)
+    certificat_autorisation_signe: List[str] = attr.Factory(list)
+
+    condition_acces: Optional[ConditionAcces] = None
+    millesime_condition_acces: Optional[int] = None
+
+    type_equivalence_titre_acces: Optional[TypeEquivalenceTitreAcces] = None
+    statut_equivalence_titre_acces: Optional[StatutEquivalenceTitreAcces] = None
+    information_a_propos_de_la_restriction: str = ''
+    etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
+    date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
     @property
     def sigle_formation(self):
@@ -458,7 +572,7 @@ class Proposition(interface.RootEntity):
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
-        ProjetDoctoralValidatorList(
+        PropositionProjetDoctoralValidatorList(
             self.type_admission,
             self.projet,
             self.financement,
@@ -478,12 +592,20 @@ class Proposition(interface.RootEntity):
         self.formation_id = formation_id
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionDoctorale.ANNULEE
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def valider_inscription(self):
         self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE
+
+    def redonner_la_main_au_candidat(self):
+        RedonnerLaMainAuCandidatValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
 
     def definir_institut_these(self, institut_these: Optional[str]):
         if institut_these:
@@ -555,3 +677,444 @@ class Proposition(interface.RootEntity):
             ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC,
         }.get(self.statut)
         self.auteur_derniere_modification = self.matricule_candidat
+
+    def specifier_statut_checklist_parcours_anterieur(
+        self,
+        statut_checklist_cible: str,
+        titres_acces_selectionnes: List[TitreAccesSelectionnable],
+        auteur_modification: str,
+    ):
+        ModifierStatutChecklistParcoursAnterieurValidatorList(
+            statut=ChoixStatutChecklist[statut_checklist_cible],
+            titres_acces_selectionnes=titres_acces_selectionnes,
+            condition_acces=self.condition_acces,
+            millesime_condition_acces=self.millesime_condition_acces,
+        ).validate()
+
+        self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
+        self.auteur_derniere_modification = auteur_modification
+
+    def specifier_statut_checklist_experience_parcours_anterieur(
+        self,
+        statut_checklist_cible: str,
+        statut_checklist_authentification: Optional[bool],
+        uuid_experience: str,
+        auteur_modification: str,
+    ):
+        try:
+            experience = self.checklist_actuelle.recuperer_enfant(
+                OngletsChecklist.parcours_anterieur.name,
+                uuid_experience,
+            )
+        except StopIteration:
+            # Si l'expérience n'existe pas dans la checklist, on l'initialise
+            experience = initialiser_checklist_experience(experience_uuid=uuid_experience)
+            self.checklist_actuelle.parcours_anterieur.enfants.append(experience)
+
+        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
+
+        if statut_checklist_authentification is None:
+            experience.extra.pop('authentification', None)
+        else:
+            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
+
+        self.auteur_derniere_modification = auteur_modification
+
+    def specifier_authentification_experience_parcours_anterieur(
+        self,
+        uuid_experience: str,
+        auteur_modification: str,
+        etat_authentification: str,
+    ):
+        try:
+            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
+        except StopIteration:
+            raise ExperienceNonTrouveeException
+
+        experience.extra['etat_authentification'] = etat_authentification
+        self.auteur_derniere_modification = auteur_modification
+
+    def specifier_condition_acces(
+        self,
+        auteur_modification: str,
+        condition_acces: str,
+        millesime_condition_acces: Optional[int],
+        avec_complements_formation: Optional[bool],
+        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
+    ):
+        nouveau_millesime_condition_acces = millesime_condition_acces
+        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
+
+        # Si la condition d'accès a changé
+        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
+            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
+            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
+                proposition_identity=self.entity_id,
+                experience_parcours_interne_translator=experience_parcours_interne_translator,
+                seulement_selectionnes=True,
+            )
+
+            if len(titres_selectionnes) == 1:
+                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
+
+            # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
+            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
+                avec_complements_formation = True
+
+        SpecifierConditionAccesParcoursAnterieurValidatorList(
+            avec_complements_formation=avec_complements_formation,
+            complements_formation=self.complements_formation,
+            commentaire_complements_formation=self.commentaire_complements_formation,
+        ).validate()
+
+        self.auteur_derniere_modification = auteur_modification
+        self.condition_acces = nouvelle_condition_acces
+        self.millesime_condition_acces = nouveau_millesime_condition_acces
+        self.avec_complements_formation = avec_complements_formation
+
+        if not avec_complements_formation:
+            self.complements_formation = []
+            self.commentaire_complements_formation = ''
+
+    def specifier_equivalence_titre_acces(
+        self,
+        auteur_modification: str,
+        type_equivalence_titre_acces: str,
+        statut_equivalence_titre_acces: str,
+        information_a_propos_de_la_restriction: str,
+        etat_equivalence_titre_acces: str,
+        date_prise_effet_equivalence_titre_acces: Optional[datetime.date],
+    ):
+        self.auteur_derniere_modification = auteur_modification
+        self.type_equivalence_titre_acces = getattr(TypeEquivalenceTitreAcces, type_equivalence_titre_acces, None)
+        self.statut_equivalence_titre_acces = getattr(StatutEquivalenceTitreAcces, statut_equivalence_titre_acces, None)
+        self.information_a_propos_de_la_restriction = information_a_propos_de_la_restriction
+        self.etat_equivalence_titre_acces = getattr(EtatEquivalenceTitreAcces, etat_equivalence_titre_acces, None)
+        self.date_prise_effet_equivalence_titre_acces = date_prise_effet_equivalence_titre_acces
+
+    def specifier_financabilite_resultat_calcul(
+        self,
+        financabilite_regle_calcule: EtatFinancabilite,
+        financabilite_regle_calcule_situation: str,
+        auteur_modification: Optional[str] = '',
+    ):
+        self.financabilite_regle_calcule = financabilite_regle_calcule
+        self.financabilite_regle_calcule_situation = (
+            SituationFinancabilite[financabilite_regle_calcule_situation]
+            if financabilite_regle_calcule_situation
+            else None
+        )
+        self.financabilite_regle_calcule_le = datetime.datetime.now()
+        if auteur_modification:
+            self.auteur_derniere_modification = auteur_modification
+
+    def specifier_financabilite_regle(
+        self,
+        financabilite_regle: SituationFinancabilite,
+        auteur_modification: str,
+    ):
+        self.financabilite_regle = financabilite_regle
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = datetime.datetime.now()
+        self.auteur_derniere_modification = auteur_modification
+
+        if financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]:
+            self.checklist_actuelle.financabilite = StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_REUSSITE,
+                libelle=__('Approval'),
+                extra={'reussite': 'financable'},
+            )
+        elif financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.NON_FINANCABLE]:
+            self.checklist_actuelle.financabilite = StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_BLOCAGE,
+                libelle=__('Not financeable'),
+                extra={'to_be_completed': '0'},
+            )
+
+    def specifier_financabilite_non_concernee(
+        self,
+        auteur_modification: str,
+    ):
+        self.financabilite_regle = None
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = datetime.datetime.now()
+        self.auteur_derniere_modification = auteur_modification
+        self.checklist_actuelle.financabilite = StatutChecklist(
+            statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            libelle='',
+        )
+
+    def specifier_derogation_financabilite(
+        self,
+        statut: DerogationFinancement,
+        refus_uuids_motifs: Optional[List[str]],
+        refus_autres_motifs: Optional[List[str]],
+        auteur_modification: str,
+    ):
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = datetime.datetime.now()
+        self.auteur_derniere_modification = auteur_modification
+        self.financabilite_derogation_statut = statut
+        if statut == DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE:
+            self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in refus_uuids_motifs]
+            self.autres_motifs_refus = refus_autres_motifs
+
+    def notifier_candidat_derogation_financabilite(self, gestionnaire: str):
+        self.financabilite_derogation_statut = DerogationFinancement.CANDIDAT_NOTIFIE
+        if not self.financabilite_derogation_premiere_notification_le:
+            self.financabilite_derogation_premiere_notification_le = datetime.datetime.now()
+            self.financabilite_derogation_premiere_notification_par = gestionnaire
+        else:
+            self.financabilite_derogation_derniere_notification_le = datetime.datetime.now()
+            self.financabilite_derogation_derniere_notification_par = gestionnaire
+
+    def specifier_besoin_de_derogation(self, besoin_de_derogation: BesoinDeDerogation, auteur_modification: str):
+        self.besoin_de_derogation = besoin_de_derogation
+        self.auteur_derniere_modification = auteur_modification
+
+    def _specifier_informations_de_base_acceptation_par_sic(
+        self,
+        auteur_modification: str,
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+    ):
+        """Spécifier les informations d'acceptation par SIC communes entre les admissions et les inscriptions."""
+        self.auteur_derniere_modification = auteur_modification
+
+        self.avec_complements_formation = avec_complements_formation
+        self.complements_formation = (
+            [ComplementFormationIdentity(uuid=uuid_complement) for uuid_complement in uuids_complements_formation]
+            if uuids_complements_formation
+            else []
+        )
+        self.commentaire_complements_formation = commentaire_complements_formation
+
+        self.nombre_annees_prevoir_programme = nombre_annees_prevoir_programme
+
+        self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
+        self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
+
+    def specifier_informations_acceptation_par_sic(
+        self,
+        auteur_modification: str,
+        documents_dto: List[EmplacementDocumentDTO],
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+        droits_inscription_montant: str,
+        droits_inscription_montant_autre: Optional[float],
+        dispense_ou_droits_majores: str,
+        est_mobilite: Optional[bool],
+        nombre_de_mois_de_mobilite: str,
+        doit_se_presenter_en_sic: Optional[bool],
+        communication_au_candidat: str,
+        doit_fournir_visa_etudes: Optional[bool],
+    ):
+        ApprouverParSicAValiderValidatorList(
+            statut=self.statut,
+            statut_checklist_parcours_anterieur=self.checklist_actuelle.parcours_anterieur,
+            documents_dto=documents_dto,
+            type_demande=self.type_demande,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Approval'),
+            extra={'en_cours': "approval"},
+        )
+
+        self._specifier_informations_de_base_acceptation_par_sic(
+            auteur_modification=auteur_modification,
+            avec_complements_formation=avec_complements_formation,
+            uuids_complements_formation=uuids_complements_formation,
+            commentaire_complements_formation=commentaire_complements_formation,
+            nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
+            nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
+            email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+        )
+
+        self.droits_inscription_montant = (
+            DroitsInscriptionMontant[droits_inscription_montant] if droits_inscription_montant else None
+        )
+        self.droits_inscription_montant_autre = droits_inscription_montant_autre
+        self.dispense_ou_droits_majores = (
+            DispenseOuDroitsMajores[dispense_ou_droits_majores] if dispense_ou_droits_majores else None
+        )
+        self.est_mobilite = est_mobilite
+        self.nombre_de_mois_de_mobilite = (
+            MobiliteNombreDeMois[nombre_de_mois_de_mobilite] if nombre_de_mois_de_mobilite else None
+        )
+        self.doit_se_presenter_en_sic = doit_se_presenter_en_sic
+        self.communication_au_candidat = communication_au_candidat
+        self.doit_fournir_visa_etudes = doit_fournir_visa_etudes
+
+    def specifier_informations_acceptation_inscription_par_sic(
+        self,
+        auteur_modification: str,
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+    ):
+        SpecifierInformationsApprobationInscriptionValidatorList(
+            statut=self.statut,
+        ).validate()
+
+        self._specifier_informations_de_base_acceptation_par_sic(
+            auteur_modification=auteur_modification,
+            avec_complements_formation=avec_complements_formation,
+            uuids_complements_formation=uuids_complements_formation,
+            commentaire_complements_formation=commentaire_complements_formation,
+            nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
+            nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
+            email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+        )
+
+    def approuver_par_sic(
+        self,
+        auteur_modification: str,
+        documents_dto: List[EmplacementDocumentDTO],
+        curriculum_dto: CurriculumAdmissionDTO,
+        academic_year_repository: IAcademicYearRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
+    ):
+        if self.type_demande == TypeDemande.INSCRIPTION:
+            ApprouverInscriptionParSicValidatorList(
+                statut=self.statut,
+                checklist=self.checklist_actuelle,
+                besoin_de_derogation=self.besoin_de_derogation,
+                documents_dto=documents_dto,
+            ).validate()
+
+        else:
+            ApprouverAdmissionParSicValidatorList(
+                statut=self.statut,
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
+                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+                checklist=self.checklist_actuelle,
+                documents_dto=documents_dto,
+            ).validate()
+
+        try:
+            ProfilCandidatService.verifier_curriculum_formation_doctorale_apres_soumission(
+                proposition=self,
+                curriculum_dto=curriculum_dto,
+                academic_year_repository=academic_year_repository,
+                profil_candidat_translator=profil_candidat_translator,
+                experience_parcours_interne_translator=experience_parcours_interne_translator,
+            )
+        except MultipleBusinessExceptions:
+            raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])
+
+        ProfilCandidatService.verifier_quarantaine(
+            proposition=self,
+            profil_candidat_translator=profil_candidat_translator,
+        )
+
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            libelle=__('Approval'),
+        )
+        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE
+        self.auteur_derniere_modification = auteur_modification
+
+    def soumettre_au_cdd_lors_de_la_decision_cdd(self, auteur_modification: str):
+        SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.auteur_derniere_modification = auteur_modification
+        self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
+
+    def specifier_acceptation_par_cdd(self):
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            libelle=__('Approval'),
+        )
+
+    def specifier_refus_par_cdd(self):
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Refusal'),
+            extra={
+                'decision': DecisionCDDEnum.EN_DECISION.name,
+            },
+        )
+
+    def approuver_par_cdd(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
+        ApprouverParCDDValidatorList(
+            statut=self.statut,
+            nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            titres_selectionnes=titres_selectionnes,
+        ).validate()
+
+        self.specifier_acceptation_par_cdd()
+        self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
+        self.auteur_derniere_modification = auteur_modification
+
+    def refuser_par_cdd(self, auteur_modification: str):
+        RefuserParCDDValidatorList(
+            statut=self.statut,
+        ).validate()
+
+        self.specifier_refus_par_cdd()
+        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
+        self.auteur_derniere_modification = auteur_modification
+
+    def soumettre_au_sic_lors_de_la_decision_cdd(self, auteur_modification: str):
+        GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList(statut=self.statut).validate()
+        self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
+        self.auteur_derniere_modification = auteur_modification
+
+    def specifier_informations_acceptation_par_cdd(
+        self,
+        auteur_modification: str,
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+        commentaire_programme_conjoint: str,
+    ):
+        SpecifierNouvellesInformationsDecisionCDDValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.auteur_derniere_modification = auteur_modification
+
+        self.avec_complements_formation = avec_complements_formation
+        self.complements_formation = (
+            [ComplementFormationIdentity(uuid=uuid_complement) for uuid_complement in uuids_complements_formation]
+            if uuids_complements_formation
+            else []
+        )
+        self.commentaire_complements_formation = commentaire_complements_formation
+
+        self.nombre_annees_prevoir_programme = nombre_annees_prevoir_programme
+
+        self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
+        self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
+
+        self.commentaire_programme_conjoint = commentaire_programme_conjoint
+
+    def modifier_checklist_choix_formation(
+        self,
+        auteur_modification: str,
+        type_demande: 'TypeDemande',
+        formation_id: FormationIdentity,
+    ):
+        self.auteur_derniere_modification = auteur_modification
+        self.type_demande = type_demande
+        self.formation_id = formation_id
+        self.annee_calculee = formation_id.annee

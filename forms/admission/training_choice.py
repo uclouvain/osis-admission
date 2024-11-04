@@ -32,7 +32,7 @@ from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models import Scholarship
+from admission.models import Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     COMMISSIONS_CDE_CLSM,
     COMMISSIONS_CDSS,
@@ -354,12 +354,6 @@ class ContinuingTrainingChoiceForm(BaseTrainingChoiceForm):
 
 
 class DoctorateTrainingChoiceForm(BaseTrainingChoiceForm):
-    campus = forms.ChoiceField(
-        label=_('Campus (optional)'),
-        required=False,
-        disabled=True,
-    )
-
     admission_type = forms.ChoiceField(
         choices=ChoixTypeAdmission.choices(),
         initial=ChoixTypeAdmission.ADMISSION.name,
@@ -426,7 +420,7 @@ class DoctorateTrainingChoiceForm(BaseTrainingChoiceForm):
         ]
 
         kwargs['initial'] = {
-            'campus': 'CAMPUS',
+            'campus': proposition.formation.campus.uuid if proposition.formation.campus else '',
             'training_type': self.training_type,
             'doctorate_training': proposition.doctorat.sigle,
             'specific_question_answers': proposition.reponses_questions_specifiques,
@@ -442,12 +436,13 @@ class DoctorateTrainingChoiceForm(BaseTrainingChoiceForm):
 
         super().__init__(*args, **kwargs)
 
+        self.fields['campus'].disabled = True
+
         # Initialise the choice fields
         self.fields['doctorate_training'].choices = [
             [self.initial['doctorate_training'], mark_safe(format_training(proposition.formation))]
         ]
         self.fields['sector'].choices = [[self.initial['sector'], proposition.intitule_secteur_formation]]
-        self.fields['campus'].choices = [[self.initial['campus'], proposition.formation.campus]]
 
     def clean(self):
         cleaned_data = super().clean()

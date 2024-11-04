@@ -29,14 +29,19 @@ from django import forms
 from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy, get_language
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.contrib.models import Scholarship
-from admission.contrib.models.working_list import WorkingList
+from admission.models import Scholarship
+from admission.models.working_list import WorkingList, ContinuingWorkingList
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
+)
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+)
 from admission.forms import (
     ALL_EMPTY_CHOICE,
     get_academic_year_choices,
@@ -321,7 +326,7 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
     )
 
     filtres_etats_checklist = ChecklistStateFilterField(
-        configurations=ORGANISATION_ONGLETS_CHECKLIST,
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
         label=_('Checklist filters'),
         required=False,
     )
@@ -412,6 +417,34 @@ class ContinuingAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypes
 
     marque_d_interet = forms.BooleanField(
         label=_('Interested mark'),
+        required=False,
+    )
+
+    liste_travail = WorkingListField(
+        label=_('Working list'),
+        queryset=ContinuingWorkingList.objects.all(),
+        required=False,
+        empty_label=_('Personalized'),
+        widget=autocomplete.ListSelect2(
+            url="admission:autocomplete:continuing-working-lists",
+            attrs={
+                'data-placeholder': _('Personalized'),
+                'data-allow-clear': 'true',
+            },
+        ),
+    )
+
+    mode_filtres_etats_checklist = forms.ChoiceField(
+        choices=ModeFiltrageChecklist.choices(),
+        label=_('Include or exclude the checklist filters'),
+        required=False,
+        initial=ModeFiltrageChecklist.INCLUSION.name,
+        widget=forms.RadioSelect(),
+    )
+
+    filtres_etats_checklist = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+        label=_('Checklist filters'),
         required=False,
     )
 

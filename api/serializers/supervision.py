@@ -26,7 +26,7 @@
 
 from rest_framework import serializers
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.commands import (
     DesignerPromoteurReferenceCommand,
     IdentifierMembreCACommand,
@@ -42,6 +42,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer
+from . import DoctoratDTOSerializer
 from .mixins import IncludedFieldsMixin
 
 __all__ = [
@@ -76,6 +77,7 @@ class ExternalDoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePr
     reponses_questions_specifiques = None
     elements_confirmation = None
     documents_demandes = None
+    doctorat = DoctoratDTOSerializer()
 
     class Meta:
         source = PropositionDTO
@@ -120,6 +122,8 @@ class IdentifierPromoteurCommandSerializer(DTOSerializer):
 
 
 class IdentifierMembreCACommandSerializer(DTOSerializer):
+    matricule_auteur = None
+
     class Meta:
         source = IdentifierMembreCACommand
         extra_kwargs = {
@@ -139,6 +143,8 @@ class IdentifierSupervisionActorSerializer(IdentifierMembreCACommandSerializer):
 
 
 class DesignerPromoteurReferenceCommandSerializer(DTOSerializer):
+    matricule_auteur = None
+
     class Meta:
         source = DesignerPromoteurReferenceCommand
 
@@ -154,6 +160,8 @@ class SupprimerMembreCACommandSerializer(DTOSerializer):
 
 
 class ModifierMembreSupervisionExterneSerializer(DTOSerializer):
+    matricule_auteur = None
+
     class Meta:
         source = ModifierMembreSupervisionExterneCommand
 

@@ -35,7 +35,7 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import Accounting
+from admission.models import Accounting
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
@@ -428,6 +428,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         self.assertEqual(response.json(), expected_response_data)
 
 
+@freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class GeneralAccountingAPIViewTestCase(APITestCase):
     @classmethod
@@ -701,7 +702,6 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         response = self.client.get(self.admission_url)
         self.assertFalse(response.json().get('a_nationalite_ue'))
 
-    @freezegun.freeze_time('2023-01-01')
     def test_put_accounting_values_with_student(self):
         self.client.force_authenticate(user=self.student.user)
 

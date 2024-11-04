@@ -26,7 +26,7 @@
 
 from abc import abstractmethod
 from email.message import EmailMessage
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
@@ -35,7 +35,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.repository.i_digit import IDigitRepository
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 from osis_common.ddd import interface
 
 
@@ -72,6 +77,9 @@ class INotification(interface.DomainService):
         proposition: Proposition,
         objet_message: str,
         corps_message: str,
+        matricule_emetteur: Optional[str] = None,
+        cc_promoteurs: bool = False,
+        cc_membres_ca: bool = False,
     ) -> EmailMessage:
         raise NotImplementedError
 
@@ -83,4 +91,61 @@ class INotification(interface.DomainService):
         liste_documents_reclames: List[EmplacementDocument],
         liste_documents_dto: List[EmplacementDocumentDTO],
     ):
+        raise NotImplementedError
+
+    @classmethod
+    def modifier_authentification_experience_parcours(
+        cls,
+        proposition: Proposition,
+        etat_authentification: str,
+    ) -> Optional[EmailMessage]:
+        methode_notification = {
+            EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: cls.demande_verification_titre_acces,
+            EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: (
+                cls.informer_candidat_verification_parcours_en_cours
+            ),
+        }.get(etat_authentification)
+
+        if methode_notification:
+            return methode_notification(proposition)
+
+    @classmethod
+    @abstractmethod
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def refuser_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def accepter_proposition_par_sic(
+        cls,
+        proposition_uuid: str,
+        objet_message: str,
+        corps_message: str,
+        digit_repository: 'IDigitRepository',
+    ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def notifier_candidat_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
         raise NotImplementedError

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ from ckeditor.fields import RichTextFormField
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import CddMailTemplate, DoctorateAdmission
+from admission.models import CddMailTemplate, DoctorateAdmission
 from admission.utils import get_mail_templates_from_admission
 from base.forms.utils import EMPTY_CHOICE
 
@@ -67,13 +67,16 @@ class CddDoctorateSendMailForm(forms.Form):
         config_name='osis_mail_template',
     )
 
-    def __init__(self, admission: 'DoctorateAdmission', *args, **kwargs):
+    def __init__(self, admission: 'DoctorateAdmission', view_url='', *args, **kwargs):
         self.admission = admission
         super().__init__(*args, **kwargs)
         self.fields['recipient'].initial = '{candidate.first_name} {candidate.last_name} ({candidate.email})'.format(
             candidate=self.admission.candidate,
         )
         self.fields['template'].choices = self.get_mail_template_choices()
+
+        if view_url:
+            self.fields['template'].widget.attrs['hx-get'] = view_url
 
     def get_mail_template_choices(self):
         from osis_mail_template import templates

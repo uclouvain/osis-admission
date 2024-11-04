@@ -34,8 +34,8 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.contrib.models import Accounting, DoctorateAdmission
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models import Accounting, DoctorateAdmission
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import (
@@ -178,6 +178,8 @@ class DoctorateAccountingFormViewTestCase(TestCase):
 
         self.client.force_login(self.program_manager_user)
         response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.post(self.form_url, data={})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_accounting_form_initialization(self):

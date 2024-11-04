@@ -48,14 +48,15 @@ class ListerDemandesInMemoryService(IListerDemandesService):
         type_financement: Optional[str] = '',
         bourse_recherche: Optional[str] = '',
         cotutelle: Optional[bool] = None,
-        date_soumission_debut: Optional[datetime.datetime] = None,
-        date_soumission_fin: Optional[datetime.datetime] = None,
+        date_soumission_debut: Optional[datetime.date] = None,
+        date_soumission_fin: Optional[datetime.date] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
+        fnrs_fria_fresh: Optional[bool] = None,
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
-        return PaginatedList()
+        return PaginatedList(id_attribute='uuid')

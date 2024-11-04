@@ -33,7 +33,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_302_FOUND, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
-from admission.contrib.models import ConfirmationPaper
+from admission.models import ConfirmationPaper
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
@@ -70,7 +70,7 @@ class DoctorateAdmissionConfirmationFormViewTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
             admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
@@ -80,7 +80,7 @@ class DoctorateAdmissionConfirmationFormViewTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
             admitted=True,
         )
         cls.confirmation_papers = [
@@ -230,7 +230,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
             admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
@@ -240,7 +240,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
             admitted=True,
         )
         cls.file_uuid = uuid.uuid4()

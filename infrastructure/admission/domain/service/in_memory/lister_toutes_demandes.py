@@ -70,7 +70,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         injection_en_erreur: Optional[bool] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
 
-        result = PaginatedList()
+        result = PaginatedList(id_attribute='uuid')
 
         for proposition in PropositionGeneraleInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
             result.append(cls._load_from_general_proposition(proposition))
@@ -80,8 +80,6 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
 
         for proposition in PropositionDoctoraleInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
             result.append(cls._load_from_doctorate_proposition(proposition))
-
-        result.total_count = len(result)
 
         return result
 
@@ -99,6 +97,9 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
             lieu_formation=proposition.formation.campus.nom,
+            est_inscription_tardive=None,
+            est_modification_inscription_externe=None,
+            est_reorientation_inscription_externe=None,
             annee_formation=proposition.formation.annee,
             annee_calculee=proposition.annee_calculee,
             nationalite_candidat='',
@@ -135,7 +136,10 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             code_formation=proposition.doctorat.sigle,
             intitule_formation=proposition.doctorat.intitule,
             type_formation=proposition.doctorat.type,
-            lieu_formation=proposition.doctorat.campus,
+            lieu_formation=proposition.doctorat.campus.nom,
+            est_inscription_tardive=None,
+            est_modification_inscription_externe=None,
+            est_reorientation_inscription_externe=None,
             annee_formation=proposition.doctorat.annee,
             annee_calculee=proposition.annee_calculee,
             nationalite_candidat=proposition.nationalite_candidat,
@@ -167,6 +171,9 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
             lieu_formation=proposition.formation.campus.nom,
+            est_inscription_tardive=None,
+            est_modification_inscription_externe=None,
+            est_reorientation_inscription_externe=None,
             annee_formation=proposition.formation.annee,
             nationalite_candidat=proposition.pays_nationalite_candidat,
             nationalite_ue_candidat=proposition.pays_nationalite_ue_candidat,

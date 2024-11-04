@@ -31,7 +31,12 @@ from admission.ddd.admission.commands import (
     ValiderTicketPersonneCommand,
     SoumettreTicketPersonneCommand,
 )
+from admission.ddd.admission.doctorat.events import AdmissionDoctoraleApprouveeParSicEvent
+from admission.ddd.admission.doctorat.events import InscriptionDoctoraleApprouveeParSicEvent
 from admission.ddd.admission.formation_generale.commands import EnvoyerEmailApprobationInscriptionAuCandidatCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand as EnvoyerEmailApprobationInscriptionDoctoraleAuCandidatCommand,
+)
 from admission.ddd.admission.formation_generale.events import (
     AdmissionApprouveeParSicEvent,
     InscriptionApprouveeParSicEvent,
@@ -41,13 +46,19 @@ from osis_common.ddd.interface import BusinessException
 
 def reagir_a_approuver_proposition(
     msg_bus: Any,
-    event: Union['InscriptionApprouveeParSicEvent', 'AdmissionApprouveeParSicEvent'],
+    event: Union[
+        'InscriptionApprouveeParSicEvent',
+        'AdmissionApprouveeParSicEvent',
+        'InscriptionDoctoraleApprouveeParSicEvent',
+        'AdmissionDoctoraleApprouveeParSicEvent',
+    ],
 ) -> None:
     with contextlib.suppress(BusinessException):
         msg_bus.invoke(RechercherCompteExistantCommand(matricule=event.matricule))
         msg_bus.invoke(ValiderTicketPersonneCommand(global_id=event.matricule))
         msg_bus.invoke(SoumettreTicketPersonneCommand(global_id=event.matricule))
 
+        # The following emails contain the NOMA that can be generated just before
         if isinstance(event, InscriptionApprouveeParSicEvent):
             msg_bus.invoke(
                 EnvoyerEmailApprobationInscriptionAuCandidatCommand(
@@ -57,3 +68,14 @@ def reagir_a_approuver_proposition(
                     auteur=event.auteur,
                 )
             )
+
+    # TODO: to move under the general command when doctorate digit ticket actions will be implemented
+    if isinstance(event, InscriptionDoctoraleApprouveeParSicEvent):
+        msg_bus.invoke(
+            EnvoyerEmailApprobationInscriptionDoctoraleAuCandidatCommand(
+                uuid_proposition=event.entity_id.uuid,
+                objet_message=event.objet_message,
+                corps_message=event.corps_message,
+                auteur=event.auteur,
+            )
+        )

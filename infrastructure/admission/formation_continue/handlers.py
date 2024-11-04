@@ -195,6 +195,10 @@ COMMAND_HANDLERS = {
         historique=Historique(),
         notification=Notification(),
     ),
+    MettreAValiderCommand: lambda msg_bus, cmd: mettre_a_valider(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
     ApprouverParFacCommand: lambda msg_bus, cmd: approuver_par_fac(
         cmd,
         proposition_repository=PropositionRepository(),
@@ -218,6 +222,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=Historique(),
         notification=Notification(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
     CloturerPropositionCommand: lambda msg_bus, cmd: cloturer_proposition(
         cmd,

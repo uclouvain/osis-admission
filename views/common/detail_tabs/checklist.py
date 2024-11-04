@@ -39,10 +39,14 @@ from rest_framework.views import APIView
 
 from admission.ddd.admission.commands import (
     ValiderTicketPersonneCommand,
-    SoumettreTicketPersonneCommand, RechercherCompteExistantCommand,
+    SoumettreTicketPersonneCommand,
+    RechercherCompteExistantCommand,
 )
-from admission.ddd.admission.domain.validator.exceptions import NotInAccountCreationPeriodException, \
-    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException
+from admission.ddd.admission.domain.validator.exceptions import (
+    NotInAccountCreationPeriodException,
+    AdmissionDansUnStatutPasAutoriseASInscrireException,
+    PropositionFusionATraiterException,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
@@ -54,6 +58,8 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_FAC,
     COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_FAC_FOR_IUFC,
+    COMMENT_TAG_CDD_FOR_SIC,
+    COMMENT_TAG_SIC_FOR_CDD,
 )
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 
@@ -79,10 +85,11 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     """Change the status of the admission of a specific tab"""
     update_fields = ['checklist', 'last_update_author', 'modified_at']
 
-    if tab in ['donnees_personnelles', 'decision_sic'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
+    if tab in ['decision_sic'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
         # TODO : add intermediary status to support async process (waiting for digit response)
 
         from infrastructure.messages_bus import message_bus_instance
+
         message_bus_instance.invoke(RechercherCompteExistantCommand(matricule=admission.candidate.global_id))
         message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
         with contextlib.suppress(
@@ -90,9 +97,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
             AdmissionDansUnStatutPasAutoriseASInscrireException,
             PropositionFusionATraiterException,
         ):
-            message_bus_instance.invoke(
-                SoumettreTicketPersonneCommand(global_id=admission.candidate.global_id)
-            )
+            message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=admission.candidate.global_id))
 
     admission.last_update_author = author
     admission.modified_at = datetime.datetime.today()
@@ -163,6 +168,8 @@ class SaveCommentView(AdmissionFormMixin, FormView):
     permission_by_custom_tag = {
         COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
         COMMENT_TAG_SIC: 'admission.checklist_change_sic_comment',
+        COMMENT_TAG_CDD_FOR_SIC: 'admission.checklist_change_fac_comment',
+        COMMENT_TAG_SIC_FOR_CDD: 'admission.checklist_change_sic_comment',
         COMMENT_TAG_IUFC_FOR_FAC: 'admission.continuing_checklist_change_iufc_comment',
         COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
         'authentication': 'admission.checklist_change_past_experiences',

@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import json
+import traceback
 from datetime import datetime
 from typing import Dict
 
@@ -31,11 +32,11 @@ import pika
 from django.conf import settings
 from django.db import transaction
 
-from admission.contrib.models import Accounting, EPCInjection
-from admission.contrib.models.base import (
+from admission.models import Accounting, EPCInjection
+from admission.models.base import (
     BaseAdmission,
 )
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.tasks import injecter_signaletique_a_epc_task
 from base.models.enums.person_address_type import PersonAddressType
@@ -49,12 +50,13 @@ SPORT_TOUT_CAMPUS = [
     ChoixAffiliationSport.MONS_UCL.name,
     ChoixAffiliationSport.TOURNAI_UCL.name,
     ChoixAffiliationSport.SAINT_GILLES_UCL.name,
-    ChoixAffiliationSport.SAINT_LOUIS_UCL.name
+    ChoixAffiliationSport.SAINT_LOUIS_UCL.name,
 ]
 
 
 class InjectionEPCSignaletique:
     def injecter(self, admission: BaseAdmission) -> None:
+        e = ""
         try:
             donnees = self.recuperer_donnees(admission=admission)
             if settings.USE_CELERY:
@@ -62,18 +64,22 @@ class InjectionEPCSignaletique:
                     lambda: injecter_signaletique_a_epc_task.run.delay(admissions_references=[admission.reference])
                 )
             statut = EPCInjectionStatus.NO_SENT.name
-        except Exception:
+        except Exception as exception:
             logger.exception("[INJECTION EPC] Erreur lors de l'injection")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
+            e = exception
+            stacktrace = traceback.format_exc()
 
-        EPCInjection.objects.get_or_create(
+        EPCInjection.objects.update_or_create(
             admission=admission,
             type=EPCInjectionType.SIGNALETIQUE.name,
             defaults={
                 'payload': donnees,
                 'status': statut,
                 'last_attempt_date': None,
+                "osis_error_message": str(e) if e else "",
+                "osis_stacktrace": stacktrace if e else ""
             }
         )
 
@@ -114,7 +120,7 @@ class InjectionEPCSignaletique:
             'pays_domicile': adresse_domicile.country.iso_code,
             'num_carte_identite': candidat.id_card_number,
             'num_passeport': candidat.passport_number,
-            'documents': documents
+            'documents': documents,
         }
 
     @staticmethod
@@ -129,75 +135,79 @@ class InjectionEPCSignaletique:
             'contexte': admission.get_admission_context().upper().replace('-', '_'),
             'carte_sport_lln_woluwe': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.LOUVAIN_WOLUWE.name] + SPORT_TOUT_CAMPUS
-                if comptabilite else False
+                if comptabilite
+                else False
             ),
             'carte_sport_mons': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.MONS.name] + SPORT_TOUT_CAMPUS
-                if comptabilite else False
+                if comptabilite
+                else False
             ),
             'carte_sport_tournai': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.TOURNAI.name] + SPORT_TOUT_CAMPUS
-                if comptabilite else False
+                if comptabilite
+                else False
             ),
-            'carte_sport_st_louis': (
-                comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_LOUIS.name] + SPORT_TOUT_CAMPUS
-                if comptabilite else False
-            ),
+            'carte_sport_st_louis': comptabilite.sport_affiliation in SPORT_TOUT_CAMPUS if comptabilite else False,
             'carte_sport_st_gilles': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_GILLES.name] + SPORT_TOUT_CAMPUS
-                if comptabilite else False
+                if comptabilite
+                else False
             ),
             'carte_solidaire': comptabilite.solidarity_student or False if comptabilite else False,
             'assimilation_resident_belge': (
-                comptabilite.assimilation_situation ==
-                TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE.name
-                if comptabilite else False
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE.name
+                if comptabilite
+                else False
             ),
             'assimilation_refugie': (
-                comptabilite.assimilation_situation ==
-                TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name
-                if comptabilite else False
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name
+                if comptabilite
+                else False
             ),
             'assimilation_revenus': (
-                comptabilite.assimilation_situation ==
-                TypeSituationAssimilation.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT.name
-                if comptabilite else False
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT.name
+                if comptabilite
+                else False
             ),
             'assimilation_cpas': (
                 comptabilite.assimilation_situation == TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name
-                if comptabilite else False
+                if comptabilite
+                else False
             ),
             'assimilation_parents_ue': (
-                comptabilite.assimilation_situation ==
-                TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name
-                if comptabilite else False
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name
+                if comptabilite
+                else False
             ),
             'assimilation_boursier': (
                 comptabilite.assimilation_situation == TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2.name
-                if comptabilite else False
+                if comptabilite
+                else False
             ),
             'assimilation_ue': (
-                comptabilite.assimilation_situation ==
-                TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name
-                if comptabilite else False
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name
+                if comptabilite
+                else False
             ),
             'date_assimilation': (
-                datetime.strptime(date_assimilation, '%Y-%m-%d').strftime('%d/%m/%Y')
-                if date_assimilation else None
-            )
+                datetime.strptime(date_assimilation, '%Y-%m-%d').strftime('%d/%m/%Y') if date_assimilation else None
+            ),
         }
 
     @staticmethod
     def envoyer_signaletique_dans_queue(donnees: Dict, admission_reference: str):
-        credentials = pika.PlainCredentials(
-            settings.QUEUES.get('QUEUE_USER'),
-            settings.QUEUES.get('QUEUE_PASSWORD')
-        )
+        credentials = pika.PlainCredentials(settings.QUEUES.get('QUEUE_USER'), settings.QUEUES.get('QUEUE_PASSWORD'))
         rabbit_settings = pika.ConnectionParameters(
             settings.QUEUES.get('QUEUE_URL'),
             settings.QUEUES.get('QUEUE_PORT'),
             settings.QUEUES.get('QUEUE_CONTEXT_ROOT'),
-            credentials
+            credentials,
         )
         try:
             connect = pika.BlockingConnection(rabbit_settings)
@@ -211,7 +221,7 @@ class InjectionEPCSignaletique:
             RuntimeError,
             pika.exceptions.ConnectionClosed,
             pika.exceptions.ChannelClosed,
-            pika.exceptions.AMQPError
+            pika.exceptions.AMQPError,
         ) as e:
             logger.exception(
                 f"[INJECTION EPC] Une erreur est survenue lors de l injection vers EPC de la signaletique de la demande"

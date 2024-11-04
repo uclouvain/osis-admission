@@ -39,21 +39,19 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override
+from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override, gettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
-from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 
-from admission.contrib.models import EPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
+from admission.models import EPCInjection
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (
@@ -124,6 +122,7 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierDerogationFinancabiliteCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
     SpecifierFinancabiliteNonConcerneeCommand,
+    ApprouverReorientationExterneParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -142,6 +141,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
     InformationsDestinatairePasTrouvee,
@@ -223,6 +223,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParco
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -239,6 +240,7 @@ __all__ = [
     'FacultyApprovalDecisionView',
     'FacultyDecisionSendToSicView',
     'LateFacultyApprovalDecisionView',
+    'CourseChangeFacultyApprovalDecisionView',
     'PastExperiencesStatusView',
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
@@ -323,8 +325,9 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
             checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
 
-        if self.proposition.type == TypeDemande.INSCRIPTION.name and self.proposition.est_inscription_tardive:
+        if self.proposition.est_inscription_tardive:
             checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
+            checklist_additional_icons_title['choix_formation'] = _('Late enrollment')
 
         candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
             ListerToutesDemandesQuery(
@@ -837,8 +840,8 @@ class LateFacultyApprovalDecisionView(
 ):
     name = 'late-fac-decision-approval'
     urlpatterns = {'late-fac-decision-approval': 'fac-decision/late-fac-decision-approval'}
-    template_name = 'admission/general_education/includes/checklist/late_fac_decision_approval_form.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/late_fac_decision_approval_form.html'
+    template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
     permission_required = 'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
     form_class = Form
 
@@ -846,6 +849,37 @@ class LateFacultyApprovalDecisionView(
         try:
             message_bus_instance.invoke(
                 ApprouverInscriptionTardiveParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+            self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class CourseChangeFacultyApprovalDecisionView(
+    FacultyDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'course-change-fac-decision-approval'
+    urlpatterns = {
+        'course-change-fac-decision-approval': 'fac-decision/course-change-fac-decision-approval-decision-approval',
+    }
+    template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/lite_fac_decision_approval_form.html'
+    permission_required = 'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ApprouverReorientationExterneParFaculteCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                 )
@@ -1043,6 +1077,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return SicDecisionApprovalDocumentsForm(
             instance=self.admission,
             documents=self.sic_decision_approval_form_requestable_documents,
+            context=self.current_context,
         )
 
     @cached_property
@@ -1740,6 +1775,13 @@ class PastExperiencesStatusView(
         super().__init__(*args, **kwargs)
         self.valid_operation = False
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past_experiences_admission_requirement_form'] = PastExperiencesAdmissionRequirementForm(
+            instance=self.admission,
+        )
+        return context
+
     def get_initial(self):
         return self.admission.checklist['current']['parcours_anterieur']['statut']
 
@@ -1758,6 +1800,20 @@ class PastExperiencesStatusView(
                 )
             )
             self.valid_operation = True
+            self.htmx_trigger_form_extra = {
+                'select_access_title_perm': self.request.user.has_perm(
+                    'admission.checklist_select_access_title',
+                    self.admission,
+                ),
+            }
+            if (
+                self.admission.checklist['current']['parcours_anterieur']['statut']
+                == ChoixStatutChecklist.GEST_REUSSITE.name
+            ):
+                self.htmx_trigger_form_extra['select_access_title_tooltip'] = gettext(
+                    'Changes for the access title are not available when the state of the Previous experience '
+                    'is "Sufficient".'
+                )
         except MultipleBusinessExceptions:
             return super().form_invalid(form)
 
@@ -2008,6 +2064,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['formation'] = self.proposition.formation
+        kwargs['context'] = self.current_context
         return kwargs
 
     def get_initial(self):
@@ -2016,6 +2073,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
             'annee_academique': self.proposition.annee_calculee,
             'formation': self.proposition.formation.sigle,
             'poursuite_cycle': self.proposition.poursuite_de_cycle,
+            'est_inscription_tardive': self.proposition.est_inscription_tardive,
         }
 
     def form_valid(self, form):
@@ -2028,6 +2086,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
                     sigle_formation=form.cleaned_data['formation'],
                     annee_formation=form.cleaned_data['annee_academique'],
                     poursuite_de_cycle=form.cleaned_data['poursuite_cycle'],
+                    est_inscription_tardive=form.cleaned_data['est_inscription_tardive'],
                 )
             )
         except MultipleBusinessExceptions as multiple_exceptions:
@@ -2184,16 +2243,17 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
         context['financability_dispensation_notification_form'] = self.financability_dispensation_notification_form
 
         if self.request.htmx:
-            comment = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags__contains=['financabilite']
-            ).first()
-            comment_derogation = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags__contains=['financabilite__derogation']
-            ).first()
+            comments = {
+                ('__'.join(c.tags)): c
+                for c in CommentEntry.objects.filter(
+                    object_uuid=self.admission_uuid,
+                    tags__contains=['financabilite'],
+                )
+            }
 
             context['comment_forms'] = {
                 'financabilite': CommentForm(
-                    comment=comment,
+                    comment=comments.get('financabilite'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
@@ -2202,7 +2262,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     prefix='financabilite',
                 ),
                 'financabilite__derogation': CommentForm(
-                    comment=comment_derogation,
+                    comment=comments.get('financabilite__derogation'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='financabilite__derogation'
                     ),
@@ -2267,8 +2327,17 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
         )
 
         admission.financability_rule = ''
-        admission.financability_rule_established_by = None
-        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
+        if status == 'GEST_REUSSITE':
+            admission.financability_established_by = self.request.user.person
+            admission.financability_established_on = timezone.now()
+        else:
+            admission.financability_established_by = None
+            admission.financability_established_on = None
+        admission.save(update_fields=[
+            'financability_rule',
+            'financability_established_by',
+            'financability_established_on',
+        ])
 
         return HttpResponseClientRefresh()
 
@@ -2291,7 +2360,6 @@ class FinancabiliteApprovalSetRuleView(HtmxPermissionRequiredMixin, Financabilit
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=form.cleaned_data['financability_rule'],
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2309,7 +2377,6 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=self.admission.financability_computed_rule_situation,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2335,7 +2402,6 @@ class FinancabiliteNotFinanceableSetRuleView(HtmxPermissionRequiredMixin, Financ
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=form.cleaned_data['financability_rule'],
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2353,7 +2419,6 @@ class FinancabiliteNotFinanceableView(HtmxPermissionRequiredMixin, Financabilite
             SpecifierFinancabiliteRegleCommand(
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=self.admission.financability_computed_rule_situation,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -2371,7 +2436,6 @@ class FinancabiliteNotConcernedView(HtmxPermissionRequiredMixin, FinancabiliteCo
         message_bus_instance.invoke(
             SpecifierFinancabiliteNonConcerneeCommand(
                 uuid_proposition=self.admission_uuid,
-                etabli_par=self.request.user.person.uuid,
                 gestionnaire=self.request.user.person.global_id,
             )
         )
@@ -3050,6 +3114,14 @@ class ChecklistView(
                 }
             )
             context['can_choose_access_title'] = can_change_access_title
+            context['can_choose_access_title_tooltip'] = (
+                _(
+                    'Changes for the access title are not available when the state of the Previous experience '
+                    'is "Sufficient".'
+                )
+                if context.get('past_experiences_are_sufficient')
+                else ''
+            )
 
             context['digit_ticket'] = message_bus_instance.invoke(
                 GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)

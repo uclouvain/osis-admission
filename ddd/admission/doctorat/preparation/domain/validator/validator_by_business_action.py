@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import datetime, date
 from typing import List, Optional, Union, Dict
 
 import attr
@@ -40,14 +41,36 @@ from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixDoctoratDejaRealise, ChoixTypeAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixDoctoratDejaRealise,
+    ChoixTypeAdmission,
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+    BesoinDeDerogation,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    StatutsChecklistDoctorale,
+    StatutChecklist,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.doctorat.preparation.domain.validator import *
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
+    ShouldStatutEtreEnAttenteDeSignature,
+)
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
 )
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from epc.models.enums.condition_acces import ConditionAcces
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -244,7 +267,7 @@ class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class PropositionProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: 'ChoixTypeAdmission'
     projet: 'DetailProjet'
     financement: 'Financement'
@@ -307,6 +330,33 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    annee_soumission: int
+    date_soumission: date
+    annee_diplome_etudes_secondaires: Optional[int]
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
+    experiences_academiques: List[ExperienceAcademiqueDTO]
+    experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldAnneesCVRequisesCompletees(
+                annee_courante=self.annee_soumission,
+                experiences_academiques=self.experiences_academiques,
+                experiences_academiques_incompletes={},
+                annee_derniere_inscription_ucl=None,
+                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                experiences_non_academiques=self.experiences_non_academiques,
+                date_soumission=self.date_soumission,
+                experiences_parcours_interne=self.experiences_parcours_interne,
             ),
         ]
 
@@ -416,4 +466,256 @@ class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVal
                 self.proposition_institut_these,
                 self.institut_these,
             ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionCdd(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCddPeutDonnerDecision(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    nombre_annees_prevoir_programme: Optional[int]
+
+    titres_selectionnes: List[TitreAccesSelectionnable]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCddPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldSpecifierInformationsAcceptation(
+                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+            ShouldSelectionnerTitreAccesPourEnvoyerASIC(
+                titres_selectionnes=self.titres_selectionnes,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+
+    nombre_annees_prevoir_programme: Optional[int]
+
+    checklist: StatutsChecklistDoctorale
+    documents_dto: List[EmplacementDocumentDTO]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist,
+            ),
+            ShouldSpecifierInformationsAcceptation(
+                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+            ShouldParcoursAnterieurEtreSuffisant(
+                statut=self.checklist.parcours_anterieur,
+            ),
+            ShouldNePasAvoirDeDocumentReclameImmediat(
+                documents_dto=self.documents_dto,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    checklist: StatutsChecklistDoctorale
+    besoin_de_derogation: BesoinDeDerogation
+
+    documents_dto: List[EmplacementDocumentDTO]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist,
+            ),
+            ShouldChecklistEtreDansEtatCorrectPourApprouverInscription(
+                checklist_actuelle=self.checklist,
+                besoin_de_derogation=self.besoin_de_derogation,
+            ),
+            ShouldParcoursAnterieurEtreSuffisant(
+                statut=self.checklist.parcours_anterieur,
+            ),
+            ShouldNePasAvoirDeDocumentReclameImmediat(
+                documents_dto=self.documents_dto,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutChecklist
+
+    titres_acces_selectionnes: List[TitreAccesSelectionnable]
+
+    condition_acces: Optional[ConditionAcces]
+    millesime_condition_acces: Optional[int]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldTitreAccesEtreSelectionne(
+                statut=self.statut,
+                titres_acces_selectionnes=self.titres_acces_selectionnes,
+            ),
+            ShouldConditionAccesEtreSelectionne(
+                statut=self.statut,
+                condition_acces=self.condition_acces,
+                millesime_condition_acces=self.millesime_condition_acces,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierConditionAccesParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    avec_complements_formation: Optional[bool]
+
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+    commentaire_complements_formation: str
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation(
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
+                commentaire_complements_formation=self.commentaire_complements_formation,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierNouvellesInformationsDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPeutSpecifierInformationsDecisionCdd(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+    statut_checklist_parcours_anterieur: StatutChecklist
+    documents_dto: List[EmplacementDocumentDTO]
+    type_demande: TypeDemande
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldParcoursAnterieurEtreSuffisant(
+                statut=self.statut_checklist_parcours_anterieur,
+            ),
+            ShouldNePasAvoirDeDocumentReclameImmediat(
+                documents_dto=self.documents_dto,
+            ),
+            ShouldDemandeEtreTypeAdmission(
+                type_demande=self.type_demande,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsApprobationInscriptionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(statut=self.statut),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RedonnerLaMainAuCandidatValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldStatutEtreEnAttenteDeSignature(self.statut),
         ]

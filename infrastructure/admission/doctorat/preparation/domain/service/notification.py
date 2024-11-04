@@ -24,22 +24,28 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import List
+from typing import List, Optional
 
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
 from django.shortcuts import resolve_url
-from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import lazy
-from django.utils.translation import get_language, gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _, gettext
+from osis_async.models import AsyncTask
+from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
+from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
+from osis_notification.contrib.notification import WebNotification, EmailNotification
+from osis_signature.enums import SignatureState
+from osis_signature.models import Actor
+from osis_signature.utils import get_signing_token
 
-from admission.contrib.models import AdmissionTask, SupervisionActor
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.doctorate import PropositionProxy
-from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd import MAIL_INSCRIPTION_DEFAUT
+from admission.models import AdmissionTask, SupervisionActor, DoctorateAdmission
+from admission.models.base import BaseAdmission
+from admission.models.doctorate import PropositionProxy
+from admission.models.enums.actor_type import ActorType
+from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
@@ -56,7 +62,9 @@ from admission.ddd.admission.domain.model.emplacement_document import Emplacemen
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import DoctoratTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.notification import ONE_YEAR_SECONDS
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
@@ -65,10 +73,14 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
-)
-from admission.mail_templates.document import (
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
+    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
 from admission.utils import (
     get_admission_cdd_managers,
@@ -77,15 +89,11 @@ from admission.utils import (
     get_backoffice_admission_url,
 )
 from base.models.person import Person
-from osis_async.models import AsyncTask
-from osis_mail_template import generate_email
-from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
-from osis_notification.contrib.notification import WebNotification, EmailNotification
-from osis_signature.enums import SignatureState
-from osis_signature.models import Actor
-from osis_signature.utils import get_signing_token
-
 from base.utils.utils import format_academic_year
+from osis_document.api.utils import get_remote_token, get_remote_tokens
+from osis_document.utils import get_file_url
+
+EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
 
 class Notification(INotification):
@@ -104,16 +112,17 @@ class Notification(INotification):
     @classmethod
     def get_common_tokens(cls, proposition, candidat):
         """Return common tokens about a submission"""
-        frontend_link = settings.ADMISSION_FRONTEND_LINK.format(context='doctorate', uuid=proposition.entity_id.uuid)
+        frontend_link = get_portal_admission_url(context='doctorate', admission_uuid=proposition.entity_id.uuid)
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
             "training_title": cls._get_doctorate_title_translation(proposition.formation_id),
             "admission_link_front": frontend_link,
             "admission_link_front_supervision": "{}supervision".format(frontend_link),
-            "admission_link_back": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX,
-                resolve_url('admission:doctorate:project', uuid=proposition.entity_id.uuid),
+            "admission_link_back": get_backoffice_admission_url(
+                context='doctorate',
+                admission_uuid=proposition.entity_id.uuid,
+                url_suffix='project',
             ),
             "reference": proposition.reference,
         }
@@ -274,7 +283,6 @@ class Notification(INotification):
 
     @classmethod
     def notifier_soumission(cls, proposition: Proposition) -> None:
-        candidat = Person.objects.get(global_id=proposition.matricule_candidat)
         admission = (
             PropositionProxy.objects.annotate_training_management_faculty()
             .annotate_with_reference()
@@ -306,20 +314,21 @@ class Notification(INotification):
         )
 
         # Notifier le doctorant via mail en mettant en copie les membres du groupe de supervision
-        common_tokens = cls.get_common_tokens(proposition, candidat)
+        common_tokens = cls.get_common_tokens(proposition, admission.candidate)
         common_tokens['training_acronym'] = proposition.formation_id.sigle
         common_tokens['admission_reference'] = admission.formatted_reference
         common_tokens['recap_link'] = common_tokens['admission_link_front'] + 'pdf-recap'
+        common_tokens['salutation'] = get_salutation_prefix(person=admission.candidate)
 
         actors_invited = admission.supervision_group.actors.select_related('person')
         email_message = generate_email(
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
-            candidat.language,
+            admission.candidate.language,
             common_tokens,
-            recipients=[candidat.private_email],
+            recipients=[admission.candidate.private_email],
             cc_recipients=[actor.email for actor in actors_invited],
         )
-        EmailNotificationHandler.create(email_message, person=candidat)
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
 
         # Envoyer aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
@@ -400,18 +409,42 @@ class Notification(INotification):
         proposition: Proposition,
         objet_message: str,
         corps_message: str,
+        matricule_emetteur: Optional[str] = None,
+        cc_promoteurs: bool = False,
+        cc_membres_ca: bool = False,
     ) -> EmailMessage:
-        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        admission = DoctorateAdmission.objects.select_related(
+            'candidate',
+            'supervision_group',
+        ).get(uuid=proposition.entity_id.uuid)
 
         email_notification = EmailNotification(
-            recipient=candidate.private_email,
+            recipient=admission.candidate.private_email,
             subject=objet_message,
             html_content=corps_message,
             plain_text_content=transform_html_to_text(corps_message),
         )
 
         email_message = EmailNotificationHandler.build(email_notification)
-        EmailNotificationHandler.create(email_message, person=candidate)
+
+        if cc_promoteurs or cc_membres_ca:
+            actors = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
+
+            cc_list = []
+
+            if cc_promoteurs:
+                for promoter in actors.filter(type=ActorType.PROMOTER.name):
+                    cc_list.append(cls._format_email(promoter))
+
+            if cc_membres_ca:
+                for ca_member in actors.filter(type=ActorType.CA_MEMBER.name):
+                    cc_list.append(cls._format_email(ca_member))
+
+            if cc_list:
+                email_message['Cc'] = ','.join(cc_list)
+
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
         return email_message
 
     @classmethod
@@ -443,8 +476,8 @@ class Notification(INotification):
             'enrolment_service_email': admission.training.enrollment_campus.sic_enrollment_email
             or MAIL_INSCRIPTION_DEFAUT,
             'training_year': format_academic_year(proposition.annee_calculee),
-            'admission_link_front': get_portal_admission_url('continuing-education', proposition.uuid),
-            'admission_link_back': get_backoffice_admission_url('continuing-education', proposition.uuid),
+            'admission_link_front': get_portal_admission_url('doctorate', proposition.uuid),
+            'admission_link_back': get_backoffice_admission_url('doctorate', proposition.uuid),
         }
 
         email_message = generate_email(
@@ -471,3 +504,197 @@ class Notification(INotification):
             admission=admission,
             type=AdmissionTask.TaskType.DOCTORATE_FOLDER.name,
         )
+
+    @classmethod
+    def _format_email(cls, actor: SupervisionActor):
+        return "{a.first_name} {a.last_name} <{a.email}>".format(a=actor)
+
+    @classmethod
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+        admission: BaseAdmission = (
+            BaseAdmission.objects.with_training_management_and_reference()
+            .select_related('candidate__country_of_citizenship', 'training')
+            .get(uuid=proposition.entity_id.uuid)
+        )
+
+        # Notifier le vérificateur par mail
+        current_language = settings.LANGUAGE_CODE
+        with translation.override(current_language):
+            tokens = {
+                'admission_reference': admission.formatted_reference,
+                'candidate_first_name': admission.candidate.first_name,
+                'candidate_last_name': admission.candidate.last_name,
+                'candidate_nationality_country': {
+                    settings.LANGUAGE_CODE_FR: admission.candidate.country_of_citizenship.name,
+                    settings.LANGUAGE_CODE_EN: admission.candidate.country_of_citizenship.name_en,
+                }[current_language],
+                'training_title': {
+                    settings.LANGUAGE_CODE_FR: admission.training.title,
+                    settings.LANGUAGE_CODE_EN: admission.training.title_english,
+                }[current_language],
+                'training_acronym': admission.training.acronym,
+                'training_year': format_academic_year(proposition.annee_calculee),
+                'admission_link_front': get_portal_admission_url('doctorate', str(admission.uuid)),
+                'admission_link_back': get_backoffice_admission_url('doctorate', str(admission.uuid)),
+            }
+
+            email_message = generate_email(
+                ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
+                admission.candidate.language,
+                tokens,
+                recipients=[MAIL_VERIFICATEUR_CURSUS],
+            )
+
+            EmailNotificationHandler.create(email_message, person=None)
+
+            return email_message
+
+    @classmethod
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+        admission: BaseAdmission = (
+            BaseAdmission.objects.with_training_management_and_reference()
+            .select_related('candidate', 'training')
+            .get(uuid=proposition.entity_id.uuid)
+        )
+
+        # Notifier le candidat par mail
+        with translation.override(admission.candidate.language):
+            tokens = {
+                'admission_reference': admission.formatted_reference,
+                'candidate_first_name': admission.candidate.first_name,
+                'candidate_last_name': admission.candidate.last_name,
+                'training_title': {
+                    settings.LANGUAGE_CODE_FR: admission.training.title,
+                    settings.LANGUAGE_CODE_EN: admission.training.title_english,
+                }[admission.candidate.language],
+                'training_acronym': admission.training.acronym,
+                'training_campus': admission.teaching_campus,
+                'training_year': format_academic_year(proposition.annee_calculee),
+                'admission_link_front': get_portal_admission_url('doctorate', str(admission.uuid)),
+                'admission_link_back': get_backoffice_admission_url('doctorate', str(admission.uuid)),
+            }
+
+            email_message = generate_email(
+                ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
+                admission.candidate.language,
+                tokens,
+                recipients=[admission.candidate.private_email],
+            )
+
+            EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+            return email_message
+
+    @classmethod
+    def refuser_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> Optional[EmailMessage]:
+        if not objet_message or not corps_message:
+            return None
+
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        document_uuid = (
+            DoctorateAdmission.objects.filter(uuid=proposition.entity_id.uuid).values('sic_refusal_certificate')
+        )[0]['sic_refusal_certificate'][0]
+        token = get_remote_token(document_uuid, custom_ttl=ONE_YEAR_SECONDS)
+        document_url = get_file_url(token)
+        corps_message = corps_message.replace(EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN, document_url)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message
+
+    @classmethod
+    def accepter_proposition_par_sic(
+        cls,
+        proposition_uuid: str,
+        objet_message: str,
+        corps_message: str,
+        digit_repository: 'IDigitRepository',
+    ) -> EmailMessage:
+        certificate_fields = {
+            'cdd_approval_certificate': EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
+            'sic_approval_certificate': EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+            'sic_annexe_approval_certificate': EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+        }
+        admission = (
+            DoctorateAdmission.objects.filter(uuid=proposition_uuid)
+            .only(
+                'candidate',
+                *certificate_fields,
+            )
+            .select_related('candidate')
+            .first()
+        )
+
+        document_uuids = {
+            field: str(getattr(admission, field)[0]) if getattr(admission, field) else ''
+            for field in certificate_fields
+        }
+
+        document_uuids_list = [document for document in document_uuids.values() if document]
+        document_urls = {field: '' for field in certificate_fields}
+
+        if document_uuids_list:
+            document_tokens = get_remote_tokens(document_uuids_list, custom_ttl=ONE_YEAR_SECONDS)
+
+            if document_tokens:
+                for field in certificate_fields:
+                    if document_uuids[field] and document_tokens.get(document_uuids[field]):
+                        document_urls[field] = get_file_url(document_tokens[document_uuids[field]])
+
+        for field_name, token in certificate_fields.items():
+            corps_message = corps_message.replace(token, document_urls[field_name])
+
+        if EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN in corps_message:
+            noma_genere = digit_repository.get_registration_id_sent_to_digit(global_id=admission.candidate.global_id)
+
+            corps_message = corps_message.replace(
+                EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
+                noma_genere or gettext('NOMA not found'),
+            )
+
+        email_notification = EmailNotification(
+            recipient=admission.candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=admission.candidate)
+
+        return candidate_email_message
+
+    @classmethod
+    def notifier_candidat_derogation_financabilite(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message

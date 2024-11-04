@@ -36,6 +36,7 @@ from admission.auth.predicates.common import (
     is_entity_manager,
     is_sent_to_epc,
     pending_digit_ticket_response,
+    past_experiences_checklist_tab_is_not_sufficient,
 )
 from education_group.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
@@ -73,17 +74,21 @@ class CentralManager(EntityRoleModel):
             'admission.appose_sic_notice': is_entity_manager,
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc & ~pending_digit_ticket_response,
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status
+               | general.in_progress | continuing.in_progress | doctorate.in_progress)
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status
+               | general.in_progress | continuing.in_progress | doctorate.in_progress)
             & ~is_sent_to_epc
             & ~pending_digit_ticket_response,
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc & ~pending_digit_ticket_response,
+            & ~is_sent_to_epc
+            & ~pending_digit_ticket_response,
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,
@@ -98,11 +103,8 @@ class CentralManager(EntityRoleModel):
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,
-            'admission.change_admission_project': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_cotutelle': is_entity_manager,
-            'admission.change_admission_cotutelle': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_supervision': is_entity_manager,
-            'admission.change_admission_supervision': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_accounting': is_entity_manager,
             'admission.change_admission_accounting': is_entity_manager
             & (general.in_sic_status | doctorate.in_sic_status)
@@ -113,8 +115,6 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc,
             'admission.view_admission_jury': is_entity_manager,
             'admission.change_admission_jury': is_entity_manager,
-            'admission.add_supervision_member': is_entity_manager,
-            'admission.remove_supervision_member': is_entity_manager,
             'admission.view_internalnote': is_entity_manager,
             'admission.view_debug_info': is_entity_manager & is_debug,
             'admission.view_historyentry': is_entity_manager,
@@ -159,7 +159,9 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc,
             'admission.checklist_select_access_title': is_entity_manager
             & (general.in_sic_status | doctorate.in_sic_status)
+            & past_experiences_checklist_tab_is_not_sufficient
             & ~is_sent_to_epc,
+            'admission.checklist_change_training_choice': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.checklist_change_sic_comment': is_entity_manager
             & (general.is_submitted | doctorate.is_submitted)
             & ~is_sent_to_epc,
@@ -176,6 +178,7 @@ class CentralManager(EntityRoleModel):
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
             'admission.can_inject_to_epc': ~is_sent_to_epc,
+            'admission.send_message': is_entity_manager,
             # Fusion
             'admission.merge_candidate_with_known_person': is_entity_manager & ~is_sent_to_epc,
         }

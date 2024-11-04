@@ -31,7 +31,7 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext
 
-from admission.contrib.models import AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItemInstantiation
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
@@ -45,6 +45,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorale,
 )
 from admission.tests.factories.categorized_free_document import CategorizedFreeDocumentFactory

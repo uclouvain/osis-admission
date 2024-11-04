@@ -24,13 +24,13 @@
 #
 # ##############################################################################
 from admission.ddd.parcours_doctoral.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from admission.ddd.parcours_doctoral.repository.i_doctorat import IDoctoratRepository
 
 
 def recuperer_doctorat(
-    cmd: 'RecupererDoctoratQuery',
+    cmd: 'RecupererAdmissionDoctoratQuery',
     doctorat_repository: 'IDoctoratRepository',
 ) -> DoctoratDTO:
     # GIVEN

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ from rules.contrib.views import LoginRequiredMixin
 from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema, ResponseSpecificSchema, BetterChoicesSchema
 from admission.api.serializers import PersonSerializer
-from admission.contrib.models import EntityProxy, Scholarship, DiplomaticPost
+from admission.models import EntityProxy, Scholarship, DiplomaticPost
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
 from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
@@ -95,7 +95,7 @@ class AutocompleteSectorView(ListAPIView):
         ).filter(
             academic_year__year=year,
             education_group_type__category=Categories.TRAINING.name,
-            education_group_type__name=TrainingType.PHD.name,
+            education_group_type__name=TrainingType.FORMATION_PHD.name,
         )
         doctorate_paths = doctorate_qs.values_list('path_as_string', flat=True)
         # Get all sectors
@@ -346,13 +346,16 @@ class AutocompletePersonView(ListAPIView):
         Person.objects.exclude(
             # Remove unexistent users
             Q(user_id__isnull=True)
-            | Q(global_id=''),
+            | Q(global_id='')
+            | Q(first_name='')
+            | Q(last_name='')
         )
         .alias(
             # Remove students
             is_student=Exists(Student.objects.filter(person=OuterRef('pk'))),
         )
         .filter(is_student=False)
+        .order_by('last_name', 'first_name')
     )
 
 

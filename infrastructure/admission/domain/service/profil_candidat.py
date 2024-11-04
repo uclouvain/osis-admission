@@ -48,9 +48,9 @@ from django.db.models import (
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionType
-from admission.contrib.models.functions import ArrayLength
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
@@ -60,6 +60,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
@@ -71,6 +72,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -91,7 +93,11 @@ from osis_profile.models import (
     EducationalExperience,
 )
 from osis_profile.models.education import LanguageKnowledge
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 
 
 # TODO: a mettre dans infra/shared_kernel/profil
@@ -405,12 +411,18 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         educational_experience_years = educational_experience_years.annotate(
             injecte_par_admission=Exists(
                 AdmissionEPCInjection.objects.filter(
-                    admission__uuid=OuterRef('educational_experience__valuated_from_admission__uuid'),
+                    admission__admissioneducationalvaluatedexperiences__educationalexperience_id=OuterRef(
+                        'educational_experience__uuid'
+                    ),
                     type=EPCInjectionType.DEMANDE.name,
+                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
             ),
             injecte_par_cv=Exists(
-                CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('educational_experience__uuid'))
+                CurriculumEPCInjection.objects.filter(
+                    experience_uuid=OuterRef('educational_experience__uuid'),
+                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                )
             ),
         )
         educational_experience_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
@@ -598,12 +610,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     AdmissionEPCInjection.objects.filter(
                         admission__candidate_id=OuterRef('pk'),
                         type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 secondaire_injecte_par_cv=Exists(
                     CurriculumEPCInjection.objects.filter(
                         type_experience=ExperienceType.HIGH_SCHOOL.name,
                         person_id=OuterRef('pk'),
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 **cls.get_secondary_studies_valuation_annotations(),
@@ -635,11 +649,17 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 ),
                 injecte_par_admission=Exists(
                     AdmissionEPCInjection.objects.filter(
-                        admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                        admission__admissionprofessionalvaluatedexperiences__professionalexperience_id=OuterRef('uuid'),
                         type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
-                injecte_par_cv=Exists(CurriculumEPCInjection.objects.filter(experience_uuid=OuterRef('uuid'))),
+                injecte_par_cv=Exists(
+                    CurriculumEPCInjection.objects.filter(
+                        experience_uuid=OuterRef('uuid'),
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                    )
+                ),
             )
             .order_by('-start_date', '-end_date')
         )
@@ -910,12 +930,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     AdmissionEPCInjection.objects.filter(
                         admission__candidate_id=OuterRef('pk'),
                         type=EPCInjectionType.DEMANDE.name,
+                        status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 secondaire_injecte_par_cv=Exists(
                     CurriculumEPCInjection.objects.filter(
                         type_experience=ExperienceType.HIGH_SCHOOL.name,
                         person_id=OuterRef('pk'),
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
                     )
                 ),
                 **cls.get_secondary_studies_valuation_annotations(),
@@ -984,3 +1006,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ),
             connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
         )
+
+    @classmethod
+    def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
+        try:
+            merge_proposal = PersonMergeProposal.objects.get(original_person__global_id=matricule)
+            return MergeProposalDTO(
+                status=merge_proposal.status,
+                validation=merge_proposal.validation,
+            )
+        except PersonMergeProposal.DoesNotExist:
+            return None

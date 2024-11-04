@@ -29,7 +29,7 @@ from unittest.mock import patch
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale

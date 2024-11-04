@@ -33,7 +33,7 @@ from django.test import TestCase
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
@@ -45,9 +45,6 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixMotifAttente,
     ChoixMotifRefus,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
 )
 from admission.forms.admission.continuing_education.checklist import (
     DecisionFacApprovalForm,
@@ -199,6 +196,53 @@ class ChecklistViewTestCase(TestCase):
         self.assertCountEqual(
             [entry.tags for entry in historic_entries],
             [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+        )
+
+    def test_get_to_validate_iufc(self):
+        self.client.force_login(user=self.iufc_manager_user)
+
+        url = resolve_url(
+            'admission:continuing-education:decision-to-validate',
+            uuid=self.continuing_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_valid_post_to_validate_iufc(self):
+        self.client.force_login(user=self.iufc_manager_user)
+
+        self.continuing_admission.checklist['current']['decision'] = {
+            'libelle': '',
+            'enfants': [],
+            'extra': {'en_cours': 'fac_approval'},
+            'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
+        }
+        self.continuing_admission.save(update_fields=['checklist'])
+
+        url = resolve_url(
+            'admission:continuing-education:decision-to-validate',
+            uuid=self.continuing_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={},
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(response.context['form'].is_valid())
+
+        self.continuing_admission.refresh_from_db()
+
+        self.assertEqual(
+            self.continuing_admission.checklist['current']['decision']['statut'],
+            ChoixStatutChecklist.GEST_EN_COURS.name,
+        )
+        self.assertDictEqual(
+            self.continuing_admission.checklist['current']['decision']['extra'],
+            {'en_cours': 'to_validate'},
         )
 
     def test_get_fac_approval_iufc(self):
@@ -777,6 +821,40 @@ class ChecklistViewTestCase(TestCase):
             [entry.tags for entry in historic_entries],
             [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
         )
+
+    def test_get_to_validate_fac(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        url = resolve_url(
+            'admission:continuing-education:decision-to-validate',
+            uuid=self.continuing_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_valid_post_to_validate_fac(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.continuing_admission.checklist['current']['decision'] = {
+            'libelle': '',
+            'enfants': [],
+            'extra': {'en_cours': 'fac_approval'},
+            'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
+        }
+        self.continuing_admission.save(update_fields=['checklist'])
+
+        url = resolve_url(
+            'admission:continuing-education:decision-to-validate',
+            uuid=self.continuing_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={},
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 403)
 
     def test_get_fac_approval_fac(self):
         self.client.force_login(user=self.fac_manager_user)

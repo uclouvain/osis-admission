@@ -52,6 +52,7 @@ class InitierPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterPropositionCommand(interface.CommandRequest):
     uuid: str
+    matricule_auteur: str
     justification: Optional[str] = ''
     commission_proximite: Optional[str] = ''
     type_financement: Optional[str] = ''
@@ -91,6 +92,7 @@ class RechercherDoctoratQuery(interface.QueryRequest):
     sigle_secteur_entite_gestion: str
     terme_de_recherche: Optional[str] = ''
     campus: Optional[str] = ''
+    annee: Optional[int] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -101,6 +103,7 @@ class RecupererResumePropositionQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierPromoteurCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     matricule: Optional[str]
     prenom: Optional[str]
     nom: Optional[str]
@@ -115,6 +118,7 @@ class IdentifierPromoteurCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     matricule: Optional[str]
     prenom: Optional[str]
     nom: Optional[str]
@@ -129,6 +133,7 @@ class IdentifierMembreCACommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ModifierMembreSupervisionExterneCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     uuid_membre: str
     prenom: Optional[str]
     nom: Optional[str]
@@ -143,6 +148,13 @@ class ModifierMembreSupervisionExterneCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class DemanderSignaturesCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RedonnerLaMainAuCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    matricule_gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -165,18 +177,21 @@ class VerifierProjetQuery(interface.QueryRequest):
 class SupprimerPromoteurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_promoteur: str
+    matricule_auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class DesignerPromoteurReferenceCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_promoteur: str
+    matricule_auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SupprimerMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_membre_ca: str
+    matricule_auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -208,6 +223,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class DefinirCotutelleCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     motivation: Optional[str] = ''
     institution_fwb: Optional[bool] = None
     institution: Optional[str] = ''
@@ -251,6 +267,7 @@ class SupprimerPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionParPdfCommand(interface.CommandRequest):
     uuid_proposition: str
+    matricule_auteur: str
     uuid_membre: str
     pdf: List[str] = attr.Factory(list)
 
@@ -482,11 +499,12 @@ class ListerDemandesQuery(SortedQueryRequest):
     type_financement: Optional[str] = ''
     bourse_recherche: Optional[str] = ''
     cotutelle: Optional[bool] = None
-    date_soumission_debut: Optional[datetime.datetime] = None
-    date_soumission_fin: Optional[datetime.datetime] = None
+    date_soumission_debut: Optional[datetime.date] = None
+    date_soumission_fin: Optional[datetime.date] = None
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = None
     demandeur: Optional[str] = ''
+    fnrs_fria_fresh: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -504,3 +522,238 @@ class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
     justification: str
 
     reponses_questions_specifiques: Dict
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerMessageCandidatCommand(interface.CommandRequest):
+    matricule_emetteur: str
+    proposition_uuid: str
+    sujet: str
+    message: str
+    cc_promoteurs: bool
+    cc_membres_ca: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererResumeEtEmplacementsDocumentsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+    avec_document_libres: bool = False
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    gestionnaire: str
+    statut: str
+    statut_authentification: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerPropositionACddLorsDeLaDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    envoi_par_cdd: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionParCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverPropositionParCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+    type_demande: str
+    sigle_formation: str
+    annee_formation: int
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsAcceptationPropositionParCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+    commentaire_programme_conjoint: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    statut: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    condition_acces: str = ''
+    millesime_condition_acces: Optional[int] = None
+    avec_complements_formation: Optional[bool] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    type_equivalence_titre_acces: str = ''
+    statut_equivalence_titre_acces: str = ''
+    etat_equivalence_titre_acces: str = ''
+    information_a_propos_de_la_restriction: str = ''
+    date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
+    uuid_proposition: str
+    financabilite_regle_calcule: str
+    financabilite_regle_calcule_situation: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
+    uuid_proposition: str
+    financabilite_regle: str
+    etabli_par: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteNonConcerneeCommand(interface.CommandRequest):
+    uuid_proposition: str
+    etabli_par: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierDerogationFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    statut: str
+    gestionnaire: str
+    refus_uuids_motifs: List[str] = attr.Factory(list)
+    refus_autres_motifs: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    gestionnaire: str
+    statut: str
+    statut_authentification: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    gestionnaire: str
+    etat_authentification: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    besoin_de_derogation: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsAcceptationPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+    droits_inscription_montant: str = ''
+    droits_inscription_montant_autre: Optional[float] = None
+    dispense_ou_droits_majores: str = ''
+    est_mobilite: Optional[bool] = None
+    nombre_de_mois_de_mobilite: str = ''
+    doit_se_presenter_en_sic: Optional[bool] = None
+    communication_au_candidat: str = ''
+    doit_fournir_visa_etudes: Optional[bool] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverAdmissionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerEmailApprobationInscriptionAuCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
+    uuid_proposition: str
+    pdf: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
+    uuid_proposition: str

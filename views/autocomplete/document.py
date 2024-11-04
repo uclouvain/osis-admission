@@ -31,7 +31,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
@@ -75,14 +75,10 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
         )
 
         documents_by_category: Dict[str, List[EmplacementDocumentDTO]] = {}
-        original_document_is_required = False
         search_term = self.q.lower()
 
         for document in documents:
-            if document.identifiant == document_identifier:
-                original_document_is_required = document.requis_automatiquement
-
-            if search_term not in document.libelle.lower():
+            if search_term and search_term not in document.libelle.lower():
                 continue
 
             if (
@@ -102,10 +98,7 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
                             f'{"paperclip" if document.document_uuids else "link-slash"}'
                             f'"></i> {document.libelle}'
                         ),
-                        'disabled': document.identifiant == document_identifier
-                        or document.lecture_seule
-                        or original_document_is_required
-                        and not bool(document.document_uuids),
+                        'disabled': document.identifiant == document_identifier or document.lecture_seule,
                     }
                     for document in category_documents
                 ],

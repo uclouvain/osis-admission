@@ -44,7 +44,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
 )
 from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
@@ -986,6 +986,34 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         cls.specific_questions = get_dynamic_questions_by_tab(all_specific_questions_dto)
         cls.empty_questions = get_dynamic_questions_by_tab([])
 
+        cls.louvain_campus = CampusDTO(
+            uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
+            nom='Louvain-la-Neuve',
+            code_postal='',
+            ville='',
+            pays_iso_code='',
+            nom_pays='',
+            rue='',
+            numero_rue='',
+            boite_postale='',
+            localisation='',
+            email_inscription_sic='',
+        )
+
+        cls.mons_campus = CampusDTO(
+            uuid=ORDERED_CAMPUSES_UUIDS['MONS_UUID'],
+            nom='Mons',
+            code_postal='',
+            ville='',
+            pays_iso_code='',
+            nom_pays='',
+            rue='',
+            numero_rue='',
+            boite_postale='',
+            localisation='',
+            email_inscription_sic='',
+        )
+
         identification_dto = _IdentificationDTO(
             matricule='MAT1',
             nom='Doe',
@@ -1440,8 +1468,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_regle_calcule_situation='',
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
-            financabilite_regle_etabli_par="",
-            financabilite_regle_etabli_le=None,
+            financabilite_etabli_par="",
+            financabilite_etabli_le=None,
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_refus_sic=[],
@@ -1461,11 +1489,15 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 sigle='FD1',
                 annee=2023,
                 intitule='Doctorate 1',
-                campus='Louvain-la-Neuve',
+                intitule_fr='Doctorate 1',
+                intitule_en='Doctorate 1',
+                campus=cls.louvain_campus,
                 type=TrainingType.BACHELOR.name,
-                campus_inscription='Mons',
+                campus_inscription=cls.mons_campus,
                 sigle_entite_gestion='FFD',
                 code='CFD1',
+                credits=180,
+                date_debut=datetime.date(2023, 1, 1),
             ),
             reference='1234',
             annee_calculee=2023,
@@ -1527,6 +1559,23 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             documents_demandes={},
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
+            financabilite_regle_calcule="",
+            financabilite_regle_calcule_situation='',
+            financabilite_regle_calcule_le=None,
+            financabilite_regle="",
+            financabilite_etabli_par="",
+            financabilite_etabli_le=None,
+            certificat_approbation_sic=[],
+            certificat_approbation_sic_annexe=[],
+            certificat_approbation_cdd=[],
+            doit_fournir_visa_etudes=False,
+            visa_etudes_d=['uuid-visa-etudes-d'],
+            certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
+            financabilite_derogation_statut='',
+            financabilite_derogation_premiere_notification_le=None,
+            financabilite_derogation_premiere_notification_par='',
+            financabilite_derogation_derniere_notification_le=None,
+            financabilite_derogation_derniere_notification_par='',
         )
         cls.continuing_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -3487,12 +3536,96 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertFalse(attachments[1].readonly)
 
     def test_authorization_attachments_with_doctorate_proposition(self):
+        with mock.patch.multiple(
+            self.doctorate_context.proposition,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+        ):
+            section = get_authorization_section(
+                context=self.doctorate_context,
+                load_content=False,
+            )
+
+            self.assertEqual(section.attachments, [])
+
+        with mock.patch.multiple(
+            self.doctorate_context.proposition,
+            statut=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+        ):
+            section = get_authorization_section(
+                context=self.doctorate_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 1)
+
+            authorization_certificate = section.attachments[0]
+
+            self.assertEqual(
+                authorization_certificate.identifier,
+                'AUTORISATION_PDF_SIGNEE',
+            )
+            self.assertEqual(
+                authorization_certificate.label,
+                DocumentsSuiteAutorisation['AUTORISATION_PDF_SIGNEE'],
+            )
+            self.assertEqual(
+                authorization_certificate.uuids,
+                self.doctorate_context.proposition.certificat_autorisation_signe,
+            )
+
+        with mock.patch.multiple(
+            self.doctorate_context.proposition,
+            statut=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+            doit_fournir_visa_etudes=True,
+        ):
+            section = get_authorization_section(
+                context=self.doctorate_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 2)
+
+            self.assertEqual(
+                section.attachments[0].identifier,
+                'AUTORISATION_PDF_SIGNEE',
+            )
+
+            self.assertEqual(
+                section.attachments[1].identifier,
+                'VISA_ETUDES',
+            )
+            self.assertEqual(
+                section.attachments[1].label,
+                DocumentsSuiteAutorisation['VISA_ETUDES'],
+            )
+            self.assertEqual(section.attachments[1].uuids, self.doctorate_context.proposition.visa_etudes_d)
+
+        with mock.patch.multiple(
+            self.doctorate_context.proposition,
+            statut=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+            doit_fournir_visa_etudes=True,
+            type_demande=TypeDemande.INSCRIPTION.name,
+        ):
+            section = get_authorization_section(
+                context=self.doctorate_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 0)
+
         section = get_authorization_section(
             context=self.doctorate_context,
             load_content=False,
         )
 
-        self.assertEqual(len(section.attachments), 0)
+        self.assertEqual(len(section.attachments), 2)
 
     def test_authorization_attachments_with_continuing_proposition(self):
         section = get_authorization_section(

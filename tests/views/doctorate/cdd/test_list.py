@@ -33,9 +33,9 @@ from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext
+from django.utils.translation import gettext, gettext_lazy
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
@@ -55,7 +55,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixSousDomaineSciences,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.ddd.admission.doctorat.validation.dtos import DemandeRechercheDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.forms import ALL_EMPTY_CHOICE, ALL_FEMININE_EMPTY_CHOICE
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -88,8 +87,8 @@ from reference.tests.factories.country import CountryFactory
 @freezegun.freeze_time('2022-01-01')
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES_WITHOUT_SEARCH = 25
-    NB_MAX_QUERIES_WITH_SEARCH = 28
+    NB_MAX_QUERIES_WITHOUT_SEARCH = 26
+    NB_MAX_QUERIES_WITH_SEARCH = 29
 
     @classmethod
     def setUpTestData(cls):
@@ -175,6 +174,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             candidate__last_name='Doe',
             last_update_author__first_name='Joe',
             last_update_author__last_name='Cole',
+            is_fnrs_fria_fresh_csc_linked=True,
         )
         cls.admissions: List[DoctorateAdmission] = [
             admission,
@@ -190,11 +190,12 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 other_international_scholarship=BourseRecherche.ARC.name,
                 financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
                 type=ChoixTypeAdmission.ADMISSION.name,
-                submitted_at=datetime.datetime(2021, 1, 2),
+                submitted_at=datetime.datetime(2021, 1, 2, 1, 0, 0),
                 status_cdd=ChoixStatutCDD.TO_BE_VERIFIED.name,
                 status_sic=ChoixStatutSIC.VALID.name,
                 proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
                 last_update_author=cls.promoter,
+                is_fnrs_fria_fresh_csc_linked=False,
                 submitted_profile={
                     "coordinates": {
                         "city": "Louvain-La-Neuves",
@@ -211,6 +212,12 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                         "last_name": "Doe",
                         "first_name": "John",
                         "country_of_citizenship": "BE",
+                    },
+                },
+                checklist={
+                    'initial': {},
+                    'current': {
+                        'decision_sic': {'statut': 'INITIAL_CANDIDAT'},
                     },
                 },
             ),
@@ -233,6 +240,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 candidate__last_name='Foe',
                 modified_at=datetime.datetime(2021, 1, 2),
                 last_update_author=None,
+                is_fnrs_fria_fresh_csc_linked=None,
             ),
             DoctorateAdmissionFactory(
                 training__management_entity=third_doctoral_commission,
@@ -343,7 +351,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(form['cotutelle'].value(), None)
         self.assertCountEqual(
             form.fields['cotutelle'].widget.choices,
-            ALL_EMPTY_CHOICE + ((True, 'Yes'), (False, 'No')),
+            ALL_EMPTY_CHOICE + ((True, gettext_lazy('Yes')), (False, gettext_lazy('No'))),
         )
 
         self.assertEqual(form['date_soumission_debut'].value(), None)
@@ -867,6 +875,41 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 ],
             )
 
+    def test_filter_by_fnrs_fria_fresh(self):
+        self.client.force_login(user=self.user_with_several_cdds)
+
+        data = {
+            'annee_academique': '2021',
+            'fnrs_fria_fresh': True,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(
+                response,
+                [
+                    self.admission_references[0],
+                ],
+            )
+
+        data = {
+            'annee_academique': '2021',
+            'fnrs_fria_fresh': False,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(
+                response,
+                [
+                    self.admission_references[0],
+                    self.admission_references[1],
+                    self.admission_references[2],
+                ],
+            )
+
     def test_filter_by_submission_date(self):
         self.client.force_login(user=self.user_with_several_cdds)
 
@@ -948,8 +991,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(proposition.sigle_formation, self.admissions[1].training.acronym)
             self.assertEqual(proposition.code_formation, self.admissions[1].training.partial_acronym)
             self.assertEqual(proposition.intitule_formation, self.admissions[1].training.title)
-            self.assertEqual(proposition.decision_fac, 'TODO')
-            self.assertEqual(proposition.decision_sic, 'TODO')
+            self.assertEqual(proposition.decision_fac, '')
+            self.assertEqual(proposition.decision_sic, gettext('To be processed'))
             self.assertEqual(proposition.date_confirmation, self.admissions[1].submitted_at)
             self.assertEqual(proposition.derniere_modification_le, self.admissions[1].modified_at)
             self.assertEqual(proposition.type_admission, self.admissions[1].type)

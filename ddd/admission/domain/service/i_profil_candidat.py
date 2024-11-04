@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.community import CommunityEnum
@@ -145,14 +146,28 @@ class IProfilCandidatTranslator(interface.DomainService):
         )
 
     @classmethod
-    def get_date_maximale_curriculum(cls, date_reference: Optional[datetime.date] = None):
+    def get_date_maximale_curriculum(
+        cls,
+        date_soumission: Optional[datetime.date] = None,
+        mois_debut_annee_academique_courante_facultatif: bool = False,
+    ):
         """
-        Retourne la date de la dernière expérience à remplir dans le CV (mois précédent la date de référence,
-        par défaut celle du jour).
+        Retourne la date de la dernière expérience à remplir dans le CV.
+        :param date_soumission: date de soumission de la demande.
+        :param mois_debut_annee_academique_courante_facultatif: si vrai, rend facultatif le dernier mois normalement
+            obligatoire si celui-ci correspond au mois de début de l'année académique à valoriser.
+        :return: la date de la dernière expérience à remplir dans le CV.
         """
-        if not date_reference:
-            date_reference = datetime.date.today()
-        return (date_reference.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+        date_reference = date_soumission if date_soumission else datetime.date.today()
+        date_maximale = (date_reference.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+
+        if (
+            mois_debut_annee_academique_courante_facultatif
+            and date_maximale.month == cls.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER
+        ):
+            return date_maximale.replace(month=cls.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER - 1)
+
+        return date_maximale
 
     @classmethod
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
@@ -206,3 +221,8 @@ class IProfilCandidatTranslator(interface.DomainService):
 
         if noms:
             return DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO(annee=derniere_annee, noms=noms)
+
+    @classmethod
+    @abstractmethod
+    def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
+        raise NotImplementedError

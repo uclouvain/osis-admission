@@ -162,6 +162,12 @@ msgid ""
 "href=\"%(add_url)s\">add a course</a>"
 msgstr ""
 
+msgid ""
+"<a href='https://uclouvain.be/en/research/valodoc/confirmation-eligibility-"
+"doctoral-programme.html' target='_blank'>https://uclouvain.be/en/research/"
+"valodoc/confirmation-eligibility-doctoral-programme.html</a>"
+msgstr ""
+
 #, python-format
 msgid ""
 "<h2>Delete \"%(name)s\" custom mail template?</h2> <p>Are you sure you want "
@@ -496,6 +502,9 @@ msgstr ""
 msgid "Add a paper/presentation for this seminar"
 msgstr ""
 
+msgid "Add a promoter or a CA member"
+msgstr ""
+
 msgid "Add a publication"
 msgstr ""
 
@@ -590,6 +599,9 @@ msgid "Admission requirement"
 msgstr ""
 
 msgid "Admission requirement year"
+msgstr ""
+
+msgid "Admission sent back to the candidate"
 msgstr ""
 
 msgid "Admission statuses"
@@ -699,6 +711,9 @@ msgid ""
 "An international scholarship may be awarded to students as part of a "
 "project. These international grants are awarded by ARES and a scholarship "
 "certificate must be provided."
+msgstr ""
+
+msgid "An invitation has been sent again."
 msgstr ""
 
 msgid ""
@@ -814,7 +829,13 @@ msgstr ""
 msgid "Approval certificate of faculty"
 msgstr ""
 
+msgid "Approval certificate of the CDD"
+msgstr ""
+
 msgid "Approval condition by faculty"
+msgstr ""
+
+msgid "Approval for a course change"
 msgstr ""
 
 msgid "Approval for a late enrolment"
@@ -827,6 +848,13 @@ msgid "Approval to validate"
 msgstr ""
 
 msgid "Approvals"
+msgstr ""
+
+msgid "Approve by PDF"
+msgstr ""
+
+#, python-format
+msgid "Approve on behalf of %(first_name)s %(last_name)s"
 msgstr ""
 
 msgid "Approved"
@@ -876,6 +904,11 @@ msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr ""
 
 #, python-format
+msgid ""
+"Are you sure you want to delete %(first_name)s %(last_name)s as %(role)s?"
+msgstr ""
+
+#, python-format
 msgid "Are you sure you want to delete this experience (%(experience_name)s)?"
 msgstr ""
 
@@ -902,8 +935,14 @@ msgstr ""
 msgid "Are you sure you want to remove \"%(prenom)s %(nom)s\" from the jury?"
 msgstr ""
 
+msgid "Are you sure you want to request signatures for this admission?"
+msgstr ""
+
 #, python-format
 msgid "Are you sure you want to restore \"%(object)s\"?"
+msgstr ""
+
+msgid "Are you sure you want to send the admission back to the candidate?"
 msgstr ""
 
 msgid "Are you sure your want to delete this document?"
@@ -1147,13 +1186,25 @@ msgstr ""
 msgid "CDD Mail templates"
 msgstr ""
 
+msgid "CDD comment about the collaborative program"
+msgstr ""
+
+msgid "CDD comment for the SIC"
+msgstr ""
+
 msgid "CDD configuration"
+msgstr ""
+
+msgid "CDD decision"
 msgstr ""
 
 msgid "CDD manager comment"
 msgstr ""
 
 msgid "CDD opinion"
+msgstr ""
+
+msgid "CDD process"
 msgstr ""
 
 msgid "CEP"
@@ -1523,6 +1574,11 @@ msgstr ""
 msgid "Change the publication for this conference"
 msgstr ""
 
+msgid ""
+"Changes for the access title are not available when the state of the "
+"Previous experience is \"Sufficient\"."
+msgstr ""
+
 msgid "Checklist"
 msgstr ""
 
@@ -1712,6 +1768,9 @@ msgstr ""
 msgid "Confirm the submit"
 msgstr ""
 
+msgid "Confirmation"
+msgstr ""
+
 msgctxt "tab"
 msgid "Confirmation"
 msgstr ""
@@ -1783,6 +1842,12 @@ msgid "Continuing education admission"
 msgstr ""
 
 msgid "Continuing enrolment applications"
+msgstr ""
+
+msgid "Continuing working list"
+msgstr ""
+
+msgid "Continuing working lists"
 msgstr ""
 
 msgid "Coordinates"
@@ -2047,6 +2112,9 @@ msgstr ""
 msgid "Credits earned"
 msgstr ""
 
+msgid "Current funding"
+msgstr ""
+
 msgid "Curriculum"
 msgstr ""
 
@@ -2178,6 +2246,9 @@ msgstr ""
 msgid "Decision of SIC"
 msgstr ""
 
+msgid "Decision of the CDD"
+msgstr ""
+
 msgid "Decision of the faculty"
 msgstr ""
 
@@ -2252,10 +2323,20 @@ msgstr ""
 msgid "Deny reason"
 msgstr ""
 
+msgid ""
+"Depending on your previous experience and your research project, the PhD "
+"Committee may require you to take additional PhD training, up to a maximum "
+"of 60 credits. If so, please indicate here a proposal for additional "
+"training."
+msgstr ""
+
 msgid "Description"
 msgstr ""
 
 msgid "Description of your communication"
+msgstr ""
+
+msgid "Designate as lead supervisor"
 msgstr ""
 
 msgid "Detailed curriculum vitae"
@@ -2354,13 +2435,15 @@ msgstr ""
 msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
+msgid ""
+"Do you confirm the integration of this experience into the current "
+"application?"
+msgstr ""
+
 #, python-format
 msgid ""
 "Do you confirm the sending of this email to the <a href=\"mailto:"
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
-msgstr ""
-
-msgid "Do you confirm the valuation of this experience?"
 msgstr ""
 
 msgid "Do you have a Belgian National Register Number (NISS)?"
@@ -2420,6 +2503,15 @@ msgstr ""
 msgid "Doctorate enrolment applications"
 msgstr ""
 
+msgid "Doctorate thesis field"
+msgstr ""
+
+msgid "Doctorate working list"
+msgstr ""
+
+msgid "Doctorate working lists"
+msgstr ""
+
 msgid "Document"
 msgstr ""
 
@@ -2445,6 +2537,24 @@ msgid "Document type"
 msgstr ""
 
 msgid "Documents"
+msgstr ""
+
+msgid "Documents requested by the CDD are still expected from the candidate."
+msgstr ""
+
+msgid ""
+"Documents requested by the CDD are still expected from the candidate. The "
+"application could be sent to the SIC once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the CDD are still expected from the candidate. The "
+"application will be sent to the SIC once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the SIC are still expected from the candidate. The "
+"application could be sent to the CDD once they have been received."
 msgstr ""
 
 msgid ""
@@ -2497,6 +2607,9 @@ msgid "Dossier submission date"
 msgstr ""
 
 msgid "Double degree:"
+msgstr ""
+
+msgid "Download as PDF"
 msgstr ""
 
 msgid "Download the document"
@@ -2615,10 +2728,23 @@ msgid ""
 "%(author)s."
 msgstr ""
 
+msgid ""
+"Email sent to the EU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+
 msgid "Email sent to the EU+5 candidate when SIC approves an admission."
 msgstr ""
 
+msgid ""
+"Email sent to the NEU+5 candidate when SIC approves a doctorate admission."
+msgstr ""
+
 msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that a financability dispensation "
+"is needed for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2629,6 +2755,11 @@ msgstr ""
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2652,10 +2783,29 @@ msgstr ""
 msgid "Email sent to the candidate when IUFC validate the application."
 msgstr ""
 
+msgid "Email sent to the candidate when SIC approves a doctorate inscription."
+msgstr ""
+
 msgid "Email sent to the candidate when SIC approves an inscription."
 msgstr ""
 
+msgid "Email sent to the candidate when SIC refuses a doctorate admission."
+msgstr ""
+
 msgid "Email sent to the candidate when SIC refuses an admission."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate when the CDD approves a doctorate admission of a "
+"candidat without any Belgian diploma."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate when the CDD approves a doctorate admission of a "
+"candidate with a Belgian diploma."
+msgstr ""
+
+msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2666,6 +2816,11 @@ msgstr ""
 msgid ""
 "Email sent to the candidate when the faculty approve the application without "
 "condition."
+msgstr ""
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
+"authentication of the candidate for a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -2861,6 +3016,9 @@ msgstr ""
 msgid "Extension request not defined."
 msgstr ""
 
+msgid "External"
+msgstr ""
+
 msgid "External enrollment change"
 msgstr ""
 
@@ -2894,6 +3052,9 @@ msgstr ""
 msgid "FNRS"
 msgstr ""
 
+msgid "FNRS, FRIA, FRESH"
+msgstr ""
+
 msgid "FR"
 msgstr ""
 
@@ -2923,9 +3084,6 @@ msgid "FWB equivalent course"
 msgstr ""
 
 msgid "Fac approval"
-msgstr ""
-
-msgid "Fac decision"
 msgstr ""
 
 msgctxt "ways_hear_about_training"
@@ -3025,13 +3183,13 @@ msgstr ""
 msgid "Financability dispensation status"
 msgstr ""
 
+msgid "Financability established by"
+msgstr ""
+
+msgid "Financability established on"
+msgstr ""
+
 msgid "Financability rule"
-msgstr ""
-
-msgid "Financability rule established by"
-msgstr ""
-
-msgid "Financability rule established on"
 msgstr ""
 
 #, python-format
@@ -3140,6 +3298,11 @@ msgid ""
 "the radios buttons allow to select only one value whereas the checkboxes "
 "allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
+msgstr ""
+
+msgid ""
+"For example, a contract, a letter from a supervisor, or any other document "
+"showing that you have been awarded the scholarship on the dates indicated."
 msgstr ""
 
 msgid "For the attention of"
@@ -3342,6 +3505,9 @@ msgstr ""
 msgid "HTML"
 msgstr ""
 
+msgid "Has the PhD project already started?"
+msgstr ""
+
 msgid ""
 "Has this diploma been recognised as equivalent by the French Community of "
 "Belgium?"
@@ -3380,6 +3546,9 @@ msgstr ""
 
 msgctxt "tab"
 msgid "History"
+msgstr ""
+
+msgid "Holder of a PhD with thesis"
 msgstr ""
 
 msgid "Holding reason"
@@ -3668,8 +3837,16 @@ msgid ""
 msgstr ""
 
 msgid ""
+"If known, indicate the name of the laboratory, clinical department or "
+"research centre where the thesis will be carried out"
+msgstr ""
+
+msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
 "defense preparation below before submitting the jury proposition."
+msgstr ""
+
+msgid "If other scholarship, specify"
 msgstr ""
 
 msgid "If other, specify"
@@ -3679,6 +3856,11 @@ msgid ""
 "If the answer to the additional courses question is no, there must be no "
 "additional LU and the communication relating to the additional courses must "
 "be completely empty."
+msgstr ""
+
+msgid ""
+"If you don't have any funding yet, please choose \"Self-funding\" and "
+"explain the considered funding in the \"Comment\" area."
 msgstr ""
 
 msgid ""
@@ -3787,6 +3969,11 @@ msgid "Incomplete field"
 msgstr ""
 
 msgid ""
+"Indicate any completed or interrupted PhD studies in which you are no longer "
+"enrolled."
+msgstr ""
+
+msgid ""
 "Information about a potential cotutelle are to be inputted in the \"Doctoral "
 "project\" part."
 msgstr ""
@@ -3842,13 +4029,25 @@ msgstr ""
 msgid "Institution contacted"
 msgstr ""
 
+msgid "Institution in which the PhD has been realised / started"
+msgstr ""
+
+msgid "Institution in which the PhD has been realised / started."
+msgstr ""
+
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Insufficient"
 msgstr ""
 
+msgid "Integrate"
+msgstr ""
+
 msgid "Interested mark"
+msgstr ""
+
+msgid "Internal"
 msgstr ""
 
 msgid "Internal comment"
@@ -3925,6 +4124,10 @@ msgstr ""
 
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
+msgstr ""
+
+msgid ""
+"It is not possible to go from the \"To validate IUFC\" status to this status."
 msgstr ""
 
 msgid "It is not possible to go from the \"validated\" status to this status."
@@ -4469,6 +4672,9 @@ msgstr ""
 msgid "Maximum number of documents"
 msgstr ""
 
+msgid "Member not found"
+msgstr ""
+
 msgid "Member of supervision group already invited."
 msgstr ""
 
@@ -4678,6 +4884,9 @@ msgstr ""
 msgid "Name of the contact person for the design of the annual program"
 msgstr ""
 
+msgid "Name of the doctoral commission"
+msgstr ""
+
 msgid "Name of the management entity"
 msgstr ""
 
@@ -4708,11 +4917,17 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
+msgid "Next admission"
+msgstr ""
+
 msgid "No"
 msgstr ""
 
 msgid ""
 "No 'ValidationError' exception must be triggered with the the provided data."
+msgstr ""
+
+msgid "No (access to sports facilities on the Saint-Louis campus is free)"
 msgstr ""
 
 msgid "No English studies"
@@ -4726,6 +4941,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "No data"
+msgstr ""
+
+msgid "No defense"
 msgstr ""
 
 msgid "No defense reason"
@@ -4928,6 +5146,11 @@ msgid ""
 "information."
 msgstr ""
 
+msgid ""
+"Once the signatures request is sent, you will not be able to change anything "
+"in the application for admission."
+msgstr ""
+
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr ""
 
@@ -4958,10 +5181,6 @@ msgid "Online payment history"
 msgstr ""
 
 msgid "Only one admission"
-msgstr ""
-
-msgid ""
-"Only the \"to be processed\" status is available from the \"closed\" status."
 msgstr ""
 
 msgid "Opinion of the CA following the format provided by the CDD"
@@ -5231,6 +5450,9 @@ msgstr ""
 msgid "PhD"
 msgstr ""
 
+msgid "PhD Subject Committee annex document link"
+msgstr ""
+
 msgid "PhD already done"
 msgstr ""
 
@@ -5297,6 +5519,9 @@ msgstr ""
 msgid "Please confirm the withdrawal of the candidate."
 msgstr ""
 
+msgid "Please correct the errors below"
+msgstr ""
+
 msgid "Please enter your work email address"
 msgstr ""
 
@@ -5329,6 +5554,11 @@ msgid ""
 msgstr ""
 
 msgid "Please justify why the member does not have a doctor title"
+msgstr ""
+
+msgid ""
+"Please look up the website of your domain doctoral committee on how to "
+"download the document."
 msgstr ""
 
 #, python-format
@@ -5418,9 +5648,6 @@ msgstr ""
 msgid "Pre-admission"
 msgstr ""
 
-msgid "Pre-admission submission date"
-msgstr ""
-
 msgid "Prerequisite courses"
 msgstr ""
 
@@ -5449,6 +5676,9 @@ msgstr ""
 
 #, python-format
 msgid "Preview <em>%(name)s</em> custom mail template"
+msgstr ""
+
+msgid "Previous admission"
 msgstr ""
 
 msgid "Previous confirmation exams"
@@ -5499,7 +5729,13 @@ msgstr ""
 msgid "Project resume"
 msgstr ""
 
+msgid "Project resume (max. 2000 characters)"
+msgstr ""
+
 msgid "Project title"
+msgstr ""
+
+msgid "Project title (max. 100 characters)"
 msgstr ""
 
 msgid "Promoters"
@@ -5544,6 +5780,12 @@ msgid "Proof of regular registration"
 msgstr ""
 
 msgid "Proof of scholarship"
+msgstr ""
+
+msgid "Proposal approved"
+msgstr ""
+
+msgid "Proposal summary"
 msgstr ""
 
 msgid "Proposed new deadline"
@@ -5883,6 +6125,9 @@ msgstr ""
 msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
+msgid "Request signatures"
+msgstr ""
+
 msgid "Request the documents from the candidate"
 msgstr ""
 
@@ -5927,6 +6172,9 @@ msgid "Research scholarship"
 msgstr ""
 
 msgid "Research seminar"
+msgstr ""
+
+msgid "Resend invitation"
 msgstr ""
 
 msgid "Reset"
@@ -6085,6 +6333,9 @@ msgstr ""
 msgid "SIC Approval"
 msgstr ""
 
+msgid "SIC comment for the CDD"
+msgstr ""
+
 msgid "SIC comment for the faculty"
 msgstr ""
 
@@ -6145,6 +6396,9 @@ msgstr ""
 msgid "Scholarship end date"
 msgstr ""
 
+msgid "Scholarship end date prior to any possible renewal."
+msgstr ""
+
 msgid "Scholarship start date"
 msgstr ""
 
@@ -6156,6 +6410,12 @@ msgstr ""
 
 msgctxt "verb"
 msgid "Search"
+msgstr ""
+
+msgid "Search a person by surname"
+msgstr ""
+
+msgid "Search a tutor by name"
 msgstr ""
 
 msgid "Search for an EU code (outside the EU of the form)"
@@ -6235,13 +6495,22 @@ msgstr ""
 msgid "Send a mail to the faculty"
 msgstr ""
 
+msgid "Send an email"
+msgstr ""
+
 msgid "Send an information email"
+msgstr ""
+
+msgid "Send back to the candidate"
 msgstr ""
 
 msgid "Send selected candidate to digit"
 msgstr ""
 
 msgid "Send the message"
+msgstr ""
+
+msgid "Send to CDD"
 msgstr ""
 
 msgid "Send to EPC"
@@ -6316,6 +6585,9 @@ msgid "Show the checklist menu"
 msgstr ""
 
 msgid "Show the states of the checklist"
+msgstr ""
+
+msgid "Signature requests sent"
 msgstr ""
 
 msgid "Signatures"
@@ -6427,6 +6699,9 @@ msgstr ""
 msgid "Specified"
 msgstr ""
 
+msgid "Specify employer and function"
+msgstr ""
+
 msgid "Specify if other"
 msgstr ""
 
@@ -6493,6 +6768,9 @@ msgid "Submission date:"
 msgstr ""
 
 msgid "Submit"
+msgstr ""
+
+msgid "Submit my decision"
 msgstr ""
 
 msgid "Submit selected activities"
@@ -6707,6 +6985,11 @@ msgid ""
 "this action."
 msgstr ""
 
+msgid ""
+"The Previous experience must not be in the \"Sufficient\" status in order to "
+"do this action."
+msgstr ""
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -6719,6 +7002,13 @@ msgid "The acronym of the scholarship grant"
 msgstr ""
 
 msgid "The activity title"
+msgstr ""
+
+#, python-format
+msgid ""
+"The applicant is registered in the year %(year)s. Click <a class='bold-text "
+"underline-text' href='%(full_training_choice_url)s'>here</a> to change the "
+"academic year."
 msgstr ""
 
 msgid "The application can only be validated if it was previously approved."
@@ -6878,10 +7168,18 @@ msgstr ""
 msgid "The dossier has been confirmed with the following contact address:"
 msgstr ""
 
+msgid "The dossier is currently in CDD"
+msgstr ""
+
 msgid "The dossier is currently in SIC"
 msgstr ""
 
 msgid "The dossier is currently in faculty"
+msgstr ""
+
+#, python-format
+msgid ""
+"The e-mail for the CDD decision has been sent on %(sent_at)s by %(sender)s."
 msgstr ""
 
 #, python-format
@@ -6938,8 +7236,19 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid ""
+"The format of the documents to be uploaded below may vary from one CDD to "
+"another. Find out more on your CDD's website or from your doctoral manager."
+msgstr ""
+
+msgid ""
 "The global status of the application must be one of the following in order "
 "to realize this action: "
+msgstr ""
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following in order "
+"to submit the dossier to the CDD: %(statuses)s."
 msgstr ""
 
 #, python-format
@@ -7027,6 +7336,9 @@ msgstr ""
 msgid "The person concerned"
 msgstr ""
 
+msgid "The person is in quarantine."
+msgstr ""
+
 msgid ""
 "The person whose the secondary studies have been valuated by this admission"
 msgstr ""
@@ -7057,13 +7369,24 @@ msgstr ""
 msgid "The proposition must be in draft form to realize this action."
 msgstr ""
 
+msgid "The proposition must be in the 'waiting for signature' status."
+msgstr ""
+
 msgid "The proposition must be managed by FAC to realized this action."
 msgstr ""
 
 msgid "The proposition must be managed by SIC to realized this action."
 msgstr ""
 
+msgid "The proposition must be managed by the CDD to realized this action."
+msgstr ""
+
 msgid "The proposition must be submitted to realize this action."
+msgstr ""
+
+msgid ""
+"The proposition must involve a change of course and must have a defined "
+"access condition."
 msgstr ""
 
 msgid "The proposition must not be cancelled to realize this action."
@@ -7126,6 +7449,11 @@ msgid ""
 msgstr ""
 
 msgid "The submitted information is not consistent with information requested."
+msgstr ""
+
+msgid ""
+"The summary of the proposal in PDF format is being generated. Please come "
+"back later to access it."
 msgstr ""
 
 #, python-format
@@ -7307,15 +7635,18 @@ msgstr ""
 
 #, python-format
 msgid ""
-"This experience has been added by the applicant in another application, to "
-"proceed to a modification, click on his/her <a href=\"%(admission_url)s\" "
-"target=\"_blank\">other application %(admission_reference)s</a>."
+"This experience has been added by the applicant in <a "
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>. You "
+"have the option to integrate it in the current application."
 msgstr ""
 
 msgid "This field is required if the first name is missing."
 msgstr ""
 
 msgid "This field is required if the surname is missing."
+msgstr ""
+
+msgid "This field is required."
 msgstr ""
 
 #, python-format
@@ -7423,6 +7754,9 @@ msgid ""
 msgstr ""
 
 msgid "To the attention of"
+msgstr ""
+
+msgid "To validate IUFC"
 msgstr ""
 
 msgid ""
@@ -7648,9 +7982,6 @@ msgctxt "decision-checklist"
 msgid "Validated"
 msgstr ""
 
-msgid "Valuate"
-msgstr ""
-
 msgid "Valuated diplomas or experiences:"
 msgstr ""
 
@@ -7783,6 +8114,9 @@ msgstr ""
 msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 
+msgid "Work contract type"
+msgstr ""
+
 msgid "Work start date"
 msgstr ""
 
@@ -7820,6 +8154,11 @@ msgstr ""
 "membership cost, which is €12, will be added to your tuition fee."
 
 msgid ""
+"Would you like to carry out your thesis under joint supervision with another "
+"institution?"
+msgstr ""
+
+msgid ""
 "Would you like to change your UCLouvain enrolment for this academic year?"
 msgstr ""
 
@@ -7851,6 +8190,10 @@ msgstr ""
 msgid ""
 "Would you like to switch courses this academic year at UCLouvain? (<a "
 "href=\"%(url)s\" target=\"_blank\">Informations</a>)"
+msgstr ""
+
+msgid ""
+"Write your resume in the language decided with your accompanying committee."
 msgstr ""
 
 msgid "Writing ability"
@@ -7908,9 +8251,6 @@ msgstr "Yes, only in Mons (€12)"
 msgid "Yes, only in Saint-Gilles (E12)"
 msgstr "Yes, only in Saint-Gilles (€12)"
 
-msgid "Yes, only in Saint-Louis (E12)"
-msgstr "Yes, only in Saint-Louis (€12)"
-
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"
 
@@ -7921,6 +8261,9 @@ msgid "Yes,No,Incomplete field"
 msgstr ""
 
 msgid "You appear to have unsaved changes, which will be lost."
+msgstr ""
+
+msgid "You are about to submit the application to the CDD."
 msgstr ""
 
 msgid "You are about to submit the application to the Faculty."
@@ -7989,6 +8332,11 @@ msgid ""
 msgstr ""
 
 msgid "You can only select courses that are managed by the program manager."
+msgstr ""
+
+msgid ""
+"You can only transition to the \"To validate IUFC\" status from the "
+"\"Approved\" status."
 msgstr ""
 
 msgid ""
@@ -8132,10 +8480,16 @@ msgstr ""
 msgid "You must choose an admission requirement."
 msgstr ""
 
+msgid "You must correct your application before you can request signatures."
+msgstr ""
+
 msgid ""
 "You must have worked in Belgium and your monthly salary must be at least "
 "half of the guaranteed minimum average monthly salary set by the National "
 "Labour Council. This corresponded to E903 in 2023."
+msgstr ""
+
+msgid "You must reference a person in UCLouvain."
 msgstr ""
 
 msgid "You must set a lead supervisor."
@@ -8189,6 +8543,11 @@ msgstr ""
 msgid ""
 "Your export request has been planned, you will receive a notification as "
 "soon as it is available."
+msgstr ""
+
+msgid ""
+"Your joint supervision information can be completed later. Please input "
+"\"No\" if you don't have information yet."
 msgstr ""
 
 msgid "Your note has been added."

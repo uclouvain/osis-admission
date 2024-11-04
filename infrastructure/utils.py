@@ -36,11 +36,11 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import SUPPORTED_MIME_TYPES
-from admission.contrib.models import (
+from admission.models import (
     SupervisionActor,
     AdmissionFormItem,
 )
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import CleConfigurationItemFormulaire
@@ -588,6 +588,7 @@ CORRESPONDANCE_CHAMPS_AUTORISATION = {
 CORRESPONDANCE_CHAMPS_SYSTEME = {
     'DOSSIER_ANALYSE': 'pdf_recap',
     'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
+    'ATTESTATION_ACCORD_CDD': 'cdd_approval_certificate',
     'ATTESTATION_REFUS_FACULTAIRE': 'fac_refusal_certificate',
     'ATTESTATION_ACCORD_SIC': 'sic_approval_certificate',
     'ATTESTATION_ACCORD_ANNEXE_SIC': 'sic_annexe_approval_certificate',

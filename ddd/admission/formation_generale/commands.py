@@ -104,6 +104,7 @@ class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
     sigle_formation: str
     annee_formation: int
     poursuite_de_cycle: str
+    est_inscription_tardive: bool
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -450,6 +451,12 @@ class ApprouverInscriptionTardiveParFaculteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ApprouverReorientationExterneParFaculteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
@@ -523,14 +530,12 @@ class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
 class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
     uuid_proposition: str
     financabilite_regle: str
-    etabli_par: str
     gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierFinancabiliteNonConcerneeCommand(interface.CommandRequest):
     uuid_proposition: str
-    etabli_par: str
     gestionnaire: str
 
 

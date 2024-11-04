@@ -28,6 +28,7 @@ from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.checklist import Checklist
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
@@ -52,7 +53,9 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPSansPromoteurReferenceFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
+    PropositionAdmissionSC3DPConfirmeeFactory,
 )
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
@@ -143,6 +146,7 @@ class PropositionInMemoryRepository(
             PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
             PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
             PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(),
+            PropositionAdmissionSC3DPConfirmeeFactory(),
         ]
 
     @classmethod
@@ -223,7 +227,7 @@ class PropositionInMemoryRepository(
             type_admission=proposition.type_admission.name,
             reference=formater_reference(
                 reference=proposition.reference,
-                nom_campus_inscription=doctorat.campus_inscription,
+                nom_campus_inscription=doctorat.campus_inscription.nom,
                 sigle_entite_gestion=secteur_doctorat,
                 annee=proposition.formation_id.annee,
             ),
@@ -291,12 +295,44 @@ class PropositionInMemoryRepository(
             documents_demandes=proposition.documents_demandes,
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
+            financabilite_regle_calcule=proposition.financabilite_regle_calcule.name
+            if proposition.financabilite_regle_calcule
+            else '',
+            financabilite_regle_calcule_situation=proposition.financabilite_regle_calcule_situation.name
+            if proposition.financabilite_regle_calcule_situation
+            else '',
+            financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
+            financabilite_regle=proposition.financabilite_regle.name if proposition.financabilite_regle else '',
+            financabilite_etabli_par=proposition.financabilite_etabli_par,
+            financabilite_etabli_le=proposition.financabilite_etabli_le,
+            financabilite_derogation_statut=proposition.financabilite_derogation_statut.name
+            if proposition.financabilite_derogation_statut
+            else '',
+            financabilite_derogation_premiere_notification_le=(
+                proposition.financabilite_derogation_premiere_notification_le
+            ),
+            financabilite_derogation_premiere_notification_par=(
+                proposition.financabilite_derogation_premiere_notification_par
+            ),
+            financabilite_derogation_derniere_notification_le=(
+                proposition.financabilite_derogation_derniere_notification_le
+            ),
+            financabilite_derogation_derniere_notification_par=(
+                proposition.financabilite_derogation_derniere_notification_par
+            ),
+            certificat_approbation_cdd=proposition.certificat_approbation_cdd,
+            certificat_approbation_sic=proposition.certificat_approbation_sic,
+            certificat_approbation_sic_annexe=proposition.certificat_approbation_sic_annexe,
+            doit_fournir_visa_etudes=proposition.doit_fournir_visa_etudes,
+            visa_etudes_d=proposition.visa_etudes_d,
+            certificat_autorisation_signe=proposition.certificat_autorisation_signe,
         )
 
     @classmethod
     def get_dto_for_gestionnaire(
         cls,
         entity_id: 'PropositionIdentity',
+        unites_enseignement_translator: 'IUnitesEnseignementTranslator',
     ) -> 'PropositionGestionnaireDTO':
         proposition = cls.get(entity_id=entity_id)
         propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)
@@ -322,4 +358,13 @@ class PropositionInMemoryRepository(
             ),
             cotutelle=GroupeDeSupervisionInMemoryRepository.get_cotutelle_dto(uuid_proposition=entity_id.uuid),
             profil_soumis_candidat=None,
+        )
+
+    @classmethod
+    def initialiser_checklist_proposition(cls, proposition_id: 'PropositionIdentity'):
+        proposition = cls.get(proposition_id)
+        Checklist.initialiser(
+            proposition=proposition,
+            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
+            annee_courante=proposition.annee_calculee,
         )

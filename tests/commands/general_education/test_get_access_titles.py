@@ -31,8 +31,8 @@ from uuid import UUID
 import freezegun
 from django.test import TestCase
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import (
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )

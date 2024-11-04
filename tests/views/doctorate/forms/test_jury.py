@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
 )
@@ -57,7 +57,7 @@ class DoctorateAdmissionJuryFormViewTestCase(TestCase):
             training__academic_year=academic_years[0],
             cotutelle=False,
             supervision_group=promoter.process,
-            pre_admission_submission_date=datetime.datetime.now(),
+            submitted_at=datetime.datetime.now(),
             passed_confirmation=True,
         )
 

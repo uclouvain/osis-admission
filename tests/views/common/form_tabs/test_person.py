@@ -37,7 +37,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -144,6 +144,10 @@ class PersonFormTestCase(TestCase):
             candidate=cls.general_admission.candidate,
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
+
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
 
         cls.doctorate_url = resolve_url('admission:doctorate:update:person', uuid=cls.doctorate_admission.uuid)
 
@@ -458,8 +462,7 @@ class PersonFormTestCase(TestCase):
                 'id_card': [],
             },
         )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
+        self.assertTrue(form.is_valid())
 
         # The candidate indicated that he has a belgian national number -> the belgian national number is required
         form = AdmissionPersonForm(
@@ -483,8 +486,7 @@ class PersonFormTestCase(TestCase):
                 'id_card': [],
             },
         )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
+        self.assertTrue(form.is_valid())
 
         form = AdmissionPersonForm(
             data={
@@ -532,18 +534,6 @@ class PersonFormTestCase(TestCase):
                 'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
-                'id_card': [],
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card', []))
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.ID_CARD_NUMBER.name,
                 'id_card_number': '0123456',
                 'id_card_expiry_date': datetime.date(2020, 1, 1),
                 'id_card': ['file-2-token'],
@@ -578,18 +568,6 @@ class PersonFormTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_number', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_expiry_date', []))
         self.assertEqual(form.cleaned_data.get('passport'), ['file-1-token'])
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.PASSPORT_NUMBER.name,
-                'passport': [],
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport', []))
 
         form = AdmissionPersonForm(
             data={
@@ -979,3 +957,12 @@ class PersonFormTestCase(TestCase):
         self.client.force_login(user=self.sic_manager_user)
         response = self.client.post(self.doctorate_url, {})
         self.assertEqual(response.status_code, 200)
+
+    def test_doctorate_program_manager_is_forbidden(self):
+        self.client.force_login(user=self.doctorate_program_manager_user)
+
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.post(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)

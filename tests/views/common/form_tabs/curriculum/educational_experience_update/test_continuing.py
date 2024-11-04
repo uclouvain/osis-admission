@@ -33,7 +33,7 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.constants import CONTEXT_CONTINUING
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (

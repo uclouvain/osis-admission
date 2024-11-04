@@ -35,16 +35,16 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import (
+from admission.models import (
     EPCInjection as AdmissionEPCInjection,
     ContinuingEducationAdmission,
     DoctorateAdmission,
 )
-from admission.contrib.models.base import (
+from admission.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.contrib.models.epc_injection import EPCInjectionType
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
@@ -67,7 +67,11 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
 from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection, ExperienceType
+from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
+    ExperienceType,
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
 from reference.tests.factories.country import CountryFactory
 
 
@@ -208,6 +212,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             person=self.general_admission.candidate,
             type_experience=ExperienceType.PROFESSIONAL.name,
             experience_uuid=self.experience.uuid,
+            status=CurriculumEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.general_form_url)
@@ -215,23 +220,38 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
 
         cv_injection.delete()
 
-        # The admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
-            admission=self.general_admission,
+        # The experience has been injected from another admission
+        other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
+
+        other_admission_injection = AdmissionEPCInjection.objects.create(
+            admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
         )
 
         response = self.client.get(self.general_form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        AdmissionProfessionalValuatedExperiencesFactory(
-            baseadmission=self.general_admission, professionalexperience=self.experience
+        other_valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=self.experience,
         )
 
         response = self.client.get(self.general_form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        admission_injection.delete()
+        other_admission.delete()
+        other_valuation.delete()
+
+        # The current admission has been injected
+        admission_injection = AdmissionEPCInjection.objects.create(
+            admission=self.general_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+
+        response = self.client.get(self.general_form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_general_form_initialization(self):
         self.client.force_login(self.sic_manager_user)

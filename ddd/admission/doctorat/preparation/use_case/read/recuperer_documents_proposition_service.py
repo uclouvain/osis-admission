@@ -42,7 +42,6 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums import TypeItemFormulaire
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
@@ -70,17 +69,14 @@ def recuperer_documents_proposition(
         groupe_supervision_repository=groupe_supervision_repository,
         promoteur_translator=promoteur_translator,
         membre_ca_translator=membre_ca_translator,
-    )
-    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
-        proposition_uuid=cmd.uuid_proposition,
-        type=TypeItemFormulaire.DOCUMENT.name,
+        question_specifique_translator=question_specifique_translator,
     )
 
     # WHEN
     documents_dto = emplacements_documents_demande_translator.recuperer_emplacements_dto(
         personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
-        questions_specifiques=questions_specifiques_dtos,
+        questions_specifiques=resume_dto.questions_specifiques_dtos,
     )
 
     # THEN

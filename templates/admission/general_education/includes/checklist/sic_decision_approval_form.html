@@ -105,6 +105,7 @@
       </div>
     {% endif %}
 
+    {% if view.is_general %}
     {% bootstrap_field sic_decision_approval_form.with_additional_approval_conditions %}
     <div
         id="sic-decision-additional-approval-conditions-container"
@@ -135,6 +136,7 @@
           {% endfor %}
         </table>
     </div>
+    {% endif %}
 
     {% bootstrap_field sic_decision_approval_form.with_prerequisite_courses %}
     <div
@@ -323,7 +325,9 @@
     <script>
         $(document).ready(function(){
             {# Show / Hide fields depending on other field values #}
+            {% if view.is_general %}
             $('input[name="sic-decision-approval-with_additional_approval_conditions"]:checked').change();
+            {% endif %}
             $('input[name="sic-decision-approval-with_prerequisite_courses"]:checked').change();
 
             {# Initialize the custom select2 component #}
@@ -340,6 +344,7 @@
 
   {% endif %}
 
+  {% if view.is_general %}
   <script>
       $(document).ready(function(){
           function formsetInitialization() {
@@ -364,6 +369,7 @@
           {% endif %}
       })
   </script>
+  {% endif %}
 
   <style>
     #sic-approval-requested-documents-selects tbody tr.tab-name {

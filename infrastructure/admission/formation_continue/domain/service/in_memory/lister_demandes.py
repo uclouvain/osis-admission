@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from admission.ddd.admission.formation_continue.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
@@ -49,6 +49,8 @@ class ListerDemandesInMemory(IListerDemandesService):
         inscription_requise: Optional[bool] = None,
         paye: Optional[bool] = None,
         marque_d_interet: Optional[bool] = None,
+        mode_filtres_etats_checklist: Optional[str] = '',
+        filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
@@ -56,12 +58,10 @@ class ListerDemandesInMemory(IListerDemandesService):
         taille_page: Optional[int] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
 
-        result = PaginatedList()
+        result = PaginatedList(id_attribute='uuid')
 
         for proposition in PropositionInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
             result.append(cls._load_from_continuing_proposition(proposition))
-
-        result.total_count = len(result)
 
         return result
 

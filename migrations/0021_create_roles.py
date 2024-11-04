@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models.enums.actor_type import ActorType
 
 
 def forward(apps, schema_editor):
@@ -10,15 +10,19 @@ def forward(apps, schema_editor):
     Promoter = apps.get_model('admission', 'Promoter')
     CommitteeMember = apps.get_model('admission', 'CommitteeMember')
 
-    Promoter.objects.bulk_create([
-        Promoter(person_id=s.actor_ptr.person_id)
-        for s in SupervisionActor.objects.filter(type=ActorType.PROMOTER.name).distinct('person')
-    ])
+    Promoter.objects.bulk_create(
+        [
+            Promoter(person_id=s.actor_ptr.person_id)
+            for s in SupervisionActor.objects.filter(type=ActorType.PROMOTER.name).distinct('person')
+        ]
+    )
 
-    CommitteeMember.objects.bulk_create([
-        CommitteeMember(person_id=s.actor_ptr.person_id)
-        for s in SupervisionActor.objects.filter(type=ActorType.CA_MEMBER.name).distinct('person')
-    ])
+    CommitteeMember.objects.bulk_create(
+        [
+            CommitteeMember(person_id=s.actor_ptr.person_id)
+            for s in SupervisionActor.objects.filter(type=ActorType.CA_MEMBER.name).distinct('person')
+        ]
+    )
 
 
 class Migration(migrations.Migration):
