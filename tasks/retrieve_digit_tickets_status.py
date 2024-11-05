@@ -36,12 +36,16 @@ from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission, AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
+    BaseAdmission,
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand, RecupererMatriculeDigitQuery,
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
+    RecupererMatriculeDigitQuery,
 )
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.infrastructure.admission.domain.service.digit import TEMPORARY_ACCOUNT_GLOBAL_ID_PREFIX
@@ -55,8 +59,11 @@ from base.models.person_creation_ticket import PersonTicketCreation, PersonTicke
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tasks import send_pictures_to_card_app
 from osis_profile.models import (
-    ProfessionalExperience, EducationalExperience, BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative,
+    ProfessionalExperience,
+    EducationalExperience,
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
 )
 from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
@@ -73,11 +80,14 @@ def run(request=None):
         return
 
     from infrastructure.messages_bus import message_bus_instance
+
     logger.info(f"{PREFIX_TASK} starting task...")
 
     # Retrieve list of tickets
     logger.info(f"{PREFIX_TASK} fetch pending DigIT tickets...")
-    tickets_pending = message_bus_instance.invoke(RetrieveListeTicketsEnAttenteQuery())  # type: List[StatutTicketPersonneDTO]
+    tickets_pending = message_bus_instance.invoke(
+        RetrieveListeTicketsEnAttenteQuery()
+    )  # type: List[StatutTicketPersonneDTO]
     logger.info(f"{PREFIX_TASK} pending DigIT tickets..." + str(tickets_pending))
 
     for ticket in tickets_pending:
@@ -95,7 +105,7 @@ def run(request=None):
             logger.exception(f"{PREFIX_TASK} An error occured during processing ticket")
             PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(
                 status=PersonTicketCreationStatus.ERROR.name,
-                errors=[{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}]
+                errors=[{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': repr(e)}],
             )
 
     # Handle response when task is ran as a cmd from admin panel
@@ -111,13 +121,8 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         person=ticket_rowdb.person,
         created_at__lt=ticket_rowdb.created_at,
     ).exclude(
-        Q(uuid=ticket.uuid) |
-        Q(
-            status__in=[
-                PersonTicketCreationStatus.DONE.name,
-                PersonTicketCreationStatus.DONE_WITH_WARNINGS.name
-            ]
-        )
+        Q(uuid=ticket.uuid)
+        | Q(status__in=[PersonTicketCreationStatus.DONE.name, PersonTicketCreationStatus.DONE_WITH_WARNINGS.name])
     )
     if qs_pending_errored_tickets.exists():
         raise Exception(
@@ -125,6 +130,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
         )
 
     from admission.infrastructure.admission.repository.digit import DigitRepository
+
     noma = DigitRepository.get_registration_id_sent_to_digit(global_id=ticket.matricule)
 
     logger.info(f"{PREFIX_TASK} fetch matricule DigIT from noma (NOMA: {noma})")
@@ -154,23 +160,28 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             f"candidate global_id ({candidat.global_id}) is already the same as DigIT response ({digit_matricule})"
         )
     else:
-        msg = f"candidate global_id ({candidat.global_id}) is not the same as DigIT response ({digit_matricule}) " \
-              f"for noma {noma}. Please verify data integrity !"
+        msg = (
+            f"candidate global_id ({candidat.global_id}) is not the same as DigIT response ({digit_matricule}) "
+            f"for noma {noma}. Please verify data integrity !"
+        )
         logger.info(f"{PREFIX_TASK} {msg}")
         PersonTicketCreation.objects.filter(uuid=ticket.uuid).update(
             status=PersonTicketCreationStatus.ERROR.name,
-            errors=[{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': msg}]
+            errors=[{"errorCode": {"errorCode": "ERROR_DURING_RETRIEVE_DIGIT_TICKET"}, 'msg': msg}],
         )
         return
 
     try:
-        proposition_fusion = PersonMergeProposal.objects.select_related(
-            'proposal_merge_person'
-        ).filter(
-            original_person_id=candidat.pk,
-            status=PersonMergeStatus.IN_PROGRESS.name,
-            proposal_merge_person__isnull=False,
-        ).exclude(selected_global_id='').get()
+        proposition_fusion = (
+            PersonMergeProposal.objects.select_related('proposal_merge_person')
+            .filter(
+                original_person_id=candidat.pk,
+                status=PersonMergeStatus.IN_PROGRESS.name,
+                proposal_merge_person__isnull=False,
+            )
+            .exclude(selected_global_id='')
+            .get()
+        )
         logger.info(
             f"{PREFIX_TASK} Person merge proposal found in valid state for candidate "
             f"(PK: {candidat.pk} - UUID: {candidat.uuid})"
@@ -227,9 +238,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                             model.objects.get(person=proposition_fusion.original_person).delete()
 
                 if model == BaseAdmission:
-                    admissions = model.objects.filter(
-                        **{field_name: proposition_fusion.original_person}
-                    )
+                    admissions = model.objects.filter(**{field_name: proposition_fusion.original_person})
                     for admission in admissions:
                         admission.candidate_id = personne_connue.pk
                         if admission.valuated_secondary_studies_person_id:
@@ -243,9 +252,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                     candidate_high_school_diplomas = model.objects.filter(
                         **{field_name: proposition_fusion.original_person}
                     )
-                    known_person_high_school_diplomas = model.objects.filter(
-                        **{field_name: personne_connue}
-                    )
+                    known_person_high_school_diplomas = model.objects.filter(**{field_name: personne_connue})
                     if candidate_high_school_diplomas.exists() and known_person_high_school_diplomas.exists():
                         alternative_suppr = model == HighSchoolDiplomaAlternative
                         a_supprimer = list(known_person_high_school_diplomas.values_list('uuid', flat=True))
@@ -264,8 +271,11 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                         f"{PREFIX_TASK} {len(known_person_experiences)} instances of {model.__name__} of known person"
                     )
                     curex_to_merge = [
-                        UUID(experience_uuid) for experience_uuid in
-                        (proposition_fusion.professional_curex_to_merge + proposition_fusion.educational_curex_to_merge)
+                        UUID(experience_uuid)
+                        for experience_uuid in (
+                            proposition_fusion.professional_curex_to_merge
+                            + proposition_fusion.educational_curex_to_merge
+                        )
                     ]
 
                     # always keep curex from candidate and delete known_person curex that has not been selected
@@ -306,9 +316,9 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                         experience.save()
 
                 else:
-                    updated_count = model.objects.filter(
-                        **{field_name: proposition_fusion.original_person}
-                    ).update(**{field_name: personne_connue})
+                    updated_count = model.objects.filter(**{field_name: proposition_fusion.original_person}).update(
+                        **{field_name: personne_connue}
+                    )
                     logger.info(
                         f"{PREFIX_TASK} Link {updated_count} instances of {model.__name__}"
                         f" from candidate to known person"
@@ -334,12 +344,8 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
             f"(Status: IN_PROGRESS / selected_global_id not empty / proposal_merge_person exist)"
         )
 
-    logger.info(f"{PREFIX_TASK} send signaletique into EPC")
     _injecter_signaletique_a_epc(digit_matricule)
-    if settings.USE_CELERY:
-        # TODO refactor to create a model which monitor sending picture to card
-        send_pictures_to_card_app.run.delay(global_id=digit_matricule)
-    logger.info(f"{PREFIX_TASK} send picture to card")
+    _injecter_photo_a_card(digit_matricule)
     logger.info(f"{PREFIX_TASK} ####### END PROCESS SUCCESSFUL DIGIT RESPONSE #######")
 
 
@@ -374,6 +380,7 @@ def _trigger_epc_non_academic_curriculum_deletion(experience_uuid, noma, personn
 
 
 def _injecter_signaletique_a_epc(matricule: str):
+    logger.info(f"{PREFIX_TASK} send signaletique into EPC")
     from admission.services.injection_epc.injection_signaletique import InjectionEPCSignaletique
     periodes_actives = PeriodeSoumissionTicketDigitTranslator.get_periodes_actives()
     demande = PropositionRepository.get_active_period_submitted_proposition(
@@ -381,6 +388,25 @@ def _injecter_signaletique_a_epc(matricule: str):
     )
     admission = GeneralEducationAdmission.objects.get(uuid=demande.entity_id.uuid)
     InjectionEPCSignaletique().injecter(admission=admission)
+
+
+def _injecter_photo_a_card(matricule: str):
+    from base.models.picture_to_card_task import initialiser_call_to_card, NoPictureToSendException, \
+        PictureAlreadySentException, PictureBeingSentOrInErrorException
+
+    try:
+        task_uuid = initialiser_call_to_card(matricule)
+        if settings.USE_CELERY:
+            transaction.on_commit(
+                lambda: send_pictures_to_card_app.run.delay(task_uuid=task_uuid)
+            )
+        logger.info(f"{PREFIX_TASK} send picture to card")
+    except NoPictureToSendException:
+        logger.info(f"{PREFIX_TASK} No picture to send to card")
+    except PictureAlreadySentException:
+        logger.info(f"{PREFIX_TASK} picture already sent to card")
+    except PictureBeingSentOrInErrorException:
+        logger.info(f"{PREFIX_TASK} picture being sent to card or in error state")
 
 
 def _update_non_empty_fields(source_obj: Model, target_obj: Model):
@@ -391,13 +417,18 @@ def _update_non_empty_fields(source_obj: Model, target_obj: Model):
         field_name = field.name
         source_value = getattr(source_obj, field_name)
         # Skip fields that should not be updated
-        if field.primary_key or field.name in [
-            'uuid',
-            'user',
-            'external_id',
-            'global_id',
-            'email',
-        ] or not source_value:
+        if (
+            field.primary_key
+            or field.name
+            in [
+                'uuid',
+                'user',
+                'external_id',
+                'global_id',
+                'email',
+            ]
+            or not source_value
+        ):
             continue
         setattr(target_obj, field_name, source_value)
 

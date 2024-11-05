@@ -27,7 +27,7 @@
 from django.utils import translation
 
 from admission.exports.utils import admission_generate_pdf
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 
 
 def admission_pdf_canvas(task_uuid, language=None):

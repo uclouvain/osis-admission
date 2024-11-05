@@ -37,8 +37,8 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.base import (
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
@@ -232,6 +232,13 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
 
         htmx_info = json.loads(response.headers['HX-Trigger'])
         self.assertFalse(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
+        self.assertEqual(
+            htmx_info.get('formValidation', {}).get('select_access_title_tooltip'),
+            gettext(
+                'Changes for the access title are not available when the state of the Previous experience '
+                'is "Sufficient".'
+            ),
+        )
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -441,7 +448,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         )
 
         self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
+            recuperer_conditions_acces_par_formation(TrainingType.FORMATION_PHD.name),
             [
                 (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
                 (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),

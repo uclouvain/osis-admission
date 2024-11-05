@@ -26,11 +26,11 @@
 import logging
 
 from django.conf import settings
-from django.db.models import Q, Exists, OuterRef
+from django.db.models import Q, Exists, OuterRef, When, Case, Value
 
 from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus, EPCInjection
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus, EPCInjection
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from backoffice.celery import app as celery_app
 from base.models.person_merge_proposal import PersonMergeStatus
@@ -57,15 +57,9 @@ def run():  # pragma: no cover
         candidate__email__endswith='uclouvain.be',
         # Aucune erreur syntaxique de signalétique
         candidate__personmergeproposal__validation__valid=True,
-        # Doit être financable ou non concerné
-        checklist__current__financabilite__statut__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'],
     ).exclude(
-        # Doit avoir une situation de financabilité + une date + un auteur
-        Q(generaleducationadmission__financability_rule='')
-        | Q(generaleducationadmission__financability_rule_established_on__isnull=True)
-        | Q(generaleducationadmission__financability_rule_established_by_id__isnull=True)
         # Un noma doit exister
-        | Q(candidate__personmergeproposal__registration_id_sent_to_digit='')
+        Q(candidate__personmergeproposal__registration_id_sent_to_digit='')
         # Aucune erreur avec Digit
         | Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses()),
     ).annotate(
@@ -78,9 +72,34 @@ def run():  # pragma: no cover
         )
     ).exclude(
         a_ete_injecte=True
+    ).annotate(
+        financabilite_completee=Case(
+            When(
+                ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
+                | Q(
+                    checklist__current__financabilite__status='GEST_REUSSITE',
+                    checklist__current__financanbilite__extra__reussite='financable',
+                    generaleducationadmission__financability_rule=''
+                )
+                | Q(
+                    checklist__current__financabilite__status='GEST_REUSSITE',
+                    generaleducationadmission__financability_established_on__isnull=True
+                )
+                | Q(
+                    checklist__current__financabilite__status='GEST_REUSSITE',
+                    generaleducationadmission__financability_established_by_id__isnull=True
+                ),
+                generaleducationadmission__isnull=False,
+                then=Value(False),
+            ),
+            default=Value(True),
+        )
+    ).exclude(
+        financabilite_completee=False
     )
     logger.info(f"[TASK - INJECTION EPC] {admissions.count()} dossiers a traiter")
     from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
+
     for admission in admissions:
         InjectionEPCAdmission().injecter(admission)
 

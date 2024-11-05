@@ -29,7 +29,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models.cdd_config import CddConfiguration
+from admission.models.cdd_config import CddConfiguration
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 
 

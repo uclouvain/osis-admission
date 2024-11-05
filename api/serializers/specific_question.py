@@ -26,7 +26,7 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
-from admission.contrib.models import AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItemInstantiation
 from admission.ddd.admission.formation_continue.commands import (
     CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationContinueCommand,
 )

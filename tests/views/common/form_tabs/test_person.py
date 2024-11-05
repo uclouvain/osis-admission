@@ -37,7 +37,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -144,6 +144,10 @@ class PersonFormTestCase(TestCase):
             candidate=cls.general_admission.candidate,
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
+
+        cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
 
         cls.doctorate_url = resolve_url('admission:doctorate:update:person', uuid=cls.doctorate_admission.uuid)
 
@@ -953,3 +957,12 @@ class PersonFormTestCase(TestCase):
         self.client.force_login(user=self.sic_manager_user)
         response = self.client.post(self.doctorate_url, {})
         self.assertEqual(response.status_code, 200)
+
+    def test_doctorate_program_manager_is_forbidden(self):
+        self.client.force_login(user=self.doctorate_program_manager_user)
+
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.post(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)

@@ -303,8 +303,8 @@ class PropositionInMemoryRepository(
             else '',
             financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
             financabilite_regle=proposition.financabilite_regle.name if proposition.financabilite_regle else '',
-            financabilite_regle_etabli_par=proposition.financabilite_regle_etabli_par,
-            financabilite_regle_etabli_le=proposition.financabilite_regle_etabli_le,
+            financabilite_etabli_par=proposition.financabilite_etabli_par,
+            financabilite_etabli_le=proposition.financabilite_etabli_le,
             financabilite_derogation_statut=proposition.financabilite_derogation_statut.name
             if proposition.financabilite_derogation_statut
             else '',
@@ -320,11 +320,9 @@ class PropositionInMemoryRepository(
             financabilite_derogation_derniere_notification_par=(
                 proposition.financabilite_derogation_derniere_notification_par
             ),
-            certificat_refus_fac=proposition.certificat_refus_fac,
-            certificat_approbation_fac=proposition.certificat_approbation_fac,
+            certificat_approbation_cdd=proposition.certificat_approbation_cdd,
             certificat_approbation_sic=proposition.certificat_approbation_sic,
             certificat_approbation_sic_annexe=proposition.certificat_approbation_sic_annexe,
-            certificat_refus_sic=proposition.certificat_refus_sic,
             doit_fournir_visa_etudes=proposition.doit_fournir_visa_etudes,
             visa_etudes_d=proposition.visa_etudes_d,
             certificat_autorisation_signe=proposition.certificat_autorisation_signe,

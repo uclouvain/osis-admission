@@ -26,7 +26,7 @@
 from dal import autocomplete
 from django.utils.translation import get_language
 
-from admission.contrib.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
+from admission.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )

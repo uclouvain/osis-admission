@@ -33,7 +33,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     OngletsChecklist,
     DerogationFinancement,
-    DecisionFacultaireEnum,
+    DecisionCDDEnum,
     BesoinDeDerogation,
 )
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -74,7 +74,7 @@ class StatutsChecklistDoctorale:
     financabilite: StatutChecklist
     choix_formation: StatutChecklist
     projet_recherche: StatutChecklist
-    decision_facultaire: StatutChecklist
+    decision_cdd: StatutChecklist
     decision_sic: StatutChecklist
 
     @classmethod
@@ -374,11 +374,27 @@ onglet_choix_formation = ConfigurationOngletChecklist(
 
 onglet_projet_recherche = ConfigurationOngletChecklist(
     identifiant=OngletsChecklist.projet_recherche,
-    statuts=[],
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDE',
+            libelle=_('Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
 )
 
-onglet_decision_facultaire = ConfigurationOngletChecklist(
-    identifiant=OngletsChecklist.decision_facultaire,
+onglet_decision_cdd = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.decision_cdd,
     statuts=[
         ConfigurationStatutChecklist(
             identifiant='A_TRAITER',
@@ -394,13 +410,13 @@ onglet_decision_facultaire = ConfigurationOngletChecklist(
             identifiant='A_COMPLETER_PAR_SIC',
             libelle=_('To be completed by SIC'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
-            extra={'decision': DecisionFacultaireEnum.HORS_DECISION.value},
+            extra={'decision': DecisionCDDEnum.HORS_DECISION.name},
         ),
         ConfigurationStatutChecklist(
             identifiant='REFUS',
             libelle=_('Refusal'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
-            extra={'decision': DecisionFacultaireEnum.EN_DECISION.value},
+            extra={'decision': DecisionCDDEnum.EN_DECISION.name},
         ),
         ConfigurationStatutChecklist(
             identifiant='ACCORD',
@@ -484,12 +500,12 @@ ORGANISATION_ONGLETS_CHECKLIST: List[ConfigurationOngletChecklist] = [
     onglet_financabilite,
     onglet_choix_formation,
     onglet_projet_recherche,
-    onglet_decision_facultaire,
+    onglet_decision_cdd,
     onglet_decision_sic,
 ]
 
 ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING: List[ConfigurationOngletChecklist] = [
-    onglet_decision_facultaire,
+    onglet_decision_cdd,
     ConfigurationOngletChecklist(
         identifiant=onglet_decision_sic.identifiant,
         statuts=[statut for statut in onglet_decision_sic.statuts if not statut.identifiant_parent],

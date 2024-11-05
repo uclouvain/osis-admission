@@ -26,6 +26,7 @@
 from abc import abstractmethod
 from typing import Optional, List
 
+from admission.ddd.admission.doctorat.preparation.dtos import GroupeDeSupervisionDTO
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
@@ -40,7 +41,7 @@ from osis_common.ddd.interface import DomainService
 class IPDFGeneration(DomainService):
     @classmethod
     @abstractmethod
-    def generer_attestation_accord_facultaire(
+    def generer_attestation_accord_cdd(
         cls,
         proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
@@ -50,17 +51,7 @@ class IPDFGeneration(DomainService):
         titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
-    ) -> None:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def generer_attestation_refus_facultaire(
-        cls,
-        proposition: Proposition,
-        gestionnaire: PersonneConnueUclDTO,
-        proposition_repository: IPropositionRepository,
-        unites_enseignement_translator: IUnitesEnseignementTranslator,
+        groupe_supervision_dto: GroupeDeSupervisionDTO,
     ) -> None:
         raise NotImplementedError
 

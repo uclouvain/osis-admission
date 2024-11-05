@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.infrastructure.admission.repository.emplacement_document import BaseEmplacementDocumentRepository
 
 

@@ -70,7 +70,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         injection_en_erreur: Optional[bool] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
 
-        result = PaginatedList()
+        result = PaginatedList(id_attribute='uuid')
 
         for proposition in PropositionGeneraleInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
             result.append(cls._load_from_general_proposition(proposition))
@@ -80,8 +80,6 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
 
         for proposition in PropositionDoctoraleInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
             result.append(cls._load_from_doctorate_proposition(proposition))
-
-        result.total_count = len(result)
 
         return result
 

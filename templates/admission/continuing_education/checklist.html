@@ -292,6 +292,8 @@
               })
           });
 
+          let onFirstTabLoad = true;
+
           menuItems.on('shown.bs.tab', function (e) {
               $(this).parents('.list-group-item').find('.sub-items').show();
 
@@ -303,8 +305,18 @@
 
               refreshDocuments(tabPaneId);
 
-              // refresh info viewer (e.target = active && e.relatedTarget = previous)
-              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+              // refresh info viewer
+              if (onFirstTabLoad) {
+                  onFirstTabLoad = false;
+                  if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                      // move info from the current tab to the info viewer 
+                      $('#infos-shortcut').click();
+                  } else {
+                      // hide the info viewer
+                      $('#info-viewer-tab').hide();
+                  }
+              } else if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                  // (e.target = active && e.relatedTarget = previous)
                   const $info = $('#info-viewer-tab .info-content');
                   // move old info from info viewer to old tab
                   const oldTabPanel = $($(e.relatedTarget).parent().attr('href')).find('.info-part');
@@ -340,12 +352,6 @@
 
               // Activate tab from hash on first load
               $(`#checklist-menu *[data-toggle="tab"][href="${defaultTab}"]`).click();
-
-              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                  $('#infos-shortcut').click();
-              } else {
-                  $('#info-viewer-tab').hide();
-              }
 
               $('textarea[name="comment"]:visible').each(autogrow);
           });

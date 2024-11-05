@@ -35,10 +35,10 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
+from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
@@ -371,6 +371,5 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.assertRedirects(
             response=response,
             fetch_redirect_response=False,
-            expected_url=resolve_url('admission:doctorate:curriculum', uuid=self.doctorate_admission.uuid),
+            expected_url=resolve_url('admission:doctorate:checklist', uuid=self.doctorate_admission.uuid),
         )
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)

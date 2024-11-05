@@ -4,7 +4,7 @@ from django.db import migrations, models
 from django.db.backends.postgresql.schema import DatabaseSchemaEditor
 from django.db.models import F
 
-from admission.contrib.models.base import REFERENCE_SEQ_NAME
+from admission.models.base import REFERENCE_SEQ_NAME
 
 OLD_REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
@@ -20,11 +20,13 @@ def create_base_admission_reference_sequence(apps, schema_editor: DatabaseSchema
     # Create the new sequence
     cursor.execute("CREATE SEQUENCE %(sequence)s" % {'sequence': REFERENCE_SEQ_NAME})
     sql_set_sequence_max = "SELECT setval('%(sequence)s', MAX(%(column)s)) FROM %(table)s"
-    cursor.execute(sql_set_sequence_max % {
-        'sequence': REFERENCE_SEQ_NAME,
-        "table": BaseAdmission._meta.db_table,
-        "column": 'id',
-    })
+    cursor.execute(sql_set_sequence_max
+        % {
+            'sequence': REFERENCE_SEQ_NAME,
+            "table": BaseAdmission._meta.db_table,
+            "column": 'id',
+        }
+    )
 
     # Set a default reference value based on the id
     BaseAdmission.objects.all().update(reference=F('id'))

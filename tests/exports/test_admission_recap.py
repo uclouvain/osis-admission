@@ -44,7 +44,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
 )
 from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
@@ -1468,8 +1468,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_regle_calcule_situation='',
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
-            financabilite_regle_etabli_par="",
-            financabilite_regle_etabli_le=None,
+            financabilite_etabli_par="",
+            financabilite_etabli_le=None,
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_refus_sic=[],
@@ -1563,13 +1563,11 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_regle_calcule_situation='',
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
-            financabilite_regle_etabli_par="",
-            financabilite_regle_etabli_le=None,
+            financabilite_etabli_par="",
+            financabilite_etabli_le=None,
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
-            certificat_refus_sic=[],
-            certificat_refus_fac=[],
-            certificat_approbation_fac=[],
+            certificat_approbation_cdd=[],
             doit_fournir_visa_etudes=False,
             visa_etudes_d=['uuid-visa-etudes-d'],
             certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],

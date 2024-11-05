@@ -611,24 +611,16 @@ class SituationPropositionNonSICException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class SituationPropositionNonFACException(BusinessException):
+class SituationPropositionNonCddException(BusinessException):
     status_code = "PROPOSITION-68"
 
     def __init__(self, **kwargs):
-        message = _("The proposition must be managed by FAC to realized this action.")
+        message = _("The proposition must be managed by the CDD to realized this action.")
         super().__init__(message, **kwargs)
 
 
-class MotifRefusFacultaireNonSpecifieException(BusinessException):
+class InformationsAcceptationNonSpecifieesException(BusinessException):
     status_code = "PROPOSITION-69"
-
-    def __init__(self, **kwargs):
-        message = _("When refusing a proposition, the reason must be specified.")
-        super().__init__(message, **kwargs)
-
-
-class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException):
-    status_code = "PROPOSITION-70"
 
     def __init__(self, **kwargs):
         message = _(
@@ -700,4 +692,12 @@ class TypeCompteBancaireRemboursementNonCompleteDoctoratException(BusinessExcept
 
     def __init__(self, **kwargs):
         message = _("You haven't answered to the question about your bank account.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionNonEnAttenteDeSignatureException(BusinessException):
+    status_code = "DOCTORAT-8"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be in the 'waiting for signature' status.")
         super().__init__(message, **kwargs)

@@ -44,9 +44,9 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
+from admission.models import AdmissionViewer
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -408,15 +408,14 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
         qs = qs.order_by(*field_order, 'id')
 
-        result = PaginatedList()
-
+        # Paginate the queryset
         if page and taille_page:
-            result.total_count = qs.count()
+            result = PaginatedList(complete_list=qs.all().values_list('uuid', flat=True))
             bottom = (page - 1) * taille_page
             top = page * taille_page
             qs = qs[bottom:top]
         else:
-            result.total_count = len(qs)
+            result = PaginatedList(id_attribute='uuid')
 
         for admission in qs:
             result.append(cls.load_dto_from_model(admission, language_is_french))

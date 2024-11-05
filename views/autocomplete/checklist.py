@@ -27,7 +27,7 @@ from dal import autocomplete
 from django.conf import settings
 from django.utils.translation import get_language, gettext
 
-from admission.contrib.models.checklist import RefusalReason, RefusalReasonCategory, AdditionalApprovalCondition
+from admission.models.checklist import RefusalReason, RefusalReasonCategory, AdditionalApprovalCondition
 
 __all__ = [
     'RefusalReasonAutocomplete',

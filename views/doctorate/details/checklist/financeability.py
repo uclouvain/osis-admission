@@ -224,16 +224,17 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
         context['financability_dispensation_notification_form'] = self.financability_dispensation_notification_form
 
         if self.request.htmx:
-            comment = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags__contains=['financabilite']
-            ).first()
-            comment_derogation = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags__contains=['financabilite__derogation']
-            ).first()
+            comments = {
+                ('__'.join(c.tags)): c
+                for c in CommentEntry.objects.filter(
+                    object_uuid=self.admission_uuid,
+                    tags__contains=['financabilite'],
+                )
+            }
 
             context['comment_forms'] = {
                 'financabilite': CommentForm(
-                    comment=comment,
+                    comment=comments.get('financabilite'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
@@ -242,12 +243,13 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     prefix='financabilite',
                 ),
                 'financabilite__derogation': CommentForm(
-                    comment=comment_derogation,
+                    comment=comments.get('financabilite__derogation'),
                     form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='financabilite__derogation'
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab='financabilite__derogation',
                     ),
                     prefix='financabilite__derogation',
-                    label=_('Faculty comment about financability dispensation'),
                     permission='admission.checklist_change_fac_comment',
                 ),
             }
@@ -307,8 +309,8 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
         )
 
         admission.financability_rule = ''
-        admission.financability_rule_established_by = None
-        admission.save(update_fields=['financability_rule', 'financability_rule_established_by'])
+        admission.financability_established_by = None
+        admission.save(update_fields=['financability_rule', 'financability_established_by'])
 
         return HttpResponseClientRefresh()
 

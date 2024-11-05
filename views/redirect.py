@@ -26,7 +26,7 @@
 from django.utils.functional import cached_property
 from django.views.generic import RedirectView
 
-from admission.contrib.models.base import BaseAdmission
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_SOUMISE
 from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_SOUMISE
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
@@ -40,7 +40,7 @@ __namespace__ = False
 
 class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     urlpatterns = {
-        '': '<uuid:uuid>/',
+        'base': '<uuid:uuid>/',
         'doctorate': 'doctorate/<uuid:uuid>/',
         'general-education': 'general-education/<uuid:uuid>/',
         'continuing-education': 'continuing-education/<uuid:uuid>/',

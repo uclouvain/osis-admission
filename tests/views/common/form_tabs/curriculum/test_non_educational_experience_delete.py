@@ -33,12 +33,12 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
-from admission.contrib.models.base import (
+from admission.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
+from admission.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
@@ -280,11 +280,15 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
 
     def test_delete_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
-        response = self.client.delete(self.doctorate_delete_url)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.delete(f'{self.doctorate_delete_url}?next={admission_url}&next_hash_url=custom_hash')
 
         self.assertRedirects(
             response=response,
             fetch_redirect_response=False,
-            expected_url=resolve_url('admission:doctorate:curriculum', uuid=self.doctorate_admission.uuid),
+            expected_url=expected_url,
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)

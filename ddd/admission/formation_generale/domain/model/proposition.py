@@ -99,6 +99,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierConditionAccesParcoursAnterieurValidatorList,
     ApprouverInscriptionParSicValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
+    ApprouverReorientationExterneParFacValidatorList,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -166,8 +167,8 @@ class Proposition(interface.RootEntity):
     financabilite_regle_calcule_situation: SituationFinancabilite = ''
     financabilite_regle_calcule_le: Optional[datetime.datetime] = None
     financabilite_regle: SituationFinancabilite = ''
-    financabilite_regle_etabli_par: str = ''
-    financabilite_regle_etabli_le: Optional[datetime.datetime] = None
+    financabilite_etabli_par: str = ''
+    financabilite_etabli_le: Optional[datetime.datetime] = None
 
     financabilite_derogation_statut: DerogationFinancement = ''
     financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
@@ -274,12 +275,14 @@ class Proposition(interface.RootEntity):
         type_demande: 'TypeDemande',
         formation_id: FormationIdentity,
         poursuite_de_cycle: 'PoursuiteDeCycle',
+        est_inscription_tardive: bool,
     ):
         self.auteur_derniere_modification = auteur_modification
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
         self.poursuite_de_cycle = poursuite_de_cycle
+        self.est_inscription_tardive = est_inscription_tardive
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionGenerale.ANNULEE
@@ -458,6 +461,22 @@ class Proposition(interface.RootEntity):
             statut=self.statut,
             condition_acces=self.condition_acces,
             est_inscription_tardive=self.est_inscription_tardive,
+            titres_selectionnes=titres_selectionnes,
+        ).validate()
+
+        self.specifier_acceptation_par_fac()
+        self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
+        self.auteur_derniere_modification = auteur_modification
+
+    def approuver_reorientation_externe_par_fac(
+        self,
+        auteur_modification: str,
+        titres_selectionnes: List[TitreAccesSelectionnable],
+    ):
+        ApprouverReorientationExterneParFacValidatorList(
+            statut=self.statut,
+            condition_acces=self.condition_acces,
+            est_reorientation_inscription_externe=self.est_reorientation_inscription_externe,
             titres_selectionnes=titres_selectionnes,
         ).validate()
 
@@ -798,6 +817,8 @@ class Proposition(interface.RootEntity):
         self.attestation_inscription_reguliere = attestation_inscription_reguliere
         self.est_modification_inscription_externe = est_modification_inscription_externe
         self.formulaire_modification_inscription = formulaire_modification_inscription
+        if self.est_modification_inscription_externe:
+            self.est_inscription_tardive = False
 
     def specifier_financabilite_resultat_calcul(
         self,
@@ -818,12 +839,11 @@ class Proposition(interface.RootEntity):
     def specifier_financabilite_regle(
         self,
         financabilite_regle: SituationFinancabilite,
-        etabli_par: str,
         auteur_modification: str,
     ):
         self.financabilite_regle = financabilite_regle
-        self.financabilite_regle_etabli_par = etabli_par
-        self.financabilite_regle_etabli_le = now()
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = now()
         self.auteur_derniere_modification = auteur_modification
 
         if financabilite_regle in SITUATION_FINANCABILITE_PAR_ETAT[EtatFinancabilite.FINANCABLE]:
@@ -841,12 +861,11 @@ class Proposition(interface.RootEntity):
 
     def specifier_financabilite_non_concernee(
         self,
-        etabli_par: str,
         auteur_modification: str,
     ):
         self.financabilite_regle = None
-        self.financabilite_regle_etabli_par = etabli_par
-        self.financabilite_regle_etabli_le = now()
+        self.financabilite_etabli_par = auteur_modification
+        self.financabilite_etabli_le = now()
         self.auteur_derniere_modification = auteur_modification
         self.checklist_actuelle.financabilite = StatutChecklist(
             statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,

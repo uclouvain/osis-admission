@@ -3,7 +3,7 @@
 from django.db import migrations
 from django.db.backends.postgresql.schema import DatabaseSchemaEditor
 
-from admission.contrib.models.base import REFERENCE_SEQ_NAME
+from admission.models.base import REFERENCE_SEQ_NAME
 
 
 def create_reference_sequence(apps, schema_editor: DatabaseSchemaEditor):
@@ -11,11 +11,13 @@ def create_reference_sequence(apps, schema_editor: DatabaseSchemaEditor):
     cursor = schema_editor.connection.cursor()
     cursor.execute("CREATE SEQUENCE %(sequence)s" % {'sequence': REFERENCE_SEQ_NAME})
     sql_set_sequence_max = "SELECT setval('%(sequence)s', MAX(%(column)s)) FROM %(table)s"
-    cursor.execute(sql_set_sequence_max % {
-        'sequence': REFERENCE_SEQ_NAME,
-        "table": DoctorateAdmission._meta.db_table,
-        "column": 'id',
-    })
+    cursor.execute(sql_set_sequence_max
+        % {
+            'sequence': REFERENCE_SEQ_NAME,
+            "table": DoctorateAdmission._meta.db_table,
+            "column": 'id',
+        }
+    )
 
 
 def drop_reference_sequence(apps, schema_editor: DatabaseSchemaEditor):

@@ -26,7 +26,7 @@
 import factory
 from factory import fuzzy, Faker
 
-from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.enums.question_specifique import (
     TypeItemFormulaire,
     CritereItemFormulaireFormation,

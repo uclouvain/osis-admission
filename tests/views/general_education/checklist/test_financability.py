@@ -31,7 +31,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils import timezone
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -74,7 +74,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             financability_rule=SituationFinancabilite.PLUS_FINANCABLE.name,
-            financability_rule_established_by=CompletePersonFactory(),
+            financability_established_by=CompletePersonFactory(),
         )
         cls.default_headers = {'HTTP_HX-Request': 'true'}
         cls.url = resolve_url(
@@ -99,7 +99,33 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
         self.assertEqual(self.general_admission.financability_rule, '')
-        self.assertIsNone(self.general_admission.financability_rule_established_by)
+        self.assertIsNone(self.general_admission.financability_established_by)
+
+    def test_post_derogation_accordee(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:financability-change-status',
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        response = self.client.post(url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['financabilite']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+        self.assertEqual(
+            self.general_admission.financability_established_by,
+            self.sic_manager_user.person
+        )
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -153,7 +179,7 @@ class FinancabiliteApprovalSetRuleViewTestCase(TestCase):
             SituationFinancabilite.ACQUIS_100_POURCENT_EN_N_MOINS_1.name,
         )
         self.assertEqual(
-            self.general_admission.financability_rule_established_by,
+            self.general_admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -214,7 +240,7 @@ class FinancabiliteApprovalViewTestCase(TestCase):
             SituationFinancabilite.FINANCABLE_D_OFFICE.name,
         )
         self.assertEqual(
-            self.general_admission.financability_rule_established_by,
+            self.general_admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -274,7 +300,7 @@ class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
             SituationFinancabilite.PLUS_FINANCABLE.name,
         )
         self.assertEqual(
-            self.general_admission.financability_rule_established_by,
+            self.general_admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -335,7 +361,7 @@ class FinancabiliteNotFinanceableViewTestCase(TestCase):
             SituationFinancabilite.PLUS_FINANCABLE.name,
         )
         self.assertEqual(
-            self.general_admission.financability_rule_established_by,
+            self.general_admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(
@@ -391,6 +417,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             DerogationFinancement.NON_CONCERNE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIsNone(self.general_admission.financability_established_by)
 
     def test_abandon_candidat_post(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -413,6 +440,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.general_admission.financability_dispensation_status,
             DerogationFinancement.ABANDON_DU_CANDIDAT.name,
         )
+        self.assertIsNone(self.general_admission.financability_established_by)
 
     def test_refus_post(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -436,6 +464,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.general_admission.financability_dispensation_status,
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
         )
+        self.assertIsNone(self.general_admission.financability_established_by)
 
     def test_refus_post_with_other_reasons(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -462,6 +491,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.general_admission.financability_dispensation_status,
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
         )
+        self.assertIsNone(self.general_admission.financability_established_by)
         self.assertQuerySetEqual(
             self.general_admission.refusal_reasons.all(),
             [refusal_reason],
@@ -492,6 +522,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             self.general_admission.financability_dispensation_status,
             DerogationFinancement.ACCORD_DE_DEROGATION_FACULTAIRE.name,
         )
+        self.assertIsNone(self.general_admission.financability_established_by)
 
     def test_notification_candidat(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -568,7 +599,7 @@ class FinancabiliteNotConcernedViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.financability_rule, '')
         self.assertEqual(
-            self.general_admission.financability_rule_established_by,
+            self.general_admission.financability_established_by,
             self.sic_manager_user.person,
         )
         self.assertEqual(

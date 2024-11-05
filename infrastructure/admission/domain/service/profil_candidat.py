@@ -48,9 +48,9 @@ from django.db.models import (
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
-from admission.contrib.models import EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.contrib.models.functions import ArrayLength
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
@@ -411,7 +411,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         educational_experience_years = educational_experience_years.annotate(
             injecte_par_admission=Exists(
                 AdmissionEPCInjection.objects.filter(
-                    admission__uuid=OuterRef('educational_experience__valuated_from_admission__uuid'),
+                    admission__admissioneducationalvaluatedexperiences__educationalexperience_id=OuterRef(
+                        'educational_experience__uuid'
+                    ),
                     type=EPCInjectionType.DEMANDE.name,
                     status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                 )
@@ -647,7 +649,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 ),
                 injecte_par_admission=Exists(
                     AdmissionEPCInjection.objects.filter(
-                        admission__uuid=OuterRef('valuated_from_admission__uuid'),
+                        admission__admissionprofessionalvaluatedexperiences__professionalexperience_id=OuterRef('uuid'),
                         type=EPCInjectionType.DEMANDE.name,
                         status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
                     )

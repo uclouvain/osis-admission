@@ -87,7 +87,7 @@ class TestSpecifierFinancabiliteRegle(TestCase):
 
         # Proposition mise à jour
         self.assertEqual(proposition.financabilite_regle, SituationFinancabilite.REPRISE_APRES_5_ANS)
-        self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
+        self.assertEqual(proposition.financabilite_etabli_par, '0123456789')
         self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_specifier_regle_non_financable_etre_ok(self):
@@ -107,5 +107,5 @@ class TestSpecifierFinancabiliteRegle(TestCase):
 
         # Proposition mise à jour
         self.assertEqual(proposition.financabilite_regle, SituationFinancabilite.N_A_PAS_VALIDE_60_CREDITS_BLOC_1)
-        self.assertEqual(proposition.financabilite_regle_etabli_par, 'uuid-GESTIONNAIRE')
+        self.assertEqual(proposition.financabilite_etabli_par, '0123456789')
         self.assertEqual(proposition.checklist_actuelle.financabilite.statut, ChoixStatutChecklist.GEST_BLOCAGE)

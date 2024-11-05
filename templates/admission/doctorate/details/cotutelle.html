@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,3 +24,25 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% block tab_content %}
+  {% panel _("Cotutelle") %}
+    {% if cotutelle.cotutelle is None %}
+      {% trans "Choice of joint supervision is not yet defined" %}
+    {% elif cotutelle.cotutelle %}
+      {% field_data _("Is it a Wallonia-Brussels Federation institution?") cotutelle.institution_fwb %}
+      {% if cotutelle.institution %}
+        {% field_data _("Partner institution") cotutelle.institution|superior_institute_name %}
+      {% elif cotutelle.autre_institution %}
+        {% field_data _("Institute name") cotutelle.autre_institution_nom %}
+        {% field_data _("Institute address") cotutelle.autre_institution_adresse %}
+      {% endif %}
+      {% field_data _("Motivation for joint supervision") cotutelle.motivation|linebreaks %}
+      {% field_data _("Joint supervision request") cotutelle.demande_ouverture %}
+      {% field_data _("Joint supervision agreement") cotutelle.convention %}
+      {% field_data _("Other documents relating to joint supervision") cotutelle.autres_documents %}
+    {% else %}
+      {% trans "No joint supervision" %}
+    {% endif %}
+  {% endpanel %}
+{% endblock %}

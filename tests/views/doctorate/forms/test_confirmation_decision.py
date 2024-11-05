@@ -36,7 +36,7 @@ from osis_async.models.enums import TaskState
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
-from admission.contrib.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
+from admission.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
 from admission.exports.admission_confirmation_success_attestation import admission_confirmation_success_attestation

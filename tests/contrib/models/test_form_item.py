@@ -27,8 +27,8 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.translation import gettext as _
 
-from admission.contrib.models import AdmissionFormItemInstantiation
-from admission.contrib.models.form_item import (
+from admission.models import AdmissionFormItemInstantiation
+from admission.models.form_item import (
     is_valid_translated_json_field,
     TRANSLATION_LANGUAGES,
     AdmissionFormItem,

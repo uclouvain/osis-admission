@@ -27,7 +27,7 @@ import factory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 
-from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 
 

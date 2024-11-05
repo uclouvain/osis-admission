@@ -30,8 +30,8 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
-from admission.contrib.models import EntityProxy, Scholarship
-from admission.contrib.models.working_list import WorkingList, DoctorateWorkingList
+from admission.models import EntityProxy, Scholarship
+from admission.models.working_list import WorkingList, DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -196,7 +196,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
 
     def get_doctorate_queryset(self):
         """Used to determine which training to filter on"""
-        qs = EducationGroupYear.objects.filter(education_group_type__name=TrainingType.PHD.name)
+        qs = EducationGroupYear.objects.filter(education_group_type__name=TrainingType.FORMATION_PHD.name)
         conditions = Q()
         for entity_aware_role in [r for r in self.relevant_roles if issubclass(r, EntityRoleModel)]:
             conditions |= Q(

@@ -88,7 +88,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
             FormationDTO(
                 sigle='SC3DP',
                 annee=2020,
-                type=TrainingType.PHD.name,
+                type=TrainingType.FORMATION_PHD.name,
                 grade_academique='',
                 credits=0,
                 cycle=3,
@@ -176,7 +176,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
 
         self.assertEqual(
             updated_proposition.checklist_initiale.financabilite.statut,
-            ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
         self.assertEqual(
             updated_proposition.checklist_initiale.choix_formation.statut,
@@ -187,7 +187,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
             ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
         self.assertEqual(
-            updated_proposition.checklist_initiale.decision_facultaire.statut,
+            updated_proposition.checklist_initiale.decision_cdd.statut,
             ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
         self.assertEqual(
