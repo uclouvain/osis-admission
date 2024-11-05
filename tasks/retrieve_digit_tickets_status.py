@@ -110,7 +110,7 @@ def run(request=None):
 
     # Handle response when task is ran as a cmd from admin panel
     if request:
-        return redirect(request.META.get('HTTP_REFERER'))
+        return redirect(request.headers.get('referer'))
 
 
 def _process_successful_response_ticket(message_bus_instance, ticket):

@@ -88,4 +88,4 @@ class CddConfigTestCase(TestCase):
         values = [str(v) for v in dict(CategorieActivite.choices()).values()][:-2]
         data['category_labels_en'] = "\n".join(values)
         response = self.client.post(url, data)
-        self.assertFormError(response, 'form', 'category_labels', _("Number of values mismatch"))
+        self.assertFormError(response.context['form'], 'category_labels', _("Number of values mismatch"))
