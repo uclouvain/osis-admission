@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
         ("base", "0700_auto_20240831_0115"),
         ("epc", "0095_alter_inscriptionprogrammeannuel_admission_uuid"),
         ("reference", "0018_country_active"),
-        ("admission", "0226_initialize_iufc_specific_questions"),
+        ("admission", "0232_cdd_configuration_for_more_entities"),
     ]
 
     operations = [
@@ -68,16 +68,6 @@ class Migration(migrations.Migration):
                 related_name="+",
                 to="admission.refusalreason",
                 verbose_name="Refusal reasons",
-            ),
-        ),
-        migrations.AlterField(
-            model_name="doctorateadmission",
-            name="additional_approval_conditions",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="+",
-                to="admission.additionalapprovalcondition",
-                verbose_name="Additional approval conditions",
             ),
         ),
         migrations.AlterField(
