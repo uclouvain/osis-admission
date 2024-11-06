@@ -96,7 +96,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         cls.sic_entity = EntityWithVersionFactory(version__acronym=ENTITY_SIC)
         cls.sic_b_entity = EntityWithVersionFactory(version__acronym=ENTITY_SICB)
 
-        today = datetime.datetime.today()
+        today = datetime.datetime.now()
 
         cls.sic_director_mandate = MandataryFactory(
             mandate__entity=cls.sic_entity,
@@ -205,7 +205,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(len(self.general_admission.sic_approval_certificate), 1)
         self.assertEqual(len(self.general_admission.sic_annexe_approval_certificate), 0)
 
@@ -300,7 +300,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(len(self.general_admission.sic_approval_certificate), 1)
         self.assertEqual(len(self.general_admission.sic_annexe_approval_certificate), 1)
 
@@ -365,7 +365,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         event = self.mock_publish.call_args[0][0]
         self.assertIsInstance(event, InscriptionApprouveeParSicEvent)

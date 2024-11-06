@@ -125,7 +125,7 @@ class ApplicationFeesViewTestCase(TestCase):
             'Must pay',
         )
         self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
 
         # Check that a notification has been sent
         message_created = EmailNotification.objects.filter(person=general_admission.candidate).exists()
@@ -283,7 +283,7 @@ class ApplicationFeesViewTestCase(TestCase):
             'Not concerned',
         )
         self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
 
         # Check that two entries in the history have been added
         history_items: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=general_admission.uuid)
@@ -358,7 +358,7 @@ class ApplicationFeesViewTestCase(TestCase):
             'Dispensed',
         )
         self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
 
         # Check that two entries in the history have been added
         history_items: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=general_admission.uuid)
@@ -483,7 +483,7 @@ class ApplicationFeesViewTestCase(TestCase):
             'Dispensed',
         )
         self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
 
         # Check that no entry in the history has been added
         has_history_items = HistoryEntry.objects.filter(object_uuid=general_admission.uuid).exists()
@@ -529,7 +529,7 @@ class ApplicationFeesViewTestCase(TestCase):
             'Not concerned',
         )
         self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
 
         # Check that no entry in the history has been added
         has_history_items = HistoryEntry.objects.filter(object_uuid=general_admission.uuid).exists()

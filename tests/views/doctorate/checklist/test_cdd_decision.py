@@ -251,7 +251,7 @@ class CddDecisionSendToCddViewTestCase(TestCase):
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
@@ -296,7 +296,7 @@ class CddDecisionSendToCddViewTestCase(TestCase):
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that no notification has been planned
         email_notifications = EmailNotification.objects.all()
@@ -448,7 +448,7 @@ class CddDecisionSendToSicViewTestCase(TestCase):
 
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
@@ -488,7 +488,7 @@ class CddDecisionSendToSicViewTestCase(TestCase):
 
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
@@ -711,7 +711,7 @@ class CddRefusalDecisionViewTestCase(TestCase):
             {'decision': DecisionCDDEnum.EN_DECISION.name},
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that a notication has been planned
         notifications = EmailNotification.objects.filter(person=self.admission.candidate)
@@ -1049,7 +1049,7 @@ class CddApprovalDecisionViewTestCase(TestCase):
             ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.cdd_approval_certificate, [])
         self.assertEqual(self.admission.with_prerequisite_courses, True)
         prerequisite_courses = self.admission.prerequisite_courses.all()
@@ -1243,7 +1243,7 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # A certificate has been generated
         self.assertEqual(self.admission.cdd_approval_certificate, [self.file_uuid])

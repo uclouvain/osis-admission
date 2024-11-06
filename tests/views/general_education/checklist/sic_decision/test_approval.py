@@ -444,7 +444,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.must_report_to_sic, None)
         self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.must_provide_student_visa_d, False)  # False for UE+5 candidates
 
         # Check the creation of the free additional conditions

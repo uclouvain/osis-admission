@@ -253,7 +253,7 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
             self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
             [],
         )
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
