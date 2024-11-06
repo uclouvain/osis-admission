@@ -187,7 +187,7 @@ class FinancabiliteApprovalSetRuleViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -248,7 +248,7 @@ class FinancabiliteApprovalViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -308,7 +308,7 @@ class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -369,7 +369,7 @@ class FinancabiliteNotFinanceableViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
 
 class FinancabiliteDerogationViewTestCase(TestCase):
@@ -607,4 +607,4 @@ class FinancabiliteNotConcernedViewTestCase(TestCase):
             ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())

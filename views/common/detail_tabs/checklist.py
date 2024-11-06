@@ -100,7 +100,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
             message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=admission.candidate.global_id))
 
     admission.last_update_author = author
-    admission.modified_at = datetime.datetime.today()
+    admission.modified_at = datetime.datetime.now()
 
     serializer = ChangeStatusSerializer(
         data={

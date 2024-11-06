@@ -2041,7 +2041,7 @@ class ChangeExtraView(AdmissionFormMixin, FormView):
         tab_data = admission.checklist['current'][tab_name]
         tab_data.setdefault('extra', {})
         tab_data['extra'].update(form.cleaned_data)
-        admission.modified_at = datetime.datetime.today()
+        admission.modified_at = datetime.datetime.now()
         admission.last_update_author = self.request.user.person
         admission.save(update_fields=['checklist', 'modified_at', 'last_update_author'])
         return super().form_valid(form)
