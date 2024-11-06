@@ -40,14 +40,16 @@ from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
+    as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
+    as RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,

@@ -1069,7 +1069,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'nationalite': 'FR',
             'cdds': 'unknown_cdd',
         }
-        response = self.client.get(self.url, data, HTTP_HX_REQUEST='true')
+        response = self.client.get(self.url, data, headers={"hx-request": 'true'})
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(

@@ -83,11 +83,11 @@ def run():  # pragma: no cover
                 )
                 | Q(
                     checklist__current__financabilite__status='GEST_REUSSITE',
-                    generaleducationadmission__financability_rule_established_on__isnull=True
+                    generaleducationadmission__financability_established_on__isnull=True
                 )
                 | Q(
                     checklist__current__financabilite__status='GEST_REUSSITE',
-                    generaleducationadmission__financability_rule_established_by_id__isnull=True
+                    generaleducationadmission__financability_established_by_id__isnull=True
                 ),
                 generaleducationadmission__isnull=False,
                 then=Value(False),

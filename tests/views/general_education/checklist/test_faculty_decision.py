@@ -289,7 +289,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that a notification has been planned
         email_notifications = EmailNotification.objects.all()
@@ -354,7 +354,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that no notification has been planned
         email_notifications = EmailNotification.objects.all()
@@ -410,7 +410,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that no notification has been planned
         email_notifications = EmailNotification.objects.all()
@@ -594,7 +594,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             },
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
@@ -720,7 +720,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_approval_certificate, [self.file_uuid])
@@ -1091,7 +1091,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -1135,7 +1135,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -1367,7 +1367,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
             {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         frozen_time.move_to('2022-01-02')
 
@@ -1392,7 +1392,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         self.assertFalse(self.general_admission.refusal_reasons.exists())
         self.assertEqual(self.general_admission.other_refusal_reasons, ['My other reason'])
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
     @freezegun.freeze_time('2022-01-01')
     def test_refusal_decision_form_submitting_with_transfer_to_sic(self):
@@ -1446,7 +1446,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
             {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
@@ -2004,7 +2004,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.fac_approval_certificate, [])
         self.assertEqual(self.general_admission.with_additional_approval_conditions, True)
         approval_conditions = self.general_admission.additional_approval_conditions.all()
@@ -2153,7 +2153,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.fac_approval_certificate, [self.file_uuid])
         self.assertEqual(self.general_admission.with_additional_approval_conditions, True)
         approval_conditions = self.general_admission.additional_approval_conditions.all()
@@ -2394,7 +2394,7 @@ class LateFacultyApprovalDecisionViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -2609,7 +2609,7 @@ class CourseChangeFacultyApprovalDecisionViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)

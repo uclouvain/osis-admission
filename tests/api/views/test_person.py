@@ -141,5 +141,5 @@ class PersonTestCase(APITestCase):
         response = self.client.put(admission_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         general_admission.refresh_from_db()
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(general_admission.last_update_author, self.candidate_user.person)

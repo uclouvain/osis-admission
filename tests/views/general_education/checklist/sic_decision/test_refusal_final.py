@@ -130,7 +130,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         cls.sic_entity = EntityWithVersionFactory(version__acronym=ENTITY_SIC)
         cls.sic_b_entity = EntityWithVersionFactory(version__acronym=ENTITY_SICB)
 
-        today = datetime.datetime.today()
+        today = datetime.datetime.now()
 
         cls.sic_director_mandate = MandataryFactory(
             mandate__entity=cls.sic_entity,
@@ -218,7 +218,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             {'blocage': 'refusal'},
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check the mail is sent
         self.assertTrue(
@@ -368,7 +368,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             {'blocage': 'refusal'},
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check that the refusal certificate contains the right data
         self.get_pdf_from_template_patcher.assert_called_once()
@@ -489,7 +489,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             {'blocage': 'refusal'},
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check the mail is not sent
         self.assertFalse(

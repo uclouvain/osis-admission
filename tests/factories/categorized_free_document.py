@@ -24,13 +24,14 @@
 #
 # ##############################################################################
 import factory
+from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 
 from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 
 
-class CategorizedFreeDocumentFactory(factory.django.DjangoModelFactory):
+class CategorizedFreeDocumentFactory(DjangoModelFactory):
     checklist_tab = factory.Iterator(OngletsChecklist.get_names())
     short_label_fr = FuzzyText(length=10)
     short_label_en = FuzzyText(length=10)

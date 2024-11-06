@@ -189,7 +189,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
             {'en_cours': 'refusal'},
         )
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that an history entry is created
         entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
