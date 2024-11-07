@@ -54,8 +54,8 @@ from admission.ddd.admission.formation_generale.events import PropositionSoumise
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
-from ddd.logic.financabilite.domain.service.financabilite import Financabilite
+from ddd.logic.financabilite.domain.service.algorithmes.v2024.algorithme import Algorithme2024
+from ddd.logic.financabilite.domain.service.i_fetcher import IFetcher
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -76,7 +76,7 @@ def soumettre_proposition(
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
-    financabilite_fetcher: 'IFinancabiliteFetcher',
+    financabilite_fetcher: 'IFetcher',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -159,7 +159,7 @@ def soumettre_proposition(
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
-    financabilite = Financabilite(
+    financabilite = Algorithme2024(
         parcours=parcours,
         formation=formation_dto,
         est_en_reorientation=proposition.est_reorientation_inscription_externe,
