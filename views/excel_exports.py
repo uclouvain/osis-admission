@@ -45,6 +45,7 @@ from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
+from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.models import Scholarship, AdmissionFormItem
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
@@ -358,16 +359,18 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
         if admission_type:
             mapping_filter_key_value['type'] = TypeDemande.get_value(admission_type)
 
+        late_modification_reorientation = formatted_filters.get('tardif_modif_reorientation')
+        if late_modification_reorientation:
+            mapping_filter_key_value['tardif_modif_reorientation'] = TardiveModificationReorientationFiltre.get_value(
+                late_modification_reorientation
+            )
+
         trainings_types = formatted_filters.get('types_formation')
         if trainings_types:
             mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
 
         # Format boolean values
         mapping_filter_key_value['quarantaine'] = yesno(formatted_filters.get('quarantaine'), _('Yes,No,All'))
-        mapping_filter_key_value['injection_en_erreur'] = yesno(
-            formatted_filters.get('injection_en_erreur'),
-            _('In error,Without error,All'),
-        )
 
         return {
             mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])

@@ -35,16 +35,10 @@ from django.shortcuts import resolve_url
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-    EPCInjection,
-)
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     PoursuiteDeCycle,
@@ -55,6 +49,11 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DerogationFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -459,73 +458,103 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
 
-    def test_list_with_filter_by_injection_error(self):
+    def test_list_with_filter_by_late_enrollment_reorientation_or_course_change(self):
         self.client.force_login(user=self.sic_management_user)
 
-        # Without injection
-        response = self._do_request(injection_en_erreur=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(self.results[0], response.context['object_list'])
-
-        response = self._do_request(injection_en_erreur='')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
-
-        response = self._do_request(injection_en_erreur=False)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
-
-        # With an identification injection
-        identification_injection = EPCInjection(
-            admission=self.admissions[0],
-            type=EPCInjectionType.SIGNALETIQUE.name,
-            status=EPCInjectionStatus.ERROR.name,
+        second_admission = GeneralEducationAdmissionFactory(
+            training__management_entity=self.first_entity,
+            training=self.admissions[0].training,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
-        response = self._do_request(injection_en_erreur='True')
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(self.results[0], response.context['object_list'])
 
-        response = self._do_request(injection_en_erreur='')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
-
-        response = self._do_request(injection_en_erreur='False')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
-
-        # With an admission injection but without error
-        admission_injection = EPCInjection(
-            admission=self.admissions[0],
-            type=EPCInjectionType.DEMANDE.name,
-            status=EPCInjectionStatus.OK.name,
+        # No late enrollment, reorientation or course change
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.REORIENTATION.name,
         )
-        response = self._do_request(injection_en_erreur='True')
         self.assertEqual(response.status_code, 200)
-        self.assertNotIn(self.results[0], response.context['object_list'])
+        self.assertEqual(len(response.context['object_list']), 0)
 
-        response = self._do_request(injection_en_erreur='')
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.MODIFICATION_INSCRIPTION.name,
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
+        self.assertEqual(len(response.context['object_list']), 0)
 
-        response = self._do_request(injection_en_erreur='False')
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
+        self.assertEqual(len(response.context['object_list']), 0)
 
-        # With an admission injection with error
-        admission_injection.status = EPCInjectionStatus.ERROR.name
-        admission_injection.save()
+        # Late enrollment
+        second_admission.late_enrollment = True
+        second_admission.save()
 
-        response = self._do_request(injection_en_erreur='True')
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
+        self.assertEqual(len(response.context['object_list']), 1)
 
-        response = self._do_request(injection_en_erreur='')
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.REORIENTATION.name,
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertIn(self.results[0], response.context['object_list'])
+        self.assertEqual(len(response.context['object_list']), 0)
 
-        response = self._do_request(injection_en_erreur='False')
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.MODIFICATION_INSCRIPTION.name,
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertNotIn(self.results[0], response.context['object_list'])
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        second_admission.late_enrollment = None
+
+        # Course change
+        second_admission.is_external_modification = True
+        second_admission.save()
+
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.MODIFICATION_INSCRIPTION.name,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.REORIENTATION.name,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        second_admission.is_external_modification = None
+
+        # Reorientation
+        second_admission.is_external_reorientation = True
+        second_admission.save()
+
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.REORIENTATION.name,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.MODIFICATION_INSCRIPTION.name,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        response = self._do_request(
+            tardif_modif_reorientation=TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
 
     def test_list_with_filter_by_training(self):
         self.client.force_login(user=self.sic_management_user)
@@ -636,7 +665,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 result[0].uuid: {'previous': None, 'next': result[1].uuid},
                 result[1].uuid: {'previous': result[0].uuid, 'next': result[2].uuid},
                 result[2].uuid: {'previous': result[1].uuid, 'next': None},
-            }
+            },
         )
 
         response = self.client.get(resolve_url('admission:general-education:person', uuid=result[0].uuid))
