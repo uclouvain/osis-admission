@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@
     {% if proposition.est_bachelier_belge %}
       {% field_data _('Would you like to switch courses this academic year at UCLouvain?') proposition.est_reorientation_inscription_externe %}
       {% if proposition.est_reorientation_inscription_externe %}
+        {% field_data _("Your completed and signed reorientation form") proposition.formulaire_reorientation %}
         {% field_data _("Certificate of regular enrolment") proposition.attestation_inscription_reguliere %}
       {% endif %}
     {% endif %}

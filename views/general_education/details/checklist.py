@@ -2333,11 +2333,13 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
         else:
             admission.financability_established_by = None
             admission.financability_established_on = None
-        admission.save(update_fields=[
-            'financability_rule',
-            'financability_established_by',
-            'financability_established_on',
-        ])
+        admission.save(
+            update_fields=[
+                'financability_rule',
+                'financability_established_by',
+                'financability_established_on',
+            ]
+        )
 
         return HttpResponseClientRefresh()
 
@@ -2739,6 +2741,7 @@ class ChecklistView(
             },
             'frais_dossier': assimilation_documents,
             'choix_formation': {
+                'FORMULAIRE_REORIENTATION',
                 'ATTESTATION_INSCRIPTION_REGULIERE',
                 'FORMULAIRE_MODIFICATION_INSCRIPTION',
             },
