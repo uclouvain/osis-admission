@@ -36,12 +36,6 @@ from django.shortcuts import redirect
 from waffle.testutils import override_switch
 
 from admission.auth.roles.candidate import Candidate
-from admission.models import GeneralEducationAdmission
-from admission.models.base import (
-    BaseAdmission,
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
 from admission.ddd.admission.commands import (
     RetrieveListeTicketsEnAttenteQuery,
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
@@ -52,6 +46,12 @@ from admission.infrastructure.admission.domain.service.digit import TEMPORARY_AC
 from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import \
     PeriodeSoumissionTicketDigitTranslator
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
+    BaseAdmission,
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from backoffice.celery import app
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -197,6 +197,7 @@ def _process_successful_response_ticket(message_bus_instance, ticket):
                 external_id=f"osis.person_{proposition_fusion.selected_global_id}",
                 global_id=proposition_fusion.selected_global_id,
             )
+            personne_connue.save()
             logger.exception(
                 f"{PREFIX_TASK} Person with global_id ({personne_connue.global_id}) not found. (Maybe data < 2015 ?)"
             )
