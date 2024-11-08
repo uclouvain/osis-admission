@@ -387,7 +387,7 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         # Check the creation of the free additional conditions
         conditions: QuerySet[FreeAdditionalApprovalCondition] = FreeAdditionalApprovalCondition.objects.filter(

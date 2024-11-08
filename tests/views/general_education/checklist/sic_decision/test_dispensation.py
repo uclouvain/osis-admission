@@ -102,4 +102,4 @@ class SicDecisionDispensationViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.dispensation_needed, BesoinDeDerogation.NON_CONCERNE.name)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())

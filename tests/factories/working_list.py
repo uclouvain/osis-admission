@@ -25,12 +25,13 @@
 # ##############################################################################
 import factory
 from django.conf import settings
+from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 
 from admission.models.working_list import WorkingList
 
 
-class WorkingListFactory(factory.django.DjangoModelFactory):
+class WorkingListFactory(DjangoModelFactory):
     class Meta:
         model = WorkingList
 

@@ -316,7 +316,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.regular_registration_proof, [])
         self.assertEqual(general_admission.is_external_modification, None)
         self.assertEqual(general_admission.registration_change_form, [])
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
@@ -425,7 +425,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         )
         self.assertEqual(general_admission.is_external_modification, False)
         self.assertEqual(general_admission.registration_change_form, [])
-        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',

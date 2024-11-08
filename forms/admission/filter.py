@@ -29,18 +29,16 @@ from django import forms
 from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy, get_language
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.models import Scholarship
-from admission.models.working_list import WorkingList, ContinuingWorkingList
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
-)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
 )
 from admission.forms import (
     ALL_EMPTY_CHOICE,
@@ -52,6 +50,8 @@ from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import Scholarship
+from admission.models.working_list import WorkingList, ContinuingWorkingList
 from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
 from base.forms.utils import autocomplete
 from base.forms.widgets import Select2MultipleCheckboxesWidget
@@ -59,7 +59,7 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
-from base.templatetags.pagination import PAGINATOR_SIZE_LIST
+from base.templatetags.pagination_bs5 import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
 
 REGEX_REFERENCE = r'\d{4}\.\d{4}$'

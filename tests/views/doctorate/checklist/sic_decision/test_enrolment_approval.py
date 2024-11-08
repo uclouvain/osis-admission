@@ -264,4 +264,4 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())

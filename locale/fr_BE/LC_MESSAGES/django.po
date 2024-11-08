@@ -2877,6 +2877,9 @@ msgstr "Dupliquer l'expérience"
 msgid "Duplication of an experience"
 msgstr "Duplication d'une expérience"
 
+msgid "Dynamic questions"
+msgstr "Questions dynamiques"
+
 msgid "ECONOMY"
 msgstr "Economie"
 

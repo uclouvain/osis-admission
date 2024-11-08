@@ -126,6 +126,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             candidate__country_of_citizenship__european_union=True,
             candidate__private_email='candidate2@test.be',
             bachelor_with_access_conditions_met=True,
+            determined_academic_year__year=1980,
         )
         FreeAdditionalApprovalConditionFactory(
             admission=cls.admission_ok,
@@ -312,6 +313,29 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
+        required_admission_form_item = TextAdmissionFormItemFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=required_admission_form_item,
+            required=True,
+            display_according_education=CritereItemFormulaireFormation.TOUTE_FORMATION.name,
+            tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+            academic_year=self.admission_ok.training.academic_year,
+        )
+        facultative_admission_form_item = TextAdmissionFormItemFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=facultative_admission_form_item,
+            required=False,
+            display_according_education=CritereItemFormulaireFormation.TOUTE_FORMATION.name,
+            tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+            academic_year=self.admission_ok.training.academic_year,
+        )
+        required_admission_form_item.refresh_from_db()
+        facultative_admission_form_item.refresh_from_db()
+        self.admission_ok.specific_question_answers = {
+            str(required_admission_form_item.uuid): 'My first answer',
+            str(uuid.uuid4()): 'My second answer',
+        }
+        self.admission_ok.save(update_fields=['specific_question_answers'])
         response = self.client.post(self.ok_url, self.data_ok)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
@@ -337,6 +361,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                     'street_number': self.candidate_ok_residential_address.street_number,
                     'postal_box': self.candidate_ok_residential_address.postal_box,
                 },
+            },
+        )
+        self.assertEqual(
+            self.admission_ok.specific_question_answers,
+            {
+                str(required_admission_form_item.uuid): 'My first answer',
+                str(facultative_admission_form_item.uuid): '',
             },
         )
 
