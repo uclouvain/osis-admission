@@ -28,6 +28,7 @@ from typing import List, Optional
 
 import attrs
 from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
@@ -182,6 +183,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         admission, _ = ContinuingEducationAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
+                # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
+                'modified_at': timezone.now(),
                 'candidate': candidate,
                 'training': training,
                 'reference': entity.reference,
