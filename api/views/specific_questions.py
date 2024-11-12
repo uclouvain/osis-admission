@@ -30,7 +30,7 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import SpecificQuestionSerializer
-from admission.contrib.models import AdmissionFormItemInstantiation
+from admission.models import AdmissionFormItemInstantiation
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationGeneraleCommand,
 )

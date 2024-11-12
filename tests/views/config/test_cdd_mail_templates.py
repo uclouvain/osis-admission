@@ -32,7 +32,7 @@ from django.test import TestCase
 from osis_mail_template import templates
 from rest_framework import status
 
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 from admission.mail_templates import ADMISSION_EMAIL_MEMBER_REMOVED
 from admission.tests.factories.roles import CddConfiguratorFactory
 from base.tests.factories.person import PersonFactory
@@ -104,7 +104,7 @@ class CddMailTemplatesTestCase(TestCase):
         self.assertEqual(self.client.get(self.edit_url).status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(self.client.get(self.add_url).status_code, status.HTTP_403_FORBIDDEN)
 
-    @patch('admission.contrib.models.cdd_mail_template.ALLOWED_CUSTOM_IDENTIFIERS', [ADMISSION_EMAIL_MEMBER_REMOVED])
+    @patch('admission.models.cdd_mail_template.ALLOWED_CUSTOM_IDENTIFIERS', [ADMISSION_EMAIL_MEMBER_REMOVED])
     def test_list_as_cdd(self):
         self.client.force_login(self.cdd_user)
 

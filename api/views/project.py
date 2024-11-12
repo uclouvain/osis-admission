@@ -33,7 +33,7 @@ from rest_framework.views import APIView
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
     ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
@@ -221,7 +221,12 @@ class ProjectViewSet(
         """Edit the project"""
         serializer = serializers.CompleterPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(CompleterPropositionCommand(**serializer.data))
+        result = message_bus_instance.invoke(
+            CompleterPropositionCommand(
+                matricule_auteur=self.get_permission_object().candidate.global_id,
+                **serializer.data,
+            )
+        )
         self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

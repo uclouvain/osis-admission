@@ -25,8 +25,8 @@
 # ##############################################################################
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-from admission.contrib.models import SupervisionActor
-from admission.contrib.models.base import BaseAdmission
+from admission.models import SupervisionActor
+from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 

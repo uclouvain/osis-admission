@@ -38,9 +38,9 @@ class ChoixStatutChecklist(ChoiceEnum):
     SYST_REUSSITE = _("SYST_REUSSITE")
 
 
-class DecisionFacultaireEnum(ChoiceEnum):
-    EN_DECISION = '1'
-    HORS_DECISION = '0'
+class DecisionCDDEnum(ChoiceEnum):
+    EN_DECISION = 'EN_DECISION'
+    HORS_DECISION = 'HORS_DECISION'
 
 
 class DerogationFinancement(ChoiceEnum):
@@ -125,5 +125,5 @@ class OngletsChecklist(ChoiceEnum):
     financabilite = _('Financeability')
     choix_formation = _('Course choice')
     projet_recherche = pgettext_lazy('tab', 'Research project')
-    decision_facultaire = _('Decision of the faculty')
+    decision_cdd = _('Decision of the CDD')
     decision_sic = _('Decision of SIC')

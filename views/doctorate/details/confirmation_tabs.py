@@ -32,7 +32,7 @@ from django.views.generic import FormView
 from django.views.generic.edit import FormMixin
 from osis_mail_template.models import MailTemplate
 
-from admission.contrib.models import CddMailTemplate
+from admission.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     ConfirmerEchecCommand,

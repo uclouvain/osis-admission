@@ -30,8 +30,8 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, EPCInjection as AdmissionEPCInjection
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models import ContinuingEducationAdmission, EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 

@@ -36,7 +36,7 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.events import InscriptionDoctoraleApprouveeParSicEvent
 from admission.ddd.admission.doctorat.preparation.commands import EnvoyerEmailApprobationInscriptionAuCandidatCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
@@ -138,7 +138,6 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             program_planned_years_number=2,
             annual_program_contact_person_name='foo',
             annual_program_contact_person_email='bar@example.org',
-            with_additional_approval_conditions=False,
             tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name,
             tuition_fees_dispensation=DispenseOuDroitsMajores.NON_CONCERNE.name,
             must_report_to_sic=False,

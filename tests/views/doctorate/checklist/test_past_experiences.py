@@ -37,8 +37,8 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import (
+from admission.models import DoctorateAdmission
+from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
@@ -240,7 +240,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         cls.training = DoctorateFactory(
             management_entity=cls.commission,
             academic_year=cls.academic_years[0],
-            education_group_type__name=TrainingType.PHD.name,
+            education_group_type__name=TrainingType.FORMATION_PHD.name,
         )
 
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
@@ -298,7 +298,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
         self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
+            recuperer_conditions_acces_par_formation(TrainingType.FORMATION_PHD.name),
             doctorate_choices,
         )
 

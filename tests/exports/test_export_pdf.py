@@ -29,7 +29,7 @@ from unittest.mock import patch
 from django.core.management import call_command
 from django.test import TestCase
 
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState

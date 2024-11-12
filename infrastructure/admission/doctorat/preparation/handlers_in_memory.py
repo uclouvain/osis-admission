@@ -28,6 +28,9 @@ from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
+    redonner_la_main_au_candidat,
+)
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
@@ -149,6 +152,7 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=_groupe_supervision_repository,
         promoteur_translator=_promoteur_translator,
         membre_ca_translator=_membre_ca_translator,
+        historique=_historique,
     ),
     DemanderSignaturesCommand: lambda msg_bus, cmd: demander_signatures(
         cmd,
@@ -194,6 +198,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
+        historique=_historique,
     ),
     SupprimerMembreCACommand: lambda msg_bus, cmd: supprimer_membre_CA(
         cmd,
@@ -488,36 +493,27 @@ COMMAND_HANDLERS = {
             pdf_generation=_pdf_generation,
         )
     ),
-    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
-        lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
+    EnvoyerPropositionACddLorsDeLaDecisionCddCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_a_cdd_lors_de_la_decision_cdd(
             cmd,
             proposition_repository=_proposition_repository,
-            email_destinataire_repository=_email_destinataire_repository,
-            notification=_notification,
             historique=_historique,
         )
     ),
-    SpecifierMotifsRefusPropositionParFaculteCommand: (
-        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_faculte(
-            cmd,
-            proposition_repository=_proposition_repository,
-        )
-    ),
-    RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
+    RefuserPropositionParCddCommand: lambda msg_bus, cmd: refuser_proposition_par_cdd(
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
-        pdf_generation=_pdf_generation,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
-        unites_enseignement_translator=_unites_enseignement_translator,
+        notification=_notification,
     ),
-    SpecifierInformationsAcceptationPropositionParFaculteCommand: (
-        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
+    SpecifierInformationsAcceptationPropositionParCddCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_cdd(
             cmd,
             proposition_repository=_proposition_repository,
         )
     ),
-    ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
+    ApprouverPropositionParCddCommand: lambda msg_bus, cmd: approuver_proposition_par_cdd(
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
@@ -528,9 +524,13 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        groupe_supervision_repository=_groupe_supervision_repository,
+        membre_ca_translator=_membre_ca_translator,
+        promoteur_translator=_promoteur_translator,
+        notification=_notification,
     ),
-    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand: (
-        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
+    EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_cdd(
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique,
@@ -600,35 +600,6 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             notification=_notification,
             historique=_historique,
-        )
-    ),
-    SpecifierMotifsRefusPropositionParSicCommand: (
-        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
-            cmd,
-            proposition_repository=_proposition_repository,
-            historique=_historique,
-        )
-    ),
-    RefuserAdmissionParSicCommand: (
-        lambda msg_bus, cmd: refuser_admission_par_sic(
-            cmd,
-            proposition_repository=_proposition_repository,
-            profil_candidat_translator=_profil_candidat_translator,
-            historique=_historique,
-            notification=_notification,
-            pdf_generation=_pdf_generation,
-            campus_repository=_campus_repository,
-        )
-    ),
-    RefuserInscriptionParSicCommand: (
-        lambda msg_bus, cmd: refuser_inscription_par_sic(
-            cmd,
-            proposition_repository=_proposition_repository,
-            profil_candidat_translator=_profil_candidat_translator,
-            historique=_historique,
-            notification=_notification,
-            pdf_generation=_pdf_generation,
-            campus_repository=_campus_repository,
         )
     ),
     ApprouverAdmissionParSicCommand: (
@@ -713,5 +684,10 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_doctorat_translator,
+    ),
+    RedonnerLaMainAuCandidatCommand: lambda msg_bus, cmd: redonner_la_main_au_candidat(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
     ),
 }

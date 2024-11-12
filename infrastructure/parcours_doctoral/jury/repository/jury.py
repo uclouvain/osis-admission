@@ -28,8 +28,8 @@ from typing import Optional, List
 from django.db import transaction
 from django.db.models import Prefetch, Q
 
-from admission.contrib.models import DoctorateAdmission, JuryMember, SupervisionActor
-from admission.contrib.models.enums.actor_type import ActorType
+from admission.models import DoctorateAdmission, JuryMember, SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury
 from admission.ddd.parcours_doctoral.jury.domain.model.jury import Jury, JuryIdentity, MembreJury
 from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO, MembreJuryDTO
@@ -124,7 +124,7 @@ class JuryRepository(IJuryRepository):
         DoctorateAdmission.objects.filter(uuid=str(entity.entity_id.uuid)).update(
             thesis_proposed_title=entity.titre_propose,
             cotutelle=entity.cotutelle,
-            cotutelle_institution=entity.institution_cotutelle,
+            cotutelle_institution=entity.institution_cotutelle if entity.institution_cotutelle else None,
             defense_method=entity.formule_defense,
             defense_indicative_date=entity.date_indicative,
             thesis_language=entity.langue_redaction,
@@ -314,7 +314,7 @@ class JuryRepository(IJuryRepository):
             entity_id=JuryIdentity(uuid=str(doctorate.uuid)),
             titre_propose=doctorate.thesis_proposed_title,
             cotutelle=doctorate.cotutelle,
-            institution_cotutelle=doctorate.cotutelle_institution,
+            institution_cotutelle=doctorate.cotutelle_institution if doctorate.cotutelle_institution else '',
             formule_defense=doctorate.defense_method,
             date_indicative=doctorate.defense_indicative_date,
             langue_redaction=doctorate.thesis_language,

@@ -31,16 +31,17 @@ from unittest.mock import ANY
 import freezegun
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.shortcuts import resolve_url
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.contrib.models import (
+from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
     EPCInjection,
 )
-from admission.contrib.models.epc_injection import EPCInjectionType, EPCInjectionStatus
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -62,6 +63,7 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from admission.views.list import BaseAdmissionList
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
@@ -596,6 +598,67 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0].uuid, second_admission[0].uuid)
         self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_cached_sorted_list(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            training__management_entity=self.first_entity,
+            training=self.admissions[0].training,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        third_admission = GeneralEducationAdmissionFactory(
+            training__management_entity=self.first_entity,
+            training=self.admissions[0].training,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self._do_request()
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0].uuid, self.admissions[0].uuid)
+        self.assertEqual(result[1].uuid, second_admission.uuid)
+        self.assertEqual(result[2].uuid, third_admission.uuid)
+
+        cached_admissions = cache.get(BaseAdmissionList.cache_key_for_result(user_id=self.sic_management_user.id))
+
+        self.assertIsNotNone(cached_admissions)
+
+        self.assertEqual(len(cached_admissions), 3)
+        self.assertEqual(
+            cached_admissions,
+            {
+                result[0].uuid: {'previous': None, 'next': result[1].uuid},
+                result[1].uuid: {'previous': result[0].uuid, 'next': result[2].uuid},
+                result[2].uuid: {'previous': result[1].uuid, 'next': None},
+            }
+        )
+
+        response = self.client.get(resolve_url('admission:general-education:person', uuid=result[0].uuid))
+
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context.get('previous_admission_url'), None)
+        self.assertEqual(context.get('next_admission_url'), resolve_url('admission:base', uuid=result[1].uuid))
+
+        response = self.client.get(resolve_url('admission:general-education:person', uuid=result[1].uuid))
+
+        context = response.context
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(context.get('previous_admission_url'), resolve_url('admission:base', uuid=result[0].uuid))
+        self.assertEqual(context.get('next_admission_url'), resolve_url('admission:base', uuid=result[2].uuid))
+
+        response = self.client.get(resolve_url('admission:general-education:person', uuid=result[2].uuid))
+
+        context = response.context
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(context.get('previous_admission_url'), resolve_url('admission:base', uuid=result[1].uuid))
+        self.assertEqual(context.get('next_admission_url'), None)
 
     def test_list_sort_by_candidate_name(self):
         self.client.force_login(user=self.sic_management_user)

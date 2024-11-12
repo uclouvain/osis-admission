@@ -46,7 +46,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.constants import SUPPORTED_MIME_TYPES, PNG_MIME_TYPE
-from admission.contrib.models import AdmissionTask
+from admission.models import AdmissionTask
 from admission.ddd.admission.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,

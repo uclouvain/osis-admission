@@ -33,7 +33,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.status import HTTP_302_FOUND, HTTP_404_NOT_FOUND
 
-from admission.contrib.models import ConfirmationPaper
+from admission.models import ConfirmationPaper
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from base.tests.factories.academic_year import AcademicYearFactory

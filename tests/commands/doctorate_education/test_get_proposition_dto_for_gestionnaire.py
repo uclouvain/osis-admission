@@ -30,10 +30,9 @@ from unittest.mock import ANY, patch
 
 import freezegun
 from django.test import TestCase, override_settings
-from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
-from admission.contrib.models import DoctorateAdmission
+from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -47,9 +46,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
-from admission.ddd.admission.doctorat.preparation.dtos.condition_approbation import (
-    ConditionComplementaireApprobationDTO,
-)
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
@@ -57,30 +53,19 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import DROITS_INSCRIPTION_MONTANT_VALEURS
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.faculty_decision import (
-    RefusalReasonFactory,
-    AdditionalApprovalConditionFactory,
-    FreeAdditionalApprovalConditionFactory,
-    DoctorateFreeAdditionalApprovalConditionFactory,
-)
 from admission.tests.factories.scholarship import DoctorateScholarshipFactory
-from base.models.enums.organization_type import MAIN
-from base.models.person import Person
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
-from base.tests.factories.learning_unit_year import LearningUnitYearFactory
-from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 
 
@@ -95,11 +80,9 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         cls.files_uuids = {
             name_field: [uuid.uuid4()]
             for name_field in [
-                'fac_refusal_certificate',
-                'fac_approval_certificate',
+                'cdd_approval_certificate',
                 'sic_approval_certificate',
                 'sic_annexe_approval_certificate',
-                'sic_refusal_certificate',
                 'must_provide_student_visa_d',
                 'student_visa_d',
                 'signed_enrollment_authorization',
@@ -119,14 +102,10 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             international_scholarship=None,
             candidate__private_email='john.doe@example.com',
             candidate__country_of_citizenship=self.country,
-            refusal_type=TypeDeRefus.REFUS_LIBRE.name,
             dispensation_needed=BesoinDeDerogation.BESOIN_DE_COMPLEMENT.name,
             tuition_fees_amount=DroitsInscriptionMontant.DROITS_MAJORES.name,
             tuition_fees_amount_other=Decimal(10),
             tuition_fees_dispensation=DispenseOuDroitsMajores.DROITS_MAJORES_DEMANDES.name,
-            particular_cost='10.2',
-            rebilling_or_third_party_payer='Info',
-            first_year_inscription_and_status='2021',
             is_mobility=True,
             mobility_months_amount=MobiliteNombreDeMois.SIX.name,
             must_report_to_sic=True,
@@ -149,11 +128,9 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             financability_dispensation_first_notification_by=PersonFactory(),
             financability_dispensation_last_notification_on=datetime.datetime(2020, 1, 4),
             financability_dispensation_last_notification_by=PersonFactory(),
-            fac_refusal_certificate=self.files_uuids['fac_refusal_certificate'],
-            fac_approval_certificate=self.files_uuids['fac_approval_certificate'],
+            cdd_approval_certificate=self.files_uuids['cdd_approval_certificate'],
             sic_approval_certificate=self.files_uuids['sic_approval_certificate'],
             sic_annexe_approval_certificate=self.files_uuids['sic_annexe_approval_certificate'],
-            sic_refusal_certificate=self.files_uuids['sic_refusal_certificate'],
             must_provide_student_visa_d=True,
             student_visa_d=self.files_uuids['student_visa_d'],
             signed_enrollment_authorization=self.files_uuids['signed_enrollment_authorization'],
@@ -227,7 +204,6 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.cotutelle, None)
         self.assertEqual(result.profil_soumis_candidat, None)
         self.assertEqual(result.bourse_recherche, None)
-        self.assertEqual(result.type_de_refus, self.admission.refusal_type)
         self.assertEqual(result.besoin_de_derogation, self.admission.dispensation_needed)
         self.assertEqual(result.droits_inscription_montant, self.admission.tuition_fees_amount)
         self.assertEqual(
@@ -236,11 +212,6 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         )
         self.assertEqual(result.droits_inscription_montant_autre, self.admission.tuition_fees_amount_other)
         self.assertEqual(result.dispense_ou_droits_majores, self.admission.tuition_fees_dispensation)
-        self.assertEqual(result.tarif_particulier, self.admission.particular_cost)
-        self.assertEqual(result.refacturation_ou_tiers_payant, self.admission.rebilling_or_third_party_payer)
-        self.assertEqual(
-            result.annee_de_premiere_inscription_et_statut, self.admission.first_year_inscription_and_status
-        )
         self.assertEqual(result.est_mobilite, self.admission.is_mobility)
         self.assertEqual(result.nombre_de_mois_de_mobilite, self.admission.mobility_months_amount)
         self.assertEqual(result.doit_se_presenter_en_sic, self.admission.must_report_to_sic)
@@ -284,11 +255,9 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             result.financabilite_derogation_derniere_notification_par,
             self.admission.financability_dispensation_last_notification_by.global_id,
         )
-        self.assertEqual(result.certificat_refus_fac, self.admission.fac_refusal_certificate)
-        self.assertEqual(result.certificat_approbation_fac, self.admission.fac_approval_certificate)
+        self.assertEqual(result.certificat_approbation_cdd, self.admission.cdd_approval_certificate)
         self.assertEqual(result.certificat_approbation_sic, self.admission.sic_approval_certificate)
         self.assertEqual(result.certificat_approbation_sic_annexe, self.admission.sic_annexe_approval_certificate)
-        self.assertEqual(result.certificat_refus_sic, self.admission.sic_refusal_certificate)
         self.assertEqual(result.doit_fournir_visa_etudes, self.admission.must_provide_student_visa_d)
         self.assertEqual(result.visa_etudes_d, self.admission.student_visa_d)
         self.assertEqual(result.certificat_autorisation_signe, self.admission.signed_enrollment_authorization)
@@ -388,7 +357,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.admission.cotutelle = True
         self.admission.cotutelle_motivation = 'My motivation'
         self.admission.cotutelle_institution_fwb = True
-        self.admission.cotutelle_institution = 'Institute'
+        self.admission.cotutelle_institution = '34eab30c-27e3-40db-b92e-0b51546a2448'
         self.admission.cotutelle_opening_request = [uuid.uuid4()]
         self.admission.cotutelle_convention = [uuid.uuid4()]
         self.admission.cotutelle_other_documents = [uuid.uuid4()]
@@ -402,7 +371,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.cotutelle.cotutelle, True)
         self.assertEqual(result.cotutelle.motivation, 'My motivation')
         self.assertEqual(result.cotutelle.institution_fwb, True)
-        self.assertEqual(result.cotutelle.institution, 'Institute')
+        self.assertEqual(str(result.cotutelle.institution), '34eab30c-27e3-40db-b92e-0b51546a2448')
         self.assertEqual([str(result.cotutelle.demande_ouverture[0])], self.admission.cotutelle_opening_request)
         self.assertEqual([str(result.cotutelle.convention[0])], self.admission.cotutelle_convention)
         self.assertEqual([str(result.cotutelle.autres_documents[0])], self.admission.cotutelle_other_documents)
@@ -445,59 +414,9 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.profil_soumis_candidat.numero_rue, '1')
         self.assertEqual(result.profil_soumis_candidat.boite_postale, 'A')
 
-    def test_get_proposition_with_faculty_refusal_reason(self):
-        self.admission.fac_refusal_certificate = ['uuid-fac-refusal-certificate']
-
-        # Choose an existing reason
-        chosen_reason = RefusalReasonFactory()
-        self.admission.refusal_reasons.add(chosen_reason)
-        self.admission.other_refusal_reasons = []
-        self.admission.save()
-
-        result = self._get_command_result()
-        self.assertEqual([str(result.certificat_refus_fac[0])], self.admission.fac_refusal_certificate)
-        self.assertEqual(len(result.motifs_refus), 1)
-        self.assertEqual(result.motifs_refus[0].motif, chosen_reason.name)
-        self.assertEqual(result.motifs_refus[0].categorie, chosen_reason.category.name)
-
-        # Choose a free reason
-        self.admission.refusal_reasons.all().delete()
-        self.admission.other_refusal_reasons = ['other reason']
-        self.admission.save()
-
-        result = self._get_command_result()
-        self.assertEqual(len(result.motifs_refus), 1)
-        self.assertEqual(result.motifs_refus[0].motif, 'other reason')
-        self.assertEqual(result.motifs_refus[0].categorie, pgettext('admission', 'Other reasons'))
-
     def test_get_proposition_with_faculty_approval_reason(self):
         # Approval data
-        self.admission.fac_approval_certificate = ['uuid-fac-approval-certificate']
-        self.admission.with_additional_approval_conditions = True
-        self.admission.additional_approval_conditions.set(
-            [
-                AdditionalApprovalConditionFactory(),
-                AdditionalApprovalConditionFactory(),
-            ]
-        )
-        free_conditions = [
-            DoctorateFreeAdditionalApprovalConditionFactory(
-                admission=self.admission,
-                name_fr='Ma première condition',
-                name_en='My first condition',
-            ),
-            DoctorateFreeAdditionalApprovalConditionFactory(
-                admission=self.admission,
-                name_fr='Ma deuxième condition',
-                name_en='My second condition',
-            ),
-        ]
-        self.admission.other_training_accepted_by_fac = DoctorateFactory(
-            academic_year__current=True,
-            enrollment_campus__name='Mons',
-            enrollment_campus__organization__type=MAIN,
-        )
-
+        self.admission.cdd_approval_certificate = ['uuid-cdd-approval-certificate']
         self.admission.with_prerequisite_courses = True
         self.admission.prerequisite_courses.set(
             [
@@ -514,49 +433,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.admission.save()
 
         result = self._get_command_result()
-        self.assertEqual([str(result.certificat_approbation_fac[0])], self.admission.fac_approval_certificate)
-
-        self.assertIsNotNone(result.autre_formation_choisie_fac)
-        self.assertEqual(
-            result.autre_formation_choisie_fac,
-            BaseFormationDTO(
-                sigle=self.admission.other_training_accepted_by_fac.acronym,
-                annee=self.admission.other_training_accepted_by_fac.academic_year.year,
-                intitule=self.admission.other_training_accepted_by_fac.title,
-                uuid=self.admission.other_training_accepted_by_fac.uuid,
-                lieu_enseignement=(
-                    EducationGroupVersion.objects.filter(offer=self.admission.other_training_accepted_by_fac)
-                    .first()
-                    .root_group.main_teaching_campus.name
-                ),
-            ),
-        )
-
-        self.assertEqual(result.avec_conditions_complementaires, self.admission.with_additional_approval_conditions)
-
-        self.assertCountEqual(
-            result.conditions_complementaires,
-            [
-                ConditionComplementaireApprobationDTO(
-                    uuid=condition.uuid,
-                    libre=False,
-                    nom_fr=condition.name_fr,
-                    nom_en=condition.name_en,
-                    uuid_experience='',
-                )
-                for condition in self.admission.additional_approval_conditions.all()
-            ]
-            + [
-                ConditionComplementaireApprobationDTO(
-                    uuid=condition.uuid,
-                    libre=True,
-                    nom_fr=condition.name_fr,
-                    nom_en=condition.name_en,
-                    uuid_experience='',
-                )
-                for condition in free_conditions
-            ],
-        )
+        self.assertEqual([str(result.certificat_approbation_cdd[0])], self.admission.cdd_approval_certificate)
 
         prerequisite_courses = self.admission.prerequisite_courses.all()
         self.assertEqual(result.avec_complements_formation, self.admission.with_prerequisite_courses)
