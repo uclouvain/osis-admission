@@ -39,6 +39,8 @@ from admission.infrastructure.utils import get_message_to_historize
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
+TAGS_AUTORISATION_SIC = ["proposition", "sic-decision", "approval", "status-changed"]
+
 
 class Historique(IHistorique):
     @classmethod
@@ -228,7 +230,7 @@ class Historique(IHistorique):
             "Le dossier a été accepté par SIC.",
             "The dossier has been accepted by SIC.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "sic-decision", "approval", "status-changed"],
+            tags=TAGS_AUTORISATION_SIC,
         )
 
     @classmethod
