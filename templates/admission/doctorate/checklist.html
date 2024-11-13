@@ -229,12 +229,27 @@
 
       {% with initial=original_admission.checklist.initial.projet_recherche current=original_admission.checklist.current.projet_recherche next_url=next_base_url|add:'projet_recherche' %}
         <div role="tabpanel" class="tab-pane" id="projet_recherche">
+
+          {% include "admission/doctorate/includes/checklist/projet_recherche_demander_modification_modal.html" %}
+
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='projet_recherche' label=initial_state_label icon='user' state=initial.statut class='muted' %}
             {% checklist_state_button tab='projet_recherche' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
             {% checklist_state_button tab='projet_recherche' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
+
+          <button
+              class="btn btn-default pull-right"
+              {% if original_admission.status == 'TRAITEMENT_FAC' %}
+              data-toggle="modal"
+              data-target="#projet-recherche-demander-modification-ca"
+              {% else %}
+              disabled
+              {% endif %}
+          >
+            {% translate 'Supervision committee modification by candidate' %}
+          </button>
 
           {% bootstrap_form comment_forms.choix_formation %}
           {% include "admission/doctorate/includes/checklist/projet_recherche_detail.html" %}

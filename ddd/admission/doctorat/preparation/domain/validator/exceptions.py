@@ -701,3 +701,29 @@ class PropositionNonEnAttenteDeSignatureException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The proposition must be in the 'waiting for signature' status.")
         super().__init__(message, **kwargs)
+
+
+class PropositionStatutIncorrectPourMembreCAException(BusinessException):
+    status_code = "DOCTORAT-9"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "The proposition must be in the 'draft', 'Support committee to be completed' or 'processed by fac' status."
+        )
+        super().__init__(message, **kwargs)
+
+
+class PropositionStatutIncorrectPourPromoteurException(BusinessException):
+    status_code = "DOCTORAT-10"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be in the 'draft' or 'processed by fac' status.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionStatutIncorrectPourSoumissionCAException(BusinessException):
+    status_code = "DOCTORAT-11"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be in the 'Support committee waiting for signature' status.")
+        super().__init__(message, **kwargs)

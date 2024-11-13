@@ -39,7 +39,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
+from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory, \
+    ExternalCaMemberFactory
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.entity_version import EntityVersionFactory

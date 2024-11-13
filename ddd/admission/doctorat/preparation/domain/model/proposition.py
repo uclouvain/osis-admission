@@ -92,6 +92,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
     SpecifierNouvellesInformationsDecisionCDDValidatorList,
     RedonnerLaMainAuCandidatValidatorList,
+    DemanderCandidatModificationCaValidatorList,
+    SoumettreCAValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
@@ -567,7 +569,10 @@ class Proposition(interface.RootEntity):
         self.fiche_archive_signatures_envoyees = []
 
     def verrouiller_proposition_pour_signature(self):
-        self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
+        if self.statut == ChoixStatutPropositionDoctorale.CA_A_COMPLETER:
+            self.statut = ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE
+        else:
+            self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
 
     def deverrouiller_projet_doctoral(self):
         self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
@@ -1126,3 +1131,15 @@ class Proposition(interface.RootEntity):
             questions_specifiques,
             self.reponses_questions_specifiques,
         )
+
+    def demander_candidat_modification_ca(self):
+        DemanderCandidatModificationCaValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.CA_A_COMPLETER
+
+    def soumettre_ca(self):
+        SoumettreCAValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC

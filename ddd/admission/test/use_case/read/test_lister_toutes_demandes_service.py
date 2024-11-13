@@ -49,6 +49,6 @@ class TestListerToutesDemandes(TestCase):
 
     def test_should_rechercher_par_matricule(self):
         propositions = self.message_bus.invoke(self.cmd)
-        self.assertEqual(len(propositions), 10)
+        self.assertEqual(len(propositions), 11)
         for proposition in propositions:
             self.assertEqual(proposition.noma_candidat, '0123456789')
