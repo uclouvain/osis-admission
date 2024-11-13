@@ -53,7 +53,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPSansPromoteurReferenceFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
-    PropositionAdmissionSC3DPConfirmeeFactory,
+    PropositionAdmissionSC3DPConfirmeeFactory, PropositionAdmissionSC3DPTraitementFacFactory,
 )
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -147,6 +147,7 @@ class PropositionInMemoryRepository(
             PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
             PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(),
             PropositionAdmissionSC3DPConfirmeeFactory(),
+            PropositionAdmissionSC3DPTraitementFacFactory(),
         ]
 
     @classmethod

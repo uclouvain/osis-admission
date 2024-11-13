@@ -114,6 +114,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             sigle=doctorate.entity_id.sigle,
             annee=doctorate.entity_id.annee,
             sigle_entite_gestion=doctorate.entite_ucl_id.code,
+            intitule_entite_gestion=doctorate.entite_ucl_id.code,
             intitule=doctorate.intitule,
             intitule_en=doctorate.intitule,
             intitule_fr=doctorate.intitule,
@@ -136,6 +137,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
                 sigle=doc.entity_id.sigle,
                 annee=doc.entity_id.annee,
                 sigle_entite_gestion=doc.entite_ucl_id.code,
+                intitule_entite_gestion=doc.entite_ucl_id.code,
             )
             for doc in cls.doctorats
             if doc.entity_id.sigle in doctorates

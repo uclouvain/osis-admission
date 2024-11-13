@@ -94,7 +94,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
 
         school = EntityFactory()
-        EntityVersionFactory(entity=school, acronym='SCH', parent=first_doctoral_commission)
+        EntityVersionFactory(entity=school, acronym='SCH', title='School entity', parent=first_doctoral_commission)
 
         self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
@@ -174,6 +174,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 type=self.admission.training.education_group_type.name,
                 campus_inscription=ANY,
                 sigle_entite_gestion='SCH',
+                intitule_entite_gestion='School entity',
                 credits=self.admission.training.credits,
                 date_debut=self.admission.training.academic_year.start_date,
             ),
