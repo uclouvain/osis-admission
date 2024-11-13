@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0232_cdd_configuration_for_more_entities'),
+        ('admission', '0233_django_4_migration'),
     ]
 
     operations = [
