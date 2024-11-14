@@ -31,6 +31,7 @@ from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy,
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
@@ -53,7 +54,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.models import Scholarship
 from admission.models.working_list import WorkingList, ContinuingWorkingList
 from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
-from base.forms.utils import autocomplete
+from base.forms.utils import autocomplete, EMPTY_CHOICE
 from base.forms.widgets import Select2MultipleCheckboxesWidget
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -282,7 +283,7 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
         coerce=lambda x: x == 'True',
         required=False,
         choices=(
-            (None, _('All')),
+            (None, ' - '),
             (True, _('Yes')),
             (False, _('No')),
         ),
@@ -290,17 +291,10 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
         empty_value=None,
     )
 
-    injection_en_erreur = forms.TypedChoiceField(
-        label=_('Injection error'),
-        coerce=lambda x: x == 'True',
+    tardif_modif_reorientation = forms.ChoiceField(
+        choices=EMPTY_CHOICE + TardiveModificationReorientationFiltre.choices(),
+        label=_('Late/Modif./Reor.'),
         required=False,
-        choices=(
-            (None, _('All')),
-            (True, _('In error')),
-            (False, _('Without error')),
-        ),
-        widget=forms.Select(attrs={"class": "form-control"}),
-        empty_value=None,
     )
 
     liste_travail = WorkingListField(
@@ -347,7 +341,7 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
 
         for scholarship_field, scholarship_types in self.scholarship_types_by_field.items():
             self.fields[scholarship_field].coerce = scholarships.get
-            self.fields[scholarship_field].choices = ALL_EMPTY_CHOICE + tuple(
+            self.fields[scholarship_field].choices = EMPTY_CHOICE + tuple(
                 (scholarship.uuid, str(scholarship))
                 for scholarship_uuid, scholarship in scholarships.items()
                 if scholarship.type in scholarship_types

@@ -53,6 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO as DemandeDoctoraleRechercheDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixEdition
@@ -521,7 +522,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 OngletsChecklistGenerale.frais_dossier.name: ['PAYES'],
             },
             'quarantaine': 'True',
-            'injection_en_erreur': 'True',
+            'tardif_modif_reorientation': TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
         }
 
         view = AdmissionListExcelExportView()
@@ -558,7 +559,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(names[16], _('Include or exclude the checklist filters'))
         self.assertEqual(names[17], _('Checklist filters'))
         self.assertEqual(names[18], _('Quarantine'))
-        self.assertEqual(names[19], _('Injection error'))
+        self.assertEqual(names[19], _('Late/Modif./Reor.'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '1 Janvier 2023')
@@ -588,10 +589,9 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             ),
         )
         self.assertEqual(values[18], 'Oui')
-        self.assertEqual(values[19], 'En erreur')
+        self.assertEqual(values[19], 'Inscription tardive')
 
         filters['quarantaine'] = False
-        filters['injection_en_erreur'] = False
 
         worksheet: Worksheet = workbook.create_sheet()
 
@@ -606,10 +606,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(values), 20)
 
         self.assertEqual(values[18], 'Non')
-        self.assertEqual(values[19], 'Sans erreur')
 
         filters['quarantaine'] = None
-        filters['injection_en_erreur'] = None
 
         worksheet: Worksheet = workbook.create_sheet()
 
@@ -624,7 +622,6 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(values), 20)
 
         self.assertEqual(values[18], 'Tous')
-        self.assertEqual(values[19], 'Tous')
 
 
 @freezegun.freeze_time('2023-01-03')

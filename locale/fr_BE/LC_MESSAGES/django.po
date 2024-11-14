@@ -1707,6 +1707,9 @@ msgstr "Modifier la configuration de <em>%(name)s</em>"
 msgid "Change <em>%(name)s</em> custom mail template"
 msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
 
+msgid "Change of course"
+msgstr "Réorientation"
+
 msgid "Change of enrolment"
 msgstr "Modification d'inscription"
 
@@ -4395,12 +4398,6 @@ msgstr ""
 msgid "In draft form"
 msgstr "En brouillon"
 
-msgid "In error"
-msgstr "En erreur"
-
-msgid "In error,Without error,All"
-msgstr "En erreur,Sans erreur,Tous"
-
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
@@ -4475,9 +4472,6 @@ msgid ""
 msgstr ""
 "Initialisation des questions spécifiques prédéfinies pour une année "
 "académique"
-
-msgid "Injection error"
-msgstr "Erreur d'injection"
 
 msgctxt "admission"
 msgid "Institute"
@@ -4717,6 +4711,9 @@ msgstr "Auteur de la dernière mise à jour"
 
 msgid "Late enrollment"
 msgstr "Inscription tardive"
+
+msgid "Late/Modif./Reor."
+msgstr "Tardif/Modif./Réor."
 
 msgid "Later > blocking"
 msgstr "Ultérieurement > bloquant"
@@ -9003,9 +9000,6 @@ msgstr "Sous condition"
 
 msgid "Without condition"
 msgstr "Sans condition"
-
-msgid "Without error"
-msgstr "Sans erreur"
 
 msgid "Without free documents"
 msgstr "Sans les documents libres"

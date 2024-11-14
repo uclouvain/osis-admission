@@ -44,6 +44,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
+from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.models import AdmissionViewer
 from admission.models.base import BaseAdmission
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
@@ -94,7 +95,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         taille_page: Optional[int] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
-        injection_en_erreur: Optional[bool] = None,
+        tardif_modif_reorientation: Optional[str] = '',
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -226,16 +227,14 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     | ~Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
                 )
 
-        if injection_en_erreur is not None:
-            injection_condition = Q(
-                epc_injection__type=EPCInjectionType.DEMANDE.name,
-                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name],
-            )
+        if tardif_modif_reorientation:
+            related_field = {
+                TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name: 'late_enrollment',
+                TardiveModificationReorientationFiltre.MODIFICATION_INSCRIPTION.name: 'is_external_modification',
+                TardiveModificationReorientationFiltre.REORIENTATION.name: 'is_external_reorientation',
+            }[tardif_modif_reorientation]
 
-            if injection_en_erreur:
-                qs = qs.filter(injection_condition)
-            else:
-                qs = qs.exclude(injection_condition)
+            qs = qs.filter(**{f'{related_field}': True})
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 
