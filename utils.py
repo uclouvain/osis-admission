@@ -322,7 +322,7 @@ def get_training_url(training_type, training_acronym, partial_training_acronym, 
     from admission.constants import CONTEXT_GENERAL
     from admission.constants import CONTEXT_DOCTORATE
 
-    if training_type == TrainingType.FORMATION_PHD.name:
+    if training_type == TrainingType.PHD.name:
         return (
             "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
             if get_language() == settings.LANGUAGE_CODE_EN

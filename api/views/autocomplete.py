@@ -95,7 +95,7 @@ class AutocompleteSectorView(ListAPIView):
         ).filter(
             academic_year__year=year,
             education_group_type__category=Categories.TRAINING.name,
-            education_group_type__name=TrainingType.FORMATION_PHD.name,
+            education_group_type__name=TrainingType.PHD.name,
         )
         doctorate_paths = doctorate_qs.values_list('path_as_string', flat=True)
         # Get all sectors

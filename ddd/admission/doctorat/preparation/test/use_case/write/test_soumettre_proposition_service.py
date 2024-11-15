@@ -88,7 +88,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
             FormationDTO(
                 sigle='SC3DP',
                 annee=2020,
-                type=TrainingType.FORMATION_PHD.name,
+                type=TrainingType.PHD.name,
                 grade_academique='',
                 credits=0,
                 cycle=3,

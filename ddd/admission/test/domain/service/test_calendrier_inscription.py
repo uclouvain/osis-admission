@@ -84,11 +84,11 @@ class CalendrierInscriptionTestCase(TestCase):
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
         dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
-            formation_id=FormationFactory(type=TrainingType.FORMATION_PHD).entity_id,
+            formation_id=FormationFactory(type=TrainingType.PHD).entity_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.FORMATION_PHD,
+            type_formation=TrainingType.PHD,
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
