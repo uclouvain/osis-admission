@@ -44,10 +44,6 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
-from admission.models import AdmissionViewer
-from admission.models.base import BaseAdmission
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -61,10 +57,12 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ConfigurationStatutChecklist,
 )
 from admission.infrastructure.utils import get_entities_with_descendants_ids
+from admission.models import AdmissionViewer
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeStatus
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Result
@@ -221,11 +219,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             if quarantaine:
                 qs = qs.filter_in_quarantine()
             else:
-                qs = qs.filter(
-                    Q(candidate__personmergeproposal__isnull=True)
-                    | Q(candidate__personmergeproposal__status__isnull=True)
-                    | ~Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
-                )
+                qs = qs.exclude(id__in=qs.filter_in_quarantine().values('id'))
 
         if tardif_modif_reorientation:
             related_field = {
