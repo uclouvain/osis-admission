@@ -937,7 +937,7 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
 
         # Initialize conditions field
         self.is_admission = self.instance.type_demande == TypeDemande.ADMISSION.name
-        self.is_hue = not self.instance.candidate.country_of_citizenship.european_union
+        self.is_hue = False #not self.instance.candidate.country_of_citizenship.european_union
         self.is_assimilation = (
             self.instance.accounting
             and self.instance.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name

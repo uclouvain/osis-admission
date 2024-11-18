@@ -131,12 +131,7 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
-
-          {% search_account_digit_result_msg original_admission %}
-          {% validation_syntaxique_resultat_digit original_admission %}
-          {% if digit_ticket %}
-            {% digit_ticket_status_msg digit_ticket %}
-          {% endif %}
+          {% resultat_workflow_gestion_des_comptes_alert original_admission.candidate.global_id %}
 
           {% if injection_signaletique %}
             <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
