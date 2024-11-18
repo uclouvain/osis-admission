@@ -1106,7 +1106,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             '4bdffb42-552d-415d-9e4c-725f10dce228',
         )
         self.assertEqual(admission.diplomatic_post, self.diplomatic_post)
-        self.assertEqual(admission.modified_at, datetime.datetime.today())
+        self.assertEqual(admission.modified_at, datetime.datetime.now())
         self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
         # Unknown diplomatic post

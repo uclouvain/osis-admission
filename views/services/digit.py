@@ -66,7 +66,7 @@ class SearchDigitAccountView(PermissionRequiredMixin, FormView):
                 request,
                 "Unable to find person merge proposal database object. Please contact technical team"
             )
-            return redirect(to=self.request.META.get('HTTP_REFERER'))
+            return redirect(to=self.request.headers.get('referer'))
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])

@@ -67,7 +67,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         taille_page: Optional[int] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
-        injection_en_erreur: Optional[bool] = None,
+        tardif_modif_reorientation: Optional[str] = '',
     ) -> PaginatedList[DemandeRechercheDTO]:
 
         result = PaginatedList(id_attribute='uuid')
@@ -121,6 +121,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_premiere_annee=None,
             poursuite_de_cycle='',
             adresse_email_candidat='',
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )
 
     @classmethod
@@ -155,6 +156,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_premiere_annee=None,
             poursuite_de_cycle='',
             adresse_email_candidat='',
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )
 
     @classmethod
@@ -189,4 +191,5 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             poursuite_de_cycle='',
             annee_calculee=proposition.annee_calculee,
             adresse_email_candidat='',
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )

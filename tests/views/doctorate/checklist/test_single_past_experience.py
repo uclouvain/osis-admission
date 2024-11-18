@@ -148,7 +148,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(new_experience_data['extra']['identifiant'], unknown_uuid)
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
     def test_pass_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -207,7 +207,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
     def test_change_the_checklist_status_to_a_status_with_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -232,7 +232,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(experience_checklist['extra'].get('authentification'), '1')
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
     def test_change_the_checklist_status_to_a_status_without_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -257,7 +257,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(experience_checklist['extra'].get('authentification'), '0')
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -424,13 +424,13 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         self.assertEqual(experience_checklist['extra']['etat_authentification'], EtatAuthentificationParcours.FAUX.name)
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that no history entry has been created
         self.assertEqual(HistoryEntry.objects.filter(object_uuid=self.admission.uuid).count(), 0)
 
         # Check that no notification has been created
-        self.assertEqual(EmailNotification.objects.filter(created_at=datetime.datetime.today()).count(), 0)
+        self.assertEqual(EmailNotification.objects.filter(created_at=datetime.datetime.now()).count(), 0)
 
     @freezegun.freeze_time('2023-01-11')
     def test_change_the_authentication_data_by_informing_the_checkers(self):
@@ -466,7 +466,7 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         )
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that the history entry has been created
         history_items: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
@@ -485,7 +485,7 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         # Check that the email has been sent
         email_notifications = EmailNotification.objects.filter(
-            created_at=datetime.datetime.today(),
+            created_at=datetime.datetime.now(),
         )
 
         self.assertEqual(len(email_notifications), 1)
@@ -528,7 +528,7 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         )
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
         # Check that the history entry has been created
         history_items: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
@@ -546,7 +546,7 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         )
 
         # Check that the email has been sent to the candidate
-        email_notifications = EmailNotification.objects.filter(created_at=datetime.datetime.today())
+        email_notifications = EmailNotification.objects.filter(created_at=datetime.datetime.now())
 
         self.assertEqual(len(email_notifications), 1)
         self.assertEqual(email_notifications[0].person, self.admission.candidate)

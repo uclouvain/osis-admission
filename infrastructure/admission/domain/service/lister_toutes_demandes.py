@@ -44,9 +44,6 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.models import AdmissionViewer
-from admission.models.base import BaseAdmission
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -60,10 +57,12 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ConfigurationStatutChecklist,
 )
 from admission.infrastructure.utils import get_entities_with_descendants_ids
+from admission.models import AdmissionViewer
+from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeStatus
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Result
@@ -94,7 +93,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         taille_page: Optional[int] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
-        injection_en_erreur: Optional[bool] = None,
+        tardif_modif_reorientation: Optional[str] = '',
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -220,22 +219,16 @@ class ListerToutesDemandes(IListerToutesDemandes):
             if quarantaine:
                 qs = qs.filter_in_quarantine()
             else:
-                qs = qs.filter(
-                    Q(candidate__personmergeproposal__isnull=True)
-                    | Q(candidate__personmergeproposal__status__isnull=True)
-                    | ~Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
-                )
+                qs = qs.exclude(id__in=qs.filter_in_quarantine().values('id'))
 
-        if injection_en_erreur is not None:
-            injection_condition = Q(
-                epc_injection__type=EPCInjectionType.DEMANDE.name,
-                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name],
-            )
+        if tardif_modif_reorientation:
+            related_field = {
+                TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name: 'late_enrollment',
+                TardiveModificationReorientationFiltre.MODIFICATION_INSCRIPTION.name: 'is_external_modification',
+                TardiveModificationReorientationFiltre.REORIENTATION.name: 'is_external_reorientation',
+            }[tardif_modif_reorientation]
 
-            if injection_en_erreur:
-                qs = qs.filter(injection_condition)
-            else:
-                qs = qs.exclude(injection_condition)
+            qs = qs.filter(**{f'{related_field}': True})
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 
@@ -482,4 +475,5 @@ class ListerToutesDemandes(IListerToutesDemandes):
             poursuite_de_cycle=admission.cycle_pursuit,
             annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year else None,
             adresse_email_candidat=admission.candidate.private_email,
+            reponses_questions_specifiques=admission.specific_question_answers,
         )

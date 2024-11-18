@@ -30,6 +30,7 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 
@@ -370,6 +371,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         admission, _ = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
+                # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
+                'modified_at': timezone.now(),
                 'reference': entity.reference,
                 'type': entity.type_admission.name,
                 'status': entity.statut.name,

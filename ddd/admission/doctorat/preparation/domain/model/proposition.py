@@ -105,10 +105,12 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
+from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import (
@@ -1118,3 +1120,9 @@ class Proposition(interface.RootEntity):
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
+
+    def nettoyer_reponses_questions_specifiques(self, questions_specifiques: List[QuestionSpecifique]):
+        self.reponses_questions_specifiques = ISuperQuestionSpecifiqueTranslator.clean_specific_question_answers(
+            questions_specifiques,
+            self.reponses_questions_specifiques,
+        )

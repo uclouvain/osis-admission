@@ -200,6 +200,7 @@ class AdmissionAdminMixin(ReadOnlyFilesMixin, admin.ModelAdmin):
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Candidate on portal")}</a>')
 
 
+@admin.register(DoctorateAdmission)
 class DoctorateAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = [
         'training',
@@ -229,6 +230,7 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         return resolve_url(f'admission:doctorate', uuid=obj.uuid)
 
 
+@admin.register(ContinuingEducationAdmission)
 class ContinuingEducationAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = [
         'training',
@@ -240,6 +242,7 @@ class ContinuingEducationAdmissionAdmin(AdmissionAdminMixin):
         return resolve_url(f'admission:continuing-education', uuid=obj.uuid)
 
 
+@admin.register(GeneralEducationAdmission)
 class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = [
         'training',
@@ -308,6 +311,7 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
             )
 
 
+@admin.register(CddMailTemplate)
 class CddMailTemplateAdmin(MailTemplateAdmin):
     list_display = ('name', 'identifier', 'language', 'cdd')
     search_fields = [
@@ -328,6 +332,7 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
         return resolve_url(f'admission:config:cdd-mail-template:preview', identifier=obj.identifier, pk=obj.pk)
 
 
+@admin.register(Scholarship)
 class ScholarshipAdmin(admin.ModelAdmin):
     list_display = [
         'short_name',
@@ -439,6 +444,7 @@ class AdmissionFormItemFreeDocumentListFilter(SimpleListFilterWithDefaultValue):
         return queryset.filter(filter_by if value == 'free_documents' else ~filter_by)
 
 
+@admin.register(AdmissionFormItem)
 class AdmissionFormItemAdmin(admin.ModelAdmin):
     list_display = [
         'id',
@@ -497,6 +503,7 @@ class AdmissionFormItemInstantiationFreeDocumentListFilter(AdmissionFormItemFree
         return queryset.filter(filter_by if value == 'free_documents' else ~filter_by)
 
 
+@admin.register(AdmissionFormItemInstantiation)
 class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
     list_display = [
         'academic_year',
@@ -541,6 +548,7 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
             return obj.education_group.most_recent_acronym
 
 
+@admin.register(AdmissionViewer)
 class AdmissionViewerAdmin(admin.ModelAdmin):
     list_display = ['admission', 'person', 'viewed_at']
     search_fields = ['admission__reference']
@@ -553,6 +561,7 @@ class AdmissionViewerAdmin(admin.ModelAdmin):
     ]
 
 
+@admin.register(Accounting)
 class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
     autocomplete_fields = ['admission']
     list_display = ['admission']
@@ -734,6 +743,7 @@ class QuarantaineFilter(admin.SimpleListFilter):
         return queryset
 
 
+@admin.register(BaseAdmission)
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference', 'candidate__last_name', 'candidate__global_id', 'training__acronym']
@@ -777,10 +787,12 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
             )
         )
 
+    @admin.display(
+        ordering='_noma_sent_to_digit'
+    )
     def noma_sent_to_digit(self, obj):
         return obj._noma_sent_to_digit
 
-    noma_sent_to_digit.admin_order_field = '_noma_sent_to_digit'
 
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
@@ -819,11 +831,13 @@ class DisplayTranslatedNameMixin:
     search_fields = ['name_fr', 'name_en']
 
 
+@admin.register(RefusalReasonCategory)
 class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
     list_display = ['name', 'move_up_down_links', 'order']
     search_fields = ['name']
 
 
+@admin.register(RefusalReason)
 class RefusalReasonAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
     autocomplete_fields = ['category']
     list_display = ['safe_name', 'category', 'move_up_down_links', 'order']
@@ -834,6 +848,7 @@ class RefusalReasonAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
         return mark_safe(obj.name)
 
 
+@admin.register(AdditionalApprovalCondition)
 class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
     list_display = ['safe_name_fr', 'safe_name_en']
 
@@ -846,18 +861,21 @@ class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAd
         return mark_safe(obj.name_en)
 
 
+@admin.register(DiplomaticPost)
 class DiplomaticPostAdmin(admin.ModelAdmin):
     autocomplete_fields = ['countries']
     search_fields = ['name_fr', 'name_en']
     list_display = ['name_fr', 'name_en', 'email']
 
 
+@admin.register(OnlinePayment)
 class OnlinePaymentAdmin(admin.ModelAdmin):
     search_fields = ['admission', 'payment_id']
     list_display = ['admission', 'payment_id', 'status', 'method']
     list_filter = ['status', 'method']
 
 
+@admin.register(EPCInjection)
 class EPCInjectionAdmin(admin.ModelAdmin):
     search_fields = ['admission__reference', 'admission__candidate__global_id', 'admission__candidate__last_name']
     list_display = ['admission', 'type', 'status', 'errors_messages', 'last_attempt_date', 'last_response_date']
@@ -900,6 +918,7 @@ class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
         self.fields['related_experience'].queryset = self.instance.admission.candidate.educationalexperience_set
 
 
+@admin.register(FreeAdditionalApprovalCondition)
 class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
     form = FreeAdditionalApprovalConditionAdminForm
     list_display = ['name_fr', 'name_en', 'admission']
@@ -910,31 +929,14 @@ class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
     ]
 
 
+@admin.register(CddConfiguration)
 class CddConfigurationAdmin(admin.ModelAdmin):
     autocomplete_fields = [
         'cdd',
     ]
 
 
-admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
-admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
-admin.site.register(CddConfiguration, CddConfigurationAdmin)
-admin.site.register(Scholarship, ScholarshipAdmin)
-admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
-admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)
-admin.site.register(GeneralEducationAdmission, GeneralEducationAdmissionAdmin)
-admin.site.register(ContinuingEducationAdmission, ContinuingEducationAdmissionAdmin)
-admin.site.register(BaseAdmission, BaseAdmissionAdmin)
-admin.site.register(AdmissionViewer, AdmissionViewerAdmin)
-admin.site.register(Accounting, AccountingAdmin)
-admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
-admin.site.register(RefusalReason, RefusalReasonAdmin)
-admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
-admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
-admin.site.register(OnlinePayment, OnlinePaymentAdmin)
-admin.site.register(FreeAdditionalApprovalCondition, FreeAdditionalApprovalConditionAdmin)
-
-
+@admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'context', 'get_category', 'ects', 'modified_at', 'status', 'is_course_completed')
     search_fields = ['doctorate__uuid', 'doctorate__reference']
@@ -1034,9 +1036,7 @@ class ActivityAdmin(admin.ModelAdmin):
         return url + f'#{obj.uuid}'
 
 
-admin.site.register(Activity, ActivityAdmin)
-
-
+@admin.register(AdmissionTask)
 class AdmissionTaskAdmin(admin.ModelAdmin):
     list_display = ['admission', 'task_uuid', 'task_status', 'type']
     list_filter = ['task__state', 'type']
@@ -1058,14 +1058,11 @@ class AdmissionTaskAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None) -> bool:
         return False
 
-
-admin.site.register(AdmissionTask, AdmissionTaskAdmin)
-
-
 # ##############################################################################
 # Roles
 
 
+@admin.register(AdreSecretary, DoctorateReader, JurySecretary, Sceb)
 class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
     list_select_related = ['person__user']
 
@@ -1073,6 +1070,7 @@ class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
         return obj.person.user
 
 
+@admin.register(SicManagement)
 class HijackEntityRoleModelAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
     list_select_related = ['person__user']
 
@@ -1080,6 +1078,7 @@ class HijackEntityRoleModelAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
         return obj.person.user
 
 
+@admin.register(CddConfigurator)
 class CddConfiguratorAdmin(HijackRoleModelAdmin):
     list_display = ('person', 'most_recent_acronym')
     search_fields = [
@@ -1111,6 +1110,7 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
         )
 
 
+@admin.register(CommitteeMember, Promoter)
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
     list_display = ('person', 'global_id', 'view_on_portal')
 
@@ -1124,6 +1124,7 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Search on portal")}</a>')
 
 
+@admin.register(Candidate)
 class CandidateAdmin(FrontOfficeRoleModelAdmin):
     actions = ['send_selected_to_digit']
 
@@ -1161,6 +1162,7 @@ class TypeField(forms.CheckboxSelectMultiple):
         return super().format_value(value)
 
 
+@admin.register(CentralManager)
 class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
     list_select_related = ['person__user']
     list_display = ('person', 'entity', 'scopes')
@@ -1192,6 +1194,7 @@ class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
         return obj.person.user
 
 
+@admin.register(ProgramManager)
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
     list_select_related = ['person__user']
     list_display = ['person', 'education_group_most_recent_acronym']
@@ -1218,6 +1221,7 @@ class WorkingListForm(forms.ModelForm):
         fields = '__all__'
 
 
+@admin.register(WorkingList)
 class WorkingListAdmin(OrderedModelAdmin):
     list_display = ['translated_name', 'move_up_down_links', 'order']
     search_fields = ['name']
@@ -1271,14 +1275,17 @@ class DoctorateWorkingListForm(forms.ModelForm):
         fields = '__all__'
 
 
+@admin.register(ContinuingWorkingList)
 class ContinuingWorkingListAdmin(WorkingListAdmin):
     form = ContinuingWorkingListForm
 
 
+@admin.register(DoctorateWorkingList)
 class DoctorateWorkingListAdmin(WorkingListAdmin):
     form = DoctorateWorkingListForm
 
 
+@admin.register(CategorizedFreeDocument)
 class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
     model = CategorizedFreeDocument
     list_display = [
@@ -1295,23 +1302,3 @@ class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
         'short_label_en',
         'short_label_fr',
     ]
-
-
-admin.site.register(CategorizedFreeDocument, CategorizedFreeDocumentAdmin)
-admin.site.register(WorkingList, WorkingListAdmin)
-admin.site.register(ContinuingWorkingList, ContinuingWorkingListAdmin)
-admin.site.register(DoctorateWorkingList, DoctorateWorkingListAdmin)
-admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
-admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
-admin.site.register(Candidate, CandidateAdmin)
-
-admin.site.register(CddConfigurator, CddConfiguratorAdmin)
-
-admin.site.register(CentralManager, CentralManagerAdmin)
-admin.site.register(ProgramManager, ProgramManagerAdmin)
-admin.site.register(SicManagement, HijackEntityRoleModelAdmin)
-admin.site.register(AdreSecretary, HijackRoleModelAdmin)
-admin.site.register(JurySecretary, HijackRoleModelAdmin)
-admin.site.register(Sceb, HijackRoleModelAdmin)
-admin.site.register(DoctorateReader, HijackRoleModelAdmin)
-admin.site.register(EPCInjection, EPCInjectionAdmin)
