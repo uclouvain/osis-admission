@@ -23,23 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import factory
-from django.conf import settings
-from factory.django import DjangoModelFactory
-from factory.fuzzy import FuzzyText
 
-from admission.models.working_list import WorkingList
+from django.utils.translation import gettext_lazy as _
+
+from base.models.utils.utils import ChoiceEnum
 
 
-class WorkingListFactory(DjangoModelFactory):
-    class Meta:
-        model = WorkingList
-
-    name = factory.Dict(
-        {
-            settings.LANGUAGE_CODE_FR: FuzzyText(length=10),
-            settings.LANGUAGE_CODE_EN: FuzzyText(length=10),
-        }
-    )
-
-    order = 0
+class TardiveModificationReorientationFiltre(ChoiceEnum):
+    INSCRIPTION_TARDIVE = _('Late enrollment')
+    MODIFICATION_INSCRIPTION = _('Change of enrolment')
+    REORIENTATION = _('Change of course')

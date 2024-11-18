@@ -149,7 +149,7 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.cycle_pursuit, 'YES')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertTrue(self.general_admission.late_enrollment)
 
     def test_get_without_htmx(self):
@@ -214,7 +214,7 @@ class ChoixFormationFormViewTestCase(TestCase):
         master_general_admission.refresh_from_db()
         self.assertEqual(master_general_admission.cycle_pursuit, PoursuiteDeCycle.TO_BE_DETERMINED.name)
         self.assertEqual(master_general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(master_general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(master_general_admission.modified_at, datetime.datetime.now())
         self.assertFalse(master_general_admission.late_enrollment)
 
         master_general_admission.cycle_pursuit = PoursuiteDeCycle.YES.name

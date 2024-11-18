@@ -168,7 +168,7 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         htmx_info = json.loads(response.headers['HX-Trigger'])
         self.assertTrue(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
@@ -228,7 +228,7 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         htmx_info = json.loads(response.headers['HX-Trigger'])
         self.assertFalse(htmx_info.get('formValidation', {}).get('select_access_title_perm'))
@@ -504,9 +504,9 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertEqual(self.general_admission.prerequisite_courses_fac_comment, 'Test')
         self.assertEqual(self.general_admission.prerequisite_courses.count(), 1)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
-        previous_date = datetime.datetime.today()
+        previous_date = datetime.datetime.now()
 
         self.general_admission.last_update_author = None
         self.general_admission.save(update_fields=['last_update_author'])
@@ -569,7 +569,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertEqual(self.general_admission.prerequisite_courses_fac_comment, '')
         self.assertEqual(self.general_admission.prerequisite_courses.count(), 0)
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
     def assertDjangoMessage(self, response, message):
         messages = [m.message for m in response.context['messages']]
@@ -933,7 +933,7 @@ class PastExperiencesAccessTitleEquivalencyViewTestCase(TestCase):
             self.assertEqual(self.general_admission.foreign_access_title_equivalency_state, '')
             self.assertEqual(self.general_admission.foreign_access_title_equivalency_effective_date, None)
             self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-            self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+            self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         for equivalency_type in [
             TypeEquivalenceTitreAcces.NON_CONCERNE.name,

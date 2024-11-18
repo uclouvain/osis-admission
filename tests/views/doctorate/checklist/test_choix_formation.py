@@ -167,7 +167,7 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.admission.refresh_from_db()
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.training, self.other_training)
         self.assertEqual(self.admission.type_demande, TypeDemande.INSCRIPTION.name)
 
@@ -188,7 +188,7 @@ class ChoixFormationFormViewTestCase(TestCase):
 
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.last_update_author, self.program_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.training, self.other_training)
         self.assertEqual(self.admission.type_demande, TypeDemande.INSCRIPTION.name)
 

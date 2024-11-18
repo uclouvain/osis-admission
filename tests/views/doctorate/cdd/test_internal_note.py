@@ -195,7 +195,7 @@ class InternalNoteTestCase(TestCase):
         response = self.client.post(self.url, data={'text': ''})
 
         self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', 'text', 'Ce champ est obligatoire.')
+        self.assertFormError(response.context['form'], 'text', 'Ce champ est obligatoire.')
 
         self.assertEqual(InternalNote.objects.filter(admission=self.first_admission).count(), 2)
 

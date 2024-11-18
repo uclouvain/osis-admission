@@ -130,6 +130,13 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             campus__nom='Louvain-la-Neuve',
         ),
         FormationFactory(
+            intitule='Master en sciences',
+            entity_id__sigle='MASTER-SCI',
+            entity_id__annee=2021,
+            type=TrainingType.MASTER_M1,
+            campus__nom='Louvain-la-Neuve',
+        ),
+        FormationFactory(
             intitule='Aggrégation en économie',
             entity_id__sigle='AGGREGATION-ECO',
             entity_id__annee=2020,

@@ -295,7 +295,7 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
                 str(self.specific_questions[0].form_item.uuid): 'Answer',
             },
         )
-        self.assertEqual(self.master_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.master_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.master_admission.last_update_author, self.sic_manager_user.person)
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
@@ -459,7 +459,7 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(self.bachelor_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.bachelor_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.bachelor_admission.last_update_author, self.sic_manager_user.person)
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',

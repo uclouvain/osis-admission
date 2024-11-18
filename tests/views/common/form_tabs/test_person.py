@@ -701,7 +701,7 @@ class PersonFormTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
     def test_general_person_form_post_without_country_of_citizenship(self):
