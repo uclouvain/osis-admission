@@ -74,7 +74,7 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
             TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.name,
         ],
         TypeFormation.DOCTORAT.name: [
-            TrainingType.FORMATION_PHD.name,
+            TrainingType.PHD.name,
         ],
     }
 

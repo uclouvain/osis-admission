@@ -68,7 +68,7 @@ class DoctorateFactory(EducationGroupYearFactory):
 
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     management_entity = factory.SubFactory(EntityWithVersionFactory)
-    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.FORMATION_PHD.name)
+    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
     primary_language = None
 
     @factory.post_generation
