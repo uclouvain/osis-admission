@@ -32,6 +32,7 @@ import attrs
 from django.conf import settings
 from django.db import transaction
 from django.db.models import OuterRef, Subquery, Prefetch, Case, IntegerField, When
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
@@ -271,6 +272,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         admission, _ = GeneralEducationAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
+                # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
+                'modified_at': timezone.now(),
                 'candidate': candidate,
                 'training': training,
                 'determined_academic_year': entity.annee_calculee and academic_years[entity.annee_calculee],

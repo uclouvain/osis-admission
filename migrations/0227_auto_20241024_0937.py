@@ -9,7 +9,7 @@ def ajout_au_group_program_manager(apps, schema_editor):
         return
     ContinuingEducationTrainingManager = apps.get_model('continuing_education', 'ContinuingEducationTrainingManager')
     Group = apps.get_model('auth', 'Group')
-    group = Group.objects.get(name='admission_program_managers')
+    group, _ = Group.objects.get_or_create(name='admission_program_managers')
     gestionnaires_iufc = ContinuingEducationTrainingManager.objects.all().select_related(
         'training__education_group',
         'person',

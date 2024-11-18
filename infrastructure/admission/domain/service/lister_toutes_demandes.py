@@ -93,7 +93,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         taille_page: Optional[int] = None,
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
-        injection_en_erreur: Optional[bool] = None,
+        tardif_modif_reorientation: Optional[str] = '',
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -221,16 +221,14 @@ class ListerToutesDemandes(IListerToutesDemandes):
             else:
                 qs = qs.exclude(id__in=qs.filter_in_quarantine().values('id'))
 
-        if injection_en_erreur is not None:
-            injection_condition = Q(
-                epc_injection__type=EPCInjectionType.DEMANDE.name,
-                epc_injection__status__in=[EPCInjectionStatus.ERROR.name, EPCInjectionStatus.OSIS_ERROR.name],
-            )
+        if tardif_modif_reorientation:
+            related_field = {
+                TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name: 'late_enrollment',
+                TardiveModificationReorientationFiltre.MODIFICATION_INSCRIPTION.name: 'is_external_modification',
+                TardiveModificationReorientationFiltre.REORIENTATION.name: 'is_external_reorientation',
+            }[tardif_modif_reorientation]
 
-            if injection_en_erreur:
-                qs = qs.filter(injection_condition)
-            else:
-                qs = qs.exclude(injection_condition)
+            qs = qs.filter(**{f'{related_field}': True})
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 
@@ -477,4 +475,5 @@ class ListerToutesDemandes(IListerToutesDemandes):
             poursuite_de_cycle=admission.cycle_pursuit,
             annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year else None,
             adresse_email_candidat=admission.candidate.private_email,
+            reponses_questions_specifiques=admission.specific_question_answers,
         )

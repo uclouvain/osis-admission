@@ -32,12 +32,12 @@ import pika
 from django.conf import settings
 from django.db import transaction
 
+from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.models import Accounting, EPCInjection
 from admission.models.base import (
     BaseAdmission,
 )
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.tasks import injecter_signaletique_a_epc_task
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -78,7 +78,6 @@ class InjectionEPCSignaletique:
                 'payload': donnees,
                 'status': statut,
                 'last_attempt_date': None,
-                "osis_error_message": str(e) if e else "",
                 "osis_stacktrace": stacktrace if e else ""
             }
         )

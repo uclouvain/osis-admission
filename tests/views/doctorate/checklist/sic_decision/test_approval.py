@@ -313,7 +313,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.admission.must_report_to_sic, None)
         self.assertEqual(self.admission.communication_to_the_candidate, 'Communication')
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.must_provide_student_visa_d, False)  # False for UE+5 candidates
 
         # Check that an history entry is created
