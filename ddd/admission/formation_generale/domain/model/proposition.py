@@ -308,7 +308,7 @@ class Proposition(interface.RootEntity):
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
         self.soumise_le = now()
-        if pool != AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE:
+        if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION:
             self.attestation_inscription_reguliere = []
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
             self.formulaire_modification_inscription = []
