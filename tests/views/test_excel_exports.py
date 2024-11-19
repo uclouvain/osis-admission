@@ -441,7 +441,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         answers_to_specific_questions = row_data[14].split(SPECIFIC_QUESTION_SEPARATOR)
         self.assertCountEqual(
             answers_to_specific_questions,
-            ['Q2=Answer 1', 'Q5=Un,Deux', 'Q6=Trois'],
+            ['Q2 : Answer 1', 'Q5 : Un,Deux', 'Q6 : Trois'],
         )
 
         with mock.patch.object(self.result, 'date_confirmation', None):
@@ -469,7 +469,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             answers_to_specific_questions = row_data[14].split(SPECIFIC_QUESTION_SEPARATOR)
             self.assertCountEqual(
                 answers_to_specific_questions,
-                ['Q5=Un', 'Q6='],
+                ['Q5 : Un', 'Q6 : '],
             )
 
     def test_export_content_with_specific_questions_answers_containing_the_separator(self):
@@ -490,8 +490,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             self.assertCountEqual(
                 answers_to_specific_questions,
                 [
-                    f'Q2=A{SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT}B',
-                    f'Q6=One{SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT}A',
+                    f'Q2 : A{SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT}B',
+                    f'Q6 : One{SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT}A',
                 ],
             )
 
