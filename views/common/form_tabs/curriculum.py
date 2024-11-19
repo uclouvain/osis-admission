@@ -29,8 +29,7 @@ from typing import Union, List
 from uuid import UUID
 
 from django.contrib import messages
-from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import ProtectedError, QuerySet, OuterRef, Exists, Q
+from django.db.models import ProtectedError, QuerySet, OuterRef, Exists
 from django.forms import forms
 from django.shortcuts import redirect, get_object_or_404, resolve_url
 from django.urls import reverse
@@ -38,6 +37,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
@@ -46,7 +46,6 @@ from admission.models.base import (
 from admission.models.base import BaseAdmission
 from admission.models.checklist import FreeAdditionalApprovalCondition
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
@@ -295,10 +294,10 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
     def person(self):
         return self.admission.candidate
 
-    def delete(self, request, *args, **kwargs):
+    def form_valid(self, form):
         # Delete the experience
         try:
-            delete = super().delete(request, *args, **kwargs)
+            delete = super().form_valid(form)
         except ProtectedError as e:
             free_approval_condition = next(
                 (obj for obj in e.protected_objects if isinstance(obj, FreeAdditionalApprovalCondition)),

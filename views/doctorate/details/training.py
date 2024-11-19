@@ -34,7 +34,6 @@ from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin
 
-from admission.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.commands import (
     RefuserActiviteCommand,
     RevenirSurStatutActiviteCommand,
@@ -45,6 +44,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
 from admission.forms.doctorate.training.activity import *
 from admission.forms.doctorate.training.activity import ComplementaryCourseForm
 from admission.forms.doctorate.training.processus import RefuseForm
+from admission.models.doctoral_training import Activity
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
@@ -178,7 +178,8 @@ class TrainingActivityDeleteView(AdmissionFormMixin, LoadDossierViewMixin, gener
             f"admission.view_{self.request.resolver_match.namespaces[2].replace('-', '_')}",
         ]
 
-    def delete(self, request, *args, **kwargs):
+    def form_valid(self, form):
+        super().form_valid(form)
         Activity.objects.filter(
             Q(uuid=self.kwargs['activity_id']) | Q(parent__uuid=self.kwargs['activity_id'])
         ).delete()
