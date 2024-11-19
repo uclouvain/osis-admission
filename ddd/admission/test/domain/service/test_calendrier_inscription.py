@@ -241,6 +241,7 @@ class CalendrierInscriptionTestCase(TestCase):
         proposition = PropositionFactory(est_bachelier_en_reorientation=True)
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
         dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
@@ -250,6 +251,24 @@ class CalendrierInscriptionTestCase(TestCase):
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
+        self.assertEqual(dto.annee, 2022)
+
+    @freezegun.freeze_time('2022-03-15')
+    def test_verification_calendrier_inscription_reorientation_validee_hors_periode(self):
+        # Nous ne sommes pas dans la période réorientation mais le candidat l'a validée
+        proposition = PropositionFactory(est_bachelier_en_reorientation=True)
+        profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
+        self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+            formation_id=proposition.formation_id,
+            proposition=proposition,
+            matricule_candidat=proposition.matricule_candidat,
+            titres_acces=Titres(AdmissionConditionsDTOFactory()),
+            type_formation=TrainingType.BACHELOR,
+            profil_candidat_translator=self.profil_candidat_translator,
+        )
+        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
 
     @freezegun.freeze_time('2022-12-15')
     def test_verification_calendrier_inscription_reorientation_non_choisie(self):
