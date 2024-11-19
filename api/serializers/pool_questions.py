@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,9 @@ from admission.ddd.admission.domain.validator.exceptions import (
 
 class PoolQuestionsSerializer(serializers.ModelSerializer):
     reorientation_pool_end_date = serializers.DateTimeField(read_only=True, allow_null=True)
+    reorientation_pool_academic_year = serializers.IntegerField(read_only=True, allow_null=True)
     modification_pool_end_date = serializers.DateTimeField(read_only=True, allow_null=True)
+    modification_pool_academic_year = serializers.IntegerField(read_only=True, allow_null=True)
     forbid_enrolment_limited_course_for_non_resident = serializers.SerializerMethodField()
 
     def get_forbid_enrolment_limited_course_for_non_resident(self, _):
@@ -58,10 +60,13 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
             'is_belgian_bachelor',
             'is_external_reorientation',
             'regular_registration_proof',
+            'reorientation_form',
             'is_external_modification',
             'registration_change_form',
             'is_non_resident',
             'reorientation_pool_end_date',
+            'reorientation_pool_academic_year',
             'modification_pool_end_date',
+            'modification_pool_academic_year',
             'forbid_enrolment_limited_course_for_non_resident',
         ]

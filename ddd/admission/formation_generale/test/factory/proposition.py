@@ -223,6 +223,7 @@ class PropositionFactory(factory.Factory):
             est_bachelier_belge=True,
             est_reorientation_inscription_externe=True,
             attestation_inscription_reguliere=['uuid-attestation_inscription_reguliere'],
+            formulaire_reorientation=['uuid-formulaire_reorientation'],
         )
         est_bachelier_en_modification = factory.Trait(
             est_bachelier_belge=True,

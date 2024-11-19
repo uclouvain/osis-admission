@@ -1888,6 +1888,9 @@ msgstr "Complète"
 msgid "Completed after the request"
 msgstr "Complété après la réclamation"
 
+msgid "Completed and signed reorientation form"
+msgstr "Formulaire de réorientation complété et signé"
+
 msgid "Completed for Fac"
 msgstr "Complétée pour Fac"
 
@@ -9522,6 +9525,9 @@ msgstr "Votre dossier est en cours de vérification par le jury de la formation"
 
 msgid "Your background is not suited to this course"
 msgstr "Votre parcours n'est pas adapté au programme de cette formation"
+
+msgid "Your completed and signed reorientation form"
+msgstr "Votre formulaire de réorientation complété et signé"
 
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."

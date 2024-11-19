@@ -1730,6 +1730,9 @@ msgstr ""
 msgid "Completed after the request"
 msgstr ""
 
+msgid "Completed and signed reorientation form"
+msgstr ""
+
 msgid "Completed for Fac"
 msgstr ""
 
@@ -8522,6 +8525,9 @@ msgid "Your application is currently being reviewed by the course exam board"
 msgstr ""
 
 msgid "Your background is not suited to this course"
+msgstr ""
+
+msgid "Your completed and signed reorientation form"
 msgstr ""
 
 msgid "Your data have been saved."

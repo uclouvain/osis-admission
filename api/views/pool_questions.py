@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -95,25 +95,41 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
 
         # Load current reorientation and modification calendar for their finishing dates
         pools = {
-            "modification_pool_end_date": AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE.name,
-            "reorientation_pool_end_date": AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION.name,
+            "modification_pool": AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE.name,
+            "reorientation_pool": AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION.name,
         }
-        calendars = dict(
-            AcademicCalendar.objects.filter(
-                start_date__lte=datetime.date.today(),
-                end_date__gte=datetime.date.today(),
-                reference__in=pools.values(),
-            ).values_list('reference', 'end_date')
-        )
-        for field_name, calendar_name in pools.items():
-            date = calendars.get(calendar_name)
+        calendars = {
+            calendar['reference']: {
+                'end_date': calendar.get('end_date'),
+                'academic_year': calendar.get('data_year__year')
+            }
+            for calendar in (
+                AcademicCalendar.objects.filter(
+                    start_date__lte=datetime.date.today(),
+                    end_date__gte=datetime.date.today(),
+                    reference__in=pools.values(),
+                ).values('reference', 'end_date', 'data_year__year')
+            )
+        }
+
+        field_questions_to_display = []
+
+        for base_field_name, calendar_name in pools.items():
+            current_calendar = calendars.get(calendar_name, {})
+
+            date = current_calendar.get('end_date')
             if date is not None:
                 # Set the last hour of the date if existing
                 date = datetime.datetime.combine(date, datetime.time(23, 59))
-            setattr(admission, field_name, date)
+            end_date_field_name = f'{base_field_name}_end_date'
+            setattr(admission, end_date_field_name, date)
+            field_questions_to_display.append(end_date_field_name)
+
+            academic_year_field_name = f'{base_field_name}_academic_year'
+            setattr(admission, academic_year_field_name, current_calendar.get('academic_year'))
+            field_questions_to_display.append(academic_year_field_name)
 
         # Build relevant field list
-        field_questions_to_display = list(pools.keys())
         if self.get_permission_object().training.acronym in SIGLES_WITH_QUOTA:
             field_questions_to_display.append('is_non_resident')
         if admission.reorientation_pool_end_date is not None:
@@ -121,6 +137,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
                 'is_belgian_bachelor',
                 'is_external_reorientation',
                 'regular_registration_proof',
+                'reorientation_form',
             ]
         elif admission.modification_pool_end_date is not None:
             field_questions_to_display += [
@@ -148,6 +165,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
             'is_external_reorientation': None,
             'registration_change_form': [],
             'regular_registration_proof': [],
+            'reorientation_form': [],
             # Add user input
             **request.data,
         }

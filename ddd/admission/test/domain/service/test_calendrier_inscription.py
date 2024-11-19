@@ -220,6 +220,28 @@ class CalendrierInscriptionTestCase(TestCase):
             formation_id__annee=2022,
             est_reorientation_inscription_externe=True,
             attestation_inscription_reguliere=[],
+            formulaire_reorientation=['uuid-formulaire_reorientation'],
+        )
+        profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
+        self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        with self.assertRaises(ReorientationInscriptionExterneNonConfirmeeException):
+            CalendrierInscriptionInMemory.verifier(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                type_formation=TrainingType.BACHELOR,
+                profil_candidat_translator=self.profil_candidat_translator,
+                formation_translator=self.formation_translator,
+            )
+
+        proposition = PropositionFactory(
+            formation_id__sigle='ECGE3DP',
+            formation_id__annee=2022,
+            est_reorientation_inscription_externe=True,
+            formulaire_reorientation=[],
+            attestation_inscription_reguliere=['uuid_attestation_inscription_reguliere'],
         )
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
