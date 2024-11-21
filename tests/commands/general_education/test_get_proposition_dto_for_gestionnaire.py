@@ -157,6 +157,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.est_bachelier_belge, self.admission.is_belgian_bachelor)
         self.assertEqual(result.est_reorientation_inscription_externe, self.admission.is_external_reorientation)
         self.assertEqual(result.attestation_inscription_reguliere, self.admission.regular_registration_proof)
+        self.assertEqual(result.formulaire_reorientation, self.admission.reorientation_form)
         self.assertEqual(result.est_modification_inscription_externe, self.admission.is_external_modification)
         self.assertEqual(result.formulaire_modification_inscription, self.admission.registration_change_form)
         self.assertEqual(result.est_non_resident_au_sens_decret, self.admission.is_non_resident)

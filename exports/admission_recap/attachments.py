@@ -480,6 +480,15 @@ def get_specific_questions_attachments(
     if eligible_for_reorientation and context.proposition.est_reorientation_inscription_externe:
         attachments.append(
             Attachment(
+                identifier='FORMULAIRE_REORIENTATION',
+                label=DocumentsQuestionsSpecifiques['FORMULAIRE_REORIENTATION'],
+                uuids=context.proposition.formulaire_reorientation,
+                required=True,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
+        attachments.append(
+            Attachment(
                 identifier='ATTESTATION_INSCRIPTION_REGULIERE',
                 label=DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'],
                 uuids=context.proposition.attestation_inscription_reguliere,

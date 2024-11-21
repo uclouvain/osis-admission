@@ -258,6 +258,7 @@ class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandReque
     est_bachelier_belge: Optional[bool] = None
     est_reorientation_inscription_externe: Optional[bool] = None
     attestation_inscription_reguliere: List[str] = attr.Factory(list)
+    formulaire_reorientation: List[str] = attr.Factory(list)
 
     est_modification_inscription_externe: Optional[bool] = None
     formulaire_modification_inscription: List[str] = attr.Factory(list)

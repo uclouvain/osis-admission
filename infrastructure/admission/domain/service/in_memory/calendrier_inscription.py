@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,12 +24,18 @@
 #
 # ##############################################################################
 from datetime import date, timedelta
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
+from admission.ddd.admission.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
+    AnneeInscriptionFormationInMemoryTranslator,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import get_current_year
 from osis_profile import PLUS_5_ISO_CODES
@@ -41,24 +47,35 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
             pool.cutover_date,
             getattr(pool, 'end_date', None),
         )
-        for pool in ICalendrierInscription.pools
+        for pool in ICalendrierInscription.all_pools
     }
 
     @classmethod
-    def get_annees_academiques_pour_calcul(cls, type_formation: TrainingType) -> List[int]:
-        return cls._get_annees_academiques_pour_calcul()
+    def get_annees_academiques_pour_calcul(cls, type_formation: TrainingType) -> Tuple[List[int], List[int]]:
+        from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+            ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
+        )
 
-    @classmethod
-    def _get_annees_academiques_pour_calcul(cls) -> List[int]:
-        current_year = get_current_year()
-        return [current_year, current_year - 1, current_year + 1, current_year + 2]
+        current_year = AnneeInscriptionFormationInMemoryTranslator.recuperer(
+            {
+                CONTEXT_GENERAL: AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+                CONTEXT_DOCTORATE: AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT,
+                CONTEXT_CONTINUING: AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT,
+            }[ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE[type_formation.name]]
+        )
+
+        return (
+            [current_year - 1, current_year],
+            [current_year, current_year - 1, current_year + 1, current_year + 2],
+        )
 
     @classmethod
     def get_pool_ouverts(cls) -> List[Tuple[str, int]]:
         opened = []
         today = date.today()
+        annees = [today.year, today.year - 1, today.year + 1, today.year + 2]
         for pool_name, dates in cls.periodes_ouvertes.items():
-            for annee in cls._get_annees_academiques_pour_calcul():
+            for annee in annees:
                 date_debut, date_fin = cls._get_dates_completes(annee, dates[0], dates[1])
                 if date_debut <= today <= date_fin:
                     opened.append((pool_name, annee))

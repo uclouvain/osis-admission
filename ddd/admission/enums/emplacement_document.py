@@ -203,6 +203,7 @@ DocumentsQuestionsSpecifiques = {
         'Copy of residence permit covering entire course, including assessment test (except for online courses).'
     ),
     'ATTESTATION_INSCRIPTION_REGULIERE': _('Certificate of regular enrolment'),
+    'FORMULAIRE_REORIENTATION': _('Your completed and signed reorientation form'),
     'FORMULAIRE_MODIFICATION_INSCRIPTION': _('Change of enrolment form'),
     'ADDITIONAL_DOCUMENTS': _(
         'You can add any document you feel is relevant to your application '

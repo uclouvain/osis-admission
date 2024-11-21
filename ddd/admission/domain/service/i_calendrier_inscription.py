@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -64,7 +64,6 @@ class ICalendrierInscription(interface.DomainService):
         DoctorateAdmissionCalendar(),
         ContinuingEducationAdmissionCalendar(),
         AdmissionPoolExternalEnrollmentChangeCalendar(),
-        AdmissionPoolExternalReorientationCalendar(),
         AdmissionPoolVipCalendar(),
         AdmissionPoolHueUclPathwayChangeCalendar(),
         AdmissionPoolInstituteChangeCalendar(),
@@ -74,6 +73,10 @@ class ICalendrierInscription(interface.DomainService):
         AdmissionPoolHue5ForeignResidencyCalendar(),
         AdmissionPoolNonResidentQuotaCalendar(),
     ]
+    priority_pools = [
+        AdmissionPoolExternalReorientationCalendar(),
+    ]
+    all_pools = priority_pools + pools
 
     # Les inscriptions pour une formation contingentée pour un candidat non résident au sens du décret via osis
     # sont interdites pour le moment
@@ -106,7 +109,7 @@ class ICalendrierInscription(interface.DomainService):
             and getattr(proposition.comptabilite, 'type_situation_assimilation', None)
         )
         ue_plus_5 = cls.est_ue_plus_5(identification, situation_assimilation)
-        annees = cls.get_annees_academiques_pour_calcul(type_formation=type_formation)
+        annees_prioritaires, annees = cls.get_annees_academiques_pour_calcul(type_formation=type_formation)
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
 
         log_messages = [
@@ -124,20 +127,36 @@ changements_etablissement={changements_etablissement},
 proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if proposition else 'None'},
         """,
         ]
+        current_kwargs = dict(
+            logs=log_messages,
+            pool_ouverts=pool_ouverts,
+            sigle=formation_id.sigle,
+            ue_plus_5=ue_plus_5,
+            access_diplomas=titres_acces.get_valid_conditions(),
+            training_type=type_formation,
+            residential_address=residential_address,
+            annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
+            matricule_candidat=matricule_candidat,
+            changements_etablissement=changements_etablissement,
+            proposition=proposition,
+        )
+
+        for annee in annees_prioritaires:
+            pool = cls.determiner_pool_pour_annee_academique(
+                pools=cls.priority_pools,
+                annee_academique=annee,
+                **current_kwargs,
+            )
+            if pool:
+                logger.debug('\n'.join(log_messages))
+                return InfosDetermineesDTO(annee, pool)
+            log_messages.append("")
+
         for annee in annees:
             pool = cls.determiner_pool_pour_annee_academique(
-                log_messages,
-                pool_ouverts,
+                pools=cls.pools,
                 annee_academique=annee,
-                sigle=formation_id.sigle,
-                ue_plus_5=ue_plus_5,
-                access_diplomas=titres_acces.get_valid_conditions(),
-                training_type=type_formation,
-                residential_address=residential_address,
-                annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
-                matricule_candidat=matricule_candidat,
-                changements_etablissement=changements_etablissement,
-                proposition=proposition,
+                **current_kwargs,
             )
             if pool:
                 logger.debug('\n'.join(log_messages))
@@ -152,9 +171,10 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         cls,
         logs: List[str],
         pool_ouverts: List[Tuple[str, int]],
+        pools: List[PoolCalendar],
         **kwargs,
     ) -> Optional['AcademicCalendarTypes']:
-        for pool in cls.pools:
+        for pool in pools:
             annee = kwargs['annee_academique']
             logs.append(
                 f"{str(AcademicCalendarTypes.get_value(pool.event_reference)):<70} {annee}"
@@ -213,7 +233,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             and (
                 proposition.est_reorientation_inscription_externe is None
                 or proposition.est_reorientation_inscription_externe
-                and not proposition.attestation_inscription_reguliere
+                and not (proposition.attestation_inscription_reguliere and proposition.formulaire_reorientation)
             )
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()
@@ -271,7 +291,11 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         raise NotImplementedError
 
     @classmethod
-    def get_annees_academiques_pour_calcul(cls, type_formation: TrainingType) -> List[int]:
+    def get_annees_academiques_pour_calcul(cls, type_formation: TrainingType) -> Tuple[List[int], List[int]]:
+        """
+        Retourne un tuple contenant les deux listes des années académiques utilisées dans le calcul des pots, la
+        première pour les pots prioritaires et la seconde pour les autres pots.
+        """
         raise NotImplementedError
 
     @classmethod

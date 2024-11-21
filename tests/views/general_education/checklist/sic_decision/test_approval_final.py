@@ -81,11 +81,13 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
             enrollment_campus__uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
+            acronym='LOUKBK',
         )
         cls.saint_louis_training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
             enrollment_campus__uuid=ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID'],
+            acronym='SLUKBK',
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user

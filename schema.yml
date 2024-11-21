@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.107
+  version: 1.0.109
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -6164,6 +6164,10 @@ components:
               creee_le:
                 type: string
                 format: date-time
+              soumise_le:
+                type: string
+                format: date-time
+                nullable: true
               statut:
                 type: string
                 readOnly: true
@@ -6308,6 +6312,10 @@ components:
               creee_le:
                 type: string
                 format: date-time
+              soumise_le:
+                type: string
+                format: date-time
+                nullable: true
               statut:
                 type: string
                 readOnly: true
@@ -6431,6 +6439,10 @@ components:
               creee_le:
                 type: string
                 format: date-time
+              soumise_le:
+                type: string
+                format: date-time
+                nullable: true
               statut:
                 type: string
                 readOnly: true
@@ -6676,6 +6688,10 @@ components:
         creee_le:
           type: string
           format: date-time
+        soumise_le:
+          type: string
+          format: date-time
+          nullable: true
         statut:
           type: string
           readOnly: true
@@ -10195,6 +10211,11 @@ components:
           items:
             type: string
           maxItems: 1
+        reorientation_form:
+          type: array
+          items:
+            type: string
+          maxItems: 1
         is_external_modification:
           type: boolean
           nullable: true
@@ -10211,9 +10232,17 @@ components:
           format: date-time
           readOnly: true
           nullable: true
+        reorientation_pool_academic_year:
+          type: integer
+          readOnly: true
+          nullable: true
         modification_pool_end_date:
           type: string
           format: date-time
+          readOnly: true
+          nullable: true
+        modification_pool_academic_year:
+          type: integer
           readOnly: true
           nullable: true
         forbid_enrolment_limited_course_for_non_resident:
@@ -11004,10 +11033,10 @@ components:
           type: integer
         pool:
           enum:
+          - ADMISSION_POOL_EXTERNAL_REORIENTATION
           - DOCTORATE_EDUCATION_ENROLLMENT
           - CONTINUING_EDUCATION_ENROLLMENT
           - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
-          - ADMISSION_POOL_EXTERNAL_REORIENTATION
           - ADMISSION_POOL_VIP
           - ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE
           - ADMISSION_POOL_INSTITUT_CHANGE
