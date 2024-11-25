@@ -122,6 +122,15 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 in_payement_order=True,
                 modified_at=datetime.datetime(2023, 1, 2),
                 last_update_author=PersonFactory(first_name='Robin'),
+                reduced_rights=False,
+                pay_by_training_cheque=True,
+                cep=False,
+                payement_spread=True,
+                training_spread=False,
+                experience_knowledge_valorisation=True,
+                assessment_test_presented=False,
+                assessment_test_succeeded=True,
+                certificate_provided=False,
             ),
             ContinuingEducationAdmissionFactory(
                 candidate__first_name="Jim",
@@ -362,7 +371,19 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         )
         self.assertEqual(object_list[0].edition, current_admission.edition)
         self.assertEqual(object_list[0].sigle_faculte, current_admission.training_management_faculty)
-        self.assertEqual(object_list[0].paye, current_admission.in_payement_order)
+        self.assertEqual(object_list[0].droits_reduits, current_admission.reduced_rights)
+        self.assertEqual(object_list[0].paye_par_cheque_formation, current_admission.pay_by_training_cheque)
+        self.assertEqual(object_list[0].cep, current_admission.cep)
+        self.assertEqual(object_list[0].etalement_des_paiements, current_admission.payement_spread)
+        self.assertEqual(object_list[0].etalement_de_la_formation, current_admission.training_spread)
+        self.assertEqual(
+            object_list[0].valorisation_des_acquis_d_experience,
+            current_admission.experience_knowledge_valorisation,
+        )
+        self.assertEqual(object_list[0].a_presente_l_epreuve_d_evaluation, current_admission.assessment_test_presented)
+        self.assertEqual(object_list[0].a_reussi_l_epreuve_d_evaluation, current_admission.assessment_test_succeeded)
+        self.assertEqual(object_list[0].diplome_produit, current_admission.certificate_provided)
+
         self.assertEqual(object_list[0].etat_demande, current_admission.status)
         self.assertEqual(object_list[0].etat_epc, '')
         self.assertEqual(object_list[0].date_confirmation, current_admission.submitted_at)

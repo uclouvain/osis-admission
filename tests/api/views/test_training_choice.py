@@ -416,7 +416,7 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
         self.assertEqual(admission.specific_question_answers, expected)
-        self.assertEqual(admission.modified_at, datetime.datetime.today())
+        self.assertEqual(admission.modified_at, datetime.datetime.now())
         self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):

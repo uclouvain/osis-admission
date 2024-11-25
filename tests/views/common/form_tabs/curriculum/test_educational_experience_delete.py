@@ -35,10 +35,6 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
-from admission.models.base import AdmissionEducationalValuatedExperiences
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
@@ -46,6 +42,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
+from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
@@ -288,7 +288,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             name_en='Test condition',
         )
 
-        response = self.client.delete(self.delete_url, follow=True)
+        response = self.client.post(self.delete_url, follow=True)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -316,7 +316,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         self.general_admission.save()
 
-        response = self.client.delete(self.delete_url)
+        response = self.client.post(self.delete_url)
 
         self.assertFalse(EducationalExperience.objects.filter(uuid=self.experience.uuid).exists())
 
@@ -339,7 +339,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             [],
         )
 
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',

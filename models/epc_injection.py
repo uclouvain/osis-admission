@@ -73,7 +73,6 @@ class EPCInjection(models.Model):
     payload = models.JSONField(default=dict, blank=True)
     epc_responses = models.JSONField(default=list, blank=True)
 
-    osis_error_message = models.CharField(max_length=255, default="", blank=True)
     osis_stacktrace = models.TextField(default="", blank=True)
 
     @property
