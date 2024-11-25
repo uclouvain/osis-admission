@@ -23,17 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from mock.mock import Mock
 
-from admission.ddd.admission.commands import (
-    SoumettreTicketPersonneCommand,
-    RechercherCompteExistantCommand,
-    GetStatutTicketPersonneQuery,
-    RetrieveListeTicketsEnAttenteQuery,
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
-    ValiderTicketPersonneCommand,
-    RetrieveListePropositionFusionEnErreurQuery,
-)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
@@ -757,13 +747,6 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
         )
     ),
-    SoumettreTicketPersonneCommand: lambda *args, **kwargs: Mock(),
-    RechercherCompteExistantCommand: lambda *args, **kwargs: Mock(),
-    GetStatutTicketPersonneQuery: lambda *args, **kwargs: Mock(),
-    RetrieveListeTicketsEnAttenteQuery: lambda *args, **kwargs: Mock(),
-    RetrieveListePropositionFusionEnErreurQuery: lambda *args, **kwargs: Mock(),
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand: lambda *args, **kwargs: Mock(),
-    ValiderTicketPersonneCommand: lambda *args, **kwargs: Mock(),
     VerifierCurriculumApresSoumissionQuery: (
         lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
             cmd,

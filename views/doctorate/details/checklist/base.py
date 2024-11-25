@@ -37,7 +37,7 @@ from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
 from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
-from admission.ddd.admission.commands import GetStatutTicketPersonneQuery, RechercherParcoursAnterieurQuery
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,
 )
@@ -511,11 +511,6 @@ class ChecklistView(
                 if context.get('past_experiences_are_sufficient')
                 else ''
             )
-
-            context['digit_ticket'] = message_bus_instance.invoke(
-                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
-            )
-
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 

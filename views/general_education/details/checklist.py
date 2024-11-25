@@ -56,7 +56,6 @@ from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (
     ListerToutesDemandesQuery,
-    GetStatutTicketPersonneQuery,
     RechercherParcoursAnterieurQuery,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
@@ -3125,11 +3124,6 @@ class ChecklistView(
                 if context.get('past_experiences_are_sufficient')
                 else ''
             )
-
-            context['digit_ticket'] = message_bus_instance.invoke(
-                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
-            )
-
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 

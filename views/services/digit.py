@@ -35,11 +35,11 @@ __all__ = [
 
 from django.views.generic import FormView
 
-from admission.ddd.admission.commands import RefuserPropositionFusionCommand
 from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal
 from base.views.common import display_error_messages
+from ddd.logic.gestion_des_comptes.commands import RefuserPropositionFusionCommand
 
 from osis_role.contrib.views import PermissionRequiredMixin
 

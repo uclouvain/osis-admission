@@ -37,11 +37,6 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from admission.ddd.admission.commands import (
-    ValiderTicketPersonneCommand,
-    SoumettreTicketPersonneCommand,
-    RechercherCompteExistantCommand,
-)
 from admission.ddd.admission.domain.validator.exceptions import (
     NotInAccountCreationPeriodException,
     AdmissionDansUnStatutPasAutoriseASInscrireException,
@@ -70,6 +65,9 @@ __all__ = [
 
 __namespace__ = False
 
+from ddd.logic.gestion_des_comptes.commands import RechercherCompteExistantCommand, ValiderTicketCommand, \
+    SoumettreTicketCommand
+
 from osis_common.ddd.interface import BusinessException
 
 COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
@@ -86,18 +84,16 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     update_fields = ['checklist', 'last_update_author', 'modified_at']
 
     if tab in ['decision_sic'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
-        # TODO : add intermediary status to support async process (waiting for digit response)
-
+        # TODO : add intermediary status to support async process (waiting for digit response) + decouple process
         from infrastructure.messages_bus import message_bus_instance
-
         message_bus_instance.invoke(RechercherCompteExistantCommand(matricule=admission.candidate.global_id))
-        message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
+        message_bus_instance.invoke(ValiderTicketCommand(global_id=admission.candidate.global_id))
         with contextlib.suppress(
             NotInAccountCreationPeriodException,
             AdmissionDansUnStatutPasAutoriseASInscrireException,
             PropositionFusionATraiterException,
         ):
-            message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=admission.candidate.global_id))
+            message_bus_instance.invoke(SoumettreTicketCommand(global_id=admission.candidate.global_id))
 
     admission.last_update_author = author
     admission.modified_at = datetime.datetime.now()

@@ -97,7 +97,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
-from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
+from admission.tasks import injecter_signaletique_a_epc_task
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -1148,11 +1148,6 @@ class CandidateAdmin(FrontOfficeRoleModelAdmin):
         if ticket:
             return self.person_digit_creation_ticket(obj).status in ["DONE", "DONE_WITH_WARNINGS"]
         return False
-
-    @admin.action(description=_('Send selected candidate to digit'))
-    def send_selected_to_digit(self, request, queryset):
-        global_ids = queryset.values_list('person__global_id', flat=True)
-        bulk_create_digit_persons_tickets.run(request=request, global_ids=global_ids)
 
 
 class TypeField(forms.CheckboxSelectMultiple):

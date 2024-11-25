@@ -48,7 +48,6 @@ from admission.models import (
 from admission.models.base import AdmissionViewer
 from admission.models.base import BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
     GetCotutelleCommand,
@@ -100,6 +99,7 @@ from admission.utils import (
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 

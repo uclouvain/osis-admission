@@ -134,52 +134,6 @@ class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest)
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RechercherCompteExistantCommand(interface.QueryRequest):
-    matricule: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
-    existing_merge_person_id: Optional[str]
-    status: str
-    original_global_id: str
-    selected_global_id: str
-    nom: str
-    prenom: str
-    autres_prenoms: str
-    date_naissance: str
-    lieu_naissance: str
-    email: str
-    sex: str
-    etat_civil: str
-    nationalite: str
-    numero_national: str
-    numero_carte_id: str
-    numero_passeport: str
-    dernier_noma_connu: str
-    expiration_carte_id: str
-    expiration_passeport: str
-    educational_curex_uuids: List[str]
-    professional_curex_uuids: List[str]
-    annee_diplome_etudes_secondaires: int
-
-
-@attr.dataclass(frozen=True, slots=True)
-class GetPropositionFusionQuery(interface.QueryRequest):
-    global_id: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class DefairePropositionFusionCommand(interface.CommandRequest):
-    global_id: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RefuserPropositionFusionCommand(interface.CommandRequest):
-    global_id: str
-
-
-@attr.dataclass(frozen=True, slots=True)
 class RechercherParcoursAnterieurQuery(interface.QueryRequest):
     global_id: str
     uuid_proposition: str
@@ -198,42 +152,6 @@ class RecupererExperienceNonAcademiqueQuery(interface.QueryRequest):
     global_id: str
     uuid_proposition: str
     uuid_experience: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SoumettreTicketPersonneCommand(interface.CommandRequest):
-    global_id: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ValiderTicketPersonneCommand(interface.CommandRequest):
-    global_id: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class GetStatutTicketPersonneQuery(interface.QueryRequest):
-    global_id: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RetrieveAndStoreStatutTicketPersonneFromDigitCommand(interface.CommandRequest):
-    ticket_uuid: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RetrieveListeTicketsEnAttenteQuery(interface.QueryRequest):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RetrieveListePropositionFusionEnErreurQuery(interface.QueryRequest):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererMatriculeDigitQuery(interface.QueryRequest):
-    noma: str
-
 
 @attr.dataclass(frozen=True, slots=True)
 class RecupererEtudesSecondairesQuery(interface.QueryRequest):
