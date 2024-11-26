@@ -104,8 +104,8 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         json_response = response.json()
         self.assertActionLinks(
             json_response['links'],
-            ['create_training_choice'],
-            ['create_person', 'create_coordinates'],
+            ['create_training_choice', 'create_coordinates'],
+            ['create_person'],
         )
 
 
