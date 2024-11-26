@@ -29,7 +29,6 @@ from typing import List, Optional
 import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
-from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import PeriodeSoumissionTicketDigit
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
@@ -112,12 +111,6 @@ class PropositionInMemoryRepository(
             if proposition.matricule_candidat == matricule_candidat
         ]
         return propositions
-
-    @classmethod
-    def get_active_period_submitted_proposition(
-        cls, matricule_candidat: str, periodes_actives: List['PeriodeSoumissionTicketDigit']
-    ) -> Optional['Proposition']:
-        return next((p for p in cls.entities if p.matricule_candidat == matricule_candidat), None)
 
     @classmethod
     def search(

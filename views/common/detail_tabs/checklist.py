@@ -37,11 +37,6 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from admission.ddd.admission.domain.validator.exceptions import (
-    NotInAccountCreationPeriodException,
-    AdmissionDansUnStatutPasAutoriseASInscrireException,
-    PropositionFusionATraiterException,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
@@ -67,6 +62,8 @@ __namespace__ = False
 
 from ddd.logic.gestion_des_comptes.commands import RechercherCompteExistantCommand, ValiderTicketCommand, \
     SoumettreTicketCommand
+from ddd.logic.gestion_des_comptes.domain.validator.exceptions import NotInAccountCreationPeriodException, \
+    AdmissionDansUnStatutPasAutoriseASInscrireException, PropositionFusionATraiterException
 
 from osis_common.ddd.interface import BusinessException
 

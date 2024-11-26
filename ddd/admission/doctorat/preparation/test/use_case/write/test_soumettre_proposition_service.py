@@ -69,7 +69,6 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 
 
 @freezegun.freeze_time('2020-11-01')
-@mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
 class TestVerifierPropositionServiceCommun(TestCase):
     @classmethod
     def setUpClass(cls):
