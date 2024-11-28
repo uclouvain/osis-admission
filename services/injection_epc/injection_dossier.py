@@ -37,6 +37,7 @@ from django.db import transaction
 from django.db.models import QuerySet, Exists, OuterRef
 from osis_history.models.history_entry import HistoryEntry
 from unidecode import unidecode
+from osis_common.queue.queue_utils import get_pika_connexion_parameters
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -568,17 +569,11 @@ class InjectionEPCAdmission:
 
     @staticmethod
     def envoyer_admission_dans_queue(donnees: Dict, admission_uuid: str, admission_reference: str):
-        credentials = pika.PlainCredentials(settings.QUEUES.get('QUEUE_USER'), settings.QUEUES.get('QUEUE_PASSWORD'))
-        rabbit_settings = pika.ConnectionParameters(
-            settings.QUEUES.get("QUEUE_URL"),
-            settings.QUEUES.get("QUEUE_PORT"),
-            settings.QUEUES.get("QUEUE_CONTEXT_ROOT"),
-            credentials,
-        )
         try:
-            connect = pika.BlockingConnection(rabbit_settings)
-            channel = connect.channel()
             queue_name = settings.QUEUES.get("QUEUES_NAME").get("ADMISSION_TO_EPC")
+            conn_params = get_pika_connexion_parameters(queue_name)
+            connect = pika.BlockingConnection(conn_params)
+            channel = connect.channel()
             send_message(queue_name, donnees, connect, channel)
             # change something in admission object ? epc_injection_status ? = sended
             # history ?
