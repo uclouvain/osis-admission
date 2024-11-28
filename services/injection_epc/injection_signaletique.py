@@ -31,6 +31,7 @@ from typing import Dict
 import pika
 from django.conf import settings
 from django.db import transaction
+from osis_common.queue.queue_utils import get_pika_connexion_parameters
 
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.models import Accounting, EPCInjection
@@ -201,17 +202,11 @@ class InjectionEPCSignaletique:
 
     @staticmethod
     def envoyer_signaletique_dans_queue(donnees: Dict, admission_reference: str):
-        credentials = pika.PlainCredentials(settings.QUEUES.get('QUEUE_USER'), settings.QUEUES.get('QUEUE_PASSWORD'))
-        rabbit_settings = pika.ConnectionParameters(
-            settings.QUEUES.get('QUEUE_URL'),
-            settings.QUEUES.get('QUEUE_PORT'),
-            settings.QUEUES.get('QUEUE_CONTEXT_ROOT'),
-            credentials,
-        )
         try:
-            connect = pika.BlockingConnection(rabbit_settings)
-            channel = connect.channel()
             queue_name = settings.QUEUES.get('QUEUES_NAME').get('SIGNALETIQUE_TO_EPC_REQUEST')
+            conn_params = get_pika_connexion_parameters(queue_name)
+            connect = pika.BlockingConnection(conn_params)
+            channel = connect.channel()
             send_message(queue_name, donnees, connect, channel)
             # change something in admission object ? epc_injection_status ? = sended
             # history ?
