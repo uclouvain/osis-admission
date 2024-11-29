@@ -213,7 +213,7 @@ class BaseAdmissionExcelExportView(
                     if isinstance(answer, str):
                         answer = answer.replace(SPECIFIC_QUESTION_SEPARATOR, SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT)
 
-                specific_questions_answers.append(f'{form_item.internal_label}={answer}')
+                specific_questions_answers.append(f'{form_item.internal_label} : {answer}')
 
         return SPECIFIC_QUESTION_SEPARATOR.join(specific_questions_answers)
 

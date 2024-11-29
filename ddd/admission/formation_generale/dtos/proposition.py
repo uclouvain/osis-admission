@@ -77,6 +77,7 @@ class PropositionDTO(interface.DTO):
     est_bachelier_belge: Optional[bool]
     est_reorientation_inscription_externe: Optional[bool]
     attestation_inscription_reguliere: List[str]
+    formulaire_reorientation: List[str]
 
     est_modification_inscription_externe: Optional[bool]
     formulaire_modification_inscription: List[str]
