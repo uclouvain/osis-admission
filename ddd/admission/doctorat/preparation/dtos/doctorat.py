@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,34 +22,34 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from datetime import datetime
+# ##############################################################################
+import datetime
 from typing import Optional
 
 import attr
 
-from admission.ddd.admission.dtos.campus import CampusDTO
+from admission.ddd.admission.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
 class DoctoratDTO(interface.DTO):
-    sigle: str
-    code: str
-    annee: int
-    date_debut: Optional[datetime.date]
-    intitule: str
-    intitule_fr: str
-    intitule_en: str
-    sigle_entite_gestion: str
-    campus: Optional[CampusDTO]
-    type: str
-    campus_inscription: Optional[CampusDTO]
-    credits: Optional[int]
+    uuid: str
+    reference: str
 
-    def __str__(self):
-        return f'{self.sigle} - {self.intitule or self.intitule_fr} ({self.campus})'
+    sigle_formation: str
+    annee_formation: int
+    intitule_formation: str
 
-    @property
-    def nom_complet(self):
-        return f'{self.sigle} - {self.intitule or self.intitule_fr}'
+    type_admission: str
+    titre_these: str
+    type_financement: str
+    bourse_recherche: Optional[BourseDTO]
+    autre_bourse_recherche: Optional[str]
+    admission_acceptee_le: Optional[datetime.datetime]
+
+    matricule_doctorant: str
+    noma_doctorant: str
+    genre_doctorant: str
+    prenom_doctorant: str
+    nom_doctorant: str

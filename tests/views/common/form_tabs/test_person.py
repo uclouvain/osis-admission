@@ -39,7 +39,7 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre, ChoixSexe
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue

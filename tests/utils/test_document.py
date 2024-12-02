@@ -817,6 +817,21 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.field, 'regular_registration_proof')
         self.assertEqual(document.uuids, [file_uuid])
 
+        # reorientation form
+        file_uuid = uuid.uuid4()
+        self.general_admission.reorientation_form = [file_uuid]
+        self.general_admission.save()
+
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.FORMULAIRE_REORIENTATION',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, self.general_admission)
+        self.assertEqual(document.field, 'reorientation_form')
+        self.assertEqual(document.uuids, [file_uuid])
+
         # registration change form
         file_uuid = uuid.uuid4()
         self.general_admission.registration_change_form = [file_uuid]

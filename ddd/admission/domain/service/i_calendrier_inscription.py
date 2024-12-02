@@ -233,7 +233,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             and (
                 proposition.est_reorientation_inscription_externe is None
                 or proposition.est_reorientation_inscription_externe
-                and not proposition.attestation_inscription_reguliere
+                and not (proposition.attestation_inscription_reguliere and proposition.formulaire_reorientation)
             )
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()

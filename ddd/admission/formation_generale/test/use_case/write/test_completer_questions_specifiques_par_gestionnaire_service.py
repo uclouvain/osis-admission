@@ -66,6 +66,7 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
                 formulaire_modification_inscription=['6453f700-9c1a-4f3e-99b4-20ba6e638299'],
                 est_reorientation_inscription_externe=True,
                 attestation_inscription_reguliere=['7453f700-9c1a-4f3e-99b4-20ba6e638299'],
+                formulaire_reorientation=['8453f700-9c1a-4f3e-99b4-20ba6e638299'],
             )
         )
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
@@ -88,6 +89,7 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
         self.assertEqual(proposition.formulaire_modification_inscription, ['6453f700-9c1a-4f3e-99b4-20ba6e638299'])
         self.assertEqual(proposition.est_reorientation_inscription_externe, True)
         self.assertEqual(proposition.attestation_inscription_reguliere, ['7453f700-9c1a-4f3e-99b4-20ba6e638299'])
+        self.assertEqual(proposition.formulaire_reorientation, ['8453f700-9c1a-4f3e-99b4-20ba6e638299'])
 
     def test_should_completer_et_modifier_inscription_tardive_si_modification(self):
         proposition = self.proposition_repository.get(PropositionIdentity('uuid-MASTER-SCI'))  # type: Proposition

@@ -37,7 +37,7 @@ from osis_notification.models import EmailNotification
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import EnvoyerEmailApprobationInscriptionAuCandidatCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -81,11 +81,13 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
             enrollment_campus__uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
+            acronym='LOUKBK',
         )
         cls.saint_louis_training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
             enrollment_campus__uuid=ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID'],
+            acronym='SLUKBK',
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user

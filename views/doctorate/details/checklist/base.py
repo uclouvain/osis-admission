@@ -222,7 +222,6 @@ class ChecklistView(
             # Add forms
             context['send_email_form'] = CddDoctorateSendMailForm(
                 admission=self.admission,
-                view_url=resolve_url('admission:doctorate:send-mail', self.admission_uuid),
             )
 
             context['comment_forms'] = {

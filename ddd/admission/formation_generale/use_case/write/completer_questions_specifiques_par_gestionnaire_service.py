@@ -53,6 +53,7 @@ def completer_questions_specifiques_par_gestionnaire(
         est_bachelier_belge=cmd.est_bachelier_belge,
         est_reorientation_inscription_externe=cmd.est_reorientation_inscription_externe,
         attestation_inscription_reguliere=cmd.attestation_inscription_reguliere,
+        formulaire_reorientation=cmd.formulaire_reorientation,
         est_modification_inscription_externe=cmd.est_modification_inscription_externe,
         formulaire_modification_inscription=cmd.formulaire_modification_inscription,
     )

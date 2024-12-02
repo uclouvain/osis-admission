@@ -26,19 +26,19 @@
 
 from email import message_from_string
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import CddMailTemplate
-from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
-from base.tests.factories.program_manager import ProgramManagerFactory
 from osis_notification.models import EmailNotification
 
 
+@freezegun.freeze_time('2024-10-30')
 class SendMailDoctorateStudentTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -51,34 +51,17 @@ class SendMailDoctorateStudentTestCase(TestCase):
             supervision_group=process,
         )
         cls.cdd = cls.admission.training.management_entity
-        cls.user = ProgramManagerFactory(education_group=cls.admission.training.education_group).person.user
+        cls.user = ProgramManagerRoleFactory(education_group=cls.admission.training.education_group).person.user
         cls.url = resolve_url('admission:doctorate:send-mail', uuid=cls.admission.uuid)
 
-    def test_prefill_no_selection(self):
+    def test_prefill(self):
         self.client.force_login(self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.context['form'].initial.get('subject', ''), '')
-
-    def test_prefill_select_generic(self):
-        self.client.force_login(self.user)
-        response = self.client.get(self.url + '?template=' + ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertNotEqual(response.context['form'].initial.get('subject', ''), '')
-
-    def test_prefill_selecting_custom(self):
-        self.client.force_login(self.user)
-
-        tpl = CddMailTemplate.objects.create(
-            identifier=ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
-            name="Some name",
-            language=settings.LANGUAGE_CODE_EN,
-            cdd=self.cdd,
-            subject="Subject",
-            body="Body",
+        self.assertEqual(
+            response.context['form'].initial.get('subject', ''),
+            f'Information about your {self.admission.training.title_english} enrollment',
         )
-        response = self.client.get(self.url + '?template=' + str(tpl.pk))
-        self.assertEqual(response.context['form'].initial.get('body', ''), 'Body')
 
     def test_send_mail_doctorate_post_with_cc(self):
         self.client.force_login(self.user)
