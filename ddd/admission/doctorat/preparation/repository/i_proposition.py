@@ -75,6 +75,7 @@ class IPropositionRepository(IGlobalPropositionRepository):
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
+        est_pre_admission_d_une_admission_en_cours: Optional[bool] = None,
     ) -> List['PropositionDTO']:
         raise NotImplementedError
 
@@ -85,7 +86,7 @@ class IPropositionRepository(IGlobalPropositionRepository):
 
     @classmethod
     @abc.abstractmethod
-    def save(cls, entity: 'Proposition') -> None:  # type: ignore[override]
+    def save(cls, entity: 'Proposition', dupliquer_documents=False) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod

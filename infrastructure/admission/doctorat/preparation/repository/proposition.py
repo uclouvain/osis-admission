@@ -29,15 +29,13 @@ from typing import List, Optional, Union
 
 import attrs
 from django.conf import settings
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Exists
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
@@ -197,6 +195,9 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         ),
         creee_le=admission.created_at,
         modifiee_le=admission.modified_at,
+        pre_admission_associee=PropositionIdentityBuilder.build_from_uuid(
+            str(admission.related_pre_admission.uuid)
+        ) if admission.related_pre_admission_id else None,
         soumise_le=admission.submitted_at,
         comptabilite=get_accounting_from_admission(admission=admission),
         reponses_questions_specifiques=admission.specific_question_answers,
@@ -337,7 +338,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         raise NotImplementedError
 
     @classmethod
-    def save(cls, entity: 'Proposition') -> None:
+    def save(cls, entity: 'Proposition', dupliquer_documents=False) -> None:
         doctorate = EducationGroupYear.objects.get(
             acronym=entity.sigle_formation,
             academic_year__year=entity.annee,
@@ -353,6 +354,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                         entity.auteur_derniere_modification,
                         entity.financabilite_derogation_premiere_notification_par,
                         entity.financabilite_derogation_derniere_notification_par,
+                        entity.financabilite_etabli_par,
                     ]
                     if matricule
                 ]
@@ -377,11 +379,17 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None
         )
 
-        financabilite_etabli_par_person = None
-        if entity.financabilite_etabli_par:
-            financabilite_etabli_par_person = Person.objects.filter(
-                global_id=entity.financabilite_etabli_par,
-            ).first()
+        financabilite_etabli_par_person = (
+            persons[entity.financabilite_etabli_par]
+            if entity.financabilite_etabli_par in persons
+            else None
+        )
+
+        related_pre_admission_id = None
+        if entity.pre_admission_associee:
+            related_pre_admission_id = DoctorateAdmission.objects.only('pk').get(
+                uuid=entity.pre_admission_associee.uuid,
+            ).pk
 
         years = [year for year in [entity.annee_calculee, entity.millesime_condition_acces] if year]
         academic_years = {}
@@ -392,6 +400,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         admission, _ = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
+                'duplicate_documents_when_saving': dupliquer_documents,  # Indicate if the documents must be duplicated
                 # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
                 'modified_at': timezone.now(),
                 'reference': entity.reference,
@@ -400,6 +409,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'comment': entity.justification,
                 'candidate': candidate,
                 'submitted_at': entity.soumise_le,
+                'related_pre_admission_id': related_pre_admission_id,
                 'proximity_commission': entity.commission_proximite and entity.commission_proximite.name or '',
                 'doctorate': doctorate,
                 'determined_academic_year': academic_years.get(entity.annee_calculee),
@@ -647,6 +657,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
+        est_pre_admission_d_une_admission_en_cours: Optional[bool] = None,
     ) -> List['PropositionDTO']:
         qs = PropositionProxy.objects.for_dto().all()
         if numero is not None:
@@ -693,6 +704,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         if entity_ids is not None:
             qs = qs.filter(uuid__in=[entity_id.uuid for entity_id in entity_ids])
 
+        if est_pre_admission_d_une_admission_en_cours is not None:
+            qs = qs.alias(
+                already_associated_to_proposition_in_progress=Exists(
+                    DoctorateAdmission.objects.filter(related_pre_admission_id=OuterRef('pk')).exclude(
+                        status=ChoixStatutPropositionDoctorale.ANNULEE.name,
+                    ),
+                )
+            ).filter(already_associated_to_proposition_in_progress=est_pre_admission_d_une_admission_en_cours)
+
         return [cls._load_dto(admission) for admission in qs]
 
     @classmethod
@@ -704,6 +724,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return PropositionDTO(
             uuid=admission.uuid,
             reference=admission.formatted_reference,  # from annotation
+            pre_admission_associee=str(admission.related_pre_admission.uuid) if admission.related_pre_admission else '',
             type_admission=admission.type,
             doctorat=DoctoratFormationDTO(
                 sigle=admission.doctorate.acronym,
