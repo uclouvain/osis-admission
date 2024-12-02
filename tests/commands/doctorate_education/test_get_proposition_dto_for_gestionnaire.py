@@ -34,7 +34,7 @@ from osis_history.models import HistoryEntry
 
 from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     TypeDeRefus,
@@ -45,7 +45,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DerogationFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
@@ -163,7 +163,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.uuid, self.admission.uuid)
         self.assertEqual(
             result.doctorat,
-            DoctoratDTO(
+            DoctoratFormationDTO(
                 sigle=self.admission.training.acronym,
                 code=self.admission.training.partial_acronym,
                 annee=self.admission.training.academic_year.year,

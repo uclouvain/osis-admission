@@ -31,8 +31,8 @@ from django.db.models import Q
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.models import EntityProxy, Scholarship
-from admission.models.working_list import WorkingList, DoctorateWorkingList
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+from admission.models.working_list import DoctorateWorkingList
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
     ENTITY_CLSM,

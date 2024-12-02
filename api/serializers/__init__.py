@@ -45,7 +45,6 @@ from .approvals import (
     RefuserPropositionCommandSerializer,
     ApprouverPropositionParPdfCommandSerializer,
 )
-from .confirmation import *
 from .doctorate import *
 from .accounting import (
     DoctorateEducationAccountingDTOSerializer,
@@ -70,7 +69,6 @@ from .specific_question import (
 from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer
 from .pdf_recap import PDFRecapSerializer
 from .documents import *
-from .jury import *
 from .payment import *
 from .diplomatic_post import DiplomaticPostSerializer
 from .continuing_education import InformationsSpecifiquesFormationContinueDTOSerializer

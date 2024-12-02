@@ -32,8 +32,8 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from osis_signature.models import StateHistory
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.models.enums.actor_type import ActorType
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixEtatSignature,

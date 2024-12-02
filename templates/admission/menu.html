@@ -51,22 +51,6 @@
           </a>
         </li>
       {% endif %}
-      {% if perms.admission.change_cddmailtemplate %}
-        <li class="dropdown-item">
-          <a href="{% url 'admission:config:cdd-mail-template:list' %}">
-            <span class="fa fa-tools"></span>
-            {% trans 'CDD Mail template' %}
-          </a>
-        </li>
-      {% endif %}
-      {% if perms.admission.change_cddconfiguration %}
-        <li class="dropdown-item">
-          <a href="{% url 'admission:config:cdd-config:list' %}">
-            <span class="fa fa-tools"></span>
-            {% trans 'CDD configuration' %}
-          </a>
-        </li>
-      {% endif %}
         <li role="separator" class="divider dropdown-divider"></li>
       {% if perms.admission.view_continuing_enrolment_applications %}
         <li class="dropdown-item">

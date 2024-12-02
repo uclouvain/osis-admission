@@ -27,6 +27,7 @@
 from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
+from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
@@ -60,6 +61,7 @@ from .domain.service.notification import Notification
 from .domain.service.pdf_generation import PDFGeneration
 from .domain.service.promoteur import PromoteurTranslator
 from .domain.service.question_specifique import QuestionSpecifiqueTranslator
+from .repository.doctorat import DoctoratRepository
 from .repository.emplacement_document import EmplacementDocumentRepository
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
@@ -657,5 +659,9 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
+    ),
+    RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
+        cmd,
+        doctorat_repository=DoctoratRepository(),
     ),
 }
