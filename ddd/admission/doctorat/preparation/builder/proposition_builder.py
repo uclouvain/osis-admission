@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from abc import abstractmethod
 from typing import Optional, Union
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
@@ -39,15 +40,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     InitierPropositionValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.model.formation import FormationIdentity
 from osis_common.ddd import interface
 
 
-class PropositionBuilder(interface.RootEntityBuilder):
+class IPropositionBuilder(interface.RootEntityBuilder):
     @classmethod
     def build_from_repository_dto(cls, dto_object: 'interface.DTO') -> 'Proposition':
         raise NotImplementedError
@@ -60,9 +62,30 @@ class PropositionBuilder(interface.RootEntityBuilder):
     def initier_proposition(
         cls,
         cmd: 'InitierPropositionCommand',
-        doctorat: 'DoctoratFormation',
+        doctorat_translator: 'IDoctoratTranslator',
         proposition_repository: 'IPropositionRepository',
-    ) -> 'Proposition':
+    ) -> 'PropositionIdentity ':
+        if cmd.pre_admission_associee:
+            return cls.initier_nouvelle_proposition_attachee_a_pre_admission(
+                cmd,
+                doctorat_translator,
+                proposition_repository,
+            )
+        else:
+            return cls.initier_nouvelle_proposition_non_attachee_a_pre_admission(
+                cmd,
+                doctorat_translator,
+                proposition_repository,
+            )
+
+    @classmethod
+    def initier_nouvelle_proposition_non_attachee_a_pre_admission(
+        cls,
+        cmd: 'InitierPropositionCommand',
+        doctorat_translator: 'IDoctoratTranslator',
+        proposition_repository: 'IPropositionRepository',
+    ) -> 'PropositionIdentity':
+        doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
             justification=cmd.justification,
@@ -79,7 +102,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         elif cmd.commission_proximite and cmd.commission_proximite in ChoixSousDomaineSciences.get_names():
             commission_proximite = ChoixSousDomaineSciences[cmd.commission_proximite]
         reference = proposition_repository.recuperer_reference_suivante()
-        return Proposition(
+        proposition = Proposition(
             entity_id=PropositionIdentityBuilder.build(),
             reference=reference,
             statut=ChoixStatutPropositionDoctorale.EN_BROUILLON,
@@ -91,3 +114,16 @@ class PropositionBuilder(interface.RootEntityBuilder):
             projet=projet_non_rempli,
             auteur_derniere_modification=cmd.matricule_candidat,
         )
+        proposition_repository.save(proposition)
+
+        return proposition.entity_id
+
+    @classmethod
+    @abstractmethod
+    def initier_nouvelle_proposition_attachee_a_pre_admission(
+        cls,
+        cmd: 'InitierPropositionCommand',
+        doctorat_translator: 'IDoctoratTranslator',
+        proposition_repository: 'IPropositionRepository',
+    ) -> 'PropositionIdentity':
+        raise NotImplementedError

@@ -75,6 +75,7 @@ class IPropositionRepository(IGlobalPropositionRepository):
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
+        est_pre_admission_d_une_admission_en_cours: Optional[bool] = None,
     ) -> List['PropositionDTO']:
         raise NotImplementedError
 

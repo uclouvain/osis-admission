@@ -54,6 +54,6 @@ repos:
       - id: check_app_messages
         name: Check messages
         language: system
-        entry: bash -c '(cd .. && ./manage.py check_app_messages parcours_doctoral)'
+        entry: bash -c '(cd .. && ./manage.py check_app_messages admission)'
         always_run: true
         pass_filenames: false
