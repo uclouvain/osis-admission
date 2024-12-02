@@ -34,7 +34,7 @@ from rest_framework import status
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue

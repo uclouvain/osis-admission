@@ -27,7 +27,7 @@ from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import (
     DoctoratCDEFactory,
     DoctoratCDSCFactory,
@@ -35,7 +35,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import (
     DoctoratCLSMFactory,
     _DoctoratDTOFactory,
 )
-from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import DoctoratEtendu
+from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import DoctoratFormationEtendu
 from admission.ddd.admission.test.factory.formation import CampusFactory
 
 
@@ -101,14 +101,14 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
     }
 
     @classmethod
-    def get(cls, sigle: str, annee: int) -> 'DoctoratEtendu':
+    def get(cls, sigle: str, annee: int) -> 'DoctoratFormationEtendu':
         try:
             return next(doc for doc in cls.doctorats if doc.entity_id.sigle == sigle and doc.entity_id.annee == annee)
         except StopIteration:
             raise DoctoratNonTrouveException()
 
     @classmethod
-    def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:  # pragma: no cover
+    def get_dto(cls, sigle: str, annee: int) -> DoctoratFormationDTO:  # pragma: no cover
         doctorate = cls.get(sigle, annee)
         return _DoctoratDTOFactory(
             sigle=doctorate.entity_id.sigle,
@@ -129,7 +129,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         annee: Optional[int] = None,
         campus: Optional[str] = '',
         terme_de_recherche: Optional[str] = '',
-    ) -> List['DoctoratDTO']:
+    ) -> List['DoctoratFormationDTO']:
         doctorates = cls.sector_doctorates_mapping.get(sigle_secteur_entite_gestion, [])
         return [
             _DoctoratDTOFactory(

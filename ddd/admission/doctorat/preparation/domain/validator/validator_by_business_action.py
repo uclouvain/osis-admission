@@ -40,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._institut import 
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixTypeAdmission,
@@ -76,7 +76,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 @attr.dataclass(frozen=True, slots=True)
 class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    doctorat: Doctorat
+    doctorat: DoctoratFormation
     commission_proximite: Optional[str] = ''
     justification: Optional[str] = ''
 
@@ -93,7 +93,7 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
 @attr.dataclass(frozen=True, slots=True)
 class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    doctorat: Doctorat
+    doctorat: DoctoratFormation
     commission_proximite: Optional[str] = ''
     justification: Optional[str] = ''
 
@@ -110,7 +110,7 @@ class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 @attr.dataclass(frozen=True, slots=True)
 class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    doctorat: Doctorat
+    doctorat: DoctoratFormation
     type_financement: Optional[str] = ''
     justification: Optional[str] = ''
     type_contrat_travail: Optional[str] = ''

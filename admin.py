@@ -42,15 +42,11 @@ from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
 from osis_document.contrib import FileField
-from osis_mail_template.admin import MailTemplateAdmin
 
-from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
-from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
-from admission.auth.roles.jury_secretary import JurySecretary
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
@@ -58,7 +54,6 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.models import (
     AdmissionTask,
     AdmissionViewer,
-    CddMailTemplate,
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
@@ -68,14 +63,12 @@ from admission.models import (
 )
 from admission.models.base import BaseAdmission
 from admission.models.categorized_free_document import CategorizedFreeDocument
-from admission.models.cdd_config import CddConfiguration
 from admission.models.checklist import (
     RefusalReasonCategory,
     RefusalReason,
     AdditionalApprovalCondition,
     FreeAdditionalApprovalCondition,
 )
-from admission.models.doctoral_training import Activity
 from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.models.online_payment import OnlinePayment
@@ -94,7 +87,6 @@ from admission.ddd.admission.formation_continue.domain.model.statut_checklist im
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
-from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
@@ -309,27 +301,6 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
                     len(not_achieved_admissions_ids),
                 ).format(', '.join(map(str, not_achieved_admissions_ids))),
             )
-
-
-@admin.register(CddMailTemplate)
-class CddMailTemplateAdmin(MailTemplateAdmin):
-    list_display = ('name', 'identifier', 'language', 'cdd')
-    search_fields = [
-        'cdd__acronym',
-        'idenfier',
-    ]
-    list_filter = [
-        'cdd',
-        'language',
-        'identifier',
-    ]
-    autocomplete_fields = [
-        'cdd',
-    ]
-
-    @staticmethod
-    def view_on_site(obj):
-        return resolve_url(f'admission:config:cdd-mail-template:preview', identifier=obj.identifier, pk=obj.pk)
 
 
 @admin.register(Scholarship)
@@ -929,113 +900,6 @@ class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(CddConfiguration)
-class CddConfigurationAdmin(admin.ModelAdmin):
-    autocomplete_fields = [
-        'cdd',
-    ]
-
-
-@admin.register(Activity)
-class ActivityAdmin(admin.ModelAdmin):
-    list_display = ('uuid', 'context', 'get_category', 'ects', 'modified_at', 'status', 'is_course_completed')
-    search_fields = ['doctorate__uuid', 'doctorate__reference']
-    list_filter = [
-        'context',
-        'category',
-        'status',
-    ]
-    fields = [
-        'doctorate',
-        'category',
-        'parent',
-        'ects',
-        'course_completed',
-        "type",
-        "title",
-        "participating_proof",
-        "comment",
-        "start_date",
-        "end_date",
-        "participating_days",
-        "is_online",
-        "country",
-        "city",
-        "organizing_institution",
-        "website",
-        "committee",
-        "dial_reference",
-        "acceptation_proof",
-        "summary",
-        "subtype",
-        "subtitle",
-        "authors",
-        "role",
-        "keywords",
-        "journal",
-        "publication_status",
-        "hour_volume",
-        "learning_unit_year",
-        "can_be_submitted",
-    ]
-    readonly_fields = [
-        'doctorate',
-        'category',
-        'parent',
-        "type",
-        "title",
-        "participating_proof",
-        "comment",
-        "start_date",
-        "end_date",
-        "participating_days",
-        "is_online",
-        "country",
-        "city",
-        "organizing_institution",
-        "website",
-        "committee",
-        "dial_reference",
-        "acceptation_proof",
-        "summary",
-        "subtype",
-        "subtitle",
-        "authors",
-        "role",
-        "keywords",
-        "journal",
-        "publication_status",
-        "hour_volume",
-        "learning_unit_year",
-        "can_be_submitted",
-    ]
-    list_select_related = ['doctorate', 'parent']
-
-    @admin.display(description=_('Course completed'), boolean=True)
-    def is_course_completed(self, obj: Activity):
-        if obj.category == CategorieActivite.UCL_COURSE.name:
-            return obj.course_completed
-
-    @admin.display(description=_('Category'))
-    def get_category(self, obj: Activity):
-        if obj.parent_id:
-            return f"({obj.parent.category}) {obj.category}"
-        return obj.category
-
-    @staticmethod
-    def view_on_site(obj):
-        context_mapping = {
-            ContexteFormation.DOCTORAL_TRAINING.name: 'doctoral-training',
-            ContexteFormation.COMPLEMENTARY_TRAINING.name: 'complementary-training',
-            ContexteFormation.FREE_COURSE.name: 'course-enrollment',
-        }
-        context = (
-            context_mapping[obj.context] if obj.category != CategorieActivite.UCL_COURSE.name else 'course-enrollment'
-        )
-        url = resolve_url(f'admission:doctorate:{context}', uuid=obj.doctorate.uuid)
-        return url + f'#{obj.uuid}'
-
-
 @admin.register(AdmissionTask)
 class AdmissionTaskAdmin(admin.ModelAdmin):
     list_display = ['admission', 'task_uuid', 'task_status', 'type']
@@ -1062,7 +926,7 @@ class AdmissionTaskAdmin(admin.ModelAdmin):
 # Roles
 
 
-@admin.register(AdreSecretary, DoctorateReader, JurySecretary, Sceb)
+@admin.register(DoctorateReader, Sceb)
 class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
     list_select_related = ['person__user']
 
@@ -1076,38 +940,6 @@ class HijackEntityRoleModelAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
 
     def get_hijack_user(self, obj):
         return obj.person.user
-
-
-@admin.register(CddConfigurator)
-class CddConfiguratorAdmin(HijackRoleModelAdmin):
-    list_display = ('person', 'most_recent_acronym')
-    search_fields = [
-        'person__first_name',
-        'person__last_name',
-        'entity__entityversion__acronym',
-    ]
-    autocomplete_fields = [
-        'entity',
-    ]
-
-    @admin.display(description=pgettext_lazy('admission', 'Entity'))
-    def most_recent_acronym(self, obj):
-        return obj.most_recent_acronym
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .annotate(
-                most_recent_acronym=models.Subquery(
-                    EntityVersion.objects.filter(
-                        entity__id=models.OuterRef('entity_id'),
-                    )
-                    .order_by("-start_date")
-                    .values('acronym')[:1]
-                )
-            )
-        )
 
 
 @admin.register(CommitteeMember, Promoter)

@@ -28,7 +28,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from osis_comment.models import CommentEntry
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory

@@ -38,8 +38,8 @@ from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
 from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
-from .doctorat import DoctoratDTO
 from .motif_refus import MotifRefusDTO
+from .doctorat_formation import DoctoratFormationDTO
 from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 from ..domain.model.enums.checklist import DroitsInscriptionMontant
 
@@ -50,7 +50,7 @@ class PropositionDTO(interface.DTO):
     type_admission: str
     reference: str
     justification: Optional[str]
-    doctorat: DoctoratDTO
+    doctorat: DoctoratFormationDTO
     annee_calculee: Optional[int]
     type_demande: str
     pot_calcule: Optional[str]
