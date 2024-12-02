@@ -63,6 +63,8 @@ class MembreCATranslator(IMembreCATranslator):
             code_pays=actor.country_id and actor.country.iso_code or '',
             pays=actor.country_id and getattr(actor.country, 'name_en' if get_language() == 'en' else 'name') or '',
             est_externe=actor.is_external,
+            langue=actor.language,
+            est_membre_reference=actor.is_reference_promoter,
         )
 
     @classmethod

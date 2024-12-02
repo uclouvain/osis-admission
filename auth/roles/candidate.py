@@ -64,7 +64,9 @@ _CANDIDATE_RULESET = {
     'change_admission_languages': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_admission_accounting': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     # Project tabs and supervision group edition are accessible as long as signing has not begun
-    'change_admission_training_choice': common.is_admission_request_author & doctorate.in_progress,
+    'change_admission_training_choice': common.is_admission_request_author
+    & doctorate.in_progress
+    & doctorate.must_not_follow_a_pre_admission,
     'change_admission_project': common.is_admission_request_author & doctorate.in_progress,
     'change_admission_cotutelle': common.is_admission_request_author & doctorate.in_progress & doctorate.is_admission,
     'change_admission_supervision': common.is_admission_request_author & doctorate.in_progress,

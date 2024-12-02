@@ -201,6 +201,7 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'thesis_language',
         'prerequisite_courses',
         'refusal_reasons',
+        'related_pre_admission',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']
@@ -667,15 +668,15 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
                         checklist__current__financanbilite__extra__reussite='financable',
-                        generaleducationadmission__financability_rule=''
+                        generaleducationadmission__financability_rule='',
                     )
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
-                        generaleducationadmission__financability_established_on__isnull=True
+                        generaleducationadmission__financability_established_on__isnull=True,
                     )
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
-                        generaleducationadmission__financability_established_by_id__isnull=True
+                        generaleducationadmission__financability_established_by_id__isnull=True,
                     ),
                     generaleducationadmission__isnull=False,
                     then=Value(False),
@@ -758,12 +759,9 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
             )
         )
 
-    @admin.display(
-        ordering='_noma_sent_to_digit'
-    )
+    @admin.display(ordering='_noma_sent_to_digit')
     def noma_sent_to_digit(self, obj):
         return obj._noma_sent_to_digit
-
 
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
@@ -921,6 +919,7 @@ class AdmissionTaskAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None) -> bool:
         return False
+
 
 # ##############################################################################
 # Roles

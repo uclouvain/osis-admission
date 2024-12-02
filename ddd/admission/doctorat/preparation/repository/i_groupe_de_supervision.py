@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 import abc
+import uuid
 from typing import List, Optional, Union
 
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
@@ -34,8 +34,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervisionIdentity,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity, Proposition
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
+from admission.models.enums.actor_type import ActorType
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 
@@ -101,6 +102,7 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
         city: Optional[str] = '',
         country_code: Optional[str] = '',
         language: Optional[str] = '',
+        is_reference_promoter: Optional[bool] = False,
     ) -> 'SignataireIdentity':
         raise NotImplementedError
 
@@ -128,7 +130,11 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
-    def get_members(cls, groupe_id: 'GroupeDeSupervisionIdentity') -> List[Union['PromoteurDTO', 'MembreCADTO']]:
+    def get_members(
+        cls,
+        groupe_id: 'Optional[GroupeDeSupervisionIdentity]' = None,
+        proposition_id: 'Optional[PropositionIdentity]' = None,
+    ) -> List[Union['PromoteurDTO', 'MembreCADTO']]:
         raise NotImplementedError
 
     @classmethod
@@ -151,3 +157,40 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
             convention=cotutelle and cotutelle.convention or [],
             autres_documents=cotutelle and cotutelle.autres_documents or [],
         )
+
+    @classmethod
+    def initialize_supervision_group_from_proposition(
+        cls,
+        uuid_proposition_originale: str,
+        nouvelle_proposition: 'Proposition',
+    ):
+        # Create a supervision group with default values
+        groupe_supervision = GroupeDeSupervision(
+            entity_id=GroupeDeSupervisionIdentity(uuid=str(uuid.uuid4())),
+            proposition_id=nouvelle_proposition.entity_id,
+        )
+
+        cls.save(groupe_supervision)
+
+        if not uuid_proposition_originale:
+            return
+
+        # Add members to the supervision group
+        membres = cls.get_members(proposition_id=PropositionIdentity(uuid=str(uuid_proposition_originale)))
+
+        for member in membres:
+            cls.add_member(
+                groupe_id=groupe_supervision.entity_id,
+                proposition_status=nouvelle_proposition.statut,
+                type=member.type_acteur,
+                matricule=member.matricule,
+                first_name=member.prenom,
+                last_name=member.nom,
+                email=member.email,
+                is_doctor=member.est_docteur,
+                institute=member.institution,
+                city=member.ville,
+                country_code=member.code_pays,
+                language=member.langue,
+                is_reference_promoter=member.est_membre_reference,
+            )

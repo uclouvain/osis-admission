@@ -42,9 +42,10 @@ UUID = str
 @attr.dataclass(frozen=True, slots=True)
 class InitierPropositionCommand(interface.CommandRequest):
     type_admission: str
-    sigle_formation: str
-    annee_formation: int
     matricule_candidat: str
+    sigle_formation: Optional[str] = ''
+    annee_formation: Optional[int] = None
+    pre_admission_associee: Optional[str] = ''
     justification: Optional[str] = ''
     commission_proximite: Optional[str] = ''
 
@@ -237,6 +238,9 @@ class DefinirCotutelleCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ListerPropositionsCandidatQuery(interface.QueryRequest):
     matricule_candidat: str
+    type_admission: Optional[str] = ''
+    statut: Optional[str] = ''
+    est_pre_admission_d_une_admission_en_cours: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -762,3 +766,8 @@ class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererAdmissionDoctoratQuery(interface.QueryRequest):
     doctorat_uuid: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ListerPreAdmissionsCandidatQuery(interface.QueryRequest):
+    matricule_candidat: str

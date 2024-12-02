@@ -163,6 +163,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
         city: Optional[str] = '',
         country_code: Optional[str] = '',
         language: Optional[str] = '',
+        is_reference_promoter: Optional[bool] = False,
     ) -> 'SignataireIdentity':
         groupe: GroupeDeSupervision = cls.get(groupe_id)
         signature_etat = ChoixEtatSignature.NOT_INVITED
@@ -200,6 +201,10 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
                     pays=country_code,
                 )
             )
+
+        if is_reference_promoter:
+            groupe.designer_promoteur_reference(signataire_id)
+
         return signataire_id
 
     @classmethod
@@ -211,9 +216,13 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             groupe.signatures_membres_CA = [s for s in groupe.signatures_membres_CA if s.membre_CA_id != signataire]
 
     @classmethod
-    def get_members(cls, groupe_id: 'GroupeDeSupervisionIdentity') -> List[Union['PromoteurDTO', 'MembreCADTO']]:
+    def get_members(
+        cls,
+        groupe_id: 'Optional[GroupeDeSupervisionIdentity]' = None,
+        proposition_id: 'Optional[PropositionIdentity]' = None,
+    ) -> List[Union['PromoteurDTO', 'MembreCADTO']]:
         members = []
-        groupe: GroupeDeSupervision = cls.get(groupe_id)
+        groupe: GroupeDeSupervision = cls.get(groupe_id) if groupe_id else cls.get_by_proposition_id(proposition_id)
         for membre in groupe.signatures_promoteurs:
             members.append(PromoteurInMemoryTranslator.get_dto(membre.promoteur_id))
         for membre in groupe.signatures_membres_CA:

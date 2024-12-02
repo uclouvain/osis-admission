@@ -1489,6 +1489,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
+            pre_admission_associee='',
             doctorat=DoctoratFormationDTO(
                 sigle='FD1',
                 annee=2023,

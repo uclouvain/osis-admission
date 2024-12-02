@@ -111,6 +111,7 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
                 ville=p.ville,
                 pays=p.pays,
                 est_externe=p.externe,
+                langue=p.langue,
             )
         except StopIteration:  # pragma: no cover
             raise PromoteurNonTrouveException

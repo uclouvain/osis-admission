@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
+from admission.models.enums.actor_type import ActorType
 from osis_common.ddd import interface
 
 
@@ -42,3 +43,11 @@ class SignatureMembreCA(interface.ValueObject):
     commentaire_interne: str = ''
     motif_refus: str = ''
     pdf: List[str] = attr.Factory(list)
+
+    @property
+    def uuid(self):
+        return self.membre_CA_id.uuid
+
+    @property
+    def actor_type(self):
+        return ActorType.CA_MEMBER

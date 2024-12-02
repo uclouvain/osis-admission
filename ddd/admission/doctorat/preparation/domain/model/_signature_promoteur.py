@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
+from admission.models.enums.actor_type import ActorType
 from osis_common.ddd import interface
 
 
@@ -42,3 +43,11 @@ class SignaturePromoteur(interface.ValueObject):
     commentaire_interne: str = ''
     motif_refus: str = ''
     pdf: List[str] = attr.Factory(list)
+
+    @property
+    def uuid(self):
+        return self.promoteur_id.uuid
+
+    @property
+    def actor_type(self):
+        return ActorType.PROMOTER

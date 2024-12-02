@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from collections import defaultdict
 from typing import List, Optional, Union
 
@@ -33,6 +34,7 @@ from osis_signature.enums import SignatureState
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.models import DoctorateAdmission, SupervisionActor
 from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
@@ -290,6 +292,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         city: Optional[str] = '',
         country_code: Optional[str] = '',
         language: Optional[str] = '',
+        is_reference_promoter: bool = False,
     ) -> 'SignataireIdentity':
         groupe = Process.objects.get(uuid=groupe_id.uuid)
         person = Person.objects.get(global_id=matricule) if matricule else None
@@ -305,6 +308,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             city=city,
             country=Country.objects.get(iso_code=country_code) if country_code else None,
             language=language,
+            is_reference_promoter=is_reference_promoter,
         )
         if type == ActorType.PROMOTER:
             group_name, model = 'promoters', Promoter
@@ -324,10 +328,20 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         SupervisionActor.objects.filter(process__uuid=groupe_id.uuid, uuid=signataire.uuid).delete()
 
     @classmethod
-    def get_members(cls, groupe_id: 'GroupeDeSupervisionIdentity') -> List[Union['PromoteurDTO', 'MembreCADTO']]:
-        actors = SupervisionActor.objects.select_related('person__tutor').filter(
-            process__uuid=groupe_id.uuid,
-        )
+    def get_members(
+        cls,
+        groupe_id: 'Optional[GroupeDeSupervisionIdentity]' = None,
+        proposition_id: 'Optional[PropositionIdentity]' = None,
+    ) -> List[Union['PromoteurDTO', 'MembreCADTO']]:
+        actors = SupervisionActor.objects.select_related('person__tutor', 'country')
+
+        if groupe_id:
+            actors = actors.filter(process__uuid=groupe_id.uuid)
+        elif proposition_id:
+            actors = actors.filter(process__doctorateadmission__uuid=proposition_id.uuid)
+        else:
+            return []
+
         members = []
         for actor in actors:
             klass = PromoteurDTO if actor.type == ActorType.PROMOTER.name else MembreCADTO

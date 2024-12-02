@@ -30,6 +30,7 @@ import attr
 from django.utils.functional import cached_property
 
 from osis_common.ddd import interface
+from parcours_doctoral.models import ActorType
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -45,6 +46,12 @@ class PromoteurDTO(interface.DTO):
     code_pays: str = ""
     pays: str = ""
     est_externe: bool = False
+    est_membre_reference: bool = False
+    langue: str = ""
+
+    @property
+    def type_acteur(self):
+        return ActorType.PROMOTER
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -60,6 +67,12 @@ class MembreCADTO(interface.DTO):
     code_pays: str = ""
     pays: str = ""
     est_externe: bool = False
+    est_membre_reference: bool = False
+    langue: str = ""
+
+    @property
+    def type_acteur(self):
+        return ActorType.CA_MEMBER
 
 
 @attr.dataclass(frozen=True, slots=True)

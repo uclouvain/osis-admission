@@ -43,6 +43,8 @@ class MembreCA:
     institution: str = ''
     ville: str = ''
     pays: str = ''
+    langue: str = 'fr-be'
+    est_membre_reference: bool = False
 
 
 class MembreCAInMemoryTranslator(IMembreCATranslator):
@@ -87,6 +89,8 @@ class MembreCAInMemoryTranslator(IMembreCATranslator):
                 institution=p.institution,
                 ville=p.ville,
                 pays=p.pays,
+                langue=p.langue,
+                est_membre_reference=p.est_membre_reference,
             )
         except StopIteration:  # pragma: no cover
             raise MembreCANonTrouveException
