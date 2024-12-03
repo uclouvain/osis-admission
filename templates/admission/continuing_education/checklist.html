@@ -268,16 +268,6 @@
               $(this).find('.next-option-button').prop('disabled', optionsNumber <=1);
           });
 
-          function autogrow () {
-              if (this.scrollHeight > this.clientHeight) {
-                  this.style.height = `${this.scrollHeight}px`;
-              }
-          }
-
-          $('#tabs-content').on('input', 'textarea[name$="-comment"]', function () {
-              autogrow.call(this);
-          });
-
           const menuItems = $('#checklist-menu *[data-toggle="tab"]');
 
           menuItems.on('show.bs.tab', function (e) {
@@ -299,9 +289,6 @@
 
               const tabPaneId = $(this).attr('href');
               window.location.hash = tabPaneId;
-
-              // refresh comment height
-              autogrow.call($(tabPaneId).find('textarea[name$="-comment"]')[0]);
 
               refreshDocuments(tabPaneId);
 
@@ -352,8 +339,6 @@
 
               // Activate tab from hash on first load
               $(`#checklist-menu *[data-toggle="tab"][href="${defaultTab}"]`).click();
-
-              $('textarea[name="comment"]:visible').each(autogrow);
           });
 
           let bound = false;
@@ -453,10 +438,6 @@
               }
           });
 
-          $('#tabs-content').on('htmx:afterSettle', function(event){
-              $('textarea[name$="-comment"]:visible').each(autogrow);
-          });
-
           $('#tabs-content').on('htmx:afterRequest', function(event) {
               // Do not remove spinner if we are going to refresh the page
               if (event.originalEvent.detail.xhr.getResponseHeader('hx-refresh') === 'true') {
@@ -543,6 +524,7 @@
   {{ block.super }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
+  <link href="{% static 'admission/autogrow_textarea.css' %}" rel="stylesheet" />
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
   <style>
     #three-pane-checklist {
