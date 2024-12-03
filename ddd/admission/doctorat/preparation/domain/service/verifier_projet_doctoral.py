@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 from functools import partial
 from typing import List
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
@@ -50,15 +51,27 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
         questions_specifiques: List[QuestionSpecifique],
         promoteur_translator: IPromoteurTranslator,
     ) -> None:
+        if proposition_candidat.type_admission == ChoixTypeAdmission.PRE_ADMISSION:
+            fonctions_personnalisees = [
+                # Vérification différente de la composition du groupe de supervision
+                groupe_de_supervision.verifier_signataires_pre_admission,
+            ]
+        else:
+            fonctions_personnalisees = [
+                # Vérification différente de la composition du groupe de supervision
+                groupe_de_supervision.verifier_signataires,
+                # Vérification de la cotutelle, absente en pré-admission
+                groupe_de_supervision.verifier_cotutelle,
+                partial(CotutellePossedePromoteurExterne.verifier, groupe_de_supervision, promoteur_translator),
+            ]
+
         execute_functions_and_aggregate_exceptions(
             proposition_candidat.verifier_projet_doctoral,
-            groupe_de_supervision.verifier_cotutelle,
             partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),
-            partial(CotutellePossedePromoteurExterne.verifier, groupe_de_supervision, promoteur_translator),
-            groupe_de_supervision.verifier_signataires,
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_choix_formation,
                 proposition_candidat,
                 questions_specifiques,
             ),
+            *fonctions_personnalisees,
         )

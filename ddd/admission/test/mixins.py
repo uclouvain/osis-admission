@@ -24,32 +24,12 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
-from rules import RuleSet, always_allow
 
-from admission.auth.predicates import doctorate
-from osis_role.contrib.models import RoleModel
+class AdmissionTestMixin:
+    def assertHasInstance(self, container, cls):
+        if not any(isinstance(obj, cls) for obj in container):
+            self.fail(f"No instance of '{cls}' has been found")
 
-
-class DoctorateReader(RoleModel):
-    class Meta:
-        verbose_name = _("Role: Doctorate reader")
-        verbose_name_plural = _("Role: Doctorate readers")
-        group_name = "doctorate_reader"
-
-    @classmethod
-    def rule_set(cls):
-        ruleset = {
-            'admission.view_doctorateadmission': always_allow,
-            'admission.view_admission_person': always_allow,
-            'admission.view_admission_coordinates': always_allow,
-            'admission.view_admission_secondary_studies': always_allow,
-            'admission.view_admission_languages': always_allow,
-            'admission.view_admission_curriculum': always_allow,
-            'admission.view_admission_project': always_allow,
-            'admission.view_admission_cotutelle': doctorate.is_admission,
-            'admission.view_admission_supervision': always_allow,
-            'admission.view_dossiers': always_allow,
-            'admission.view_internalnote': always_allow,
-        }
-        return RuleSet(ruleset)
+    def assertHasNoInstance(self, container, cls):
+        if any(isinstance(obj, cls) for obj in container):
+            self.fail(f"Instance of '{cls}' has been found")

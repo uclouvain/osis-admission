@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ from admission.auth.predicates.doctorate import (
     is_enrolled,
     is_part_of_committee,
     is_part_of_committee_and_invited,
+    is_admission,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -63,7 +64,7 @@ class CommitteeMember(RoleModel):
             'admission.view_doctorateadmission': is_part_of_committee,
             'admission.view_admission_training_choice': is_part_of_committee,
             'admission.view_admission_project': is_part_of_committee,
-            'admission.view_admission_cotutelle': is_part_of_committee,
+            'admission.view_admission_cotutelle': is_admission & is_part_of_committee,
             'admission.view_admission_supervision': is_part_of_committee,
             # A ca member can approve as long as he is invited to the committee
             'admission.approve_proposition': is_part_of_committee_and_invited,

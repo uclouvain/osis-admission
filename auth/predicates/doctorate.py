@@ -146,6 +146,12 @@ def is_submitted(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition must be an admission to realize this action."))
+def is_admission(self, user: User, obj: DoctorateAdmission):
+    return obj.type == ChoixTypeAdmission.ADMISSION.name
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
 def not_cancelled(self, user: User, obj: DoctorateAdmission):
     return isinstance(obj, DoctorateAdmission) and obj.status != ChoixStatutPropositionDoctorale.ANNULEE.name

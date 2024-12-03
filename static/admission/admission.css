@@ -106,7 +106,7 @@ textarea {
   color: #a94442;
 }
 
-.required_panel .panel-title:after {
+.required_panel .panel-title:after, .required_text:after {
   content: " *";
   color: #a94442;
 }

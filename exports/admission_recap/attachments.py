@@ -35,6 +35,7 @@ from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
@@ -586,6 +587,7 @@ def get_research_project_attachments(context: ResumePropositionDTO) -> List[Atta
                 label=DocumentsProjetRecherche['PREUVE_BOURSE'],
                 uuids=context.proposition.bourse_preuve,
                 candidate_language=context.identification.langue_contact,
+                required=context.proposition.est_admission_doctorat,
             )
         )
 
@@ -594,14 +596,14 @@ def get_research_project_attachments(context: ResumePropositionDTO) -> List[Atta
             identifier='DOCUMENTS_PROJET',
             label=DocumentsProjetRecherche['DOCUMENTS_PROJET'],
             uuids=context.proposition.documents_projet,
-            required=True,
+            required=context.proposition.est_admission_doctorat,
             candidate_language=context.identification.langue_contact,
         ),
         Attachment(
             identifier='PROPOSITION_PROGRAMME_DOCTORAL',
             label=DocumentsProjetRecherche['PROPOSITION_PROGRAMME_DOCTORAL'],
             uuids=context.proposition.proposition_programme_doctoral,
-            required=True,
+            required=context.proposition.est_admission_doctorat,
             candidate_language=context.identification.langue_contact,
         ),
         Attachment(

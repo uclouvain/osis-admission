@@ -39,6 +39,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._signature_promot
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutSignatureGroupeDeSupervision,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.validator import ShouldSignaturesPasEtreEnvoyees
@@ -57,6 +58,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     SignatairesValidatorList,
     SupprimerMembreCAValidatorList,
     SupprimerPromoteurValidatorList,
+    SignatairesPreAdmissionValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -261,6 +263,9 @@ class GroupeDeSupervision(interface.RootEntity):
 
     def verifier_signataires(self):
         SignatairesValidatorList(groupe_de_supervision=self).validate()
+
+    def verifier_signataires_pre_admission(self):
+        SignatairesPreAdmissionValidatorList(groupe_de_supervision=self).validate()
 
     def verifier_promoteur_reference_renseigne_institut_these(
         self,

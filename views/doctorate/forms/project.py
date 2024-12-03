@@ -70,6 +70,11 @@ class DoctorateAdmissionProjectFormView(
     def get_success_url(self):
         return resolve_url('admission:doctorate:project', uuid=self.admission_uuid)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['admission_type'] = self.proposition.type_admission
+        return kwargs
+
     def get_initial(self):
         return {
             **attr.asdict(self.proposition),

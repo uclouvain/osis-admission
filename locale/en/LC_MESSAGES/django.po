@@ -6333,6 +6333,9 @@ msgid ""
 "The proposition must be a late enrollment with a defined access condition."
 msgstr ""
 
+msgid "The proposition must be an admission to realize this action."
+msgstr ""
+
 msgid "The proposition must be an admission."
 msgstr ""
 

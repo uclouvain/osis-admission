@@ -46,7 +46,9 @@ _CANDIDATE_RULESET = {
     'view_admission_accounting': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'view_admission_training_choice': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'view_admission_project': common.is_admission_request_author & doctorate.unconfirmed_proposition,
-    'view_admission_cotutelle': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'view_admission_cotutelle': common.is_admission_request_author
+    & doctorate.unconfirmed_proposition
+    & doctorate.is_admission,
     'view_admission_supervision': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     # Can edit while not confirmed proposition
     'delete_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
@@ -64,7 +66,7 @@ _CANDIDATE_RULESET = {
     # Project tabs and supervision group edition are accessible as long as signing has not begun
     'change_admission_training_choice': common.is_admission_request_author & doctorate.in_progress,
     'change_admission_project': common.is_admission_request_author & doctorate.in_progress,
-    'change_admission_cotutelle': common.is_admission_request_author & doctorate.in_progress,
+    'change_admission_cotutelle': common.is_admission_request_author & doctorate.in_progress & doctorate.is_admission,
     'change_admission_supervision': common.is_admission_request_author & doctorate.in_progress,
     'request_signatures': common.is_admission_request_author & doctorate.in_progress,
     'add_supervision_member': common.is_admission_request_author & doctorate.in_progress,

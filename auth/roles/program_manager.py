@@ -28,6 +28,7 @@ import rules
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from admission.auth.predicates import general, continuing, doctorate
 from admission.auth.predicates.common import (
     has_education_group_of_types,
     is_part_of_education_group,
@@ -36,7 +37,6 @@ from admission.auth.predicates.common import (
     pending_digit_ticket_response,
     past_experiences_checklist_tab_is_not_sufficient,
 )
-from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -110,8 +110,10 @@ class ProgramManager(EducationGroupRoleModel):
             # Project
             'admission.view_admission_project': is_part_of_education_group,
             'admission.change_admission_project': is_part_of_education_group & ~is_sent_to_epc,
-            'admission.view_admission_cotutelle': is_part_of_education_group,
-            'admission.change_admission_cotutelle': is_part_of_education_group & ~is_sent_to_epc,
+            'admission.view_admission_cotutelle': doctorate.is_admission & is_part_of_education_group,
+            'admission.change_admission_cotutelle': doctorate.is_admission
+            & is_part_of_education_group
+            & ~is_sent_to_epc,
             'admission.view_admission_training_choice': is_part_of_education_group,
             'admission.change_admission_training_choice': is_part_of_education_group
             & (continuing.in_manager_status | doctorate.in_fac_status)
