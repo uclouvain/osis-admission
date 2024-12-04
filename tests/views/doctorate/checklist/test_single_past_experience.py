@@ -39,7 +39,7 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 
 from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.tests.factories import DoctorateAdmissionFactory

@@ -46,6 +46,7 @@ class PropositionDoctoraleSoumiseEvent(Event):
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class InscriptionDoctoraleApprouveeParSicEvent(Event):
     entity_id: 'PropositionIdentity'
+    type_admission: str
     matricule: str
     objet_message: str
     corps_message: str
@@ -55,6 +56,7 @@ class InscriptionDoctoraleApprouveeParSicEvent(Event):
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class AdmissionDoctoraleApprouveeParSicEvent(Event):
     entity_id: 'PropositionIdentity'
+    type_admission: str
     matricule: str
     nom: str
     prenom: str

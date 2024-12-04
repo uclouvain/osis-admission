@@ -28,6 +28,7 @@ from typing import List, Optional, Union
 
 from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
@@ -35,7 +36,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
-from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 

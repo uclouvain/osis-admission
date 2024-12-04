@@ -108,6 +108,7 @@ def approuver_inscription_par_sic(
     message_bus.publish(
         InscriptionDoctoraleApprouveeParSicEvent(
             entity_id=proposition.entity_id,
+            type_admission=proposition.type_admission.name,
             matricule=proposition.matricule_candidat,
             auteur=cmd.auteur,
             objet_message=cmd.objet_message,

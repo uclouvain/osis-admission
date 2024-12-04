@@ -26,20 +26,20 @@
 from abc import abstractmethod
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
 
 
 class IDoctoratTranslator(IFormationTranslator):
     @classmethod
     @abstractmethod
-    def get(cls, sigle: str, annee: int) -> Doctorat:
+    def get(cls, sigle: str, annee: int) -> DoctoratFormation:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:
+    def get_dto(cls, sigle: str, annee: int) -> DoctoratFormationDTO:
         raise NotImplementedError
 
     @classmethod
@@ -50,5 +50,5 @@ class IDoctoratTranslator(IFormationTranslator):
         annee: Optional[int] = None,
         campus: Optional[str] = '',
         terme_de_recherche: Optional[str] = '',
-    ) -> List['DoctoratDTO']:
+    ) -> List['DoctoratFormationDTO']:
         raise NotImplementedError

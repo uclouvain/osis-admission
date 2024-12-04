@@ -31,23 +31,12 @@ from admission.ddd.admission.doctorat.validation.domain.service.proposition_iden
     PropositionIdentityTranslator,
 )
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
-from admission.ddd.parcours_doctoral.domain.service.demande_identity import DemandeIdentityTranslator
-from admission.ddd.parcours_doctoral.domain.service.doctorat import DoctoratService
-from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.service.epreuve_confirmation import (
-    EpreuveConfirmationService,
-)
-from admission.ddd.parcours_doctoral.epreuve_confirmation.repository.i_epreuve_confirmation import (
-    IEpreuveConfirmationRepository,
-)
-from admission.ddd.parcours_doctoral.repository.i_doctorat import IDoctoratRepository
 
 
 def approuver_demande_cdd(
     cmd: 'ApprouverDemandeCddCommand',
     demande_repository: 'IDemandeRepository',
     proposition_repository: 'IPropositionRepository',
-    epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
-    doctorat_repository: 'IDoctoratRepository',
 ) -> 'DemandeIdentity':
     # GIVEN
     demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.uuid)
@@ -56,20 +45,14 @@ def approuver_demande_cdd(
     proposition_id = PropositionIdentityTranslator.convertir_depuis_demande(demande_id)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
-    doctorat_id = DemandeIdentityTranslator.convertir_en_doctorat(demande_id)
-
     # WHEN
     demande.approuver_cdd()
 
     # TODO Both SIC and CDD must approved the proposition
     proposition.valider_inscription()
-    epreuve_confirmation = EpreuveConfirmationService.initier(doctorat_id=doctorat_id)
-    doctorat = DoctoratService.initier(entity_id=doctorat_id, proposition=proposition)
 
     # THEN
     demande_repository.save(demande)
     proposition_repository.save(proposition)
-    doctorat_repository.save(doctorat)
-    epreuve_confirmation_repository.save(epreuve_confirmation)
 
     return demande.entity_id

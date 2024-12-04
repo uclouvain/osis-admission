@@ -27,15 +27,12 @@ from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates.doctorate import (
-    complementary_training_enabled,
-    confirmation_paper_in_progress,
     is_admission_reference_promoter,
     is_admission_request_promoter,
     is_being_enrolled,
     is_enrolled,
     is_part_of_committee_and_invited,
     is_pre_admission,
-    is_jury_in_progress,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -56,7 +53,6 @@ class Promoter(RoleModel):
 
     @classmethod
     def rule_set(cls):
-        promoter_and_enrolled = is_admission_request_promoter & is_enrolled
         rules = {
             'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
@@ -79,16 +75,5 @@ class Promoter(RoleModel):
             'admission.view_admission_jury': is_admission_request_promoter,
             # A promoter can approve as long as he is invited to the admission committee
             'admission.approve_proposition': is_part_of_committee_and_invited,
-            # Once the candidate is enrolling, a promoter can
-            'admission.view_admission_confirmation': is_admission_request_promoter & is_enrolled,
-            'admission.change_admission_confirmation': is_admission_request_promoter & confirmation_paper_in_progress,
-            'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
-            'admission.change_admission_jury': is_admission_request_promoter & is_enrolled & is_jury_in_progress,
-            # PhD training
-            'admission.view_doctoral_training': promoter_and_enrolled & ~is_pre_admission,
-            'admission.view_complementary_training': promoter_and_enrolled & complementary_training_enabled,
-            'admission.view_course_enrollment': promoter_and_enrolled,
-            'admission.view_training': promoter_and_enrolled,
-            'admission.assent_training': is_admission_reference_promoter & is_enrolled,
         }
         return RuleSet(rules)

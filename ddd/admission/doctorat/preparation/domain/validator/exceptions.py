@@ -701,3 +701,11 @@ class PropositionNonEnAttenteDeSignatureException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The proposition must be in the 'waiting for signature' status.")
         super().__init__(message, **kwargs)
+
+
+class DoctoratNonTrouveException(BusinessException):
+    status_code = "DOCTORAT-9"
+
+    def __init__(self, **kwargs):
+        message = _("No doctorate found.")
+        super().__init__(message, **kwargs)

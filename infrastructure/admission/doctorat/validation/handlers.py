@@ -27,10 +27,6 @@
 from admission.ddd.admission.doctorat.validation.commands import *
 from admission.ddd.admission.doctorat.validation.use_case.read import *
 from admission.ddd.admission.doctorat.validation.use_case.write import *
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.epreuve_confirmation import (
-    EpreuveConfirmationRepository,
-)
-from admission.infrastructure.parcours_doctoral.repository.doctorat import DoctoratRepository
 from .repository.demande import DemandeRepository
 from ..preparation.repository.proposition import PropositionRepository
 
@@ -52,7 +48,5 @@ COMMAND_HANDLERS = {
         cmd,
         demande_repository=DemandeRepository(),
         proposition_repository=PropositionRepository(),
-        epreuve_confirmation_repository=EpreuveConfirmationRepository(),
-        doctorat_repository=DoctoratRepository(),
     ),
 }

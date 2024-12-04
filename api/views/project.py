@@ -155,7 +155,6 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
             DoctorateAdmission.objects.select_related(
                 'supervision_group',
                 'candidate',
-                'training__management_entity__admission_config',
             )
             .prefetch_related(
                 Prefetch('supervision_group__actors', Actor.objects.select_related('supervisionactor').all())
