@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_builder import PropositionBuilder
+from admission.ddd.admission.doctorat.preparation.builder.proposition_builder import IPropositionBuilder
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
@@ -38,20 +38,19 @@ def initier_proposition(
     doctorat_translator: 'IDoctoratTranslator',
     historique: 'IHistorique',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    proposition_builder: 'IPropositionBuilder',
 ) -> 'PropositionIdentity':
     # GIVEN
-    doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
     maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
 
     # WHEN
-    proposition = PropositionBuilder().initier_proposition(
+    proposition_identity = proposition_builder.initier_proposition(
         cmd,
-        doctorat,
+        doctorat_translator,
         proposition_repository,
     )
 
     # THEN
-    proposition_repository.save(proposition)
-    historique.historiser_initiation(proposition)
+    historique.historiser_initiation(proposition_identity, cmd.matricule_candidat)
 
-    return proposition.entity_id
+    return proposition_identity

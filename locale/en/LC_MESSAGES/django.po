@@ -1215,9 +1215,6 @@ msgid ""
 "number"
 msgstr ""
 
-msgid "Canvas"
-msgstr ""
-
 msgid "Carbon-copy the CA members"
 msgstr ""
 
@@ -1492,9 +1489,6 @@ msgid "Confirmation exam"
 msgstr ""
 
 msgid "Confirmation exam date"
-msgstr ""
-
-msgid "Confirmation success attestation"
 msgstr ""
 
 msgid "Contact"
@@ -5259,6 +5253,9 @@ msgstr ""
 msgid "Related experience"
 msgstr ""
 
+msgid "Related pre-admission"
+msgstr ""
+
 msgid "Relationship"
 msgstr ""
 
@@ -6019,6 +6016,9 @@ msgid ""
 msgstr ""
 
 msgid "The University tuition fee is EUR 0.0."
+msgstr ""
+
+msgid "The admission must not follow a pre-admission"
 msgstr ""
 
 #, python-format

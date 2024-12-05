@@ -89,6 +89,14 @@ class DoctorateAdmission(BaseAdmission):
         db_index=True,
         default=ChoixTypeAdmission.ADMISSION.name,
     )
+    related_pre_admission = models.ForeignKey(
+        'self',
+        verbose_name=_('Related pre-admission'),
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='+',
+    )
     # TODO: remove this field in the future
     valuated_experiences = models.ManyToManyField(
         'osis_profile.Experience',
@@ -803,6 +811,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             self.get_queryset()
             .select_related(
                 'training__enrollment_campus__country',
+                'related_pre_admission',
             )
             .annotate_campus_info()
             .annotate_training_management_entity()

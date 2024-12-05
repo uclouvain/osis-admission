@@ -31,7 +31,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
@@ -39,7 +39,7 @@ from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDT
 
 class HistoriqueInMemory(IHistorique):
     @classmethod
-    def historiser_initiation(cls, proposition: Proposition):
+    def historiser_initiation(cls, proposition_identity: PropositionIdentity, matricule_auteur: str):
         pass
 
     @classmethod

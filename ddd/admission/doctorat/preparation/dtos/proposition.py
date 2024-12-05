@@ -49,6 +49,7 @@ class PropositionDTO(interface.DTO):
     uuid: str
     type_admission: str
     reference: str
+    pre_admission_associee: Optional[str]
     justification: Optional[str]
     doctorat: DoctoratFormationDTO
     annee_calculee: Optional[int]

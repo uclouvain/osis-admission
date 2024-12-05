@@ -35,7 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 from admission.infrastructure.admission.doctorat.preparation.domain.service.membre_CA import MembreCATranslator
@@ -56,10 +56,10 @@ class Historique(IHistorique):
         return MembreCATranslator.get_dto(signataire_id)
 
     @classmethod
-    def historiser_initiation(cls, proposition: Proposition):
-        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+    def historiser_initiation(cls, proposition_identity: PropositionIdentity, matricule_auteur: str):
+        candidat = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
-            proposition.entity_id.uuid,
+            proposition_identity.uuid,
             "La proposition a été initiée.",
             "The proposition has been initialized.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
@@ -110,9 +110,11 @@ class Historique(IHistorique):
                     signataire=signataire,
                     action="refusé" if avis.motif_refus else "aprouvé",
                     via_pdf="via PDF " if avis.pdf else "",
-                    role="promoteur"
-                    if isinstance(signataire_id, PromoteurIdentity)
-                    else "membre du comité d'accompagnement",
+                    role=(
+                        "promoteur"
+                        if isinstance(signataire_id, PromoteurIdentity)
+                        else "membre du comité d'accompagnement"
+                    ),
                 )
             )
             details = []

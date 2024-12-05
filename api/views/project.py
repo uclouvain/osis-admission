@@ -33,11 +33,14 @@ from rest_framework.views import APIView
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
-from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
     ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
     ListerPropositionsSuperviseesQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.ddd.admission.formation_continue.commands import (
@@ -46,6 +49,7 @@ from admission.ddd.admission.formation_continue.commands import (
 from admission.ddd.admission.formation_generale.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
 )
+from admission.models import DoctorateAdmission
 from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -56,6 +60,7 @@ __all__ = [
     "PropositionListView",
     "SupervisedPropositionListView",
     "ProjectViewSet",
+    "DoctoratePreAdmissionList",
 ]
 
 
@@ -229,3 +234,36 @@ class ProjectViewSet(
         self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DoctoratePreAdmissionListSchema(ResponseSpecificSchema):
+    operation_id_base = '_doctorate_pre_admission'
+    serializer_mapping = {
+        'GET': serializers.DoctoratePreAdmissionSearchDTOSerializer,
+    }
+
+
+class DoctoratePreAdmissionList(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListAPIView):
+    name = "doctorate_pre_admission_list"
+    schema = DoctoratePreAdmissionListSchema()
+    pagination_class = None
+    filter_backends = []
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+
+    def list(self, request, **kwargs):
+        """List the propositions of the logged in user"""
+        doctorate_list = message_bus_instance.invoke(
+            ListerPropositionsDoctoralesCandidatQuery(
+                matricule_candidat=request.user.person.global_id,
+                type_admission=ChoixTypeAdmission.PRE_ADMISSION.name,
+                statut=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+                est_pre_admission_d_une_admission_en_cours=False,
+            ),
+        )
+
+        serializer = serializers.DoctoratePreAdmissionSearchDTOSerializer(
+            instance=doctorate_list,
+            many=True,
+        )
+
+        return Response(serializer.data)
