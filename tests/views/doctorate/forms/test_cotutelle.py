@@ -29,7 +29,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory

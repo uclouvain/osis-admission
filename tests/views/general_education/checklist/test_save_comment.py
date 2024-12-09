@@ -28,7 +28,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from osis_comment.models import CommentEntry
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,

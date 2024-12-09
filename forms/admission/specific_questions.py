@@ -122,6 +122,12 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         required=False,
     )
 
+    formulaire_reorientation = MaxOneFileUploadField(
+        label=_('Your completed and signed reorientation form'),
+        max_files=1,
+        required=False,
+    )
+
     class Media:
         js = ('js/dependsOn.min.js',)
 
@@ -165,6 +171,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
                 'formulaire_modification_inscription',
                 'est_reorientation_inscription_externe',
                 'attestation_inscription_reguliere',
+                'formulaire_reorientation',
             ]:
                 del self.fields[field]
         elif not self.enrolled_for_contingent_training:
@@ -182,6 +189,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
             data['formulaire_modification_inscription'] = []
             data['est_reorientation_inscription_externe'] = data.get('est_bachelier_belge')
             data['attestation_inscription_reguliere'] = []
+            data['formulaire_reorientation'] = []
 
         if (
             'est_bachelier_belge' in data
@@ -205,6 +213,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
                 self.add_error('est_reorientation_inscription_externe', FIELD_REQUIRED_MESSAGE)
             elif not data['est_reorientation_inscription_externe']:
                 data['attestation_inscription_reguliere'] = []
+                data['formulaire_reorientation'] = []
 
         return data
 

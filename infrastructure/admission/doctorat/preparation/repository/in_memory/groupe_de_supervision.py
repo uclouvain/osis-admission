@@ -36,6 +36,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale, \
     ChoixEtatSignature
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
@@ -69,7 +70,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
     GroupeDeSupervisionSC3DPSansPromoteurReferenceFactory,
     GroupeDeSupervisionConfirmeeSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
-from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.membre_CA import (
     MembreCA,
     MembreCAInMemoryTranslator,

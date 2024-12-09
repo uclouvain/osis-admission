@@ -37,7 +37,7 @@ from rest_framework import status
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -132,6 +132,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         cls.file_uuids = {
             'formulaire_modification_inscription': uuid.uuid4(),
             'attestation_inscription_reguliere': uuid.uuid4(),
+            'formulaire_reorientation': uuid.uuid4(),
             'documents_additionnels': uuid.uuid4(),
         }
 
@@ -216,6 +217,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertNotIn('formulaire_modification_inscription', form.fields)
         self.assertNotIn('est_reorientation_inscription_externe', form.fields)
         self.assertNotIn('attestation_inscription_reguliere', form.fields)
+        self.assertNotIn('formulaire_reorientation', form.fields)
 
     def test_general_specific_questions_form_initialization_for_a_bachelor(self):
         self.client.force_login(self.sic_manager_user)
@@ -263,6 +265,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertIn('formulaire_modification_inscription', form.fields)
         self.assertIn('est_reorientation_inscription_externe', form.fields)
         self.assertIn('attestation_inscription_reguliere', form.fields)
+        self.assertIn('formulaire_reorientation', form.fields)
 
         # Hide the resident question because the training has no quota
         general_admission.training = self.bachelor_training
@@ -280,6 +283,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertIn('formulaire_modification_inscription', form.fields)
         self.assertIn('est_reorientation_inscription_externe', form.fields)
         self.assertIn('attestation_inscription_reguliere', form.fields)
+        self.assertIn('formulaire_reorientation', form.fields)
 
     def test_general_specific_questions_form_submit_with_a_master(self):
         self.client.force_login(self.sic_manager_user)
@@ -314,6 +318,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.additional_documents, [])
         self.assertEqual(general_admission.is_external_reorientation, None)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, None)
         self.assertEqual(general_admission.registration_change_form, [])
         self.assertEqual(general_admission.modified_at, datetime.datetime.now())
@@ -336,6 +341,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
                 'documents_additionnels_0': [self.file_uuids['documents_additionnels']],
             },
         )
@@ -354,6 +360,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.additional_documents, [self.file_uuids['documents_additionnels']])
         self.assertEqual(general_admission.is_external_reorientation, None)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, None)
         self.assertEqual(general_admission.registration_change_form, [])
         self.assertTrue(general_admission.late_enrollment)
@@ -408,6 +415,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -422,6 +430,10 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(
             general_admission.regular_registration_proof,
             [self.file_uuids['attestation_inscription_reguliere']],
+        )
+        self.assertEqual(
+            general_admission.reorientation_form,
+            [self.file_uuids['formulaire_reorientation']],
         )
         self.assertEqual(general_admission.is_external_modification, False)
         self.assertEqual(general_admission.registration_change_form, [])
@@ -444,6 +456,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': False,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -456,6 +469,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.is_belgian_bachelor, True)
         self.assertEqual(general_admission.is_external_reorientation, False)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, True)
         self.assertEqual(
             general_admission.registration_change_form,
@@ -474,6 +488,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -509,6 +524,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -520,6 +536,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.is_belgian_bachelor, None)
         self.assertEqual(general_admission.is_external_reorientation, None)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, None)
         self.assertEqual(general_admission.registration_change_form, [])
 
@@ -532,6 +549,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -543,6 +561,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.is_belgian_bachelor, False)
         self.assertEqual(general_admission.is_external_reorientation, False)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, False)
         self.assertEqual(general_admission.registration_change_form, [])
 
@@ -556,6 +575,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -576,6 +596,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -587,6 +608,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.is_belgian_bachelor, False)
         self.assertEqual(general_admission.is_external_reorientation, False)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, False)
         self.assertEqual(general_admission.registration_change_form, [])
 
@@ -600,6 +622,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': False,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -611,6 +634,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.is_belgian_bachelor, True)
         self.assertEqual(general_admission.is_external_reorientation, False)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, True)
         self.assertEqual(
             general_admission.registration_change_form,
@@ -627,6 +651,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': '',
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -651,6 +676,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': False,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+                'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
             },
         )
 
@@ -662,6 +688,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.is_belgian_bachelor, True)
         self.assertEqual(general_admission.is_external_reorientation, False)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, False)
         self.assertEqual(general_admission.registration_change_form, [])
 
@@ -698,6 +725,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.is_belgian_bachelor, True)
         self.assertEqual(general_admission.is_external_reorientation, False)
         self.assertEqual(general_admission.regular_registration_proof, [])
+        self.assertEqual(general_admission.reorientation_form, [])
         self.assertEqual(general_admission.is_external_modification, True)
         self.assertEqual(
             general_admission.registration_change_form,

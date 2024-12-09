@@ -32,7 +32,7 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
 from admission.ddd.admission.domain.enums import TypeFormation

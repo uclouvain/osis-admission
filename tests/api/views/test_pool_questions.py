@@ -87,6 +87,8 @@ class PoolQuestionApiTestCase(APITestCase):
         expected = {
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': None,
+            'modification_pool_academic_year': None,
+            'reorientation_pool_academic_year': None,
             'is_non_resident': None,
         }
         self.assertDictEqual(expected, response.json())
@@ -109,6 +111,8 @@ class PoolQuestionApiTestCase(APITestCase):
         expected = {
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': None,
+            'modification_pool_academic_year': None,
+            'reorientation_pool_academic_year': None,
             'is_non_resident': None,
             'forbid_enrolment_limited_course_for_non_resident': (
                 ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message
@@ -125,9 +129,12 @@ class PoolQuestionApiTestCase(APITestCase):
         expected = {
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': '2023-02-15T23:59:00',
+            'modification_pool_academic_year': None,
+            'reorientation_pool_academic_year': 2022,
             'is_belgian_bachelor': None,
             'is_external_reorientation': None,
             'regular_registration_proof': [],
+            'reorientation_form': [],
         }
         self.assertDictEqual(expected, response.json())
 
@@ -143,10 +150,13 @@ class PoolQuestionApiTestCase(APITestCase):
         expected = {
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': '2023-02-15T23:59:00',
+            'modification_pool_academic_year': None,
+            'reorientation_pool_academic_year': 2022,
             'is_non_resident': None,
             'is_belgian_bachelor': None,
             'is_external_reorientation': None,
             'regular_registration_proof': [],
+            'reorientation_form': [],
         }
         self.assertDictEqual(expected, response.json())
 
@@ -159,6 +169,8 @@ class PoolQuestionApiTestCase(APITestCase):
         expected = {
             'modification_pool_end_date': '2022-10-31T23:59:00',
             'reorientation_pool_end_date': None,
+            'modification_pool_academic_year': 2022,
+            'reorientation_pool_academic_year': None,
             'is_belgian_bachelor': None,
             'is_external_modification': None,
             'registration_change_form': [],
@@ -189,6 +201,8 @@ class PoolQuestionApiTestCase(APITestCase):
         expected = {
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': None,
+            'modification_pool_academic_year': None,
+            'reorientation_pool_academic_year': None,
             'is_non_resident': None,
         }
         self.assertDictEqual(expected, response.json())
@@ -199,11 +213,14 @@ class PoolQuestionApiTestCase(APITestCase):
             # The rest should be set to default
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': None,
+            'modification_pool_academic_year': None,
+            'reorientation_pool_academic_year': None,
             'is_belgian_bachelor': None,
             'is_external_modification': None,
             'is_external_reorientation': None,
             'registration_change_form': [],
             'regular_registration_proof': [],
+            'reorientation_form': [],
         }
         self.assertDictEqual(expected, response.json())
         admission.refresh_from_db()

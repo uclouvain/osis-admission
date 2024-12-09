@@ -56,7 +56,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     CotutelleDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
-    DoctoratDTO,
+    DoctoratFormationDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
@@ -1449,6 +1449,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
             attestation_inscription_reguliere=['uuid-attestation-inscription-reguliere'],
+            formulaire_reorientation=['uuid-formulaire-reorientation'],
             bourse_double_diplome=None,
             bourse_erasmus_mundus=None,
             bourse_internationale=None,
@@ -1485,7 +1486,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
-            doctorat=DoctoratDTO(
+            doctorat=DoctoratFormationDTO(
                 sigle='FD1',
                 annee=2023,
                 intitule='Doctorate 1',
@@ -3090,21 +3091,30 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 2)
+            self.assertEqual(len(attachments), 3)
 
-            self.assertEqual(attachments[0].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
-            self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'])
+            self.assertEqual(attachments[0].identifier, 'FORMULAIRE_REORIENTATION')
+            self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['FORMULAIRE_REORIENTATION'])
             self.assertEqual(
                 attachments[0].uuids,
-                self.general_bachelor_context.proposition.attestation_inscription_reguliere,
+                self.general_bachelor_context.proposition.formulaire_reorientation,
             )
             self.assertTrue(attachments[0].required)
             self.assertFalse(attachments[0].readonly)
 
-            self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
-            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
-            self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+            self.assertEqual(attachments[1].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
+            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'])
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.proposition.attestation_inscription_reguliere,
+            )
+            self.assertTrue(attachments[1].required)
             self.assertFalse(attachments[1].readonly)
+
+            self.assertEqual(attachments[2].identifier, 'ADDITIONAL_DOCUMENTS')
+            self.assertEqual(attachments[2].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
+            self.assertEqual(attachments[2].uuids, self.admission.additional_documents)
+            self.assertFalse(attachments[2].readonly)
 
             # The pool is not open...
             with freezegun.freeze_time('2023-10-1'):
@@ -3131,20 +3141,31 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     )
                     attachments = section.attachments
 
-                    self.assertEqual(len(attachments), 2)
+                    self.assertEqual(len(attachments), 3)
 
-                    self.assertEqual(attachments[0].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
+                    self.assertEqual(attachments[0].identifier, 'FORMULAIRE_REORIENTATION')
                     self.assertEqual(
                         attachments[0].label,
-                        DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'],
+                        DocumentsQuestionsSpecifiques['FORMULAIRE_REORIENTATION'],
                     )
                     self.assertEqual(
                         attachments[0].uuids,
-                        self.general_bachelor_context.proposition.attestation_inscription_reguliere,
+                        self.general_bachelor_context.proposition.formulaire_reorientation,
                     )
                     self.assertTrue(attachments[0].required)
                     self.assertFalse(attachments[0].readonly)
-                    self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
+                    self.assertEqual(attachments[1].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
+                    self.assertEqual(
+                        attachments[1].label,
+                        DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'],
+                    )
+                    self.assertEqual(
+                        attachments[1].uuids,
+                        self.general_bachelor_context.proposition.attestation_inscription_reguliere,
+                    )
+                    self.assertTrue(attachments[1].required)
+                    self.assertFalse(attachments[1].readonly)
+                    self.assertEqual(attachments[2].identifier, 'ADDITIONAL_DOCUMENTS')
 
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,

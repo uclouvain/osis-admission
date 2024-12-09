@@ -147,6 +147,7 @@ class Proposition(interface.RootEntity):
     est_bachelier_belge: Optional[bool] = None
     est_reorientation_inscription_externe: Optional[bool] = None
     attestation_inscription_reguliere: List[str] = attr.Factory(list)
+    formulaire_reorientation: List[str] = attr.Factory(list)
 
     est_modification_inscription_externe: Optional[bool] = None
     formulaire_modification_inscription: List[str] = attr.Factory(list)
@@ -312,6 +313,7 @@ class Proposition(interface.RootEntity):
         self.soumise_le = now()
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION:
             self.attestation_inscription_reguliere = []
+            self.formulaire_reorientation = []
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
             self.formulaire_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
@@ -803,6 +805,7 @@ class Proposition(interface.RootEntity):
         est_bachelier_belge: Optional[bool],
         est_reorientation_inscription_externe: Optional[bool],
         attestation_inscription_reguliere: List[str],
+        formulaire_reorientation: List[str],
         est_modification_inscription_externe: Optional[bool],
         formulaire_modification_inscription: List[str],
         est_non_resident_au_sens_decret: Optional[bool],
@@ -817,6 +820,7 @@ class Proposition(interface.RootEntity):
         self.est_bachelier_belge = est_bachelier_belge
         self.est_reorientation_inscription_externe = est_reorientation_inscription_externe
         self.attestation_inscription_reguliere = attestation_inscription_reguliere
+        self.formulaire_reorientation = formulaire_reorientation
         self.est_modification_inscription_externe = est_modification_inscription_externe
         self.formulaire_modification_inscription = formulaire_modification_inscription
         if self.est_modification_inscription_externe:

@@ -39,7 +39,7 @@ from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.events import InscriptionDoctoraleApprouveeParSicEvent
 from admission.ddd.admission.doctorat.preparation.commands import EnvoyerEmailApprobationInscriptionAuCandidatCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     DroitsInscriptionMontant,

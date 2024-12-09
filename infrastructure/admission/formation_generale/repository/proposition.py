@@ -131,9 +131,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def get_active_period_submitted_proposition(
-            cls,
-            matricule_candidat: str,
-            periodes_actives: List['PeriodeSoumissionTicketDigit']
+        cls, matricule_candidat: str, periodes_actives: List['PeriodeSoumissionTicketDigit']
     ) -> 'Proposition':
         first_submitted_proposition = (
             GeneralEducationAdmissionProxy.objects.prefetch_related(
@@ -161,7 +159,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     default=0,
                     output_field=IntegerField(),
                 )
-            ).order_by('-status_priority', 'created_at')
+            )
+            .order_by('-status_priority', 'created_at')
             .first()
         )
 
@@ -287,6 +286,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'is_belgian_bachelor': entity.est_bachelier_belge,
                 'is_external_reorientation': entity.est_reorientation_inscription_externe,
                 'regular_registration_proof': entity.attestation_inscription_reguliere,
+                'reorientation_form': entity.formulaire_reorientation,
                 'is_external_modification': entity.est_modification_inscription_externe,
                 'registration_change_form': entity.formulaire_modification_inscription,
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
@@ -520,6 +520,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             est_bachelier_belge=admission.is_belgian_bachelor,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
+            formulaire_reorientation=admission.reorientation_form,
             est_modification_inscription_externe=admission.is_external_modification,
             formulaire_modification_inscription=admission.registration_change_form,
             est_non_resident_au_sens_decret=admission.is_non_resident,
@@ -746,6 +747,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             formulaire_modification_inscription=admission.registration_change_form,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
+            formulaire_reorientation=admission.reorientation_form,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,

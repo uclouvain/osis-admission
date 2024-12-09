@@ -115,7 +115,7 @@ class PropositionInMemoryRepository(
 
     @classmethod
     def get_active_period_submitted_proposition(
-            cls, matricule_candidat: str, periodes_actives: List['PeriodeSoumissionTicketDigit']
+        cls, matricule_candidat: str, periodes_actives: List['PeriodeSoumissionTicketDigit']
     ) -> Optional['Proposition']:
         return next((p for p in cls.entities if p.matricule_candidat == matricule_candidat), None)
 
@@ -288,6 +288,7 @@ class PropositionInMemoryRepository(
             formulaire_modification_inscription=proposition.formulaire_modification_inscription,
             est_reorientation_inscription_externe=proposition.est_reorientation_inscription_externe,
             attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
+            formulaire_reorientation=proposition.formulaire_reorientation,
             pdf_recapitulatif=['recap.pdf'],
             documents_demandes=proposition.documents_demandes,
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),

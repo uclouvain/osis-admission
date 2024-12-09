@@ -118,6 +118,12 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         blank=True,
     )
+    reorientation_form = FileField(
+        verbose_name=_("Completed and signed reorientation form"),
+        max_files=1,
+        upload_to=admission_directory_path,
+        blank=True,
+    )
     is_non_resident = models.BooleanField(
         verbose_name=_("Is non-resident (as defined in decree)"),
         null=True,
