@@ -34,32 +34,20 @@
       <span class="caret"></span>
     </a>
     <ul class="dropdown-menu">
-      {% if perms.admission.view_enrolment_applications %}
-        <li class="dropdown-item">
-          <a href="{% url 'admission:all-list' %}">
-            <span class="fa fa-chalkboard-user"></span>
-            {% trans 'Enrolment applications' %}
-          </a>
-        </li>
-      {% endif %}
-        <li role="separator" class="divider dropdown-divider"></li>
-      {% if perms.admission.view_doctorate_enrolment_applications %}
-        <li class="dropdown-item">
-          <a href="{% url 'admission:doctorate:cdd:list' %}">
-            <span class="fa fa-graduation-cap"></span>
-            {% trans 'Doctorate enrolment applications' %}
-          </a>
-        </li>
-      {% endif %}
-        <li role="separator" class="divider dropdown-divider"></li>
-      {% if perms.admission.view_continuing_enrolment_applications %}
-        <li class="dropdown-item">
-          <a href="{% url 'admission:continuing-education:list' %}">
-            <span class="fa fa-chalkboard-user"></span>
-            {% trans 'Continuing enrolment applications' %}
-          </a>
-        </li>
-      {% endif %}
+      <li class="dropdown-item">
+        <a
+          {% if perms.admission.view_enrolment_applications %}
+            href="{% url 'admission:all-list' %}"
+          {% elif perms.admission.view_doctorate_enrolment_applications %}
+            href="{% url 'admission:doctorate:cdd:list' %}"
+          {% elif perms.admission.view_continuing_enrolment_applications %}
+            href="{% url 'admission:continuing-education:list' %}"
+          {% endif %}
+        >
+          <span class="fa fa-chalkboard-user"></span>
+          {% trans 'Enrolment applications' %}
+        </a>
+      </li>
     </ul>
   </li>
 {% endif %}
