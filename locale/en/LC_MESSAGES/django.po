@@ -3981,12 +3981,6 @@ msgctxt "tab"
 msgid "Management"
 msgstr ""
 
-msgid "Management of the continuing enrolment applications"
-msgstr ""
-
-msgid "Management of the doctorate enrolments"
-msgstr ""
-
 msgid "Management of the enrolment applications"
 msgstr ""
 
