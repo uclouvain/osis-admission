@@ -57,8 +57,6 @@ from admission.constants import (
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE_AFTER_ENROLMENT,
 )
-from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -112,6 +110,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models.base import BaseAdmission
 from admission.utils import (
     get_access_conditions_url,
     get_experience_urls,
@@ -119,7 +119,6 @@ from admission.utils import (
     format_school_title,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
-from base.models.entity_version import EntityVersion
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
@@ -1669,9 +1668,10 @@ def osis_language_name(code):
 def superior_institute_name(organization_uuid):
     if not organization_uuid:
         return ''
-    try:
-        institute = get_superior_institute_queryset().get(organization_uuid=organization_uuid)
-    except EntityVersion.DoesNotExist:
+    institute = (
+        get_superior_institute_queryset().filter(organization_uuid=organization_uuid).order_by('-start_date').first()
+    )
+    if not institute:
         return organization_uuid
     return mark_safe(format_school_title(institute))
 
