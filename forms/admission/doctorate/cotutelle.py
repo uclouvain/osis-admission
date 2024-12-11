@@ -129,8 +129,7 @@ class DoctorateAdmissionCotutelleForm(forms.Form):
             street=F('entityversionaddress__street'),
             street_number=F('entityversionaddress__street_number'),
             zipcode=F('entityversionaddress__postal_code'),
-        ).get(organization_uuid=institute_id)
-
+        ).filter(organization_uuid=institute_id).order_by('-start_date').first()
         return EMPTY_CHOICE + ((institute.organization_uuid, format_school_title(school=institute)),)
 
     def clean(self):

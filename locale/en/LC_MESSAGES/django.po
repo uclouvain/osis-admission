@@ -1215,9 +1215,6 @@ msgid ""
 "number"
 msgstr ""
 
-msgid "Canvas"
-msgstr ""
-
 msgid "Carbon-copy the CA members"
 msgstr ""
 
@@ -1492,9 +1489,6 @@ msgid "Confirmation exam"
 msgstr ""
 
 msgid "Confirmation exam date"
-msgstr ""
-
-msgid "Confirmation success attestation"
 msgstr ""
 
 msgid "Contact"

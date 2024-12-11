@@ -1330,9 +1330,6 @@ msgstr ""
 "Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le "
 "même numéro de registre national"
 
-msgid "Canvas"
-msgstr "Canvas"
-
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du groupe de supervision"
 
@@ -1625,9 +1622,6 @@ msgstr "Épreuve de confirmation"
 
 msgid "Confirmation exam date"
 msgstr "Date de l'épreuve de confirmation"
-
-msgid "Confirmation success attestation"
-msgstr "Attestation de réussite de l'épreuve de confirmation"
 
 msgid "Contact"
 msgstr "Contact"
@@ -8509,23 +8503,3 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
-
-#~ msgid "CDD"
-#~ msgstr "CDD"
-
-#, python-format
-#~ msgid "Change <em>%(name)s</em> configuration"
-#~ msgstr "Modifier la configuration de <em>%(name)s</em>"
-
-#, python-format
-#~ msgid "Change <em>%(name)s</em> custom mail template"
-#~ msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
-
-#~ msgid "Role: ADRE Secretaries"
-#~ msgstr "Rôle: Secrétaires ADRE"
-
-#~ msgid "Role: ADRE secretary"
-#~ msgstr "Rôle: Secrétaire ADRE"
-
-#~ msgid "Template title"
-#~ msgstr "Intitulé du template"
