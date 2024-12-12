@@ -510,7 +510,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             'type': TypeDemande.ADMISSION.name,
             'site_inscription': str(campus.uuid),
             'entites': 'ENT',
-            'types_formation': [TrainingType.BACHELOR.name, TrainingType.FORMATION_PHD.name],
+            'types_formation': [TrainingType.BACHELOR.name, TrainingType.PHD.name],
             'formation': 'Informatique',
             'bourse_internationale': str(international_scholarship.uuid),
             'bourse_erasmus_mundus': str(erasmus_mundus_scholarship.uuid),
@@ -573,7 +573,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(values[8], TypeDemande.ADMISSION.value)
         self.assertEqual(values[9], campus.name)
         self.assertEqual(values[10], 'ENT')
-        self.assertEqual(values[11], f"['{TrainingType.BACHELOR.value}', '{TrainingType.FORMATION_PHD.value}']")
+        self.assertEqual(values[11], f"['{TrainingType.BACHELOR.value}', '{TrainingType.PHD.value}']")
         self.assertEqual(values[12], 'Informatique')
         self.assertEqual(values[13], international_scholarship.short_name)
         self.assertEqual(values[14], erasmus_mundus_scholarship.short_name)
@@ -1138,7 +1138,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
             training__management_entity=self.first_entity,
             training__acronym="ZEBU0",
-            training__education_group_type__name=TrainingType.FORMATION_PHD.name,
+            training__education_group_type__name=TrainingType.PHD.name,
             submitted_at=datetime.datetime(2023, 1, 1),
             training__academic_year=self.academic_years[1],
             determined_academic_year=self.academic_years[2],
@@ -1232,7 +1232,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
             training__management_entity=self.first_entity,
             training__acronym="ZEBU0",
-            training__education_group_type__name=TrainingType.FORMATION_PHD.name,
+            training__education_group_type__name=TrainingType.PHD.name,
             submitted_at=datetime.datetime(2023, 1, 1),
             training__academic_year=self.academic_years[1],
             determined_academic_year=self.academic_years[2],

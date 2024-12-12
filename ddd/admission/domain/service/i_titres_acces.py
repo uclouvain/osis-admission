@@ -99,7 +99,7 @@ class ITitresAcces(interface.DomainService):
             ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
             ConditionAccess.POTENTIEL_ACCES_VAE,
         ],
-        (TrainingType.FORMATION_PHD,): [
+        (TrainingType.PHD,): [
             ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,
             ConditionAccess.DIPLOMATION_POTENTIEL_DOCTORAT_BELGE,
             ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,

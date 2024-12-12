@@ -1302,7 +1302,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 
     def test_admission_training_type(self):
         self.assertEqual(
-            admission_training_type(TrainingType.FORMATION_PHD.name),
+            admission_training_type(TrainingType.PHD.name),
             TypeFormation.DOCTORAT.name,
         )
 
@@ -1557,7 +1557,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 class AdmissionTagsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.doctorate_training_type = TrainingType.FORMATION_PHD.name
+        cls.doctorate_training_type = TrainingType.PHD.name
         cls.general_training_type = TrainingType.BACHELOR.name
         cls.continuing_training_type = TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name
         cls.admission_uuid = str(uuid.uuid4())
