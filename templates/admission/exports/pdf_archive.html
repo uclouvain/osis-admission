@@ -97,7 +97,7 @@
 
     {% for experience in experiences %}
       <p><strong>
-        {{ experience.first_year }} - {{ experience.last_year|add:1 }}
+        {{ experience.first_year }}-{{ experience.last_year|add:1 }} -
         {{ experience.education_name|default:experience.program }}
         {{ experience.institute_name|default:experience.institute }}
       </strong></p>
@@ -138,7 +138,7 @@
 
     <p>
       {% trans "Date the application is sent to the supervision group" %} :
-      {{ date_envoi_supervision|date:'d/m/Y H:i' }}
+      {{ date_envoi_supervision|date:'d/m/Y' }}
     </p>
 
     <p>
@@ -153,7 +153,7 @@
     {% if admission.cotutelle %}
       <p style="margin-left: 10px;">
         ➔ {% trans "Partner institution" %} :
-        {{ admission.cotutelle_institution }}
+        {{ admission|cotutelle_institute }}
       </p>
     {% endif %}
 
