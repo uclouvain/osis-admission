@@ -392,7 +392,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
         birth_date = None
 
     start_date_limit_idm = date(date.today().year, 6, 1)
-    start_date_idm = date.today().strftime('%Y-%m-%d') if date.today() > start_date_limit_idm else start_date_limit_idm
+    start_date_idm = date.today() if date.today() > start_date_limit_idm else start_date_limit_idm
 
     ticket_data = {
         "provider": {
@@ -430,7 +430,7 @@ def _get_ticket_data(person: Person, noma: str, addresses: QuerySet, program_typ
         ticket_data["activities"] = [
             {
                 "idmId": _get_idm_number(program_type),
-                "startDate": start_date_idm,
+                "startDate": start_date_idm.strftime('%Y-%m-%d'),
                 "stopDate": "9999-12-31",
             }
         ]
