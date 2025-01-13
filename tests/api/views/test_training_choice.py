@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,26 +37,35 @@ from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator import exceptions as doctorate_education_exceptions
+from admission.ddd.admission.doctorat.preparation.domain.validator import (
+    exceptions as doctorate_education_exceptions,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DoctoratNonTrouveException,
 )
-from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixMoyensDecouverteFormation,
+    ChoixStatutPropositionContinue,
 )
-from admission.ddd.admission.formation_continue.domain.validator import exceptions as continuing_education_exceptions
+from admission.ddd.admission.formation_continue.domain.validator import (
+    exceptions as continuing_education_exceptions,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
+from admission.ddd.admission.formation_generale.domain.validator import (
+    exceptions as general_education_exceptions,
+)
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
+from admission.models.base import REFERENCE_SEQ_NAME
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import (
@@ -71,17 +80,18 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.scholarship import (
-    DoubleDegreeScholarshipFactory,
-    ErasmusMundusScholarshipFactory,
-    InternationalScholarshipFactory,
-)
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from ddd.logic.reference.domain.validator.exceptions import BourseNonTrouveeException
+from reference.tests.factories.scholarship import (
+    DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
+)
 
 
 def create_default_propositions_in_progress(candidate):

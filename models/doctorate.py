@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,15 +28,16 @@ from contextlib import suppress
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import OuterRef, Prefetch
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -47,17 +48,20 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    DerogationFinancement,
     BesoinDeDerogation,
-    DroitsInscriptionMontant,
+    DerogationFinancement,
     DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
     MobiliteNombreDeMois,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.doctorat.validation.domain.model.enums import (
+    ChoixStatutCDD,
+    ChoixStatutSIC,
+)
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -71,7 +75,7 @@ from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
-from osis_document.contrib import FileField
+
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
 __all__ = [
@@ -338,7 +342,7 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
     )
     international_scholarship = models.ForeignKey(
-        to="admission.Scholarship",
+        to="reference.Scholarship",
         verbose_name=_("International scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
@@ -707,9 +711,9 @@ class DoctorateAdmission(BaseAdmission):
 
     def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.doctorat.preparation.commands import (
+            DeterminerAnneeAcademiqueEtPotQuery,
             VerifierProjetQuery,
             VerifierPropositionQuery,
-            DeterminerAnneeAcademiqueEtPotQuery,
         )
         from admission.utils import gather_business_exceptions
         from infrastructure.messages_bus import message_bus_instance

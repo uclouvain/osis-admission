@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,9 +25,13 @@
 # ##############################################################################
 
 from admission.ddd.admission.doctorat.preparation.commands import *
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
-from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
+from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import (
+    recuperer_doctorat,
+)
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
@@ -36,31 +40,74 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_mai
     redonner_la_main_au_candidat,
 )
 from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.use_case.read import (
+    recuperer_questions_specifiques_proposition,
+)
 from admission.ddd.admission.use_case.write import (
-    initialiser_emplacement_document_libre_non_reclamable,
-    initialiser_emplacement_document_libre_a_reclamer,
-    initialiser_emplacement_document_a_reclamer,
     annuler_reclamation_emplacement_document,
+    initialiser_emplacement_document_a_reclamer,
+    initialiser_emplacement_document_libre_a_reclamer,
+    initialiser_emplacement_document_libre_non_reclamable,
     modifier_reclamation_emplacement_document,
-    supprimer_emplacement_document,
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
+    supprimer_emplacement_document,
 )
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
+from infrastructure.financabilite.domain.service.in_memory.financabilite import (
+    FinancabiliteInMemoryFetcher,
+)
+from infrastructure.reference.domain.service.in_memory.bourse import (
+    BourseInMemoryTranslator,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
+from infrastructure.shared_kernel.campus.repository.in_memory.campus import (
+    UclouvainCampusInMemoryRepository,
+)
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
+
+from ...domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
+from ...domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
+from ...domain.service.in_memory.historique import (
+    HistoriqueInMemory as HistoriqueGlobalInMemory,
+)
+from ...domain.service.in_memory.maximum_propositions import (
+    MaximumPropositionsAutoriseesInMemory,
+)
+from ...domain.service.in_memory.recuperer_documents_proposition import (
+    EmplacementsDocumentsPropositionInMemoryTranslator,
+)
+from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
+from ...domain.service.in_memory.unites_enseignement_translator import (
+    UnitesEnseignementInMemoryTranslator,
+)
+from ...repository.in_memory.digit import DigitInMemoryRepository
+from ...repository.in_memory.emplacement_document import (
+    emplacement_document_in_memory_repository,
+)
+from ...repository.in_memory.titre_acces_selectionnable import (
+    TitreAccesSelectionnableInMemoryRepositoryFactory,
+)
+from ...shared_kernel.email_destinataire.repository.in_memory import (
+    EmailDestinataireInMemoryRepository,
+)
+from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
@@ -69,24 +116,14 @@ from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
 from .domain.service.in_memory.notification import NotificationInMemory
 from .domain.service.in_memory.pdf_generation import PDFGenerationInMemory
 from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
-from .domain.service.in_memory.question_specifique import QuestionSpecifiqueInMemoryTranslator
-from .repository.doctorat import DoctoratRepository
-from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
-from .repository.in_memory.proposition import PropositionInMemoryRepository
-from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
-from ...domain.service.in_memory.calendrier_inscription import CalendrierInscriptionInMemory
-from ...domain.service.in_memory.elements_confirmation import ElementsConfirmationInMemory
-from ...domain.service.in_memory.historique import HistoriqueInMemory as HistoriqueGlobalInMemory
-from ...domain.service.in_memory.maximum_propositions import MaximumPropositionsAutoriseesInMemory
-from ...domain.service.in_memory.recuperer_documents_proposition import (
-    EmplacementsDocumentsPropositionInMemoryTranslator,
+from .domain.service.in_memory.question_specifique import (
+    QuestionSpecifiqueInMemoryTranslator,
 )
-from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
-from ...domain.service.in_memory.unites_enseignement_translator import UnitesEnseignementInMemoryTranslator
-from ...repository.in_memory.digit import DigitInMemoryRepository
-from ...repository.in_memory.emplacement_document import emplacement_document_in_memory_repository
-from ...repository.in_memory.titre_acces_selectionnable import TitreAccesSelectionnableInMemoryRepositoryFactory
-from ...shared_kernel.email_destinataire.repository.in_memory import EmailDestinataireInMemoryRepository
+from .repository.doctorat import DoctoratRepository
+from .repository.in_memory.groupe_de_supervision import (
+    GroupeDeSupervisionInMemoryRepository,
+)
+from .repository.in_memory.proposition import PropositionInMemoryRepository
 
 _proposition_repository = PropositionInMemoryRepository()
 _groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()

@@ -25,4 +25,3 @@
 # ##############################################################################
 from .comptabilite import *
 from .question_specifique import *
-from .type_bourse import TypeBourse

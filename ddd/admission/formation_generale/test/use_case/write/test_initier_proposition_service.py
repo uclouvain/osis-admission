@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,22 +28,34 @@ import uuid
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
-from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
-from admission.ddd.admission.enums.type_bourse import TypeBourse
-from admission.ddd.admission.formation_generale.commands import InitierPropositionCommand
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    MaximumPropositionsAtteintException,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    InitierPropositionCommand,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    FormationNonTrouveeException,
+)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
+from ddd.logic.reference.domain.validator.exceptions import BourseNonTrouveeException
+from infrastructure.reference.domain.service.in_memory.bourse import (
+    BourseInMemoryTranslator,
+)
+from reference.models.enums.scholarship_type import ScholarshipType
 
 
 class TestInitierPropositionService(SimpleTestCase):
     @classmethod
-    def _get_une_bourse_par_type(cls, type_bourse: TypeBourse):
+    def _get_une_bourse_par_type(cls, type_bourse: ScholarshipType):
         return next(
             (bourse.entity_id.uuid for bourse in BourseInMemoryTranslator.ENTITIES if bourse.type == type_bourse),
             None,
@@ -58,9 +70,11 @@ class TestInitierPropositionService(SimpleTestCase):
             sigle_formation='MASTER-SCI',
             annee_formation=2020,
             matricule_candidat='01234567',
-            bourse_erasmus_mundus=self._get_une_bourse_par_type(TypeBourse.ERASMUS_MUNDUS),
-            bourse_internationale=self._get_une_bourse_par_type(TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE),
-            bourse_double_diplome=self._get_une_bourse_par_type(TypeBourse.DOUBLE_TRIPLE_DIPLOMATION),
+            bourse_erasmus_mundus=self._get_une_bourse_par_type(ScholarshipType.ERASMUS_MUNDUS),
+            bourse_internationale=self._get_une_bourse_par_type(
+                ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE
+            ),
+            bourse_double_diplome=self._get_une_bourse_par_type(ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION),
         )
 
     def test_should_initier(self):
