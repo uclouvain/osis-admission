@@ -229,7 +229,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 # Management entity acronym
                 Case(
                     When(
-                        Q(training__education_group_type__name=TrainingType.FORMATION_PHD.name),
+                        Q(training__education_group_type__name=TrainingType.PHD.name),
                         then=F('sigle_entite_gestion'),
                     ),
                     default=Coalesce(
