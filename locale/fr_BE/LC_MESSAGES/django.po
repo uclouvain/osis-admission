@@ -1330,9 +1330,6 @@ msgstr ""
 "Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le "
 "même numéro de registre national"
 
-msgid "Canvas"
-msgstr "Canvas"
-
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du groupe de supervision"
 
@@ -1625,9 +1622,6 @@ msgstr "Épreuve de confirmation"
 
 msgid "Confirmation exam date"
 msgstr "Date de l'épreuve de confirmation"
-
-msgid "Confirmation success attestation"
-msgstr "Attestation de réussite de l'épreuve de confirmation"
 
 msgid "Contact"
 msgstr "Contact"
@@ -2200,9 +2194,6 @@ msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 
-msgid "Disabled"
-msgstr "Désactivé"
-
 msgid "Discard fusion"
 msgstr "Rejeter la fusion"
 
@@ -2438,9 +2429,6 @@ msgstr ""
 "La double diplomation concerne une formation conjointe entre deux ou "
 "plusieurs universités, qui débouchera sur l'obtention de deux diplômes "
 "distincts fournis par chaque université signataire."
-
-msgid "Dual or triple degree"
-msgstr "Double ou triple diplomation"
 
 msgid "Duplicate experience"
 msgstr "Dupliquer l'expérience"
@@ -2689,9 +2677,6 @@ msgstr "Contact en cas d'urgence (numéro de téléphone)"
 
 msgid "Employer"
 msgstr "Employeur"
-
-msgid "Enabled"
-msgstr "Activé"
 
 msgctxt "admission"
 msgid "End"
@@ -4038,12 +4023,6 @@ msgstr "Les expériences internes à choisir comme des titres d'accès"
 msgid "Internal label"
 msgstr "Label interne"
 
-msgid "International for doctorate"
-msgstr "Internationale pour les doctorats"
-
-msgid "International for general education"
-msgstr "Internationale pour les formation générales"
-
 msgid "International scholarship"
 msgstr "Bourse internationale"
 
@@ -4290,9 +4269,6 @@ msgstr "Libellé long en anglais"
 
 msgid "Long label in french"
 msgstr "Libellé long en français"
-
-msgid "Long name"
-msgstr "Nom long"
 
 msgid "Long-term resident card"
 msgstr "Carte de résident longue durée"
@@ -4840,9 +4816,6 @@ msgstr "Aucun invité"
 
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
-
-msgid "No scholarship found."
-msgstr "Bourse non trouvée."
 
 msgid "No specific profile"
 msgstr "Pas de profil particulier"
@@ -6061,10 +6034,6 @@ msgstr "Enregistrer la proposition de fusion"
 msgid "Scholarship"
 msgstr "Boursier"
 
-msgctxt "admission model"
-msgid "Scholarship"
-msgstr "Bourse"
-
 msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr "Bourse"
@@ -6228,9 +6197,6 @@ msgstr "Libellé court en anglais"
 
 msgid "Short label in french"
 msgstr "Libellé court en français"
-
-msgid "Short name"
-msgstr "Nom court"
 
 msgid "Show details"
 msgstr "Voir le détail"
@@ -8509,23 +8475,3 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
-
-#~ msgid "CDD"
-#~ msgstr "CDD"
-
-#, python-format
-#~ msgid "Change <em>%(name)s</em> configuration"
-#~ msgstr "Modifier la configuration de <em>%(name)s</em>"
-
-#, python-format
-#~ msgid "Change <em>%(name)s</em> custom mail template"
-#~ msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
-
-#~ msgid "Role: ADRE Secretaries"
-#~ msgstr "Rôle: Secrétaires ADRE"
-
-#~ msgid "Role: ADRE secretary"
-#~ msgstr "Rôle: Secrétaire ADRE"
-
-#~ msgid "Template title"
-#~ msgstr "Intitulé du template"

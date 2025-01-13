@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,41 +28,42 @@ from dal import forward
 from django import forms
 from django.conf import settings
 from django.db.models import Q
-from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
-from admission.models import EntityProxy, Scholarship
-from admission.models.working_list import DoctorateWorkingList
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
     ENTITY_CLSM,
-    SIGLE_SCIENCES,
     ENTITY_SCIENCES,
+    SIGLE_SCIENCES,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
-    ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.forms import (
-    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     ALL_EMPTY_CHOICE,
     ALL_FEMININE_EMPTY_CHOICE,
+    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
 )
 from admission.forms.admission.filter import BaseAdmissionFilterForm, WorkingListField
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import EntityProxy
+from admission.models.working_list import DoctorateWorkingList
 from base.forms.utils import autocomplete
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
@@ -74,6 +75,8 @@ from education_group.contrib.models import EducationGroupRoleModel
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from reference.models.country import Country
+from reference.models.enums.scholarship_type import ScholarshipType
+from reference.models.scholarship import Scholarship
 
 
 class DoctorateListFilterForm(BaseAdmissionFilterForm):
@@ -256,7 +259,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
 
     def get_scholarship_choices(self):
         doctorate_scholarships = Scholarship.objects.filter(
-            type=TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
+            type=ScholarshipType.BOURSE_INTERNATIONALE_DOCTORAT.name,
         ).order_by('short_name')
 
         return (

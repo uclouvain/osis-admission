@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,93 +26,118 @@
 
 import datetime
 from decimal import Decimal
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import attr
 from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.domain.model.poste_diplomatique import (
+    PosteDiplomatiqueIdentity,
+)
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
-from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_question_specifique import (
+    ISuperQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.domain.service.profil_candidat import (
+    ProfilCandidat as ProfilCandidatService,
+)
+from admission.ddd.admission.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import (
-    TypeSituationAssimilation,
+    ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
-    ChoixAffiliationSport,
     ChoixTypeCompteBancaire,
     LienParente,
+    TypeSituationAssimilation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
+    Comptabilite,
+    comptabilite_non_remplie,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
-    PoursuiteDeCycle,
-    DecisionFacultaireEnum,
     BesoinDeDerogation,
-    TypeDeRefus,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    DecisionFacultaireEnum,
     DerogationFinancement,
+    PoursuiteDeCycle,
+    TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    StatutsChecklistGenerale,
     StatutChecklist,
+    StatutsChecklistGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     CurriculumNonCompletePourAcceptationException,
 )
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
-    SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
-    RefuserParFacValidatorList,
+    ApprouverAdmissionParSicValidatorList,
+    ApprouverInscriptionParSicValidatorList,
+    ApprouverInscriptionTardiveParFacValidatorList,
     ApprouverParFacValidatorList,
-    SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    ApprouverParSicAValiderValidatorList,
+    ApprouverReorientationExterneParFacValidatorList,
     FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     ModifierStatutChecklistParcoursAnterieurValidatorList,
-    RefuserParSicValidatorList,
-    ApprouverAdmissionParSicValidatorList,
-    ApprouverParSicAValiderValidatorList,
+    RefuserParFacValidatorList,
     RefuserParSicAValiderValidatorList,
+    RefuserParSicValidatorList,
+    SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
-    ApprouverInscriptionTardiveParFacValidatorList,
     SpecifierConditionAccesParcoursAnterieurValidatorList,
-    ApprouverInscriptionParSicValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
-    ApprouverReorientationExterneParFacValidatorList,
+    SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
-    SituationFinancabilite,
     SITUATION_FINANCABILITE_PAR_ETAT,
+    SituationFinancabilite,
 )
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.reference.domain.model.bourse import BourseIdentity
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -613,19 +638,19 @@ class Proposition(interface.RootEntity):
             enfant_personnel=enfant_personnel,
             attestation_enfant_personnel=attestation_enfant_personnel,
             preuve_statut_apatride=preuve_statut_apatride,
-            type_situation_assimilation=TypeSituationAssimilation[type_situation_assimilation]
-            if type_situation_assimilation
-            else None,
-            sous_type_situation_assimilation_1=ChoixAssimilation1[sous_type_situation_assimilation_1]
-            if sous_type_situation_assimilation_1
-            else None,
+            type_situation_assimilation=(
+                TypeSituationAssimilation[type_situation_assimilation] if type_situation_assimilation else None
+            ),
+            sous_type_situation_assimilation_1=(
+                ChoixAssimilation1[sous_type_situation_assimilation_1] if sous_type_situation_assimilation_1 else None
+            ),
             carte_resident_longue_duree=carte_resident_longue_duree,
             carte_cire_sejour_illimite_etranger=carte_cire_sejour_illimite_etranger,
             carte_sejour_membre_ue=carte_sejour_membre_ue,
             carte_sejour_permanent_membre_ue=carte_sejour_permanent_membre_ue,
-            sous_type_situation_assimilation_2=ChoixAssimilation2[sous_type_situation_assimilation_2]
-            if sous_type_situation_assimilation_2
-            else None,
+            sous_type_situation_assimilation_2=(
+                ChoixAssimilation2[sous_type_situation_assimilation_2] if sous_type_situation_assimilation_2 else None
+            ),
             carte_a_b_refugie=carte_a_b_refugie,
             annexe_25_26_refugies_apatrides=annexe_25_26_refugies_apatrides,
             attestation_immatriculation=attestation_immatriculation,
@@ -633,18 +658,18 @@ class Proposition(interface.RootEntity):
             decision_protection_subsidiaire=decision_protection_subsidiaire,
             decision_protection_temporaire=decision_protection_temporaire,
             carte_a=carte_a,
-            sous_type_situation_assimilation_3=ChoixAssimilation3[sous_type_situation_assimilation_3]
-            if sous_type_situation_assimilation_3
-            else None,
+            sous_type_situation_assimilation_3=(
+                ChoixAssimilation3[sous_type_situation_assimilation_3] if sous_type_situation_assimilation_3 else None
+            ),
             titre_sejour_3_mois_professionel=titre_sejour_3_mois_professionel,
             fiches_remuneration=fiches_remuneration,
             titre_sejour_3_mois_remplacement=titre_sejour_3_mois_remplacement,
             preuve_allocations_chomage_pension_indemnite=preuve_allocations_chomage_pension_indemnite,
             attestation_cpas=attestation_cpas,
             relation_parente=LienParente[relation_parente] if relation_parente else None,
-            sous_type_situation_assimilation_5=ChoixAssimilation5[sous_type_situation_assimilation_5]
-            if sous_type_situation_assimilation_5
-            else None,
+            sous_type_situation_assimilation_5=(
+                ChoixAssimilation5[sous_type_situation_assimilation_5] if sous_type_situation_assimilation_5 else None
+            ),
             composition_menage_acte_naissance=composition_menage_acte_naissance,
             acte_tutelle=acte_tutelle,
             composition_menage_acte_mariage=composition_menage_acte_mariage,
@@ -655,9 +680,9 @@ class Proposition(interface.RootEntity):
             titre_sejour_3_mois_parent=titre_sejour_3_mois_parent,
             fiches_remuneration_parent=fiches_remuneration_parent,
             attestation_cpas_parent=attestation_cpas_parent,
-            sous_type_situation_assimilation_6=ChoixAssimilation6[sous_type_situation_assimilation_6]
-            if sous_type_situation_assimilation_6
-            else None,
+            sous_type_situation_assimilation_6=(
+                ChoixAssimilation6[sous_type_situation_assimilation_6] if sous_type_situation_assimilation_6 else None
+            ),
             decision_bourse_cfwb=decision_bourse_cfwb,
             attestation_boursier=attestation_boursier,
             titre_identite_sejour_longue_duree_ue=titre_identite_sejour_longue_duree_ue,

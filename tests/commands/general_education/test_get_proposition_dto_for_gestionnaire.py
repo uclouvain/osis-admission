@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,35 +32,47 @@ from django.test import TestCase, override_settings
 from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
-from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.dtos.bourse import BourseDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO
+from admission.ddd.admission.dtos.formation import BaseFormationDTO, FormationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererPropositionGestionnaireQuery,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
+    ConditionComplementaireApprobationDTO,
+)
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
+from admission.models import GeneralEducationAdmission
 from admission.tests.factories.faculty_decision import (
-    RefusalReasonFactory,
     AdditionalApprovalConditionFactory,
     FreeAdditionalApprovalConditionFactory,
+    RefusalReasonFactory,
 )
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
-from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory
 from base.models.enums.organization_type import MAIN
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from base.tests.factories.student import StudentFactory
+from ddd.logic.reference.dtos.bourse import BourseDTO
 from infrastructure.messages_bus import message_bus_instance
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import ErasmusMundusScholarshipFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')

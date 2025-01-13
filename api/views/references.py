@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,27 +24,19 @@
 #
 # ##############################################################################
 from django.http import Http404
-from rest_framework.generics import RetrieveAPIView, ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.models import Scholarship, DiplomaticPost
+from admission.models import DiplomaticPost
 from base.models.campus import Campus
-from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesQuery, GetCampusQuery
+from ddd.logic.shared_kernel.campus.commands import (
+    GetCampusQuery,
+    SearchUclouvainCampusesQuery,
+)
 from infrastructure.messages_bus import message_bus_instance
-
-
-class RetrieveScholarshipView(RetrieveAPIView):
-    """Retrieves a scholarship"""
-
-    name = 'retrieve-scholarship'
-    schema = AuthorizationAwareSchema()
-    filter_backends = []
-    serializer_class = serializers.ScholarshipSerializer
-    queryset = Scholarship.objects.all()
-    lookup_field = 'uuid'
 
 
 class RetrieveCampusView(RetrieveAPIView):

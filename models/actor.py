@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@
 # ##############################################################################
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-from admission.models import DoctorateAdmission
-from admission.models.enums.actor_type import ActorType
 from osis_document.contrib import FileField
 from osis_signature.models import Actor
+
+from admission.models.doctorate import DoctorateAdmission
+from admission.models.enums.actor_type import ActorType
 
 
 def actor_upload_directory_path(instance: 'SupervisionActor', filename):

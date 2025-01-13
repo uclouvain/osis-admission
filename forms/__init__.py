@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import html
-from typing import List, Optional, Dict, Union, Mapping
+from typing import Dict, List, Mapping, Optional, Union
 
 import phonenumbers
 from dal import forward
@@ -33,16 +33,18 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.enums import TypeBourse
 from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus
 from education_group.forms.fields import MainCampusChoiceField
 from education_group.templatetags.education_group_extra import format_to_academic_year
 from reference.models.country import Country
+from reference.models.enums.scholarship_type import ScholarshipType
 
 NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
@@ -186,7 +188,7 @@ def get_year_choices(min_year=1920, max_year=None, full_format=False, empty_labe
         return [('', empty_label)] + [(year, year) for year in year_range]
 
 
-def get_scholarship_choices(scholarships, scholarship_type: TypeBourse):
+def get_scholarship_choices(scholarships, scholarship_type: ScholarshipType):
     """
     Return the list of choices of a scholarship choice field.
     :param scholarships: The queryset containing the scholarships

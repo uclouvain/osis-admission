@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,26 +31,26 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.forms import EMPTY_CHOICE_AS_LIST
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.models import GeneralEducationAdmission
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
-    SicManagementRoleFactory,
     CandidateFactory,
     ProgramManagerRoleFactory,
-)
-from admission.tests.factories.scholarship import (
-    DoubleDegreeScholarshipFactory,
-    InternationalScholarshipFactory,
-    ErasmusMundusScholarshipFactory,
+    SicManagementRoleFactory,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
@@ -58,11 +58,21 @@ from base.models.campus import Campus
 from base.models.enums.organization_type import MAIN
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
-from base.tests.factories.education_group_year import Master120TrainingFactory, EducationGroupYearBachelorFactory
+from base.tests.factories.education_group_year import (
+    EducationGroupYearBachelorFactory,
+    Master120TrainingFactory,
+)
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
+from program_management.tests.factories.education_group_version import (
+    EducationGroupVersionFactory,
+)
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import (
+    DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
+)
 
 
 @freezegun.freeze_time('2021-12-01')

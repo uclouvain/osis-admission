@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,29 +27,33 @@ import datetime
 from contextlib import suppress
 
 from django.contrib.postgres.fields import ArrayField
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
-from admission.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    PoursuiteDeCycle,
     BesoinDeDerogation,
-    DroitsInscriptionMontant,
-    DispenseOuDroitsMajores,
-    MobiliteNombreDeMois,
-    TypeDeRefus,
+    ChoixStatutPropositionGenerale,
     DerogationFinancement,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+    MobiliteNombreDeMois,
+    PoursuiteDeCycle,
+    TypeDeRefus,
+)
+from admission.models.base import (
+    BaseAdmission,
+    BaseAdmissionQuerySet,
+    admission_directory_path,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
@@ -69,7 +73,7 @@ class GeneralEducationAdmission(BaseAdmission):
     )
 
     double_degree_scholarship = models.ForeignKey(
-        to="admission.Scholarship",
+        to="reference.Scholarship",
         verbose_name=_("Dual degree scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
@@ -78,7 +82,7 @@ class GeneralEducationAdmission(BaseAdmission):
     )
 
     international_scholarship = models.ForeignKey(
-        to="admission.Scholarship",
+        to="reference.Scholarship",
         verbose_name=_("International scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
@@ -87,7 +91,7 @@ class GeneralEducationAdmission(BaseAdmission):
     )
 
     erasmus_mundus_scholarship = models.ForeignKey(
-        to="admission.Scholarship",
+        to="reference.Scholarship",
         verbose_name=_("Erasmus Mundus scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
@@ -475,8 +479,8 @@ class GeneralEducationAdmission(BaseAdmission):
     def update_detailed_status(self, author: 'Person' = None):
         """Gather exceptions from verification and update determined pool and academic year"""
         from admission.ddd.admission.formation_generale.commands import (
-            VerifierPropositionQuery,
             DeterminerAnneeAcademiqueEtPotQuery,
+            VerifierPropositionQuery,
         )
         from admission.utils import gather_business_exceptions
         from infrastructure.messages_bus import message_bus_instance

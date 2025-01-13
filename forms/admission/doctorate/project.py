@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,27 +24,27 @@
 #
 # ##############################################################################
 
-from dal import forward, autocomplete
+from dal import autocomplete, forward
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileUploadField
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeFinancement,
-    ChoixTypeContratTravail,
     ChoixDoctoratDejaRealise,
+    ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
-from admission.ddd.admission.enums import TypeBourse
 from admission.forms import SelectOrOtherField
 from admission.utils import (
-    get_thesis_location_initial_choices,
-    get_scholarship_initial_choices,
     get_language_initial_choices,
+    get_scholarship_initial_choices,
+    get_thesis_location_initial_choices,
 )
 from base.forms.utils import EMPTY_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.fields import RadioBooleanField
 from base.utils.mark_safe_lazy import mark_safe_lazy
+from reference.models.enums.scholarship_type import ScholarshipType
 
 LANGUAGE_UNDECIDED = 'XX'
 
@@ -94,7 +94,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
         required=False,
         widget=autocomplete.ListSelect2(
             url='admission:autocomplete:scholarship',
-            forward=[forward.Const(TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name, 'scholarship_type')],
+            forward=[forward.Const(ScholarshipType.BOURSE_INTERNATIONALE_DOCTORAT.name, 'scholarship_type')],
         ),
     )
     autre_bourse_recherche = forms.CharField(
