@@ -214,9 +214,9 @@
       const formFields = $('#admission-search :input:not([type=button], [type=submit], [type=reset], [type=hidden])');
       $('#search_form').on('reset', function (evt) {
         $.each(formFields, function (index, field) {
-            const defaultValue = defaultFormValues[field.id];
+            const defaultValue = defaultFormValues[field.name];
             if (field.type === 'checkbox' || field.type === 'radio') {
-                const isChecked = !!defaultFormValues[field.id] && (Array.isArray(defaultValue) ? defaultValue.includes(field.value) : defaultValue === field.value);
+                const isChecked = !!defaultValue && (Array.isArray(defaultValue) ? defaultValue.includes(field.value) : defaultValue === field.value);
                 $(this).prop('checked', isChecked).change();
                 $(this).parents('label').toggleClass('active', isChecked);
             } else {
