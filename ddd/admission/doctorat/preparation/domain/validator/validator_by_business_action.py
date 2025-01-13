@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime, date
+from datetime import date
 from typing import List, Optional, Union, Dict
 
 import attr
@@ -55,12 +55,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     StatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
     ShouldStatutEtreEnAttenteDeSignature,
 )
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
@@ -427,6 +426,19 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA(self.groupe_de_supervision.signatures_membres_CA),
+            ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(self.groupe_de_supervision),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SignatairesPreAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    groupe_de_supervision: 'GroupeDeSupervision'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
             ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(self.groupe_de_supervision),
         ]
 

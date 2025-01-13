@@ -688,13 +688,14 @@ def strip(value):
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None, label_class=''):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
         'html_tooltip': html_tooltip,
         'label': label,
+        'label_class': label_class,
     }
 
 
@@ -1607,9 +1608,11 @@ def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO
     """
     return unordered_list(
         [
-            ChoixMoyensDecouverteFormation.get_value(way)
-            if way != ChoixMoyensDecouverteFormation.AUTRE.name
-            else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            (
+                ChoixMoyensDecouverteFormation.get_value(way)
+                if way != ChoixMoyensDecouverteFormation.AUTRE.name
+                else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            )
             for way in proposition.moyens_decouverte_formation
         ]
     )
