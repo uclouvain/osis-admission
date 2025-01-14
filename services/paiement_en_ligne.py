@@ -66,6 +66,7 @@ class PaiementEnLigneService:
         try:
             online_payment.save()
         except Exception as e:
+            logger.exception(f"[PAIEMENT EN LIGNE] Impossible de mettre a jour le paiement en ligne {online_payment}")
             raise UpdateOnlinePaymentException(reference=str(online_payment.admission)) from e
 
     @classmethod
