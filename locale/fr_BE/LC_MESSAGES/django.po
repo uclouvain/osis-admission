@@ -7041,6 +7041,9 @@ msgstr ""
 "La proposition doit être une inscription tardive avec une condition d'accès "
 "définie."
 
+msgid "The proposition must be an admission to realize this action."
+msgstr "La proposition doit être une admission pour réaliser cette action."
+
 msgid "The proposition must be an admission."
 msgstr "La proposition doit être une admission."
 
