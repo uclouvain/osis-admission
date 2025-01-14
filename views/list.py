@@ -85,7 +85,7 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
         kwargs['form'] = self.form
         kwargs['filter_form'] = self.form
         kwargs['htmx_template_name'] = self.htmx_template_name
-        kwargs['default_form_values'] = {field.id_for_label: field.initial for field in self.form if field.initial}
+        kwargs['default_form_values'] = {field.name: field.initial for field in self.form if field.initial}
         kwargs['now'] = datetime.datetime.now()
         return super().get_context_data(**kwargs)
 
