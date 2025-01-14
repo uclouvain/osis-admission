@@ -4312,7 +4312,7 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: A UUID string identifying this Scholarship.
+        description: A UUID string identifying this Bourse.
         schema:
           type: string
       - $ref: '#/components/parameters/Accept-Language'
