@@ -41,6 +41,10 @@ class DigitRepository(IDigitRepository):
     def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
         candidate = Person.objects.get(global_id=global_id)
 
+        # prevent concurrential access to resource PersonMergeProposal
+        # with contextlib.suppress(PersonMergeProposal.DoesNotExist):
+        #     PersonMergeProposal.objects.select_for_update().get(original_person=candidate)
+
         # Check if already a personmergeproposal with generated noma
         if hasattr(candidate, 'personmergeproposal') and candidate.personmergeproposal.registration_id_sent_to_digit:
             return candidate.personmergeproposal.registration_id_sent_to_digit
@@ -53,7 +57,7 @@ class DigitRepository(IDigitRepository):
         # Check person in EPC
         noma_from_epc = _find_student_registration_id_in_epc(matricule=candidate.global_id)
         if noma_from_epc:
-            return noma_from_epc
+            return str(noma_from_epc)
 
 
 def _find_student_registration_id_in_epc(matricule):

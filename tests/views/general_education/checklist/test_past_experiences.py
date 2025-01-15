@@ -42,7 +42,7 @@ from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
     recuperer_conditions_acces_par_formation,
@@ -448,7 +448,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         )
 
         self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.FORMATION_PHD.name),
+            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
             [
                 (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
                 (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),

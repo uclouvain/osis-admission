@@ -32,7 +32,6 @@ from django.utils import translation
 
 from admission.auth.predicates import general, not_in_general_statuses_predicate_message
 from admission.auth.predicates.general import is_invited_to_pay_after_request
-from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (

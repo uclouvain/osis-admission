@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,10 +24,11 @@
 #
 # ##############################################################################
 
+from django.utils.translation import gettext_lazy as _
 from rules import RuleSet, always_allow
 
+from admission.auth.predicates import doctorate
 from osis_role.contrib.models import RoleModel
-from django.utils.translation import gettext_lazy as _
 
 
 class DoctorateReader(RoleModel):
@@ -46,11 +47,8 @@ class DoctorateReader(RoleModel):
             'admission.view_admission_languages': always_allow,
             'admission.view_admission_curriculum': always_allow,
             'admission.view_admission_project': always_allow,
-            'admission.view_admission_cotutelle': always_allow,
+            'admission.view_admission_cotutelle': doctorate.is_admission,
             'admission.view_admission_supervision': always_allow,
-            'admission.view_admission_jury': always_allow,
-            'admission.view_admission_confirmation': always_allow,
-            'admission.view_doctorate_enrolment_applications': always_allow,
             'admission.view_dossiers': always_allow,
             'admission.view_internalnote': always_allow,
         }

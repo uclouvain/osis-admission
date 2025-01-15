@@ -27,7 +27,7 @@ from typing import List
 
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
@@ -36,7 +36,7 @@ def rechercher_doctorats(
     cmd: 'RechercherDoctoratQuery',
     doctorat_translator: 'IDoctoratTranslator',
     annee_inscription_formation_translator: 'IAnneeInscriptionFormationTranslator',
-) -> List['DoctoratDTO']:
+) -> List['DoctoratFormationDTO']:
     annee = annee_inscription_formation_translator.recuperer(
         type_calendrier_academique=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT,
         annee=cmd.annee,

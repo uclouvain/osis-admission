@@ -28,6 +28,9 @@ from admission.ddd.admission.doctorat.preparation.commands import SupprimerMembr
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
+    SupprimerMembreCAValidatorList,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -46,6 +49,12 @@ def supprimer_membre_CA(
     proposition_candidat = proposition_repository.get(entity_id=proposition_id)
     groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
     membre_ca_id = groupe_supervision.get_membre_CA(cmd.uuid_membre_ca)
+
+    # WHEN
+    SupprimerMembreCAValidatorList(
+        groupe_de_supervision=groupe_supervision,
+        membre_CA_id=membre_ca_id,
+    ).validate()
 
     # THEN
     notification.notifier_suppression_membre(proposition_candidat, membre_ca_id)

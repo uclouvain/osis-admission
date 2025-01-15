@@ -27,17 +27,11 @@
 from admission.ddd.admission.doctorat.validation.commands import *
 from admission.ddd.admission.doctorat.validation.use_case.read import *
 from admission.ddd.admission.doctorat.validation.use_case.write import *
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
-    EpreuveConfirmationInMemoryRepository,
-)
-from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 from .repository.in_memory.demande import DemandeInMemoryRepository
 from ..preparation.repository.in_memory.proposition import PropositionInMemoryRepository
 
 _proposition_repository = PropositionInMemoryRepository()
 _demande_repository = DemandeInMemoryRepository()
-_epreuve_confirmation_repository = EpreuveConfirmationInMemoryRepository()
-_doctorat_repository = DoctoratInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -58,7 +52,5 @@ COMMAND_HANDLERS = {
         cmd,
         demande_repository=_demande_repository,
         proposition_repository=_proposition_repository,
-        epreuve_confirmation_repository=_epreuve_confirmation_repository,
-        doctorat_repository=_doctorat_repository,
     ),
 }

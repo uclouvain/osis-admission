@@ -228,7 +228,7 @@ class Command(BaseCommand):
             },
         )
 
-        # > All masters, specialized masters, FORMATION_PHD, CAPAES and certificates
+        # > All masters, specialized masters, PHD, CAPAES and certificates
         for education_type in (
             AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[TypeFormation.MASTER.name]
             + AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[TypeFormation.DOCTORAT.name]

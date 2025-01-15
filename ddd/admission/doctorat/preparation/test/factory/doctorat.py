@@ -27,10 +27,10 @@
 import attr
 import factory.fuzzy
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 
 # FIXME import this factory from shared kernel when available
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory, CampusFactory
@@ -48,7 +48,7 @@ class _DoctoratIdentityFactory(factory.Factory):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class DoctoratEtendu(Doctorat):
+class DoctoratFormationEtendu(DoctoratFormation):
     campus: str
     intitule: str
     sigle: str
@@ -59,7 +59,7 @@ class DoctoratEtendu(Doctorat):
 
 class _DoctoratFactory(factory.Factory):
     class Meta:
-        model = DoctoratEtendu
+        model = DoctoratFormationEtendu
         abstract = False
 
     entity_id = factory.SubFactory(FormationIdentityFactory)
@@ -70,12 +70,12 @@ class _DoctoratFactory(factory.Factory):
     intitule_secteur = factory.Faker('sentence')
     sigle = factory.Faker('word')
     code_secteur = factory.Faker('word')
-    type = TrainingType.FORMATION_PHD
+    type = TrainingType.PHD
 
 
 class _DoctoratDTOFactory(factory.Factory):
     class Meta:
-        model = DoctoratDTO
+        model = DoctoratFormationDTO
         abstract = False
 
     code = factory.Sequence(lambda n: 'CODE%02d' % n)
@@ -85,7 +85,7 @@ class _DoctoratDTOFactory(factory.Factory):
     campus = CampusFactory()
     campus_inscription = CampusFactory()
     date_debut = factory.Faker('date')
-    type = TrainingType.FORMATION_PHD.name
+    type = TrainingType.PHD.name
     credits = 180
 
 

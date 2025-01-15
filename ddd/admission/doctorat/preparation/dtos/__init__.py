@@ -25,7 +25,7 @@
 ##############################################################################
 from .comptabilite import ComptabiliteDTO, ConditionsComptabiliteDTO
 from .connaissance_langue import ConnaissanceLangueDTO
-from .doctorat import DoctoratDTO
+from .doctorat_formation import DoctoratFormationDTO
 from .groupe_supervision import (
     AvisDTO,
     CotutelleDTO,
@@ -53,7 +53,7 @@ __all__ = [
     "CotutelleDTO",
     "DetailSignatureMembreCADTO",
     "DetailSignaturePromoteurDTO",
-    "DoctoratDTO",
+    "DoctoratFormationDTO",
     "GroupeDeSupervisionDTO",
     "MembreCADTO",
     "PromoteurDTO",

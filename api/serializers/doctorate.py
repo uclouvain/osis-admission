@@ -26,7 +26,7 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import DOCTORATE_ACTION_LINKS
-from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
 
@@ -46,22 +46,6 @@ class DoctorateDTOSerializer(DTOSerializer):
                 'retrieve_cotutelle',
                 # Supervision
                 'retrieve_supervision',
-                # Confirmation
-                'retrieve_confirmation',
-                'update_confirmation',
-                'update_confirmation_extension',
-                # Training
-                'retrieve_doctoral_training',
-                'retrieve_complementary_training',
-                'retrieve_course_enrollment',
-                'add_training',
-                'submit_training',
-                'assent_training',
-                # Jury
-                'retrieve_jury_preparation',
-                'update_jury_preparation',
-                'list_jury_members',
-                'create_jury_members',
             ]
         }
     )

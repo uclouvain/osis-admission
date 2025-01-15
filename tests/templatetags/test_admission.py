@@ -250,20 +250,6 @@ class AdmissionTabsTestCase(TestCase):
         result = update_tab_path_from_detail(context, current_uuid)
         self.assertEqual(result, reverse('admission:doctorate:update:project', args=[current_uuid]))
 
-        # admission:doctorate:confirmation ->  admission:doctorate:update:confirmation
-        context = {'request': Mock(resolver_match=Mock(namespaces=['admission', 'doctorate'], url_name='confirmation'))}
-        result = update_tab_path_from_detail(context, current_uuid)
-        self.assertEqual(result, reverse('admission:doctorate:update:confirmation', args=[current_uuid]))
-
-        # admission:doctorate:confirmation:opinion ->  admission:doctorate:confirmation
-        context = {
-            'request': Mock(
-                resolver_match=Mock(namespaces=['admission', 'doctorate', 'confirmation'], url_name='opinion')
-            )
-        }
-        result = update_tab_path_from_detail(context, current_uuid)
-        self.assertEqual(result, reverse('admission:doctorate:confirmation', args=[current_uuid]))
-
         # admission:doctorate:send-mail ->  admission:doctorate:send-mail
         context = {'request': Mock(resolver_match=Mock(namespaces=['admission', 'doctorate'], url_name='send-mail'))}
         result = update_tab_path_from_detail(context, current_uuid)
@@ -1316,7 +1302,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 
     def test_admission_training_type(self):
         self.assertEqual(
-            admission_training_type(TrainingType.FORMATION_PHD.name),
+            admission_training_type(TrainingType.PHD.name),
             TypeFormation.DOCTORAT.name,
         )
 
@@ -1571,7 +1557,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 class AdmissionTagsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.doctorate_training_type = TrainingType.FORMATION_PHD.name
+        cls.doctorate_training_type = TrainingType.PHD.name
         cls.general_training_type = TrainingType.BACHELOR.name
         cls.continuing_training_type = TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name
         cls.admission_uuid = str(uuid.uuid4())

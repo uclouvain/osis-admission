@@ -30,8 +30,11 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixCommissionProximiteCDEouCLSM
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixTypeAdmission,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -61,6 +64,12 @@ class ProjectViewTestCase(TestCase):
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
+            type=ChoixTypeAdmission.ADMISSION.name,
+        )
+
+        cls.pre_admission = DoctorateAdmissionFactory(
+            training=cls.admission.training,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
         )
 
         EnglishLanguageFactory()
@@ -72,6 +81,7 @@ class ProjectViewTestCase(TestCase):
 
         # Urls
         cls.url = reverse('admission:doctorate:update:project', args=[cls.admission.uuid])
+        cls.pre_admission_url = reverse('admission:doctorate:update:project', args=[cls.pre_admission.uuid])
         cls.details_url = reverse('admission:doctorate:project', args=[cls.admission.uuid])
 
     def setUp(self):
@@ -146,3 +156,56 @@ class ProjectViewTestCase(TestCase):
         }
         response = self.client.post(self.url, data, follow=True)
         self.assertTemplateUsed(response, 'admission/doctorate/details/project.html')
+
+    def test_update_get_field_label_classes(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        response = self.client.get(self.pre_admission_url)
+
+        form = response.context['form']
+
+        required_fields = {
+            'justification',
+            'type_contrat_travail',
+            'eft',
+            'bourse_recherche',
+            'autre_bourse_recherche',
+            'raison_non_soutenue',
+            'titre_projet',
+        }
+
+        for field in form.fields:
+            self.assertEqual(form.label_classes.get(field), 'required_text' if field in required_fields else None)
+
+        response = self.client.get(self.url)
+
+        form = response.context['form']
+
+        required_fields = {
+            'justification',
+            'type_contrat_travail',
+            'eft',
+            'bourse_recherche',
+            'autre_bourse_recherche',
+            'raison_non_soutenue',
+            'titre_projet',
+            'type_financement',
+            'bourse_date_debut',
+            'bourse_date_fin',
+            'bourse_preuve',
+            'duree_prevue',
+            'temps_consacre',
+            'est_lie_fnrs_fria_fresh_csc',
+            'resume_projet',
+            'documents_projet',
+            'proposition_programme_doctoral',
+            'langue_redaction_these',
+            'projet_doctoral_deja_commence',
+            'projet_doctoral_institution',
+            'projet_doctoral_date_debut',
+            'institution',
+            'domaine_these',
+        }
+
+        for field in form.fields:
+            self.assertEqual(form.label_classes.get(field), 'required_text' if field in required_fields else None)

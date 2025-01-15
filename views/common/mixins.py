@@ -52,10 +52,13 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
     GetCotutelleCommand,
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
+    RecupererAdmissionDoctoratQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException, \
+    DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, CotutelleDTO
+from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
@@ -74,18 +77,6 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.parcours_doctoral.commands import RecupererAdmissionDoctoratQuery
-from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
-from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
-    RecupererDerniereEpreuveConfirmationQuery,
-)
-from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
-    EpreuveConfirmationNonTrouveeException,
-)
-from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
-from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -184,22 +175,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     @cached_property
     def doctorate(self) -> 'DoctoratDTO':
         return message_bus_instance.invoke(RecupererAdmissionDoctoratQuery(doctorat_uuid=self.admission_uuid))
-
-    @cached_property
-    def last_confirmation_paper(self) -> EpreuveConfirmationDTO:
-        try:
-            last_confirmation_paper = message_bus_instance.invoke(
-                RecupererDerniereEpreuveConfirmationQuery(self.admission_uuid)
-            )
-            if not last_confirmation_paper:
-                raise Http404(_('Confirmation exam not found.'))
-            return last_confirmation_paper
-        except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
-            raise Http404(e.message)
-
-    @cached_property
-    def jury(self) -> 'JuryDTO':
-        return message_bus_instance.invoke(RecupererJuryQuery(uuid_jury=self.admission_uuid))
 
     @cached_property
     def cotutelle(self) -> 'CotutelleDTO':

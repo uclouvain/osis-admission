@@ -26,10 +26,8 @@
 
 import factory
 
-from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
-from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.program_manager import ProgramManager
@@ -58,23 +56,6 @@ class PromoterRoleFactory(BaseFactory):
 class CaMemberRoleFactory(BaseFactory):
     class Meta:
         model = CommitteeMember
-        django_get_or_create = ('person',)
-
-
-class CddConfiguratorFactory(BaseFactory):
-    class Meta:
-        model = CddConfigurator
-
-    entity = factory.SubFactory(
-        'base.tests.factories.entity.EntityWithVersionFactory',
-        organization=None,
-    )
-    with_child = False
-
-
-class AdreSecretaryRoleFactory(BaseFactory):
-    class Meta:
-        model = AdreSecretary
         django_get_or_create = ('person',)
 
 

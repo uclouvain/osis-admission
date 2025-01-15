@@ -40,7 +40,7 @@ from admission.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
 from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
