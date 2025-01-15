@@ -82,6 +82,15 @@ class ExternalPromoterFactory(PromoterFactory):
             PromoterRoleFactory(person=self.actor_ptr.person, **kwargs)
 
 
+class ExternalCaMemberFactory(ExternalPromoterFactory):
+    type = ActorType.CA_MEMBER.name
+
+    @factory.post_generation
+    def generate_role(self, create, extracted, **kwargs):
+        if self.actor_ptr.person_id:
+            CaMemberRoleFactory(person=self.actor_ptr.person, **kwargs)
+
+
 class CaMemberFactory(PromoterFactory):
     actor_ptr = factory.SubFactory(_ActorFactory, person__user__first_name="CA Member")
     type = ActorType.CA_MEMBER.name

@@ -915,6 +915,9 @@ msgstr ""
 "introduire via cette <a href=\"https://uclouvain.be/fr/etudier/inscriptions/"
 "demande-en-ligne\" target=\"_blank\">plateforme spécifique</a>."
 
+msgid "Ask candidate to modify supervision committee"
+msgstr "Demander au candidat de modifier le comité d’accompagnement"
+
 msgid "Assessment test presented"
 msgstr "A présenté l'épreuve d'évaluation"
 
@@ -1330,9 +1333,6 @@ msgstr ""
 "Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le "
 "même numéro de registre national"
 
-msgid "Canvas"
-msgstr "Canvas"
-
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du groupe de supervision"
 
@@ -1625,9 +1625,6 @@ msgstr "Épreuve de confirmation"
 
 msgid "Confirmation exam date"
 msgstr "Date de l'épreuve de confirmation"
-
-msgid "Confirmation success attestation"
-msgstr "Attestation de réussite de l'épreuve de confirmation"
 
 msgid "Contact"
 msgstr "Contact"
@@ -2563,6 +2560,13 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour l'informer qu'une dérogation à la "
 "financabilité est nécessaire."
+
+msgid ""
+"Email sent to the candidate to inform him that a supervision modification is "
+"needed for a doctorate admission."
+msgstr ""
+"E-mail envoyé au candidat pour l'informer qu'une modification du comité "
+"d’accompagnement est nécessaire pour une demande en formation doctorale."
 
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
@@ -4223,6 +4227,9 @@ msgstr "Lien vers le groupe de supervision de l'admission (front-office)"
 msgid "Link to the admissions (front-office)"
 msgstr "Lien vers la liste des admissions (front-office)"
 
+msgid "Link to the admissions dashboard (front-office)"
+msgstr "Lien vers la liste des admissions (front-office)"
+
 msgid "Link to the application in the back-office"
 msgstr "Lien vers l'admission (back-office)"
 
@@ -5252,6 +5259,9 @@ msgstr "Personnalisée"
 
 msgid "PhD"
 msgstr "Doctorat"
+
+msgid "PhD Committee"
+msgstr "Comité de doctorat"
 
 msgid "PhD Subject Committee annex document link"
 msgstr "Lien du document de l'annexe de la Commission doctorale de domaine"
@@ -6467,6 +6477,9 @@ msgstr "Suffisant"
 msgid "Supervision"
 msgstr "Supervision"
 
+msgid "Supervision committee modification by candidate"
+msgstr "Modification du comité d’accompagnement par le candidat"
+
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
@@ -6488,6 +6501,12 @@ msgstr "Proposition de comité d'accompagnement"
 
 msgid "Supervisory panel report of the confirmation paper"
 msgstr "Procès-verbal de l'épreuve de confirmation"
+
+msgid "Support committee to be completed"
+msgstr "Comité d'accompagnement à compléter"
+
+msgid "Support committee waiting for signature"
+msgstr "En attente de signature du comité d’accompagnement"
 
 msgid "Supporting documents"
 msgstr "Justificatifs"
@@ -6625,6 +6644,9 @@ msgstr ""
 
 msgid "The Belgian national register number must consist of 11 digits."
 msgstr "Le numéro de registre national belge doit être composé de 11 chiffres."
+
+msgid "The CA is not currently to be completed"
+msgstr "Le comité d’accompagnement n'est pas en attente de complétion"
 
 msgid "The CA members"
 msgstr "Les membres du comité d’accompagnement"
@@ -7055,6 +7077,25 @@ msgstr "La proposition doit être concernée par le paiement."
 
 msgid "The proposition must be in draft form to realize this action."
 msgstr "La proposition doit être en brouillon pour réaliser cette action."
+
+msgid ""
+"The proposition must be in the 'Support committee waiting for signature' "
+"status."
+msgstr ""
+"La proposition doit être en attente de signature par le comité "
+"d’accompagnement pour réaliser cette action."
+
+msgid "The proposition must be in the 'draft' or 'processed by fac' status."
+msgstr ""
+"La proposition doit être en brouillon ou en traitement par fac pour réaliser "
+"cette action."
+
+msgid ""
+"The proposition must be in the 'draft', 'Support committee to be completed' "
+"or 'processed by fac' status."
+msgstr ""
+"La proposition doit être en brouillon, en attente de signature par le comité "
+"d’accompagnement ou en traitement par fac pour réaliser cette action."
 
 msgid "The proposition must be in the 'waiting for signature' status."
 msgstr ""
@@ -8238,6 +8279,9 @@ msgstr ""
 "Vous devez corriger votre demande d'admission avant de pouvoir réaliser la "
 "demande de signatures."
 
+msgid "You must fill the message body first."
+msgstr "Il est nécessaire de compléter le message avant de pouvoir envoyer."
+
 msgid ""
 "You must have worked in Belgium and your monthly salary must be at least "
 "half of the guaranteed minimum average monthly salary set by the National "
@@ -8512,23 +8556,3 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
-
-#~ msgid "CDD"
-#~ msgstr "CDD"
-
-#, python-format
-#~ msgid "Change <em>%(name)s</em> configuration"
-#~ msgstr "Modifier la configuration de <em>%(name)s</em>"
-
-#, python-format
-#~ msgid "Change <em>%(name)s</em> custom mail template"
-#~ msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
-
-#~ msgid "Role: ADRE Secretaries"
-#~ msgstr "Rôle: Secrétaires ADRE"
-
-#~ msgid "Role: ADRE secretary"
-#~ msgstr "Rôle: Secrétaire ADRE"
-
-#~ msgid "Template title"
-#~ msgstr "Intitulé du template"

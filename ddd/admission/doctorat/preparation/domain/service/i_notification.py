@@ -149,3 +149,13 @@ class INotification(interface.DomainService):
         corps_message: str,
     ) -> EmailMessage:
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def demander_candidat_modification_ca(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        raise NotImplementedError

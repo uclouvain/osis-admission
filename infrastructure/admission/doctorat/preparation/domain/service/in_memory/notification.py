@@ -112,3 +112,12 @@ class NotificationInMemory(INotification):
         corps_message: str,
     ) -> EmailMessage:
         pass
+
+    @classmethod
+    def demander_candidat_modification_ca(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        pass
