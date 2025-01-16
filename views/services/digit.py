@@ -82,7 +82,7 @@ class DiscardMergeAccountView(PermissionRequiredMixin, FormView):
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
         message_bus_instance.invoke(
             RefuserPropositionFusionCommand(
-                global_id=candidate.global_id,
+                matricule=candidate.global_id,
             )
         )
         return HttpResponse(status=200, headers={'HX-Refresh': 'true'})

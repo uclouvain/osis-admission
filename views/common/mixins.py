@@ -166,7 +166,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @cached_property
     def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
-        return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))
+        return message_bus_instance.invoke(GetPropositionFusionQuery(matricule=self.admission.candidate.global_id))
 
     @cached_property
     def dossier(self) -> 'DemandeDTO':

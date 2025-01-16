@@ -84,13 +84,13 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
         # TODO : add intermediary status to support async process (waiting for digit response) + decouple process
         from infrastructure.messages_bus import message_bus_instance
         message_bus_instance.invoke(RechercherCompteExistantCommand(matricule=admission.candidate.global_id))
-        message_bus_instance.invoke(ValiderTicketCommand(global_id=admission.candidate.global_id))
+        message_bus_instance.invoke(ValiderTicketCommand(matricule=admission.candidate.global_id))
         with contextlib.suppress(
             NotInAccountCreationPeriodException,
             AdmissionDansUnStatutPasAutoriseASInscrireException,
             PropositionFusionATraiterException,
         ):
-            message_bus_instance.invoke(SoumettreTicketCommand(global_id=admission.candidate.global_id))
+            message_bus_instance.invoke(SoumettreTicketCommand(matricule=admission.candidate.global_id))
 
     admission.last_update_author = author
     admission.modified_at = datetime.datetime.now()
