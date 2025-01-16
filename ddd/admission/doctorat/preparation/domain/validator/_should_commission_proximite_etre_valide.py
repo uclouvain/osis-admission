@@ -27,7 +27,7 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -41,7 +41,7 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldCommissionProximiteEtreValide(BusinessValidator):
-    doctorat: Doctorat
+    doctorat: DoctoratFormation
     commission_proximite: Optional[str]
 
     def validate(self, *args, **kwargs):

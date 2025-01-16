@@ -43,6 +43,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
     SignaturePromoteur,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
@@ -58,7 +59,6 @@ from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, Memb
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_signature.models import Actor, Process, StateHistory
@@ -157,6 +157,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             cotutelle=cotutelle,
             statut_signature=ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
             if proposition.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+            or proposition.status == ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name
             else None,
         )
 

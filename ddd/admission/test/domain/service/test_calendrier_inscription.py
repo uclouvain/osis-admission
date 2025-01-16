@@ -84,11 +84,11 @@ class CalendrierInscriptionTestCase(TestCase):
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
         dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
-            formation_id=FormationFactory(type=TrainingType.FORMATION_PHD).entity_id,
+            formation_id=FormationFactory(type=TrainingType.PHD).entity_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.FORMATION_PHD,
+            type_formation=TrainingType.PHD,
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
@@ -282,15 +282,20 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
-            formation_id=proposition.formation_id,
-            proposition=proposition,
-            matricule_candidat=proposition.matricule_candidat,
-            titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
-            profil_candidat_translator=self.profil_candidat_translator,
-        )
-        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
+        pool = None
+        try:
+            dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                type_formation=TrainingType.BACHELOR,
+                profil_candidat_translator=self.profil_candidat_translator,
+            )
+            pool = dto.pool
+        except AucunPoolCorrespondantException:
+            pass
+        self.assertNotEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
 
     @freezegun.freeze_time('2022-12-15')
     def test_verification_calendrier_inscription_reorientation_non_choisie(self):

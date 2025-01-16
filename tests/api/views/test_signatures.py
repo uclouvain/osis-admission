@@ -28,24 +28,31 @@ from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from osis_history.models import HistoryEntry
+from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     MembreCAManquantException,
     PromoteurManquantException,
     SignataireNonTrouveException,
+    PromoteurDeReferenceManquantException,
+    DetailProjetNonCompleteException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
-from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
-from osis_notification.models import EmailNotification
-
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalPromoterFactory,
+    PromoterFactory,
+    _ProcessFactory,
+)
 from reference.tests.factories.language import FrenchLanguageFactory
 
 
@@ -65,12 +72,22 @@ class RequestSignaturesApiTestCase(APITestCase):
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
+            type=ChoixTypeAdmission.ADMISSION.name,
+        )
+        cls.pre_admission = DoctorateAdmissionFactory(
+            candidate=cls.admission.candidate,
+            supervision_group=_ProcessFactory(),
+            training=cls.admission.training,
+            cotutelle=True,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+            project_title='',
         )
         ProgramManagerRoleFactory(education_group_id=cls.admission.training.education_group_id)
         AdmissionAcademicCalendarFactory.produce_all_required()
         cls.patcher.stop()
         cls.candidate = cls.admission.candidate
         cls.url = resolve_url("admission_api_v1:request-signatures", uuid=cls.admission.uuid)
+        cls.pre_admission_url = resolve_url("admission_api_v1:request-signatures", uuid=cls.pre_admission.uuid)
 
     def setUp(self):
         patched = self.patcher.start()
@@ -134,6 +151,8 @@ class RequestSignaturesApiTestCase(APITestCase):
         url = resolve_url("admission_api_v1:request-signatures", uuid=admission.uuid)
 
         promoter = PromoterFactory(is_reference_promoter=True)
+        PromoterFactory(actor_ptr__process=promoter.actor_ptr.process)
+        CaMemberFactory(process=promoter.actor_ptr.process)
         CaMemberFactory(process=promoter.actor_ptr.process)
         admission.supervision_group = promoter.actor_ptr.process
         admission.save()
@@ -179,7 +198,33 @@ class RequestSignaturesApiTestCase(APITestCase):
 
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurManquantException.status_code)
+        status_codes = [e['status_code'] for e in response.json()['non_field_errors']]
+        self.assertIn(PromoteurManquantException.status_code, status_codes)
+
+    def test_request_signatures_using_api_for_a_pre_admission(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.post(self.pre_admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        status_codes = [e['status_code'] for e in response.json()['non_field_errors']]
+        self.assertCountEqual(
+            status_codes,
+            [
+                PromoteurManquantException.status_code,
+                PromoteurDeReferenceManquantException.status_code,
+                DetailProjetNonCompleteException.status_code,
+            ],
+        )
+
+        PromoterFactory(process=self.pre_admission.supervision_group, is_reference_promoter=True)
+
+        self.pre_admission.project_title = 'Title'
+        self.pre_admission.save(update_fields=['project_title'])
+
+        response = self.client.post(self.pre_admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_resend_signature(self):
         self.client.force_authenticate(user=self.candidate.user)

@@ -42,7 +42,7 @@ from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
 from admission.ddd.admission.domain.model.enums.condition_acces import (
@@ -240,7 +240,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         cls.training = DoctorateFactory(
             management_entity=cls.commission,
             academic_year=cls.academic_years[0],
-            education_group_type__name=TrainingType.FORMATION_PHD.name,
+            education_group_type__name=TrainingType.PHD.name,
         )
 
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
@@ -298,7 +298,7 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
         self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.FORMATION_PHD.name),
+            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
             doctorate_choices,
         )
 

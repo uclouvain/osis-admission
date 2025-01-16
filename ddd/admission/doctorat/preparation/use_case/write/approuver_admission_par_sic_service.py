@@ -142,6 +142,7 @@ def approuver_admission_par_sic(
     message_bus.publish(
         AdmissionDoctoraleApprouveeParSicEvent(
             entity_id=proposition.entity_id,
+            type_admission=proposition.type_admission.name,
             matricule=proposition.matricule_candidat,
             nom=resume_dto.identification.nom,
             prenom=resume_dto.identification.prenom,

@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime, date
+from datetime import date
 from typing import List, Optional, Union, Dict
 
 import attr
@@ -40,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._institut import 
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixTypeAdmission,
@@ -55,12 +55,17 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     StatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.doctorat.preparation.domain.validator import *
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_peut_demander_candidat_modification_ca import (
+    ShouldPeutDemanderCandidatModificationCaFacultaire,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator._should_proposition_statut_etre_correct_pour_soumission_ca import (
+    ShouldPropositionStatutEtreCorrectPourSoumissionCA,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
     ShouldStatutEtreEnAttenteDeSignature,
 )
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
@@ -76,7 +81,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 @attr.dataclass(frozen=True, slots=True)
 class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    doctorat: Doctorat
+    doctorat: DoctoratFormation
     commission_proximite: Optional[str] = ''
     justification: Optional[str] = ''
 
@@ -93,7 +98,7 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
 @attr.dataclass(frozen=True, slots=True)
 class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    doctorat: Doctorat
+    doctorat: DoctoratFormation
     commission_proximite: Optional[str] = ''
     justification: Optional[str] = ''
 
@@ -110,7 +115,7 @@ class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 @attr.dataclass(frozen=True, slots=True)
 class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    doctorat: Doctorat
+    doctorat: DoctoratFormation
     type_financement: Optional[str] = ''
     justification: Optional[str] = ''
     type_contrat_travail: Optional[str] = ''
@@ -432,6 +437,19 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SignatairesPreAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    groupe_de_supervision: 'GroupeDeSupervision'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(self.groupe_de_supervision),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
 
@@ -718,4 +736,34 @@ class RedonnerLaMainAuCandidatValidatorList(TwoStepsMultipleBusinessExceptionLis
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldStatutEtreEnAttenteDeSignature(self.statut),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DemanderCandidatModificationCaValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPeutDemanderCandidatModificationCaFacultaire(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPropositionStatutEtreCorrectPourSoumissionCA(
+                statut=self.statut,
+            ),
         ]

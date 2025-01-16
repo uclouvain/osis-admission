@@ -50,13 +50,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConnaissanceLangueDTO,
     CotutelleDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
-    DoctoratDTO,
+    DoctoratFormationDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
@@ -967,9 +968,11 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         cls.admission = ContinuingEducationAdmissionFactory(
             training__academic_year=cls.academic_year,
             specific_question_answers={
-                str(question.form_item.uuid): f'answer-{index}'
-                if question.form_item.type == TypeItemFormulaire.TEXTE.name
-                else [f'uuid-file-{index}']
+                str(question.form_item.uuid): (
+                    f'answer-{index}'
+                    if question.form_item.type == TypeItemFormulaire.TEXTE.name
+                    else [f'uuid-file-{index}']
+                )
                 for index, tab_questions in enumerate(specific_questions.values())
                 for question in tab_questions
             },
@@ -1486,7 +1489,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
-            doctorat=DoctoratDTO(
+            doctorat=DoctoratFormationDTO(
                 sigle='FD1',
                 annee=2023,
                 intitule='Doctorate 1',
@@ -1496,6 +1499,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 type=TrainingType.BACHELOR.name,
                 campus_inscription=cls.mons_campus,
                 sigle_entite_gestion='FFD',
+                intitule_entite_gestion='FFD',
                 code='CFD1',
                 credits=180,
                 date_debut=datetime.date(2023, 1, 1),
@@ -1553,7 +1557,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             est_lie_fnrs_fria_fresh_csc=False,
             commentaire_financement='',
             titre_projet='',
-            type_admission='',
+            type_admission=ChoixTypeAdmission.ADMISSION.name,
             type_contrat_travail='',
             type_financement='',
             langue_contact_candidat=settings.LANGUAGE_CODE_FR,
@@ -1700,7 +1704,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             numero_registre_national_belge='',
             numero_passeport='',
         ):
-            section = get_identification_section(self.continuing_context, True)
+            section = get_identification_section(self.continuing_context, False)
             attachments = section.attachments
 
             self.assertEqual(len(attachments), 1)
@@ -1993,14 +1997,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_foreign_diploma_with_translations(self):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-            diplome_etudes_secondaires=GotDiploma.YES.name,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            regime_linguistique='BR',
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                regime_linguistique='BR',
+            ),
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
@@ -2070,14 +2077,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_diploma_this_year(self):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-            diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            pays_membre_ue=False,
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+                diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                pays_membre_ue=False,
+            ),
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
@@ -2108,14 +2118,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_diploma_with_translations(self):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            pays_membre_ue=False,
-            regime_linguistique='BR',
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                pays_membre_ue=False,
+                regime_linguistique='BR',
+            ),
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
@@ -2185,14 +2198,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_diploma_this_year(self):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-            diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            regime_linguistique='BR',
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+                diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                regime_linguistique='BR',
+            ),
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
@@ -2262,17 +2278,21 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.assertTrue(attachments[1].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_assimilated_foreign_diploma_this_year(self):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-            diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            pays_membre_ue=False,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.proposition.formation,
-            code_domaine='11SA',
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+                diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                pays_membre_ue=False,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.proposition.formation,
+                code_domaine='11SA',
+            ),
         ):
             section = get_secondary_studies_section(self.general_bachelor_context, self.empty_questions, False)
 
@@ -2319,14 +2339,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_national_bachelor_diploma_equiv(
         self,
     ):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
-            pays_membre_ue=False,
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
+                pays_membre_ue=False,
+            ),
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
@@ -2370,14 +2393,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_equival(
         self,
     ):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
-            equivalence=Equivalence.YES.name,
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
+                equivalence=Equivalence.YES.name,
+            ),
         ):
             section = get_secondary_studies_section(self.general_bachelor_context, self.empty_questions, False)
 
@@ -2418,14 +2444,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_pending_eq(
         self,
     ):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
-            equivalence=Equivalence.PENDING.name,
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
+                equivalence=Equivalence.PENDING.name,
+            ),
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
@@ -2469,14 +2498,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_without_eq(
         self,
     ):
-        with mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires,
-            diplome_belge=None,
-            alternative_secondaires=None,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-            type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
-            equivalence=Equivalence.NO.name,
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires,
+                diplome_belge=None,
+                alternative_secondaires=None,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
+                equivalence=Equivalence.NO.name,
+            ),
         ):
             section = get_secondary_studies_section(self.general_bachelor_context, self.empty_questions, False)
             attachments = section.attachments
@@ -3268,7 +3300,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(section.attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
 
     def test_accounting_attachments_with_general_proposition_for_ue_candidate_and_french_frequented_institute(self):
-        section = get_accounting_section(self.general_bachelor_context, True)
+        section = get_accounting_section(self.general_bachelor_context, False)
         attachments = section.attachments
 
         self.assertEqual(len(attachments), 1)
@@ -3316,14 +3348,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
     def test_accounting_attachments_with_general_proposition_for_not_ue_candidate(self):
         type_situation = TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name
-        with mock.patch.multiple(
-            self.general_bachelor_context.identification,
-            pays_nationalite_europeen=False,
-        ), mock.patch.multiple(
-            self.general_bachelor_context.comptabilite,
-            type_situation_assimilation=type_situation,
-            sous_type_situation_assimilation_5=ChoixAssimilation5.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name,
-            relation_parente=LienParente.PERE.name,
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.identification,
+                pays_nationalite_europeen=False,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.comptabilite,
+                type_situation_assimilation=type_situation,
+                sous_type_situation_assimilation_5=ChoixAssimilation5.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name,
+                relation_parente=LienParente.PERE.name,
+            ),
         ):
             section = get_accounting_section(self.general_bachelor_context, False)
 
@@ -3369,7 +3404,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertFalse(attachments[2].readonly)
 
     def test_languages_attachments_with_doctorate_proposition(self):
-        section = get_languages_section(self.doctorate_context, True)
+        section = get_languages_section(self.doctorate_context, False)
         attachments = section.attachments
 
         self.assertEqual(len(attachments), 2)
@@ -3407,7 +3442,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertFalse(attachments[1].readonly)
 
     def test_research_project_attachments_with_doctorate_proposition(self):
-        section = get_research_project_section(self.doctorate_context, True)
+        section = get_research_project_section(self.doctorate_context, False)
         attachments = section.attachments
 
         self.assertEqual(len(attachments), 5)
@@ -3455,7 +3490,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].identifier, 'PREUVE_BOURSE')
             self.assertEqual(attachments[0].label, DocumentsProjetRecherche['PREUVE_BOURSE'])
             self.assertEqual(attachments[0].uuids, self.doctorate_context.proposition.bourse_preuve)
-            self.assertFalse(attachments[0].required)
+            self.assertTrue(attachments[0].required)
             self.assertFalse(attachments[0].readonly)
 
             self.assertEqual(attachments[1].identifier, 'DOCUMENTS_PROJET')
@@ -3488,12 +3523,66 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertFalse(attachments[5].required)
             self.assertFalse(attachments[5].readonly)
 
+    def test_research_project_attachments_with_doctorate_proposition_for_a_pre_admission(self):
+        with mock.patch.multiple(
+            self.doctorate_context.proposition,
+            type_admission=ChoixTypeAdmission.PRE_ADMISSION.name,
+        ):
+            section = get_research_project_section(self.doctorate_context, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 5)
+
+            self.assertEqual(attachments[0].identifier, 'DOCUMENTS_PROJET')
+            self.assertFalse(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, 'PROPOSITION_PROGRAMME_DOCTORAL')
+            self.assertFalse(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, 'PROJET_FORMATION_COMPLEMENTAIRE')
+            self.assertFalse(attachments[2].required)
+
+            self.assertEqual(attachments[3].identifier, 'GRAPHE_GANTT')
+            self.assertFalse(attachments[3].required)
+
+            self.assertEqual(attachments[4].identifier, 'LETTRES_RECOMMANDATION')
+            self.assertFalse(attachments[4].required)
+
+    def test_research_project_attachments_with_doctorate_proposition_and_search_scholarship_for_a_pre_admission(self):
+        with mock.patch.multiple(
+            self.doctorate_context.proposition,
+            type_financement=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
+            type_admission=ChoixTypeAdmission.PRE_ADMISSION.name,
+        ):
+            section = get_research_project_section(self.doctorate_context, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 6)
+
+            self.assertEqual(attachments[0].identifier, 'PREUVE_BOURSE')
+            self.assertFalse(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, 'DOCUMENTS_PROJET')
+            self.assertFalse(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, 'PROPOSITION_PROGRAMME_DOCTORAL')
+            self.assertFalse(attachments[2].required)
+
+            self.assertEqual(attachments[3].identifier, 'PROJET_FORMATION_COMPLEMENTAIRE')
+            self.assertFalse(attachments[3].required)
+
+            self.assertEqual(attachments[4].identifier, 'GRAPHE_GANTT')
+            self.assertFalse(attachments[4].required)
+
+            self.assertEqual(attachments[5].identifier, 'LETTRES_RECOMMANDATION')
+            self.assertFalse(attachments[5].required)
+
     def test_cotutelle_attachments_with_doctorate_proposition_without_specified_cotutelle(self):
         with mock.patch.multiple(
             self.doctorate_context.groupe_supervision,
             cotutelle=None,
         ):
-            section = get_cotutelle_section(self.doctorate_context, True)
+            section = get_cotutelle_section(self.doctorate_context, False)
             self.assertEqual(len(section.attachments), 0)
 
     def test_cotutelle_attachments_with_doctorate_proposition_with_no_cotutelle(self):

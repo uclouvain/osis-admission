@@ -1,0 +1,59 @@
+repos:
+  - repo: https://github.com/ambv/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3.11
+        args: [ '--skip-string-normalization', '--line-length',  '120', '-t', 'py311' ]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--filter-files"]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: copyright
+        name: Check that copyright is in source code
+        types: [file]
+        files: \.(py|html)$
+        args: [ --multiline, --negate ]
+        exclude: '^(migrations/\w+|.*__init__).py'
+        entry: '2015\-2024'
+        language: pygrep
+
+      - id: diff-quality
+        name: pycodestyle
+        language: system
+        entry: diff-quality --violations=pycodestyle --compare-branch=origin/dev --fail-under=100 --options="--ignore=E501"
+        types: [ python ]
+        pass_filenames: false
+
+#      - id: diff-quality
+#        name: pylint
+#        language: system
+#        entry: diff-quality --violations=pylint --compare-branch=origin/dev --fail-under=90
+#        types: [ python ]
+#        pass_filenames: false
+
+      - id: messages
+        name: messages
+        language: system
+        entry: bash -c '../manage.py makemessages -a && ../manage.py compilemessages --locale fr_BE'
+        always_run: true
+        pass_filenames: false
+
+
+      - id: check_app_messages
+        name: Check messages
+        language: system
+        entry: bash -c '(cd .. && ./manage.py check_app_messages parcours_doctoral)'
+        always_run: true
+        pass_filenames: false

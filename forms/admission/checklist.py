@@ -47,12 +47,6 @@ from django.utils.translation import (
 )
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE
-from admission.models import GeneralEducationAdmission, DoctorateAdmission
-from admission.models.base import training_campus_subquery
-from admission.models.checklist import (
-    RefusalReason,
-    AdditionalApprovalCondition,
-)
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.model.enums.condition_acces import recuperer_conditions_acces_par_formation
@@ -79,9 +73,16 @@ from admission.forms import (
     EMPTY_CHOICE_AS_LIST,
     get_initial_choices_for_additional_approval_conditions,
     AdmissionHTMLCharField,
+    AutoGrowTextareaWidget,
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
+from admission.models import GeneralEducationAdmission, DoctorateAdmission
+from admission.models.base import training_campus_subquery
+from admission.models.checklist import (
+    RefusalReason,
+    AdditionalApprovalCondition,
+)
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_SIC,
@@ -114,7 +115,7 @@ FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 
 class CommentForm(forms.Form):
     comment = forms.CharField(
-        widget=forms.Textarea(
+        widget=AutoGrowTextareaWidget(
             attrs={
                 'rows': 2,
                 'hx-trigger': 'keyup changed delay:2s',

@@ -102,11 +102,6 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionDTO as PropositionGeneraleDTO,
 )
 from admission.ddd.admission.repository.i_proposition import formater_reference
-from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
-    CategorieActivite,
-    ChoixTypeEpreuve,
-    StatutActivite,
-)
 from admission.exports.admission_recap.section import (
     get_educational_experience_context,
     get_secondary_studies_context,
@@ -692,31 +687,15 @@ def strip(value):
     return value
 
 
-@register.filter
-def status_list(admission):
-    statuses = {str(admission.status)}
-    for child in admission.children.all():
-        statuses.add(str(child.status))
-    return ','.join(statuses)
-
-
-@register.filter
-def status_as_class(activity):
-    return {
-        StatutActivite.SOUMISE.name: "warning",
-        StatutActivite.ACCEPTEE.name: "success",
-        StatutActivite.REFUSEE.name: "danger",
-    }.get(getattr(activity, 'status', activity), 'info')
-
-
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None, label_class=''):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
         'html_tooltip': html_tooltip,
         'label': label,
+        'label_class': label_class,
     }
 
 
@@ -743,74 +722,6 @@ def can_read_tab(context, tab_name, obj=None):
 def can_update_tab(context, tab_name, obj=None):
     """Return true if the specified tab can be opened in update mode for this admission, otherwise return False"""
     return has_perm(context, UPDATE_ACTIONS_BY_TAB[tab_name], obj)
-
-
-@register.inclusion_tag('admission/doctorate/includes/training_categories.html')
-def training_categories(activities):
-    added, validated = 0, 0
-
-    categories = {
-        _("Participation to symposium/conference"): [0, 0],
-        _("Oral communication"): [0, 0],
-        _("Seminar taken"): [0, 0],
-        _("Publications"): [0, 0],
-        _("Courses taken"): [0, 0],
-        _("Services"): [0, 0],
-        _("VAE"): [0, 0],
-        _("Scientific residencies"): [0, 0],
-        _("Confirmation exam"): [0, 0],
-        _("Thesis defense"): [0, 0],
-    }
-    for activity in activities:
-        # Increment global counts
-        if activity.status != StatutActivite.REFUSEE.name:
-            added += activity.ects
-        if activity.status == StatutActivite.ACCEPTEE.name:
-            validated += activity.ects
-        if activity.status not in [StatutActivite.SOUMISE.name, StatutActivite.ACCEPTEE.name]:
-            continue
-
-        # Increment category counts
-        index = int(activity.status == StatutActivite.ACCEPTEE.name)
-        if activity.category == CategorieActivite.CONFERENCE.name:
-            categories[_("Participation to symposium/conference")][index] += activity.ects
-        elif activity.category == CategorieActivite.SEMINAR.name:
-            categories[_("Seminar taken")][index] += activity.ects
-        elif activity.category == CategorieActivite.COMMUNICATION.name and (
-            activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
-        ):
-            categories[_("Oral communication")][index] += activity.ects
-        elif activity.category == CategorieActivite.PUBLICATION.name and (
-            activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
-        ):
-            categories[_("Publications")][index] += activity.ects
-        elif activity.category == CategorieActivite.SERVICE.name:
-            categories[_("Services")][index] += activity.ects
-        elif (
-            activity.category == CategorieActivite.RESIDENCY.name
-            or activity.parent_id
-            and activity.parent.category == CategorieActivite.RESIDENCY.name
-        ):
-            categories[_("Scientific residencies")][index] += activity.ects
-        elif activity.category == CategorieActivite.VAE.name:
-            categories[_("VAE")][index] += activity.ects
-        elif activity.category in [CategorieActivite.COURSE.name, CategorieActivite.UCL_COURSE.name]:
-            categories[_("Courses taken")][index] += activity.ects
-        elif (
-            activity.category == CategorieActivite.PAPER.name
-            and activity.type == ChoixTypeEpreuve.CONFIRMATION_PAPER.name
-        ):
-            categories[_("Confirmation exam")][index] += activity.ects
-        elif activity.category == CategorieActivite.PAPER.name:
-            categories[_("Thesis defense")][index] += activity.ects
-    if not added:
-        return {}
-    return {
-        'display_table': any(cat_added + cat_validated for cat_added, cat_validated in categories.values()),
-        'categories': categories,
-        'added': added,
-        'validated': validated,
-    }
 
 
 @register.filter
@@ -1575,9 +1486,11 @@ def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO
     """
     return unordered_list(
         [
-            ChoixMoyensDecouverteFormation.get_value(way)
-            if way != ChoixMoyensDecouverteFormation.AUTRE.name
-            else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            (
+                ChoixMoyensDecouverteFormation.get_value(way)
+                if way != ChoixMoyensDecouverteFormation.AUTRE.name
+                else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            )
             for way in proposition.moyens_decouverte_formation
         ]
     )

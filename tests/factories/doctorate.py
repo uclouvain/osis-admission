@@ -40,7 +40,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     OngletsChecklist,
 )
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference
@@ -68,7 +67,7 @@ class DoctorateFactory(EducationGroupYearFactory):
 
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     management_entity = factory.SubFactory(EntityWithVersionFactory)
-    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.FORMATION_PHD.name)
+    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
     primary_language = None
 
     @factory.post_generation
@@ -129,8 +128,6 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     curriculum = factory.LazyFunction(lambda: [uuid.uuid4()])
 
-    thesis_proposed_title = 'Thesis title'
-
     last_update_author = factory.SubFactory(PersonFactory)
 
     checklist = factory.Dict({'default': True})  # This default value is overridden in a post generation method
@@ -168,7 +165,6 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
         )
         admitted = factory.Trait(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             submitted_profile={
                 "coordinates": {
                     "city": "Louvain-la-Neuve",
@@ -189,7 +185,6 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
         )
         passed_confirmation = factory.Trait(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
-            post_enrolment_status=ChoixStatutDoctorat.PASSED_CONFIRMATION.name,
             submitted_profile={
                 "coordinates": {
                     "city": "Louvain-La-Neuves",
@@ -225,7 +220,7 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def create_student_if_admitted(self, create, extracted, **kwargs):
-        if self.post_enrolment_status != ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
+        if self.status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
             StudentFactory(person=self.candidate)
 
     @factory.post_generation

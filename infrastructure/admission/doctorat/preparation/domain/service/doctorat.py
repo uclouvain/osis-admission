@@ -29,10 +29,10 @@ from typing import List, Optional, Dict
 from django.conf import settings
 from django.utils.translation import get_language
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.dtos.campus import CampusDTO
 from base.models.enums.active_status import ActiveStatusEnum
@@ -53,7 +53,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         dto: 'TrainingDto',
         campuses_by_uuid: Dict[str, UclouvainCampusDTO] = None,
         academic_years_by_year: Dict[int, AcademicYear] = None,
-    ) -> 'DoctoratDTO':
+    ) -> 'DoctoratFormationDTO':
         # Load the academic year if not already loaded
         if not academic_years_by_year:
             academic_years_by_year = cls._get_academic_years_by_year(years=[dto.year])
@@ -82,7 +82,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             campuses_by_uuid[dto.enrollment_campus_uuid] if dto.enrollment_campus_uuid in campuses_by_uuid else None
         )
 
-        return DoctoratDTO(
+        return DoctoratFormationDTO(
             sigle=dto.acronym,
             code=dto.code,
             annee=dto.year,
@@ -91,6 +91,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             intitule_fr=dto.title_fr,
             intitule_en=dto.title_en,
             sigle_entite_gestion=dto.management_entity_acronym,
+            intitule_entite_gestion='',
             campus_inscription=CampusDTO.from_uclouvain_campus_dto(campus_inscription),
             campus=CampusDTO.from_uclouvain_campus_dto(campus),
             type=dto.type,
@@ -128,26 +129,26 @@ class DoctoratTranslator(IDoctoratTranslator):
         return {academic_year.year: academic_year for academic_year in academic_years}
 
     @classmethod
-    def get_dto(cls, sigle: str, annee: int) -> 'DoctoratDTO':  # pragma: no cover
+    def get_dto(cls, sigle: str, annee: int) -> 'DoctoratFormationDTO':  # pragma: no cover
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.FORMATION_PHD.name)
+            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
         )
         if dtos:
             return cls._build_dto(dtos[0])
         raise DoctoratNonTrouveException()
 
     @classmethod
-    def get(cls, sigle: str, annee: int) -> 'Doctorat':
+    def get(cls, sigle: str, annee: int) -> 'DoctoratFormation':
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.FORMATION_PHD.name)
+            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
         )
         if dtos:
             dto: TrainingDto = dtos[0]
-            return Doctorat(
+            return DoctoratFormation(
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 entite_ucl_id=UCLEntityIdentity(code=dto.management_entity_acronym),
                 type=TrainingType[dto.type],
@@ -161,7 +162,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         annee: Optional[int] = None,
         campus: Optional[str] = '',
         terme_de_recherche: Optional[str] = '',
-    ) -> List['DoctoratDTO']:
+    ) -> List['DoctoratFormationDTO']:
         from infrastructure.messages_bus import message_bus_instance
 
         if not annee:
@@ -172,7 +173,7 @@ class DoctoratTranslator(IDoctoratTranslator):
                 annee=annee,
                 sigle_entite_gestion=sigle_secteur_entite_gestion,
                 inclure_entites_gestion_subordonnees=True,
-                type=TrainingType.FORMATION_PHD.name,
+                type=TrainingType.PHD.name,
                 campus=campus,
                 terme_de_recherche=terme_de_recherche,
                 est_inscriptible=True,
@@ -220,7 +221,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
                 sigles_annees=[(sigle, annee)],
-                type=TrainingType.FORMATION_PHD.name,
+                type=TrainingType.PHD.name,
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,

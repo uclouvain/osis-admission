@@ -35,8 +35,6 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import Choix
 from admission.ddd.admission.doctorat.validation.domain.service.proposition_identity import (
     PropositionIdentityTranslator,
 )
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.parcours_doctoral.domain.service.demande_identity import DemandeIdentityTranslator
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -44,10 +42,6 @@ from admission.infrastructure.admission.doctorat.validation.repository.in_memory
     DemandeInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory import (
-    epreuve_confirmation,
-)
-from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 
 
 class TestApprouverDemandeCDD(TestCase):
@@ -72,19 +66,3 @@ class TestApprouverDemandeCDD(TestCase):
         # Updated dossier
         demande = DemandeInMemoryRepository.get(demande_a_approuver_entity_id)
         self.assertEqual(demande.statut_cdd, ChoixStatutCDD.ACCEPTED)
-
-        # Update doctorat
-        doctorat_id = DemandeIdentityTranslator.convertir_en_doctorat(demande_a_approuver_entity_id)
-        doctorat = DoctoratInMemoryRepository.get(doctorat_id)
-        self.assertEqual(doctorat.statut, ChoixStatutDoctorat.ADMITTED)
-
-        # New confirmation paper
-        epreuves_confirmations = epreuve_confirmation.EpreuveConfirmationInMemoryRepository.search_by_doctorat_identity(
-            doctorat_entity_id=doctorat_id,
-        )
-
-        self.assertEqual(len(epreuves_confirmations), 1)
-        self.assertEqual(
-            epreuves_confirmations[0].date_limite,
-            datetime.date(2022, 11, 1),
-        )
