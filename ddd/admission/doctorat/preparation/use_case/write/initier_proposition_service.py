@@ -23,11 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_builder import IPropositionBuilder
+from admission.ddd.admission.doctorat.preparation.builder.proposition_builder import PropositionBuilder
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
+    IGroupeDeSupervisionRepository,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 
@@ -38,19 +41,29 @@ def initier_proposition(
     doctorat_translator: 'IDoctoratTranslator',
     historique: 'IHistorique',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
-    proposition_builder: 'IPropositionBuilder',
+    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
 
     # WHEN
-    proposition_identity = proposition_builder.initier_proposition(
+    proposition = PropositionBuilder().initier_proposition(
         cmd,
         doctorat_translator,
         proposition_repository,
     )
 
     # THEN
-    historique.historiser_initiation(proposition_identity, cmd.matricule_candidat)
+    proposition_repository.save(
+        proposition,
+        dupliquer_documents=bool(cmd.pre_admission_associee),
+    )
 
-    return proposition_identity
+    groupe_supervision_repository.initialize_supervision_group_from_proposition(
+        uuid_proposition_originale=cmd.pre_admission_associee,
+        nouvelle_proposition=proposition,
+    )
+
+    historique.historiser_initiation(proposition.entity_id, cmd.matricule_candidat)
+
+    return proposition.entity_id

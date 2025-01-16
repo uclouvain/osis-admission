@@ -45,7 +45,7 @@ class MembreCATranslator(IMembreCATranslator):
 
     @classmethod
     def get_dto(cls, membre_ca_id: 'MembreCAIdentity') -> MembreCADTO:
-        actor = SupervisionActor.objects.select_related('person').get(
+        actor = SupervisionActor.objects.select_related('person__tutor', 'country').get(
             type=ActorType.CA_MEMBER.name,
             uuid=membre_ca_id.uuid,
         )

@@ -57,7 +57,6 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
-from .builder.in_memory.proposition_builder import PropositionBuilderInMemory
 from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
@@ -115,7 +114,6 @@ _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryReposit
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _digit_repository = DigitInMemoryRepository()
 _financabilite_fetcher = FinancabiliteInMemoryFetcher()
-_proposition_builder = PropositionBuilderInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -125,7 +123,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=_doctorat_translator,
         historique=_historique,
         maximum_propositions_service=_maximum_propositions_autorisees,
-        proposition_builder=_proposition_builder,
+        groupe_supervision_repository=_groupe_supervision_repository,
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,

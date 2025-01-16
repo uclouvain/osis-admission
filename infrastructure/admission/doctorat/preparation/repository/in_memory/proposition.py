@@ -150,7 +150,7 @@ class PropositionInMemoryRepository(
         ]
 
     @classmethod
-    def save(cls, entity: 'Proposition') -> None:
+    def save(cls, entity: 'Proposition', dupliquer_documents=False) -> None:
         super().save(entity)
 
     @classmethod

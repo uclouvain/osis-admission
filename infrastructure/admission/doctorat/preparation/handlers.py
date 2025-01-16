@@ -52,7 +52,6 @@ from infrastructure.shared_kernel.academic_year.repository.academic_year import 
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
-from .builder.proposition_builder import PropositionBuilder
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
@@ -84,7 +83,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=DoctoratTranslator(),
         historique=Historique(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
-        proposition_builder=PropositionBuilder(),
+        groupe_supervision_repository=GroupeDeSupervisionRepository(),
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,

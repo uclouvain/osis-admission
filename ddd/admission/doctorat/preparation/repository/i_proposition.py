@@ -86,7 +86,7 @@ class IPropositionRepository(IGlobalPropositionRepository):
 
     @classmethod
     @abc.abstractmethod
-    def save(cls, entity: 'Proposition') -> None:  # type: ignore[override]
+    def save(cls, entity: 'Proposition', dupliquer_documents=False) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod

@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 from contextlib import suppress
+from typing import Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
@@ -36,6 +37,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
+from admission.admission_utils.copy_documents import copy_documents
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -641,6 +643,19 @@ class DoctorateAdmission(BaseAdmission):
             )
         )
 
+    def __init__(self, *args, **kwargs):
+        self._duplicate_documents_when_saving: Optional[bool] = None
+
+        super().__init__(*args, **kwargs)
+
+    @property
+    def duplicate_documents_when_saving(self):
+        return self._duplicate_documents_when_saving
+
+    @duplicate_documents_when_saving.setter
+    def duplicate_documents_when_saving(self, value):
+        self._duplicate_documents_when_saving = value
+
     # The following properties are here to alias the training_id field to doctorate_id
     @property
     def doctorate(self):
@@ -710,6 +725,9 @@ class DoctorateAdmission(BaseAdmission):
         ]
 
     def save(self, *args, **kwargs) -> None:
+        if self._state.adding and self.duplicate_documents_when_saving:
+            copy_documents(objs=[self])
+
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
@@ -784,6 +802,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "financability_established_by",
                 "financability_dispensation_first_notification_by",
                 "financability_dispensation_last_notification_by",
+                "related_pre_admission",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
@@ -811,7 +830,6 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             self.get_queryset()
             .select_related(
                 'training__enrollment_campus__country',
-                'related_pre_admission',
             )
             .annotate_campus_info()
             .annotate_training_management_entity()

@@ -119,7 +119,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         cls.commission = EntityVersionFactory(
             parent=cls.sector,
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
-            acronym='CDA',
+            acronym='CDSS',
         ).entity
         cls.doctorate = DoctorateFactory(
             management_entity=cls.commission,
@@ -135,7 +135,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             "sigle_formation": cls.doctorate.acronym,
             "annee_formation": cls.doctorate.academic_year.year,
             "matricule_candidat": cls.candidate.global_id,
-            "commission_proximite": '',
+            "commission_proximite": ChoixCommissionProximiteCDSS.ECLI.name,
         }
         cls.url = resolve_url("admission_api_v1:doctorate_training_choice")
         cls.list_url = resolve_url("admission_api_v1:propositions")
@@ -231,7 +231,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             admission.reference,
             seq_value + 1,
         )
-        self.assertEqual(response.json()['doctorate_propositions'][0]["reference"], f'M-CDA22-{str(admission)}')
+        self.assertEqual(response.json()['doctorate_propositions'][0]["reference"], f'M-CDSS22-{str(admission)}')
 
     @freezegun.freeze_time('2023-01-01')
     def test_admission_doctorate_creation_based_on_pre_admission(self):
@@ -267,7 +267,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             comment='Comment',
             proximity_commission=ChoixCommissionProximiteCDSS.ECLI.name,
-            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
+            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             financing_eft=10,
             international_scholarship_id=self.scholarship.pk,
@@ -324,32 +324,32 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         self.assertEqual(admissions.count(), 1)
 
         new_admission = admissions[0]
-        self.assertEqual(new_admission.candidate, new_admission.candidate)
-        self.assertEqual(new_admission.training, new_admission.training)
+        self.assertEqual(new_admission.candidate, pre_admission.candidate)
+        self.assertEqual(new_admission.training, pre_admission.training)
         self.assertEqual(new_admission.type, ChoixTypeAdmission.ADMISSION.name)
         self.assertEqual(new_admission.status, ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
-        self.assertEqual(new_admission.comment, 'Some new justification')
-        self.assertEqual(new_admission.proximity_commission, new_admission.proximity_commission)
-        self.assertEqual(new_admission.financing_type, new_admission.financing_type)
-        self.assertEqual(new_admission.financing_work_contract, new_admission.financing_work_contract)
-        self.assertEqual(new_admission.financing_eft, new_admission.financing_eft)
-        self.assertEqual(new_admission.international_scholarship_id, new_admission.international_scholarship_id)
-        self.assertEqual(new_admission.other_international_scholarship, new_admission.other_international_scholarship)
-        self.assertEqual(new_admission.scholarship_start_date, new_admission.scholarship_start_date)
-        self.assertEqual(new_admission.scholarship_end_date, new_admission.scholarship_end_date)
+        self.assertEqual(new_admission.comment, pre_admission.comment)
+        self.assertEqual(new_admission.proximity_commission, pre_admission.proximity_commission)
+        self.assertEqual(new_admission.financing_type, pre_admission.financing_type)
+        self.assertEqual(new_admission.financing_work_contract, pre_admission.financing_work_contract)
+        self.assertEqual(new_admission.financing_eft, pre_admission.financing_eft)
+        self.assertEqual(new_admission.international_scholarship_id, pre_admission.international_scholarship_id)
+        self.assertEqual(new_admission.other_international_scholarship, pre_admission.other_international_scholarship)
+        self.assertEqual(new_admission.scholarship_start_date, pre_admission.scholarship_start_date)
+        self.assertEqual(new_admission.scholarship_end_date, pre_admission.scholarship_end_date)
         self.assertEqual(new_admission.scholarship_proof, self.duplicated_documents_tokens['scholarship_proof'])
-        self.assertEqual(new_admission.planned_duration, new_admission.planned_duration)
-        self.assertEqual(new_admission.dedicated_time, new_admission.dedicated_time)
-        self.assertEqual(new_admission.is_fnrs_fria_fresh_csc_linked, new_admission.is_fnrs_fria_fresh_csc_linked)
-        self.assertEqual(new_admission.financing_comment, new_admission.financing_comment)
-        self.assertEqual(new_admission.project_title, new_admission.project_title)
-        self.assertEqual(new_admission.project_abstract, new_admission.project_abstract)
-        self.assertEqual(new_admission.thesis_language, new_admission.thesis_language)
-        self.assertEqual(new_admission.thesis_institute, new_admission.thesis_institute)
-        self.assertEqual(new_admission.thesis_location, new_admission.thesis_location)
-        self.assertEqual(new_admission.phd_alread_started, new_admission.phd_alread_started)
-        self.assertEqual(new_admission.phd_alread_started_institute, new_admission.phd_alread_started_institute)
-        self.assertEqual(new_admission.work_start_date, new_admission.work_start_date)
+        self.assertEqual(new_admission.planned_duration, pre_admission.planned_duration)
+        self.assertEqual(new_admission.dedicated_time, pre_admission.dedicated_time)
+        self.assertEqual(new_admission.is_fnrs_fria_fresh_csc_linked, pre_admission.is_fnrs_fria_fresh_csc_linked)
+        self.assertEqual(new_admission.financing_comment, pre_admission.financing_comment)
+        self.assertEqual(new_admission.project_title, pre_admission.project_title)
+        self.assertEqual(new_admission.project_abstract, pre_admission.project_abstract)
+        self.assertEqual(new_admission.thesis_language, pre_admission.thesis_language)
+        self.assertEqual(new_admission.thesis_institute, pre_admission.thesis_institute)
+        self.assertEqual(new_admission.thesis_location, pre_admission.thesis_location)
+        self.assertEqual(new_admission.phd_alread_started, pre_admission.phd_alread_started)
+        self.assertEqual(new_admission.phd_alread_started_institute, pre_admission.phd_alread_started_institute)
+        self.assertEqual(new_admission.work_start_date, pre_admission.work_start_date)
         self.assertEqual(new_admission.project_document, self.duplicated_documents_tokens['project_document'])
         self.assertEqual(new_admission.gantt_graph, self.duplicated_documents_tokens['gantt_graph'])
         self.assertEqual(new_admission.program_proposition, self.duplicated_documents_tokens['program_proposition'])
@@ -361,13 +361,13 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             new_admission.recommendation_letters,
             self.duplicated_documents_tokens['recommendation_letters'],
         )
-        self.assertEqual(new_admission.phd_already_done, new_admission.phd_already_done)
-        self.assertEqual(new_admission.phd_already_done_institution, new_admission.phd_already_done_institution)
-        self.assertEqual(new_admission.phd_already_done_thesis_domain, new_admission.phd_already_done_thesis_domain)
-        self.assertEqual(new_admission.phd_already_done_defense_date, new_admission.phd_already_done_defense_date)
+        self.assertEqual(new_admission.phd_already_done, pre_admission.phd_already_done)
+        self.assertEqual(new_admission.phd_already_done_institution, pre_admission.phd_already_done_institution)
+        self.assertEqual(new_admission.phd_already_done_thesis_domain, pre_admission.phd_already_done_thesis_domain)
+        self.assertEqual(new_admission.phd_already_done_defense_date, pre_admission.phd_already_done_defense_date)
         self.assertEqual(
             new_admission.phd_already_done_no_defense_reason,
-            new_admission.phd_already_done_no_defense_reason,
+            pre_admission.phd_already_done_no_defense_reason,
         )
         self.assertEqual(new_admission.curriculum, self.duplicated_documents_tokens['curriculum'])
 
