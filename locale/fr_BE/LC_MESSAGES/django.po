@@ -289,6 +289,12 @@ msgstr "Admission"
 msgid "AGREGATION"
 msgstr "279 € - Agrégation"
 
+msgid "ANCIENS_DROITS_MAJORES_2505"
+msgstr "2505 € - Anciens droits majorés"
+
+msgid "ANCIENS_DROITS_MAJORES_4175"
+msgstr "4175 € - Anciens droits majorés"
+
 msgid "AUTRE"
 msgstr "Autre"
 
@@ -1983,9 +1989,6 @@ msgstr "Dispense UNIV"
 
 msgid "DISPENSE_VCRC"
 msgstr "Dispense VCRC"
-
-msgid "DROITS_MAJORES"
-msgstr "4175 € - Droits majorés"
 
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr "Droits majorés demandés"
@@ -4728,7 +4731,7 @@ msgid "NOT_INVITED"
 msgstr "Pas encore invité à signer"
 
 msgid "NOUVEAUX_DROITS_MAJORES"
-msgstr "2505 € - Nouveaux droits majorés"
+msgstr "5010 € - Nouveaux droits majorés"
 
 msgid "Name"
 msgstr "Nom"
@@ -7547,7 +7550,7 @@ msgid "True"
 msgstr "Vrai"
 
 msgid "Tuition fees amount"
-msgstr "Montant des droits d'inscriptions"
+msgstr "Montant des droits d'inscription"
 
 msgid "Tutorship act"
 msgstr "Acte de tutelle"

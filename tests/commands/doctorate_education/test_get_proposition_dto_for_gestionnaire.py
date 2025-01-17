@@ -103,7 +103,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             candidate__private_email='john.doe@example.com',
             candidate__country_of_citizenship=self.country,
             dispensation_needed=BesoinDeDerogation.BESOIN_DE_COMPLEMENT.name,
-            tuition_fees_amount=DroitsInscriptionMontant.DROITS_MAJORES.name,
+            tuition_fees_amount=DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_2505.name,
             tuition_fees_amount_other=Decimal(10),
             tuition_fees_dispensation=DispenseOuDroitsMajores.DROITS_MAJORES_DEMANDES.name,
             is_mobility=True,
