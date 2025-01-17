@@ -42,13 +42,14 @@
                     <input type="checkbox"
                            name="educational"
                            value="{{ experience.uuid }}"
-                           {% if experience.source == 'CANDIDAT' %}
+                           disabled
+                           {% if experience.is_checked %}
                                 checked
-                                disabled
+                           {% endif %}
+                           {% if experience.source == 'CANDIDAT' %}
                                 title="{% trans 'Will be automatically retrieved from candidate' %}"
-                           {% else %}
-                                disabled
-                           {% endif %}/>
+                           {% endif %}
+                           />
                 </td>
                 <td>{{ experience.annees|display_as_academic_year }}</td>
                 <td>{{ experience.nom_formation|default_if_none_or_empty:'-' }}</td>
@@ -69,7 +70,7 @@
                 </td>
              </tr>
          {% empty %}
-            <tr>
+            <tr class="text-center">
                 <td colspan="5">
                     <strong>{% trans 'No data' context 'admission' %}</strong>
                 </td>
@@ -107,11 +108,11 @@
                 <td>{{ experience.nom_formation|default_if_none_or_empty:'-' }}</td>
                 <td>{{ experience.nom_institut|default_if_none_or_empty:'-' }}</td>
                 <td>
-                    {% if experience.uuid in mergeable_experiences_uuids %}
-                        <div class="badge badge-warning">Connue UCL</div>
-                    {% else %}
+                     {% if experience.source == 'CANDIDAT' %}
                         <div class="badge badge-info">Candidat</div>
-                    {% endif %}
+                     {% else %}
+                        <div class="badge badge-warning">Connue UCL</div>
+                     {% endif %}
                 </td>
             </tr>
         {% empty %}
@@ -160,10 +161,10 @@
                 <td>{{ experience.fonction|default_if_none_or_empty:'-' }}</td>
                 <td>{{ experience.employeur|default_if_none_or_empty:'-' }}</td>
                 <td>
-                    {% if experience.uuid in mergeable_experiences_uuids %}
-                        <div class="badge badge-warning">Connue UCL</div>
-                    {% else %}
+                    {% if experience.source == 'CANDIDAT' %}
                         <div class="badge badge-info">Candidat</div>
+                    {% else %}
+                        <div class="badge badge-warning">Connue UCL</div>
                     {% endif %}
                 </td>
             </tr>
