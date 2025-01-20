@@ -1993,6 +1993,9 @@ msgstr "Dispense VCRC"
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr "Droits majorés demandés"
 
+msgid "Dashboard indicator"
+msgstr "Indicateur du tableau de bord"
+
 msgid "Data protection"
 msgstr "Protection des données"
 

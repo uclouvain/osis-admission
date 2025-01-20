@@ -82,6 +82,14 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
 )
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
 )
@@ -109,6 +117,11 @@ from base.models.campus import Campus
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from infrastructure.messages_bus import message_bus_instance
+from parcours_doctoral.ddd.read_view.repository.i_tableau_bord import ITableauBordRepository
+from reference.models.country import Country
+from reference.models.country import Country
+from reference.models.scholarship import Scholarship
+
 
 __all__ = [
     'AdmissionListExcelExportView',
@@ -116,8 +129,6 @@ __all__ = [
     'DoctorateAdmissionListExcelExportView',
 ]
 
-from reference.models.country import Country
-from reference.models.scholarship import Scholarship
 
 FULL_DATE_FORMAT = '%Y/%m/%d, %H:%M:%S'
 SHORT_DATE_FORMAT = '%Y/%m/%d'
@@ -722,6 +733,12 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         checklist_mode = formatted_filters.get('mode_filtres_etats_checklist')
         if checklist_mode:
             mapping_filter_key_value['mode_filtres_etats_checklist'] = ModeFiltrageChecklist.get_value(checklist_mode)
+
+        dashboard_indicator = formatted_filters.get('indicateur_tableau_bord')
+        if dashboard_indicator:
+            mapping_filter_key_value['indicateur_tableau_bord'] = ITableauBordRepository.libelles_indicateurs.get(
+                dashboard_indicator,
+            )
 
         # Format boolean values
         # > "Yes" / "No" / ""

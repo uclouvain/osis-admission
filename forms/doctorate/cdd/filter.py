@@ -56,6 +56,7 @@ from admission.forms import (
     ALL_EMPTY_CHOICE,
     ALL_FEMININE_EMPTY_CHOICE,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+    SelectWithDisabledOptions,
 )
 from admission.forms.admission.filter import BaseAdmissionFilterForm, WorkingListField
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
@@ -64,7 +65,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.models import EntityProxy
 from admission.models.working_list import DoctorateWorkingList
-from base.forms.utils import autocomplete
+from base.forms.utils import autocomplete, EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -74,6 +75,8 @@ from base.models.person import Person
 from education_group.contrib.models import EducationGroupRoleModel
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
+from parcours_doctoral.ddd.read_view.domain.enums.tableau_bord import TypeCategorieTableauBord
+from parcours_doctoral.infrastructure.parcours_doctoral.read_view.repository.tableau_bord import TableauBordRepository
 from reference.models.country import Country
 from reference.models.enums.scholarship_type import ScholarshipType
 from reference.models.scholarship import Scholarship
@@ -185,6 +188,18 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
                 'data-placeholder': _('Personalized'),
                 'data-allow-clear': 'true',
             },
+        ),
+    )
+    indicateur_tableau_bord = forms.ChoiceField(
+        label=_('Dashboard indicator'),
+        required=False,
+        choices=[EMPTY_CHOICE[0]] + [
+            [category.libelle, [[indicator.id.name, indicator.libelle] for indicator in category.indicateurs]]
+            for category in TableauBordRepository.categories
+            if category.type == TypeCategorieTableauBord.ADMISSION
+        ],
+        widget=SelectWithDisabledOptions(
+            enabled_options={*TableauBordRepository.ADMISSION_DJANGO_FILTER_BY_INDICATOR, ''},
         ),
     )
 
@@ -299,6 +314,9 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         current_academic_year = AnneeInscriptionFormationTranslator().recuperer(
             AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT
         )
+        self.fields['annee_academique'].choices.insert(0, ALL_FEMININE_EMPTY_CHOICE[0])
+        self.fields['annee_academique'].required = False
+
         if current_academic_year:
             self.fields['annee_academique'].initial = current_academic_year + 1
 
@@ -333,5 +351,11 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         submission_date_end = cleaned_data.get('date_soumission_fin')
         if submission_date_start and submission_date_end and submission_date_start > submission_date_end:
             self.add_error(None, _("The start date must be earlier than or the same as the end date."))
+
+        # The academic year is not required if we use a doctorate dashboard indicator
+        dashboard_indicator = cleaned_data.get('indicateur_tableau_bord')
+
+        if not dashboard_indicator and not cleaned_data.get('annee_academique'):
+            self.add_error('annee_academique', FIELD_REQUIRED_MESSAGE)
 
         return cleaned_data

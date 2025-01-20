@@ -35,8 +35,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext as _
-from django.utils.translation import pgettext
+from django.utils.translation import gettext as _, pgettext, pgettext_lazy
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -115,6 +114,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from infrastructure.messages_bus import message_bus_instance
+from parcours_doctoral.ddd.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.scholarship import (
@@ -1279,6 +1279,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'date_soumission_fin': '2020-01-02',
                 'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
                 'filtres_etats_checklist': {},
+                'indicateur_tableau_bord': IndicateurTableauBordEnum.ADMISSION_DOSSIER_SOUMIS.name,
                 'demandeur': str(self.sic_management_user.person.uuid),
             }
         )
@@ -1295,8 +1296,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         names, values = list(worksheet.iter_cols(values_only=True))
 
-        self.assertEqual(len(names), 21)
-        self.assertEqual(len(values), 21)
+        self.assertEqual(len(names), 22)
+        self.assertEqual(len(values), 22)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -1320,6 +1321,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(names[18], _('Submitted until'))
         self.assertEqual(names[19], _('Include or exclude the checklist filters'))
         self.assertEqual(names[20], _('Checklist filters'))
+        self.assertEqual(names[21], _('Dashboard indicator'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '3 Janvier 2023')
@@ -1347,6 +1349,10 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(values[18], '2020-01-02')
         self.assertEqual(values[19], ModeFiltrageChecklist.INCLUSION.value)
         self.assertEqual(values[20], '{}')
+        self.assertEqual(values[21], '{} - {}'.format(
+            pgettext_lazy('dashboard-category', 'Admission'),
+            pgettext_lazy('dashboard-indicator admission', 'Submitted dossiers'),
+        ))
 
         filters = str(
             {
@@ -1368,6 +1374,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'date_soumission_fin': '',
                 'mode_filtres_etats_checklist': '',
                 'filtres_etats_checklist': {},
+                'indicateur_tableau_bord': '',
                 'demandeur': str(self.sic_management_user.person.uuid),
             }
         )
@@ -1384,8 +1391,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         names, values = list(worksheet.iter_cols(values_only=True))
 
-        self.assertEqual(len(names), 21)
-        self.assertEqual(len(values), 21)
+        self.assertEqual(len(names), 22)
+        self.assertEqual(len(values), 22)
 
         # Check the values of the parameters
         self.assertEqual(values[0], '3 Janvier 2023')
@@ -1409,3 +1416,4 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(values[18], '')
         self.assertEqual(values[19], '')
         self.assertEqual(values[20], '{}')
+        self.assertEqual(values[21], '')
