@@ -112,7 +112,7 @@
       {% checklist_state_button tab='decision_cdd' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' class='warning' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip htmx_post=change_status_url_in_progress open_modal=cdd_in_progress_confirm_modal %}
       {% checklist_state_button tab='decision_cdd' label=_("To be completed by SIC") icon='circle-stop' state='GEST_BLOCAGE' decision='HORS_DECISION' class='danger' htmx_post=change_status_url_to_be_completed_sic disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip open_modal=cdd_to_be_completed_confirm_modal %}
       {% checklist_state_button tab='decision_cdd' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' decision='EN_DECISION' class='danger' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip open_modal=cdd_to_be_completed_refusal_modal %}
-      {% checklist_state_button tab='decision_cdd' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=cannot_change_cdd_decision tooltip=cannot_transfer_message open_modal=cdd_in_progress_approval_modal %}
+      {% checklist_state_button tab='decision_cdd' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip open_modal=cdd_in_progress_approval_modal %}
     </div>
 
     {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION' or current.statut == 'GEST_REUSSITE' %}

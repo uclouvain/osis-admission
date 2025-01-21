@@ -453,3 +453,8 @@ class PropositionAdmissionSC3DPConfirmeeFactory(PropositionAdmissionSC3DPAvecPro
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             annee_courante=self.annee_calculee,
         )
+
+
+class PropositionAdmissionSC3DPTraitementFacFactory(PropositionAdmissionSC3DPConfirmeeFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-traitement-fac')
+    statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC

@@ -448,3 +448,41 @@ templates.register(
         ),
     ],
 )
+
+ADMISSION_EMAIL_SUPERVISION_MODIFICATION_DOCTORATE = 'osis-admission-supervision-modification-doctorate'
+templates.register(
+    ADMISSION_EMAIL_SUPERVISION_MODIFICATION_DOCTORATE,
+    description=_(
+        'Email sent to the candidate to inform him that a supervision modification is needed for a '
+        'doctorate admission.'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='admissions_link_front',
+            description=_("Link to the admissions dashboard (front-office)"),
+            example="http://dev.studies.uclouvain.be/admission/",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='phd_committee',
+            description=_('PhD Committee'),
+            example="John Doe",
+        ),
+    ],
+)

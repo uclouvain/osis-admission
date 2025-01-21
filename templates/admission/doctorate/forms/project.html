@@ -29,7 +29,7 @@
   {% panel _("Course choice") %}
     <div class="row">
       <div class="col-md-12">
-        {% field_data _("Admission type") admission.type_admission|enum_display:'AdmissionType' %}
+        {% field_data _("Admission type") admission.type_admission|enum_display:'ChoixTypeAdmission' %}
       </div>
       {% if admission.type_admission == 'PRE_ADMISSION' %}
       <div class="col-md-12" id="justification">
@@ -46,7 +46,7 @@
             <br /> Please also consult the special provisions of the field for all pre-admission conditions.
           {% endblocktrans %}
         </p>
-        {% bootstrap_field form.justification form_group_class="form-group required_field" %}
+        {% bootstrap_field form.justification label_class=form.label_classes.justification %}
       </div>
       {% endif %}
     </div>
@@ -62,50 +62,50 @@
   {% panel funding_translation %}
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field_with_tooltip form.type_financement classes="form-group required_field" %}
+        {% bootstrap_field_with_tooltip form.type_financement label_class=form.label_classes.type_financement %}
       </div>
     </div>
     <div class="row" id="work">
-      {% bootstrap_field form.type_contrat_travail show_help=False form_group_class="form-group col-md-4 required_field" %}
+      {% bootstrap_field form.type_contrat_travail show_help=False label_class=form.label_classes.type_contrat_travail form_group_class="form-group col-md-4" %}
       <div class="col-md-4">
-        {% bootstrap_field form.eft form_group_class="form-group required_field" placeholder="" %}
+        {% bootstrap_field form.eft label_class=form.label_classes.eft placeholder="" %}
       </div>
     </div>
     <div id="scholarship">
       <div class="row">
-        {% bootstrap_field form.bourse_recherche form_group_class="form-group col-md-4 required_field" %}
-        <div id="other-scholarship-container" class="col-md-4 required_field">
+        {% bootstrap_field form.bourse_recherche label_class=form.label_classes.bourse_recherche form_group_class="form-group col-md-4" %}
+        <div id="other-scholarship-container" class="col-md-4">
           {% bootstrap_field form.autre_bourse_recherche placeholder="" %}
         </div>
       </div>
       <div class="row">
-        {% bootstrap_field form.bourse_date_debut form_group_class="form-group col-md-5 required_field" %}
-        {% bootstrap_field_with_tooltip form.bourse_date_fin classes="form-group col-md-4 required_field" %}
+        {% bootstrap_field form.bourse_date_debut label_class=form.label_classes.bourse_date_debut form_group_class="form-group col-md-5" %}
+        {% bootstrap_field_with_tooltip form.bourse_date_fin label_class=form.label_classes.bourse_date_fin classes="form-group col-md-4" %}
       </div>
-      {% bootstrap_field_with_tooltip form.bourse_preuve classes="form-group required_field" %}
+      {% bootstrap_field_with_tooltip form.bourse_preuve label_class=form.label_classes.bourse_preuve %}
     </div>
     <div id="financing-details" class="row">
       <div class="col-md-6">
-        {% bootstrap_field form.duree_prevue placeholder="" form_group_class="form-group required_field" %}
+        {% bootstrap_field form.duree_prevue placeholder="" label_class=form.label_classes.duree_prevue %}
       </div>
       <div class="col-md-6">
-        {% bootstrap_field form.temps_consacre placeholder="" form_group_class="form-group required_field" %}
+        {% bootstrap_field form.temps_consacre placeholder="" label_class=form.label_classes.temps_consacre %}
       </div>
       <div class="col-md-6">
-        {% bootstrap_field_with_tooltip form.est_lie_fnrs_fria_fresh_csc classes="form-group required_field" %}
+        {% bootstrap_field_with_tooltip form.est_lie_fnrs_fria_fresh_csc label_class=form.label_classes.est_lie_fnrs_fria_fresh_csc %}
       </div>
       <div class="col-md-6">
-        {% bootstrap_field form.commentaire_financement form_group_class="form-group" %}
+        {% bootstrap_field form.commentaire_financement label_class=form.label_classes.commentaire_financement %}
       </div>
     </div>
   {% endpanel %}
 
   {% panel _("PhD research project") %}
-    {% bootstrap_field form.titre_projet form_group_class="form-group required_field" placeholder="" %}
-    {% bootstrap_field_with_tooltip form.resume_projet classes="form-group required_field" %}
+    {% bootstrap_field form.titre_projet label_class=form.label_classes.titre_projet placeholder="" %}
+    {% bootstrap_field_with_tooltip form.resume_projet label_class=form.label_classes.resume_projet %}
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field form.langue_redaction_these form_group_class="form-group required_field" %}
+        {% bootstrap_field form.langue_redaction_these label_class=form.label_classes.langue_redaction_these %}
       </div>
     </div>
     <div class="row">
@@ -119,9 +119,9 @@
         website or from your doctoral manager.
       {% endblocktrans %}
     </p>
-    {% bootstrap_field form.documents_projet form_group_class="form-group required_field" %}
+    {% bootstrap_field form.documents_projet label_class=form.label_classes.documents_projet %}
     {% if admission.type_admission == 'ADMISSION' %}
-      {% bootstrap_field form.proposition_programme_doctoral form_group_class="form-group required_field" %}
+      {% bootstrap_field form.proposition_programme_doctoral label_class=form.label_classes.proposition_programme_doctoral %}
     {% endif %}
     {% bootstrap_field_with_tooltip form.projet_formation_complementaire %}
     {% bootstrap_field form.graphe_gantt %}
@@ -129,14 +129,14 @@
   {% endpanel %}
 
   {% panel _("PhD research experience") %}
-    {% bootstrap_field form.projet_doctoral_deja_commence form_group_class="form-group required_field" %}
+    {% bootstrap_field form.projet_doctoral_deja_commence label_class=form.label_classes.projet_doctoral_deja_commence %}
     <div id="deja_commence">
       <div class="row">
         <div class="col-md-6">
-          {% bootstrap_field form.projet_doctoral_institution placeholder="" form_group_class="form-group required_field" %}
+          {% bootstrap_field form.projet_doctoral_institution placeholder="" label_class=form.label_classes.projet_doctoral_institution %}
         </div>
         <div class="col-md-6">
-          {% bootstrap_field form.projet_doctoral_date_debut form_group_class="form-group required_field" %}
+          {% bootstrap_field form.projet_doctoral_date_debut label_class=form.label_classes.projet_doctoral_date_debut %}
         </div>
       </div>
     </div>
@@ -144,10 +144,10 @@
     <div id="previous_experience">
       <div class="row">
         <div class="col-md-6">
-          {% bootstrap_field form.institution placeholder="" form_group_class="form-group required_field" %}
+          {% bootstrap_field form.institution placeholder="" label_class=form.label_classes.institution %}
         </div>
         <div class="col-md-6">
-          {% bootstrap_field form.domaine_these placeholder="" form_group_class="form-group required_field" %}
+          {% bootstrap_field form.domaine_these placeholder="" label_class=form.label_classes.domaine_these %}
         </div>
       </div>
       {% bootstrap_field form.non_soutenue %}
@@ -157,7 +157,7 @@
         </div>
       </div>
       <div id="non-soutenue">
-        {% bootstrap_field form.raison_non_soutenue form_group_class="form-group required_field" placeholder="" %}
+        {% bootstrap_field form.raison_non_soutenue label_class=form.label_classes.raison_non_soutenue placeholder="" %}
       </div>
     </div>
   {% endpanel %}

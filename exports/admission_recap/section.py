@@ -31,6 +31,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -242,9 +243,11 @@ def get_curriculum_section(
             TrainingType.CAPAES.name,
         ]
         and all_foreign_diploma,
-        'display_curriculum': context.proposition.inscription_au_role_obligatoire is True
-        if context.est_proposition_continue
-        else formation.type != TrainingType.BACHELOR.name,
+        'display_curriculum': (
+            context.proposition.inscription_au_role_obligatoire is True
+            if context.est_proposition_continue
+            else formation.type != TrainingType.BACHELOR.name
+        ),
         'require_curriculum': formation.type != TrainingType.BACHELOR.name
         and (context.est_proposition_doctorale or context.est_proposition_generale),
         'specific_questions': specific_questions_by_tab[Onglets.CURRICULUM.name],
@@ -581,9 +584,7 @@ def get_sections(
         pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
-        pdf_sections.append(
-            get_non_educational_experience_section(context, non_educational_experience, load_content)
-        )
+        pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
@@ -595,11 +596,12 @@ def get_sections(
         pdf_sections.append(get_accounting_section(context, load_content))
 
     if context.est_proposition_doctorale:
-        pdf_sections += [
-            get_research_project_section(context, load_content),
-            get_cotutelle_section(context, load_content),
-            get_supervision_section(context, load_content),
-        ]
+        pdf_sections.append(get_research_project_section(context, load_content))
+
+        if context.proposition.est_admission_doctorat:
+            pdf_sections.append(get_cotutelle_section(context, load_content))
+
+        pdf_sections.append(get_supervision_section(context, load_content))
 
     pdf_sections.append(get_confirmation_section(context, load_content))
 

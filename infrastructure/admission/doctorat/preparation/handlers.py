@@ -29,9 +29,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
+    demander_candidat_modifier_ca,
+)
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
@@ -663,5 +667,17 @@ COMMAND_HANDLERS = {
     RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
         cmd,
         doctorat_repository=DoctoratRepository(),
+    ),
+    DemanderCandidatModificationCACommand: lambda msg_bus, cmd: demander_candidat_modifier_ca(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        notification=Notification(),
+    ),
+    SoumettreCACommand: lambda msg_bus, cmd: soumettre_ca(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+        groupe_supervision_repository=GroupeDeSupervisionRepository(),
     ),
 }
