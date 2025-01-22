@@ -55,8 +55,11 @@ from admission.models import (
     GeneralEducationAdmission,
 )
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory, \
+    ContinuingEducationTrainingFactory
+from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory, \
+    GeneralEducationTrainingFactory
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
     ProgramManagerRoleFactory,
@@ -313,7 +316,9 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
     def test_list_education_group_scopes(self):
-        self.client.force_login(user=ProgramManagerRoleFactory().person.user)
+        self.client.force_login(user=ProgramManagerRoleFactory(
+            education_group=GeneralEducationTrainingFactory().education_group,
+        ).person.user)
 
         response = self._do_request()
         self.assertEqual(response.status_code, 200)
@@ -326,6 +331,20 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         response = self._do_request()
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(self.results[0].uuid, response.context['object_list'][0].uuid)
+
+        self.client.force_login(user=ProgramManagerRoleFactory(
+            education_group=DoctorateFactory().education_group,
+        ).person.user)
+
+        response = self._do_request()
+        self.assertEqual(response.status_code, 403)
+
+        self.client.force_login(user=ProgramManagerRoleFactory(
+            education_group=ContinuingEducationTrainingFactory().education_group,
+        ).person.user)
+
+        response = self._do_request()
+        self.assertEqual(response.status_code, 403)
 
     def test_list_with_filter_by_academic_year(self):
         self.client.force_login(user=self.sic_management_user)
