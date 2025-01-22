@@ -35,12 +35,10 @@ from admission.exceptions import MergePDFException
 from admission.exports.utils import admission_generate_pdf
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
-from base.models.student import Student
 from osis_document.api.utils import confirm_remote_upload, launch_post_processing
 from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
+from osis_history.models.history_entry import HistoryEntry
 from osis_profile.models import EducationalExperience
-from osis_signature.enums import SignatureState
-from osis_signature.models import StateHistory
 
 
 def admission_pdf_archive(task_uuid, language=None):
@@ -56,13 +54,14 @@ def admission_pdf_archive(task_uuid, language=None):
             label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
         ).select_related('country')
     }
-    date_envoi = (
-        StateHistory.objects.filter(
-            actor__process=admission.supervision_group,
-            state=SignatureState.INVITED.name,
+    signature_request_history_entry = (
+        HistoryEntry.objects.filter(
+            tags=['proposition', 'supervision', 'status-changed'],
+            object_uuid=admission.uuid,
         )
-        .order_by('created_at')
-        .values('created_at')[:1]
+        .order_by('-created')
+        .only('created')
+        .first()
     )
     experiences = EducationalExperience.objects.filter(person=admission.candidate).annotate(
         credits=models.Sum('educationalexperienceyear__acquired_credit_number'),
@@ -79,7 +78,7 @@ def admission_pdf_archive(task_uuid, language=None):
                 'contact_address': addresses.get(PersonAddressType.CONTACT.name),
                 'residential_address': addresses.get(PersonAddressType.RESIDENTIAL.name),
                 "noma": admission.student_registration_id,
-                "date_envoi_supervision": date_envoi,
+                "date_envoi_supervision": signature_request_history_entry and signature_request_history_entry.created,
                 'allocated_time_label': _("Time allocated for thesis (in %)"),
                 'actors': SupervisionActor.objects.filter(process=admission.supervision_group).order_by('-type'),
                 'experiences': experiences,
