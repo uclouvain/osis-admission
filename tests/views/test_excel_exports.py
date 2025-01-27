@@ -52,13 +52,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.liste import (
-    DemandeRechercheDTO as DemandeDoctoraleRechercheDTO,
-)
-from admission.ddd.admission.dtos.liste import (
-    DemandeRechercheDTO,
-    VisualiseurAdmissionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO as DemandeDoctoraleRechercheDTO
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -114,7 +110,6 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from infrastructure.messages_bus import message_bus_instance
-from parcours_doctoral.ddd.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.scholarship import (
@@ -1349,10 +1344,13 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(values[18], '2020-01-02')
         self.assertEqual(values[19], ModeFiltrageChecklist.INCLUSION.value)
         self.assertEqual(values[20], '{}')
-        self.assertEqual(values[21], '{} - {}'.format(
-            pgettext_lazy('dashboard-category', 'Admission'),
-            pgettext_lazy('dashboard-indicator admission', 'Submitted dossiers'),
-        ))
+        self.assertEqual(
+            values[21],
+            '{} - {}'.format(
+                pgettext_lazy('dashboard-category', 'Admission'),
+                pgettext_lazy('dashboard-indicator admission', 'Submitted dossiers'),
+            ),
+        )
 
         filters = str(
             {

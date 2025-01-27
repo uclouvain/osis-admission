@@ -64,51 +64,27 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.dtos.liste import (
-    DemandeRechercheDTO as TouteDemandeRechercheDTO,
+from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
+    ITableauBordRepositoryAdmissionMixin,
 )
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import (
-    ListerDemandesQuery as ListerDemandesContinuesQuery,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixEdition,
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    OngletsChecklist as OngletsChecklistContinue,
-)
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
-from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
-from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
-)
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
 )
-from admission.ddd.admission.formation_continue.dtos.liste import (
-    DemandeRechercheDTO as DemandeContinueRechercheDTO,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist as OngletsChecklistGenerale,
-)
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
 )
-from admission.forms.admission.filter import (
-    AllAdmissionsFilterForm,
-    ContinuingAdmissionsFilterForm,
-)
+from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.models import AdmissionFormItem
 from admission.templatetags.admission import admission_status
@@ -117,11 +93,8 @@ from base.models.campus import Campus
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from infrastructure.messages_bus import message_bus_instance
-from parcours_doctoral.ddd.read_view.repository.i_tableau_bord import ITableauBordRepository
-from reference.models.country import Country
 from reference.models.country import Country
 from reference.models.scholarship import Scholarship
-
 
 __all__ = [
     'AdmissionListExcelExportView',
@@ -198,7 +171,9 @@ class BaseAdmissionExcelExportView(
 
     def get_row_data_specific_questions_answers(
         self,
-        proposition_dto: Union[TouteDemandeRechercheDTO,],
+        proposition_dto: Union[
+            TouteDemandeRechercheDTO,
+        ],
     ):
         """
         Get the answers of the specific questions of the proposition based on a list of configurations.
@@ -736,9 +711,9 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         dashboard_indicator = formatted_filters.get('indicateur_tableau_bord')
         if dashboard_indicator:
-            mapping_filter_key_value['indicateur_tableau_bord'] = ITableauBordRepository.libelles_indicateurs.get(
-                dashboard_indicator,
-            )
+            mapping_filter_key_value[
+                'indicateur_tableau_bord'
+            ] = ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
 
         # Format boolean values
         # > "Yes" / "No" / ""
