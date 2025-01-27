@@ -53,6 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
 from admission.ddd.admission.doctorat.validation.domain.model.enums import (
     ChoixStatutCDD,
     ChoixStatutSIC,
@@ -330,6 +331,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(
             form.fields['annee_academique'].choices,
             [
+                ('', ALL_FEMININE_EMPTY_CHOICE[0][1]),
                 (2022, '2022-23'),
                 (2021, '2021-22'),
             ],
@@ -407,6 +409,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(form['filtres_etats_checklist'].value(), None)
 
         self.assertEqual(form['liste_travail'].value(), None)
+
+        self.assertEqual(form['indicateur_tableau_bord'].value(), None)
 
     def test_form_initialization_for_a_central_manager_having_one_cdd(self):
         self.client.force_login(user=self.sic_user)
@@ -912,6 +916,34 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                     self.admission_references[2],
                 ],
             )
+
+    def test_filter_by_dashboard_indicator(self):
+        self.client.force_login(user=self.user_with_several_cdds)
+
+        data = {
+            'annee_academique': '2021',
+            'indicateur_tableau_bord': IndicateurTableauBordEnum.ADMISSION_DOSSIER_SOUMIS.name,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(
+                response,
+                [
+                    self.admission_references[1],
+                ],
+            )
+
+        data = {
+            'annee_academique': '2021',
+            'indicateur_tableau_bord': IndicateurTableauBordEnum.PRE_ADMISSION_AUTORISE_SIC.name,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(response, [])
 
     def test_filter_by_submission_date(self):
         self.client.force_login(user=self.user_with_several_cdds)
