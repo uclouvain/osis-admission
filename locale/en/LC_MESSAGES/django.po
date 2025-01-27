@@ -2008,9 +2008,6 @@ msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr ""
 
-msgid "Disabled"
-msgstr ""
-
 msgid "Discard fusion"
 msgstr ""
 
@@ -2229,9 +2226,6 @@ msgid ""
 "leading to two separate diplomas awarded by each signatory university."
 msgstr ""
 
-msgid "Dual or triple degree"
-msgstr ""
-
 msgid "Duplicate experience"
 msgstr ""
 
@@ -2443,9 +2437,6 @@ msgid "Emergency contact (telephone number)"
 msgstr ""
 
 msgid "Employer"
-msgstr ""
-
-msgid "Enabled"
 msgstr ""
 
 msgctxt "admission"
@@ -3601,12 +3592,6 @@ msgstr ""
 msgid "Internal label"
 msgstr ""
 
-msgid "International for doctorate"
-msgstr ""
-
-msgid "International for general education"
-msgstr ""
-
 msgid "International scholarship"
 msgstr ""
 
@@ -3844,9 +3829,6 @@ msgid "Long label in english"
 msgstr ""
 
 msgid "Long label in french"
-msgstr ""
-
-msgid "Long name"
 msgstr ""
 
 msgid "Long-term resident card"
@@ -4327,9 +4309,6 @@ msgid "No one invited"
 msgstr ""
 
 msgid "No pool was found to match."
-msgstr ""
-
-msgid "No scholarship found."
 msgstr ""
 
 msgid "No specific profile"
@@ -5480,10 +5459,6 @@ msgstr ""
 msgid "Scholarship"
 msgstr ""
 
-msgctxt "admission model"
-msgid "Scholarship"
-msgstr ""
-
 msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr ""
@@ -5644,9 +5619,6 @@ msgid "Short label in english"
 msgstr ""
 
 msgid "Short label in french"
-msgstr ""
-
-msgid "Short name"
 msgstr ""
 
 msgid "Show details"

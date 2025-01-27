@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,17 +31,16 @@ from uuid import UUID
 import attr
 
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
-from admission.ddd.admission.dtos.bourse import BourseDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
-from ddd.logic.learning_unit.dtos import PartimSearchDTO
+from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
+from ddd.logic.reference.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
-from .motif_refus import MotifRefusDTO
-from .doctorat_formation import DoctoratFormationDTO
 from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE, ChoixTypeAdmission
 from ..domain.model.enums.checklist import DroitsInscriptionMontant
+from .doctorat_formation import DoctoratFormationDTO
+from .motif_refus import MotifRefusDTO
 
 
 @attr.dataclass(slots=True)

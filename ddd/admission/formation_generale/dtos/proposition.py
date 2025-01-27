@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,9 +29,7 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.formation import BaseFormationDTO, FormationDTO
 from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -39,9 +37,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     DroitsInscriptionMontant,
 )
-from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
+    ConditionComplementaireApprobationDTO,
+)
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
+from ddd.logic.reference.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
 

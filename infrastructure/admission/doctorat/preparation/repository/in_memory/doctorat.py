@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,12 +27,18 @@ from typing import List
 
 from attr import dataclass
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DoctoratNonTrouveException,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
-from admission.ddd.admission.doctorat.preparation.repository.i_doctorat import IDoctoratRepository
+from admission.ddd.admission.doctorat.preparation.repository.i_doctorat import (
+    IDoctoratRepository,
+)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from infrastructure.reference.domain.service.in_memory.bourse import (
+    BourseInMemoryTranslator,
+)
 
 
 @dataclass
@@ -67,10 +73,7 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
 
     @classmethod
     def _get(cls, entity_id: 'DoctoratIdentity') -> 'DoctoratDTO':
-        return next(
-            (dto for dto in cls.dtos if dto.uuid == entity_id.uuid),
-            None
-        )
+        return next((dto for dto in cls.dtos if dto.uuid == entity_id.uuid), None)
 
     @classmethod
     def verifier_existence(cls, entity_id: 'DoctoratIdentity') -> None:
@@ -89,9 +92,7 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
         doctorant = next(d for d in cls.doctorants if d.matricule == matricule_doctorant)  # pragma: no branch
         formation = next(f for f in cls.formations if f.sigle == sigle)  # pragma: no branch
         bourse_recherche_dto = (
-            BourseInMemoryTranslator.get_dto(uuid=str(bourse_recherche_uuid))
-            if bourse_recherche_uuid
-            else None
+            BourseInMemoryTranslator.get_dto(uuid=str(bourse_recherche_uuid)) if bourse_recherche_uuid else None
         )
 
         return DoctoratDTO(
