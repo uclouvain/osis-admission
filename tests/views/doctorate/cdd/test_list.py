@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,40 +35,37 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext, gettext_lazy
 
-from admission.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
-    SIGLE_SCIENCES,
     ENTITY_CLSM,
     ENTITY_SCIENCES,
+    SIGLE_SCIENCES,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
-    ChoixCommissionProximiteCDEouCLSM,
-    ChoixCommissionProximiteCDSS,
-    ChoixSousDomaineSciences,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.doctorat.validation.domain.model.enums import (
+    ChoixStatutCDD,
+    ChoixStatutSIC,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.forms import ALL_EMPTY_CHOICE, ALL_FEMININE_EMPTY_CHOICE
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
     DoctorateReaderRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
-)
-from admission.tests.factories.scholarship import (
-    DoctorateScholarshipFactory,
-    InternationalScholarshipFactory,
-    DoubleDegreeScholarshipFactory,
-    ErasmusMundusScholarshipFactory,
 )
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -81,14 +78,20 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.user import UserFactory
 from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import (
+    DoctorateScholarshipFactory,
+    DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
+)
 
 
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 @freezegun.freeze_time('2022-01-01')
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES_WITHOUT_SEARCH = 26
-    NB_MAX_QUERIES_WITH_SEARCH = 29
+    NB_MAX_QUERIES_WITHOUT_SEARCH = 27
+    NB_MAX_QUERIES_WITH_SEARCH = 30
 
     @classmethod
     def setUpTestData(cls):

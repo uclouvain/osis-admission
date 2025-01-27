@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,64 +31,91 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import OuterRef, Subquery, Prefetch, Case, IntegerField, When
+from django.db.models import Case, IntegerField, OuterRef, Prefetch, Subquery, When
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
-from admission.models.checklist import RefusalReason, FreeAdditionalApprovalCondition
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.builder.formation_identity import (
+    FormationIdentityBuilder,
+)
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.bourse import BourseIdentity
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO, CampusDTO
+from admission.ddd.admission.domain.model.poste_diplomatique import (
+    PosteDiplomatiqueIdentity,
+)
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from admission.ddd.admission.dtos.formation import (
+    BaseFormationDTO,
+    CampusDTO,
+    FormationDTO,
+)
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     DROITS_INSCRIPTION_MONTANT_VALEURS,
-    PoursuiteDeCycle,
-    BesoinDeDerogation,
-    DerogationFinancement,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    BesoinDeDerogation,
+    ChoixStatutPropositionGenerale,
+    DerogationFinancement,
+    PoursuiteDeCycle,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PremierePropositionSoumisesNonTrouveeException,
+    PropositionNonTrouveeException,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
+    ConditionComplementaireApprobationDTO,
+)
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
-from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
-from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
-from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.infrastructure.admission.domain.service.poste_diplomatique import (
+    PosteDiplomatiqueTranslator,
+)
+from admission.infrastructure.admission.formation_generale.repository._comptabilite import (
+    get_accounting_from_admission,
+)
+from admission.infrastructure.admission.repository.proposition import (
+    GlobalPropositionRepository,
+)
 from admission.infrastructure.utils import dto_to_dict
+from admission.models import Accounting, GeneralEducationAdmissionProxy
+from admission.models.checklist import FreeAdditionalApprovalCondition, RefusalReason
+from admission.models.general_education import GeneralEducationAdmission
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
@@ -97,10 +124,13 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
-from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
-from ddd.logic.learning_unit.dtos import PartimSearchDTO
+from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
+from ddd.logic.reference.domain.model.bourse import BourseIdentity
 from epc.models.enums.condition_acces import ConditionAcces
+from infrastructure.reference.domain.service.bourse import BourseTranslator
 from osis_common.ddd.interface import ApplicationService
+from reference.models.enums.scholarship_type import ScholarshipType
+from reference.models.scholarship import Scholarship
 
 
 class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
@@ -237,9 +267,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'reference': entity.reference,
                 'type_demande': entity.type_demande.name,
                 'submitted_at': entity.soumise_le,
-                'double_degree_scholarship': scholarships.get(TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name),
-                'international_scholarship': scholarships.get(TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name),
-                'erasmus_mundus_scholarship': scholarships.get(TypeBourse.ERASMUS_MUNDUS.name),
+                'double_degree_scholarship': scholarships.get(ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION.name),
+                'international_scholarship': scholarships.get(
+                    ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name
+                ),
+                'erasmus_mundus_scholarship': scholarships.get(ScholarshipType.ERASMUS_MUNDUS.name),
                 'is_belgian_bachelor': entity.est_bachelier_belge,
                 'is_external_reorientation': entity.est_reorientation_inscription_externe,
                 'regular_registration_proof': entity.attestation_inscription_reguliere,
@@ -263,19 +295,21 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     or {},
                 },
                 'cycle_pursuit': entity.poursuite_de_cycle.name,
-                'financability_computed_rule': entity.financabilite_regle_calcule.name
-                if entity.financabilite_regle_calcule
-                else '',
-                'financability_computed_rule_situation': entity.financabilite_regle_calcule_situation.name
-                if entity.financabilite_regle_calcule_situation
-                else '',
+                'financability_computed_rule': (
+                    entity.financabilite_regle_calcule.name if entity.financabilite_regle_calcule else ''
+                ),
+                'financability_computed_rule_situation': (
+                    entity.financabilite_regle_calcule_situation.name
+                    if entity.financabilite_regle_calcule_situation
+                    else ''
+                ),
                 'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
                 'financability_rule': entity.financabilite_regle.name if entity.financabilite_regle else '',
                 'financability_established_by': financabilite_etabli_par_person,
                 'financability_established_on': entity.financabilite_etabli_le,
-                'financability_dispensation_status': entity.financabilite_derogation_statut.name
-                if entity.financabilite_derogation_statut
-                else '',
+                'financability_dispensation_status': (
+                    entity.financabilite_derogation_statut.name if entity.financabilite_derogation_statut else ''
+                ),
                 'financability_dispensation_first_notification_on': (
                     entity.financabilite_derogation_premiere_notification_le
                 ),
@@ -308,16 +342,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'admission_requirement': entity.condition_acces.name if entity.condition_acces else '',
                 'admission_requirement_year': entity.millesime_condition_acces
                 and academic_years[entity.millesime_condition_acces],
-                'foreign_access_title_equivalency_type': entity.type_equivalence_titre_acces.name
-                if entity.type_equivalence_titre_acces
-                else '',
+                'foreign_access_title_equivalency_type': (
+                    entity.type_equivalence_titre_acces.name if entity.type_equivalence_titre_acces else ''
+                ),
                 'foreign_access_title_equivalency_restriction_about': entity.information_a_propos_de_la_restriction,
-                'foreign_access_title_equivalency_status': entity.statut_equivalence_titre_acces.name
-                if entity.statut_equivalence_titre_acces
-                else '',
-                'foreign_access_title_equivalency_state': entity.etat_equivalence_titre_acces.name
-                if entity.etat_equivalence_titre_acces
-                else '',
+                'foreign_access_title_equivalency_status': (
+                    entity.statut_equivalence_titre_acces.name if entity.statut_equivalence_titre_acces else ''
+                ),
+                'foreign_access_title_equivalency_state': (
+                    entity.etat_equivalence_titre_acces.name if entity.etat_equivalence_titre_acces else ''
+                ),
                 'foreign_access_title_equivalency_effective_date': entity.date_prise_effet_equivalence_titre_acces,
                 'dispensation_needed': entity.besoin_de_derogation.name if entity.besoin_de_derogation else '',
                 'tuition_fees_amount': entity.droits_inscription_montant,
@@ -369,19 +403,25 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'french_community_study_allowance_application': fr_study_allowance_application,
                 'is_staff_child': entity.comptabilite.enfant_personnel,
                 'staff_child_certificate': entity.comptabilite.attestation_enfant_personnel,
-                'assimilation_situation': entity.comptabilite.type_situation_assimilation.name
-                if entity.comptabilite.type_situation_assimilation
-                else '',
-                'assimilation_1_situation_type': entity.comptabilite.sous_type_situation_assimilation_1.name
-                if entity.comptabilite.sous_type_situation_assimilation_1
-                else '',
+                'assimilation_situation': (
+                    entity.comptabilite.type_situation_assimilation.name
+                    if entity.comptabilite.type_situation_assimilation
+                    else ''
+                ),
+                'assimilation_1_situation_type': (
+                    entity.comptabilite.sous_type_situation_assimilation_1.name
+                    if entity.comptabilite.sous_type_situation_assimilation_1
+                    else ''
+                ),
                 'long_term_resident_card': entity.comptabilite.carte_resident_longue_duree,
                 'cire_unlimited_stay_foreigner_card': entity.comptabilite.carte_cire_sejour_illimite_etranger,
                 'ue_family_member_residence_card': entity.comptabilite.carte_sejour_membre_ue,
                 'ue_family_member_permanent_residence_card': entity.comptabilite.carte_sejour_permanent_membre_ue,
-                'assimilation_2_situation_type': entity.comptabilite.sous_type_situation_assimilation_2.name
-                if entity.comptabilite.sous_type_situation_assimilation_2
-                else '',
+                'assimilation_2_situation_type': (
+                    entity.comptabilite.sous_type_situation_assimilation_2.name
+                    if entity.comptabilite.sous_type_situation_assimilation_2
+                    else ''
+                ),
                 'refugee_a_b_card': entity.comptabilite.carte_a_b_refugie,
                 'refugees_stateless_annex_25_26': entity.comptabilite.annexe_25_26_refugies_apatrides,
                 'registration_certificate': entity.comptabilite.attestation_immatriculation,
@@ -390,20 +430,24 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'subsidiary_protection_decision': entity.comptabilite.decision_protection_subsidiaire,
                 'temporary_protection_decision': entity.comptabilite.decision_protection_temporaire,
                 'a_card': entity.comptabilite.carte_a,
-                'assimilation_3_situation_type': entity.comptabilite.sous_type_situation_assimilation_3.name
-                if entity.comptabilite.sous_type_situation_assimilation_3
-                else '',
+                'assimilation_3_situation_type': (
+                    entity.comptabilite.sous_type_situation_assimilation_3.name
+                    if entity.comptabilite.sous_type_situation_assimilation_3
+                    else ''
+                ),
                 'professional_3_month_residence_permit': entity.comptabilite.titre_sejour_3_mois_professionel,
                 'salary_slips': entity.comptabilite.fiches_remuneration,
                 'replacement_3_month_residence_permit': entity.comptabilite.titre_sejour_3_mois_remplacement,
                 'unemployment_benefit_pension_compensation_proof': unemployment_benefit_pension_proof,
                 'cpas_certificate': entity.comptabilite.attestation_cpas,
-                'relationship': entity.comptabilite.relation_parente.name
-                if entity.comptabilite.relation_parente
-                else '',
-                'assimilation_5_situation_type': entity.comptabilite.sous_type_situation_assimilation_5.name
-                if entity.comptabilite.sous_type_situation_assimilation_5
-                else '',
+                'relationship': (
+                    entity.comptabilite.relation_parente.name if entity.comptabilite.relation_parente else ''
+                ),
+                'assimilation_5_situation_type': (
+                    entity.comptabilite.sous_type_situation_assimilation_5.name
+                    if entity.comptabilite.sous_type_situation_assimilation_5
+                    else ''
+                ),
                 'household_composition_or_birth_certificate': entity.comptabilite.composition_menage_acte_naissance,
                 'tutorship_act': entity.comptabilite.acte_tutelle,
                 'household_composition_or_marriage_certificate': entity.comptabilite.composition_menage_acte_mariage,
@@ -414,20 +458,22 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'parent_3_month_residence_permit': entity.comptabilite.titre_sejour_3_mois_parent,
                 'parent_salary_slips': entity.comptabilite.fiches_remuneration_parent,
                 'parent_cpas_certificate': entity.comptabilite.attestation_cpas_parent,
-                'assimilation_6_situation_type': entity.comptabilite.sous_type_situation_assimilation_6.name
-                if entity.comptabilite.sous_type_situation_assimilation_6
-                else '',
+                'assimilation_6_situation_type': (
+                    entity.comptabilite.sous_type_situation_assimilation_6.name
+                    if entity.comptabilite.sous_type_situation_assimilation_6
+                    else ''
+                ),
                 'cfwb_scholarship_decision': entity.comptabilite.decision_bourse_cfwb,
                 'scholarship_certificate': entity.comptabilite.attestation_boursier,
                 'ue_long_term_stay_identity_document': entity.comptabilite.titre_identite_sejour_longue_duree_ue,
                 'belgium_residence_permit': entity.comptabilite.titre_sejour_belgique,
-                'sport_affiliation': entity.comptabilite.affiliation_sport.name
-                if entity.comptabilite.affiliation_sport
-                else '',
+                'sport_affiliation': (
+                    entity.comptabilite.affiliation_sport.name if entity.comptabilite.affiliation_sport else ''
+                ),
                 'solidarity_student': entity.comptabilite.etudiant_solidaire,
-                'account_number_type': entity.comptabilite.type_numero_compte.name
-                if entity.comptabilite.type_numero_compte
-                else '',
+                'account_number_type': (
+                    entity.comptabilite.type_numero_compte.name if entity.comptabilite.type_numero_compte else ''
+                ),
                 'iban_account_number': entity.comptabilite.numero_compte_iban,
                 'valid_iban': entity.comptabilite.iban_valide,
                 'other_format_account_number': entity.comptabilite.numero_compte_autre_format,
@@ -464,15 +510,21 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
             statut=ChoixStatutPropositionGenerale[admission.status],
-            bourse_internationale_id=BourseIdentity(uuid=str(admission.international_scholarship.uuid))
-            if admission.international_scholarship
-            else None,
-            bourse_double_diplome_id=BourseIdentity(uuid=str(admission.double_degree_scholarship.uuid))
-            if admission.double_degree_scholarship
-            else None,
-            bourse_erasmus_mundus_id=BourseIdentity(uuid=str(admission.erasmus_mundus_scholarship.uuid))
-            if admission.erasmus_mundus_scholarship
-            else None,
+            bourse_internationale_id=(
+                BourseIdentity(uuid=str(admission.international_scholarship.uuid))
+                if admission.international_scholarship
+                else None
+            ),
+            bourse_double_diplome_id=(
+                BourseIdentity(uuid=str(admission.double_degree_scholarship.uuid))
+                if admission.double_degree_scholarship
+                else None
+            ),
+            bourse_erasmus_mundus_id=(
+                BourseIdentity(uuid=str(admission.erasmus_mundus_scholarship.uuid))
+                if admission.erasmus_mundus_scholarship
+                else None
+            ),
             reponses_questions_specifiques=admission.specific_question_answers,
             est_bachelier_belge=admission.is_belgian_bachelor,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
@@ -486,34 +538,38 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             comptabilite=get_accounting_from_admission(admission=admission),
             elements_confirmation=admission.confirmation_elements,
             est_inscription_tardive=admission.late_enrollment,
-            profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile)
-            if admission.submitted_profile
-            else None,
+            profil_soumis_candidat=(
+                ProfilCandidat.from_dict(admission.submitted_profile) if admission.submitted_profile else None
+            ),
             documents_demandes=admission.requested_documents,
             checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
             type_de_refus=admission.refusal_type,
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
-            financabilite_regle_calcule=EtatFinancabilite[admission.financability_computed_rule]
-            if admission.financability_computed_rule
-            else '',
-            financabilite_regle_calcule_situation=SituationFinancabilite[
-                admission.financability_computed_rule_situation
-            ]
-            if admission.financability_computed_rule_situation
-            else '',
+            financabilite_regle_calcule=(
+                EtatFinancabilite[admission.financability_computed_rule]
+                if admission.financability_computed_rule
+                else ''
+            ),
+            financabilite_regle_calcule_situation=(
+                SituationFinancabilite[admission.financability_computed_rule_situation]
+                if admission.financability_computed_rule_situation
+                else ''
+            ),
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
-            financabilite_regle=SituationFinancabilite[admission.financability_rule]
-            if admission.financability_rule
-            else '',
-            financabilite_etabli_par=admission.financability_established_by.global_id
-            if admission.financability_established_by
-            else None,
+            financabilite_regle=(
+                SituationFinancabilite[admission.financability_rule] if admission.financability_rule else ''
+            ),
+            financabilite_etabli_par=(
+                admission.financability_established_by.global_id if admission.financability_established_by else None
+            ),
             financabilite_etabli_le=admission.financability_established_on,
-            financabilite_derogation_statut=DerogationFinancement[admission.financability_dispensation_status]
-            if admission.financability_dispensation_status
-            else '',
+            financabilite_derogation_statut=(
+                DerogationFinancement[admission.financability_dispensation_status]
+                if admission.financability_dispensation_status
+                else ''
+            ),
             financabilite_derogation_premiere_notification_le=(
                 admission.financability_dispensation_first_notification_on
             ),
@@ -535,12 +591,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             certificat_approbation_sic=admission.sic_approval_certificate,
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
             certificat_refus_sic=admission.sic_refusal_certificate,
-            autre_formation_choisie_fac_id=FormationIdentityBuilder.build(
-                sigle=admission.other_training_accepted_by_fac.acronym,
-                annee=admission.other_training_accepted_by_fac.academic_year.year,
-            )
-            if admission.other_training_accepted_by_fac_id
-            else None,
+            autre_formation_choisie_fac_id=(
+                FormationIdentityBuilder.build(
+                    sigle=admission.other_training_accepted_by_fac.acronym,
+                    annee=admission.other_training_accepted_by_fac.academic_year.year,
+                )
+                if admission.other_training_accepted_by_fac_id
+                else None
+            ),
             avec_conditions_complementaires=admission.with_additional_approval_conditions,
             conditions_complementaires_existantes=[
                 ConditionComplementaireApprobationIdentity(uuid=condition.uuid)
@@ -565,30 +623,34 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
             documents_additionnels=admission.additional_documents,
-            poste_diplomatique=PosteDiplomatiqueIdentity(code=admission.diplomatic_post.code)
-            if admission.diplomatic_post
-            else None,
-            condition_acces=ConditionAcces[admission.admission_requirement]
-            if admission.admission_requirement
-            else None,
+            poste_diplomatique=(
+                PosteDiplomatiqueIdentity(code=admission.diplomatic_post.code) if admission.diplomatic_post else None
+            ),
+            condition_acces=(
+                ConditionAcces[admission.admission_requirement] if admission.admission_requirement else None
+            ),
             millesime_condition_acces=admission.admission_requirement_year
             and admission.admission_requirement_year.year,
             information_a_propos_de_la_restriction=admission.foreign_access_title_equivalency_restriction_about,
-            type_equivalence_titre_acces=TypeEquivalenceTitreAcces[admission.foreign_access_title_equivalency_type]
-            if admission.foreign_access_title_equivalency_type
-            else None,
-            statut_equivalence_titre_acces=StatutEquivalenceTitreAcces[
-                admission.foreign_access_title_equivalency_status
-            ]
-            if admission.foreign_access_title_equivalency_status
-            else None,
-            etat_equivalence_titre_acces=EtatEquivalenceTitreAcces[admission.foreign_access_title_equivalency_state]
-            if admission.foreign_access_title_equivalency_state
-            else None,
+            type_equivalence_titre_acces=(
+                TypeEquivalenceTitreAcces[admission.foreign_access_title_equivalency_type]
+                if admission.foreign_access_title_equivalency_type
+                else None
+            ),
+            statut_equivalence_titre_acces=(
+                StatutEquivalenceTitreAcces[admission.foreign_access_title_equivalency_status]
+                if admission.foreign_access_title_equivalency_status
+                else None
+            ),
+            etat_equivalence_titre_acces=(
+                EtatEquivalenceTitreAcces[admission.foreign_access_title_equivalency_state]
+                if admission.foreign_access_title_equivalency_state
+                else None
+            ),
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
-            besoin_de_derogation=BesoinDeDerogation[admission.dispensation_needed]
-            if admission.dispensation_needed
-            else '',
+            besoin_de_derogation=(
+                BesoinDeDerogation[admission.dispensation_needed] if admission.dispensation_needed else ''
+            ),
             droits_inscription_montant=admission.tuition_fees_amount,
             droits_inscription_montant_autre=admission.tuition_fees_amount_other,
             dispense_ou_droits_majores=admission.tuition_fees_dispensation,
@@ -599,9 +661,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nombre_de_mois_de_mobilite=admission.mobility_months_amount,
             doit_se_presenter_en_sic=admission.must_report_to_sic,
             communication_au_candidat=admission.communication_to_the_candidate,
-            poursuite_de_cycle=PoursuiteDeCycle[admission.cycle_pursuit]
-            if admission.cycle_pursuit
-            else PoursuiteDeCycle.TO_BE_DETERMINED,
+            poursuite_de_cycle=(
+                PoursuiteDeCycle[admission.cycle_pursuit]
+                if admission.cycle_pursuit
+                else PoursuiteDeCycle.TO_BE_DETERMINED
+            ),
             poursuite_de_cycle_a_specifier=admission.training.education_group_type.name == TrainingType.BACHELOR.name,
             auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
             doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
@@ -637,47 +701,57 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
                 date_debut=admission.training.academic_year.start_date,
-                intitule=admission.training.title
-                if get_language() == settings.LANGUAGE_CODE_FR
-                else admission.training.title_english,
+                intitule=(
+                    admission.training.title
+                    if get_language() == settings.LANGUAGE_CODE_FR
+                    else admission.training.title_english
+                ),
                 intitule_fr=admission.training.title,
                 intitule_en=admission.training.title_english,
-                campus=CampusDTO(
-                    uuid=campus.uuid,
-                    nom=campus.name,
-                    code_postal=campus.postal_code,
-                    ville=campus.city,
-                    pays_iso_code=campus.country.iso_code if campus.country else '',
-                    nom_pays=campus.country.name if campus.country else '',
-                    rue=campus.street,
-                    numero_rue=campus.street_number,
-                    boite_postale=campus.postal_box,
-                    localisation=campus.location,
-                    email_inscription_sic=campus.sic_enrollment_email,
-                )
-                if campus
-                else None,
+                campus=(
+                    CampusDTO(
+                        uuid=campus.uuid,
+                        nom=campus.name,
+                        code_postal=campus.postal_code,
+                        ville=campus.city,
+                        pays_iso_code=campus.country.iso_code if campus.country else '',
+                        nom_pays=campus.country.name if campus.country else '',
+                        rue=campus.street,
+                        numero_rue=campus.street_number,
+                        boite_postale=campus.postal_box,
+                        localisation=campus.location,
+                        email_inscription_sic=campus.sic_enrollment_email,
+                    )
+                    if campus
+                    else None
+                ),
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
-                campus_inscription=CampusDTO(
-                    uuid=admission.training.enrollment_campus.uuid,
-                    nom=admission.training.enrollment_campus.name,
-                    code_postal=admission.training.enrollment_campus.postal_code,
-                    ville=admission.training.enrollment_campus.city,
-                    pays_iso_code=admission.training.enrollment_campus.country.iso_code
-                    if admission.training.enrollment_campus.country
-                    else '',
-                    nom_pays=admission.training.enrollment_campus.country.name
-                    if admission.training.enrollment_campus.country
-                    else '',
-                    rue=admission.training.enrollment_campus.street,
-                    numero_rue=admission.training.enrollment_campus.street_number,
-                    boite_postale=admission.training.enrollment_campus.postal_box,
-                    localisation=admission.training.enrollment_campus.location,
-                    email_inscription_sic=admission.training.enrollment_campus.sic_enrollment_email,
-                )
-                if admission.training.enrollment_campus
-                else None,
+                campus_inscription=(
+                    CampusDTO(
+                        uuid=admission.training.enrollment_campus.uuid,
+                        nom=admission.training.enrollment_campus.name,
+                        code_postal=admission.training.enrollment_campus.postal_code,
+                        ville=admission.training.enrollment_campus.city,
+                        pays_iso_code=(
+                            admission.training.enrollment_campus.country.iso_code
+                            if admission.training.enrollment_campus.country
+                            else ''
+                        ),
+                        nom_pays=(
+                            admission.training.enrollment_campus.country.name
+                            if admission.training.enrollment_campus.country
+                            else ''
+                        ),
+                        rue=admission.training.enrollment_campus.street,
+                        numero_rue=admission.training.enrollment_campus.street_number,
+                        boite_postale=admission.training.enrollment_campus.postal_box,
+                        localisation=admission.training.enrollment_campus.location,
+                        email_inscription_sic=admission.training.enrollment_campus.sic_enrollment_email,
+                    )
+                    if admission.training.enrollment_campus
+                    else None
+                ),
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
                 credits=admission.training.credits,
@@ -685,15 +759,21 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
-            bourse_double_diplome=BourseTranslator.build_dto(admission.double_degree_scholarship)
-            if admission.double_degree_scholarship
-            else None,
-            bourse_internationale=BourseTranslator.build_dto(admission.international_scholarship)
-            if admission.international_scholarship
-            else None,
-            bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
-            if admission.erasmus_mundus_scholarship
-            else None,
+            bourse_double_diplome=(
+                BourseTranslator.build_dto(admission.double_degree_scholarship)
+                if admission.double_degree_scholarship
+                else None
+            ),
+            bourse_internationale=(
+                BourseTranslator.build_dto(admission.international_scholarship)
+                if admission.international_scholarship
+                else None
+            ),
+            bourse_erasmus_mundus=(
+                BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
+                if admission.erasmus_mundus_scholarship
+                else None
+            ),
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
@@ -713,9 +793,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             financabilite_regle_calcule_situation=admission.financability_computed_rule_situation,
             financabilite_regle_calcule_le=admission.financability_computed_rule_on,
             financabilite_regle=admission.financability_rule,
-            financabilite_etabli_par=admission.financability_established_by.global_id
-            if admission.financability_established_by
-            else None,
+            financabilite_etabli_par=(
+                admission.financability_established_by.global_id if admission.financability_established_by else None
+            ),
             financabilite_etabli_le=admission.financability_established_on,
             financabilite_derogation_statut=admission.financability_dispensation_status,
             financabilite_derogation_premiere_notification_le=(
@@ -740,9 +820,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
             certificat_refus_sic=admission.sic_refusal_certificate,
             documents_additionnels=admission.additional_documents,
-            poste_diplomatique=PosteDiplomatiqueTranslator.build_dto(admission.diplomatic_post)
-            if admission.diplomatic_post
-            else None,
+            poste_diplomatique=(
+                PosteDiplomatiqueTranslator.build_dto(admission.diplomatic_post) if admission.diplomatic_post else None
+            ),
             doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
             visa_etudes_d=admission.student_visa_d,
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
@@ -767,23 +847,27 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             photo_identite_candidat=admission.candidate.id_photo,
             adresse_email_candidat=admission.candidate.private_email,
             langue_contact_candidat=admission.candidate.language,
-            nationalite_candidat=getattr(
-                admission.candidate.country_of_citizenship,
-                'name' if is_french_language else 'name_en',
-            )
-            if admission.candidate.country_of_citizenship
-            else '',
-            nationalite_candidat_fr=admission.candidate.country_of_citizenship.name
-            if admission.candidate.country_of_citizenship
-            else '',
-            nationalite_candidat_en=admission.candidate.country_of_citizenship.name_en
-            if admission.candidate.country_of_citizenship
-            else '',
+            nationalite_candidat=(
+                getattr(
+                    admission.candidate.country_of_citizenship,
+                    'name' if is_french_language else 'name_en',
+                )
+                if admission.candidate.country_of_citizenship
+                else ''
+            ),
+            nationalite_candidat_fr=(
+                admission.candidate.country_of_citizenship.name if admission.candidate.country_of_citizenship else ''
+            ),
+            nationalite_candidat_en=(
+                admission.candidate.country_of_citizenship.name_en if admission.candidate.country_of_citizenship else ''
+            ),
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
-            nationalite_candidat_code_iso=admission.candidate.country_of_citizenship.iso_code
-            if admission.candidate.country_of_citizenship
-            else '',
+            nationalite_candidat_code_iso=(
+                admission.candidate.country_of_citizenship.iso_code
+                if admission.candidate.country_of_citizenship
+                else ''
+            ),
             poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
@@ -794,13 +878,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             fraudeur_ares=False,  # TODO
             non_financable=False,  # TODO,
             est_inscription_tardive=admission.late_enrollment,
-            profil_soumis_candidat=ProfilCandidatDTO.from_dict(
-                dict_profile=admission.submitted_profile,
-                nom_pays_nationalite=admission.submitted_profile_country_of_citizenship_name,  # from annotation
-                nom_pays_adresse=admission.submitted_profile_country_name,  # from annotation
-            )
-            if admission.submitted_profile
-            else None,
+            profil_soumis_candidat=(
+                ProfilCandidatDTO.from_dict(
+                    dict_profile=admission.submitted_profile,
+                    nom_pays_nationalite=admission.submitted_profile_country_of_citizenship_name,  # from annotation
+                    nom_pays_adresse=admission.submitted_profile_country_name,  # from annotation
+                )
+                if admission.submitted_profile
+                else None
+            ),
             type_de_refus=admission.refusal_type,
             motifs_refus=[
                 MotifRefusDTO(motif=mark_safe(reason.name), categorie=reason.category.name)
@@ -810,17 +896,21 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 MotifRefusDTO(motif=reason, categorie=pgettext('admission', 'Other reasons'))
                 for reason in admission.other_refusal_reasons
             ],
-            autre_formation_choisie_fac=BaseFormationDTO(
-                sigle=admission.other_training_accepted_by_fac.acronym,
-                annee=admission.other_training_accepted_by_fac.academic_year.year,
-                uuid=admission.other_training_accepted_by_fac.uuid,
-                intitule=admission.other_training_accepted_by_fac.title
-                if get_language() == settings.LANGUAGE_CODE_FR
-                else admission.other_training_accepted_by_fac.title_english,
-                lieu_enseignement=admission.other_training_accepted_by_fac_teaching_campus,  # From annotation
-            )
-            if admission.other_training_accepted_by_fac_id
-            else None,
+            autre_formation_choisie_fac=(
+                BaseFormationDTO(
+                    sigle=admission.other_training_accepted_by_fac.acronym,
+                    annee=admission.other_training_accepted_by_fac.academic_year.year,
+                    uuid=admission.other_training_accepted_by_fac.uuid,
+                    intitule=(
+                        admission.other_training_accepted_by_fac.title
+                        if get_language() == settings.LANGUAGE_CODE_FR
+                        else admission.other_training_accepted_by_fac.title_english
+                    ),
+                    lieu_enseignement=admission.other_training_accepted_by_fac_teaching_campus,  # From annotation
+                )
+                if admission.other_training_accepted_by_fac_id
+                else None
+            ),
             avec_conditions_complementaires=admission.with_additional_approval_conditions,
             conditions_complementaires=[
                 ConditionComplementaireApprobationDTO(
@@ -849,9 +939,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
             condition_acces=admission.admission_requirement,
-            millesime_condition_acces=admission.admission_requirement_year.year
-            if admission.admission_requirement_year
-            else None,
+            millesime_condition_acces=(
+                admission.admission_requirement_year.year if admission.admission_requirement_year else None
+            ),
             type_equivalence_titre_acces=admission.foreign_access_title_equivalency_type,
             information_a_propos_de_la_restriction=admission.foreign_access_title_equivalency_restriction_about,
             statut_equivalence_titre_acces=admission.foreign_access_title_equivalency_status,

@@ -26,7 +26,7 @@ repos:
         files: \.(py|html)$
         args: [ --multiline, --negate ]
         exclude: '^(migrations/\w+|.*__init__).py'
-        entry: '2015\-2024'
+        entry: '2015\-2025'
         language: pygrep
 
       - id: diff-quality

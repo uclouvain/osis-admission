@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.112
+  version: 1.0.113
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4234,107 +4234,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - autocomplete
-  /autocomplete/{scholarship_type}/scholarship:
-    get:
-      operationId: listScholarships
-      description: Autocomplete scholarships
-      parameters:
-      - name: scholarship_type
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: The term to search the scholarship on (short or long name)
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                - count
-                - results
-                properties:
-                  count:
-                    type: integer
-                    example: 123
-                  next:
-                    type: string
-                    nullable: true
-                    format: uri
-                    example: http://api.example.org/accounts/?offset=400&limit=100
-                  previous:
-                    type: string
-                    nullable: true
-                    format: uri
-                    example: http://api.example.org/accounts/?offset=200&limit=100
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Scholarship'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - autocomplete
-  /scholarship/{uuid}:
-    get:
-      operationId: retrieveScholarship
-      description: Retrieves a scholarship
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: A UUID string identifying this Bourse.
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Scholarship'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - scholarship
   /campus:
     get:
       operationId: listCampus
@@ -8744,28 +8643,6 @@ components:
       - name_en
       - email
       - countries_iso_codes
-    Scholarship:
-      type: object
-      properties:
-        uuid:
-          type: string
-          readOnly: true
-        short_name:
-          type: string
-          maxLength: 50
-        long_name:
-          type: string
-          maxLength: 255
-        type:
-          enum:
-          - DOUBLE_TRIPLE_DIPLOMATION
-          - BOURSE_INTERNATIONALE_DOCTORAT
-          - BOURSE_INTERNATIONALE_FORMATION_GENERALE
-          - ERASMUS_MUNDUS
-          type: string
-      required:
-      - short_name
-      - type
     Campus:
       type: object
       properties:

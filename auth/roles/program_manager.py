@@ -72,7 +72,9 @@ class ProgramManager(EducationGroupRoleModel):
     def rule_set(cls):
         ruleset = {
             # Listings
-            'admission.view_enrolment_applications': rules.always_allow,
+            'admission.view_enrolment_applications': has_education_group_of_types(
+                *AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES,
+            ),
             'admission.view_doctorate_enrolment_applications': has_education_group_of_types(
                 *AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES,
             ),

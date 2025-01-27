@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,7 +30,9 @@ from admission.ddd.admission.commands import (
     RechercherParcoursAnterieurQuery,
 )
 from admission.ddd.admission.formation_generale.commands import *
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
     recuperer_pdf_temporaire_decision_sic,
@@ -48,7 +50,9 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
-from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import (
+    retyper_document,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
@@ -67,64 +71,106 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
-from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
+from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import (
+    rechercher_parcours_anterieur,
+)
 from admission.ddd.admission.use_case.write import (
-    initialiser_emplacement_document_libre_non_reclamable,
-    initialiser_emplacement_document_libre_a_reclamer,
-    initialiser_emplacement_document_a_reclamer,
     annuler_reclamation_emplacement_document,
+    initialiser_emplacement_document_a_reclamer,
+    initialiser_emplacement_document_libre_a_reclamer,
+    initialiser_emplacement_document_libre_non_reclamable,
     modifier_reclamation_emplacement_document,
-    supprimer_emplacement_document,
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
+    supprimer_emplacement_document,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
-from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
-from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.domain.service.calendrier_inscription import (
+    CalendrierInscription,
+)
+from admission.infrastructure.admission.domain.service.elements_confirmation import (
+    ElementsConfirmation,
+)
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
-from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
-from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.domain.service.historique import (
+    Historique as HistoriqueGlobal,
+)
+from admission.infrastructure.admission.domain.service.maximum_propositions import (
+    MaximumPropositionsAutorisees,
+)
+from admission.infrastructure.admission.domain.service.poste_diplomatique import (
+    PosteDiplomatiqueTranslator,
+)
+from admission.infrastructure.admission.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import (
+    ComptabiliteTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.formation import (
+    FormationGeneraleTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.historique import (
     Historique as HistoriqueFormationGenerale,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.inscription_tardive import InscriptionTardive
-from admission.infrastructure.admission.formation_generale.domain.service.notification import Notification
+from admission.infrastructure.admission.formation_generale.domain.service.inscription_tardive import (
+    InscriptionTardive,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.notification import (
+    Notification,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.paiement_frais_dossier import (
     PaiementFraisDossier,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import PDFGeneration
+from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import (
+    PDFGeneration,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.reference import ReferenceTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.taches_techniques import TachesTechniques
+from admission.infrastructure.admission.formation_generale.domain.service.reference import (
+    ReferenceTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.taches_techniques import (
+    TachesTechniques,
+)
 from admission.infrastructure.admission.formation_generale.repository.emplacement_document import (
     EmplacementDocumentRepository,
 )
-from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.infrastructure.admission.formation_generale.repository.proposition import (
+    PropositionRepository,
+)
 from admission.infrastructure.admission.repository.digit import DigitRepository
-from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from admission.infrastructure.admission.repository.titre_acces_selectionnable import (
+    TitreAccesSelectionnableRepository,
+)
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
-from infrastructure.financabilite.domain.service.financabilite import FinancabiliteFetcher
-from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
-from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
-from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
+from infrastructure.financabilite.domain.service.financabilite import (
+    FinancabiliteFetcher,
+)
+from infrastructure.reference.domain.service.bourse import BourseTranslator
+from infrastructure.shared_kernel.academic_year.repository.academic_year import (
+    AcademicYearRepository,
+)
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import (
+    UclouvainCampusRepository,
+)
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
+    PersonneConnueUclTranslator,
+)
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
+    ExperienceParcoursInterneTranslator,
+)
 
 
 def _call_if_digit_switch_active(callable_fn):
@@ -132,6 +178,7 @@ def _call_if_digit_switch_active(callable_fn):
         return callable_fn()
     else:
         import logging
+
         from django.conf import settings
 
         logger = logging.getLogger(settings.DEFAULT_LOGGER)

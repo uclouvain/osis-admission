@@ -238,6 +238,12 @@ msgstr "Admission"
 msgid "AGREGATION"
 msgstr ""
 
+msgid "ANCIENS_DROITS_MAJORES_2505"
+msgstr ""
+
+msgid "ANCIENS_DROITS_MAJORES_4175"
+msgstr ""
+
 msgid "AUTRE"
 msgstr ""
 
@@ -1796,9 +1802,6 @@ msgstr ""
 msgid "DISPENSE_VCRC"
 msgstr ""
 
-msgid "DROITS_MAJORES"
-msgstr ""
-
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr ""
 
@@ -2003,9 +2006,6 @@ msgstr ""
 
 msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
-msgstr ""
-
-msgid "Disabled"
 msgstr ""
 
 msgid "Discard fusion"
@@ -2226,9 +2226,6 @@ msgid ""
 "leading to two separate diplomas awarded by each signatory university."
 msgstr ""
 
-msgid "Dual or triple degree"
-msgstr ""
-
 msgid "Duplicate experience"
 msgstr ""
 
@@ -2440,9 +2437,6 @@ msgid "Emergency contact (telephone number)"
 msgstr ""
 
 msgid "Employer"
-msgstr ""
-
-msgid "Enabled"
 msgstr ""
 
 msgctxt "admission"
@@ -3598,12 +3592,6 @@ msgstr ""
 msgid "Internal label"
 msgstr ""
 
-msgid "International for doctorate"
-msgstr ""
-
-msgid "International for general education"
-msgstr ""
-
 msgid "International scholarship"
 msgstr ""
 
@@ -3843,9 +3831,6 @@ msgstr ""
 msgid "Long label in french"
 msgstr ""
 
-msgid "Long name"
-msgstr ""
-
 msgid "Long-term resident card"
 msgstr ""
 
@@ -3976,12 +3961,6 @@ msgstr ""
 
 msgctxt "tab"
 msgid "Management"
-msgstr ""
-
-msgid "Management of the continuing enrolment applications"
-msgstr ""
-
-msgid "Management of the doctorate enrolments"
 msgstr ""
 
 msgid "Management of the enrolment applications"
@@ -4330,9 +4309,6 @@ msgid "No one invited"
 msgstr ""
 
 msgid "No pool was found to match."
-msgstr ""
-
-msgid "No scholarship found."
 msgstr ""
 
 msgid "No specific profile"
@@ -5483,10 +5459,6 @@ msgstr ""
 msgid "Scholarship"
 msgstr ""
 
-msgctxt "admission model"
-msgid "Scholarship"
-msgstr ""
-
 msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr ""
@@ -5647,9 +5619,6 @@ msgid "Short label in english"
 msgstr ""
 
 msgid "Short label in french"
-msgstr ""
-
-msgid "Short name"
 msgstr ""
 
 msgid "Show details"

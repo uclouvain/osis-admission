@@ -289,6 +289,12 @@ msgstr "Admission"
 msgid "AGREGATION"
 msgstr "279 € - Agrégation"
 
+msgid "ANCIENS_DROITS_MAJORES_2505"
+msgstr "2505 € - Anciens droits majorés"
+
+msgid "ANCIENS_DROITS_MAJORES_4175"
+msgstr "4175 € - Anciens droits majorés"
+
 msgid "AUTRE"
 msgstr "Autre"
 
@@ -1984,9 +1990,6 @@ msgstr "Dispense UNIV"
 msgid "DISPENSE_VCRC"
 msgstr "Dispense VCRC"
 
-msgid "DROITS_MAJORES"
-msgstr "4175 € - Droits majorés"
-
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr "Droits majorés demandés"
 
@@ -2196,9 +2199,6 @@ msgstr "Directeur du Service des inscriptions Saint-Louis Bruxelles"
 msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
-
-msgid "Disabled"
-msgstr "Désactivé"
 
 msgid "Discard fusion"
 msgstr "Rejeter la fusion"
@@ -2435,9 +2435,6 @@ msgstr ""
 "La double diplomation concerne une formation conjointe entre deux ou "
 "plusieurs universités, qui débouchera sur l'obtention de deux diplômes "
 "distincts fournis par chaque université signataire."
-
-msgid "Dual or triple degree"
-msgstr "Double ou triple diplomation"
 
 msgid "Duplicate experience"
 msgstr "Dupliquer l'expérience"
@@ -2693,9 +2690,6 @@ msgstr "Contact en cas d'urgence (numéro de téléphone)"
 
 msgid "Employer"
 msgstr "Employeur"
-
-msgid "Enabled"
-msgstr "Activé"
 
 msgctxt "admission"
 msgid "End"
@@ -4042,12 +4036,6 @@ msgstr "Les expériences internes à choisir comme des titres d'accès"
 msgid "Internal label"
 msgstr "Label interne"
 
-msgid "International for doctorate"
-msgstr "Internationale pour les doctorats"
-
-msgid "International for general education"
-msgstr "Internationale pour les formation générales"
-
 msgid "International scholarship"
 msgstr "Bourse internationale"
 
@@ -4298,9 +4286,6 @@ msgstr "Libellé long en anglais"
 msgid "Long label in french"
 msgstr "Libellé long en français"
 
-msgid "Long name"
-msgstr "Nom long"
-
 msgid "Long-term resident card"
 msgstr "Carte de résident longue durée"
 
@@ -4472,12 +4457,6 @@ msgstr "Masculin"
 msgctxt "tab"
 msgid "Management"
 msgstr "Gestion"
-
-msgid "Management of the continuing enrolment applications"
-msgstr "Gestion des demandes d'inscription en formation continue"
-
-msgid "Management of the doctorate enrolments"
-msgstr "Gestion des demandes d'inscription en doctorat"
 
 msgid "Management of the enrolment applications"
 msgstr "Gestion des demandes d'inscription"
@@ -4728,7 +4707,7 @@ msgid "NOT_INVITED"
 msgstr "Pas encore invité à signer"
 
 msgid "NOUVEAUX_DROITS_MAJORES"
-msgstr "2505 € - Nouveaux droits majorés"
+msgstr "5010 € - Nouveaux droits majorés"
 
 msgid "Name"
 msgstr "Nom"
@@ -4847,9 +4826,6 @@ msgstr "Aucun invité"
 
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
-
-msgid "No scholarship found."
-msgstr "Bourse non trouvée."
 
 msgid "No specific profile"
 msgstr "Pas de profil particulier"
@@ -6071,10 +6047,6 @@ msgstr "Enregistrer la proposition de fusion"
 msgid "Scholarship"
 msgstr "Boursier"
 
-msgctxt "admission model"
-msgid "Scholarship"
-msgstr "Bourse"
-
 msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr "Bourse"
@@ -6238,9 +6210,6 @@ msgstr "Libellé court en anglais"
 
 msgid "Short label in french"
 msgstr "Libellé court en français"
-
-msgid "Short name"
-msgstr "Nom court"
 
 msgid "Show details"
 msgstr "Voir le détail"
@@ -7547,7 +7516,7 @@ msgid "True"
 msgstr "Vrai"
 
 msgid "Tuition fees amount"
-msgstr "Montant des droits d'inscriptions"
+msgstr "Montant des droits d'inscription"
 
 msgid "Tutorship act"
 msgstr "Acte de tutelle"

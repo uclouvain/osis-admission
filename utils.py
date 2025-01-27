@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Union, Iterable, List
+from typing import Dict, Iterable, List, Union
 
 import weasyprint
 from django.conf import settings
@@ -36,34 +36,45 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.db.models import QuerySet, F
+from django.db.models import F, QuerySet
 from django.shortcuts import resolve_url
 from django.utils import timezone
-from django.utils.translation import pgettext, override, get_language, gettext
+from django.utils.translation import get_language, gettext, override, pgettext
 from django_htmx.http import trigger_client_event
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
+from admission.auth.roles.program_manager import (
+    ProgramManager as AdmissionProgramManager,
+)
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import CONTEXT_CONTINUING, CONTEXT_GENERAL, CONTEXT_DOCTORATE
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AnneesCurriculumNonSpecifieesException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
+)
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    VerifierCurriculumApresSoumissionQuery,
+)
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
+)
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
-    Scholarship,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    AnneesCurriculumNonSpecifieesException,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.formation_generale.commands import VerifierCurriculumApresSoumissionQuery
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
@@ -78,19 +89,22 @@ from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
+)
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 from reference.models.country import Country
 from reference.models.language import Language
+from reference.models.scholarship import Scholarship
 
 
 def get_cached_admission_perm_obj(admission_uuid):
@@ -303,10 +317,12 @@ def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionn
 
 def get_training_url(training_type, training_acronym, partial_training_acronym, suffix):
     # Circular import otherwise
+    from admission.constants import (
+        CONTEXT_CONTINUING,
+        CONTEXT_DOCTORATE,
+        CONTEXT_GENERAL,
+    )
     from infrastructure.messages_bus import message_bus_instance
-    from admission.constants import CONTEXT_CONTINUING
-    from admission.constants import CONTEXT_GENERAL
-    from admission.constants import CONTEXT_DOCTORATE
 
     if training_type == TrainingType.PHD.name:
         return (
@@ -423,9 +439,11 @@ def get_access_titles_names(
             # Curriculum experiences
             if isinstance(experience, ExperienceAcademiqueDTO):
                 experience_name = '{title} ({year}) - {institute}'.format(
-                    title=f'{experience.nom_formation} ({experience.nom_formation_equivalente_communaute_fr})'
-                    if experience.nom_formation_equivalente_communaute_fr
-                    else experience.nom_formation,
+                    title=(
+                        f'{experience.nom_formation} ({experience.nom_formation_equivalente_communaute_fr})'
+                        if experience.nom_formation_equivalente_communaute_fr
+                        else experience.nom_formation
+                    ),
                     year=format_academic_year(access_title.annee),
                     institute=experience.nom_institut,
                 )
@@ -445,7 +463,11 @@ def copy_documents(objs):
     Create copies of the files of the specified objects and affect them to the specified objects.
     :param objs: The list of objects.
     """
-    from osis_document.api.utils import get_several_remote_metadata, get_remote_tokens, documents_remote_duplicate
+    from osis_document.api.utils import (
+        documents_remote_duplicate,
+        get_remote_tokens,
+        get_several_remote_metadata,
+    )
     from osis_document.contrib import FileField
     from osis_document.utils import generate_filename
 

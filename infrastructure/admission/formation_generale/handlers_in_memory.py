@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,9 @@
 ##############################################################################
 
 from admission.ddd.admission.formation_generale.commands import *
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
@@ -49,7 +51,9 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
-from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import (
+    retyper_document,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
@@ -69,19 +73,18 @@ from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
 from admission.ddd.admission.use_case.write import (
-    initialiser_emplacement_document_libre_non_reclamable,
-    initialiser_emplacement_document_a_reclamer,
     annuler_reclamation_emplacement_document,
+    initialiser_emplacement_document_a_reclamer,
+    initialiser_emplacement_document_libre_a_reclamer,
+    initialiser_emplacement_document_libre_non_reclamable,
     modifier_reclamation_emplacement_document,
-    supprimer_emplacement_document,
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
-    initialiser_emplacement_document_libre_a_reclamer,
+    supprimer_emplacement_document,
 )
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
@@ -97,11 +100,15 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
 from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryFactory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.domain.service.in_memory.titres_acces import (
+    TitresAccesInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.unites_enseignement_translator import (
     UnitesEnseignementInMemoryTranslator,
 )
@@ -135,7 +142,9 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.repository.in_memory.digit import DigitInMemoryRepository
+from admission.infrastructure.admission.repository.in_memory.digit import (
+    DigitInMemoryRepository,
+)
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -145,9 +154,18 @@ from admission.infrastructure.admission.repository.in_memory.titre_acces_selecti
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import (
     EmailDestinataireInMemoryRepository,
 )
-from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
+from infrastructure.financabilite.domain.service.in_memory.financabilite import (
+    FinancabiliteInMemoryFetcher,
+)
+from infrastructure.reference.domain.service.in_memory.bourse import (
+    BourseInMemoryTranslator,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
+from infrastructure.shared_kernel.campus.repository.in_memory.campus import (
+    UclouvainCampusInMemoryRepository,
+)
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
