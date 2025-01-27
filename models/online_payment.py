@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from django.db import models
-from django.utils.translation import gettext_noop, gettext_lazy, pgettext_lazy
+from django.utils.translation import pgettext_lazy
 
 from admission.models.base import BaseAdmission
 from base.models.utils.utils import ChoiceEnum
@@ -85,6 +85,6 @@ class OnlinePayment(models.Model):
     creation_date = models.DateTimeField()
     updated_date = models.DateTimeField()
     dashboard_url = models.URLField()
-    checkout_url = models.URLField(blank=True)
+    checkout_url = models.URLField(blank=True, max_length=255)
     payment_url = models.URLField()
     amount = models.DecimalField(decimal_places=2, max_digits=6)
