@@ -39,7 +39,6 @@ from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
@@ -50,6 +49,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
     AbsenceDeDetteNonCompleteeDoctoratException,
+    DetailProjetNonCompleteException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -60,6 +60,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
 )
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -82,7 +83,6 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from base.views.learning_achievement import update
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory
@@ -511,12 +511,22 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
+            type=ChoixTypeAdmission.ADMISSION.name,
+        )
+        cls.pre_admission = DoctorateAdmissionFactory(
+            candidate=cls.admission.candidate,
+            training=cls.admission.training,
+            supervision_group=_ProcessFactory(),
+            cotutelle=True,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+            project_title='',
         )
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
         cls.url = resolve_url("verify-project", uuid=cls.admission.uuid)
+        cls.pre_admission_url = resolve_url("verify-project", uuid=cls.pre_admission.uuid)
 
     @mock.patch(
         'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
@@ -563,6 +573,32 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()[0]['status_code'], PromoteurDeReferenceManquantException.status_code)
+
+    def test_verify_project_using_api_for_a_pre_admission(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.pre_admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertCountEqual(
+            status_codes,
+            [
+                PromoteurManquantException.status_code,
+                PromoteurDeReferenceManquantException.status_code,
+                DetailProjetNonCompleteException.status_code,
+            ],
+        )
+
+        PromoterFactory(process=self.pre_admission.supervision_group, is_reference_promoter=True)
+
+        self.pre_admission.project_title = 'Title'
+        self.pre_admission.save(update_fields=['project_title'])
+
+        response = self.client.get(self.pre_admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
 
     @mock.patch(
         'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',

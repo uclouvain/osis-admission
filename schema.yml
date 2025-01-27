@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.110
+  version: 1.0.112
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4612,6 +4612,41 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/doctorate/{uuid}/supervision/submit-ca:
+    post:
+      operationId: submit_ca
+      description: Submit the new CA
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/doctorate/{uuid}/supervision/request-signatures:
     post:
       operationId: create_signatures
@@ -5292,6 +5327,8 @@ components:
                     type: string
                   sigle_entite_gestion:
                     type: string
+                  intitule_entite_gestion:
+                    type: string
                   campus:
                     type: string
                     default: ''
@@ -5306,6 +5343,7 @@ components:
                 - annee
                 - intitule
                 - sigle_entite_gestion
+                - intitule_entite_gestion
                 - type
               matricule_candidat:
                 type: string
@@ -5804,6 +5842,8 @@ components:
               type: string
             sigle_entite_gestion:
               type: string
+            intitule_entite_gestion:
+              type: string
             campus:
               type: string
               default: ''
@@ -5818,6 +5858,7 @@ components:
           - annee
           - intitule
           - sigle_entite_gestion
+          - intitule_entite_gestion
           - type
         matricule_candidat:
           type: string
@@ -6608,6 +6649,8 @@ components:
               type: string
             sigle_entite_gestion:
               type: string
+            intitule_entite_gestion:
+              type: string
             campus:
               type: string
               default: ''
@@ -6622,6 +6665,7 @@ components:
           - annee
           - intitule
           - sigle_entite_gestion
+          - intitule_entite_gestion
           - type
         annee_calculee:
           type: integer
@@ -7461,6 +7505,8 @@ components:
                   type: string
                 sigle_entite_gestion:
                   type: string
+                intitule_entite_gestion:
+                  type: string
                 campus:
                   type: string
                   default: ''
@@ -7475,6 +7521,7 @@ components:
               - annee
               - intitule
               - sigle_entite_gestion
+              - intitule_entite_gestion
               - type
             matricule_candidat:
               type: string
@@ -8539,6 +8586,8 @@ components:
           type: string
         sigle_entite_gestion:
           type: string
+        intitule_entite_gestion:
+          type: string
         campus:
           type: string
           default: ''
@@ -8553,6 +8602,7 @@ components:
       - annee
       - intitule
       - sigle_entite_gestion
+      - intitule_entite_gestion
       - type
     FormationGeneraleDTO:
       type: object

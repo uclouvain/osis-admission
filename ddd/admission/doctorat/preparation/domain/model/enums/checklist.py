@@ -62,8 +62,9 @@ class BesoinDeDerogation(ChoiceEnum):
 class DroitsInscriptionMontant(ChoiceEnum):
     INSCRIPTION_AU_ROLE = _("INSCRIPTION_AU_ROLE")
     INSCRIPTION_REGULIERE = _("INSCRIPTION_REGULIERE")
-    DROITS_MAJORES = _("DROITS_MAJORES")
     NOUVEAUX_DROITS_MAJORES = _("NOUVEAUX_DROITS_MAJORES")
+    ANCIENS_DROITS_MAJORES_2505 = _("ANCIENS_DROITS_MAJORES_2505")
+    ANCIENS_DROITS_MAJORES_4175 = _("ANCIENS_DROITS_MAJORES_4175")
     AGREGATION = _("AGREGATION")
     MASTER_DE_SPECIALISATION_SANTE = _("MASTER_DE_SPECIALISATION_SANTE")
     CERTIFICAT_60_CREDITS = _("CERTIFICAT_60_CREDITS")
@@ -74,8 +75,9 @@ class DroitsInscriptionMontant(ChoiceEnum):
 DROITS_INSCRIPTION_MONTANT_VALEURS = {
     DroitsInscriptionMontant.INSCRIPTION_AU_ROLE.name: 66,
     DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name: 835,
-    DroitsInscriptionMontant.DROITS_MAJORES.name: 4175,
-    DroitsInscriptionMontant.NOUVEAUX_DROITS_MAJORES.name: 2505,
+    DroitsInscriptionMontant.NOUVEAUX_DROITS_MAJORES.name: 5010,
+    DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_2505.name: 2505,
+    DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_4175.name: 4175,
     DroitsInscriptionMontant.AGREGATION.name: 279,
     DroitsInscriptionMontant.MASTER_DE_SPECIALISATION_SANTE.name: 485,
     DroitsInscriptionMontant.CERTIFICAT_60_CREDITS.name: 1065,

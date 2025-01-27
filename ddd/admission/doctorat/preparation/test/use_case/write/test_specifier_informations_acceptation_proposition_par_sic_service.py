@@ -165,7 +165,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 nombre_annees_prevoir_programme=3,
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
-                droits_inscription_montant='DROITS_MAJORES',
+                droits_inscription_montant=DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_2505.name,
                 droits_inscription_montant_autre=None,
                 dispense_ou_droits_majores='DISPENSE_DUREE',
                 est_mobilite=True,
@@ -198,7 +198,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.assertEqual(proposition.nombre_annees_prevoir_programme, 3)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
-        self.assertEqual(proposition.droits_inscription_montant, DroitsInscriptionMontant.DROITS_MAJORES)
+        self.assertEqual(proposition.droits_inscription_montant, DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_2505)
         self.assertIsNone(proposition.droits_inscription_montant_autre)
         self.assertEqual(proposition.dispense_ou_droits_majores, DispenseOuDroitsMajores.DISPENSE_DUREE)
         self.assertIs(proposition.est_mobilite, True)

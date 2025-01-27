@@ -111,6 +111,10 @@ urlpatterns = [
         'propositions/doctorate/<uuid:uuid>/supervision/set-reference-promoter',
         views.SupervisionSetReferencePromoterAPIView,
     ),
+    path(
+        'propositions/doctorate/<uuid:uuid>/supervision/submit-ca',
+        views.SupervisionSubmitCaAPIView,
+    ),
     path('propositions/doctorate/<uuid:uuid>/supervision/request-signatures', views.RequestSignaturesAPIView),
     path('propositions/doctorate/<uuid:uuid>/supervision/approve', views.ApprovePropositionAPIView),
     path('propositions/doctorate/<uuid:uuid>/supervision/external/<token>', views.ExternalApprovalPropositionAPIView),

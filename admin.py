@@ -841,7 +841,13 @@ class DiplomaticPostAdmin(admin.ModelAdmin):
 
 @admin.register(OnlinePayment)
 class OnlinePaymentAdmin(admin.ModelAdmin):
-    search_fields = ['admission', 'payment_id']
+    search_fields = [
+        'admission__candidate__last_name',
+        'admission__candidate__first_name',
+        'admission__candidate__global_id',
+        'admission__reference',
+        'payment_id'
+    ]
     list_display = ['admission', 'payment_id', 'status', 'method']
     list_filter = ['status', 'method']
 

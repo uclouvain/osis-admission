@@ -30,7 +30,7 @@
     {% bootstrap_field field %}
   {% else %}
     <div class="label-container">
-      <label class="control-label" for="{{ field.id_for_label }}">
+      <label class="control-label{% if label_class %} {{ label_class }}{% endif %}" for="{{ field.id_for_label }}">
         {% if label != None %}
           {{ label }}
         {% else %}

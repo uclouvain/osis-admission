@@ -74,14 +74,26 @@ class CentralManager(EntityRoleModel):
             'admission.appose_sic_notice': is_entity_manager,
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status
-               | general.in_progress | continuing.in_progress | doctorate.in_progress)
+            & (
+                general.in_sic_status
+                | continuing.in_manager_status
+                | doctorate.in_sic_status
+                | general.in_progress
+                | continuing.in_progress
+                | doctorate.in_progress
+            )
             & ~is_sent_to_epc
             & ~pending_digit_ticket_response,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status
-               | general.in_progress | continuing.in_progress | doctorate.in_progress)
+            & (
+                general.in_sic_status
+                | continuing.in_manager_status
+                | doctorate.in_sic_status
+                | general.in_progress
+                | continuing.in_progress
+                | doctorate.in_progress
+            )
             & ~is_sent_to_epc
             & ~pending_digit_ticket_response,
             'admission.view_admission_training_choice': is_entity_manager,
@@ -103,7 +115,7 @@ class CentralManager(EntityRoleModel):
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,
-            'admission.view_admission_cotutelle': is_entity_manager,
+            'admission.view_admission_cotutelle': doctorate.is_admission & is_entity_manager,
             'admission.view_admission_supervision': is_entity_manager,
             'admission.view_admission_accounting': is_entity_manager,
             'admission.change_admission_accounting': is_entity_manager

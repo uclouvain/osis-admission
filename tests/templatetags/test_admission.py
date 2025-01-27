@@ -96,19 +96,24 @@ from admission.templatetags.admission import (
     format_ways_to_find_out_about_the_course,
     get_document_details_url,
     sport_affiliation_value,
+    cotutelle_institute,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.entity import Entity
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
+from base.tests.factories.entity_version_address import EntityVersionAddressFactory
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import EvaluationSystem, CURRICULUM_ACTIVITY_LABEL
 from osis_profile.tests.factories.curriculum import ExperienceParcoursInterneDTOFactory
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.university import UniversityFactory
 
 
 # Mock views
@@ -1302,7 +1307,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 
     def test_admission_training_type(self):
         self.assertEqual(
-            admission_training_type(TrainingType.FORMATION_PHD.name),
+            admission_training_type(TrainingType.PHD.name),
             TypeFormation.DOCTORAT.name,
         )
 
@@ -1557,7 +1562,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 class AdmissionTagsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.doctorate_training_type = TrainingType.FORMATION_PHD.name
+        cls.doctorate_training_type = TrainingType.PHD.name
         cls.general_training_type = TrainingType.BACHELOR.name
         cls.continuing_training_type = TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name
         cls.admission_uuid = str(uuid.uuid4())
@@ -1608,6 +1613,52 @@ class AdmissionTagsTestCase(TestCase):
                 osis_education_type=self.continuing_training_type,
             ),
             status.value,
+        )
+
+    def test_cotutelle_institute(self):
+        # Known institute
+        entity: Entity = EntityWithVersionFactory(
+            organization=UniversityFactory(
+                name='UCL',
+            ),
+        )
+        entity_version_address = EntityVersionAddressFactory(
+            entity_version=entity.entityversion_set.first(),
+            city='Louvain-la-Neuve',
+            street='Avenue de l\'Université',
+            street_number='1',
+            postal_code='1348',
+        )
+
+        admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            cotutelle_institution=entity.organization.uuid,
+        )
+
+        self.assertEqual(
+            cotutelle_institute(admission),
+            'UCL (Avenue de l\'Université 1, 1348 Louvain-la-Neuve)',
+        )
+
+        # Custom institute
+        admission.cotutelle_institution = None
+        admission.cotutelle_other_institution_name = 'UCL'
+        admission.cotutelle_other_institution_address = 'Avenue de l\'Université 1, 1348 Louvain-la-Neuve'
+        admission.save()
+
+        self.assertEqual(
+            cotutelle_institute(admission),
+            'UCL (Avenue de l\'Université 1, 1348 Louvain-la-Neuve)',
+        )
+
+        # No institute
+        admission.cotutelle_institution = None
+        admission.cotutelle_other_institution_name = ''
+        admission.cotutelle_other_institution_address = ''
+        admission.save()
+
+        self.assertEqual(
+            cotutelle_institute(admission),
+            '',
         )
 
 
