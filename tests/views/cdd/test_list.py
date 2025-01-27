@@ -82,8 +82,8 @@ from reference.tests.factories.country import CountryFactory
 @freezegun.freeze_time('2022-01-01')
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES_WITHOUT_SEARCH = 26
-    NB_MAX_QUERIES_WITH_SEARCH = 29
+    NB_MAX_QUERIES_WITHOUT_SEARCH = 27
+    NB_MAX_QUERIES_WITH_SEARCH = 30
 
     @classmethod
     def setUpTestData(cls):

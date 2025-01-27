@@ -55,12 +55,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     StatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
-from admission.ddd.admission.doctorat.preparation.domain.validator._should_peut_demander_candidat_modification_ca import (
-    ShouldPeutDemanderCandidatModificationCaFacultaire,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator._should_proposition_statut_etre_correct_pour_soumission_ca import (
-    ShouldPropositionStatutEtreCorrectPourSoumissionCA,
-)
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
     ShouldStatutEtreEnAttenteDeSignature,
 )
