@@ -52,14 +52,18 @@ class ShouldProjetEtreComplet(BusinessValidator):
     experience_precedente_recherche: 'ExperiencePrecedenteRecherche'
 
     def validate(self, *args, **kwargs):
+        if self.type_admission == ChoixTypeAdmission.PRE_ADMISSION:
+            if not self.projet.titre:
+                raise DetailProjetNonCompleteException
+            return
+
         champs_obligatoires = [
             "titre",
             "resume",
             "langue_redaction_these",
             "documents",
+            "proposition_programme_doctoral",
         ]
-        if self.type_admission == ChoixTypeAdmission.ADMISSION:
-            champs_obligatoires.append("proposition_programme_doctoral")
 
         champs_financements_obligatoires = [
             "duree_prevue",

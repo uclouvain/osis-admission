@@ -43,7 +43,9 @@ class AdmissionReader(ParcoursViewer):
     def rule_set(cls):
         ruleset = {
             # Listings
-            'admission.view_enrolment_applications': rules.always_allow,
+            'admission.view_enrolment_applications': has_education_group_of_types(
+                *AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES,
+            ),
             'admission.view_doctorate_enrolment_applications': has_education_group_of_types(
                 *AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES,
             ),
@@ -61,7 +63,7 @@ class AdmissionReader(ParcoursViewer):
             'admission.view_admission_curriculum': is_part_of_education_group,
             # Project
             'admission.view_admission_project': is_part_of_education_group,
-            'admission.view_admission_cotutelle': is_part_of_education_group,
+            'admission.view_admission_cotutelle': is_part_of_education_group & doctorate.is_admission,
             'admission.view_admission_training_choice': is_part_of_education_group,
             'admission.view_admission_accounting': is_part_of_education_group,
             'admission.view_admission_specific_questions': is_part_of_education_group,

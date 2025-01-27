@@ -72,9 +72,13 @@ from ._should_justification_donnee_si_preadmission import ShouldJustificationDon
 from ._should_langues_connues_etre_completees import ShouldLanguesConnuesRequisesEtreSpecifiees
 from ._should_membre_CA_etre_dans_groupe_de_supervision import ShouldMembreCAEtreDansGroupeDeSupervision
 from ._should_membre_etre_interne_ou_externe import ShouldMembreEtreInterneOuExterne
+from ._should_peut_demander_candidat_modification_ca import ShouldPeutDemanderCandidatModificationCaFacultaire
 from ._should_premier_promoteur_renseigner_institut_these import ShouldPromoteurReferenceRenseignerInstitutThese
 from ._should_projet_etre_complet import ShouldProjetEtreComplet
 from ._should_promoteur_etre_dans_groupe_de_supervision import ShouldPromoteurEtreDansGroupeDeSupervision
+from ._should_proposition_statut_etre_correct_pour_soumission_ca import (
+    ShouldPropositionStatutEtreCorrectPourSoumissionCA,
+)
 from ._should_signataire_etre_dans_groupe_de_supervision import ShouldSignataireEtreDansGroupeDeSupervision
 from ._should_signataire_etre_invite import ShouldSignataireEtreInvite
 from ._should_signataire_pas_invite import ShouldSignatairePasDejaInvite
@@ -129,4 +133,6 @@ __all__ = [
     "ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation",
     "ShouldNePasAvoirDeDocumentReclameImmediat",
     "ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande",
+    "ShouldPeutDemanderCandidatModificationCaFacultaire",
+    "ShouldPropositionStatutEtreCorrectPourSoumissionCA",
 ]
