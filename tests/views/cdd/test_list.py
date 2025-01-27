@@ -53,6 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
 from admission.ddd.admission.doctorat.validation.domain.model.enums import (
     ChoixStatutCDD,
     ChoixStatutSIC,
@@ -77,7 +78,6 @@ from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.user import UserFactory
 from osis_profile import BE_ISO_CODE
-from parcours_doctoral.ddd.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.scholarship import (
     DoctorateScholarshipFactory,

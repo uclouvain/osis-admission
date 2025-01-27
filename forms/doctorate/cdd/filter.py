@@ -60,9 +60,13 @@ from admission.forms import (
 )
 from admission.forms.admission.filter import BaseAdmissionFilterForm, WorkingListField
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.infrastructure.admission.doctorat.preparation.read_view.repository.tableau_bord import (
+    TableauBordRepositoryAdmissionMixin,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import EntityProxy
 from admission.models import EntityProxy
 from admission.models.working_list import DoctorateWorkingList
 from base.forms.utils import autocomplete, EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
@@ -75,8 +79,6 @@ from base.models.person import Person
 from education_group.contrib.models import EducationGroupRoleModel
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
-from parcours_doctoral.ddd.read_view.domain.enums.tableau_bord import TypeCategorieTableauBord
-from parcours_doctoral.infrastructure.parcours_doctoral.read_view.repository.tableau_bord import TableauBordRepository
 from reference.models.country import Country
 from reference.models.enums.scholarship_type import ScholarshipType
 from reference.models.scholarship import Scholarship
@@ -193,13 +195,13 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
     indicateur_tableau_bord = forms.ChoiceField(
         label=_('Dashboard indicator'),
         required=False,
-        choices=[EMPTY_CHOICE[0]] + [
+        choices=[EMPTY_CHOICE[0]]
+        + [
             [category.libelle, [[indicator.id.name, indicator.libelle] for indicator in category.indicateurs]]
-            for category in TableauBordRepository.categories
-            if category.type == TypeCategorieTableauBord.ADMISSION
+            for category in TableauBordRepositoryAdmissionMixin.categories_admission
         ],
         widget=SelectWithDisabledOptions(
-            enabled_options={*TableauBordRepository.ADMISSION_DJANGO_FILTER_BY_INDICATOR, ''},
+            enabled_options={*TableauBordRepositoryAdmissionMixin.ADMISSION_DJANGO_FILTER_BY_INDICATOR, ''},
         ),
     )
 
