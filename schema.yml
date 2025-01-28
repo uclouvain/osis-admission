@@ -6508,10 +6508,12 @@ components:
             - country
             - obtained_diploma
         minimal_date:
-          type: date
+          type: string
+          format: date
           readOnly: true
         maximal_date:
-          type: date
+          type: string
+          format: date
           readOnly: true
         incomplete_periods:
           type: array
