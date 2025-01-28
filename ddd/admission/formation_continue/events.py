@@ -8,4 +8,3 @@ from osis_common.ddd.interface import Event
 class PropositionFormationContinueSoumiseEvent(Event):
     entity_id: 'PropositionIdentity'
     matricule: str
-

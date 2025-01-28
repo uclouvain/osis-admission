@@ -39,7 +39,7 @@ from admission.utils import get_cached_general_education_admission_perm_obj
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeProposal
 from base.views.common import display_error_messages
-from ddd.logic.gestion_des_comptes.commands import RefuserPropositionFusionCommand
+from ddd.logic.gestion_des_comptes.commands import RefuserPropositionFusionPersonneCommand
 
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -81,7 +81,7 @@ class DiscardMergeAccountView(PermissionRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
         message_bus_instance.invoke(
-            RefuserPropositionFusionCommand(
+            RefuserPropositionFusionPersonneCommand(
                 matricule=candidate.global_id,
             )
         )

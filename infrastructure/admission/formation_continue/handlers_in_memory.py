@@ -146,6 +146,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=_question_specific_translator,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_continue_translator,
