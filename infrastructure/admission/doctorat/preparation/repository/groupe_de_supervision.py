@@ -30,13 +30,12 @@ from django.db.models import F, Prefetch
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language, gettext_lazy as _
 from osis_signature.enums import SignatureState
+from osis_signature.models import Actor, Process, StateHistory
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
-from admission.models import DoctorateAdmission, SupervisionActor
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
@@ -54,14 +53,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervisionIdentity,
     SignataireIdentity,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
+from admission.models import DoctorateAdmission, SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
-from osis_signature.models import Actor, Process, StateHistory
 from reference.models.country import Country
 
 
@@ -326,7 +327,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
 
     @classmethod
     def get_members(cls, groupe_id: 'GroupeDeSupervisionIdentity') -> List[Union['PromoteurDTO', 'MembreCADTO']]:
-        actors = SupervisionActor.objects.select_related('person__tutor').filter(
+        actors = SupervisionActor.objects.select_related('person__tutor', 'country').filter(
             process__uuid=groupe_id.uuid,
         )
         members = []
@@ -374,3 +375,45 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             country=Country.objects.get(iso_code=country_code) if country_code else None,
             language=language,
         )
+
+    @classmethod
+    def initialize_supervision_group_from_proposition(
+        cls,
+        uuid_proposition_originale: str,
+        nouvelle_proposition: 'Proposition',
+    ):
+        proposition = DoctorateAdmission.objects.select_related('supervision_group').get(
+            uuid=nouvelle_proposition.entity_id.uuid
+        )
+
+        # Create a supervision group if necessary
+        if not proposition.supervision_group_id:
+            proposition.supervision_group = Process.objects.create()
+            proposition.save(update_fields=['supervision_group'])
+
+        if not uuid_proposition_originale:
+            return
+
+        # Copy members of the supervision group of the original proposition
+        for admission_actor in SupervisionActor.objects.filter(
+            process__doctorateadmission__uuid=uuid_proposition_originale,
+        ):
+            SupervisionActor.objects.create(
+                process=proposition.supervision_group,
+                type=admission_actor.type,
+                is_doctor=admission_actor.is_doctor,
+                is_reference_promoter=admission_actor.is_reference_promoter,
+                **(
+                    {'person_id': admission_actor.person_id}
+                    if admission_actor.person_id
+                    else {
+                        'first_name': admission_actor.first_name,
+                        'last_name': admission_actor.last_name,
+                        'email': admission_actor.email,
+                        'institute': admission_actor.institute,
+                        'city': admission_actor.city,
+                        'country_id': admission_actor.country_id,
+                        'language': admission_actor.language,
+                    }
+                ),
+            )

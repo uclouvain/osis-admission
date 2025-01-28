@@ -199,6 +199,8 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
+    pre_admission_associee: Optional[PropositionIdentity] = None
+
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     reponses_questions_specifiques: Dict = attr.Factory(dict)

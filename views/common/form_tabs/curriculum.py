@@ -37,6 +37,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
+from admission.admission_utils.copy_documents import copy_documents
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
@@ -46,7 +47,6 @@ from admission.models.base import (
 from admission.models.base import BaseAdmission
 from admission.models.checklist import FreeAdditionalApprovalCondition
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_profile.models.epc_injection import (

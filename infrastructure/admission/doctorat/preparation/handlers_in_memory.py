@@ -164,6 +164,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=_doctorat_translator,
         historique=_historique,
         maximum_propositions_service=_maximum_propositions_autorisees,
+        groupe_supervision_repository=_groupe_supervision_repository,
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,

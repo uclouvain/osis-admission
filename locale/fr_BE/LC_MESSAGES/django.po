@@ -2793,6 +2793,9 @@ msgstr "Export excel des demandes d'admission"
 msgid "Exclude"
 msgstr "Exclure"
 
+msgid "Existing pre-admission"
+msgstr "Pré-admission existante"
+
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
@@ -5825,6 +5828,9 @@ msgstr "Inscription au rôle requise"
 msgid "Related experience"
 msgstr "Expérience associée"
 
+msgid "Related pre-admission"
+msgstr "Pré-admission associée"
+
 msgid "Relationship"
 msgstr "Lien de parenté"
 
@@ -6666,6 +6672,9 @@ msgstr ""
 
 msgid "The University tuition fee is EUR 0.0."
 msgstr "Les droits d'inscription à l'Université s'élèvent à 0.0 EUR."
+
+msgid "The admission must not follow a pre-admission"
+msgstr "L'admission ne doit pas suivre une pré-admission"
 
 #, python-format
 msgid ""

@@ -159,9 +159,10 @@ class RequestSignaturesApiTestCase(APITestCase):
 
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json()['non_field_errors'][0]['status_code'],
+        status_codes = [e['status_code'] for e in response.json()['non_field_errors']]
+        self.assertIn(
             CotutelleDoitAvoirAuMoinsUnPromoteurExterneException.status_code,
+            status_codes,
         )
 
     def test_request_signatures_using_api_cotutelle_with_external_promoter(self):

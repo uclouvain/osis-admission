@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.113
+  version: 1.0.114
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -605,6 +605,33 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/doctorate/pre-admission-list:
+    get:
+      operationId: list_doctorate_pre_admissions
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctoratePreAdmissionSearchDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/doctorate/{uuid}:
     get:
       operationId: retrieve_doctorate_proposition
@@ -5209,6 +5236,8 @@ components:
             properties:
               uuid:
                 type: string
+              pre_admission_associee:
+                type: string
               reference:
                 type: string
               type_admission:
@@ -5723,6 +5752,8 @@ components:
       type: object
       properties:
         uuid:
+          type: string
+        pre_admission_associee:
           type: string
         reference:
           type: string
@@ -6526,10 +6557,60 @@ components:
       - educational_experiences
       - incomplete_periods
       - incomplete_experiences
+    DoctoratePreAdmissionSearchDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        reference:
+          type: string
+        doctorat:
+          type: object
+          properties:
+            sigle:
+              type: string
+            code:
+              type: string
+            annee:
+              type: integer
+            intitule:
+              type: string
+            sigle_entite_gestion:
+              type: string
+            campus:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                nom:
+                  type: string
+              required:
+              - uuid
+              - nom
+          required:
+          - sigle
+          - code
+          - annee
+          - intitule
+          - sigle_entite_gestion
+          - campus
+        code_secteur_formation:
+          type: string
+        intitule_secteur_formation:
+          type: string
+      required:
+      - uuid
+      - reference
+      - doctorat
+      - code_secteur_formation
+      - intitule_secteur_formation
     DoctoratePropositionDTO:
       type: object
       properties:
         uuid:
+          type: string
+        pre_admission_associee:
           type: string
         type_admission:
           type: string
@@ -8668,11 +8749,14 @@ components:
       properties:
         type_admission:
           $ref: '#/components/schemas/ChoixTypeAdmission'
+        matricule_candidat:
+          type: string
         sigle_formation:
           type: string
         annee_formation:
           type: integer
-        matricule_candidat:
+          nullable: true
+        pre_admission_associee:
           type: string
         justification:
           type: string
@@ -8698,8 +8782,6 @@ components:
           type: string
       required:
       - type_admission
-      - sigle_formation
-      - annee_formation
       - matricule_candidat
       - commission_proximite
     ChoixTypeAdmission:

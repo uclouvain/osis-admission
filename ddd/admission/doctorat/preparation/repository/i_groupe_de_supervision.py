@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 import abc
+from abc import abstractmethod
 from typing import List, Optional, Union
 
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
@@ -34,8 +34,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervisionIdentity,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity, Proposition
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
+from admission.models.enums.actor_type import ActorType
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 
@@ -151,3 +152,12 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
             convention=cotutelle and cotutelle.convention or [],
             autres_documents=cotutelle and cotutelle.autres_documents or [],
         )
+
+    @classmethod
+    @abstractmethod
+    def initialize_supervision_group_from_proposition(
+        cls,
+        uuid_proposition_originale: str,
+        nouvelle_proposition: 'Proposition',
+    ):
+        raise NotImplementedError

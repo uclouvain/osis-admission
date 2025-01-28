@@ -27,22 +27,23 @@
 import uuid
 from typing import List, Optional, Union
 
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale, \
-    ChoixEtatSignature
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+    ChoixEtatSignature,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity, Proposition
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     GroupeDeSupervisionNonTrouveException,
 )
@@ -78,6 +79,7 @@ from admission.infrastructure.admission.doctorat.preparation.domain.service.in_m
     Promoteur,
     PromoteurInMemoryTranslator,
 )
+from admission.models.enums.actor_type import ActorType
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -245,3 +247,47 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
                 membre.pays = country_code
                 membre.langue = language
                 return
+
+    @classmethod
+    def initialize_supervision_group_from_proposition(
+        cls,
+        uuid_proposition_originale: str,
+        nouvelle_proposition: 'Proposition',
+    ):
+        try:
+            nouveau_groupe_supervision = cls.get_by_proposition_id(nouvelle_proposition.entity_id)
+        except GroupeDeSupervisionNonTrouveException:
+            nouveau_groupe_supervision = GroupeDeSupervision(
+                entity_id=GroupeDeSupervisionIdentity(uuid=str(uuid.uuid4())),
+                proposition_id=nouvelle_proposition.entity_id,
+            )
+
+            cls.save(nouveau_groupe_supervision)
+
+        if not uuid_proposition_originale:
+            return
+
+        try:
+            groupe_supervision_original = cls.get_by_proposition_id(
+                proposition_id=PropositionIdentity(uuid=str(uuid_proposition_originale)),
+            )
+
+            membres = cls.get_members(groupe_id=groupe_supervision_original.entity_id)
+
+        except GroupeDeSupervisionNonTrouveException:
+            return
+
+        for member in membres:
+            cls.add_member(
+                groupe_id=nouveau_groupe_supervision.entity_id,
+                proposition_status=nouvelle_proposition.statut,
+                type=ActorType.PROMOTER if isinstance(member, PromoteurDTO) else ActorType.CA_MEMBER,
+                matricule=member.matricule,
+                first_name=member.prenom,
+                last_name=member.nom,
+                email=member.email,
+                is_doctor=member.est_docteur,
+                institute=member.institution,
+                city=member.ville,
+                country_code=member.code_pays,
+            )

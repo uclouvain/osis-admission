@@ -173,7 +173,7 @@ class PropositionInMemoryRepository(
         ]
 
     @classmethod
-    def save(cls, entity: 'Proposition') -> None:
+    def save(cls, entity: 'Proposition', dupliquer_documents=False) -> None:
         super().save(entity)
 
     @classmethod
@@ -208,6 +208,7 @@ class PropositionInMemoryRepository(
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
+        est_pre_admission_d_une_admission_en_cours: Optional[bool] = None,
     ) -> List['PropositionDTO']:
         returned = cls.entities
         if matricule_candidat:
@@ -351,6 +352,7 @@ class PropositionInMemoryRepository(
             doit_fournir_visa_etudes=proposition.doit_fournir_visa_etudes,
             visa_etudes_d=proposition.visa_etudes_d,
             certificat_autorisation_signe=proposition.certificat_autorisation_signe,
+            pre_admission_associee='',
         )
 
     @classmethod

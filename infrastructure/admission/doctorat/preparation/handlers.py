@@ -87,6 +87,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=DoctoratTranslator(),
         historique=Historique(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        groupe_supervision_repository=GroupeDeSupervisionRepository(),
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
