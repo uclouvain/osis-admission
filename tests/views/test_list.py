@@ -290,6 +290,21 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 0)
 
+    def test_list_central_and_program_manager(self):
+        other_admission = GeneralEducationAdmissionFactory(
+            training__acronym="ABCD1",
+        )
+        central_manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name], entity=self.first_entity)
+        ProgramManagerRoleFactory(
+            person=central_manager.person,
+            education_group=other_admission.training.education_group,
+        )
+        self.client.force_login(user=central_manager.person.user)
+
+        response = self._do_request()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 2)
+
     def test_list_central_manager_scoped_on_entity(self):
         manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name], entity=self.first_entity)
         self.client.force_login(user=manager.person.user)
