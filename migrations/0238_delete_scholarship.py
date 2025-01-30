@@ -10,7 +10,6 @@ class Migration(migrations.Migration):
             "admission",
             "0237_alter_doctorateadmission_international_scholarship_and_more",
         ),
-        ("parcours_doctoral", "0003_alter_parcoursdoctoral_international_scholarship"),
     ]
 
     operations = [
