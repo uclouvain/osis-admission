@@ -50,9 +50,6 @@ from admission.constants import (
     CONTEXT_GENERAL,
     CONTEXT_CONTINUING,
 )
-from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.models.form_item import ConfigurableModelFormItemField
-from admission.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
 )
@@ -68,6 +65,9 @@ from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSI
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.form_item import ConfigurableModelFormItemField
+from admission.models.functions import ToChar
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
@@ -344,7 +344,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 ).values_list('education_group_id')
             )
 
-        return self.filter(entities_conditions, education_group_conditions)
+        return self.filter(entities_conditions | education_group_conditions)
 
     def filter_in_quarantine(self):
         return self.filter(
