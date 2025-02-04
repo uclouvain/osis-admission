@@ -57,7 +57,10 @@ def in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations have not been sent"))
 def signing_in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+    return obj.status in [
+        ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+        ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name,
+    ]
 
 
 @predicate(bind=True)
@@ -69,6 +72,12 @@ def is_invited_to_complete(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
 def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_AVANT_SOUMISSION
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The CA is not currently to be completed"))
+def ca_to_be_completed(self, user: User, obj: DoctorateAdmission):
+    return obj.status == ChoixStatutPropositionDoctorale.CA_A_COMPLETER.name
 
 
 @predicate(bind=True)
@@ -143,6 +152,12 @@ def is_draft(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: DoctorateAdmission):
     return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition must be an admission to realize this action."))
+def is_admission(self, user: User, obj: DoctorateAdmission):
+    return obj.type == ChoixTypeAdmission.ADMISSION.name
 
 
 @predicate(bind=True)

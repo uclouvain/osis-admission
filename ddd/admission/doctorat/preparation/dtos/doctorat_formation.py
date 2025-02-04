@@ -42,6 +42,7 @@ class DoctoratFormationDTO(interface.DTO):
     intitule_fr: str
     intitule_en: str
     sigle_entite_gestion: str
+    intitule_entite_gestion: str
     campus: Optional[CampusDTO]
     type: str
     campus_inscription: Optional[CampusDTO]

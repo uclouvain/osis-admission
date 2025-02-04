@@ -51,7 +51,7 @@ class TypeDemandeTestCase(TestCase):
         self.titres_acces_in_memory.results['0000000001'] = AdmissionConditionsDTOFactory(
             diplomation_potentiel_master_belge=True,
         )
-        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.FORMATION_PHD)
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.PHD)
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionAdmissionSC3DPMinimaleFactory(matricule_candidat='0000000001'),
             titres,
@@ -65,7 +65,7 @@ class TypeDemandeTestCase(TestCase):
             diplomation_potentiel_master_belge=True,
             diplomation_academique_etranger=True,
         )
-        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.FORMATION_PHD)
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.PHD)
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionAdmissionSC3DPMinimaleFactory(matricule_candidat='0000000001'),
             titres,
@@ -79,7 +79,7 @@ class TypeDemandeTestCase(TestCase):
             diplomation_secondaire_etranger=True,
             diplomation_potentiel_master_belge=True,
         )
-        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.FORMATION_PHD)
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.PHD)
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionAdmissionSC3DPMinimaleFactory(matricule_candidat='0000000001'),
             titres,
@@ -92,7 +92,7 @@ class TypeDemandeTestCase(TestCase):
         self.titres_acces_in_memory.results['0000000003'] = AdmissionConditionsDTOFactory(
             diplomation_potentiel_master_belge=True,
         )
-        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000003', TrainingType.FORMATION_PHD)
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000003', TrainingType.PHD)
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionAdmissionSC3DPMinimaleFactory(matricule_candidat='0000000003'),
             titres,

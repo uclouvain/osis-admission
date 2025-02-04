@@ -46,11 +46,11 @@ def determiner_annee_academique_et_pot(
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     # THEN
-    titres = titres_acces.recuperer_titres_access(proposition.matricule_candidat, TrainingType.FORMATION_PHD)
+    titres = titres_acces.recuperer_titres_access(proposition.matricule_candidat, TrainingType.PHD)
     return calendrier_inscription.determiner_annee_academique_et_pot(
         formation_id=proposition.formation_id,
         matricule_candidat=proposition.matricule_candidat,
         titres_acces=titres,
-        type_formation=TrainingType.FORMATION_PHD,
+        type_formation=TrainingType.PHD,
         profil_candidat_translator=profil_candidat_translator,
     )

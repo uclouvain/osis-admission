@@ -57,8 +57,6 @@ from admission.constants import (
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE_AFTER_ENROLMENT,
 )
-from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -112,14 +110,16 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.models.base import BaseAdmission
 from admission.utils import (
     get_access_conditions_url,
     get_experience_urls,
     get_superior_institute_queryset,
     format_school_title,
+    format_address,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
-from base.models.entity_version import EntityVersion
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
@@ -688,13 +688,14 @@ def strip(value):
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None, label_class=''):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
         'html_tooltip': html_tooltip,
         'label': label,
+        'label_class': label_class,
     }
 
 
@@ -1607,9 +1608,11 @@ def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO
     """
     return unordered_list(
         [
-            ChoixMoyensDecouverteFormation.get_value(way)
-            if way != ChoixMoyensDecouverteFormation.AUTRE.name
-            else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            (
+                ChoixMoyensDecouverteFormation.get_value(way)
+                if way != ChoixMoyensDecouverteFormation.AUTRE.name
+                else proposition.autre_moyen_decouverte_formation or ChoixMoyensDecouverteFormation.AUTRE.value
+            )
             for way in proposition.moyens_decouverte_formation
         ]
     )
@@ -1669,11 +1672,39 @@ def osis_language_name(code):
 def superior_institute_name(organization_uuid):
     if not organization_uuid:
         return ''
-    try:
-        institute = get_superior_institute_queryset().get(organization_uuid=organization_uuid)
-    except EntityVersion.DoesNotExist:
+    institute = (
+        get_superior_institute_queryset().filter(organization_uuid=organization_uuid).order_by('-start_date').first()
+    )
+    if not institute:
         return organization_uuid
     return mark_safe(format_school_title(institute))
+
+
+@register.filter
+def cotutelle_institute(admission: DoctorateAdmission):
+    if admission.cotutelle_institution:
+        institute = (
+            get_superior_institute_queryset()
+            .filter(organization_uuid=admission.cotutelle_institution)
+            .order_by('-start_date')
+            .first()
+        )
+
+        if institute:
+            return '{institute_name} ({institute_address})'.format(
+                institute_name=institute.name,
+                institute_address=format_address(
+                    street=institute.street,
+                    street_number=institute.street_number,
+                    postal_code=institute.zipcode,
+                    city=institute.city,
+                ),
+            )
+
+    elif admission.cotutelle_other_institution_name and admission.cotutelle_other_institution_address:
+        return f'{admission.cotutelle_other_institution_name} ({admission.cotutelle_other_institution_address})'
+
+    return ''
 
 
 @register.simple_tag(takes_context=True)

@@ -51,6 +51,7 @@ def choix_statuts_toute_proposition_ordonnes():
     # Association entre les statuts déjà présents de formation générale et les statuts spécifiques à placer juste après
     choix_specifiques = {
         ChoixStatutPropositionGenerale.EN_BROUILLON.name: ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
+        ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: ChoixStatutPropositionDoctorale.CA_A_COMPLETER,
         ChoixStatutPropositionGenerale.CONFIRMEE.name: ChoixStatutPropositionContinue.EN_ATTENTE,
     }
 
