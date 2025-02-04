@@ -121,7 +121,11 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         # Admissions
         cls.admissions: List[Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]] = [
             GeneralEducationAdmissionFactory(
-                candidate__country_of_citizenship=CountryFactory(european_union=True, name='Belgique'),
+                candidate__country_of_citizenship=CountryFactory(
+                    european_union=True,
+                    name='Belgique',
+                    name_en='Belgium',
+                ),
                 candidate__first_name="John",
                 candidate__last_name="Doe",
                 candidate__private_email="jdoe@example.be",
@@ -762,7 +766,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         second_admission = GeneralEducationAdmissionFactory(
             training__management_entity=self.first_entity,
-            candidate__country_of_citizenship=CountryFactory(european_union=False, name='Andorre'),
+            candidate__country_of_citizenship=CountryFactory(european_union=False, name='Andorre', name_en='Andorra'),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
