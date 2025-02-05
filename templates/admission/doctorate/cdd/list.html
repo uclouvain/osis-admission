@@ -61,9 +61,14 @@
       <div class="col-md-4">
         {% bootstrap_field filter_form.liste_travail %}
       </div>
+      <div class="col-md-4">
         <button id="toggle-checklist-filters" type="button" class="btn btn-link nopadding" value="off">
           {% translate "Show the states of the checklist" %}
         </button>
+      </div>
+      <div class="col-md-4">
+        {% bootstrap_field filter_form.indicateur_tableau_bord %}
+      </div>
     </div>
     <div id="checklist-filters-container">
       <div class="btn-group mt-1" data-toggle="buttons" id="checklist-filters-mode">
