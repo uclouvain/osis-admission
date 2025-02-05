@@ -51,7 +51,7 @@ from osis_role.errors import predicate_failed_msg
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations must have been sent"))
 def in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutPropositionDoctorale.EN_BROUILLON.name
+    return isinstance(obj, DoctorateAdmission) and obj.status == ChoixStatutPropositionDoctorale.EN_BROUILLON.name
 
 
 @predicate(bind=True)
