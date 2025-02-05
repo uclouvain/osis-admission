@@ -218,6 +218,7 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'thesis_language',
         'prerequisite_courses',
         'refusal_reasons',
+        'related_pre_admission',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']

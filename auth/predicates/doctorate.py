@@ -68,6 +68,7 @@ def signing_in_progress(self, user: User, obj: DoctorateAdmission):
 def is_invited_to_complete(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT
 
+
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
 def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
@@ -223,3 +224,9 @@ def can_send_to_fac_faculty_decision(self, user: User, obj: DoctorateAdmission):
         isinstance(obj, DoctorateAdmission)
         and obj.status in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION
     )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The admission must not follow a pre-admission"))
+def must_not_follow_a_pre_admission(self, user: User, obj: DoctorateAdmission):
+    return not bool(obj.related_pre_admission_id)
