@@ -2793,6 +2793,9 @@ msgstr "Export excel des demandes d'admission"
 msgid "Exclude"
 msgstr "Exclure"
 
+msgid "Existing pre-admission"
+msgstr "Pré-admission existante"
+
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
@@ -5825,6 +5828,9 @@ msgstr "Inscription au rôle requise"
 msgid "Related experience"
 msgstr "Expérience associée"
 
+msgid "Related pre-admission"
+msgstr "Pré-admission associée"
+
 msgid "Relationship"
 msgstr "Lien de parenté"
 
@@ -6667,6 +6673,9 @@ msgstr ""
 msgid "The University tuition fee is EUR 0.0."
 msgstr "Les droits d'inscription à l'Université s'élèvent à 0.0 EUR."
 
+msgid "The admission must not follow a pre-admission"
+msgstr "L'admission ne doit pas suivre une pré-admission"
+
 #, python-format
 msgid ""
 "The applicant is registered in the year %(year)s. Click <a class='bold-text "
@@ -7246,6 +7255,21 @@ msgstr "Données relatives à la thèse"
 
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general education."
+msgstr ""
+"Cette action ne peut être réalisée car il existe, pour ce candidat, une "
+"autre admission ou expérience interne relative à une formation générale."
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general or a doctorate education."
+msgstr ""
+"Cette action ne peut être réalisée car il existe, pour ce candidat, une "
+"autre admission ou expérience interne relative à une formation générale ou "
+"doctorale."
 
 msgid "This action is limited to a specific admission context."
 msgstr "Cette action est limitée à un contexte d'admission particulier."

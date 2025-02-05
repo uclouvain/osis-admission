@@ -2537,6 +2537,9 @@ msgstr ""
 msgid "Exclude"
 msgstr ""
 
+msgid "Existing pre-admission"
+msgstr ""
+
 msgid "Exit without saving"
 msgstr ""
 
@@ -5243,6 +5246,9 @@ msgstr ""
 msgid "Related experience"
 msgstr ""
 
+msgid "Related pre-admission"
+msgstr ""
+
 msgid "Relationship"
 msgstr ""
 
@@ -6010,6 +6016,9 @@ msgstr ""
 msgid "The University tuition fee is EUR 0.0."
 msgstr ""
 
+msgid "The admission must not follow a pre-admission"
+msgstr ""
+
 #, python-format
 msgid ""
 "The applicant is registered in the year %(year)s. Click <a class='bold-text "
@@ -6505,6 +6514,16 @@ msgid "Thesis-related data"
 msgstr ""
 
 msgid "This account number has been verified"
+msgstr ""
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general education."
+msgstr ""
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general or a doctorate education."
 msgstr ""
 
 msgid "This action is limited to a specific admission context."

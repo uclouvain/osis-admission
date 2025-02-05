@@ -114,7 +114,7 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -217,6 +217,7 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'thesis_language',
         'prerequisite_courses',
         'refusal_reasons',
+        'related_pre_admission',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']

@@ -33,12 +33,15 @@ from admission.auth.predicates import general, continuing, doctorate
 from admission.auth.predicates.common import (
     has_scope,
     is_debug,
-    is_entity_manager,
+    is_entity_manager as is_entity_manager_without_scope,
+    is_scoped_entity_manager,
     is_sent_to_epc,
     pending_digit_ticket_response,
     past_experiences_checklist_tab_is_not_sufficient,
+    candidate_has_other_doctorate_or_general_admissions,
+    candidate_has_other_general_admissions,
 )
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -60,10 +63,18 @@ class CentralManager(EntityRoleModel):
         group_name = "admission_central_managers"
 
     @classmethod
+    def rule_set_without_scope(cls):
+        return cls.common_rule_set(is_entity_manager_without_scope)
+
+    @classmethod
     def rule_set(cls):
+        return cls.common_rule_set(is_scoped_entity_manager)
+
+    @classmethod
+    def common_rule_set(cls, is_entity_manager: callable):
         ruleset = {
             # Listings
-            'admission.view_enrolment_applications': has_scope(Scope.ALL),
+            'admission.view_enrolment_applications': has_scope(Scope.GENERAL),
             'admission.view_doctorate_enrolment_applications': has_scope(Scope.DOCTORAT),
             'admission.view_continuing_enrolment_applications': has_scope(Scope.IUFC),
             # Access a single application
@@ -75,12 +86,12 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
             & (
-                general.in_sic_status
-                | continuing.in_manager_status
-                | doctorate.in_sic_status
-                | general.in_progress
-                | continuing.in_progress
-                | doctorate.in_progress
+                (general.in_sic_status | general.in_progress)
+                | (
+                    (continuing.in_manager_status | continuing.in_progress)
+                    & ~candidate_has_other_doctorate_or_general_admissions
+                )
+                | ((doctorate.in_sic_status | doctorate.in_progress) & ~candidate_has_other_general_admissions)
             )
             & ~is_sent_to_epc
             & ~pending_digit_ticket_response,
@@ -105,14 +116,27 @@ class CentralManager(EntityRoleModel):
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,
             'admission.change_admission_secondary_studies': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status)
+            & (
+                general.in_sic_status
+                | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
+            )
             & ~is_sent_to_epc,
             'admission.view_admission_curriculum': is_entity_manager,
-            'admission.change_admission_curriculum': is_entity_manager
+            'admission.change_admission_global_curriculum': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
+            'admission.change_admission_curriculum': is_entity_manager
+            & (
+                general.in_sic_status
+                | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
+                | doctorate.in_sic_status
+            )
+            & ~is_sent_to_epc,
             'admission.delete_admission_curriculum': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & (
+                general.in_sic_status
+                | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
+            )
             & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,
             'admission.view_admission_cotutelle': doctorate.is_admission & is_entity_manager,

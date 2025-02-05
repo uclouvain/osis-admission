@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,25 +22,11 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from typing import List
-
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ListerPropositionsCandidatQuery,
-)
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
+##############################################################################
+from base.models.utils.utils import ChoiceEnum
 
 
-def lister_propositions_candidat(
-    cmd: 'ListerPropositionsCandidatQuery',
-    proposition_repository: 'IPropositionRepository',
-) -> List['PropositionDTO']:
-    return proposition_repository.search_dto(
-        matricule_candidat=cmd.matricule_candidat,
-        type=cmd.type_admission,
-        etat=cmd.statut,
-        est_pre_admission_d_une_admission_en_cours=cmd.est_pre_admission_d_une_admission_en_cours,
-    )
+class Scope(ChoiceEnum):
+    GENERAL = 'GENERAL'
+    IUFC = 'IUFC'
+    DOCTORAT = 'DOCTORAT'
