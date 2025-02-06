@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,16 +31,25 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from osis_history.models import HistoryEntry
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.models import DoctorateAdmission
 from admission.models.checklist import AdditionalApprovalCondition
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
-from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -100,7 +109,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.admission.with_prerequisite_courses = None
         self.admission.prerequisite_courses.set([])
         self.admission.prerequisite_courses_fac_comment = ''
-        self.admission.program_planned_years_number = None
         self.admission.annual_program_contact_person_name = ''
         self.admission.annual_program_contact_person_email = ''
         self.admission.save()
@@ -114,7 +122,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('with_prerequisite_courses'), None)
         self.assertEqual(form.initial.get('prerequisite_courses'), [])
         self.assertEqual(form.initial.get('prerequisite_courses_fac_comment'), '')
-        self.assertEqual(form.initial.get('program_planned_years_number'), None)
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
 
@@ -186,7 +193,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 "sic-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
                 'sic-decision-approval-with_prerequisite_courses': 'True',
-                'sic-decision-approval-program_planned_years_number': '',
             },
             **self.default_headers,
         )
@@ -227,7 +233,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             ],
             'sic-decision-approval-with_prerequisite_courses': 'True',
             'sic-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
-            'sic-decision-approval-program_planned_years_number': 5,
             'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
             'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
             'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
@@ -260,7 +265,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             self.admission.prerequisite_courses_fac_comment,
             'Comment about the additional trainings',
         )
-        self.assertEqual(self.admission.program_planned_years_number, 5)
         self.assertEqual(self.admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,13 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.contrib.auth.models import User, AnonymousUser
+import json
+
+from django.contrib.auth.models import AnonymousUser, User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
+from admission.models import SupervisionActor
+from admission.models.enums.actor_type import ActorType
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import PromoterFactory
-from admission.views.autocomplete.persons import CandidatesAutocomplete, PromotersAutocomplete
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalPromoterFactory,
+    PromoterFactory,
+)
+from admission.views.autocomplete.persons import (
+    CandidatesAutocomplete,
+    SupervisionActorsAutocomplete,
+)
 from base.models.person import Person
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
@@ -135,18 +146,49 @@ class PersonsAutocompleteTestCase(TestCase):
             },
         )
 
-    def test_promoters_redirects_with_anonymous_user(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'))
+
+class SupervisionActorsAutocompleteTestCase(TestCase):
+    @classmethod
+    def _formatted_person_result(cls, supervision_actor: SupervisionActor):
+        return {
+            'id': str(supervision_actor.uuid),
+            'text': '{}, {}'.format(supervision_actor.last_name, supervision_actor.first_name),
+        }
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.factory = RequestFactory()
+        cls.user = User.objects.create_user(
+            username='jacob',
+            password='top_secret',
+        )
+        cls.ca_member = CaMemberFactory(
+            actor_ptr__person__first_name='John',
+            actor_ptr__person__last_name='Poe',
+        )
+        cls.promoter = PromoterFactory(
+            actor_ptr__person__first_name='Jane',
+            actor_ptr__person__last_name='Poe',
+        )
+        cls.external_promoter = ExternalPromoterFactory(
+            first_name='John',
+            last_name='Doe',
+        )
+
+        cls.url = reverse('admission:autocomplete:supervision-actors')
+
+    def test_redirects_with_anonymous_user(self):
+        request = self.factory.get(self.url)
         request.user = AnonymousUser()
 
-        response = CandidatesAutocomplete.as_view()(request)
+        response = SupervisionActorsAutocomplete.as_view()(request)
         self.assertEqual(response.status_code, 302)
 
-    def test_promoters_without_query(self):
-        request = self.factory.get(reverse('admission:autocomplete:promoters'))
+    def test_without_query(self):
+        request = self.factory.get(self.url)
         request.user = self.user
 
-        response = PromotersAutocomplete.as_view()(request)
+        response = SupervisionActorsAutocomplete.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -156,23 +198,100 @@ class PersonsAutocompleteTestCase(TestCase):
             },
         )
 
-    def test_promoters_with_name(self):
-        request = self.factory.get(
-            reverse('admission:autocomplete:promoters'),
-            data={
-                'q': self.first_promoter.first_name,
-            },
-        )
+    def test_with_name_for_an_internal_actor(self):
+        request = self.factory.get(self.url, data={'q': 'Poe'})
         request.user = self.user
 
-        response = PromotersAutocomplete.as_view()(request)
+        response = SupervisionActorsAutocomplete.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
             {
                 'pagination': {'more': False},
                 'results': [
-                    self._formatted_person_result(self.first_promoter),
+                    self._formatted_person_result(self.promoter),
+                    self._formatted_person_result(self.ca_member),
+                ],
+            },
+        )
+
+    def test_with_name_for_an_external_actor(self):
+        request = self.factory.get(self.url, data={'q': 'Doe'})
+        request.user = self.user
+
+        response = SupervisionActorsAutocomplete.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    self._formatted_person_result(self.external_promoter),
+                ],
+            },
+        )
+
+    def test_with_global_id(self):
+        request = self.factory.get(self.url, data={'q': self.promoter.person.global_id})
+        request.user = self.user
+
+        response = SupervisionActorsAutocomplete.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    self._formatted_person_result(self.promoter),
+                ],
+            },
+        )
+
+    def test_with_actor_type(self):
+        request = self.factory.get(
+            self.url,
+            data={
+                'q': self.promoter.person.global_id,
+                'forward': json.dumps(
+                    {
+                        'actor_type': ActorType.CA_MEMBER.name,
+                    }
+                ),
+            },
+        )
+        request.user = self.user
+
+        response = SupervisionActorsAutocomplete.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'pagination': {'more': False},
+                'results': [],
+            },
+        )
+
+        request = self.factory.get(
+            self.url,
+            data={
+                'q': self.promoter.person.global_id,
+                'forward': json.dumps(
+                    {
+                        'actor_type': ActorType.PROMOTER.name,
+                    }
+                ),
+            },
+        )
+        request.user = self.user
+
+        response = SupervisionActorsAutocomplete.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    self._formatted_person_result(self.promoter),
                 ],
             },
         )

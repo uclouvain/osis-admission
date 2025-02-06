@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
     {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-3" %}
   </div>
   <div class="row">
-    {% bootstrap_field filter_form.matricule_promoteur form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.uuid_promoteur form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.type_financement form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.fnrs_fria_fresh form_group_class="form-group col-md-3" %}
@@ -58,10 +58,7 @@
   <hr>
   <div>
     <div class="row flex-content no-space">
-      <div class="col-md-4">
-        {% bootstrap_field filter_form.liste_travail %}
-      </div>
-        <button id="toggle-checklist-filters" type="button" class="btn btn-link nopadding" value="off">
+        <button id="toggle-checklist-filters" type="button" class="btn btn-link" value="off">
           {% translate "Show the states of the checklist" %}
         </button>
     </div>
@@ -104,13 +101,9 @@
               },
           });
 
-          {# Working lists #}
-          const stateInput = $('#id_etats');
-          const typeInput = $('#id_type');
-          const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
+          {# Checklist filters #}
           const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
           const toggleChecklistFiltersButton = $('#toggle-checklist-filters');
-          let selectWorkListInProgress = false;
 
           {# Toggle the checklist filters #}
           toggleChecklistFiltersButton.on('click', function () {
@@ -126,31 +119,6 @@
           });
 
           toggleChecklistFiltersButton.val(checklistFiltersInputs.filter(':checked').length > 0 ? 'off' : 'on').trigger('click');
-
-          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
-              {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
-              if (selectWorkListInProgress) return;
-              $('#id_liste_travail').val('').trigger('change');
-          });
-
-          $('#id_liste_travail').on('select2:select', function (event) {
-              {# When selecting a working list, update the dependent inputs #}
-              const data = event.params.data;
-              selectWorkListInProgress = true;
-
-              stateInput.val(data.admission_statuses).trigger('change');
-              typeInput.val([data.admission_type]).trigger('change');
-              if (!data.checklist_filters_mode) {
-                  filterModeInputs.filter(':checked').prop('checked', false).trigger('change');
-                  filterModeInputs.parents('label').removeClass('active');
-              } else {
-                  filterModeInputs.filter(`[value="${data.checklist_filters_mode}"]`).trigger('click');
-              }
-              data.checklist_filters.forEach(function(value, index) {
-                  checklistFiltersInputs.filter(`[name="filtres_etats_checklist_${index}"]`).val(value).trigger('change');
-              });
-              selectWorkListInProgress = false;
-          });
       });
   </script>
 

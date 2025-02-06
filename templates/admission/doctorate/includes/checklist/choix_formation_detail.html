@@ -24,10 +24,10 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% has_perm 'admission.change_checklist' as can_change_checklist %}
+{% has_perm 'admission.checklist_change_training_choice' as can_change_checklist_training_choice %}
 
-{% if can_change_checklist %}
-  {% url view.base_namespace|add:':choix-formation-update' uuid=view.kwargs.uuid as edit_choix_formation_url %}
+{% if can_change_checklist_training_choice %}
+  {% url 'admission:doctorate:choix-formation-update' uuid=view.kwargs.uuid as edit_choix_formation_url %}
 {% endif %}
 
 <div id="choix-formation-details"
@@ -39,23 +39,10 @@
   {% panel _("Proposition features") edit_link_button=edit_choix_formation_url %}
     {% field_data _("Proposition type") admission.type|enum_display:'TypeDemande' %}
     {% field_data _("Academic year") admission.annee_calculee|get_short_academic_year %}
-    <dl>
-        <dt>{% trans "Course" context 'admission' %}</dt>
-        <dd>
-          {% with formation=admission.formation %}
-            {% if admission|est_premiere_annee %}
-              {{ formation.sigle }}-1 - {{ formation.intitule|intitule_premiere_annee }} ({{ formation.campus }})
-            {% else %}
-              {{ formation.sigle }} - {{ formation.intitule }} ({{ formation.campus }})
-            {% endif %}
-          {% endwith %}
-        </dd>
-    </dl>
-    {% if admission.poursuite_de_cycle_a_specifier %}
-      {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' %}<div class="bg-info">{% endif %}
-      {% field_data _("Cycle pursuit") admission.poursuite_de_cycle|enum_display:'PoursuiteDeCycle' %}
-      {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' %}</div>{% endif %}
+    {% translate "Course" context 'admission' as course_title %}
+    {% field_data course_title admission.formation %}
+    {% if admission.commission_proximite %}
+      {% field_data _("Proximity commission / Subdomain") admission.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
     {% endif %}
-    {% field_data _("Late enrollment") admission.est_inscription_tardive %}
   {% endpanel %}
 </div>

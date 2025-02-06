@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,15 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-
+import datetime
 import json
 
 from django import forms
 from django.conf import settings
-from django.utils.translation import (
-    gettext_lazy as _,
-    get_language,
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    COMMISSIONS_CDE_CLSM,
+    COMMISSIONS_CDSS,
+    SIGLES_SCIENCES,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixSousDomaineSciences,
+)
+from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.forms import get_academic_year_choices
+from base.models.academic_year import AcademicYear
+from parcours_doctoral.ddd.domain.model.enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
 )
 
 
@@ -52,3 +66,44 @@ class ProjetRechercheDemanderModificationCAForm(forms.Form):
                 'language': get_language(),
             }
         )
+
+
+class ChoixFormationForm(forms.Form):
+    type_demande = forms.ChoiceField(
+        label=_('Proposition type'),
+        choices=TypeDemande.choices(),
+    )
+    annee_academique = forms.ChoiceField(
+        label=_('Academic year'),
+    )
+    commission_proximite = forms.ChoiceField(
+        label=_('Proximity commission / Subdomain'),
+    )
+
+    @classmethod
+    def get_proximity_commission_choices(cls, training: FormationDTO):
+        if training.sigle_entite_gestion in COMMISSIONS_CDE_CLSM:
+            return ChoixCommissionProximiteCDEouCLSM.choices()
+        elif training.sigle_entite_gestion in COMMISSIONS_CDSS:
+            return ChoixCommissionProximiteCDSS.choices()
+        elif training.sigle in SIGLES_SCIENCES:
+            return ChoixSousDomaineSciences.choices()
+        return []
+
+    def __init__(self, training, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        today = datetime.date.today()
+
+        try:
+            current_year = AcademicYear.objects.get(start_date__lte=today, end_date__gt=today).year
+        except AcademicYear.DoesNotExist:
+            current_year = today.year
+
+        self.fields['annee_academique'].choices = get_academic_year_choices(current_year - 2, current_year + 2)
+
+        self.fields['commission_proximite'].choices = self.get_proximity_commission_choices(training)
+
+        if len(self.fields['commission_proximite'].choices) == 0:
+            self.fields['commission_proximite'].disabled = True
+            self.fields['commission_proximite'].widget = forms.HiddenInput()

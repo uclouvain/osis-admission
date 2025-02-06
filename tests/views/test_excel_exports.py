@@ -1268,9 +1268,9 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 ],
                 'type': ChoixTypeAdmission.ADMISSION.name,
                 'cdds': 'GHIJK',
-                'commission_proximite': ChoixCommissionProximiteCDSS.BCM.name,
+                'commission_proximite': ChoixCommissionProximiteCDSS.BCGIM.name,
                 'sigles_formations': ['ZEBU0'],
-                'matricule_promoteur': promoter.person.global_id,
+                'uuid_promoteur': str(promoter.uuid),
                 'type_financement': ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
                 'bourse_recherche': str(scholarship.uuid),
                 'cotutelle': True,
@@ -1336,9 +1336,9 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         )
         self.assertEqual(values[8], ChoixTypeAdmission.ADMISSION.value)
         self.assertEqual(values[9], 'GHIJK')
-        self.assertEqual(values[10], ChoixCommissionProximiteCDSS.BCM.value)
+        self.assertEqual(values[10], ChoixCommissionProximiteCDSS.BCGIM.value)
         self.assertEqual(values[11], "['ZEBU0']")
-        self.assertEqual(values[12], promoter.person.full_name)
+        self.assertEqual(values[12], promoter.complete_name)
         self.assertEqual(values[13], ChoixTypeFinancement.SEARCH_SCHOLARSHIP.value)
         self.assertEqual(values[14], scholarship.short_name)
         self.assertEqual(values[15], 'oui')
@@ -1359,7 +1359,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'cdds': '',
                 'commission_proximite': '',
                 'sigles_formations': [],
-                'matricule_promoteur': '',
+                'uuid_promoteur': '',
                 'type_financement': '',
                 'bourse_recherche': '',
                 'cotutelle': None,

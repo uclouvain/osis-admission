@@ -39,7 +39,9 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candid
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
-from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import (
+    soumettre_ca,
+)
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
@@ -169,7 +171,6 @@ COMMAND_HANDLERS = {
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
         proposition_repository=_proposition_repository,
-        doctorat_translator=_doctorat_translator,
         historique=_historique,
     ),
     RechercherDoctoratQuery: lambda msg_bus, cmd: rechercher_doctorats(

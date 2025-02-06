@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,29 +25,33 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db.models import Q
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 
-from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
-from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    ConfigurationStatutChecklist,
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
-    onglet_decision_sic,
-    onglet_decision_cdd,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import IListerDemandesService
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+    ConfigurationStatutChecklist,
+    onglet_decision_cdd,
+    onglet_decision_sic,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import (
+    IListerDemandesService,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.infrastructure.utils import get_entities_with_descendants_ids
+from admission.models import DoctorateAdmission
 from admission.views import PaginatedList
 
 
@@ -64,7 +68,7 @@ class ListerDemandesService(IListerDemandesService):
         cdds: Optional[List[str]] = None,
         commission_proximite: Optional[str] = '',
         sigles_formations: Optional[List[str]] = None,
-        matricule_promoteur: Optional[str] = '',
+        uuid_promoteur: Optional[str] = '',
         type_financement: Optional[str] = '',
         bourse_recherche: Optional[str] = '',
         cotutelle: Optional[bool] = None,
@@ -127,8 +131,8 @@ class ListerDemandesService(IListerDemandesService):
         if sigles_formations:
             qs = qs.filter(training__acronym__in=sigles_formations)
 
-        if matricule_promoteur:
-            qs = qs.filter(supervision_group__actors__person__global_id=matricule_promoteur)
+        if uuid_promoteur:
+            qs = qs.filter(supervision_group__actors__uuid=uuid_promoteur)
 
         if type_financement:
             qs = qs.filter(financing_type=type_financement)
@@ -163,9 +167,9 @@ class ListerDemandesService(IListerDemandesService):
                 if not status_values:
                     continue
 
-                current_tab: Optional[
-                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
-                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                current_tab: Optional[Dict[str, Dict[str, ConfigurationStatutChecklist]]] = (
+                    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                )
 
                 if not current_tab:
                     continue

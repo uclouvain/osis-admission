@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@
     {% display admission.nom_institut_these ' ' '(' admission.sigle_institut_these ')' as institut_these %}
   {% endif %}
   {% field_data _("Research institute") institut_these|default_if_none:'' %}
-  {% field_data _("Thesis location") admission.lieu_these %}
+  {% field_data _("Thesis location in UCLouvain") admission.lieu_these %}
 
   {% field_data _("PhD research project") admission.documents_projet %}
   {% field_data _("PhD proposal") admission.proposition_programme_doctoral %}

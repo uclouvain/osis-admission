@@ -152,11 +152,10 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             person__first_name='Jim',
             person__last_name='Doe',
         )
-        promoter = PromoterFactory(
+        cls.promoter = PromoterFactory(
             actor_ptr__person__first_name='Jane',
             actor_ptr__person__last_name='Collins',
         )
-        cls.promoter = promoter.person
 
         # Create admissions
         admission = DoctorateAdmissionFactory(
@@ -165,12 +164,12 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             training__enrollment_campus__name='Mons',
             training__acronym='EFG3',
             cotutelle=False,
-            supervision_group=promoter.process,
+            supervision_group=cls.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            proximity_commission=ChoixCommissionProximiteCDSS.BCM.name,
+            proximity_commission=ChoixCommissionProximiteCDSS.BCGIM.name,
             candidate__country_of_citizenship=cls.belgium_country,
             submitted_at=datetime.datetime(2021, 1, 1),
             candidate__first_name='John',
@@ -197,7 +196,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 status_cdd=ChoixStatutCDD.TO_BE_VERIFIED.name,
                 status_sic=ChoixStatutSIC.VALID.name,
                 proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
-                last_update_author=cls.promoter,
+                last_update_author=cls.promoter.person,
                 is_fnrs_fria_fresh_csc_linked=False,
                 submitted_profile={
                     "coordinates": {
@@ -373,7 +372,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(form.fields['cdds'].choices, [(ENTITY_CDE, ENTITY_CDE), (ENTITY_CDSS, ENTITY_CDSS)])
 
-        self.assertEqual(form['matricule_promoteur'].value(), None)
+        self.assertEqual(form['uuid_promoteur'].value(), None)
 
         self.assertEqual(form['sigles_formations'].value(), None)
         self.assertCountEqual(
@@ -405,8 +404,6 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(form['mode_filtres_etats_checklist'].value(), ModeFiltrageChecklist.INCLUSION.name)
 
         self.assertEqual(form['filtres_etats_checklist'].value(), None)
-
-        self.assertEqual(form['liste_travail'].value(), None)
 
     def test_form_initialization_for_a_central_manager_having_one_cdd(self):
         self.client.force_login(user=self.sic_user)
@@ -468,7 +465,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         data = {
             'nationalite': self.country.iso_code,
             'matricule_candidat': self.admissions[0].candidate.global_id,
-            'matricule_promoteur': self.promoter.global_id,
+            'uuid_promoteur': self.promoter.uuid,
         }
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITHOUT_SEARCH):
             response = self.client.get(self.url, data)
@@ -490,14 +487,14 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 ),
             )
             self.assertEqual(
-                form.fields['matricule_promoteur'].widget.choices,
-                ((self.promoter.global_id, '{}, {}'.format(self.promoter.last_name, self.promoter.first_name)),),
+                form.fields['uuid_promoteur'].widget.choices,
+                ((str(self.promoter.uuid), self.promoter.complete_name),),
             )
 
         data = {
             'nationalite': 'UNKOWN',
             'matricule_candidat': '123456',
-            'matricule_promoteur': '654321',
+            'uuid_promoteur': str(uuid.uuid4()),
         }
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITHOUT_SEARCH):
             response = self.client.get(self.url, data)
@@ -507,7 +504,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             form = response.context['form']
             self.assertEqual(form.fields['nationalite'].widget.choices, [])
             self.assertEqual(form.fields['matricule_candidat'].widget.choices, [])
-            self.assertEqual(form.fields['matricule_promoteur'].widget.choices, [])
+            self.assertEqual(form.fields['uuid_promoteur'].widget.choices, [])
 
     def test_get_with_invalid_dates(self):
         self.client.force_login(user=self.sic_user)
@@ -765,7 +762,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         data = {
             'annee_academique': '2021',
-            'matricule_promoteur': self.promoter.global_id,
+            'uuid_promoteur': self.promoter.uuid,
         }
 
         response = self.client.get(self.url, data)

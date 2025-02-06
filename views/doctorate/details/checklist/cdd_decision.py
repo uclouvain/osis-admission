@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,34 +30,39 @@ from django.views.generic import FormView
 from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.doctorat.preparation.commands import (
+    ApprouverPropositionParCddCommand,
     EnvoyerPropositionACddLorsDeLaDecisionCddCommand,
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand,
     RefuserPropositionParCddCommand,
     SpecifierInformationsAcceptationPropositionParCddCommand,
-    ApprouverPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from admission.forms.admission.checklist import (
     DoctorateCddDecisionApprovalForm,
     SendEMailForm,
 )
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
 )
 from admission.utils import get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin, get_email
+from admission.views.doctorate.details.checklist.mixins import (
+    CheckListDefaultContextMixin,
+    get_email,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -146,9 +151,11 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         if self.request.method == 'GET':
             # Load the email template
             subject, body = get_email(
-                template_identifier=ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA
-                if self.proposition_resume.resume.curriculum.a_diplome_belge
-                else ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
+                template_identifier=(
+                    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA
+                    if self.proposition_resume.resume.curriculum.a_diplome_belge
+                    else ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA
+                ),
                 language=self.proposition.langue_contact_candidat,
                 proposition_dto=self.proposition,
                 extra_tokens={
@@ -339,7 +346,6 @@ class CddApprovalDecisionView(
                     avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
                     uuids_complements_formation=form.cleaned_data['prerequisite_courses'],
                     commentaire_complements_formation=form.cleaned_data['prerequisite_courses_fac_comment'],
-                    nombre_annees_prevoir_programme=form.cleaned_data['program_planned_years_number'],
                     nom_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_name'],
                     email_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_email'],
                     commentaire_programme_conjoint=form.cleaned_data['join_program_fac_comment'],

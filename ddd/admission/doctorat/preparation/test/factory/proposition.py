@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
 )
@@ -56,35 +56,44 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     DroitsInscriptionMontant,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.checklist import Checklist
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.checklist import (
+    Checklist,
+)
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.enums import (
-    ChoixTypeCompteBancaire,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -298,10 +307,6 @@ class _PropositionFactory(factory.Factory):
             ),
             avec_complements_formation=True,
             commentaire_complements_formation=factory.fuzzy.FuzzyText(),
-            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
-                low=DUREE_MINIMALE_PROGRAMME,
-                high=DUREE_MAXIMALE_PROGRAMME,
-            ),
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
             commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
@@ -315,10 +320,6 @@ class _PropositionFactory(factory.Factory):
             ),
             avec_complements_formation=True,
             commentaire_complements_formation=factory.fuzzy.FuzzyText(),
-            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
-                low=DUREE_MINIMALE_PROGRAMME,
-                high=DUREE_MAXIMALE_PROGRAMME,
-            ),
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
             droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE,

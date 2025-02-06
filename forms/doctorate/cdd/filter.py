@@ -62,18 +62,17 @@ from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.models import EntityProxy
-from admission.models.working_list import DoctorateWorkingList
+from admission.models import EntityProxy, SupervisionActor
 from base.forms.utils import autocomplete
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
-from base.models.person import Person
 from education_group.contrib.models import EducationGroupRoleModel
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
+from parcours_doctoral.models import ActorType
 from reference.models.country import Country
 from reference.models.enums.scholarship_type import ScholarshipType
 from reference.models.scholarship import Scholarship
@@ -129,15 +128,18 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         required=False,
         widget=autocomplete.Select2Multiple(),
     )
-    matricule_promoteur = forms.CharField(
+    uuid_promoteur = forms.CharField(
         label=pgettext_lazy('gender', 'Supervisor'),
         required=False,
         widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:promoters",
+            url="admission:autocomplete:supervision-actors",
             attrs={
                 **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
                 'data-placeholder': _('Last name / First name / Global id'),
             },
+            forward=[
+                forward.Const(ActorType.PROMOTER.name, 'actor_type'),
+            ],
         ),
     )
     sigles_formations = forms.MultipleChoiceField(
@@ -173,19 +175,6 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         configurations=ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
         label=_('Checklist filters'),
         required=False,
-    )
-    liste_travail = WorkingListField(
-        label=_('Working list'),
-        queryset=DoctorateWorkingList.objects.all(),
-        required=False,
-        empty_label=_('Personalized'),
-        widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:doctorate-working-lists",
-            attrs={
-                'data-placeholder': _('Personalized'),
-                'data-allow-clear': 'true',
-            },
-        ),
     )
 
     class Media:
@@ -317,12 +306,15 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
                 if country:
                     self.fields['nationalite'].widget.choices = ((nationality, country[0]),)
 
-            promoter = self.data.get(self.add_prefix('matricule_promoteur'))
-            if promoter:
-                person = Person.objects.values('last_name', 'first_name').filter(global_id=promoter).first()
-                if person:
-                    self.fields['matricule_promoteur'].widget.choices = (
-                        (promoter, '{}, {}'.format(person['last_name'], person['first_name'])),
+            promoter_uuid = self.data.get(self.add_prefix('uuid_promoteur'))
+            if promoter_uuid:
+                promoter = SupervisionActor.objects.filter(uuid=promoter_uuid).select_related('person').first()
+                if promoter:
+                    self.fields['uuid_promoteur'].widget.choices = (
+                        (
+                            promoter_uuid,
+                            promoter.complete_name,
+                        ),
                     )
 
     def clean(self):

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import json
-from typing import Union, Optional
+from typing import Optional, Union
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -37,56 +37,86 @@ from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
-from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
-from admission.models import (
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-    ContinuingEducationAdmission,
-    EPCInjection,
+from admission.calendar.admission_digit_ticket_submission import (
+    AdmissionDigitTicketSubmissionCalendar,
 )
-from admission.models.base import AdmissionViewer
-from admission.models.base import BaseAdmission
-from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
     GetCotutelleCommand,
-    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
     RecupererAdmissionDoctoratQuery,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException, \
-    DoctoratNonTrouveException
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, CotutelleDTO
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DoctoratNonTrouveException,
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    CotutelleDTO,
+    PropositionDTO,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
-from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
+from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import (
+    DemandeNonTrouveeException,
+)
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
+    TypeGestionnaire,
+)
+from admission.ddd.admission.dtos.proposition_fusion_personne import (
+    PropositionFusionPersonneDTO,
+)
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
+)
+from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
 )
-from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
+from admission.ddd.admission.formation_continue.dtos.proposition import (
+    PropositionDTO as PropositionContinueDTO,
+)
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
+)
+from admission.ddd.admission.formation_generale.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
+)
+from admission.ddd.admission.formation_generale.commands import (
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    EPCInjection,
+    GeneralEducationAdmission,
+)
+from admission.models.base import AdmissionViewer, BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.utils import (
+    access_title_country,
+    add_close_modal_into_htmx_response,
+    add_messages_into_htmx_response,
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
-    add_messages_into_htmx_response,
-    person_is_sic,
     person_is_fac_cdd,
-    access_title_country,
-    add_close_modal_into_htmx_response,
+    person_is_sic,
 )
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
@@ -247,18 +277,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             financabilite_checklist = self.admission.checklist.get('current', {}).get('financabilite', {})
             etat_financabilite = {
                 'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
-                'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
+                'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name,
             }.get(financabilite_checklist.get('statut'))
             a_une_derogation = financabilite_checklist.get('extra', {}).get('reussite') == 'derogation'
             if etat_financabilite is None:
                 return False, "La financabilité doit être 'Financable', 'Non concernée' ou 'Autorisé à poursuivre'"
-            elif (
-                etat_financabilite == EtatFinancabilite.FINANCABLE.name
-                and (
-                    (self.admission.financability_rule == '' and not a_une_derogation)
-                    or self.admission.financability_established_on is None
-                    or self.admission.financability_established_by_id is None
-                )
+            elif etat_financabilite == EtatFinancabilite.FINANCABLE.name and (
+                (self.admission.financability_rule == '' and not a_une_derogation)
+                or self.admission.financability_established_on is None
+                or self.admission.financability_established_by_id is None
             ):
                 return (
                     False,
@@ -302,14 +329,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
         if self.is_doctorate:
             context['is_doctorate'] = True
-            try:
-                context['admission'] = self.proposition
-                # TODO doctorate refactorization
-                if admission_status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
-                    context['dossier'] = self.dossier
-                    context['doctorate'] = self.doctorate
-            except (PropositionNonTrouveeException, DemandeNonTrouveeException, DoctoratNonTrouveException) as e:
-                raise Http404(e.message)
+            context['admission'] = self.proposition
         elif self.is_general:
             context['admission'] = self.proposition
             context['access_title_country'] = access_title_country(self.selected_access_titles.values())

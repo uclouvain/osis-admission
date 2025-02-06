@@ -39,7 +39,7 @@ from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
 from admission.admission_utils.copy_documents import copy_documents
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -201,7 +201,7 @@ class DoctorateAdmission(BaseAdmission):
     )
     thesis_location = models.CharField(
         max_length=255,
-        verbose_name=_("Thesis location"),
+        verbose_name=_("Thesis location in UCLouvain"),
         default='',
         blank=True,
     )
@@ -485,12 +485,6 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
         default='',
         verbose_name=_('Other communication for the candidate about the prerequisite courses'),
-    )
-    program_planned_years_number = models.SmallIntegerField(
-        blank=True,
-        null=True,
-        verbose_name=_('Number of years required for the full program (including prerequisite courses)'),
-        validators=[MinValueValidator(DUREE_MINIMALE_PROGRAMME), MaxValueValidator(DUREE_MAXIMALE_PROGRAMME)],
     )
     annual_program_contact_person_name = models.CharField(
         blank=True,
