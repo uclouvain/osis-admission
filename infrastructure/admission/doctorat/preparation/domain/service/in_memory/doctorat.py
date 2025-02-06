@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,17 +25,21 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
+    IDoctoratTranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DoctoratNonTrouveException,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import (
     DoctoratCDEFactory,
     DoctoratCDSCFactory,
     DoctoratCDSSDPFactory,
     DoctoratCLSMFactory,
+    DoctoratFormationEtendu,
     _DoctoratDTOFactory,
 )
-from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import DoctoratFormationEtendu
 from admission.ddd.admission.test.factory.formation import CampusFactory
 
 
@@ -63,6 +67,15 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         DoctoratCDSCFactory(
             entity_id__sigle='SC3DP',
             entity_id__annee=2020,
+            campus='Louvain-la-Neuve',
+            campus_inscription='Louvain-la-Neuve',
+            code_secteur='SST',
+            intitule='Doctorat en sciences',
+            intitule_secteur='Secteur des sciences et technologies',
+        ),
+        DoctoratCDSCFactory(
+            entity_id__sigle='SC3DP',
+            entity_id__annee=2023,
             campus='Louvain-la-Neuve',
             campus_inscription='Louvain-la-Neuve',
             code_secteur='SST',

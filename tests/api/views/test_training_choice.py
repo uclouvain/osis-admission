@@ -40,10 +40,12 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixCommissionProximiteCDSS,
+    ChoixDoctoratDejaRealise,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
-    ChoixDoctoratDejaRealise, ChoixCommissionProximiteCDSS, ChoixTypeFinancement,
+    ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import (
     exceptions as doctorate_education_exceptions,
@@ -61,7 +63,9 @@ from admission.ddd.admission.formation_continue.domain.validator import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
+from admission.ddd.admission.formation_generale.domain.validator import (
+    exceptions as general_education_exceptions,
+)
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
@@ -84,7 +88,11 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, ExternalPromoterFactory
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalPromoterFactory,
+    PromoterFactory,
+)
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
@@ -92,12 +100,12 @@ from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from ddd.logic.reference.domain.validator.exceptions import BourseNonTrouveeException
+from reference.tests.factories.language import LanguageFactory
 from reference.tests.factories.scholarship import (
     DoubleDegreeScholarshipFactory,
     ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
 )
-from reference.tests.factories.language import LanguageFactory
 
 
 def create_default_propositions_in_progress(candidate):

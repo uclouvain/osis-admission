@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,15 +25,26 @@
 # ##############################################################################
 from typing import List, Optional
 
-from django.utils.translation import get_language, gettext_lazy as _
+from django.contrib.postgres.search import SearchVector
+from django.db.models import F, Q, Exists, OuterRef
+from django.db.models.functions import Coalesce
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PromoteurNonTrouveException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from admission.models import SupervisionActor
 from admission.models.enums.actor_type import ActorType
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PromoteurNonTrouveException
-from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
-from base.auth.roles.tutor import Tutor
+from base.models.person import Person
+from base.models.student import Student
 
 
 class PromoteurTranslator(IPromoteurTranslator):
@@ -42,26 +53,64 @@ class PromoteurTranslator(IPromoteurTranslator):
         raise NotImplementedError
 
     @classmethod
-    def get_dto(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurDTO':
-        actor = SupervisionActor.objects.select_related('person__tutor', 'country').get(
-            type=ActorType.PROMOTER.name,
-            uuid=promoteur_id.uuid,
-        )
+    def _get_base_qs(cls):
+        return SupervisionActor.objects.select_related(
+            'person__tutor',
+            'country',
+        ).filter(type=ActorType.PROMOTER.name)
+
+    @classmethod
+    def _build_dto_from_model(cls, actor: 'SupervisionActor') -> 'PromoteurDTO':
         return PromoteurDTO(
-            uuid=promoteur_id.uuid,
+            uuid=str(actor.uuid),
             matricule=actor.person and actor.person.global_id or '',
             nom=actor.last_name,
             prenom=actor.first_name,
             email=actor.email,
-            est_docteur=True
-            if not actor.is_external and hasattr(actor.person, 'tutor')
-            else actor.is_external and actor.is_doctor,
+            est_docteur=(
+                True
+                if not actor.is_external and hasattr(actor.person, 'tutor')
+                else actor.is_external and actor.is_doctor
+            ),
             institution=_('ucl') if not actor.is_external else actor.institute,
             ville=actor.city,
             code_pays=actor.country_id and actor.country.iso_code or '',
             pays=actor.country_id and getattr(actor.country, 'name_en' if get_language() == 'en' else 'name') or '',
             est_externe=actor.is_external,
         )
+
+    @classmethod
+    def get_dto(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurDTO':
+        actor = cls._get_base_qs().get(uuid=promoteur_id.uuid)
+        return cls._build_dto_from_model(actor)
+
+    @classmethod
+    def search_dto(cls, promoteurs_ids: List[str] = None, terme_recherche: str = None) -> List['PromoteurDTO']:
+        actors = cls._get_base_qs().annotate(
+            current_first_name=Coalesce(
+                F('person__first_name'),
+                F('first_name'),
+            ),
+            current_last_name=Coalesce(
+                F('person__last_name'),
+                F('last_name'),
+            ),
+        )
+
+        if promoteurs_ids is not None:
+            actors = actors.filter(uuid__in=promoteurs_ids)
+
+        if terme_recherche is not None:
+            actors = actors.annotate(
+                name=SearchVector(
+                    'current_first_name',
+                    'current_last_name',
+                ),
+            ).filter(Q(name=terme_recherche) | Q(person__global_id__contains=terme_recherche))
+
+        actors = actors.order_by('current_last_name', 'current_first_name')
+
+        return [cls._build_dto_from_model(actor=actor) for actor in actors]
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
@@ -79,7 +128,13 @@ class PromoteurTranslator(IPromoteurTranslator):
 
     @classmethod
     def _get_queryset(cls, matricule):
-        return Tutor.objects.filter(
-            person__user_id__isnull=False,
-            person__global_id=matricule,
-        ).select_related("person")
+        return Person.objects.alias(
+            # Is the person a student?
+            is_student=Exists(Student.objects.filter(person=OuterRef('pk'))),
+        ).filter(
+            global_id=matricule,
+            # Remove unexistent users
+            user_id__isnull=False,
+            # Remove students
+            is_student=False,
+        )

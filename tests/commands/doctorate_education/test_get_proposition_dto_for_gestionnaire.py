@@ -438,7 +438,6 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             ]
         )
         self.admission.prerequisite_courses_fac_comment = 'My comment about the additional trainings'
-        self.admission.program_planned_years_number = 3
         self.admission.annual_program_contact_person_name = 'John Doe'
         self.admission.annual_program_contact_person_email = 'john.doe@example.com'
         self.admission.join_program_fac_comment = 'My comment about the join program'
@@ -452,7 +451,6 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.avec_complements_formation, self.admission.with_prerequisite_courses)
         self.assertEqual(len(result.complements_formation), len(prerequisite_courses))
         self.assertEqual(result.commentaire_complements_formation, self.admission.prerequisite_courses_fac_comment)
-        self.assertEqual(result.nombre_annees_prevoir_programme, self.admission.program_planned_years_number)
         self.assertEqual(
             result.nom_personne_contact_programme_annuel_annuel,
             self.admission.annual_program_contact_person_name,

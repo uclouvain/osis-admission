@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,18 +33,24 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonCddException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
@@ -69,7 +75,6 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
             'avec_complements_formation': False,
             'uuids_complements_formation': [],
             'commentaire_complements_formation': '',
-            'nombre_annees_prevoir_programme': 2,
             'nom_personne_contact_programme_annuel': '',
             'email_personne_contact_programme_annuel': '',
             'commentaire_programme_conjoint': '',
@@ -94,7 +99,6 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
         self.assertEqual(proposition.avec_complements_formation, False)
         self.assertEqual(proposition.complements_formation, [])
         self.assertEqual(proposition.commentaire_complements_formation, '')
-        self.assertEqual(proposition.nombre_annees_prevoir_programme, 2)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.commentaire_programme_conjoint, '')
@@ -110,7 +114,6 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
                 avec_complements_formation=True,
                 uuids_complements_formation=['uuid-complement-formation-1'],
                 commentaire_complements_formation='Mon commentaire concernant les compléments de formation',
-                nombre_annees_prevoir_programme=3,
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
                 commentaire_programme_conjoint='Mon commentaire concernant le programme conjoint',
@@ -137,7 +140,6 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
             proposition.commentaire_complements_formation,
             'Mon commentaire concernant les compléments de formation',
         )
-        self.assertEqual(proposition.nombre_annees_prevoir_programme, 3)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
         self.assertEqual(proposition.commentaire_programme_conjoint, 'Mon commentaire concernant le programme conjoint')

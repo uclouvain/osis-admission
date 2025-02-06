@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -60,10 +60,6 @@
     >
       {% bootstrap_field cdd_decision_approval_form.prerequisite_courses label=cdd_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
       {% bootstrap_field cdd_decision_approval_form.prerequisite_courses_fac_comment label=cdd_decision_approval_form.prerequisite_courses_fac_comment.label|add:candidate_language_tag|label_with_user_icon %}
-    </div>
-
-    <div class="required_field">
-      {% bootstrap_field cdd_decision_approval_form.program_planned_years_number label=cdd_decision_approval_form.program_planned_years_number.label|label_with_user_icon %}
     </div>
 
     <fieldset class="custom-fieldset" style="margin-bottom: 15px;">

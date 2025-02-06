@@ -163,9 +163,9 @@ class PersonFormTestCase(TestCase):
             "osis_document.api.utils.get_remote_metadata",
             side_effect=lambda token, *args, **kwargs: {
                 "name": "myfile",
-                "mimetype": "image/png"
-                if token in {'file-0-token', self.form_data['id_photo_0']}
-                else "application/pdf",
+                "mimetype": (
+                    "image/png" if token in {'file-0-token', self.form_data['id_photo_0']} else "application/pdf"
+                ),
                 "size": 1,
             },
         )
