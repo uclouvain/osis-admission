@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
@@ -32,20 +32,31 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from osis_signature.models import StateHistory
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.models.enums.actor_type import ActorType
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
-    ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
 )
-from admission.forms.admission.doctorate.supervision import EXTERNAL_FIELDS, ACTOR_EXTERNAL
+from admission.forms.admission.doctorate.supervision import (
+    ACTOR_EXTERNAL,
+    EXTERNAL_FIELDS,
+)
+from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
+)
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from admission.tests.factories.supervision import (
-    PromoterFactory,
     CaMemberFactory,
     ExternalPromoterFactory,
+    PromoterFactory,
     _ProcessFactory,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -323,6 +334,40 @@ class SupervisionTestCase(TestCase):
         self.assertContains(response, _("An invitation has been sent again."))
 
     def test_back_to_candidate(self):
+        # Create experiences for the candidate
+        valuated_educational_experience = EducationalExperienceFactory(person=self.admission.candidate)
+        EducationalExperienceYearFactory(educational_experience=valuated_educational_experience)
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.admission,
+            educationalexperience=valuated_educational_experience,
+        )
+
+        not_valuated_educational_experience = EducationalExperienceFactory(person=self.admission.candidate)
+        EducationalExperienceYearFactory(educational_experience=not_valuated_educational_experience)
+
+        professional_experience = ProfessionalExperienceFactory(person=self.admission.candidate)
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.admission,
+            professionalexperience=professional_experience,
+        )
+
+        not_valuated_professional_experience = ProfessionalExperienceFactory(person=self.admission.candidate)
+
+        # Create experiences for another candidate
+        other_admission = DoctorateAdmissionFactory()
+        other_educational_experience = EducationalExperienceFactory(person=other_admission.candidate)
+        EducationalExperienceYearFactory(educational_experience=other_educational_experience)
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=other_educational_experience,
+        )
+
+        other_professional_experience = ProfessionalExperienceFactory(person=other_admission.candidate)
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=other_professional_experience,
+        )
+
         self.admission.status = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
         self.admission.save(update_fields=["status"])
 
@@ -334,3 +379,27 @@ class SupervisionTestCase(TestCase):
         response = self.client.post(url, {})
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
+
+        educational_experiences = self.admission.candidate.educationalexperience_set.all().values_list(
+            'uuid',
+            flat=True,
+        )
+        professional_experiences = self.admission.candidate.professionalexperience_set.all().values_list(
+            'uuid',
+            flat=True,
+        )
+
+        self.assertCountEqual(
+            educational_experiences,
+            [valuated_educational_experience.uuid, not_valuated_educational_experience.uuid],
+        )
+        self.assertCountEqual(
+            professional_experiences,
+            [professional_experience.uuid, not_valuated_professional_experience.uuid],
+        )
+
+        self.assertFalse(self.admission.educational_valuated_experiences.exists())
+        self.assertFalse(self.admission.professional_valuated_experiences.exists())
+
+        self.assertTrue(other_admission.educational_valuated_experiences.exists())
+        self.assertTrue(other_admission.professional_valuated_experiences.exists())

@@ -3718,6 +3718,9 @@ msgstr ""
 msgid "Last registration id"
 msgstr ""
 
+msgid "Last signature request before submission at"
+msgstr ""
+
 msgid "Last update author"
 msgstr ""
 

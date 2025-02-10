@@ -29,13 +29,15 @@ from typing import List, Optional, Union
 
 import attrs
 from django.conf import settings
-from django.db.models import OuterRef, Subquery, Exists
+from django.db.models import Exists, OuterRef, Subquery
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
@@ -195,10 +197,13 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         ),
         creee_le=admission.created_at,
         modifiee_le=admission.modified_at,
-        pre_admission_associee=PropositionIdentityBuilder.build_from_uuid(
-            str(admission.related_pre_admission.uuid)
-        ) if admission.related_pre_admission_id else None,
+        pre_admission_associee=(
+            PropositionIdentityBuilder.build_from_uuid(str(admission.related_pre_admission.uuid))
+            if admission.related_pre_admission_id
+            else None
+        ),
         soumise_le=admission.submitted_at,
+        derniere_demande_signature_avant_soumission_le=admission.last_signature_request_before_submission_at,
         comptabilite=get_accounting_from_admission(admission=admission),
         reponses_questions_specifiques=admission.specific_question_answers,
         curriculum=admission.curriculum,
@@ -380,16 +385,18 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         )
 
         financabilite_etabli_par_person = (
-            persons[entity.financabilite_etabli_par]
-            if entity.financabilite_etabli_par in persons
-            else None
+            persons[entity.financabilite_etabli_par] if entity.financabilite_etabli_par in persons else None
         )
 
         related_pre_admission_id = None
         if entity.pre_admission_associee:
-            related_pre_admission_id = DoctorateAdmission.objects.only('pk').get(
-                uuid=entity.pre_admission_associee.uuid,
-            ).pk
+            related_pre_admission_id = (
+                DoctorateAdmission.objects.only('pk')
+                .get(
+                    uuid=entity.pre_admission_associee.uuid,
+                )
+                .pk
+            )
 
         years = [year for year in [entity.annee_calculee, entity.millesime_condition_acces] if year]
         academic_years = {}
@@ -535,6 +542,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'must_provide_student_visa_d': entity.doit_fournir_visa_etudes,
                 'student_visa_d': entity.visa_etudes_d,
                 'signed_enrollment_authorization': entity.certificat_autorisation_signe,
+                'last_signature_request_before_submission_at': entity.derniere_demande_signature_avant_soumission_le,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
