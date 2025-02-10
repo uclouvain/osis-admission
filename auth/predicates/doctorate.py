@@ -51,7 +51,7 @@ from osis_role.errors import predicate_failed_msg
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations must have been sent"))
 def in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutPropositionDoctorale.EN_BROUILLON.name
+    return isinstance(obj, DoctorateAdmission) and obj.status == ChoixStatutPropositionDoctorale.EN_BROUILLON.name
 
 
 @predicate(bind=True)
@@ -67,6 +67,7 @@ def signing_in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("You must be invited to complete this admission."))
 def is_invited_to_complete(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT
+
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
@@ -223,3 +224,9 @@ def can_send_to_fac_faculty_decision(self, user: User, obj: DoctorateAdmission):
         isinstance(obj, DoctorateAdmission)
         and obj.status in STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION
     )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The admission must not follow a pre-admission"))
+def must_not_follow_a_pre_admission(self, user: User, obj: DoctorateAdmission):
+    return not bool(obj.related_pre_admission_id)

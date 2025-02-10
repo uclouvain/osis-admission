@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,15 +26,19 @@
 import re
 
 from django import forms
-from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy, get_language
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext, pgettext_lazy
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
 )
@@ -43,18 +47,19 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.forms import (
     ALL_EMPTY_CHOICE,
-    get_academic_year_choices,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     NullBooleanSelectField,
+    get_academic_year_choices,
 )
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.models import Scholarship
-from admission.models.working_list import WorkingList, ContinuingWorkingList
-from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
-from base.forms.utils import autocomplete, EMPTY_CHOICE
+from admission.models.working_list import ContinuingWorkingList, WorkingList
+from admission.views.autocomplete.trainings import (
+    ContinuingManagedEducationTrainingsAutocomplete,
+)
+from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.forms.widgets import Select2MultipleCheckboxesWidget
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -62,6 +67,8 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.templatetags.pagination_bs5 import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
+from reference.models.enums.scholarship_type import ScholarshipType
+from reference.models.scholarship import Scholarship
 
 REGEX_REFERENCE = r'\d{4}\.\d{4}$'
 
@@ -223,11 +230,11 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
 
     scholarship_types_by_field = {
         'bourse_internationale': {
-            TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
-            TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
+            ScholarshipType.BOURSE_INTERNATIONALE_DOCTORAT.name,
+            ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
         },
-        'bourse_erasmus_mundus': {TypeBourse.ERASMUS_MUNDUS.name},
-        'bourse_double_diplomation': {TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name},
+        'bourse_erasmus_mundus': {ScholarshipType.ERASMUS_MUNDUS.name},
+        'bourse_double_diplomation': {ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION.name},
     }
 
     noma = forms.RegexField(

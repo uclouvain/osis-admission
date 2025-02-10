@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,17 +25,20 @@
 # ##############################################################################
 import datetime
 from contextlib import suppress
+from typing import Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import OuterRef, Prefetch
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
+from admission.admission_utils.copy_documents import copy_documents
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -47,17 +50,20 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    DerogationFinancement,
     BesoinDeDerogation,
-    DroitsInscriptionMontant,
+    DerogationFinancement,
     DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
     MobiliteNombreDeMois,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.doctorat.validation.domain.model.enums import (
+    ChoixStatutCDD,
+    ChoixStatutSIC,
+)
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -71,7 +77,7 @@ from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
-from osis_document.contrib import FileField
+
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
 __all__ = [
@@ -88,6 +94,14 @@ class DoctorateAdmission(BaseAdmission):
         choices=ChoixTypeAdmission.choices(),
         db_index=True,
         default=ChoixTypeAdmission.ADMISSION.name,
+    )
+    related_pre_admission = models.ForeignKey(
+        'self',
+        verbose_name=_('Related pre-admission'),
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='+',
     )
     # TODO: remove this field in the future
     valuated_experiences = models.ManyToManyField(
@@ -338,7 +352,7 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
     )
     international_scholarship = models.ForeignKey(
-        to="admission.Scholarship",
+        to="reference.Scholarship",
         verbose_name=_("International scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
@@ -633,6 +647,19 @@ class DoctorateAdmission(BaseAdmission):
             )
         )
 
+    def __init__(self, *args, **kwargs):
+        self._duplicate_documents_when_saving: Optional[bool] = None
+
+        super().__init__(*args, **kwargs)
+
+    @property
+    def duplicate_documents_when_saving(self):
+        return self._duplicate_documents_when_saving
+
+    @duplicate_documents_when_saving.setter
+    def duplicate_documents_when_saving(self, value):
+        self._duplicate_documents_when_saving = value
+
     # The following properties are here to alias the training_id field to doctorate_id
     @property
     def doctorate(self):
@@ -702,14 +729,17 @@ class DoctorateAdmission(BaseAdmission):
         ]
 
     def save(self, *args, **kwargs) -> None:
+        if self._state.adding and self.duplicate_documents_when_saving:
+            copy_documents(objs=[self])
+
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
     def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.doctorat.preparation.commands import (
+            DeterminerAnneeAcademiqueEtPotQuery,
             VerifierProjetQuery,
             VerifierPropositionQuery,
-            DeterminerAnneeAcademiqueEtPotQuery,
         )
         from admission.utils import gather_business_exceptions
         from infrastructure.messages_bus import message_bus_instance
@@ -776,6 +806,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "financability_established_by",
                 "financability_dispensation_first_notification_by",
                 "financability_dispensation_last_notification_by",
+                "related_pre_admission",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),

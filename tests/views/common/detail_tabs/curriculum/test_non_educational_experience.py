@@ -63,26 +63,30 @@ class CurriculumNonEducationalExperienceDetailViewTestCase(TestCase):
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.entity).person.user
 
         cls.candidate = CandidateFactory().person
+        cls.other_candidate = CandidateFactory().person
 
         cls.experience: ProfessionalExperience = ProfessionalExperienceFactory(
             person=cls.candidate,
         )
+        cls.other_experience: ProfessionalExperience = ProfessionalExperienceFactory(
+            person=cls.other_candidate,
+        )
 
-        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+        cls.other_continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=cls.entity,
             training__academic_year=academic_years[0],
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
-            candidate=cls.candidate,
+            candidate=cls.other_candidate,
         )
 
-        cls.continuing_program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.continuing_admission.training.education_group,
+        cls.other_continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.other_continuing_admission.training.education_group,
         ).person.user
 
-        cls.continuing_url = resolve_url(
+        cls.other_continuing_url = resolve_url(
             'admission:continuing-education:curriculum:non_educational',
-            uuid=cls.continuing_admission.uuid,
-            experience_uuid=cls.experience.uuid,
+            uuid=cls.other_continuing_admission.uuid,
+            experience_uuid=cls.other_experience.uuid,
         )
 
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
@@ -143,33 +147,74 @@ class CurriculumNonEducationalExperienceDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_continuing_with_program_manager(self):
-        self.client.force_login(user=self.continuing_program_manager_user)
-        response = self.client.get(self.continuing_url)
+        self.client.force_login(user=self.other_continuing_program_manager_user)
+        response = self.client.get(self.other_continuing_url)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['edit_url'],
+            f'/admissions/continuing-education/{self.other_continuing_admission.uuid}/update/curriculum/'
+            f'non_educational/'
+            f'{self.other_experience.uuid}',
+        )
 
     def test_continuing_with_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.continuing_url)
+        response = self.client.get(self.other_continuing_url)
 
         self.assertEqual(response.status_code, 200)
 
         experience = response.context['experience']
 
         self.assertIsInstance(experience, ExperienceNonAcademiqueDTO)
-        self.assertEqual(experience.uuid, self.experience.uuid)
+        self.assertEqual(experience.uuid, self.other_experience.uuid)
         self.assertEqual(
             response.context['edit_url'],
-            f'/admissions/continuing-education/{self.continuing_admission.uuid}/update/curriculum/non_educational/'
-            f'{self.experience.uuid}',
+            f'/admissions/continuing-education/{self.other_continuing_admission.uuid}/update/curriculum/'
+            f'non_educational/'
+            f'{self.other_experience.uuid}',
         )
+
+    def test_continuing_with_blocking_admissions(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=self.other_candidate,
+            submitted=True,
+        )
+
+        response = self.client.get(self.other_continuing_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['edit_url'], '')
+
+        self.client.force_login(user=self.other_continuing_program_manager_user)
+        response = self.client.get(self.other_continuing_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['edit_url'], '')
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=self.other_candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(self.other_continuing_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['edit_url'], '')
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(self.other_continuing_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['edit_url'], '')
 
     def test_continuing_with_unknown_experience(self):
         self.client.force_login(user=self.sic_manager_user)
         response = self.client.get(
             resolve_url(
                 'admission:continuing-education:curriculum:non_educational',
-                uuid=self.continuing_admission.uuid,
+                uuid=self.other_continuing_admission.uuid,
                 experience_uuid=uuid.uuid4(),
             )
         )

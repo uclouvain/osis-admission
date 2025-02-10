@@ -1069,3 +1069,197 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, QuestionsSpecifiquesCurriculumNonCompleteesException)
+
+
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
+class DoctoratePreAdmissionListTestCase(QueriesAssertionsMixin, CheckActionLinksMixin, APITestCase):
+    @classmethod
+    @freezegun.freeze_time('2023-01-01')
+    def setUpTestData(cls):
+        # Create supervision group members
+        cls.promoter = PromoterFactory()
+        cls.committee_member = CaMemberFactory(process=cls.promoter.process)
+
+        # Create doctorate management entity
+        root = EntityVersionFactory(parent=None).entity
+        cls.sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        )
+        cls.commission = EntityVersionFactory(
+            parent=cls.sector.entity,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        )
+
+        # Users
+        cls.candidate = CandidateFactory().person
+        cls.no_role_user = PersonFactory().user
+        cls.promoter_user = cls.promoter.person.user
+        cls.committee_member_user = cls.committee_member.person.user
+
+        cls.url = resolve_url("admission_api_v1:doctorate_pre_admission_list")
+
+    def test_list_with_no_pre_admission(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 0)
+
+    def test_list_with_pre_admissions_to_retrieve(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            training__management_entity=self.commission.entity,
+            determined_academic_year__year=2022,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+        )
+
+        with self.assertNumQueriesLessThan(4):
+            response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 1)
+
+        self.assertEqual(results[0]['uuid'], str(admission.uuid))
+        self.assertEqual(results[0]['reference'], f'M-CDA22-{str(admission)}')
+        self.assertEqual(results[0]['doctorat']['sigle'], admission.training.acronym)
+        self.assertEqual(results[0]['doctorat']['code'], admission.training.partial_acronym)
+        self.assertEqual(results[0]['doctorat']['annee'], admission.training.academic_year.year)
+        self.assertEqual(results[0]['doctorat']['intitule'], admission.training.title)
+        self.assertEqual(results[0]['doctorat']['sigle_entite_gestion'], self.commission.acronym)
+
+        training_campus = admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
+        self.assertEqual(results[0]['doctorat']['campus']['uuid'], str(training_campus.uuid))
+        self.assertEqual(results[0]['doctorat']['campus']['nom'], training_campus.name)
+
+        self.assertEqual(results[0]['code_secteur_formation'], self.sector.acronym)
+        self.assertEqual(results[0]['intitule_secteur_formation'], self.sector.title)
+
+        other_admission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            training=admission.training,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+        )
+
+        with self.assertNumQueriesLessThan(4, verbose=True):
+            response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 2)
+
+    def test_list_depending_on_admission_type(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            training__management_entity=self.commission.entity,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            type=ChoixTypeAdmission.ADMISSION.name,
+        )
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 0)
+
+        admission.type = ChoixTypeAdmission.PRE_ADMISSION.name
+        admission.save()
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 1)
+
+    def test_list_depending_on_admission_status(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            training__management_entity=self.commission.entity,
+            status=ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+        )
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 0)
+
+        admission.status = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name
+        admission.save()
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 1)
+
+    def test_list_depending_on_other_pre_admissions_associations(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            training__management_entity=self.commission.entity,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+        )
+
+        other_admission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            related_pre_admission=admission,
+            status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        )
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 0)
+
+        other_admission.status = ChoixStatutPropositionDoctorale.ANNULEE.name
+        other_admission.save()
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()
+
+        self.assertEqual(len(results), 1)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        methods_not_allowed = ['delete', 'put', 'patch', 'post']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

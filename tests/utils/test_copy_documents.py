@@ -28,8 +28,8 @@ from unittest import mock
 
 from django.test import TestCase
 
+from admission.admission_utils.copy_documents import copy_documents
 from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
-from admission.utils import copy_documents
 from base.tests.factories.person import PersonFactory
 
 

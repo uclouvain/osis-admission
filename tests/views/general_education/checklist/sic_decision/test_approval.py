@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,31 +33,41 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 
-from admission.models import GeneralEducationAdmission
-from admission.models.checklist import AdditionalApprovalCondition, FreeAdditionalApprovalCondition
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+)
+from admission.models import GeneralEducationAdmission
+from admission.models.checklist import (
+    AdditionalApprovalCondition,
+    FreeAdditionalApprovalCondition,
 )
 from admission.tests.factories.faculty_decision import (
     AdditionalApprovalConditionFactory,
     FreeAdditionalApprovalConditionFactory,
 )
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory
-from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
+from admission.tests.views.general_education.checklist.sic_decision.base import (
+    SicPatchMixin,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import ErasmusMundusScholarshipFactory
 
 
 @freezegun.freeze_time('2021-11-01')

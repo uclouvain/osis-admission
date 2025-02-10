@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,22 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.doctorat.preparation.commands import ListerPropositionsCandidatQuery
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ListerPropositionsCandidatQuery,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 
 
 def lister_propositions_candidat(
     cmd: 'ListerPropositionsCandidatQuery',
     proposition_repository: 'IPropositionRepository',
 ) -> List['PropositionDTO']:
-    return proposition_repository.search_dto(matricule_candidat=cmd.matricule_candidat)
+    return proposition_repository.search_dto(
+        matricule_candidat=cmd.matricule_candidat,
+        type=cmd.type_admission,
+        etat=cmd.statut,
+        est_pre_admission_d_une_admission_en_cours=cmd.est_pre_admission_d_une_admission_en_cours,
+    )

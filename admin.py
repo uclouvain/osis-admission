@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,10 +33,12 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Q, Exists, OuterRef, F, Value, When, Case
+from django.db.models import Case, Exists, F, OuterRef, Q, Value, When
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext, pgettext, pgettext_lazy
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
@@ -51,45 +53,61 @@ from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.models import (
-    AdmissionTask,
-    AdmissionViewer,
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-    Scholarship,
-    Accounting,
-    DiplomaticPost,
-)
-from admission.models.base import BaseAdmission
-from admission.models.categorized_free_document import CategorizedFreeDocument
-from admission.models.checklist import (
-    RefusalReasonCategory,
-    RefusalReason,
-    AdditionalApprovalCondition,
-    FreeAdditionalApprovalCondition,
-)
-from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
-from admission.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
-from admission.models.online_payment import OnlinePayment
-from admission.models.working_list import WorkingList, ContinuingWorkingList, DoctorateWorkingList
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.enums import CritereItemFormulaireFormation
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
-)
-from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
+from admission.ddd.admission.enums import CritereItemFormulaireFormation
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
+)
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.models import (
+    Accounting,
+    AdmissionTask,
+    AdmissionViewer,
+    ContinuingEducationAdmission,
+    DiplomaticPost,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
+from admission.models.base import BaseAdmission
+from admission.models.categorized_free_document import CategorizedFreeDocument
+from admission.models.checklist import (
+    AdditionalApprovalCondition,
+    FreeAdditionalApprovalCondition,
+    RefusalReason,
+    RefusalReasonCategory,
+)
+from admission.models.epc_injection import (
+    EPCInjection,
+    EPCInjectionStatus,
+    EPCInjectionType,
+)
+from admission.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.models.online_payment import OnlinePayment
+from admission.models.working_list import (
+    ContinuingWorkingList,
+    DoctorateWorkingList,
+    WorkingList,
+)
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
-from admission.tasks import bulk_create_digit_persons_tickets, injecter_signaletique_a_epc_task
+from admission.tasks import (
+    bulk_create_digit_persons_tickets,
+    injecter_signaletique_a_epc_task,
+)
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -97,12 +115,11 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
-
 
 # ##############################################################################
 # Models
@@ -201,6 +218,7 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'thesis_language',
         'prerequisite_courses',
         'refusal_reasons',
+        'related_pre_admission',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']
@@ -301,34 +319,6 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
                     len(not_achieved_admissions_ids),
                 ).format(', '.join(map(str, not_achieved_admissions_ids))),
             )
-
-
-@admin.register(Scholarship)
-class ScholarshipAdmin(admin.ModelAdmin):
-    list_display = [
-        'short_name',
-        'long_name',
-        'type',
-        'enabled',
-    ]
-    search_fields = [
-        'short_name',
-        'long_name',
-    ]
-    list_filter = [
-        'type',
-        'disabled',
-    ]
-    fields = [
-        'type',
-        'short_name',
-        'long_name',
-        'disabled',
-    ]
-
-    @admin.display(description=_('Enabled'), boolean=True)
-    def enabled(self, obj):
-        return not obj.disabled
 
 
 FORM_ITEM_MIN_YEAR = 2022
@@ -667,15 +657,15 @@ class FinancabiliteOKFilter(admin.SimpleListFilter):
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
                         checklist__current__financanbilite__extra__reussite='financable',
-                        generaleducationadmission__financability_rule=''
+                        generaleducationadmission__financability_rule='',
                     )
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
-                        generaleducationadmission__financability_established_on__isnull=True
+                        generaleducationadmission__financability_established_on__isnull=True,
                     )
                     | Q(
                         checklist__current__financabilite__status='GEST_REUSSITE',
-                        generaleducationadmission__financability_established_by_id__isnull=True
+                        generaleducationadmission__financability_established_by_id__isnull=True,
                     ),
                     generaleducationadmission__isnull=False,
                     then=Value(False),
@@ -758,12 +748,9 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
             )
         )
 
-    @admin.display(
-        ordering='_noma_sent_to_digit'
-    )
+    @admin.display(ordering='_noma_sent_to_digit')
     def noma_sent_to_digit(self, obj):
         return obj._noma_sent_to_digit
-
 
     @admin.action(description='Injecter la demande dans EPC')
     def injecter_dans_epc(self, request, queryset):
@@ -927,6 +914,7 @@ class AdmissionTaskAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None) -> bool:
         return False
+
 
 # ##############################################################################
 # Roles

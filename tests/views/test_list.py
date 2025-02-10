@@ -35,31 +35,43 @@ from django.shortcuts import resolve_url
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.auth.scope import Scope
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    PoursuiteDeCycle,
-    ChoixStatutChecklist,
-    DecisionFacultaireEnum,
     BesoinDeDerogation,
-    OngletsChecklist,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    DecisionFacultaireEnum,
     DerogationFinancement,
+    OngletsChecklist,
+    PoursuiteDeCycle,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
+)
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
 )
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory, \
-    ContinuingEducationTrainingFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+    ContinuingEducationTrainingFactory,
+)
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory, \
-    GeneralEducationTrainingFactory
+from admission.tests.factories.general_education import (
+    GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
+)
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
     ProgramManagerRoleFactory,
@@ -73,11 +85,13 @@ from base.models.person_merge_proposal import PersonMergeProposal
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
+from base.tests.factories.entity_version import (
+    EntityVersionFactory,
+    MainEntityVersionFactory,
+)
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
-from education_group.auth.scope import Scope
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 
@@ -121,7 +135,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         # Admissions
         cls.admissions: List[Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]] = [
             GeneralEducationAdmissionFactory(
-                candidate__country_of_citizenship=CountryFactory(european_union=True, name='Belgique'),
+                candidate__country_of_citizenship=CountryFactory(european_union=True),
                 candidate__first_name="John",
                 candidate__last_name="Doe",
                 candidate__private_email="jdoe@example.be",
@@ -209,9 +223,11 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 est_premiere_annee=False,
                 poursuite_de_cycle='',
                 annee_formation=cls.admissions[0].training.academic_year.year,
-                annee_calculee=cls.admissions[0].determined_academic_year.year
-                if cls.admissions[0].determined_academic_year
-                else None,
+                annee_calculee=(
+                    cls.admissions[0].determined_academic_year.year
+                    if cls.admissions[0].determined_academic_year
+                    else None
+                ),
                 adresse_email_candidat=cls.admissions[0].candidate.private_email,
                 reponses_questions_specifiques={},
             ),
@@ -286,7 +302,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(form['annee_academique'].initial, 2024)
 
     def test_list_central_manager_scoped_not_entity(self):
-        manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name])
+        manager = CentralManagerRoleFactory(scopes=[Scope.GENERAL.name])
         self.client.force_login(user=manager.person.user)
 
         response = self._do_request(allowed_sql_surplus=1)
@@ -297,7 +313,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         other_admission = GeneralEducationAdmissionFactory(
             training__acronym="ABCD1",
         )
-        central_manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name], entity=self.first_entity)
+        central_manager = CentralManagerRoleFactory(scopes=[Scope.GENERAL.name], entity=self.first_entity)
         ProgramManagerRoleFactory(
             person=central_manager.person,
             education_group=other_admission.training.education_group,
@@ -309,7 +325,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 2)
 
     def test_list_central_manager_scoped_on_entity(self):
-        manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name], entity=self.first_entity)
+        manager = CentralManagerRoleFactory(scopes=[Scope.GENERAL.name], entity=self.first_entity)
         self.client.force_login(user=manager.person.user)
 
         response = self._do_request(allowed_sql_surplus=1)
@@ -331,9 +347,11 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
     def test_list_education_group_scopes(self):
-        self.client.force_login(user=ProgramManagerRoleFactory(
-            education_group=GeneralEducationTrainingFactory().education_group,
-        ).person.user)
+        self.client.force_login(
+            user=ProgramManagerRoleFactory(
+                education_group=GeneralEducationTrainingFactory().education_group,
+            ).person.user
+        )
 
         response = self._do_request()
         self.assertEqual(response.status_code, 200)
@@ -347,16 +365,20 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(self.results[0].uuid, response.context['object_list'][0].uuid)
 
-        self.client.force_login(user=ProgramManagerRoleFactory(
-            education_group=DoctorateFactory().education_group,
-        ).person.user)
+        self.client.force_login(
+            user=ProgramManagerRoleFactory(
+                education_group=DoctorateFactory().education_group,
+            ).person.user
+        )
 
         response = self._do_request()
         self.assertEqual(response.status_code, 403)
 
-        self.client.force_login(user=ProgramManagerRoleFactory(
-            education_group=ContinuingEducationTrainingFactory().education_group,
-        ).person.user)
+        self.client.force_login(
+            user=ProgramManagerRoleFactory(
+                education_group=ContinuingEducationTrainingFactory().education_group,
+            ).person.user
+        )
 
         response = self._do_request()
         self.assertEqual(response.status_code, 403)
@@ -762,16 +784,21 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         second_admission = GeneralEducationAdmissionFactory(
             training__management_entity=self.first_entity,
-            candidate__country_of_citizenship=CountryFactory(european_union=False, name='Andorre'),
+            candidate__country_of_citizenship=CountryFactory(european_union=False),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        sorted_admissions = sorted(
+            [second_admission, self.admissions[0]],
+            key=lambda admission: admission.candidate.country_of_citizenship.name,
         )
 
         response = self._do_request(o='nationalite_candidat')
         self.assertEqual(response.status_code, 200)
         result = response.context['object_list']
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0].uuid, second_admission.uuid)
-        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+        self.assertEqual(result[0].uuid, sorted_admissions[0].uuid)
+        self.assertEqual(result[1].uuid, sorted_admissions[1].uuid)
 
     def test_list_sort_by_vip(self):
         self.client.force_login(user=self.sic_management_user)

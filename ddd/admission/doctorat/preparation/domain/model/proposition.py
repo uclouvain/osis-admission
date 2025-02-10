@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,8 +46,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     Financement,
     financement_non_rempli,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
+    InstitutIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    DoctoratFormation,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -59,61 +63,76 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     BesoinDeDerogation,
-    OngletsChecklist,
-    DecisionCDDEnum,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
+    DecisionCDDEnum,
     DerogationFinancement,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+    MobiliteNombreDeMois,
+    OngletsChecklist,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DispenseOuDroitsMajores
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DroitsInscriptionMontant
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import MobiliteNombreDeMois
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    StatutsChecklistDoctorale,
     StatutChecklist,
+    StatutsChecklistDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CurriculumNonCompletePourAcceptationException,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
+    ApprouverAdmissionParSicValidatorList,
+    ApprouverInscriptionParSicValidatorList,
+    ApprouverParCDDValidatorList,
+    ApprouverParSicAValiderValidatorList,
     CompletionPropositionValidatorList,
+    GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
+    ModifierStatutChecklistParcoursAnterieurValidatorList,
     ModifierTypeAdmissionValidatorList,
     PropositionProjetDoctoralValidatorList,
-    ModifierStatutChecklistParcoursAnterieurValidatorList,
-    SpecifierConditionAccesParcoursAnterieurValidatorList,
-    ApprouverParSicAValiderValidatorList,
-    SpecifierInformationsApprobationInscriptionValidatorList,
-    ApprouverInscriptionParSicValidatorList,
-    ApprouverAdmissionParSicValidatorList,
-    SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
-    ApprouverParCDDValidatorList,
-    RefuserParCDDValidatorList,
-    GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
-    SpecifierNouvellesInformationsDecisionCDDValidatorList,
     RedonnerLaMainAuCandidatValidatorList,
     DemanderCandidatModificationCaValidatorList,
+    RefuserParCDDValidatorList,
+    SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
     SoumettreCAValidatorList,
+    SpecifierConditionAccesParcoursAnterieurValidatorList,
+    SpecifierInformationsApprobationInscriptionValidatorList,
+    SpecifierNouvellesInformationsDecisionCDDValidatorList,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.bourse import BourseIdentity
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
-    EtatEquivalenceTitreAcces,
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
 )
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
+)
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
+    TypeGestionnaire,
+)
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
-from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_question_specifique import (
+    ISuperQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.domain.service.profil_candidat import (
+    ProfilCandidat as ProfilCandidatService,
+)
+from admission.ddd.admission.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import (
     ChoixAssimilation1,
@@ -131,11 +150,16 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
-    SituationFinancabilite,
     SITUATION_FINANCABILITE_PAR_ETAT,
+    SituationFinancabilite,
 )
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.reference.domain.model.bourse import BourseIdentity
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -174,6 +198,8 @@ class Proposition(interface.RootEntity):
     soumise_le: Optional[datetime.datetime] = None
 
     profil_soumis_candidat: ProfilCandidat = None
+
+    pre_admission_associee: Optional[PropositionIdentity] = None
 
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
@@ -505,19 +531,19 @@ class Proposition(interface.RootEntity):
         self.auteur_derniere_modification = auteur_modification
         self.comptabilite = Comptabilite(
             attestation_absence_dette_etablissement=attestation_absence_dette_etablissement,
-            type_situation_assimilation=TypeSituationAssimilation[type_situation_assimilation]
-            if type_situation_assimilation
-            else None,
-            sous_type_situation_assimilation_1=ChoixAssimilation1[sous_type_situation_assimilation_1]
-            if sous_type_situation_assimilation_1
-            else None,
+            type_situation_assimilation=(
+                TypeSituationAssimilation[type_situation_assimilation] if type_situation_assimilation else None
+            ),
+            sous_type_situation_assimilation_1=(
+                ChoixAssimilation1[sous_type_situation_assimilation_1] if sous_type_situation_assimilation_1 else None
+            ),
             carte_resident_longue_duree=carte_resident_longue_duree,
             carte_cire_sejour_illimite_etranger=carte_cire_sejour_illimite_etranger,
             carte_sejour_membre_ue=carte_sejour_membre_ue,
             carte_sejour_permanent_membre_ue=carte_sejour_permanent_membre_ue,
-            sous_type_situation_assimilation_2=ChoixAssimilation2[sous_type_situation_assimilation_2]
-            if sous_type_situation_assimilation_2
-            else None,
+            sous_type_situation_assimilation_2=(
+                ChoixAssimilation2[sous_type_situation_assimilation_2] if sous_type_situation_assimilation_2 else None
+            ),
             carte_a_b_refugie=carte_a_b_refugie,
             annexe_25_26_refugies_apatrides=annexe_25_26_refugies_apatrides,
             attestation_immatriculation=attestation_immatriculation,
@@ -526,18 +552,18 @@ class Proposition(interface.RootEntity):
             decision_protection_subsidiaire=decision_protection_subsidiaire,
             decision_protection_temporaire=decision_protection_temporaire,
             carte_a=carte_a,
-            sous_type_situation_assimilation_3=ChoixAssimilation3[sous_type_situation_assimilation_3]
-            if sous_type_situation_assimilation_3
-            else None,
+            sous_type_situation_assimilation_3=(
+                ChoixAssimilation3[sous_type_situation_assimilation_3] if sous_type_situation_assimilation_3 else None
+            ),
             titre_sejour_3_mois_professionel=titre_sejour_3_mois_professionel,
             fiches_remuneration=fiches_remuneration,
             titre_sejour_3_mois_remplacement=titre_sejour_3_mois_remplacement,
             preuve_allocations_chomage_pension_indemnite=preuve_allocations_chomage_pension_indemnite,
             attestation_cpas=attestation_cpas,
             relation_parente=LienParente[relation_parente] if relation_parente else None,
-            sous_type_situation_assimilation_5=ChoixAssimilation5[sous_type_situation_assimilation_5]
-            if sous_type_situation_assimilation_5
-            else None,
+            sous_type_situation_assimilation_5=(
+                ChoixAssimilation5[sous_type_situation_assimilation_5] if sous_type_situation_assimilation_5 else None
+            ),
             composition_menage_acte_naissance=composition_menage_acte_naissance,
             acte_tutelle=acte_tutelle,
             composition_menage_acte_mariage=composition_menage_acte_mariage,
@@ -548,9 +574,9 @@ class Proposition(interface.RootEntity):
             titre_sejour_3_mois_parent=titre_sejour_3_mois_parent,
             fiches_remuneration_parent=fiches_remuneration_parent,
             attestation_cpas_parent=attestation_cpas_parent,
-            sous_type_situation_assimilation_6=ChoixAssimilation6[sous_type_situation_assimilation_6]
-            if sous_type_situation_assimilation_6
-            else None,
+            sous_type_situation_assimilation_6=(
+                ChoixAssimilation6[sous_type_situation_assimilation_6] if sous_type_situation_assimilation_6 else None
+            ),
             decision_bourse_cfwb=decision_bourse_cfwb,
             attestation_boursier=attestation_boursier,
             titre_identite_sejour_longue_duree_ue=titre_identite_sejour_longue_duree_ue,

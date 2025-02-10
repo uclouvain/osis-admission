@@ -53,7 +53,7 @@ __all__ = [
 class CurriculumGlobalFormView(AdmissionFormMixin, CurriculumGlobalCommonViewMixin, FormView):
     urlpatterns = {'curriculum': 'curriculum'}
     template_name = 'admission/forms/curriculum.html'
-    permission_required = 'admission.change_admission_curriculum'
+    permission_required = 'admission.change_admission_global_curriculum'
     form_class = GlobalCurriculumForm
     extra_context = {
         'force_form': True,

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,11 +28,11 @@ from dal import autocomplete
 from django.db.models import Q
 from rules.contrib.views import LoginRequiredMixin
 
+from reference.models.scholarship import Scholarship
+
 __all__ = [
     'ScholarshipAutocomplete',
 ]
-
-from admission.models import Scholarship
 
 
 class ScholarshipAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
