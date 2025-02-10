@@ -25,9 +25,8 @@
 ##############################################################################
 from typing import Optional
 
-from django.utils.translation import gettext_lazy as _
-
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from django.utils.translation import gettext_lazy as _
 from osis_common.ddd.interface import BusinessException
 
 
@@ -209,7 +208,7 @@ class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessExcep
     message = _(
         'As you are applying for a limited course as a non-resident (as defined by government decree) candidate, '
         'applications for the 2024-2025 academic year must be submitted via this '
-        '<a href="https://uclouvain.be/fr/etudier/inscriptions/demande-en-ligne" target="_blank">'
+        '<a href="https://fishe.uclouvain.be/portail/inscription/" target="_blank">'
         'specific platform</a>.'
     )
 
