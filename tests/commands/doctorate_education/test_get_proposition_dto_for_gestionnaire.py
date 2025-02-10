@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,30 +32,40 @@ import freezegun
 from django.test import TestCase, override_settings
 from osis_history.models import HistoryEntry
 
-from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererPropositionGestionnaireQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    TypeDeRefus,
     BesoinDeDerogation,
-    DroitsInscriptionMontant,
-    DispenseOuDroitsMajores,
-    MobiliteNombreDeMois,
     DerogationFinancement,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+    MobiliteNombreDeMois,
+    TypeDeRefus,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
-from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
-    EtatEquivalenceTitreAcces,
+from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
+    PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import DROITS_INSCRIPTION_MONTANT_VALEURS
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    DROITS_INSCRIPTION_MONTANT_VALEURS,
+)
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.scholarship import DoctorateScholarshipFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -64,9 +74,11 @@ from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
+from ddd.logic.reference.dtos.bourse import BourseDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import DoctorateScholarshipFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,24 +27,19 @@ import datetime
 
 import factory.fuzzy
 
-from admission.models import GeneralEducationAdmission
-from admission.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
     OngletsChecklist,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import GeneralEducationAdmission
+from admission.models.general_education import AdmissionPrerequisiteCourses
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.scholarship import (
-    DoubleDegreeScholarshipFactory,
-    ErasmusMundusScholarshipFactory,
-    InternationalScholarshipFactory,
-)
 from admission.tests.factories.utils import generate_proposition_reference
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
@@ -53,7 +48,14 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFullFactory
 from base.tests.factories.person import PersonFactory
-from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
+from program_management.tests.factories.education_group_version import (
+    EducationGroupVersionFactory,
+)
+from reference.tests.factories.scholarship import (
+    DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
+)
 
 
 class GeneralEducationTrainingFactory(EducationGroupYearFactory):

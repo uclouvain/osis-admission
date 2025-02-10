@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,23 +32,32 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from osis_history.models import HistoryEntry
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.models import DoctorateAdmission
 from admission.models.checklist import AdditionalApprovalCondition
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
-from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from admission.tests.factories.scholarship import DoctorateScholarshipFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import DoctorateScholarshipFactory
 
 
 @freezegun.freeze_time('2021-11-01')

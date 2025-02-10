@@ -36,6 +36,7 @@ from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.forms import REQUIRED_FIELD_CLASS
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationTrainingFactory,
     ContinuingEducationAdmissionFactory,
@@ -45,6 +46,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory, CandidateFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
@@ -190,6 +192,16 @@ class AdmissionCurriculumGlobalFormViewForContinuingTestCase(TestCase):
         self.client.force_login(program_manager_user)
         response = self.client.get(self.form_url_with_attachments)
 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        GeneralEducationAdmissionFactory(candidate=self.continuing_admission_with_attachments.candidate)
+
+        response = self.client.get(self.form_url_with_attachments)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        DoctorateAdmissionFactory(candidate=self.continuing_admission_with_attachments.candidate)
+
+        response = self.client.get(self.form_url_with_attachments)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_education_is_allowed_for_sic_users(self):

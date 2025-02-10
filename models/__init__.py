@@ -25,19 +25,25 @@
 # ##############################################################################
 
 try:
-    from .doctorate import DoctorateAdmission
-    from .actor import SupervisionActor
     from admission.ddd.admission.enums.type_demande import TypeDemande
-    from .entity_proxy import EntityProxy
-    from .task import AdmissionTask
+
     from .accounting import Accounting
-    from .scholarship import Scholarship
-    from .continuing_education import ContinuingEducationAdmission, ContinuingEducationAdmissionProxy
-    from .general_education import GeneralEducationAdmission, GeneralEducationAdmissionProxy
-    from .form_item import AdmissionFormItemInstantiation, AdmissionFormItem
+    from .actor import SupervisionActor
     from .base import AdmissionViewer
-    from .visa import DiplomaticPost
+    from .continuing_education import (
+        ContinuingEducationAdmission,
+        ContinuingEducationAdmissionProxy,
+    )
+    from .doctorate import DoctorateAdmission
+    from .entity_proxy import EntityProxy
     from .epc_injection import EPCInjection
+    from .form_item import AdmissionFormItem, AdmissionFormItemInstantiation
+    from .general_education import (
+        GeneralEducationAdmission,
+        GeneralEducationAdmissionProxy,
+    )
+    from .task import AdmissionTask
+    from .visa import DiplomaticPost
 
     __all__ = [
         "DoctorateAdmission",
@@ -46,7 +52,6 @@ try:
         "EntityProxy",
         "AdmissionTask",
         "Accounting",
-        "Scholarship",
         "ContinuingEducationAdmission",
         "ContinuingEducationAdmissionProxy",
         "GeneralEducationAdmission",

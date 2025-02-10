@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,50 +38,71 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.html import format_html
 from django.utils.text import slugify
-from django.utils.translation import gettext as _, gettext_lazy, pgettext, get_language
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy, pgettext
 from django.views import View
 from osis_async.models import AsyncTask
-from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
+from osis_export.contrib.export_mixins import ExcelFileExportMixin, ExportMixin
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
-from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
-from admission.models import Scholarship, AdmissionFormItem
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ListerDemandesQuery as ListerDemandesDoctoralesQuery,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    TOUS_CHOIX_COMMISSION_PROXIMITE,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
-    TOUS_CHOIX_COMMISSION_PROXIMITE,
     ChoixTypeFinancement,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as OngletsChecklistDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO as TouteDemandeRechercheDTO,
+)
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
-from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
+from admission.ddd.admission.formation_continue.commands import (
+    ListerDemandesQuery as ListerDemandesContinuesQuery,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistContinue,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
-from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+from admission.ddd.admission.formation_continue.dtos.liste import (
+    DemandeRechercheDTO as DemandeContinueRechercheDTO,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist as OngletsChecklistDoctorale,
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist,
 )
-from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
+)
+from admission.forms.admission.filter import (
+    AllAdmissionsFilterForm,
+    ContinuingAdmissionsFilterForm,
+)
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
+from admission.models import AdmissionFormItem
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
@@ -96,6 +117,7 @@ __all__ = [
 ]
 
 from reference.models.country import Country
+from reference.models.scholarship import Scholarship
 
 FULL_DATE_FORMAT = '%Y/%m/%d, %H:%M:%S'
 SHORT_DATE_FORMAT = '%Y/%m/%d'
@@ -165,9 +187,7 @@ class BaseAdmissionExcelExportView(
 
     def get_row_data_specific_questions_answers(
         self,
-        proposition_dto: Union[
-            TouteDemandeRechercheDTO,
-        ],
+        proposition_dto: Union[TouteDemandeRechercheDTO,],
     ):
         """
         Get the answers of the specific questions of the proposition based on a list of configurations.

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,12 +24,15 @@
 #
 # ##############################################################################
 
+import attr
 from django.test import TestCase
 
-import attr
-
-from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import projet_non_rempli
+from admission.ddd.admission.doctorat.preparation.commands import (
+    InitierPropositionCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
+    projet_non_rempli,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     aucune_experience_precedente_recherche,
 )
@@ -40,10 +43,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
-    ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
     DoctoratNonTrouveException,
@@ -53,19 +58,25 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
 )
-from admission.ddd.admission.domain.service.i_maximum_propositions import MAXIMUM_PROPOSITIONS_EN_COURS
-from admission.ddd.admission.enums.type_bourse import TypeBourse
+from admission.ddd.admission.domain.service.i_maximum_propositions import (
+    MAXIMUM_PROPOSITIONS_EN_COURS,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.reference.domain.service.in_memory.bourse import (
+    BourseInMemoryTranslator,
+)
+from reference.models.enums.scholarship_type import ScholarshipType
 
 
 class TestInitierPropositionService(TestCase):
     @classmethod
-    def _get_une_bourse_par_type(cls, type_bourse: TypeBourse):
+    def _get_une_bourse_par_type(cls, type_bourse: ScholarshipType):
         return next(
             (bourse.entity_id.uuid for bourse in BourseInMemoryTranslator.ENTITIES if bourse.type == type_bourse),
             None,

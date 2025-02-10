@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ from rest_framework import serializers
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
-from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
+from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -44,7 +44,11 @@ from base.models.academic_year import current_academic_year
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from base.utils.serializers import DTOSerializer
-from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
+from osis_profile.models import (
+    EducationalExperience,
+    EducationalExperienceYear,
+    ProfessionalExperience,
+)
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
 from reference.models.diploma_title import DiplomaTitle
@@ -308,8 +312,8 @@ class CurriculumDetailsSerializer(serializers.Serializer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Define a custom schema as the default schema type of a SerializerMethodField is string
-        self.fields['minimal_date'].field_schema = {'type': 'date'}
-        self.fields['maximal_date'].field_schema = {'type': 'date'}
+        self.fields['minimal_date'].field_schema = {'type': 'string', 'format': 'date'}
+        self.fields['maximal_date'].field_schema = {'type': 'string', 'format': 'date'}
 
     def get_minimal_date(self, _):
         current_year = current_academic_year()

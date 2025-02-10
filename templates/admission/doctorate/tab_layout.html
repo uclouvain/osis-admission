@@ -151,6 +151,16 @@
         {% translate 'Several applications' %}
       </span>
     {% endif %}
+    {% if admission.pre_admission_associee %}
+      <br>
+      <a
+        class="label label-info"
+        href="{% url 'admission:doctorate' uuid=admission.pre_admission_associee %}"
+        target="_blank"
+      >
+        {% translate 'Existing pre-admission' %}
+      </a>
+    {% endif %}
   </div>
 
 {% endblock %}

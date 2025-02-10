@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,18 +22,11 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from rest_framework.serializers import ModelSerializer
-
-from admission.models import Scholarship
+##############################################################################
+from base.models.utils.utils import ChoiceEnum
 
 
-class ScholarshipSerializer(ModelSerializer):
-    class Meta:
-        model = Scholarship
-        fields = [
-            'uuid',
-            'short_name',
-            'long_name',
-            'type',
-        ]
+class Scope(ChoiceEnum):
+    GENERAL = 'GENERAL'
+    IUFC = 'IUFC'
+    DOCTORAT = 'DOCTORAT'

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,51 +24,50 @@
 #
 # ##############################################################################
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    EducationalExperienceYearSerializer,
-    CurriculumDetailsSerializer,
-    ProfessionalExperienceSerializer,
-    DoctoratCompleterCurriculumCommandSerializer,
-    ContinuingEducationCompleterCurriculumCommandSerializer,
-    GeneralEducationCompleterCurriculumCommandSerializer,
+from .accounting import (
+    CompleterComptabilitePropositionDoctoraleCommandSerializer,
+    CompleterComptabilitePropositionGeneraleCommandSerializer,
+    DoctorateEducationAccountingDTOSerializer,
+    GeneralEducationAccountingDTOSerializer,
 )
 from .approvals import (
     ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
     ApprouverPropositionParPdfCommandSerializer,
+    RefuserPropositionCommandSerializer,
 )
-from .doctorate import *
-from .accounting import (
-    DoctorateEducationAccountingDTOSerializer,
-    GeneralEducationAccountingDTOSerializer,
-    CompleterComptabilitePropositionDoctoraleCommandSerializer,
-    CompleterComptabilitePropositionGeneraleCommandSerializer,
-)
-from .scholarship import ScholarshipSerializer
 from .campus import CampusSerializer
+from .continuing_education import InformationsSpecifiquesFormationContinueDTOSerializer
+from .coordonnees import CoordonneesSerializer
+from .cotutelle import *
+from .curriculum import (
+    ContinuingEducationCompleterCurriculumCommandSerializer,
+    CurriculumDetailsSerializer,
+    DoctoratCompleterCurriculumCommandSerializer,
+    EducationalExperienceYearSerializer,
+    GeneralEducationCompleterCurriculumCommandSerializer,
+    ProfessionalExperienceSerializer,
+)
+from .dashboard import DashboardSerializer
+from .diplomatic_post import DiplomaticPostSerializer
+from .doctorate import *
+from .documents import *
+from .languages_knowledge import *
+from .payment import *
+from .pdf_recap import PDFRecapSerializer
+from .person import *
+from .project import *
+from .secondary_studies import HighSchoolDiplomaSerializer
+from .specific_question import (
+    ModifierQuestionsSpecifiquesFormationContinueCommandSerializer,
+    ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer,
+    SpecificQuestionSerializer,
+)
+from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer
+from .supervision import *
 from .training_choice import (
     InitierPropositionContinueCommandSerializer,
     InitierPropositionGeneraleCommandSerializer,
     ModifierChoixFormationContinueCommandSerializer,
-    ModifierTypeAdmissionDoctoraleCommandSerializer,
     ModifierChoixFormationGeneraleCommandSerializer,
+    ModifierTypeAdmissionDoctoraleCommandSerializer,
 )
-from .specific_question import (
-    SpecificQuestionSerializer,
-    ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer,
-    ModifierQuestionsSpecifiquesFormationContinueCommandSerializer,
-)
-from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer
-from .pdf_recap import PDFRecapSerializer
-from .documents import *
-from .payment import *
-from .diplomatic_post import DiplomaticPostSerializer
-from .continuing_education import InformationsSpecifiquesFormationContinueDTOSerializer

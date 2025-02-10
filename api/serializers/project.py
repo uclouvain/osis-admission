@@ -35,7 +35,6 @@ from admission.api.serializers.fields import (
     RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -49,11 +48,13 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     DoctoratFormationDTO,
     PropositionDTO as DoctoratPropositionDTO,
 )
+from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
+from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
 
@@ -76,6 +77,7 @@ __all__ = [
     "ContinuingEducationPropositionDTOSerializer",
     "PROPOSITION_ERROR_SCHEMA",
     "GeneralEducationPropositionIdentityWithStatusSerializer",
+    "DoctoratePreAdmissionSearchDTOSerializer",
 ]
 
 from reference.api.serializers.language import RelatedLanguageField
@@ -245,6 +247,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctorateProp
         source = DoctoratPropositionDTO
         fields = [
             'uuid',
+            'pre_admission_associee',
             'reference',
             'type_admission',
             'doctorat',
@@ -465,6 +468,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
         source = DoctoratPropositionDTO
         fields = [
             'uuid',
+            'pre_admission_associee',
             'type_admission',
             'reference',
             'justification',
@@ -710,7 +714,7 @@ class InitierPropositionCommandSerializer(DTOSerializer):
     )
 
 
-class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer):
+class CompleterPropositionCommandSerializer(DTOSerializer):
     documents_projet = serializers.ListField(child=serializers.CharField())
     graphe_gantt = serializers.ListField(child=serializers.CharField())
     proposition_programme_doctoral = serializers.ListField(child=serializers.CharField())
@@ -722,6 +726,12 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
     )
     langue_redaction_these = RelatedLanguageField(required=False)
     institut_these = RelatedInstituteField(required=False)
+    commission_proximite = serializers.ChoiceField(
+        choices=ChoixCommissionProximiteCDEouCLSM.choices()
+        + ChoixCommissionProximiteCDSS.choices()
+        + ChoixSousDomaineSciences.choices(),
+        allow_blank=True,
+    )
     type_admission = None
     matricule_auteur = None
 
@@ -732,3 +742,50 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
 class SectorDTOSerializer(serializers.Serializer):
     sigle = serializers.ReadOnlyField()
     intitule = serializers.ReadOnlyField()
+
+
+class CampusDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+    class Meta:
+        source = CampusDTO
+        fields = [
+            'uuid',
+            'nom',
+        ]
+
+
+class DoctoratSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+    campus = CampusDTOSerializer()
+    date_debut = None
+    intitule_fr = None
+    intitule_en = None
+    credits = None
+
+    class Meta:
+        source = DoctoratFormationDTO
+        fields = [
+            'sigle',
+            'code',
+            'annee',
+            'intitule',
+            'sigle_entite_gestion',
+            'campus',
+        ]
+
+
+class DoctoratePreAdmissionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+    doctorat = DoctoratSearchDTOSerializer()
+    # This is to prevent schema from breaking on JSONField
+    erreurs = None
+    reponses_questions_specifiques = None
+    elements_confirmation = None
+    documents_demandes = None
+
+    class Meta:
+        source = DoctoratPropositionDTO
+        fields = [
+            'uuid',
+            'reference',
+            'doctorat',
+            'code_secteur_formation',
+            'intitule_secteur_formation',
+        ]

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sic_management import SicManagement
-from education_group.auth.scope import Scope
+from admission.auth.scope import Scope
 from osis_role.contrib.tests.factories import EducationGroupRoleModelFactory
 
 
@@ -73,7 +73,7 @@ class CentralManagerRoleFactory(BaseFactory):
         'base.tests.factories.entity.EntityWithVersionFactory',
         organization=None,
     )
-    scopes = [Scope.ALL.name, Scope.DOCTORAT.name, Scope.IUFC.name]
+    scopes = [Scope.GENERAL.name, Scope.DOCTORAT.name, Scope.IUFC.name]
     with_child = True
 
 

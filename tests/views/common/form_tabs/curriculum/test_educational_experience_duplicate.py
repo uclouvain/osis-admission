@@ -35,16 +35,18 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import DoctorateAdmission
+from admission.models import DoctorateAdmission, ContinuingEducationAdmission
 from admission.models.base import AdmissionEducationalValuatedExperiences
 from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -93,6 +95,12 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             submitted=True,
         )
 
+        cls.other_continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=cls.academic_years[0],
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
 
@@ -119,6 +127,9 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         ).person.user
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+        cls.other_continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.other_continuing_admission.training.education_group,
         ).person.user
 
         cls.files_uuids = [uuid.uuid4() for _ in range(9)]
@@ -536,4 +547,96 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             response=response,
             fetch_redirect_response=False,
             expected_url=resolve_url('admission:doctorate:checklist', uuid=self.doctorate_admission.uuid),
+        )
+
+    def test_duplicate_experience_from_continuing_curriculum_for_fac_users(self):
+        self.client.force_login(self.other_continuing_program_manager_user)
+
+        experience = EducationalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational_duplicate',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.post(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:curriculum',
+            uuid=self.other_continuing_admission.uuid,
+        )
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=base_curriculum_url,
+        )
+
+    def test_duplicate_experience_from_continuing_curriculum_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+
+        experience = EducationalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:educational_duplicate',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.post(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:curriculum',
+            uuid=self.other_continuing_admission.uuid,
+        )
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=base_curriculum_url,
         )
