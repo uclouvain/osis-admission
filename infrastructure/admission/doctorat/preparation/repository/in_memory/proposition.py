@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,13 +26,26 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.checklist import Checklist
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.checklist import (
+    Checklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    PropositionDTO,
+    PropositionGestionnaireDTO,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
     PropositionAdmissionESP3DPMinimaleFactory,
@@ -42,6 +55,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory,
     PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory,
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
+    PropositionAdmissionSC3DPConfirmeeFactory,
     PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory,
     PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
@@ -51,11 +65,13 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPSansMembreCAFactory,
     PropositionAdmissionSC3DPSansPromoteurFactory,
     PropositionAdmissionSC3DPSansPromoteurReferenceFactory,
+    PropositionAdmissionSC3DPTraitementFacFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
-    PropositionAdmissionSC3DPConfirmeeFactory, PropositionAdmissionSC3DPTraitementFacFactory,
 )
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
@@ -64,11 +80,17 @@ from admission.infrastructure.admission.doctorat.preparation.domain.service.in_m
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
+from admission.infrastructure.admission.repository.in_memory.proposition import (
+    GlobalPropositionInMemoryRepository,
+)
 from admission.infrastructure.utils import dto_to_dict
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from infrastructure.reference.domain.service.in_memory.bourse import (
+    BourseInMemoryTranslator,
+)
 
 
 @dataclass
@@ -151,7 +173,7 @@ class PropositionInMemoryRepository(
         ]
 
     @classmethod
-    def save(cls, entity: 'Proposition') -> None:
+    def save(cls, entity: 'Proposition', dupliquer_documents=False) -> None:
         super().save(entity)
 
     @classmethod
@@ -186,6 +208,7 @@ class PropositionInMemoryRepository(
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
+        est_pre_admission_d_une_admission_en_cours: Optional[bool] = None,
     ) -> List['PropositionDTO']:
         returned = cls.entities
         if matricule_candidat:
@@ -296,19 +319,21 @@ class PropositionInMemoryRepository(
             documents_demandes=proposition.documents_demandes,
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
-            financabilite_regle_calcule=proposition.financabilite_regle_calcule.name
-            if proposition.financabilite_regle_calcule
-            else '',
-            financabilite_regle_calcule_situation=proposition.financabilite_regle_calcule_situation.name
-            if proposition.financabilite_regle_calcule_situation
-            else '',
+            financabilite_regle_calcule=(
+                proposition.financabilite_regle_calcule.name if proposition.financabilite_regle_calcule else ''
+            ),
+            financabilite_regle_calcule_situation=(
+                proposition.financabilite_regle_calcule_situation.name
+                if proposition.financabilite_regle_calcule_situation
+                else ''
+            ),
             financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
             financabilite_regle=proposition.financabilite_regle.name if proposition.financabilite_regle else '',
             financabilite_etabli_par=proposition.financabilite_etabli_par,
             financabilite_etabli_le=proposition.financabilite_etabli_le,
-            financabilite_derogation_statut=proposition.financabilite_derogation_statut.name
-            if proposition.financabilite_derogation_statut
-            else '',
+            financabilite_derogation_statut=(
+                proposition.financabilite_derogation_statut.name if proposition.financabilite_derogation_statut else ''
+            ),
             financabilite_derogation_premiere_notification_le=(
                 proposition.financabilite_derogation_premiere_notification_le
             ),
@@ -327,6 +352,7 @@ class PropositionInMemoryRepository(
             doit_fournir_visa_etudes=proposition.doit_fournir_visa_etudes,
             visa_etudes_d=proposition.visa_etudes_d,
             certificat_autorisation_signe=proposition.certificat_autorisation_signe,
+            pre_admission_associee='',
         )
 
     @classmethod

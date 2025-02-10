@@ -35,28 +35,39 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import DoctorateAdmission
-from admission.models.base import (
-    AdmissionProfessionalValuatedExperiences,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
 )
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
 )
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission
+from admission.models.base import AdmissionProfessionalValuatedExperiences
+from admission.models.general_education import GeneralEducationAdmission
+from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
+from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
-from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
+from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 from reference.tests.factories.country import CountryFactory
 
 
@@ -87,6 +98,12 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
             submitted=True,
         )
 
+        cls.other_continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=cls.academic_years[0],
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
         # Create users
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
@@ -94,6 +111,9 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         ).person.user
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+        cls.other_continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.other_continuing_admission.training.education_group,
         ).person.user
         cls.file_uuid = uuid.uuid4()
         cls.file_uuid_str = str(cls.file_uuid)
@@ -375,4 +395,96 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
             response=response,
             fetch_redirect_response=False,
             expected_url=expected_url,
+        )
+
+    def test_duplicate_experience_from_continuing_curriculum_for_fac_users(self):
+        self.client.force_login(self.other_continuing_program_manager_user)
+
+        experience = ProfessionalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational_duplicate',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.post(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:curriculum',
+            uuid=self.other_continuing_admission.uuid,
+        )
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=base_curriculum_url,
+        )
+
+    def test_duplicate_experience_from_continuing_curriculum_for_sic_users(self):
+        self.client.force_login(self.sic_manager_user)
+
+        experience = ProfessionalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational_duplicate',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        response = self.client.post(url)
+
+        base_curriculum_url = resolve_url(
+            'admission:continuing-education:curriculum',
+            uuid=self.other_continuing_admission.uuid,
+        )
+
+        self.assertRedirects(
+            response=response,
+            fetch_redirect_response=False,
+            expected_url=base_curriculum_url,
         )
