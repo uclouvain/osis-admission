@@ -330,6 +330,17 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         )
 
         self.assertEqual(
+            recuperer_conditions_acces_par_formation(TrainingType.MASTER_M5.name),
+            [
+                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
+                (ConditionAcces.VALORISATION_240_ECTS.name, ConditionAcces.VALORISATION_240_ECTS.label),
+                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
+                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
+                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
+            ],
+        )
+
+        self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.MASTER_MA_120.name),
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
@@ -395,6 +406,22 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.MASTER_M1.name),
+            [
+                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
+                (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
+                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
+                (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
+                (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
+                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
+                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
+                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
+                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
+                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
+            ],
+        )
+
+        self.assertEqual(
+            recuperer_conditions_acces_par_formation(TrainingType.MASTER_M4.name),
             [
                 (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
                 (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
