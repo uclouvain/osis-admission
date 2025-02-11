@@ -87,13 +87,17 @@ class ITitresAcces(interface.DomainService):
             TrainingType.MASTER_MD_180_240,
             TrainingType.MASTER_MS_180_240,
             TrainingType.MASTER_M1,
+            TrainingType.MASTER_M4,
         ): [
             ConditionAccess.DIPLOMATION_ACADEMIQUE_BELGE,
             ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
             ConditionAccess.POTENTIEL_BACHELIER_BELGE_SANS_DIPLOMATION,
             ConditionAccess.POTENTIEL_ACCES_VAE,
         ],
-        (TrainingType.MASTER_MC,): [
+        (
+            TrainingType.MASTER_MC,
+            TrainingType.MASTER_M5,
+        ): [
             ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,
             ConditionAccess.DIPLOMATION_POTENTIEL_DOCTORAT_BELGE,
             ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
