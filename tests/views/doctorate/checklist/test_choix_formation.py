@@ -166,10 +166,6 @@ class ChoixFormationFormViewTestCase(TestCase):
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=main_entity).person.user
-        # cls.sic_manager_user = SicManagementRoleFactory(entity=cls.other_cdss_training.management_entity).person.user
-        # cls.sic_manager_user = SicManagementRoleFactory(entity=cls.other_clsm_training.management_entity).person.user
-        # cls.sic_manager_user = SicManagementRoleFactory(entity=cls.other_science_training.management_entity).person.user
-        # cls.sic_manager_user = SicManagementRoleFactory(entity=cls.cde_entity).person.user
 
         cls.program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.cde_training.education_group,

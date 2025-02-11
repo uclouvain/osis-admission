@@ -39,7 +39,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    InformationsAcceptationNonSpecifieesException,
     SituationPropositionNonCddException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )

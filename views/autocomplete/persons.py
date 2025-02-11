@@ -30,6 +30,9 @@ from django.db.models import Exists, F, OuterRef, Q
 from django.db.models.functions import Coalesce
 
 from admission.auth.roles.candidate import Candidate
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RechercherPromoteursQuery,
+)
 from admission.models import SupervisionActor
 from base.auth.roles.tutor import Tutor
 from base.models.person import Person
@@ -38,13 +41,14 @@ __all__ = [
     'CandidatesAutocomplete',
     'JuryMembersAutocomplete',
     'PersonAutocomplete',
-    'SupervisionActorsAutocomplete',
+    'PromotersAutocomplete',
     'TutorAutocomplete',
 ]
 
 __namespace__ = False
 
 from base.models.student import Student
+from infrastructure.messages_bus import message_bus_instance
 
 
 class PersonsAutocomplete(LoginRequiredMixin):
@@ -156,14 +160,14 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         return qs
 
 
-class SupervisionActorsAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    urlpatterns = 'supervision-actors'
+class PromotersAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    urlpatterns = 'promoters'
 
     def get_results(self, context):
         return [
             {
-                'id': actor.get('uuid'),
-                'text': ', '.join([actor.get('current_last_name'), actor.get('current_first_name')]),
+                'id': actor.uuid,
+                'text': ', '.join([actor.nom, actor.prenom]),
             }
             for actor in context['object_list']
         ]
@@ -172,32 +176,4 @@ class SupervisionActorsAutocomplete(LoginRequiredMixin, autocomplete.Select2Quer
         if not self.q:
             return []
 
-        actor_type = self.forwarded.get('actor_type')
-
-        qs = (
-            SupervisionActor.objects.annotate(
-                current_first_name=Coalesce(
-                    F('person__first_name'),
-                    F('first_name'),
-                ),
-                current_last_name=Coalesce(
-                    F('person__last_name'),
-                    F('last_name'),
-                ),
-                name=SearchVector(
-                    'current_first_name',
-                    'current_last_name',
-                ),
-            )
-            .filter(Q(name=self.q) | Q(person__global_id__contains=self.q))
-            .order_by('current_last_name', 'current_first_name')
-        )
-
-        if actor_type:
-            qs = qs.filter(type=actor_type)
-
-        return qs.values(
-            'uuid',
-            'current_first_name',
-            'current_last_name',
-        )
+        return message_bus_instance.invoke(RechercherPromoteursQuery(terme_recherche=self.q))

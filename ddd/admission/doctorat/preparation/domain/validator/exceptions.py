@@ -619,16 +619,6 @@ class SituationPropositionNonCddException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class InformationsAcceptationNonSpecifieesException(BusinessException):
-    status_code = "PROPOSITION-69"
-
-    def __init__(self, **kwargs):
-        message = _(
-            "When accepting a proposition, all the required information in the approval form must be specified.",
-        )
-        super().__init__(message, **kwargs)
-
-
 class MembreNonExterneException(BusinessException):
     status_code = "PROPOSITION-14"
 

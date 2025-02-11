@@ -752,4 +752,8 @@ COMMAND_HANDLERS = {
         historique=_historique,
         groupe_supervision_repository=_groupe_supervision_repository,
     ),
+    RechercherPromoteursQuery: lambda msg_bus, cmd: rechercher_promoteurs(
+        cmd,
+        promoteur_translator=_promoteur_translator,
+    ),
 }
