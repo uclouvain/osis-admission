@@ -58,6 +58,8 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
             TrainingType.MASTER_MS_120.name,
             TrainingType.MASTER_MS_180_240.name,
             TrainingType.MASTER_M1.name,
+            TrainingType.MASTER_M4.name,
+            TrainingType.MASTER_M5.name,
         ],
         TypeFormation.AGREGATION_CAPES.name: [
             TrainingType.AGGREGATION.name,
