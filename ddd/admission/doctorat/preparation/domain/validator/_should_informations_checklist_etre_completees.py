@@ -50,7 +50,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     DocumentAReclamerImmediatException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
-    InformationsAcceptationNonSpecifieesException,
     InscriptionTardiveAvecConditionAccesException,
     ParcoursAnterieurNonSuffisantException,
     SituationPropositionNonCddException,
@@ -72,13 +71,6 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldSpecifierInformationsAcceptation(BusinessValidator):
-
-    def validate(self, *args, **kwargs):
-        pass
 
 
 @attr.dataclass(frozen=True, slots=True)

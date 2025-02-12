@@ -72,7 +72,6 @@ from base.models.enums.entity_type import EntityType
 from education_group.contrib.models import EducationGroupRoleModel
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
-from parcours_doctoral.models import ActorType
 from reference.models.country import Country
 from reference.models.enums.scholarship_type import ScholarshipType
 from reference.models.scholarship import Scholarship
@@ -132,14 +131,11 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         label=pgettext_lazy('gender', 'Supervisor'),
         required=False,
         widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:supervision-actors",
+            url="admission:autocomplete:promoters",
             attrs={
                 **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
                 'data-placeholder': _('Last name / First name / Global id'),
             },
-            forward=[
-                forward.Const(ActorType.PROMOTER.name, 'actor_type'),
-            ],
         ),
     )
     sigles_formations = forms.MultipleChoiceField(

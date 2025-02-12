@@ -779,3 +779,8 @@ class SoumettreCACommand(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ListerPreAdmissionsCandidatQuery(interface.QueryRequest):
     matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RechercherPromoteursQuery(interface.QueryRequest):
+    terme_recherche: str

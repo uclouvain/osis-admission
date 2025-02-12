@@ -41,7 +41,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DocumentAReclamerImmediatException,
-    InformationsAcceptationNonSpecifieesException,
     ParcoursAnterieurNonSuffisantException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (

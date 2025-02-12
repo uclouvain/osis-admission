@@ -488,7 +488,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             )
             self.assertEqual(
                 form.fields['uuid_promoteur'].widget.choices,
-                ((self.promoter.uuid, self.promoter.complete_name),),
+                ((str(self.promoter.uuid), self.promoter.complete_name),),
             )
 
         data = {

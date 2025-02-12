@@ -38,15 +38,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixSousDomaineSciences,
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
 )
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.forms import get_academic_year_choices
 from base.models.academic_year import AcademicYear
-from parcours_doctoral.ddd.domain.model.enums import (
-    ChoixCommissionProximiteCDEouCLSM,
-    ChoixCommissionProximiteCDSS,
-)
 
 
 class ProjetRechercheDemanderModificationCAForm(forms.Form):
