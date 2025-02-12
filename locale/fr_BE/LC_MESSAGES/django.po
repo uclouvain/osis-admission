@@ -4165,6 +4165,9 @@ msgstr "Nom / Prénom / Identifiant global"
 msgid "Last registration id"
 msgstr "Dernier NOMA connu"
 
+msgid "Last signature request before submission at"
+msgstr "Dernière demande de signature avant soumission envoyée à"
+
 msgid "Last update author"
 msgstr "Auteur de la dernière mise à jour"
 
