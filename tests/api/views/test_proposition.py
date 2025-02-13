@@ -71,9 +71,7 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
             acronym='CMC',
         )
         cls.admission = GeneralEducationAdmissionFactory(training__management_entity=cls.commission.entity)
-        cls.teaching_campus_name = (
-            cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
-        )
+        cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = CandidateFactory().person
@@ -122,9 +120,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             training__management_entity=cls.commission.entity,
             training__credits=180,
         )
-        cls.teaching_campus_name = (
-            cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
-        )
+        cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = CandidateFactory().person
@@ -147,7 +143,8 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'intitule': self.admission.training.title,
             'intitule_fr': self.admission.training.title,
             'intitule_en': self.admission.training.title_english,
-            'campus': self.teaching_campus_name,
+            'campus': self.teaching_campus.name,
+            'campus_uuid': str(self.teaching_campus.uuid),
             'type': self.admission.training.education_group_type.name,
             'code_domaine': self.admission.training.main_domain.code,
             'campus_inscription': self.admission.training.enrollment_campus.name,
@@ -300,9 +297,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             training__management_entity=cls.commission.entity,
             training__credits=180,
         )
-        cls.teaching_campus_name = (
-            cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
-        )
+        cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         # Users
         cls.candidate = cls.admission.candidate
         cls.candidate.country_of_citizenship = CountryFactory(
@@ -338,7 +333,8 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             'intitule': self.admission.training.title,
             'intitule_fr': self.admission.training.title,
             'intitule_en': self.admission.training.title_english,
-            'campus': self.teaching_campus_name,
+            'campus': self.teaching_campus.name,
+            'campus_uuid': str(self.teaching_campus.uuid),
             'type': self.admission.training.education_group_type.name,
             'code_domaine': self.admission.training.main_domain.code,
             'campus_inscription': self.admission.training.enrollment_campus.name,

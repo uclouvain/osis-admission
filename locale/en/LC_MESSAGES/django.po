@@ -76,6 +76,13 @@ msgstr[1] ""
 msgid "(%(minutes)s ago)"
 msgstr ""
 
+msgctxt "admission"
+msgid "(Expected) date of graduation"
+msgstr ""
+
+msgid "(Expected) graduation date (signed diploma)"
+msgstr ""
+
 msgid ", on"
 msgstr ""
 
@@ -99,6 +106,13 @@ msgstr ""
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s submitted request for "
+"%(training_title)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s uploaded documents for "
 "%(training_title)s"
 msgstr ""
 
@@ -2523,13 +2537,6 @@ msgstr ""
 msgid "Exit without saving"
 msgstr ""
 
-msgctxt "admission"
-msgid "Expected date of graduation"
-msgstr ""
-
-msgid "Expected graduation date (signed diploma)"
-msgstr ""
-
 msgid "Experience knowledge valorisation"
 msgstr ""
 
@@ -2584,11 +2591,11 @@ msgid ""
 "for a maximum period of 12 months. Recourse to a pre-admission phase must be "
 "justified, the objectives to be achieved planned and the duration of the pre-"
 "admission period fixed in accordance with them. Unless exceptionally "
-"authorised by the CSD, FRIA or FNRS scholarship holders and, in general, "
-"doctoral candidates engaged in a research project that has already been "
-"defined, are not authorised to take a pre-admission phase for a doctorate.\" "
-"<br /> Please also consult the special provisions of the field for all pre-"
-"admission conditions."
+"authorised by the domain doctoral committee, FRIA or FNRS scholarship "
+"holders and, in general, doctoral candidates engaged in a research project "
+"that has already been defined, are not authorised to take a pre-admission "
+"phase for a doctorate.\" <br /> Please also consult the special provisions "
+"of the field for all pre-admission conditions."
 msgstr ""
 
 msgid "FAC"
@@ -3539,10 +3546,7 @@ msgstr ""
 msgid "Institution contacted"
 msgstr ""
 
-msgid "Institution in which the PhD has been realised / started"
-msgstr ""
-
-msgid "Institution in which the PhD has been realised / started."
+msgid "Institution in which the PhD thesis has been realised / started"
 msgstr ""
 
 msgid "Institution should be set when PhD has been set to yes or partial"
@@ -4684,10 +4688,6 @@ msgstr ""
 msgid "PhD already done"
 msgstr ""
 
-msgctxt "tab"
-msgid "PhD project"
-msgstr ""
-
 msgid "PhD proposal"
 msgstr ""
 
@@ -5082,7 +5082,7 @@ msgstr ""
 msgid "Reasons for not accepting"
 msgstr ""
 
-msgid "Reasons for provisional admission."
+msgid "Reasons for pre-admission."
 msgstr ""
 
 msgid "Reasons for putting on hold"
@@ -5270,13 +5270,13 @@ msgctxt "masculine"
 msgid "Required"
 msgstr ""
 
+msgctxt "tab"
+msgid "Research"
+msgstr ""
+
 msgid "Research institute"
 msgstr ""
 
-msgid "Research project"
-msgstr ""
-
-msgctxt "tab"
 msgid "Research project"
 msgstr ""
 
@@ -5454,9 +5454,6 @@ msgid "Search"
 msgstr ""
 
 msgid "Search a person by surname"
-msgstr ""
-
-msgid "Search a tutor by name"
 msgstr ""
 
 msgid "Search on portal"

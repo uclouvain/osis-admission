@@ -182,6 +182,7 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
 
 class DoctoratDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
+    campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
 
     date_debut = None
@@ -195,6 +196,7 @@ class DoctoratDTOSerializer(DTOSerializer):
 
 class FormationGeneraleDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
+    campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
 
     class Meta:
@@ -203,6 +205,7 @@ class FormationGeneraleDTOSerializer(DTOSerializer):
 
 class FormationContinueDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
+    campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
 
     class Meta:

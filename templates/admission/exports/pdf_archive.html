@@ -104,7 +104,7 @@
 
       {% if experience.expected_graduation_date %}
         <p>
-          {% trans "Expected date of graduation" context 'admission' %} :
+          {% trans "(Expected) date of graduation" context 'admission' %} :
           {{ experience.expected_graduation_date }}
         </p>
       {% endif %}
@@ -174,7 +174,7 @@
     </p>
     {% if admission.phd_already_done == 'YES' %}
       <p style="margin-left: 10px;">
-        ➔ {% translate "Institution in which the PhD has been realised / started" %} :
+        ➔ {% translate "Institution in which the PhD thesis has been realised / started" %} :
         {{ admission.phd_already_done_institution|default:_('Not specified') }}
       </p>
     {% endif %}

@@ -232,14 +232,16 @@ class BaseCurriculumTestCase:
         )
         self.assertEqual(
             response.get('incomplete_periods'),
-            [
-                'De Septembre 2019 à Décembre 2019',
-                'De Septembre 2018 à Février 2019',
-                'De Septembre 2017 à Février 2018',
-                'De Septembre 2016 à Février 2017',
-            ]
-            if self.with_incomplete_periods
-            else [],
+            (
+                [
+                    'De Septembre 2019 à Décembre 2019',
+                    'De Septembre 2018 à Février 2019',
+                    'De Septembre 2017 à Février 2018',
+                    'De Septembre 2016 à Février 2017',
+                ]
+                if self.with_incomplete_periods
+                else []
+            ),
         )
 
         self.assertEqual(
@@ -298,12 +300,14 @@ class BaseCurriculumTestCase:
         )
         self.assertEqual(
             response.get('incomplete_periods'),
-            [
-                'De Septembre 2017 à Février 2018',
-                'De Septembre 2016 à Février 2017',
-            ]
-            if self.with_incomplete_periods
-            else [],
+            (
+                [
+                    'De Septembre 2017 à Février 2018',
+                    'De Septembre 2016 à Février 2017',
+                ]
+                if self.with_incomplete_periods
+                else []
+            ),
         )
 
     def test_get_curriculum_minimal_year_with_last_registration(self):
@@ -406,11 +410,13 @@ class BaseIncompleteCurriculumExperiencesTestCase:
 
         self.assertEqual(
             json_response.get('incomplete_experiences'),
-            {
-                str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
-            }
-            if desired_result is None
-            else desired_result,
+            (
+                {
+                    str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
+                }
+                if desired_result is None
+                else desired_result
+            ),
         )
 
     def test_get_curriculum_with_incomplete_educational_experience_transcript_missing(self):
@@ -563,33 +569,6 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurricul
             experience_args={
                 'obtained_diploma': True,
                 'expected_graduation_date': None,
-            },
-            experience_year_args={},
-        )
-
-    def test_get_curriculum_with_incomplete_educational_experience_dissertation_title_missing(self):
-        self._test_get_curriculum_with_incomplete_educational_experience(
-            experience_args={
-                'obtained_diploma': True,
-                'dissertation_title': '',
-            },
-            experience_year_args={},
-        )
-
-    def test_get_curriculum_with_incomplete_educational_experience_dissertation_score_missing(self):
-        self._test_get_curriculum_with_incomplete_educational_experience(
-            experience_args={
-                'obtained_diploma': True,
-                'dissertation_score': '',
-            },
-            experience_year_args={},
-        )
-
-    def test_get_curriculum_with_incomplete_educational_experience_dissertation_summary_missing(self):
-        self._test_get_curriculum_with_incomplete_educational_experience(
-            experience_args={
-                'obtained_diploma': True,
-                'dissertation_summary': [],
             },
             experience_year_args={},
         )

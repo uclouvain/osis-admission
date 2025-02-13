@@ -5265,6 +5265,9 @@ components:
                   campus_inscription:
                     type: string
                     default: ''
+                  campus_uuid:
+                    type: string
+                    default: ''
                 required:
                 - sigle
                 - code
@@ -5403,6 +5406,9 @@ components:
                   credits:
                     type: integer
                     nullable: true
+                  campus_uuid:
+                    type: string
+                    default: ''
                 required:
                 - sigle
                 - code
@@ -5532,6 +5538,9 @@ components:
                   credits:
                     type: integer
                     nullable: true
+                  campus_uuid:
+                    type: string
+                    default: ''
                 required:
                 - sigle
                 - code
@@ -5780,6 +5789,9 @@ components:
             type:
               type: string
             campus_inscription:
+              type: string
+              default: ''
+            campus_uuid:
               type: string
               default: ''
           required:
@@ -6641,6 +6653,9 @@ components:
             campus_inscription:
               type: string
               default: ''
+            campus_uuid:
+              type: string
+              default: ''
           required:
           - sigle
           - code
@@ -7497,6 +7512,9 @@ components:
                 campus_inscription:
                   type: string
                   default: ''
+                campus_uuid:
+                  type: string
+                  default: ''
               required:
               - sigle
               - code
@@ -7786,6 +7804,9 @@ components:
             credits:
               type: integer
               nullable: true
+            campus_uuid:
+              type: string
+              default: ''
           required:
           - sigle
           - code
@@ -8333,6 +8354,9 @@ components:
             credits:
               type: integer
               nullable: true
+            campus_uuid:
+              type: string
+              default: ''
           required:
           - sigle
           - code
@@ -8578,6 +8602,9 @@ components:
         campus_inscription:
           type: string
           default: ''
+        campus_uuid:
+          type: string
+          default: ''
       required:
       - sigle
       - code
@@ -8620,6 +8647,9 @@ components:
         credits:
           type: integer
           nullable: true
+        campus_uuid:
+          type: string
+          default: ''
       required:
       - sigle
       - code
@@ -8664,6 +8694,9 @@ components:
         credits:
           type: integer
           nullable: true
+        campus_uuid:
+          type: string
+          default: ''
       required:
       - sigle
       - code

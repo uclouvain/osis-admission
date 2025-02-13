@@ -62,7 +62,7 @@ class GlobalCurriculumForm(ConfigurableFormMixin):
         require_equivalence: bool,
         require_curriculum: bool,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
 
@@ -97,7 +97,7 @@ class CurriculumAcademicExperienceAdmissionForm(CurriculumAcademicExperienceForm
     def clean_files_fields(self, cleaned_data):
         obtained_diploma = cleaned_data.get('obtained_diploma')
         if obtained_diploma:
-            required_fields = ['graduate_degree', 'dissertation_summary']
+            required_fields = ['graduate_degree']
             for field in required_fields:
                 if not cleaned_data.get(field):
                     self.add_error(field, FIELD_REQUIRED_MESSAGE)

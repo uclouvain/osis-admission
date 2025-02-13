@@ -366,13 +366,10 @@ TAB_TREES = {
         Tab('doctorate-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
         ],
-        Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
-            Tab('project', pgettext('tab', 'Research project')),
+        Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap'): [
+            Tab('project', pgettext('tab', 'Research')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
-        ],
-        Tab('additional-information', _('Accounting'), 'puzzle-piece'): [
-            Tab('accounting', _('Accounting')),
         ],
     },
     CONTEXT_GENERAL: {
