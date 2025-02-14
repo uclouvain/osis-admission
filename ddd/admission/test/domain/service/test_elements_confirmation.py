@@ -142,6 +142,49 @@ class ElementsConfirmationTestCase(TestCase):
             ]
             self.assertListEqual([e.nom for e in elements], expected)
 
+    def test_recuperer_elements_confirmation_master_mc(self):
+        elements = message_bus_in_memory_instance.invoke(
+            RecupererElementsConfirmationGeneraleQuery(uuid_proposition='uuid-MASTER-MC')
+        )
+        expected = [
+            'reglement_general',
+            'protection_donnees',
+            'professions_reglementees',
+            'justificatifs',
+            'declaration_sur_lhonneur',
+        ]
+        self.assertListEqual([e.nom for e in elements], expected)
+
+    def test_recuperer_elements_confirmation_master_m4(self):
+        with patch.object(ProfilCandidatInMemoryTranslator.profil_candidats[1], 'pays_nationalite', 'AR'):
+            elements = message_bus_in_memory_instance.invoke(
+                RecupererElementsConfirmationGeneraleQuery(uuid_proposition='uuid-MASTER-M4')
+            )
+            expected = [
+                'reglement_general',
+                'protection_donnees',
+                'professions_reglementees',
+                'frais_dossier',
+                'justificatifs',
+                'declaration_sur_lhonneur',
+            ]
+            self.assertListEqual([e.nom for e in elements], expected)
+
+    def test_recuperer_elements_confirmation_master_m5(self):
+        with patch.object(ProfilCandidatInMemoryTranslator.profil_candidats[1], 'pays_nationalite', 'AR'):
+            elements = message_bus_in_memory_instance.invoke(
+                RecupererElementsConfirmationGeneraleQuery(uuid_proposition='uuid-MASTER-M5')
+            )
+            expected = [
+                'reglement_general',
+                'protection_donnees',
+                'professions_reglementees',
+                'frais_dossier',
+                'justificatifs',
+                'declaration_sur_lhonneur',
+            ]
+            self.assertListEqual([e.nom for e in elements], expected)
+
     def test_recuperer_elements_confirmation_frais_dossier(self):
         with patch.object(ProfilCandidatInMemoryTranslator.profil_candidats[1], 'pays_nationalite', 'AR'):
             elements = message_bus_in_memory_instance.invoke(

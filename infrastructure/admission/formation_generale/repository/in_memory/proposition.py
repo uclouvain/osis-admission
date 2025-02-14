@@ -249,6 +249,24 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="ABCD2MC", annee=2024),
                 curriculum=['file1.pdf'],
             ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-MC'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-MC", annee=2020),
+                annee_calculee=2020,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-M4'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-M4", annee=2020),
+                annee_calculee=2020,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-M5'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-M5", annee=2020),
+                annee_calculee=2020,
+            ),
         ]
 
     @classmethod

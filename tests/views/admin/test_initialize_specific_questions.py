@@ -206,6 +206,8 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             TrainingType.MASTER_MS_120.name,
             TrainingType.MASTER_MS_180_240.name,
             TrainingType.MASTER_M1.name,
+            TrainingType.MASTER_M4.name,
+            TrainingType.MASTER_M5.name,
             TrainingType.PHD.name,
             TrainingType.CAPAES.name,
             TrainingType.CERTIFICATE.name,
