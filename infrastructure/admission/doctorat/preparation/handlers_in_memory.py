@@ -39,7 +39,9 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candid
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
-from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import (
+    soumettre_ca,
+)
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
@@ -89,6 +91,9 @@ from ...domain.service.in_memory.historique import (
 )
 from ...domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
+)
+from ...domain.service.in_memory.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculumInMemory,
 )
 from ...domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
@@ -155,6 +160,7 @@ _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryReposit
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _digit_repository = DigitInMemoryRepository()
 _financabilite_fetcher = FinancabiliteInMemoryFetcher()
+_raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -206,6 +212,9 @@ COMMAND_HANDLERS = {
         promoteur_translator=_promoteur_translator,
         historique=_historique,
         notification=_notification,
+        academic_year_repository=_academic_year_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
     ),
     RenvoyerInvitationSignatureExterneCommand: lambda msg_bus, cmd: renvoyer_invitation_signature_externe(
         cmd,
@@ -231,6 +240,8 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=_groupe_supervision_repository,
         promoteur_translator=_promoteur_translator,
         questions_specifiques_translator=_question_specific_translator,
+        academic_year_repository=_academic_year_repository,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,
@@ -265,6 +276,7 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=_groupe_supervision_repository,
         historique=_historique,
         notification=_notification,
+        raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -317,6 +329,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
+        raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
     ),
     ApprouverPropositionParPdfCommand: lambda msg_bus, cmd: approuver_proposition_par_pdf(
         cmd,
@@ -734,6 +747,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
+        raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
     ),
     RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
         cmd,

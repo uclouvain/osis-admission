@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,46 +26,60 @@
 
 import datetime
 import uuid
-from typing import Optional, List, Union, Set
+from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
-from django.utils.dateparse import parse_datetime, parse_date
+from django.utils.dateparse import parse_date, parse_datetime
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as OngletsChecklistDoctorat,
+)
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+    EmplacementDocumentIdentity,
+)
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.domain.validator.exceptions import (
+    EmplacementDocumentNonTrouveException,
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.enums import (
+    CritereItemFormulaireFormation,
+    Onglets,
+    TypeItemFormulaire,
+)
+from admission.ddd.admission.enums.emplacement_document import (
+    EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
+    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+    IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
+from admission.ddd.admission.repository.i_emplacement_document import (
+    IEmplacementDocumentRepository,
+)
+from admission.infrastructure.utils import (
+    AdmissionDocument,
+    get_document_from_identifier,
+)
 from admission.models import (
     AdmissionFormItem,
     AdmissionFormItemInstantiation,
-    GeneralEducationAdmission,
-    DoctorateAdmission,
     ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
 )
 from admission.models.base import BaseAdmission
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-    EmplacementDocumentNonTrouveException,
-)
-from admission.ddd.admission.enums import (
-    TypeItemFormulaire,
-    CritereItemFormulaireFormation,
-    Onglets,
-)
-from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-    StatutEmplacementDocument,
-    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
-    EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
-    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
-    IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
-    StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from base.models.person import Person
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
-from base.tests.models.test_tutor import request
 
 
 class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
@@ -297,22 +311,29 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             libelle_en=emplacement_document.label_en,
             reclame_le=parse_datetime(emplacement_document.requested_at) if emplacement_document.requested_at else None,
             a_echeance_le=parse_date(emplacement_document.deadline_at) if emplacement_document.deadline_at else None,
-            derniere_action_le=parse_datetime(emplacement_document.last_action_at)
-            if emplacement_document.last_action_at
-            else None,
+            derniere_action_le=(
+                parse_datetime(emplacement_document.last_action_at) if emplacement_document.last_action_at else None
+            ),
             dernier_acteur=emplacement_document.last_actor,
             requis_automatiquement=emplacement_document.automatically_required,
             document_soumis_par=emplacement_document.document_submitted_by,
-            statut_reclamation=StatutReclamationEmplacementDocument[emplacement_document.request_status]
-            if emplacement_document.request_status
-            else None,
-            onglet_checklist_associe=getattr(
-                OngletsChecklistGenerale,
-                emplacement_document.related_checklist_tab,
-                getattr(OngletsChecklistContinue, emplacement_document.related_checklist_tab, None),
-            )
-            if emplacement_document.related_checklist_tab
-            else None,
+            statut_reclamation=(
+                StatutReclamationEmplacementDocument[emplacement_document.request_status]
+                if emplacement_document.request_status
+                else None
+            ),
+            onglet_checklist_associe=(
+                next(
+                    (
+                        enum[emplacement_document.related_checklist_tab]
+                        for enum in [OngletsChecklistGenerale, OngletsChecklistContinue, OngletsChecklistDoctorat]
+                        if hasattr(enum, emplacement_document.related_checklist_tab)
+                    ),
+                    None,
+                )
+                if emplacement_document.related_checklist_tab
+                else None
+            ),
         )
 
     @classmethod

@@ -288,7 +288,7 @@ class PropositionInMemoryRepository(
             proposition_programme_doctoral=proposition.projet.proposition_programme_doctoral,
             projet_formation_complementaire=proposition.projet.projet_formation_complementaire,
             lettres_recommandation=proposition.projet.lettres_recommandation,
-            langue_redaction_these=proposition.projet.langue_redaction_these.name,
+            langue_redaction_these=proposition.projet.langue_redaction_these,
             institut_these=proposition.projet.institut_these.uuid if proposition.projet.institut_these else None,
             nom_institut_these=institut.nom if institut else '',
             sigle_institut_these=institut.acronyme if institut else '',
