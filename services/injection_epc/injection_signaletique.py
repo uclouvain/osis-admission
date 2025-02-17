@@ -25,6 +25,7 @@
 # ##############################################################################
 import json
 import traceback
+import uuid
 from datetime import datetime
 from typing import Dict
 
@@ -56,7 +57,8 @@ SPORT_TOUT_CAMPUS = [
 
 
 class InjectionEPCSignaletique:
-    def injecter(self, admission: BaseAdmission) -> None:
+    def injecter(self, admission_uuid: uuid.UUID) -> None:
+        admission = BaseAdmission.objects.get(uuid=admission_uuid)
         e = ""
         try:
             donnees = self.recuperer_donnees(admission=admission)
@@ -82,6 +84,14 @@ class InjectionEPCSignaletique:
                 "osis_stacktrace": stacktrace if e else ""
             }
         )
+
+    def recuperer_etat_injection_signaletique(self, matricule: str) -> str:
+        injection_signaletique_row = EPCInjection.objects.get(
+            admission__candidate__global_id=matricule,
+            type=EPCInjectionType.SIGNALETIQUE.name,
+        )
+        return injection_signaletique_row.status
+
 
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
