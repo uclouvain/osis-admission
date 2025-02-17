@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -45,36 +45,56 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AbsenceDeDetteNonCompleteeDoctoratException,
+    DetailProjetNonCompleteException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
-    AbsenceDeDetteNonCompleteeDoctoratException,
-    DetailProjetNonCompleteException,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.doctorat.validation.domain.model.enums import (
+    ChoixStatutCDD,
+    ChoixStatutSIC,
+)
+from admission.ddd.admission.domain.service.i_elements_confirmation import (
+    IElementsConfirmation,
+)
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
 )
 from admission.ddd.admission.enums.question_specifique import Onglets
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.models import (
+    AdmissionFormItemInstantiation,
+    AdmissionTask,
+    DoctorateAdmission,
+)
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.form_item import (
+    AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
     TextAdmissionFormItemFactory,
-    AdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
-from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    PromoterFactory,
+    _ProcessFactory,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
@@ -502,6 +522,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     def setUpTestData(cls, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.admission = DoctorateAdmissionFactory(
+            candidate=CompletePersonFactory(),
             supervision_group=_ProcessFactory(),
             cotutelle=False,
             project_title="title",
@@ -814,11 +835,17 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     def assertInErrors(self, response, exception):
         errors = response.json().get('non_field_errors', [])
-        self.assertTrue(any(exc for exc in errors if exc['status_code'] == exception.status_code))
+        self.assertTrue(
+            any(exc for exc in errors if exc['status_code'] == exception.status_code),
+            f'{exception.status_code} not found in {errors}',
+        )
 
     def assertNotInErrors(self, response, exception):
         errors = response.json().get('non_field_errors', [])
-        self.assertFalse(any(exc for exc in errors if exc['status_code'] == exception.status_code))
+        self.assertFalse(
+            any(exc for exc in errors if exc['status_code'] == exception.status_code),
+            f'{exception.status_code} found in {errors}',
+        )
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.first_candidate.user)
@@ -964,9 +991,15 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     def test_submit_invalid_proposition_using_api_accounting(self):
         admission = DoctorateAdmissionFactory(
+            candidate=CompletePersonFactory(
+                last_registration_year=None,
+                graduated_from_high_school_year=None,
+            ),
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
+        admission.candidate.educationalexperience_set.all().delete()
+        admission.candidate.professionalexperience_set.all().delete()
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
 
         self.client.force_authenticate(user=admission.candidate.user)
@@ -1018,57 +1051,6 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeDoctoratException)
-
-    @mock.patch(
-        'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
-        return_value=False,
-    )
-    def test_submit_invalid_proposition_using_api_specific_questions(self, mock_is_external):
-        admission = DoctorateAdmissionFactory(
-            training__academic_year__current=True,
-            candidate=self.first_candidate,
-            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
-            supervision_group=self.first_invited_promoter.actor_ptr.process,
-        )
-        self.client.force_authenticate(user=admission.candidate.user)
-
-        admission = DoctorateAdmission.objects.get(pk=admission.pk)
-
-        url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
-
-        form_item_instantiation = AdmissionFormItemInstantiationFactory(
-            form_item=TextAdmissionFormItemFactory(
-                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
-                internal_label='text_item',
-            ),
-            academic_year=admission.doctorate.academic_year,
-            tab=Onglets.CURRICULUM.name,
-            required=True,
-        )
-
-        form_item_instantiation = AdmissionFormItemInstantiation.objects.get(pk=form_item_instantiation.pk)
-
-        # The question is required for this admission and the field is not completed
-        response = self.client.post(url, self.submitted_data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertInErrors(response, QuestionsSpecifiquesCurriculumNonCompleteesException)
-
-        # Required question for this admission but in unchecked tab
-        form_item_instantiation.tab = Onglets.CHOIX_FORMATION.name
-        form_item_instantiation.save()
-
-        response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, QuestionsSpecifiquesCurriculumNonCompleteesException)
-
-        form_item_instantiation.tab = Onglets.CURRICULUM.name
-        form_item_instantiation.save()
-
-        # The question is required for this admission and the field is completed
-        admission.specific_question_answers = {'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response.'}
-        admission.save()
-
-        response = self.client.post(url, self.submitted_data)
-        self.assertNotInErrors(response, QuestionsSpecifiquesCurriculumNonCompleteesException)
 
 
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)

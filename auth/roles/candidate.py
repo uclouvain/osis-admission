@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -55,12 +55,12 @@ _CANDIDATE_RULESET = {
     'delete_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'change_admission_person': common.is_admission_request_author
-    & doctorate.unconfirmed_proposition
+    & doctorate.in_progress
     & common.does_not_have_a_submitted_admission,
-    'change_admission_coordinates': common.is_admission_request_author & doctorate.unconfirmed_proposition,
-    'change_admission_curriculum': common.is_admission_request_author & doctorate.unconfirmed_proposition,
-    'change_admission_secondary_studies': common.is_admission_request_author & doctorate.unconfirmed_proposition,
-    'change_admission_languages': common.is_admission_request_author & doctorate.unconfirmed_proposition,
+    'change_admission_coordinates': common.is_admission_request_author & doctorate.in_progress,
+    'change_admission_curriculum': common.is_admission_request_author & doctorate.in_progress,
+    'change_admission_secondary_studies': common.is_admission_request_author & doctorate.in_progress,
+    'change_admission_languages': common.is_admission_request_author & doctorate.in_progress,
     'change_admission_accounting': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     # Project tabs and supervision group edition are accessible as long as signing has not begun
     'change_admission_training_choice': common.is_admission_request_author

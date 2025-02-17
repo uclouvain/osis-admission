@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,19 +23,34 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import RefuserPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RefuserPropositionCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.avis import Avis
 from admission.ddd.admission.doctorat.preparation.domain.service.deverrouiller_projet_doctoral import (
     DeverrouillerPropositionProjetDoctoral,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
+    INotification,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.domain.service.i_raccrocher_experiences_curriculum import (
+    IRaccrocherExperiencesCurriculum,
+)
 
 
 def refuser_proposition(
@@ -44,6 +59,7 @@ def refuser_proposition(
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     historique: 'IHistorique',
     notification: 'INotification',
+    raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -62,5 +78,6 @@ def refuser_proposition(
     notification.notifier_avis(proposition_candidat, signataire_id, avis)
     groupe_supervision_repository.save(groupe_de_supervision)
     proposition_repository.save(proposition_candidat)
+    raccrocher_experiences_curriculum.decrocher(proposition_candidat)
 
     return proposition_candidat.entity_id
