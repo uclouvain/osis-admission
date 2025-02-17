@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 <div>
                     <p>
                         First, in order to evaluate your application for admission, <span style="font-weight:bold">
-                        the documents listed below must be added to your <a href="{admissions_link_front}">online 
+                        the documents listed below must be added to your <a href="{admission_link_front}">online 
                         application file</a> by {request_deadline}</span> :
                     </p>
         
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                 <div>
                     <p>
                         Second, the documents listed below must be provided as soon as possible via your 
-                        <a href="{admissions_link_front}">online application file</a>.
+                        <a href="{admission_link_front}">online application file</a>.
                     </p>
                     
                     {later_requested_documents}
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
         <div>
             <p>
                 Afin de pouvoir poursuivre l’analyse de votre demande d’admission, <span style="font-weight:bold">les 
-                documents ci-dessous  doivent être ajoutés obligatoirement à <a href="{admissions_link_front}">votre 
+                documents ci-dessous  doivent être ajoutés obligatoirement à <a href="{admission_link_front}">votre 
                 dossier en ligne</a> pour le {request_deadline}</span> :
             </p>
 
@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
             <p>
                 Par ailleurs, nous profitons de ce courrier pour vous signaler que les documents complémentaires 
                 ci-dessous sont à nous fournir dès que possible. Si vous êtes déjà en possession de ceux-ci nous vous 
-                invitons à nous les faire parvenir sans attendre via <a href="{admissions_link_front}">votre dossier 
+                invitons à nous les faire parvenir sans attendre via <a href="{admission_link_front}">votre dossier 
                 en ligne</a>.
             </p>
             
@@ -136,7 +136,7 @@ class Migration(migrations.Migration):
                 <div>
                     <p>
                         First, in order to evaluate your application for admission, <span style="font-weight:bold">the 
-                        documents listed below must be added to your <a href="{admissions_link_front}">online 
+                        documents listed below must be added to your <a href="{admission_link_front}">online 
                         application file</a> by {request_deadline}</span> :
                     </p>
 
@@ -151,7 +151,7 @@ class Migration(migrations.Migration):
                 <div>
                     <p>
                         Second, the documents listed below must be provided as soon as possible via your 
-                        <a href="{admissions_link_front}">online application file</a>.
+                        <a href="{admission_link_front}">online application file</a>.
                     </p>
 
                     {later_requested_documents}
@@ -180,7 +180,7 @@ class Migration(migrations.Migration):
         <div>
             <p>
                 Afin de pouvoir poursuivre l’analyse de votre demande d’admission, <span style="font-weight:bold">les 
-                documents ci-dessous doivent être ajoutés obligatoirement à <a href="{admissions_link_front}">votre 
+                documents ci-dessous doivent être ajoutés obligatoirement à <a href="{admission_link_front}">votre 
                 dossier en ligne</a> pour le {request_deadline}</span> :
             </p>
 
@@ -197,7 +197,7 @@ class Migration(migrations.Migration):
             <p>
                 Par ailleurs, nous profitons de ce courrier pour vous signaler que les documents complémentaires 
                 ci-dessous sont à nous fournir dès que possible. Si vous êtes déjà en possession de ceux-ci nous vous 
-                invitons à nous les faire parvenir sans attendre via <a href="{admissions_link_front}">votre dossier 
+                invitons à nous les faire parvenir sans attendre via <a href="{admission_link_front}">votre dossier 
                 en ligne</a>.
             </p>
 

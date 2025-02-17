@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,33 +26,48 @@
 import uuid
 
 import freezegun
-from django.test import override_settings
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
-    ChoixStatutPropositionDoctorale,
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
+    ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
+    ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
-from admission.tests.factories.supervision import PromoterFactory, CaMemberFactory
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.models.specific_iufc_informations import SpecificIUFCInformations
 from base.tests import QueriesAssertionsMixin
@@ -596,14 +611,36 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 
     def test_admission_doctorate_cancel_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
+
+        valuated_educational_experience = EducationalExperienceFactory(person=self.admission.candidate)
+        EducationalExperienceYearFactory(educational_experience=valuated_educational_experience)
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.admission,
+            educationalexperience=valuated_educational_experience,
+        )
+
+        professional_experience = ProfessionalExperienceFactory(person=self.admission.candidate)
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.admission,
+            professionalexperience=professional_experience,
+        )
+
+        self.assertTrue(self.admission.educational_valuated_experiences.exists())
+        self.assertTrue(self.admission.professional_valuated_experiences.exists())
+
         response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
         # This is a soft-delete
         admissions = DoctorateAdmission.objects.all()
         self.assertEqual(admissions.count(), 1)
+
         admission = admissions.get()
         self.assertEqual(admission.status, ChoixStatutPropositionDoctorale.ANNULEE.name)
         self.assertEqual(admission.last_update_author, self.candidate)
+
+        self.assertFalse(self.admission.educational_valuated_experiences.exists())
+        self.assertFalse(self.admission.professional_valuated_experiences.exists())
 
         history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
         self.assertIsNotNone(history_entry)
