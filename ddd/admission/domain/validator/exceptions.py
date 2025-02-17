@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,18 +25,9 @@
 ##############################################################################
 from typing import Optional
 
-from django.utils.translation import gettext_lazy as _
-
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from django.utils.translation import gettext_lazy as _
 from osis_common.ddd.interface import BusinessException
-
-
-class BourseNonTrouveeException(BusinessException):
-    status_code = "ADMISSION-1"
-
-    def __init__(self, **kwargs):
-        message = _("No scholarship found.")
-        super().__init__(message, **kwargs)
 
 
 class ConditionsAccessNonRempliesException(BusinessException):
@@ -209,7 +200,7 @@ class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessExcep
     message = _(
         'As you are applying for a limited course as a non-resident (as defined by government decree) candidate, '
         'applications for the 2024-2025 academic year must be submitted via this '
-        '<a href="https://uclouvain.be/fr/etudier/inscriptions/demande-en-ligne" target="_blank">'
+        '<a href="https://fishe.uclouvain.be/portail/inscription/" target="_blank">'
         'specific platform</a>.'
     )
 

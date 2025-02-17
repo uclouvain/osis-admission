@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,15 @@
 # ##############################################################################
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Exists, F, OuterRef, Q, TextField, ExpressionWrapper, BooleanField
+from django.db.models import (
+    BooleanField,
+    Exists,
+    ExpressionWrapper,
+    F,
+    OuterRef,
+    Q,
+    TextField,
+)
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language, get_language_from_request
 from django.views.decorators.cache import cache_page
@@ -35,16 +43,26 @@ from rest_framework.response import Response
 from rules.contrib.views import LoginRequiredMixin
 
 from admission.api import serializers
-from admission.api.schema import AuthorizationAwareSchema, ResponseSpecificSchema, BetterChoicesSchema
+from admission.api.schema import (
+    AuthorizationAwareSchema,
+    BetterChoicesSchema,
+    ResponseSpecificSchema,
+)
 from admission.api.serializers import PersonSerializer
-from admission.models import EntityProxy, Scholarship, DiplomaticPost
-from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RechercherDoctoratQuery,
+)
 from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
-from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
-from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
+from admission.ddd.admission.formation_continue.commands import (
+    RechercherFormationContinueQuery,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RechercherFormationGeneraleQuery,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import DiplomaticPost, EntityProxy
 from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -64,7 +82,6 @@ __all__ = [
     "AutocompletePersonView",
     "AutocompleteGeneralEducationView",
     "AutocompleteContinuingEducationView",
-    "AutocompleteScholarshipView",
     "AutocompleteDiplomaticPostView",
 ]
 
@@ -257,41 +274,6 @@ class PersonSearchingBackend(BaseFilterBackend):
                 },
             },
         ]
-
-
-class ScholarshipSearchBackend(BaseFilterBackend):
-    searching_param = 'search'
-
-    def filter_queryset(self, request, queryset, view):
-        search_term = request.GET.get(self.searching_param, '')
-        scholarship_type = view.kwargs.get('scholarship_type', '')
-
-        return queryset.filter(type=scholarship_type).filter(
-            Q(short_name__icontains=search_term) | Q(long_name__icontains=search_term)
-        )
-
-    def get_schema_operation_parameters(self, view):  # pragma: no cover
-        return [
-            {
-                'name': self.searching_param,
-                'required': False,
-                'in': 'query',
-                'description': 'The term to search the scholarship on (short or long name)',
-                'schema': {
-                    'type': 'string',
-                },
-            },
-        ]
-
-
-class AutocompleteScholarshipView(ListAPIView):
-    """Autocomplete scholarships"""
-
-    name = 'autocomplete-scholarships'
-    schema = AuthorizationAwareSchema()
-    filter_backends = [ScholarshipSearchBackend]
-    serializer_class = serializers.ScholarshipSerializer
-    queryset = Scholarship.objects.exclude(disabled=True).order_by('long_name', 'short_name')
 
 
 class CampusSearchBackend(BaseFilterBackend):

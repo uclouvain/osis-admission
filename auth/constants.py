@@ -80,7 +80,7 @@ UPDATE_ACTIONS_BY_TAB = {
     # Training choice
     'training-choice': 'admission.change_admission_training_choice',
     # Previous experience
-    'curriculum': 'admission.change_admission_curriculum',
+    'curriculum': 'admission.change_admission_global_curriculum',
     'educational': '',
     'educational_create': '',
     'non_educational': '',

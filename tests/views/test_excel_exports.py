@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext as _, pgettext
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -43,59 +44,66 @@ from osis_async.models.enums import TaskState
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
-from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ListerDemandesQuery as ListerDemandesDoctoralesQuery,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixCommissionProximiteCDSS,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
-    ChoixCommissionProximiteCDSS,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO as DemandeDoctoraleRechercheDTO
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.liste import (
+    DemandeRechercheDTO as DemandeDoctoraleRechercheDTO,
+)
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixEdition
+from admission.ddd.admission.formation_continue.commands import (
+    ListerDemandesQuery as ListerDemandesContinuesQuery,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
     ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
 )
-from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.formation_continue.dtos.liste import (
+    DemandeRechercheDTO as DemandeContinueRechercheDTO,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.form_item import (
-    MessageAdmissionFormItemFactory,
-    TextAdmissionFormItemFactory,
-    DocumentAdmissionFormItemFactory,
-    CheckboxSelectionAdmissionFormItemFactory,
-    RadioButtonSelectionAdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
+    CheckboxSelectionAdmissionFormItemFactory,
+    DocumentAdmissionFormItemFactory,
+    MessageAdmissionFormItemFactory,
+    RadioButtonSelectionAdmissionFormItemFactory,
+    TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
-from admission.tests.factories.scholarship import (
-    InternationalScholarshipFactory,
-    DoubleDegreeScholarshipFactory,
-    ErasmusMundusScholarshipFactory,
-    DoctorateScholarshipFactory,
-)
 from admission.tests.factories.supervision import PromoterFactory
 from admission.views.excel_exports import (
+    SPECIFIC_QUESTION_SEPARATOR,
+    SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT,
     AdmissionListExcelExportView,
     ContinuingAdmissionListExcelExportView,
     DoctorateAdmissionListExcelExportView,
-)
-from admission.views.excel_exports import (
-    AdmissionListExcelExportView,
-    ContinuingAdmissionListExcelExportView,
-    SPECIFIC_QUESTION_SEPARATOR,
-    SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT,
 )
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
@@ -109,6 +117,12 @@ from base.tests.factories.student import StudentFactory
 from infrastructure.messages_bus import message_bus_instance
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import (
+    DoctorateScholarshipFactory,
+    DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
+)
 
 
 class UnfrozenDTO:
@@ -292,9 +306,9 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             est_premiere_annee=False,
             poursuite_de_cycle=cls.admission.cycle_pursuit,
             annee_formation=cls.admission.training.academic_year.year,
-            annee_calculee=cls.admission.determined_academic_year.year
-            if cls.admission.determined_academic_year
-            else None,
+            annee_calculee=(
+                cls.admission.determined_academic_year.year if cls.admission.determined_academic_year else None
+            ),
             adresse_email_candidat=cls.admission.candidate.private_email,
             reponses_questions_specifiques={
                 cls.text_form_item_uuid: 'Answer 1',

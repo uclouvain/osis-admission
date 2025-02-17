@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,42 +30,53 @@ from dal import autocomplete, forward
 from django import forms
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
-from admission.models import Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     COMMISSIONS_CDE_CLSM,
     COMMISSIONS_CDSS,
     SIGLES_SCIENCES,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
     PropositionGestionnaireDTO as PropositionDoctoraleDTO,
 )
 from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.enums import TypeBourse
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMoyensDecouverteFormation
-from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionContinueDTO
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixMoyensDecouverteFormation,
+)
+from admission.ddd.admission.formation_continue.dtos import (
+    PropositionDTO as PropositionContinueDTO,
+)
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO as PropositionGeneraleDTO,
 )
-from admission.forms import get_scholarship_choices, format_training, AdmissionMainCampusChoiceField
+from admission.forms import (
+    AdmissionMainCampusChoiceField,
+    format_training,
+    get_scholarship_choices,
+)
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
-from base.forms.utils import FIELD_REQUIRED_MESSAGE, EMPTY_CHOICE
+from admission.views.autocomplete.trainings import (
+    ContinuingManagedEducationTrainingsAutocomplete,
+)
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.fields import RadioBooleanField
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.state_iufc import StateIUFC
+from reference.models.enums.scholarship_type import ScholarshipType
+from reference.models.scholarship import Scholarship
 
 
 class BaseTrainingChoiceForm(ConfigurableFormMixin):
@@ -163,9 +174,9 @@ class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
         )
 
         self.scholarship_fields = [
-            ['double_degree_scholarship', TypeBourse.DOUBLE_TRIPLE_DIPLOMATION],
-            ['international_scholarship', TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE],
-            ['erasmus_mundus_scholarship', TypeBourse.ERASMUS_MUNDUS],
+            ['double_degree_scholarship', ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION],
+            ['international_scholarship', ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE],
+            ['erasmus_mundus_scholarship', ScholarshipType.ERASMUS_MUNDUS],
         ]
 
         for scholarship_field, scholarship_type in self.scholarship_fields:
@@ -304,9 +315,11 @@ class ContinuingTrainingChoiceForm(BaseTrainingChoiceForm):
         self.fields['continuing_education_training'].choices = [
             (
                 selected_training,
-                self.continuing_training.formatted_title  # type: ignore
-                if self.continuing_training
-                else selected_training,
+                (
+                    self.continuing_training.formatted_title  # type: ignore
+                    if self.continuing_training
+                    else selected_training
+                ),
             )
         ]
 

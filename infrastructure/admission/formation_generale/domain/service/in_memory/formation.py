@@ -137,6 +137,27 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             campus__nom='Louvain-la-Neuve',
         ),
         FormationFactory(
+            intitule='Master MC',
+            entity_id__sigle='MASTER-MC',
+            entity_id__annee=2020,
+            type=TrainingType.MASTER_MC,
+            campus__nom='Louvain-la-Neuve',
+        ),
+        FormationFactory(
+            intitule='Master M4',
+            entity_id__sigle='MASTER-M4',
+            entity_id__annee=2020,
+            type=TrainingType.MASTER_M4,
+            campus__nom='Louvain-la-Neuve',
+        ),
+        FormationFactory(
+            intitule='Master M5',
+            entity_id__sigle='MASTER-M5',
+            entity_id__annee=2020,
+            type=TrainingType.MASTER_M5,
+            campus__nom='Louvain-la-Neuve',
+        ),
+        FormationFactory(
             intitule='Aggrégation en économie',
             entity_id__sigle='AGGREGATION-ECO',
             entity_id__annee=2020,

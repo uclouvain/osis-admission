@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,44 +29,65 @@ from typing import List, Optional
 import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
-from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import PeriodeSoumissionTicketDigit
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import (
+    PeriodeSoumissionTicketDigit,
+)
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     DROITS_INSCRIPTION_MONTANT_VALEURS,
+    ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
 )
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
-from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
-from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
+from admission.infrastructure.admission.repository.in_memory.proposition import (
+    GlobalPropositionInMemoryRepository,
+)
 from admission.infrastructure.utils import dto_to_dict
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from infrastructure.reference.domain.service.in_memory.bourse import (
+    BourseInMemoryTranslator,
+)
 
 
 @dataclass
@@ -228,6 +249,24 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="ABCD2MC", annee=2024),
                 curriculum=['file1.pdf'],
             ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-MC'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-MC", annee=2020),
+                annee_calculee=2020,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-M4'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-M4", annee=2020),
+                annee_calculee=2020,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-M5'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-M5", annee=2020),
+                annee_calculee=2020,
+            ),
         ]
 
     @classmethod
@@ -269,15 +308,21 @@ class PropositionInMemoryRepository(
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
             date_fin_pot=None,
             soumise_le=None,
-            bourse_double_diplome=BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
-            if proposition.bourse_double_diplome_id
-            else None,
-            bourse_erasmus_mundus=BourseInMemoryTranslator.get_dto(proposition.bourse_erasmus_mundus_id.uuid)
-            if proposition.bourse_erasmus_mundus_id
-            else None,
-            bourse_internationale=BourseInMemoryTranslator.get_dto(proposition.bourse_internationale_id.uuid)
-            if proposition.bourse_internationale_id
-            else None,
+            bourse_double_diplome=(
+                BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
+                if proposition.bourse_double_diplome_id
+                else None
+            ),
+            bourse_erasmus_mundus=(
+                BourseInMemoryTranslator.get_dto(proposition.bourse_erasmus_mundus_id.uuid)
+                if proposition.bourse_erasmus_mundus_id
+                else None
+            ),
+            bourse_internationale=(
+                BourseInMemoryTranslator.get_dto(proposition.bourse_internationale_id.uuid)
+                if proposition.bourse_internationale_id
+                else None
+            ),
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             equivalence_diplome=proposition.equivalence_diplome,
             curriculum=proposition.curriculum,
@@ -300,19 +345,21 @@ class PropositionInMemoryRepository(
             certificat_refus_sic=proposition.certificat_refus_sic,
             documents_additionnels=proposition.documents_additionnels,
             poste_diplomatique=poste_diplomatique,
-            financabilite_regle_calcule=proposition.financabilite_regle_calcule.name
-            if proposition.financabilite_regle_calcule
-            else '',
-            financabilite_regle_calcule_situation=proposition.financabilite_regle_calcule_situation.name
-            if proposition.financabilite_regle_calcule_situation
-            else '',
+            financabilite_regle_calcule=(
+                proposition.financabilite_regle_calcule.name if proposition.financabilite_regle_calcule else ''
+            ),
+            financabilite_regle_calcule_situation=(
+                proposition.financabilite_regle_calcule_situation.name
+                if proposition.financabilite_regle_calcule_situation
+                else ''
+            ),
             financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
             financabilite_regle=proposition.financabilite_regle.name if proposition.financabilite_regle else '',
             financabilite_etabli_par=proposition.financabilite_etabli_par,
             financabilite_etabli_le=proposition.financabilite_etabli_le,
-            financabilite_derogation_statut=proposition.financabilite_derogation_statut.name
-            if proposition.financabilite_derogation_statut
-            else '',
+            financabilite_derogation_statut=(
+                proposition.financabilite_derogation_statut.name if proposition.financabilite_derogation_statut else ''
+            ),
             financabilite_derogation_premiere_notification_le=(
                 proposition.financabilite_derogation_premiere_notification_le
             ),
@@ -374,23 +421,25 @@ class PropositionInMemoryRepository(
             fraudeur_ares=False,
             non_financable=False,
             est_inscription_tardive=proposition.est_inscription_tardive,
-            profil_soumis_candidat=ProfilCandidatDTO(
-                prenom=proposition.profil_soumis_candidat.prenom,
-                nom=proposition.profil_soumis_candidat.nom,
-                genre=proposition.profil_soumis_candidat.genre,
-                nationalite=proposition.profil_soumis_candidat.nationalite,
-                nom_pays_nationalite=cls.countries.get(proposition.profil_soumis_candidat.nationalite, ''),
-                date_naissance=proposition.profil_soumis_candidat.date_naissance,
-                pays=proposition.profil_soumis_candidat.pays,
-                nom_pays=cls.countries.get(proposition.profil_soumis_candidat.pays, ''),
-                code_postal=proposition.profil_soumis_candidat.code_postal,
-                ville=proposition.profil_soumis_candidat.ville,
-                rue=proposition.profil_soumis_candidat.rue,
-                numero_rue=proposition.profil_soumis_candidat.numero_rue,
-                boite_postale=proposition.profil_soumis_candidat.boite_postale,
-            )
-            if proposition.profil_soumis_candidat
-            else None,
+            profil_soumis_candidat=(
+                ProfilCandidatDTO(
+                    prenom=proposition.profil_soumis_candidat.prenom,
+                    nom=proposition.profil_soumis_candidat.nom,
+                    genre=proposition.profil_soumis_candidat.genre,
+                    nationalite=proposition.profil_soumis_candidat.nationalite,
+                    nom_pays_nationalite=cls.countries.get(proposition.profil_soumis_candidat.nationalite, ''),
+                    date_naissance=proposition.profil_soumis_candidat.date_naissance,
+                    pays=proposition.profil_soumis_candidat.pays,
+                    nom_pays=cls.countries.get(proposition.profil_soumis_candidat.pays, ''),
+                    code_postal=proposition.profil_soumis_candidat.code_postal,
+                    ville=proposition.profil_soumis_candidat.ville,
+                    rue=proposition.profil_soumis_candidat.rue,
+                    numero_rue=proposition.profil_soumis_candidat.numero_rue,
+                    boite_postale=proposition.profil_soumis_candidat.boite_postale,
+                )
+                if proposition.profil_soumis_candidat
+                else None
+            ),
             type_de_refus=proposition.type_de_refus,
             motifs_refus=[MotifRefusDTO(motif=motif.intitule, categorie=motif.categorie) for motif in motifs_refus],
             autre_formation_choisie_fac=formation_choisie_fac
@@ -412,16 +461,16 @@ class PropositionInMemoryRepository(
             commentaire_programme_conjoint=proposition.commentaire_programme_conjoint,
             condition_acces=proposition.condition_acces.name if proposition.condition_acces else '',
             millesime_condition_acces=proposition.millesime_condition_acces,
-            type_equivalence_titre_acces=proposition.type_equivalence_titre_acces
-            if proposition.type_equivalence_titre_acces
-            else '',
+            type_equivalence_titre_acces=(
+                proposition.type_equivalence_titre_acces if proposition.type_equivalence_titre_acces else ''
+            ),
             information_a_propos_de_la_restriction=proposition.information_a_propos_de_la_restriction,
-            statut_equivalence_titre_acces=proposition.statut_equivalence_titre_acces
-            if proposition.statut_equivalence_titre_acces
-            else '',
-            etat_equivalence_titre_acces=proposition.etat_equivalence_titre_acces
-            if proposition.etat_equivalence_titre_acces
-            else '',
+            statut_equivalence_titre_acces=(
+                proposition.statut_equivalence_titre_acces if proposition.statut_equivalence_titre_acces else ''
+            ),
+            etat_equivalence_titre_acces=(
+                proposition.etat_equivalence_titre_acces if proposition.etat_equivalence_titre_acces else ''
+            ),
             date_prise_effet_equivalence_titre_acces=proposition.date_prise_effet_equivalence_titre_acces,
             besoin_de_derogation=proposition.besoin_de_derogation,
             droits_inscription_montant=proposition.droits_inscription_montant,

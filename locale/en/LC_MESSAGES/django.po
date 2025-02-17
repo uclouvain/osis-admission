@@ -819,8 +819,8 @@ msgstr ""
 msgid ""
 "As you are applying for a limited course as a non-resident (as defined by "
 "government decree) candidate, applications for the 2024-2025 academic year "
-"must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
-"inscriptions/demande-en-ligne\" target=\"_blank\">specific platform</a>."
+"must be submitted via this <a href=\"https://fishe.uclouvain.be/portail/"
+"inscription/\" target=\"_blank\">specific platform</a>."
 msgstr ""
 
 msgid "Ask candidate to modify supervision committee"
@@ -2008,9 +2008,6 @@ msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr ""
 
-msgid "Disabled"
-msgstr ""
-
 msgid "Discard fusion"
 msgstr ""
 
@@ -2229,9 +2226,6 @@ msgid ""
 "leading to two separate diplomas awarded by each signatory university."
 msgstr ""
 
-msgid "Dual or triple degree"
-msgstr ""
-
 msgid "Duplicate experience"
 msgstr ""
 
@@ -2445,9 +2439,6 @@ msgstr ""
 msgid "Employer"
 msgstr ""
 
-msgid "Enabled"
-msgstr ""
-
 msgctxt "admission"
 msgid "End"
 msgstr ""
@@ -2544,6 +2535,9 @@ msgid "Excel export of admission applications"
 msgstr ""
 
 msgid "Exclude"
+msgstr ""
+
+msgid "Existing pre-admission"
 msgstr ""
 
 msgid "Exit without saving"
@@ -3601,12 +3595,6 @@ msgstr ""
 msgid "Internal label"
 msgstr ""
 
-msgid "International for doctorate"
-msgstr ""
-
-msgid "International for general education"
-msgstr ""
-
 msgid "International scholarship"
 msgstr ""
 
@@ -3844,9 +3832,6 @@ msgid "Long label in english"
 msgstr ""
 
 msgid "Long label in french"
-msgstr ""
-
-msgid "Long name"
 msgstr ""
 
 msgid "Long-term resident card"
@@ -4327,9 +4312,6 @@ msgid "No one invited"
 msgstr ""
 
 msgid "No pool was found to match."
-msgstr ""
-
-msgid "No scholarship found."
 msgstr ""
 
 msgid "No specific profile"
@@ -5264,6 +5246,9 @@ msgstr ""
 msgid "Related experience"
 msgstr ""
 
+msgid "Related pre-admission"
+msgstr ""
+
 msgid "Relationship"
 msgstr ""
 
@@ -5480,10 +5465,6 @@ msgstr ""
 msgid "Scholarship"
 msgstr ""
 
-msgctxt "admission model"
-msgid "Scholarship"
-msgstr ""
-
 msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr ""
@@ -5644,9 +5625,6 @@ msgid "Short label in english"
 msgstr ""
 
 msgid "Short label in french"
-msgstr ""
-
-msgid "Short name"
 msgstr ""
 
 msgid "Show details"
@@ -6036,6 +6014,9 @@ msgid ""
 msgstr ""
 
 msgid "The University tuition fee is EUR 0.0."
+msgstr ""
+
+msgid "The admission must not follow a pre-admission"
 msgstr ""
 
 #, python-format
@@ -6533,6 +6514,16 @@ msgid "Thesis-related data"
 msgstr ""
 
 msgid "This account number has been verified"
+msgstr ""
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general education."
+msgstr ""
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general or a doctorate education."
 msgstr ""
 
 msgid "This action is limited to a specific admission context."

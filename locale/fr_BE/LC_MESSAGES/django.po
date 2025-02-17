@@ -913,13 +913,13 @@ msgstr ""
 msgid ""
 "As you are applying for a limited course as a non-resident (as defined by "
 "government decree) candidate, applications for the 2024-2025 academic year "
-"must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
-"inscriptions/demande-en-ligne\" target=\"_blank\">specific platform</a>."
+"must be submitted via this <a href=\"https://fishe.uclouvain.be/portail/"
+"inscription/\" target=\"_blank\">specific platform</a>."
 msgstr ""
 "Comme vous postulez pour des études contingentées en tant que candidat·es "
 "non-résident·es, les inscriptions pour l'année académique 2024-2025 sont à "
-"introduire via cette <a href=\"https://uclouvain.be/fr/etudier/inscriptions/"
-"demande-en-ligne\" target=\"_blank\">plateforme spécifique</a>."
+"introduire via cette <a href=\"https://fishe.uclouvain.be/portail/"
+"inscription/\" target=\"_blank\">plateforme spécifique</a>."
 
 msgid "Ask candidate to modify supervision committee"
 msgstr "Demander au candidat de modifier le comité d’accompagnement"
@@ -2200,9 +2200,6 @@ msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 
-msgid "Disabled"
-msgstr "Désactivé"
-
 msgid "Discard fusion"
 msgstr "Rejeter la fusion"
 
@@ -2438,9 +2435,6 @@ msgstr ""
 "La double diplomation concerne une formation conjointe entre deux ou "
 "plusieurs universités, qui débouchera sur l'obtention de deux diplômes "
 "distincts fournis par chaque université signataire."
-
-msgid "Dual or triple degree"
-msgstr "Double ou triple diplomation"
 
 msgid "Duplicate experience"
 msgstr "Dupliquer l'expérience"
@@ -2697,9 +2691,6 @@ msgstr "Contact en cas d'urgence (numéro de téléphone)"
 msgid "Employer"
 msgstr "Employeur"
 
-msgid "Enabled"
-msgstr "Activé"
-
 msgctxt "admission"
 msgid "End"
 msgstr "Fin"
@@ -2801,6 +2792,9 @@ msgstr "Export excel des demandes d'admission"
 
 msgid "Exclude"
 msgstr "Exclure"
+
+msgid "Existing pre-admission"
+msgstr "Pré-admission existante"
 
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
@@ -4045,12 +4039,6 @@ msgstr "Les expériences internes à choisir comme des titres d'accès"
 msgid "Internal label"
 msgstr "Label interne"
 
-msgid "International for doctorate"
-msgstr "Internationale pour les doctorats"
-
-msgid "International for general education"
-msgstr "Internationale pour les formation générales"
-
 msgid "International scholarship"
 msgstr "Bourse internationale"
 
@@ -4300,9 +4288,6 @@ msgstr "Libellé long en anglais"
 
 msgid "Long label in french"
 msgstr "Libellé long en français"
-
-msgid "Long name"
-msgstr "Nom long"
 
 msgid "Long-term resident card"
 msgstr "Carte de résident longue durée"
@@ -4844,9 +4829,6 @@ msgstr "Aucun invité"
 
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
-
-msgid "No scholarship found."
-msgstr "Bourse non trouvée."
 
 msgid "No specific profile"
 msgstr "Pas de profil particulier"
@@ -5846,6 +5828,9 @@ msgstr "Inscription au rôle requise"
 msgid "Related experience"
 msgstr "Expérience associée"
 
+msgid "Related pre-admission"
+msgstr "Pré-admission associée"
+
 msgid "Relationship"
 msgstr "Lien de parenté"
 
@@ -6068,10 +6053,6 @@ msgstr "Enregistrer la proposition de fusion"
 msgid "Scholarship"
 msgstr "Boursier"
 
-msgctxt "admission model"
-msgid "Scholarship"
-msgstr "Bourse"
-
 msgctxt "doctorate-header-list"
 msgid "Scholarship"
 msgstr "Bourse"
@@ -6235,9 +6216,6 @@ msgstr "Libellé court en anglais"
 
 msgid "Short label in french"
 msgstr "Libellé court en français"
-
-msgid "Short name"
-msgstr "Nom court"
 
 msgid "Show details"
 msgstr "Voir le détail"
@@ -6694,6 +6672,9 @@ msgstr ""
 
 msgid "The University tuition fee is EUR 0.0."
 msgstr "Les droits d'inscription à l'Université s'élèvent à 0.0 EUR."
+
+msgid "The admission must not follow a pre-admission"
+msgstr "L'admission ne doit pas suivre une pré-admission"
 
 #, python-format
 msgid ""
@@ -7274,6 +7255,21 @@ msgstr "Données relatives à la thèse"
 
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general education."
+msgstr ""
+"Cette action ne peut être réalisée car il existe, pour ce candidat, une "
+"autre admission ou expérience interne relative à une formation générale."
+
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general or a doctorate education."
+msgstr ""
+"Cette action ne peut être réalisée car il existe, pour ce candidat, une "
+"autre admission ou expérience interne relative à une formation générale ou "
+"doctorale."
 
 msgid "This action is limited to a specific admission context."
 msgstr "Cette action est limitée à un contexte d'admission particulier."

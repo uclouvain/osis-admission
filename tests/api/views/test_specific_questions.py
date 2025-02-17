@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,9 +34,10 @@ from django.utils.translation import gettext
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import EN_ISO_CODE, FR_ISO_CODE
-from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
+from admission.ddd.admission.domain.validator.exceptions import (
+    PosteDiplomatiqueNonTrouveException,
+)
 from admission.ddd.admission.enums import CritereItemFormulaireNationaliteDiplome
 from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireFormation,
@@ -50,9 +51,12 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
@@ -62,8 +66,10 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.scholarship import InternationalScholarshipFactory
-from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
+from admission.tests.factories.secondary_studies import (
+    BelgianHighSchoolDiplomaFactory,
+    ForeignHighSchoolDiplomaFactory,
+)
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
@@ -77,6 +83,7 @@ from osis_profile.models import EducationalExperience
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
+from reference.tests.factories.scholarship import InternationalScholarshipFactory
 
 
 class BaseDoctorateSpecificQuestionListApiTestCase(APITestCase):

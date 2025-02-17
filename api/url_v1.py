@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import include, path as _path
+from django.urls import include
+from django.urls import path as _path
 from rest_framework.routers import SimpleRouter
 
 import admission.api.views.submission
@@ -93,6 +94,7 @@ urlpatterns = [
     path('curriculum', views.PersonCurriculumView),
     # Admission-related
     path('propositions/doctorate', views.DoctorateTrainingChoiceAPIView),
+    path('propositions/doctorate/pre-admission-list', views.DoctoratePreAdmissionList),
     path('propositions/doctorate/<uuid:uuid>', views.DoctoratePropositionView),
     _path('propositions/doctorate/<uuid:uuid>/', include(person_tabs)),
     path('propositions/doctorate/<uuid:uuid>/project', views.ProjectViewSet),
@@ -174,9 +176,7 @@ urlpatterns = [
     path('autocomplete/tutor', views.AutocompleteTutorView),
     path('autocomplete/person', views.AutocompletePersonView),
     path('autocomplete/diplomatic-post', views.AutocompleteDiplomaticPostView),
-    path('autocomplete/<str:scholarship_type>/scholarship', views.AutocompleteScholarshipView),
     # Others
-    path('scholarship/<uuid:uuid>', views.RetrieveScholarshipView),
     path('campus', views.ListCampusView),
     path('campus/<uuid:uuid>', views.RetrieveCampusView),
     path('diplomatic-post/<int:code>', views.RetrieveDiplomaticPostView),

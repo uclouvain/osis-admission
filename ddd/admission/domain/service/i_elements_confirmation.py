@@ -383,4 +383,6 @@ class IElementsConfirmation(interface.DomainService):
             TrainingType.MASTER_MS_180_240,
             TrainingType.MASTER_M1,
             TrainingType.MASTER_MC,
+            TrainingType.MASTER_M4,
+            TrainingType.MASTER_M5,
         ]

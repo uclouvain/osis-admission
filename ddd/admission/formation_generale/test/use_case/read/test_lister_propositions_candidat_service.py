@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,11 +27,17 @@ from typing import List
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.enums.type_bourse import TypeBourse
-from admission.ddd.admission.formation_generale.commands import ListerPropositionsCandidatQuery
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.commands import (
+    ListerPropositionsCandidatQuery,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
+from reference.models.enums.scholarship_type import ScholarshipType
 
 
 class TestListerPropositionsCandidatService(SimpleTestCase):
@@ -52,13 +58,13 @@ class TestListerPropositionsCandidatService(SimpleTestCase):
         self.assertEqual(results[0].nom_candidat, 'Doe')
         self.assertEqual(
             results[0].bourse_internationale.type,
-            TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
+            ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
         )
         self.assertEqual(results[0].bourse_internationale.nom_court, 'AFEPA')
         self.assertEqual(results[0].bourse_internationale.nom_long, 'AFEPA --')
-        self.assertEqual(results[0].bourse_erasmus_mundus.type, TypeBourse.ERASMUS_MUNDUS.name)
+        self.assertEqual(results[0].bourse_erasmus_mundus.type, ScholarshipType.ERASMUS_MUNDUS.name)
         self.assertEqual(results[0].bourse_erasmus_mundus.nom_court, 'EMDI')
         self.assertEqual(results[0].bourse_erasmus_mundus.nom_long, 'EMDI --')
-        self.assertEqual(results[0].bourse_double_diplome.type, TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name)
+        self.assertEqual(results[0].bourse_double_diplome.type, ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION.name)
         self.assertEqual(results[0].bourse_double_diplome.nom_court, 'AGRO DD UCLOUVAIN/GEM')
         self.assertEqual(results[0].bourse_double_diplome.nom_long, 'AGRO DD UCLOUVAIN/GEM --')

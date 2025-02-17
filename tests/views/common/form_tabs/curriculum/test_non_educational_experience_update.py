@@ -96,8 +96,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
-        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
-            candidate=cls.general_admission.candidate,
+        cls.other_continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=entity,
             training__academic_year=cls.academic_years[0],
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
@@ -115,8 +114,8 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         cls.general_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.general_admission.training.education_group,
         ).person.user
-        cls.continuing_program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.continuing_admission.training.education_group,
+        cls.other_continuing_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.other_continuing_admission.training.education_group,
         ).person.user
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.doctorate_admission.training.education_group,
@@ -161,15 +160,6 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.general_create_url = resolve_url(
             'admission:general-education:update:curriculum:non_educational_create',
             uuid=self.general_admission.uuid,
-        )
-        self.continuing_form_url = resolve_url(
-            'admission:continuing-education:update:curriculum:non_educational',
-            uuid=self.continuing_admission.uuid,
-            experience_uuid=self.experience.uuid,
-        )
-        self.continuing_create_url = resolve_url(
-            'admission:continuing-education:update:curriculum:non_educational_create',
-            uuid=self.continuing_admission.uuid,
         )
         self.doctorate_form_url = resolve_url(
             'admission:doctorate:update:curriculum:non_educational',
@@ -535,25 +525,93 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             },
         )
 
-    def test_continuing_update_curriculum_is_allowed_for_fac_users(self):
-        self.client.force_login(self.continuing_program_manager_user)
-        response = self.client.get(self.continuing_form_url)
+    def test_continuing_update_curriculum_for_fac_users(self):
+        self.client.force_login(self.other_continuing_program_manager_user)
+
+        experience = ProfessionalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_continuing_update_curriculum_is_allowed_for_sic_users(self):
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_continuing_update_curriculum_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
-        response = self.client.get(self.continuing_form_url)
+
+        experience = ProfessionalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         form = response.context['form']
         self.assertEqual(form.fields['certificate'].disabled, True)
         self.assertIsInstance(form.fields['certificate'].widget, MultipleHiddenInput)
 
+        doctorate_admission = DoctorateAdmissionFactory(
+            candidate=experience.person,
+            submitted=True,
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        doctorate_admission.delete()
+
+        general_admission = GeneralEducationAdmissionFactory(
+            candidate=experience.person,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_continuing_submit_form(self):
         self.client.force_login(self.sic_manager_user)
 
+        experience = ProfessionalExperienceFactory(
+            person=self.other_continuing_admission.candidate,
+        )
+
+        url = resolve_url(
+            'admission:continuing-education:update:curriculum:non_educational',
+            uuid=self.other_continuing_admission.uuid,
+            experience_uuid=experience.uuid,
+        )
+
         response = self.client.post(
-            self.continuing_form_url,
+            url,
             {
                 'start_date_month': 1,
                 'start_date_year': 2020,
@@ -564,28 +622,28 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 'sector': ActivitySector.PRIVATE.name,
                 'institute_name': 'Institute',
                 'activity': 'Activity',
-                'certificate_0': 'certificate-token',
+                'certificate_0': [self.file_uuid],
             },
         )
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         # Check the experience
-        self.experience.refresh_from_db()
+        experience.refresh_from_db()
 
-        self.assertEqual(self.experience.start_date, datetime.date(2020, 1, 1))
-        self.assertEqual(self.experience.end_date, datetime.date(2020, 5, 31))
-        self.assertEqual(self.experience.type, ActivityType.INTERNSHIP.name)
-        self.assertEqual(self.experience.role, '')
-        self.assertEqual(self.experience.sector, '')
-        self.assertEqual(self.experience.institute_name, '')
-        self.assertEqual(self.experience.activity, '')
-        self.assertEqual(self.experience.certificate, [self.file_uuid])
+        self.assertEqual(experience.start_date, datetime.date(2020, 1, 1))
+        self.assertEqual(experience.end_date, datetime.date(2020, 5, 31))
+        self.assertEqual(experience.type, ActivityType.INTERNSHIP.name)
+        self.assertEqual(experience.role, '')
+        self.assertEqual(experience.sector, '')
+        self.assertEqual(experience.institute_name, '')
+        self.assertEqual(experience.activity, '')
+        self.assertEqual(experience.certificate, [])
 
         # Check the admission
-        self.continuing_admission.refresh_from_db()
-        self.assertEqual(self.continuing_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.continuing_admission.last_update_author, self.sic_manager_user.person)
+        self.other_continuing_admission.refresh_from_db()
+        self.assertEqual(self.other_continuing_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.other_continuing_admission.last_update_author, self.sic_manager_user.person)
 
     def test_doctorate_update_curriculum_is_allowed_for_fac_users(self):
         other_admission = DoctorateAdmissionFactory(

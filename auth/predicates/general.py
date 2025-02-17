@@ -47,7 +47,7 @@ from osis_role.errors import predicate_failed_msg
 @predicate(bind=True)
 @predicate_failed_msg(message=_('The proposition must be in draft form to realize this action.'))
 def in_progress(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status == ChoixStatutPropositionGenerale.EN_BROUILLON.name
+    return isinstance(obj, GeneralEducationAdmission) and obj.status == ChoixStatutPropositionGenerale.EN_BROUILLON.name
 
 
 @predicate(bind=True)

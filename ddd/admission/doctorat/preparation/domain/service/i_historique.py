@@ -31,7 +31,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
@@ -40,7 +40,7 @@ from osis_common.ddd import interface
 
 class IHistorique(interface.DomainService):
     @classmethod
-    def historiser_initiation(cls, proposition: Proposition):
+    def historiser_initiation(cls, proposition_identity: PropositionIdentity, matricule_auteur: str):
         raise NotImplementedError
 
     @classmethod
