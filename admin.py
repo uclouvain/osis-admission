@@ -104,9 +104,6 @@ from admission.models.working_list import (
     WorkingList,
 )
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
-from admission.tasks import (
-    injecter_signaletique_a_epc_task,
-)
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -848,19 +845,11 @@ class EPCInjectionAdmin(admin.ModelAdmin):
     }
     raw_id_fields = ['admission']
     actions = [
-        'reinjecter_la_signaletique_dans_epc',
         'reinjecter_la_demande_dans_epc',
     ]
 
     def errors_messages(self, obj):
         return obj.html_errors
-
-    @admin.action(description="Réinjecter la signalétique dans EPC")
-    def reinjecter_la_signaletique_dans_epc(self, request, queryset):
-        admissions_references = queryset.filter(
-            type=EPCInjectionType.SIGNALETIQUE.name,
-        ).values_list('admission__reference', flat=True)
-        injecter_signaletique_a_epc_task.run(admissions_references=list(admissions_references))
 
     @admin.action(description="Réinjecter la demande dans EPC")
     def reinjecter_la_demande_dans_epc(self, request, queryset):
