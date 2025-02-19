@@ -551,7 +551,7 @@ class InjectionEPCAdmission:
                 if admission_generale else None
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
-        } if admission_generale else {}
+        } if admission_generale else None
 
     @staticmethod
     def _get_adresses(adresses: QuerySet[PersonAddress]) -> List[Dict[str, str]]:
