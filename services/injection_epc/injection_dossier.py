@@ -295,7 +295,7 @@ class InjectionEPCAdmission:
                 admission=admission,
                 comptabilite=comptabilite,
                 admission_generale=admission_generale
-            ),
+            ) if admission_generale else None,
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc)
@@ -551,7 +551,7 @@ class InjectionEPCAdmission:
                 if admission_generale else None
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
-        } if admission_generale else None
+        }
 
     @staticmethod
     def _get_adresses(adresses: QuerySet[PersonAddress]) -> List[Dict[str, str]]:
