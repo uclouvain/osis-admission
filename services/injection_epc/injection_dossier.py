@@ -35,6 +35,7 @@ import pika
 from django.conf import settings
 from django.db import transaction
 from django.db.models import QuerySet, Exists, OuterRef
+from django.db.models.query_utils import Q
 from osis_history.models.history_entry import HistoryEntry
 from unidecode import unidecode
 
@@ -55,6 +56,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.historique import TAGS_APPROBATION_PROPOSITION
 from admission.infrastructure.admission.formation_generale.domain.service.historique import TAGS_AUTORISATION_SIC
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
@@ -265,7 +267,7 @@ class InjectionEPCAdmission:
         admission_iufc = getattr(admission, 'continuingeducationadmission', None)
         documents_specifiques = cls._recuperer_documents_specifiques(admission)
         auteur_autorisation_sic = HistoryEntry.objects.filter(
-            tags__contains=TAGS_AUTORISATION_SIC,
+            Q(tags__contains=TAGS_AUTORISATION_SIC) | Q(tags__contains=TAGS_APPROBATION_PROPOSITION),
             object_uuid=admission.uuid
         ).order_by('-created').first().author
         return {
@@ -649,7 +651,7 @@ class InjectionEPCAdmission:
                 if admission_generale else None
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
-        }
+        } if admission_generale else None
 
     @staticmethod
     def _get_adresses(adresses: QuerySet[PersonAddress]) -> List[Dict[str, str]]:
