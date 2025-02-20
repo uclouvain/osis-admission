@@ -37,7 +37,9 @@
      hx-push-url="false"
 >
   {% panel _("Proposition features") edit_link_button=edit_choix_formation_url %}
-    {% field_data _("Proposition type") admission.type|enum_display:'TypeDemande' %}
+    {% if not view.is_fac %}
+      {% field_data _("Proposition type") admission.type|enum_display:'TypeDemande' %}
+    {% endif %}
     {% field_data _("Academic year") admission.annee_calculee|get_short_academic_year %}
     {% translate "Course" context 'admission' as course_title %}
     {% field_data course_title admission.formation %}

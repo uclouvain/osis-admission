@@ -1445,33 +1445,3 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             self.message_bus.invoke(self.cmd)
 
         self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
-
-    def test_should_verification_renvoyer_erreur_si_titre_memoire_non_renseigne(self):
-        self.experience_academiques_complete.a_obtenu_diplome = True
-        self.experience_academiques_complete.titre_memoire = ''
-        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd)
-
-        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
-
-    def test_should_verification_renvoyer_erreur_si_note_memoire_non_renseigne(self):
-        self.experience_academiques_complete.a_obtenu_diplome = True
-        self.experience_academiques_complete.note_memoire = ''
-        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd)
-
-        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
-
-    def test_should_verification_renvoyer_erreur_si_resume_memoire_non_renseigne(self):
-        self.experience_academiques_complete.a_obtenu_diplome = True
-        self.experience_academiques_complete.resume_memoire = []
-        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd)
-
-        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)

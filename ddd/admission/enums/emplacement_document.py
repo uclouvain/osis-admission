@@ -100,7 +100,7 @@ class OngletsDemande(ChoiceEnum):
     CURRICULUM = _('Curriculum')
     LANGUES = _('Knowledge of languages')
     COMPTABILITE = _('Accounting')
-    PROJET = pgettext_lazy('tab', 'Research project')
+    PROJET = pgettext_lazy('tab', 'Research')
     COTUTELLE = _('Cotutelle')
     SUPERVISION = _('Supervision')
     INFORMATIONS_ADDITIONNELLES = _('Additional information')

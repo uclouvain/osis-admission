@@ -198,7 +198,9 @@ class BaseAdmissionQuerySet(models.QuerySet):
         return self.annotate(
             person_merge_proposal_noma=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
             existing_student_noma=models.Subquery(
-                Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
+                Student.objects.filter(
+                    person_id=OuterRef('candidate_id'),
+                ).values(
                     'registration_id'
                 )[:1]
             ),
@@ -238,18 +240,20 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 ),
                 Value('-'),
                 # Management entity acronym
-                Case(
-                    When(
-                        Q(training__education_group_type__name=TrainingType.PHD.name),
-                        then=F('sigle_entite_gestion'),
-                    ),
-                    default=Coalesce(
-                        NullIf(F('training_management_faculty'), Value('')),
-                        F('sigle_entite_gestion'),
-                    ),
-                )
-                if with_management_faculty
-                else F('sigle_entite_gestion'),
+                (
+                    Case(
+                        When(
+                            Q(training__education_group_type__name=TrainingType.PHD.name),
+                            then=F('sigle_entite_gestion'),
+                        ),
+                        default=Coalesce(
+                            NullIf(F('training_management_faculty'), Value('')),
+                            F('sigle_entite_gestion'),
+                        ),
+                    )
+                    if with_management_faculty
+                    else F('sigle_entite_gestion')
+                ),
                 # Academic year
                 Case(
                     # Before the submission, use the determined academic year if specified

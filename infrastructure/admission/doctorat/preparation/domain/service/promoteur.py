@@ -26,7 +26,7 @@
 from typing import List, Optional
 
 from django.contrib.postgres.search import SearchVector
-from django.db.models import F, Q
+from django.db.models import F, Q, Exists, OuterRef
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
@@ -43,7 +43,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from admission.models import SupervisionActor
 from admission.models.enums.actor_type import ActorType
-from base.auth.roles.tutor import Tutor
+from base.models.person import Person
+from base.models.student import Student
 
 
 class PromoteurTranslator(IPromoteurTranslator):
@@ -127,7 +128,13 @@ class PromoteurTranslator(IPromoteurTranslator):
 
     @classmethod
     def _get_queryset(cls, matricule):
-        return Tutor.objects.filter(
-            person__user_id__isnull=False,
-            person__global_id=matricule,
-        ).select_related("person")
+        return Person.objects.alias(
+            # Is the person a student?
+            is_student=Exists(Student.objects.filter(person=OuterRef('pk'))),
+        ).filter(
+            global_id=matricule,
+            # Remove unexistent users
+            user_id__isnull=False,
+            # Remove students
+            is_student=False,
+        )

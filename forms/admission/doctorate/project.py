@@ -60,7 +60,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
         widget=forms.Textarea(
             attrs={
                 'rows': 2,
-                'placeholder': _("Reasons for provisional admission."),
+                'placeholder': _("Reasons for pre-admission."),
             }
         ),
         required=False,
@@ -245,7 +245,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
         help_text=_("Indicate any completed or interrupted PhD studies in which you are no longer enrolled."),
     )
     institution = forms.CharField(
-        label=_("Institution in which the PhD has been realised / started."),
+        label=_("Institution in which the PhD thesis has been realised / started"),
         required=False,
         max_length=255,
     )

@@ -777,7 +777,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
-        self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctorale')
+        self.assertEqual(call_args_by_tab['project'].title, 'Recherche')
         self.assertEqual(call_args_by_tab['cotutelle'].title, 'Cotutelle')
         self.assertEqual(call_args_by_tab['supervision'].title, 'Supervision')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
@@ -2999,7 +2999,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[1].identifier, 'RESUME_MEMOIRE')
         self.assertEqual(attachments[1].label, DocumentsCurriculum['RESUME_MEMOIRE'])
         self.assertEqual(attachments[1].uuids, experience.resume_memoire)
-        self.assertTrue(attachments[1].required)
+        self.assertFalse(attachments[1].required)
         self.assertTrue(attachments[1].readonly)
 
         self.assertEqual(attachments[2].identifier, 'DIPLOME')

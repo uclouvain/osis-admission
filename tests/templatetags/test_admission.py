@@ -312,7 +312,7 @@ class AdmissionTabsTestCase(TestCase):
         result = current_subtabs(context)
         self.assertEqual(
             result['subtabs'],
-            TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap')],
+            TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap')],
         )
 
 

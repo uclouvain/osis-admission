@@ -151,10 +151,10 @@ doctorate_types_as_set = set(TrainingType.doctorate_types())
 continuing_education_types_as_set = set(TrainingType.continuing_education_types())
 
 ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE: Dict[str, str] = {
-    osis_type: CONTEXT_DOCTORATE
-    if osis_type in doctorate_types_as_set
-    else CONTEXT_CONTINUING
-    if osis_type in continuing_education_types_as_set
-    else CONTEXT_GENERAL
+    osis_type: (
+        CONTEXT_DOCTORATE
+        if osis_type in doctorate_types_as_set
+        else CONTEXT_CONTINUING if osis_type in continuing_education_types_as_set else CONTEXT_GENERAL
+    )
     for osis_type in AllTypes.get_names()
 }

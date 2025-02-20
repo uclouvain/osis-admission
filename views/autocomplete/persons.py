@@ -27,13 +27,12 @@ from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Exists, F, OuterRef, Q
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Concat
 
 from admission.auth.roles.candidate import Candidate
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherPromoteursQuery,
 )
-from admission.models import SupervisionActor
 from base.auth.roles.tutor import Tutor
 from base.models.person import Person
 
@@ -121,7 +120,13 @@ class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         if q:
             qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
         qs = (
-            qs.exclude(Q(user_id__isnull=True) | Q(global_id='') | Q(first_name='') | Q(last_name=''))
+            qs.exclude(
+                Q(user_id__isnull=True)
+                | Q(global_id='')
+                | Q(global_id__isnull=True)
+                | Q(first_name='')
+                | Q(last_name='')
+            )
             .exclude(Exists(Student.objects.filter(person=OuterRef('pk'))))
             .order_by('last_name', 'first_name')
             .values(
