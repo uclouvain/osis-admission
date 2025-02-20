@@ -32,7 +32,6 @@ from django.db.models import Q
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 
-from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixStatutPropositionDoctorale,
@@ -47,7 +46,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.infrastructure.admission.doctorat.preparation.read_view.repository.tableau_bord import (
+    TableauBordRepositoryAdmissionMixin,
+)
 from admission.infrastructure.utils import get_entities_with_descendants_ids
+from admission.models import DoctorateAdmission
 from admission.views import PaginatedList
 
 
@@ -74,6 +77,7 @@ class ListerDemandesService(IListerDemandesService):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
         fnrs_fria_fresh: Optional[bool] = None,
+        indicateur_tableau_bord: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
@@ -153,6 +157,14 @@ class ListerDemandesService(IListerDemandesService):
 
         if fnrs_fria_fresh:
             qs = qs.filter(is_fnrs_fria_fresh_csc_linked=fnrs_fria_fresh)
+
+        if indicateur_tableau_bord:
+            dashboard_filter = TableauBordRepositoryAdmissionMixin.ADMISSION_DJANGO_FILTER_BY_INDICATOR.get(
+                indicateur_tableau_bord,
+            )
+
+            if dashboard_filter:
+                qs = qs.filter(dashboard_filter)
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 

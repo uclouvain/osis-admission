@@ -749,7 +749,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
-        self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctoral')
+        self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctorale')
         self.assertEqual(call_args_by_tab['cotutelle'].title, 'Cotutelle')
         self.assertEqual(call_args_by_tab['supervision'].title, 'Supervision')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
