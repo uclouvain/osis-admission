@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import html
-from typing import Dict, List, Mapping, Optional, Union
+from typing import List, Optional, Dict, Union, Mapping, Iterable
 
 import phonenumbers
 from dal import forward
@@ -377,3 +377,18 @@ class AutoGrowTextareaWidget(forms.Textarea):
         css = {
             'all': ('admission/autogrow_textarea.css',),
         }
+
+
+class SelectWithDisabledOptions(forms.Select):
+    def __init__(self, enabled_options: Iterable[str], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.enabled_options = enabled_options
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        created_option = super().create_option(name, value, label, selected, index, subindex, attrs)
+
+        if value not in self.enabled_options:
+            created_option['attrs']['disabled'] = 'disabled'
+
+        return created_option
