@@ -46,22 +46,15 @@
       </div>
     {% endif %}
 
-    {% bootstrap_form comment_forms.decision_sic %}
+    {% htmx_comment_form comment_forms.decision_sic %}
 
     {# Dispensation part #}
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' %}
       {% include 'admission/general_education/includes/checklist/sic_decision_dispensation_needed_form.html' %}
-      {% bootstrap_form comment_forms.decision_sic__derogation %}
-    {% elif original_admission.dispensation_need != 'NON_CONCERNE' %}
+      {% htmx_comment_form comment_forms.decision_sic__derogation %}
+    {% elif original_admission.dispensation_needed != 'NON_CONCERNE' %}
       {% field_data _('Dispensation needed') original_admission.get_dispensation_needed_display %}
-      <dl>
-        <dt>{% trans 'Comment about dispensation' %}</dt>
-        <dd>
-          <div class="form-group">
-            <textarea class="form-control" disabled>{{ comment_forms.decision_sic__derogation.fields.comment.initial|default_if_none:"" }}</textarea>
-          </div>
-        </dd>
-      </dl>
+      {% htmx_comment_form comment_forms.decision_sic__derogation disabled=True %}
     {% endif %}
 
     {% if view.is_general %}
