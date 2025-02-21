@@ -1528,9 +1528,6 @@ msgstr "Commentaire"
 msgid "Comment about dispensation"
 msgstr "Commentaire sur la dérogation"
 
-msgid "Comment about financability dispensation"
-msgstr "Commentaire sur la dérogation à la financabilité"
-
 msgid "Comment about the authentication"
 msgstr "Commentaire sur l'authentification"
 

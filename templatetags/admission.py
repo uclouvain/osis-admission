@@ -468,14 +468,13 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
 
         # Add icon when folder in quarantine
         if parent_tab == Tab('person') and getattr(permission_obj, 'candidate_id', None):
-            demande_est_en_quarantaine = PersonMergeProposal.objects.filter(
-                original_person_id=permission_obj.candidate_id,
-            ).filter(
-                Q(
-                    Q(status__in=PersonMergeStatus.quarantine_statuses()) |
-                    ~Q(validation__valid=True)
+            demande_est_en_quarantaine = (
+                PersonMergeProposal.objects.filter(
+                    original_person_id=permission_obj.candidate_id,
                 )
-            ).exists()
+                .filter(Q(Q(status__in=PersonMergeStatus.quarantine_statuses()) | ~Q(validation__valid=True)))
+                .exists()
+            )
             if demande_est_en_quarantaine:
                 parent_tab.icon_after = 'fas fa-warning text-warning'
 
@@ -1064,6 +1063,7 @@ def render_display_field_name(field_name: str, context: str = None) -> str:
     msg = field_name.replace('_', ' ').capitalize()
     return pgettext(context, msg) if context else _(msg)
 
+
 @register.filter
 def to_niss_format(s):
     return f"{s[:2]}.{s[2:4]}.{s[4:6]}-{s[6:9]}.{s[9:]}"
@@ -1590,3 +1590,23 @@ def edit_external_member_form(context, membre):
         prefix=f"member-{membre.uuid}",
         initial=initial,
     )
+
+
+@register.inclusion_tag('admission/includes/comment_form.html')
+def htmx_comment_form(form, disabled=None):
+    """
+    Return the HTML form for a comment form whose content will be preserved after an htmx request.
+    The input will be visually disabled if necessary (if specified by the param or if the form field is disabled).
+    :param form: The comment form
+    :param disabled: If True, visually disabled the comment input.
+    """
+    if disabled is None:
+        disabled = form.fields['comment'].disabled
+
+    # As the input content is preserved, we must be sure the input will be editable if necessary
+    form.fields['comment'].disabled = False
+
+    return {
+        'form': form,
+        'disabled': disabled,
+    }
