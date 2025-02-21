@@ -1716,3 +1716,23 @@ def edit_external_member_form(context, membre):
         prefix=f"member-{membre.uuid}",
         initial=initial,
     )
+
+
+@register.inclusion_tag('admission/includes/comment_form.html')
+def htmx_comment_form(form, disabled=None):
+    """
+    Return the HTML form for a comment form whose content will be preserved after an htmx request.
+    The input will be visually disabled if necessary (if specified by the param or if the form field is disabled).
+    :param form: The comment form
+    :param disabled: If True, visually disabled the comment input.
+    """
+    if disabled is None:
+        disabled = form.fields['comment'].disabled
+
+    # As the input content is preserved, we must be sure the input will be editable if necessary
+    form.fields['comment'].disabled = False
+
+    return {
+        'form': form,
+        'disabled': disabled,
+    }

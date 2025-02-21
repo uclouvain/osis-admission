@@ -118,7 +118,7 @@ class CommentForm(forms.Form):
         widget=AutoGrowTextareaWidget(
             attrs={
                 'rows': 2,
-                'hx-trigger': 'keyup changed delay:2s',
+                'hx-trigger': 'keyup delay:2s',
                 'hx-target': 'closest .form-group',
                 'hx-swap': 'outerHTML',
             }
