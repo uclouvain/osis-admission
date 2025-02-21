@@ -68,7 +68,7 @@
     {% display proposition.nom_institut_these ' ' '(' proposition.sigle_institut_these ')' as institut_these %}
   {% endif %}
   {% field_data _("Research institute") institut_these|default_if_none:'' %}
-  {% field_data _("Thesis location in UCLouvain") proposition.lieu_these %}
+  {% field_data _("Thesis location") proposition.lieu_these %}
 
   {% field_data _("PhD research project") proposition.documents_projet %}
   {% field_data _("PhD proposal") proposition.proposition_programme_doctoral %}

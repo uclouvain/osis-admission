@@ -76,7 +76,7 @@
     {% display admission.nom_institut_these ' ' '(' admission.sigle_institut_these ')' as institut_these %}
   {% endif %}
   {% field_data _("Research institute") institut_these|default_if_none:'' %}
-  {% field_data _("Thesis location in UCLouvain") admission.lieu_these %}
+  {% field_data _("Thesis location") admission.lieu_these %}
 
   {% field_data _("PhD research project") admission.documents_projet %}
   {% field_data _("PhD proposal") admission.proposition_programme_doctoral %}

@@ -294,7 +294,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             project_abstract='Project abstract',
             thesis_language=self.language,
             thesis_institute=EntityVersionFactory(),
-            thesis_location='Thesis location in UCLouvain',
+            thesis_location='Thesis location',
             phd_alread_started=True,
             phd_alread_started_institute='PHD already started institute',
             work_start_date=datetime.date(2022, 1, 1),

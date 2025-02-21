@@ -159,11 +159,11 @@ class DoctorateAdmissionProjectForm(forms.Form):
     )
 
     lieu_these = forms.CharField(
-        label=_("Thesis location in UCLouvain"),
+        label=_("Thesis location"),
         required=False,
         help_text=_(
             "If known, indicate the name of the laboratory, clinical department or research centre where the thesis "
-            "will be carried out"
+            "will be carried out at UCLouvain"
         ),
         max_length=255,
     )

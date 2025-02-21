@@ -66,6 +66,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['training'] = self.proposition.formation
+        kwargs['hide_admission_type'] = self.is_fac
         return kwargs
 
     def get_initial(self):

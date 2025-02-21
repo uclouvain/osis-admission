@@ -201,7 +201,7 @@ class DoctorateAdmission(BaseAdmission):
     )
     thesis_location = models.CharField(
         max_length=255,
-        verbose_name=_("Thesis location in UCLouvain"),
+        verbose_name=_("Thesis location"),
         default='',
         blank=True,
     )

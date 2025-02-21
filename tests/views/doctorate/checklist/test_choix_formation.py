@@ -27,6 +27,7 @@ import datetime
 
 import freezegun
 from django.conf import settings
+from django.forms.widgets import Select, HiddenInput
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils.translation import gettext
@@ -165,6 +166,11 @@ class ChoixFormationFormViewTestCase(TestCase):
             acronym=SIGLE_SCIENCES,
         )
 
+        cls.other_training_without_proximity_commission = DoctorateFactory(
+            management_entity__version__parent=main_entity,
+            acronym='ABCDEF',
+        )
+
         cls.sic_manager_user = SicManagementRoleFactory(entity=main_entity).person.user
 
         cls.program_manager_user = ProgramManagerRoleFactory(
@@ -197,8 +203,15 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
 
-        proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
-        self.assertCountEqual(proximity_commission_choices, ChoixCommissionProximiteCDEouCLSM.choices())
+        admission_type_field = response.context['form'].fields['type_demande']
+        self.assertFalse(admission_type_field.disabled)
+        self.assertIsInstance(admission_type_field.widget, Select)
+
+        proximity_commission_field = response.context['form'].fields['commission_proximite']
+        self.assertTrue(proximity_commission_field.required)
+        self.assertFalse(proximity_commission_field.disabled)
+        self.assertIsInstance(proximity_commission_field.widget, Select)
+        self.assertCountEqual(proximity_commission_field.choices, ChoixCommissionProximiteCDEouCLSM.choices())
 
         self.admission.training = self.other_cdss_training
         self.admission.save(update_fields=['training'])
@@ -233,6 +246,24 @@ class ChoixFormationFormViewTestCase(TestCase):
         proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
         self.assertCountEqual(proximity_commission_choices, ChoixSousDomaineSciences.choices())
 
+        admission_type_field = response.context['form'].fields['type_demande']
+        self.assertFalse(admission_type_field.disabled)
+        self.assertIsInstance(admission_type_field.widget, Select)
+
+        self.admission.training = self.other_training_without_proximity_commission
+        self.admission.save(update_fields=['training'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+
+        proximity_commission_field = response.context['form'].fields['commission_proximite']
+        self.assertFalse(proximity_commission_field.required)
+        self.assertTrue(proximity_commission_field.disabled)
+        self.assertIsInstance(proximity_commission_field.widget, HiddenInput)
+        self.assertCountEqual(proximity_commission_field.choices, [])
+
     def test_post_htmx(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -249,6 +280,22 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(self.admission.training, self.other_cde_training)
         self.assertEqual(self.admission.type_demande, TypeDemande.INSCRIPTION.name)
         self.assertEqual(self.admission.proximity_commission, ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
+
+    def test_get_with_program_manager(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.save(update_fields=['status'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['form']
+
+        self.assertTrue(form.fields['type_demande'].required)
+        self.assertTrue(form.fields['type_demande'].disabled)
+        self.assertIsInstance(form.fields['type_demande'].widget, HiddenInput)
 
     def test_post_with_program_manager(self):
         self.client.force_login(user=self.program_manager_user)
@@ -269,7 +316,7 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(self.admission.last_update_author, self.program_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.training, self.other_cde_training)
-        self.assertEqual(self.admission.type_demande, TypeDemande.INSCRIPTION.name)
+        self.assertEqual(self.admission.type_demande, TypeDemande.ADMISSION.name)  # Read-only for the CDD managers
         self.assertEqual(self.admission.proximity_commission, ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
 
     def test_get_without_htmx(self):

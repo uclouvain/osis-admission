@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='thesis_location',
-            field=models.CharField(blank=True, default='', max_length=255, verbose_name='Thesis location in UCLouvain'),
+            field=models.CharField(blank=True, default='', max_length=255, verbose_name='Thesis location'),
         ),
     ]

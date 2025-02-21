@@ -88,7 +88,7 @@ class ChoixFormationForm(forms.Form):
             return ChoixSousDomaineSciences.choices()
         return []
 
-    def __init__(self, training, *args, **kwargs):
+    def __init__(self, training, hide_admission_type=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         today = datetime.date.today()
@@ -103,5 +103,10 @@ class ChoixFormationForm(forms.Form):
         self.fields['commission_proximite'].choices = self.get_proximity_commission_choices(training)
 
         if len(self.fields['commission_proximite'].choices) == 0:
+            self.fields['commission_proximite'].required = False
             self.fields['commission_proximite'].disabled = True
             self.fields['commission_proximite'].widget = forms.HiddenInput()
+
+        if hide_admission_type:
+            self.fields['type_demande'].disabled = True
+            self.fields['type_demande'].widget = forms.HiddenInput()

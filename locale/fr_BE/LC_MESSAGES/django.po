@@ -3781,10 +3781,10 @@ msgstr ""
 
 msgid ""
 "If known, indicate the name of the laboratory, clinical department or "
-"research centre where the thesis will be carried out"
+"research centre where the thesis will be carried out at UCLouvain"
 msgstr ""
 "Si connu, indiquez ici le nom du laboratoire, du service clinique ou du "
-"centre de recherche où sera réalisée la thèse"
+"centre de recherche où sera réalisée la thèse à l'UCLouvain"
 
 msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
@@ -7203,8 +7203,8 @@ msgstr "L'institut de la thèse est obligatoire."
 msgid "Thesis language"
 msgstr "Langue de rédaction de la thèse"
 
-msgid "Thesis location in UCLouvain"
-msgstr "Lieu de la thèse à l'UCLouvain"
+msgid "Thesis location"
+msgstr "Lieu de la thèse"
 
 msgid "Thesis project title"
 msgstr "Titre du projet de thèse"
