@@ -54,7 +54,6 @@ from admission.ddd.admission.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
 from admission.ddd.admission.enums import (
-    ChoixAffiliationSport,
     Onglets,
     TypeItemFormulaire,
 )
@@ -82,22 +81,16 @@ from admission.templatetags.admission import (
     admission_training_type,
     admission_url,
     authentication_css_class,
-    candidate_language,
-    checklist_experience_action_links_context,
-    cotutelle_institute,
     current_subtabs,
     detail_tab_path_from_update,
     display,
     document_component,
     experience_details_template,
-    experience_valuation_url,
     field_data,
-    format_ways_to_find_out_about_the_course,
     formatted_language,
     formatted_reference,
     get_active_parent,
     get_country_name,
-    get_document_details_url,
     get_first_truthy_value,
     get_image_file_url,
     get_item,
@@ -110,9 +103,14 @@ from admission.templatetags.admission import (
     need_to_display_specific_questions,
     part_of_dict,
     sortable_header_div,
-    sport_affiliation_value,
     strip,
     update_tab_path_from_detail,
+    candidate_language,
+    experience_valuation_url,
+    checklist_experience_action_links_context,
+    format_ways_to_find_out_about_the_course,
+    get_document_details_url,
+    cotutelle_institute,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
@@ -1279,46 +1277,6 @@ class DisplayTagTestCase(TestCase):
                 experience=experience,
             ),
             '',
-        )
-
-    def test_sport_affiliation_value(self):
-        self.assertEqual(
-            sport_affiliation_value(None, None),
-            '',
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(None, 'Louvain-la-Neuve'),
-            '',
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, None),
-            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, 'Bruxelles Woluwe'),
-            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
-        )
-
-        for campus in [
-            None,
-            '',
-            'Bruxelles Saint-Gilles',
-            'Bruxelles Woluwe',
-            'Louvain-la-Neuve',
-            'Mons',
-            'Tournai',
-        ]:
-            self.assertEqual(
-                sport_affiliation_value(ChoixAffiliationSport.NON.name, campus),
-                ChoixAffiliationSport.NON.value,
-            )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.NON.name, 'Bruxelles Saint-Louis'),
-            _('No (access to sports facilities on the Saint-Louis campus is free)'),
         )
 
 

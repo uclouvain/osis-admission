@@ -4214,9 +4214,6 @@ msgid ""
 "No 'ValidationError' exception must be triggered with the the provided data."
 msgstr ""
 
-msgid "No (access to sports facilities on the Saint-Louis campus is free)"
-msgstr ""
-
 msgid "No English studies"
 msgstr ""
 
@@ -7100,6 +7097,9 @@ msgstr "Yes, only in Mons (€12)"
 
 msgid "Yes, only in Saint-Gilles (E12)"
 msgstr "Yes, only in Saint-Gilles (€12)"
+
+msgid "Yes, only in Saint-Louis (free)"
+msgstr ""
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"
