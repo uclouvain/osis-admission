@@ -56,6 +56,7 @@ class IListerDemandesService(interface.DomainService):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
         fnrs_fria_fresh: Optional[bool] = None,
+        indicateur_tableau_bord: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
