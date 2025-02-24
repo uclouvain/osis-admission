@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
 )
@@ -56,35 +56,44 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     DroitsInscriptionMontant,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.checklist import Checklist
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.checklist import (
+    Checklist,
+)
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.enums import (
-    ChoixTypeCompteBancaire,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -287,6 +296,7 @@ class _PropositionFactory(factory.Factory):
             checklist_initiale=factory.SubFactory(StatutsChecklistDoctoraleFactory),
             checklist_actuelle=factory.SubFactory(StatutsChecklistDoctoraleFactory),
             soumise_le=factory.Faker('past_datetime'),
+            derniere_demande_signature_avant_soumission_le=factory.Faker('past_datetime'),
         )
         est_approuvee_par_fac = factory.Trait(
             certificat_approbation_cdd=['uuid-certificat_approbation_cdd'],
@@ -362,11 +372,13 @@ class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPM
 class PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-project')
     projet = projet_non_rempli
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPMinimaleSansFinancementFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-financement')
     financement = financement_non_rempli
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
@@ -375,24 +387,28 @@ class PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(PropositionAdmission
 
 class PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-sans-promoteur-externe')
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-avec-promoteur-externe')
+    matricule_candidat = '0123456789'
 
 
 class PropositionPreAdmissionSC3DPMinimaleFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-pre-admission')
     type_admission = ChoixTypeAdmission.PRE_ADMISSION
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPAvecMembresFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre')
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre-cotutelle')
-    matricule_candidat = 'candidat'
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPAvecMembresInvitesFactory(PropositionAdmissionSC3DPMinimaleFactory):
@@ -401,6 +417,7 @@ class PropositionAdmissionSC3DPAvecMembresInvitesFactory(PropositionAdmissionSC3
 
 class PropositionAdmissionSC3DPSansPromoteurFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-promoteur')
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPSansPromoteurReferenceFactory(PropositionAdmissionSC3DPMinimaleFactory):
@@ -420,7 +437,7 @@ class PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(
     PropositionAdmissionSC3DPMinimaleFactory
 ):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-refus-membre-deja-approuve')
-    matricule_candidat = 'candidat'
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(PropositionAdmissionSC3DPMinimaleFactory):

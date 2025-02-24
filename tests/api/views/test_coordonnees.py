@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,10 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -200,6 +202,38 @@ class CoordonneesTestCase(APITestCase):
         self.client.force_authenticate(candidate.user)
         response = self.client.put(self.agnostic_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_coordonnees_with_candidate_depending_on_admission_statuses(self):
+        self.client.force_authenticate(self.candidate_user)
+
+        valid_statuses_on_get = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+        }
+        valid_statuses_on_update = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        }
+
+        other_admission = DoctorateAdmissionFactory(
+            candidate=self.candidate_user.person,
+        )
+        other_admission_url = resolve_url('coordonnees', uuid=other_admission.uuid)
+
+        for current_status in ChoixStatutPropositionDoctorale:
+            other_admission.status = current_status.name
+            other_admission.save(update_fields=['status'])
+
+            response = self.client.get(other_admission_url)
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK if current_status.name in valid_statuses_on_get else status.HTTP_403_FORBIDDEN,
+            )
+
+            response = self.client.put(other_admission_url, self.updated_data)
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK if current_status.name in valid_statuses_on_update else status.HTTP_403_FORBIDDEN,
+            )
 
     def test_coordonnees_update_candidate_with_submitted_proposition(self):
         self.client.force_authenticate(self.candidate_user)

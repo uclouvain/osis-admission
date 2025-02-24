@@ -494,6 +494,10 @@ msgstr "Informations complémentaires"
 msgid "Admission"
 msgstr "Admission"
 
+msgctxt "dashboard-category"
+msgid "Admission"
+msgstr "Admission"
+
 msgid "Admission applications"
 msgstr "Demandes d'admission"
 
@@ -1011,6 +1015,14 @@ msgstr "Autorisation"
 
 msgid "Authorization to validate"
 msgstr "Autorisation à valider"
+
+msgctxt "dashboard-indicator admission"
+msgid "Authorized SIC"
+msgstr "Autorisé SIC"
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Authorized SIC"
+msgstr "Autorisé SIC"
 
 msgid "Available information (Digit)"
 msgstr "Information connue (Digit)"
@@ -1993,6 +2005,9 @@ msgstr "Dispense VCRC"
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr "Droits majorés demandés"
 
+msgid "Dashboard indicator"
+msgstr "Indicateur du tableau de bord"
+
 msgid "Data protection"
 msgstr "Protection des données"
 
@@ -2007,6 +2022,10 @@ msgstr "Date d’envoi de la demande au comité d’accompagnement"
 
 msgid "Date the application was sent to the faculty"
 msgstr "Date de transmission du dossier en faculté"
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Deadline 3 months"
+msgstr "Échéance 3 mois"
 
 msgid "Deadline for documents to be requested immediately"
 msgstr "Échéance pour les documents à fournir immédiatement"
@@ -4165,6 +4184,9 @@ msgstr "Nom / Prénom / Identifiant global"
 msgid "Last registration id"
 msgstr "Dernier NOMA connu"
 
+msgid "Last signature request before submission at"
+msgstr "Dernière demande de signature avant soumission envoyée à"
+
 msgid "Last update author"
 msgstr "Auteur de la dernière mise à jour"
 
@@ -4908,6 +4930,14 @@ msgstr "Non libre"
 msgid "Not fundable"
 msgstr "Non-finançable"
 
+msgctxt "dashboard-indicator admission"
+msgid "Not in order of registration"
+msgstr "Pas en ordre d’inscription"
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Not in order of registration"
+msgstr "Pas en ordre d’inscription"
+
 msgid "Not specified"
 msgstr "Non précisée"
 
@@ -5256,10 +5286,10 @@ msgid "PhD proposal"
 msgstr "Projet de formation doctorale"
 
 msgid "PhD research experience"
-msgstr "Expérience de recherche doctoral"
+msgstr "Expérience de recherche doctorale"
 
 msgid "PhD research project"
-msgstr "Projet de recherche doctoral"
+msgstr "Projet de recherche doctorale"
 
 msgid "PhD training"
 msgstr "Formation doctorale"
@@ -5445,6 +5475,10 @@ msgstr "Boîte"
 msgid "Postcode"
 msgstr "Code postal"
 
+msgid "Pre-admission"
+msgstr "Pré-admission"
+
+msgctxt "dashboard-category"
 msgid "Pre-admission"
 msgstr "Pré-admission"
 
@@ -5895,7 +5929,7 @@ msgstr "Projet de recherche"
 
 msgctxt "tab"
 msgid "Research project"
-msgstr "Projet de recherche doctoral"
+msgstr "Projet de recherche doctorale"
 
 msgid "Research scholarship"
 msgstr "Bourse de recherche"
@@ -6425,6 +6459,14 @@ msgstr "Soumettre ma décision"
 msgctxt "admission"
 msgid "Submitted"
 msgstr "Soumis pour publication"
+
+msgctxt "dashboard-indicator admission"
+msgid "Submitted dossiers"
+msgstr "Dossiers soumis"
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Submitted dossiers"
+msgstr "Dossiers soumis"
 
 msgid "Submitted from"
 msgstr "Soumise à partir du"
@@ -8358,7 +8400,7 @@ msgid ""
 "\"No\" if you don't have information yet."
 msgstr ""
 "Vos informations de cotutelle pourront être complétées ultérieurement; "
-"veuillez indiquer \\\"non\\\" si vous ne disposez pas encore des informations"
+"veuillez indiquer \"non\" si vous ne disposez pas encore des informations"
 
 msgid "Your participation in the event"
 msgstr "Votre participation à l'événement"

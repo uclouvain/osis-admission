@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,6 +31,9 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -94,6 +97,76 @@ class PersonTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response = self.client.put(self.admission_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
+
+    def test_person_with_candidate_depending_on_admission_statuses(self):
+        self.client.force_authenticate(self.candidate_user)
+
+        valid_statuses_on_get = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+        }
+        valid_statuses_on_update = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        }
+
+        other_admission = DoctorateAdmissionFactory(
+            candidate=self.candidate_user.person,
+        )
+        other_admission_url = resolve_url('person', uuid=other_admission.uuid)
+
+        for current_status in ChoixStatutPropositionDoctorale:
+            other_admission.status = current_status.name
+            other_admission.save(update_fields=['status'])
+
+            response = self.client.get(other_admission_url)
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK if current_status.name in valid_statuses_on_get else status.HTTP_403_FORBIDDEN,
+            )
+
+            response = self.client.put(other_admission_url, self.updated_data)
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK if current_status.name in valid_statuses_on_update else status.HTTP_403_FORBIDDEN,
+            )
+
+    def test_person_with_candidate_depending_on_other_doctorate_admissions(self):
+        self.client.force_authenticate(self.candidate_user)
+
+        other_admission = DoctorateAdmissionFactory(
+            candidate=self.candidate_user.person,
+            status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        )
+        other_admission_url = resolve_url('person', uuid=other_admission.uuid)
+
+        # Other admission - in draft
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.put(self.admission_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.put(self.agnostic_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Other admission - signature request sent
+        other_admission.status = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+        other_admission.save(update_fields=['status'])
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.put(other_admission_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put(self.agnostic_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_person_get_candidate(self):
         self.client.force_authenticate(self.candidate_user_without_admission)

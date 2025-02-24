@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,46 +30,55 @@ from unittest import TestCase, mock
 
 import freezegun
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    ExperiencesAcademiquesNonCompleteesException,
-    AnneesCurriculumNonSpecifieesException,
-)
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.doctorat.preparation.commands import (
-    VerifierCurriculumApresSoumissionQuery,
-)
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    AnneeExperienceAcademique,
-    ExperienceAcademique,
-    ProfilCandidatInMemoryTranslator,
-    ExperienceNonAcademique,
+from admission.ddd.admission.doctorat.preparation.commands import (
+    VerifierCurriculumApresSoumissionQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AnneesCurriculumNonSpecifieesException,
+    ExperiencesAcademiquesNonCompleteesException,
+)
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    AnneeExperienceAcademique,
+    ExperienceAcademique,
+    ExperienceNonAcademique,
+    ProfilCandidatInMemoryTranslator,
+)
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
+    EvaluationSystem,
+    Grade,
     Result,
     TranscriptType,
-    Grade,
-    EvaluationSystem,
-    ActivityType,
-    ActivitySector,
 )
 from osis_profile.tests.factories.curriculum import (
-    ExperienceParcoursInterneDTOFactory,
     AnneeExperienceParcoursInterneDTOFactory,
+    ExperienceParcoursInterneDTOFactory,
 )
 
 
@@ -220,6 +229,9 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ),
         )
         self.proposition_doctorale.soumise_le = datetime.datetime(2014, 11, 1)
+        self.proposition_doctorale.derniere_demande_signature_avant_soumission_le = (
+            self.proposition_doctorale.soumise_le
+        )
 
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
         self.etudes_secondaires[self.proposition_doctorale.matricule_candidat] = EtudesSecondairesAdmissionDTO(
@@ -274,9 +286,9 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-    def test_should_retourner_erreur_en_fonction_date_soumission_demande(self):
-        # Date de soumission après la fin de la période à vérifier
-        self.proposition_doctorale.soumise_le = datetime.datetime(2015, 8, 15)
+    def test_should_retourner_erreur_en_fonction_date_demande_signature(self):
+        # Date de demande après la fin de la période à vérifier
+        self.proposition_doctorale.derniere_demande_signature_avant_soumission_le = datetime.datetime(2015, 8, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -292,8 +304,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-        # Date de soumission avant la fin de la période à vérifier
-        self.proposition_doctorale.soumise_le = datetime.datetime(2015, 2, 15)
+        # Date de demande avant la fin de la période à vérifier
+        self.proposition_doctorale.derniere_demande_signature_avant_soumission_le = datetime.datetime(2015, 2, 15)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -309,8 +321,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-        # Date de soumission au mois d'octobre -> le dernier mois de septembre est à valoriser (différent de général)
-        self.proposition_doctorale.soumise_le = datetime.datetime(2014, 10, 31)
+        # Date de demande au mois d'octobre -> le dernier mois de septembre est à valoriser (différent de général)
+        self.proposition_doctorale.derniere_demande_signature_avant_soumission_le = datetime.datetime(2014, 10, 31)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -326,7 +338,9 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-        self.proposition_doctorale.soumise_le = datetime.datetime(2014, 11, 1)
+        self.proposition_doctorale.derniere_demande_signature_avant_soumission_le = (
+            self.proposition_doctorale.soumise_le
+        )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)

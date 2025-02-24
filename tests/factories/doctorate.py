@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,17 +29,17 @@ from datetime import datetime
 
 import factory
 
-from admission.models import DoctorateAdmission
-from admission.models.doctorate import DoctorateAdmissionPrerequisiteCourses
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
     ChoixStatutPropositionDoctorale,
     ChoixTypeFinancement,
-    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     OngletsChecklist,
 )
+from admission.models import DoctorateAdmission
+from admission.models.doctorate import DoctorateAdmissionPrerequisiteCourses
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference
@@ -53,8 +53,13 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFullFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
-from program_management.ddd.domain.program_tree_version import NOT_A_TRANSITION, STANDARD
-from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
+from program_management.ddd.domain.program_tree_version import (
+    NOT_A_TRANSITION,
+    STANDARD,
+)
+from program_management.tests.factories.education_group_version import (
+    EducationGroupVersionFactory,
+)
 
 
 class DoctorateFactory(EducationGroupYearFactory):
@@ -145,6 +150,9 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
         submitted = factory.Trait(
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
             submitted_at=factory.LazyAttribute(lambda obj: datetime(obj.determined_academic_year.year, 1, 1)),
+            last_signature_request_before_submission_at=factory.LazyAttribute(
+                lambda obj: datetime(obj.determined_academic_year.year, 1, 1),
+            ),
             submitted_profile={
                 "coordinates": {
                     "city": "Louvain-la-Neuve",

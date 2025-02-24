@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,16 +24,23 @@
 #
 # ##############################################################################
 from django.core.exceptions import ValidationError
-from django.test import override_settings
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import CandidateFactory
-from reference.tests.factories.language import LanguageFactory, FrenchLanguageFactory, EnglishLanguageFactory
+from reference.tests.factories.language import (
+    EnglishLanguageFactory,
+    FrenchLanguageFactory,
+    LanguageFactory,
+)
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -91,6 +98,45 @@ class LanguagesKnowledgeTestCase(APITestCase):
     def create_languages_knowledge_with_admission(self, data):
         self.client.force_authenticate(self.admission.candidate.user)
         return self.client.post(self.admission_url, data)
+
+    def test_languages_with_candidate_depending_on_admission_statuses(self):
+        other_admission = DoctorateAdmissionFactory()
+
+        self.client.force_authenticate(other_admission.candidate.user)
+
+        valid_statuses_on_get = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+        }
+        valid_statuses_on_update = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        }
+
+        other_admission_url = resolve_url('languages-knowledge', uuid=other_admission.uuid)
+
+        for current_status in ChoixStatutPropositionDoctorale:
+            other_admission.status = current_status.name
+            other_admission.save(update_fields=['status'])
+
+            response = self.client.get(other_admission_url)
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK if current_status.name in valid_statuses_on_get else status.HTTP_403_FORBIDDEN,
+            )
+
+            response = self.client.post(
+                other_admission_url,
+                data=[self.french_knowledge_data, self.english_knowledge_data],
+            )
+
+            self.assertEqual(
+                response.status_code,
+                (
+                    status.HTTP_201_CREATED
+                    if current_status.name in valid_statuses_on_update
+                    else status.HTTP_403_FORBIDDEN
+                ),
+            )
 
     def test_languages_knowledge_get(self):
         self.create_languages_knowledge_with_admission([self.french_knowledge_data, self.english_knowledge_data])

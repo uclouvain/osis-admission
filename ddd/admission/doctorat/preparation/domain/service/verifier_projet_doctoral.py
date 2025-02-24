@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,10 +26,18 @@
 from functools import partial
 from typing import List
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
+    GroupeDeSupervision,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_cotutelle import (
     CotutellePossedePromoteurExterne,
 )
@@ -37,7 +45,13 @@ from admission.ddd.admission.doctorat.preparation.domain.service.verifier_promot
     GroupeDeSupervisionPossedeUnPromoteurMinimum,
 )
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.verifier_questions_specifiques import (
+    VerifierQuestionsSpecifiques,
+)
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
@@ -50,7 +64,10 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
         groupe_de_supervision: GroupeDeSupervision,
         questions_specifiques: List[QuestionSpecifique],
         promoteur_translator: IPromoteurTranslator,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_courante: int,
     ) -> None:
+        profil_candidat_service = ProfilCandidat()
         if proposition_candidat.type_admission == ChoixTypeAdmission.PRE_ADMISSION:
             fonctions_personnalisees = [
                 # Vérification différente de la composition du groupe de supervision
@@ -66,8 +83,41 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
             ]
 
         execute_functions_and_aggregate_exceptions(
+            partial(
+                profil_candidat_service.verifier_identification,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+            ),
+            partial(
+                profil_candidat_service.verifier_coordonnees,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+            ),
+            partial(
+                profil_candidat_service.verifier_langues_connues,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+            ),
+            partial(
+                profil_candidat_service.verifier_curriculum,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+                annee_courante=annee_courante,
+                curriculum_pdf=proposition_candidat.curriculum,
+                uuid_proposition=proposition_candidat.entity_id.uuid,
+            ),
             proposition_candidat.verifier_projet_doctoral,
             partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
+                proposition=proposition_candidat,
+                questions_specifiques=questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
+                proposition=proposition_candidat,
+                questions_specifiques=questions_specifiques,
+            ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_choix_formation,
                 proposition_candidat,

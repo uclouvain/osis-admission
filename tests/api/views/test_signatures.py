@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from datetime import datetime
 from unittest.mock import patch
 
+import freezegun
 from django.shortcuts import resolve_url
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
@@ -33,19 +34,21 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeFinancement,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
+    ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
+    DetailProjetNonCompleteException,
     MembreCAManquantException,
+    PromoteurDeReferenceManquantException,
     PromoteurManquantException,
     SignataireNonTrouveException,
-    PromoteurDeReferenceManquantException,
-    DetailProjetNonCompleteException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
+from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from admission.tests.factories.supervision import (
     CaMemberFactory,
@@ -53,9 +56,11 @@ from admission.tests.factories.supervision import (
     PromoterFactory,
     _ProcessFactory,
 )
+from osis_profile.models import EducationalExperience
 from reference.tests.factories.language import FrenchLanguageFactory
 
 
+@freezegun.freeze_time('2020-01-01')
 class RequestSignaturesApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -64,6 +69,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         patched.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.language_fr = FrenchLanguageFactory()
         cls.admission = DoctorateAdmissionFactory(
+            candidate=CompletePersonFactory(),
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
@@ -110,16 +116,43 @@ class RequestSignaturesApiTestCase(APITestCase):
 
     def test_request_signatures_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
+
         promoter = PromoterFactory(is_reference_promoter=True)
         CaMemberFactory(process=promoter.process)
         CaMemberFactory(process=promoter.process)
+
         self.admission.supervision_group = promoter.actor_ptr.process
         self.admission.save()
 
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.admission.refresh_from_db()
+
+        # Admission changes
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name)
+        self.assertEqual(self.admission.last_signature_request_before_submission_at, datetime.now())
+
+        # CV changes
+        educational_experiences = self.candidate.educationalexperience_set.all().values_list('uuid', flat=True)
+        professional_experiences = self.candidate.professionalexperience_set.all().values_list('uuid', flat=True)
+
+        valuated_educational_experiences = self.admission.educational_valuated_experiences.all().values_list(
+            'uuid',
+            flat=True,
+        )
+        valuated_professional_experiences = self.admission.professional_valuated_experiences.all().values_list(
+            'uuid',
+            flat=True,
+        )
+
+        self.assertCountEqual(educational_experiences, valuated_educational_experiences)
+        self.assertCountEqual(professional_experiences, valuated_professional_experiences)
+
+        # Notifications
         self.assertEqual(EmailNotification.objects.count(), 4)
 
+        # History
         history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
         self.assertIsNotNone(history_entry)
         self.assertCountEqual(history_entry.tags, ['proposition', 'supervision', 'status-changed'])
