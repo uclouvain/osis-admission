@@ -31,7 +31,6 @@ from typing import Dict
 import pika
 from django.conf import settings
 from django.db import transaction
-from osis_common.queue.queue_utils import get_pika_connexion_parameters
 
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.models import Accounting, EPCInjection
@@ -45,6 +44,7 @@ from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.models.person_merge_proposal import PersonMergeProposal
 from osis_common.queue.queue_sender import send_message, logger
+from osis_common.queue.queue_utils import get_pika_connexion_parameters
 from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 SPORT_TOUT_CAMPUS = [
@@ -79,8 +79,8 @@ class InjectionEPCSignaletique:
                 'payload': donnees,
                 'status': statut,
                 'last_attempt_date': None,
-                "osis_stacktrace": stacktrace if e else ""
-            }
+                "osis_stacktrace": stacktrace if e else "",
+            },
         )
 
     @classmethod
@@ -148,7 +148,11 @@ class InjectionEPCSignaletique:
                 if comptabilite
                 else False
             ),
-            'carte_sport_st_louis': comptabilite.sport_affiliation in SPORT_TOUT_CAMPUS if comptabilite else False,
+            'carte_sport_st_louis': (
+                comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_LOUIS.name] + SPORT_TOUT_CAMPUS
+                if comptabilite
+                else False
+            ),
             'carte_sport_st_gilles': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_GILLES.name] + SPORT_TOUT_CAMPUS
                 if comptabilite
