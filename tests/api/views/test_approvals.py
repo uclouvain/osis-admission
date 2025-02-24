@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,17 +28,30 @@ from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from osis_history.models import HistoryEntry
+from osis_signature.enums import SignatureState
+from osis_signature.utils import get_signing_token
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
+)
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalPromoterFactory,
+    PromoterFactory,
+)
 from base.tests.factories.user import UserFactory
-from osis_signature.enums import SignatureState
-from osis_signature.utils import get_signing_token
 
 
 class ApprovalMixin:
@@ -146,9 +159,31 @@ class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
 
     def test_supervision_refuse_proposition_api_invited_promoter(self):
         self.client.force_authenticate(user=self.promoter.person.user)
+
+        valuated_educational_experience = EducationalExperienceFactory(person=self.admission.candidate)
+        EducationalExperienceYearFactory(educational_experience=valuated_educational_experience)
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.admission,
+            educationalexperience=valuated_educational_experience,
+        )
+
+        professional_experience = ProfessionalExperienceFactory(person=self.admission.candidate)
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.admission,
+            professionalexperience=professional_experience,
+        )
+
         response = self.client.put(self.url, {"uuid_membre": str(self.promoter.uuid), **self.refused_data})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
+
+        self.admission.refresh_from_db()
+
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
+
+        self.assertFalse(self.admission.educational_valuated_experiences.exists())
+        self.assertFalse(self.admission.professional_valuated_experiences.exists())
 
         history_entry = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).first()
         self.assertIsNotNone(history_entry)
@@ -275,8 +310,8 @@ class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
     def test_approve_proposition_api_by_pdf(self, confirm_multiple_upload, confirm_remote_upload, get_remote_metadata):
         get_remote_metadata.return_value = {"name": "test.pdf", "size": 1}
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
         )
         self.client.force_authenticate(user=self.admission.candidate.user)
         response = self.client.post(self.url, {"uuid_membre": str(self.promoter.uuid), **self.approved_data})

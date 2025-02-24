@@ -35,9 +35,9 @@ import pika
 from django.conf import settings
 from django.db import transaction
 from django.db.models import QuerySet, Exists, OuterRef
+from django.db.models.query_utils import Q
 from osis_history.models.history_entry import HistoryEntry
 from unidecode import unidecode
-from osis_common.queue.queue_utils import get_pika_connexion_parameters
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -56,6 +56,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.historique import TAGS_APPROBATION_PROPOSITION
 from admission.infrastructure.admission.formation_generale.domain.service.historique import TAGS_AUTORISATION_SIC
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
@@ -83,6 +84,7 @@ from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.queue.queue_sender import send_message, logger
+from osis_common.queue.queue_utils import get_pika_connexion_parameters
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,
@@ -267,7 +269,7 @@ class InjectionEPCAdmission:
         admission_iufc = getattr(admission, 'continuingeducationadmission', None)
         documents_specifiques = cls._recuperer_documents_specifiques(admission)
         auteur_autorisation_sic = HistoryEntry.objects.filter(
-            tags__contains=TAGS_AUTORISATION_SIC,
+            Q(tags__contains=TAGS_AUTORISATION_SIC) | Q(tags__contains=TAGS_APPROBATION_PROPOSITION),
             object_uuid=admission.uuid
         ).order_by('-created').first().author
         return {
@@ -309,13 +311,13 @@ class InjectionEPCAdmission:
             uuid__in=admission.specific_question_answers.keys(), type=TypeItemFormulaire.DOCUMENT.name
         )
         for form_item in form_items:
-            label = form_item.internal_label.lower()
+            label = form_item.internal_label
             if cls.__contient_uuid_valide(label):
                 document = CategorizedFreeDocument.objects.filter(long_label_fr=form_item.title['fr-be']).first()
-                label = document.short_label_fr.lower() if document else "Label du document non trouve"
+                label = document.short_label_fr if document else form_item.title['fr-be']
             documents_specifiques.append(
                 {
-                    "type": re.sub(r'[\W_]+', '_', unidecode(label)).strip('_'),
+                    "type": re.sub(r'[\W_]+', '_', unidecode(label.upper())).strip('_'),
                     "documents": admission.specific_question_answers[str(form_item.uuid)],
                 }
             )
@@ -549,7 +551,7 @@ class InjectionEPCAdmission:
                 if admission_generale else None
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
-        }
+        } if admission_generale else None
 
     @staticmethod
     def _get_adresses(adresses: QuerySet[PersonAddress]) -> List[Dict[str, str]]:

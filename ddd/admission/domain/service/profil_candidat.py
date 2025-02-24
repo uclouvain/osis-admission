@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,37 +30,53 @@ from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curric
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
+    CurriculumPostSoumissionValidatorList,
     CurriculumValidatorList,
     LanguesConnuesValidatorList,
-    CurriculumPostSoumissionValidatorList,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
-from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.domain.model._candidat_signaletique import (
+    CandidatSignaletique,
+)
 from admission.ddd.admission.domain.model.formation import Formation
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.verifier_curriculum import (
+    VerifierCurriculum,
+)
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
     IdentificationValidatorList,
     QuarantaineValidatorList,
 )
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
     FormationContinueCurriculumValidatorList,
 )
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
-    FormationGeneraleCurriculumValidatorList,
-    FormationGeneraleComptabiliteValidatorList,
-    EtudesSecondairesValidatorList,
     BachelierEtudesSecondairesValidatorList,
-    FormationGeneraleInformationsComplementairesValidatorList,
+    EtudesSecondairesValidatorList,
+    FormationGeneraleComptabiliteValidatorList,
     FormationGeneraleCurriculumPostSoumissionValidatorList,
+    FormationGeneraleCurriculumValidatorList,
+    FormationGeneraleInformationsComplementairesValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
+    GetCurrentAcademicYear,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
 from osis_common.ddd import interface
 
 
@@ -104,24 +120,28 @@ class ProfilCandidat(interface.DomainService):
         CoordonneesValidatorList(
             adresse_email_privee=coordonnees.adresse_email_privee,
             numero_telephone_mobile=coordonnees.numero_mobile,
-            domicile_legal=CandidatAdresse(
-                code_postal=coordonnees.domicile_legal.code_postal,
-                ville=coordonnees.domicile_legal.ville,
-                pays=coordonnees.domicile_legal.pays,
-                rue=coordonnees.domicile_legal.rue,
-                numero=coordonnees.domicile_legal.numero_rue,
-            )
-            if coordonnees.domicile_legal
-            else None,
-            adresse_correspondance=CandidatAdresse(
-                code_postal=coordonnees.adresse_correspondance.code_postal,
-                ville=coordonnees.adresse_correspondance.ville,
-                pays=coordonnees.adresse_correspondance.pays,
-                rue=coordonnees.adresse_correspondance.rue,
-                numero=coordonnees.adresse_correspondance.numero_rue,
-            )
-            if coordonnees.adresse_correspondance
-            else None,
+            domicile_legal=(
+                CandidatAdresse(
+                    code_postal=coordonnees.domicile_legal.code_postal,
+                    ville=coordonnees.domicile_legal.ville,
+                    pays=coordonnees.domicile_legal.pays,
+                    rue=coordonnees.domicile_legal.rue,
+                    numero=coordonnees.domicile_legal.numero_rue,
+                )
+                if coordonnees.domicile_legal
+                else None
+            ),
+            adresse_correspondance=(
+                CandidatAdresse(
+                    code_postal=coordonnees.adresse_correspondance.code_postal,
+                    ville=coordonnees.adresse_correspondance.ville,
+                    pays=coordonnees.adresse_correspondance.pays,
+                    rue=coordonnees.adresse_correspondance.rue,
+                    numero=coordonnees.adresse_correspondance.numero_rue,
+                )
+                if coordonnees.adresse_correspondance
+                else None
+            ),
         ).validate()
 
     @classmethod
@@ -277,7 +297,8 @@ class ProfilCandidat(interface.DomainService):
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
-        date_soumission = proposition.soumise_le.date()
+        # Le CV est soumis lors de l'envoi de la demande des signatures
+        date_soumission = proposition.derniere_demande_signature_avant_soumission_le.date()
 
         annee_soumission = (
             GetCurrentAcademicYear().get_starting_academic_year(date_soumission, academic_year_repository).year

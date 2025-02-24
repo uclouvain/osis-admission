@@ -84,12 +84,12 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ApprouverParCDDValidatorList,
     ApprouverParSicAValiderValidatorList,
     CompletionPropositionValidatorList,
+    DemanderCandidatModificationCaValidatorList,
     GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
     ModifierStatutChecklistParcoursAnterieurValidatorList,
     ModifierTypeAdmissionValidatorList,
     PropositionProjetDoctoralValidatorList,
     RedonnerLaMainAuCandidatValidatorList,
-    DemanderCandidatModificationCaValidatorList,
     RefuserParCDDValidatorList,
     SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
     SoumettreCAValidatorList,
@@ -196,6 +196,7 @@ class Proposition(interface.RootEntity):
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
     soumise_le: Optional[datetime.datetime] = None
+    derniere_demande_signature_avant_soumission_le: Optional[datetime.datetime] = None
 
     profil_soumis_candidat: ProfilCandidat = None
 
@@ -599,6 +600,7 @@ class Proposition(interface.RootEntity):
             self.statut = ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE
         else:
             self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
+            self.derniere_demande_signature_avant_soumission_le = datetime.datetime.now()
 
     def deverrouiller_projet_doctoral(self):
         self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON

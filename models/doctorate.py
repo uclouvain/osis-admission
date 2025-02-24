@@ -39,7 +39,7 @@ from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
 from admission.admission_utils.copy_documents import copy_documents
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -622,6 +622,11 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
         null=True,
         verbose_name=_('Foreign access title equivalence effective date'),
+    )
+    last_signature_request_before_submission_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=_('Last signature request before submission at'),
     )
 
     def update_financability_computed_rule(self, author: 'Person'):

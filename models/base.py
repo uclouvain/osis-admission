@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,23 +33,45 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models, IntegrityError
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count, IntegerField
+from django.db import IntegrityError, models
+from django.db.models import (
+    BooleanField,
+    Case,
+    CharField,
+    Count,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
-from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace, JSONObject
+from django.db.models.functions import (
+    Coalesce,
+    Concat,
+    JSONObject,
+    Mod,
+    NullIf,
+    Replace,
+)
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
+from osis_document.contrib import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (
     ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES,
+    CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE,
     CONTEXT_GENERAL,
-    CONTEXT_CONTINUING,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
@@ -65,15 +87,18 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
     ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE,
+    AnneeInscriptionFormationTranslator,
 )
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.models.form_item import ConfigurableModelFormItemField
 from admission.models.functions import ToChar
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
-from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
+from base.models.entity_version import (
+    PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS,
+    EntityVersion,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
@@ -85,7 +110,6 @@ from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
-from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -198,7 +222,9 @@ class BaseAdmissionQuerySet(models.QuerySet):
         return self.annotate(
             person_merge_proposal_noma=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
             existing_student_noma=models.Subquery(
-                Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
+                Student.objects.filter(
+                    person_id=OuterRef('candidate_id'),
+                ).values(
                     'registration_id'
                 )[:1]
             ),
@@ -238,18 +264,20 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 ),
                 Value('-'),
                 # Management entity acronym
-                Case(
-                    When(
-                        Q(training__education_group_type__name=TrainingType.PHD.name),
-                        then=F('sigle_entite_gestion'),
-                    ),
-                    default=Coalesce(
-                        NullIf(F('training_management_faculty'), Value('')),
-                        F('sigle_entite_gestion'),
-                    ),
-                )
-                if with_management_faculty
-                else F('sigle_entite_gestion'),
+                (
+                    Case(
+                        When(
+                            Q(training__education_group_type__name=TrainingType.PHD.name),
+                            then=F('sigle_entite_gestion'),
+                        ),
+                        default=Coalesce(
+                            NullIf(F('training_management_faculty'), Value('')),
+                            F('sigle_entite_gestion'),
+                        ),
+                    )
+                    if with_management_faculty
+                    else F('sigle_entite_gestion')
+                ),
                 # Academic year
                 Case(
                     # Before the submission, use the determined academic year if specified
@@ -271,7 +299,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
         return self.exclude(
             Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
             | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
-            | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
+            | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_PEU_AVANCEE),
         )
 
     def annotate_ordered_enum(self, field_name, ordering_field_name, enum_class):

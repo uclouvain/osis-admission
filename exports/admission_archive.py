@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,16 +28,15 @@ import uuid
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from osis_document.api.utils import confirm_remote_upload, launch_post_processing
+from osis_document.enums import DocumentExpirationPolicy, PostProcessingType
 
-from admission.models import AdmissionTask, DoctorateAdmission, SupervisionActor
-from admission.models.doctorate import PropositionProxy
 from admission.exceptions import MergePDFException
 from admission.exports.utils import admission_generate_pdf
+from admission.models import AdmissionTask, DoctorateAdmission, SupervisionActor
+from admission.models.doctorate import PropositionProxy
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
-from osis_document.api.utils import confirm_remote_upload, launch_post_processing
-from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
-from osis_history.models.history_entry import HistoryEntry
 from osis_profile.models import EducationalExperience
 
 
@@ -54,15 +53,6 @@ def admission_pdf_archive(task_uuid, language=None):
             label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
         ).select_related('country')
     }
-    signature_request_history_entry = (
-        HistoryEntry.objects.filter(
-            tags=['proposition', 'supervision', 'status-changed'],
-            object_uuid=admission.uuid,
-        )
-        .order_by('-created')
-        .only('created')
-        .first()
-    )
     experiences = EducationalExperience.objects.filter(person=admission.candidate).annotate(
         credits=models.Sum('educationalexperienceyear__acquired_credit_number'),
         first_year=models.Min('educationalexperienceyear__academic_year__year'),
@@ -78,7 +68,7 @@ def admission_pdf_archive(task_uuid, language=None):
                 'contact_address': addresses.get(PersonAddressType.CONTACT.name),
                 'residential_address': addresses.get(PersonAddressType.RESIDENTIAL.name),
                 "noma": admission.student_registration_id,
-                "date_envoi_supervision": signature_request_history_entry and signature_request_history_entry.created,
+                "date_envoi_supervision": admission.last_signature_request_before_submission_at,
                 'allocated_time_label': _("Time allocated for thesis (in %)"),
                 'actors': SupervisionActor.objects.filter(process=admission.supervision_group).order_by('-type'),
                 'experiences': experiences,

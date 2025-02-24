@@ -78,6 +78,27 @@ class GestionnaireInMemoryRepository(IGestionnaireRepository):
             campus='Louvain-la-Neuve',
         ),
         FormationFactory(
+            intitule='Master MC',
+            entity_id__sigle='MASTER-MC',
+            entity_id__annee=2022,
+            type=TrainingType.MASTER_MC,
+            campus='Louvain-la-Neuve',
+        ),
+        FormationFactory(
+            intitule='Master M4',
+            entity_id__sigle='MASTER-M4',
+            entity_id__annee=2022,
+            type=TrainingType.MASTER_M4,
+            campus='Louvain-la-Neuve',
+        ),
+        FormationFactory(
+            intitule='Master M5',
+            entity_id__sigle='MASTER-M5',
+            entity_id__annee=2022,
+            type=TrainingType.MASTER_M5,
+            campus='Louvain-la-Neuve',
+        ),
+        FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2022,
