@@ -1443,6 +1443,12 @@ msgstr ""
 msgid "Competent diplomatic post"
 msgstr ""
 
+<<<<<<< HEAD
+=======
+msgid "Complementary training"
+msgstr ""
+
+>>>>>>> 4af74aa75 ([OS-1346] Curriculum > the fwb credits fields are not annualized anymore)
 msgid "Complementary training proposition"
 msgstr ""
 

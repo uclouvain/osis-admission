@@ -1573,6 +1573,9 @@ msgstr "Communication avec votre école secondaire"
 msgid "Competent diplomatic post"
 msgstr "Poste diplomatique compétent"
 
+msgid "Complementary training"
+msgstr "Formation complémentaire"
+
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
 
