@@ -108,10 +108,6 @@ class EducationalExperienceYearSerializer(serializers.ModelSerializer):
             'id',
             'educational_experience',
             'external_id',
-            'with_block_1',
-            'with_complement',
-            'fwb_registered_credit_number',
-            'fwb_acquired_credit_number',
             'reduction',
             'is_102_change_of_course',
         ]
@@ -162,6 +158,10 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         exclude = [
             'id',
             'fwb_equivalent_program',
+            'with_complement',
+            'complement_registered_credit_number',
+            'complement_acquired_credit_number',
+            'block_1_acquired_credit_number',
         ]
         read_only_fields = ['external_id']
 

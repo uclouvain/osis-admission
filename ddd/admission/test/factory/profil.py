@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,12 +31,22 @@ import factory
 from attr import dataclass
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.dtos import (
+    AdressePersonnelleDTO,
+    CoordonneesDTO,
+    IdentificationDTO,
+)
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
 from base.models.enums.civil_state import CivilState
 from base.tests.factories.person import generate_global_id
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationEtudesSecondairesDTO
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    ValorisationEtudesSecondairesDTO,
+)
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     ExperienceAcademiqueDTO,
@@ -136,10 +146,6 @@ class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
     traduction_releve_notes = []
     credits_inscrits = None
     credits_acquis = None
-    avec_bloc_1 = None
-    avec_complement = None
-    credits_inscrits_communaute_fr = None
-    credits_acquis_communaute_fr = None
     allegement = ''
     est_reorientation_102 = None
 
@@ -178,6 +184,10 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
     nom_formation_equivalente_communaute_fr = ''
     cycle_formation = ''
     est_autre_formation = None
+    credits_acquis_bloc_1 = None
+    avec_complements = None
+    credits_inscrits_complements = None
+    credits_acquis_complements = None
 
 
 class ExperienceNonAcademiqueDTOFactory(factory.Factory):
