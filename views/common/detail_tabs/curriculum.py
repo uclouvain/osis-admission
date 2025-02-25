@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,14 +31,21 @@ from admission.ddd.admission.commands import (
     RecupererExperienceAcademiqueQuery,
     RecupererExperienceNonAcademiqueQuery,
 )
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+)
 from admission.utils import get_experience_urls
 from admission.views.common.mixins import LoadDossierViewMixin
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
-from osis_profile.views.edit_experience_academique import SYSTEMES_EVALUATION_AVEC_CREDITS
+from osis_profile.views.edit_experience_academique import (
+    SYSTEMES_EVALUATION_AVEC_CREDITS,
+)
 
 __all__ = [
     'CurriculumEducationalExperienceDetailView',
@@ -81,6 +88,7 @@ class CurriculumEducationalExperienceDetailView(LoadDossierViewMixin, TemplateVi
         )
         context['evaluation_system_with_credits'] = experience.systeme_evaluation in SYSTEMES_EVALUATION_AVEC_CREDITS
         context['title'] = _('Academic course')
+        context['checklist_display'] = True
 
         experience_urls = get_experience_urls(
             user=self.request.user,

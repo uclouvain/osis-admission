@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,29 +35,48 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
+)
+from admission.models import DoctorateAdmission
+from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import AdmissionEducationalValuatedExperiences
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.models.general_education import GeneralEducationAdmission
 from admission.models.continuing_education import ContinuingEducationAdmission
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
-    AdmissionEducationalValuatedExperiencesFactory,
 )
-from admission.tests.factories.faculty_decision import FreeAdditionalApprovalConditionFactory
+from admission.tests.factories.faculty_decision import (
+    FreeAdditionalApprovalConditionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -67,11 +86,11 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Reduction
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -156,14 +175,12 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[0],
-            with_block_1=True,
             reduction='',
             is_102_change_of_course=True,
         )
         self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[2],
-            with_complement=True,
             reduction=Reduction.A150.name,
         )
         # Targeted urls

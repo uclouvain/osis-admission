@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,16 +33,23 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.constants import CONTEXT_CONTINUING
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.models import ContinuingEducationAdmission
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
@@ -56,7 +63,13 @@ from osis_profile.forms.experience_academique import (
     EDUCATIONAL_EXPERIENCE_YEAR_FIELDS_BY_CONTEXT,
 )
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, Reduction, Grade
+from osis_profile.models.enums.curriculum import (
+    EvaluationSystem,
+    Grade,
+    Reduction,
+    Result,
+    TranscriptType,
+)
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -146,6 +159,10 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             dissertation_title='The new title',
             dissertation_score='A',
             dissertation_summary=[self.files_uuids['dissertation_summary']],
+            block_1_acquired_credit_number=30,
+            with_complement=True,
+            complement_registered_credit_number=40,
+            complement_acquired_credit_number=39,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -155,10 +172,6 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             acquired_credit_number=9,
             transcript=[],
             transcript_translation=[],
-            with_block_1=True,
-            with_complement=True,
-            fwb_registered_credit_number=20,
-            fwb_acquired_credit_number=19,
             reduction=Reduction.A150.name,
             is_102_change_of_course=True,
         )
@@ -170,10 +183,6 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             acquired_credit_number=29,
             transcript=[],
             transcript_translation=[],
-            with_block_1=False,
-            with_complement=False,
-            fwb_registered_credit_number=40,
-            fwb_acquired_credit_number=39,
             reduction=Reduction.A150.name,
             is_102_change_of_course=False,
         )
@@ -357,6 +366,10 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.dissertation_title, '')
         self.assertEqual(experience.dissertation_score, '')
         self.assertEqual(experience.dissertation_summary, [])
+        self.assertEqual(experience.block_1_acquired_credit_number, None)
+        self.assertEqual(experience.with_complement, None)
+        self.assertEqual(experience.complement_registered_credit_number, None)
+        self.assertEqual(experience.complement_acquired_credit_number, None)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 
@@ -367,10 +380,6 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(years[0].acquired_credit_number, None)
         self.assertEqual(years[0].transcript, [])
         self.assertEqual(years[0].transcript_translation, [])
-        self.assertEqual(years[0].with_block_1, None)
-        self.assertEqual(years[0].with_complement, None)
-        self.assertEqual(years[0].fwb_registered_credit_number, None)
-        self.assertEqual(years[0].fwb_acquired_credit_number, None)
         self.assertEqual(years[0].reduction, '')
         self.assertEqual(years[0].is_102_change_of_course, None)
 
@@ -380,10 +389,6 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(years[1].acquired_credit_number, None)
         self.assertEqual(years[1].transcript, [])
         self.assertEqual(years[1].transcript_translation, [])
-        self.assertEqual(years[1].with_block_1, None)
-        self.assertEqual(years[1].with_complement, None)
-        self.assertEqual(years[1].fwb_registered_credit_number, None)
-        self.assertEqual(years[1].fwb_acquired_credit_number, None)
         self.assertEqual(years[1].reduction, '')
         self.assertEqual(years[1].is_102_change_of_course, None)
 
@@ -464,6 +469,10 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.dissertation_title, 'The new title')
         self.assertEqual(experience.dissertation_score, 'A')
         self.assertEqual(experience.dissertation_summary, [self.files_uuids['dissertation_summary']])
+        self.assertEqual(experience.block_1_acquired_credit_number, None)
+        self.assertEqual(experience.with_complement, None)
+        self.assertEqual(experience.complement_registered_credit_number, None)
+        self.assertEqual(experience.complement_acquired_credit_number, None)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 
@@ -474,11 +483,6 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(years[0].acquired_credit_number, 29)
         self.assertEqual(years[0].transcript, [])
         self.assertEqual(years[0].transcript_translation, [])
-
-        self.assertEqual(years[0].with_block_1, None)
-        self.assertEqual(years[0].with_complement, None)
-        self.assertEqual(years[0].fwb_registered_credit_number, None)
-        self.assertEqual(years[0].fwb_acquired_credit_number, None)
         self.assertEqual(years[0].reduction, Reduction.A150.name)
         self.assertEqual(years[0].is_102_change_of_course, None)
 
@@ -488,9 +492,5 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(years[1].acquired_credit_number, None)
         self.assertEqual(years[1].transcript, [])
         self.assertEqual(years[1].transcript_translation, [])
-        self.assertEqual(years[1].with_block_1, None)
-        self.assertEqual(years[1].with_complement, None)
-        self.assertEqual(years[1].fwb_registered_credit_number, None)
-        self.assertEqual(years[1].fwb_acquired_credit_number, None)
         self.assertEqual(years[1].reduction, '')
         self.assertEqual(years[1].is_102_change_of_course, None)
