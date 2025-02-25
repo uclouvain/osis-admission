@@ -90,9 +90,6 @@ msgstr "(il y a %(minutes)s)"
 msgid ", on"
 msgstr ", le"
 
-msgid "102 change of course"
-msgstr "Réorientation 102"
-
 msgid "12"
 msgstr "12"
 
@@ -364,6 +361,12 @@ msgstr "Comptabilité"
 
 msgid "Achieved additional training"
 msgstr "Formation complémentaire réalisée"
+
+msgid "Acquired bloc 1 credits total number"
+msgstr "Nombre total de crédits de bloc 1 acquis"
+
+msgid "Acquired complements credits total number"
+msgstr "Nombre total de crédits de compléments acquis"
 
 msgid "Acquired credit number"
 msgstr "Crédits acquis"
@@ -1107,9 +1110,6 @@ msgstr "Le numéro de rue de l'adresse de facturation"
 msgid "Billing address type"
 msgstr "Le type de l'adresse de facturation"
 
-msgid "Block 1"
-msgstr "Bloc 1"
-
 msgid "Box"
 msgstr "Boîte"
 
@@ -1425,6 +1425,9 @@ msgstr ""
 "iufc/participants-de-nationalite-hue.html\">https://uclouvain.be/fr/etudier/"
 "iufc/participants-de-nationalite-hue.html</a>."
 
+msgid "Cessation for 102 change of course"
+msgstr "Cessation pour réorientation 102"
+
 msgid "Change of course"
 msgstr "Réorientation"
 
@@ -1575,14 +1578,14 @@ msgstr "Communication avec votre école secondaire"
 msgid "Competent diplomatic post"
 msgstr "Poste diplomatique compétent"
 
-msgid "Complement"
-msgstr "Complément"
-
 msgid "Complementary training"
 msgstr "Formation complémentaire"
 
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
+
+msgid "Complements credits total number"
+msgstr "Nombre total de crédits de compléments"
 
 msgctxt "equivalence_status"
 msgid "Completed"
@@ -2916,12 +2919,6 @@ msgstr "FRESH"
 
 msgid "FRIA"
 msgstr "FRIA"
-
-msgid "FWB - Credits earned"
-msgstr "FWB - Crédits acquis"
-
-msgid "FWB - Registered credits"
-msgstr "FWB - Crédits inscrits"
 
 msgid "FWB Cotutelle"
 msgstr "Cotutelle FWB"
@@ -7807,6 +7804,9 @@ msgstr ""
 
 msgid "Weight"
 msgstr "Poids"
+
+msgid "Were there any prerequisite courses?"
+msgstr "Y a-t-il eu des compléments de formation ?"
 
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr "Quel diplôme avez-vous obtenu (ou obtiendrez-vous) ?"

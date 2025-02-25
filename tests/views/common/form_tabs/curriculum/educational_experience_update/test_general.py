@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,24 +35,34 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.base import AdmissionEducationalValuatedExperiences
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
-    AdmissionEducationalValuatedExperiencesFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -66,12 +76,17 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, Reduction
+from osis_profile.models.enums.curriculum import (
+    EvaluationSystem,
+    Reduction,
+    Result,
+    TranscriptType,
+)
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -139,18 +154,20 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             institute_name='University of Louvain',
             institute_address='Rue de Louvain, 1000 Bruxelles',
             expected_graduation_date=datetime.date(2024, 1, 1),
+            block_1_acquired_credit_number=40,
+            with_complement=True,
+            complement_registered_credit_number=30,
+            complement_acquired_credit_number=29,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[0],
-            with_block_1=True,
             reduction='',
             is_102_change_of_course=True,
         )
         self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[2],
-            with_complement=True,
             reduction=Reduction.A150.name,
         )
 
@@ -345,6 +362,26 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         # Dissertation summary
         self.assertEqual(base_form['dissertation_summary'].value(), self.experience.dissertation_summary)
 
+        # Block 1 field
+        self.assertEqual(
+            base_form['block_1_acquired_credit_number'].value(),
+            self.experience.block_1_acquired_credit_number,
+        )
+
+        # With complements fields
+        self.assertEqual(
+            base_form['with_complement'].value(),
+            self.experience.with_complement,
+        )
+        self.assertEqual(
+            base_form['complement_registered_credit_number'].value(),
+            self.experience.complement_registered_credit_number,
+        )
+        self.assertEqual(
+            base_form['complement_acquired_credit_number'].value(),
+            self.experience.complement_acquired_credit_number,
+        )
+
         # Check disabled fields
         for field in base_form.fields:
             if field in {
@@ -414,38 +451,6 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(
             first_year_form['transcript_translation'].value(),
             self.first_experience_year.transcript_translation,
-        )
-
-        # With block 1
-        self.assertEqual(third_year_form['with_block_1'].value(), self.second_experience_year.with_block_1)
-        self.assertEqual(second_year_form['with_block_1'].value(), None)
-        self.assertEqual(first_year_form['with_block_1'].value(), self.first_experience_year.with_block_1)
-
-        # With complement
-        self.assertEqual(third_year_form['with_complement'].value(), self.second_experience_year.with_complement)
-        self.assertEqual(second_year_form['with_complement'].value(), None)
-        self.assertEqual(first_year_form['with_complement'].value(), self.first_experience_year.with_complement)
-
-        # Fwb registered credit number
-        self.assertEqual(
-            third_year_form['fwb_registered_credit_number'].value(),
-            self.second_experience_year.fwb_registered_credit_number,
-        )
-        self.assertEqual(second_year_form['fwb_registered_credit_number'].value(), None)
-        self.assertEqual(
-            first_year_form['fwb_registered_credit_number'].value(),
-            self.first_experience_year.fwb_registered_credit_number,
-        )
-
-        # Fwb acquired credit number
-        self.assertEqual(
-            third_year_form['fwb_acquired_credit_number'].value(),
-            self.second_experience_year.fwb_acquired_credit_number,
-        )
-        self.assertEqual(second_year_form['fwb_acquired_credit_number'].value(), None)
-        self.assertEqual(
-            first_year_form['fwb_acquired_credit_number'].value(),
-            self.first_experience_year.fwb_acquired_credit_number,
         )
 
         # With reduction
@@ -1266,14 +1271,14 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             'base_form-institute': self.experience.institute.pk,
             'base_form-program': self.first_cycle_diploma.pk,
             'base_form-fwb_equivalent_program': self.experience.program.pk,
+            'base_form-block_1_acquired_credit_number': 50,
+            'base_form-with_complement': True,
+            'base_form-complement_registered_credit_number': 10,
+            'base_form-complement_acquired_credit_number': 9,
             'year_formset-TOTAL_FORMS': 1,
             'year_formset-INITIAL_FORMS': 1,
             'year_formset-2020-academic_year': 2020,
             'year_formset-2020-is_enrolled': True,
-            'year_formset-2020-with_block_1': True,
-            'year_formset-2020-with_complement': True,
-            'year_formset-2020-fwb_registered_credit_number': 10,
-            'year_formset-2020-fwb_acquired_credit_number': 10,
             'year_formset-2020-is_102_change_of_course': True,
         }
 
@@ -1288,13 +1293,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
         # No chosen institute -> no fwb data
@@ -1308,13 +1315,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
         # Obtained diploma -> no fwb data
@@ -1328,33 +1337,16 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
-
-        # No block 1 -> no fwb credits
-        copy_data = default_data.copy()
-        copy_data.pop('year_formset-2020-with_block_1')
-        response = self.client.post(
-            self.form_url,
-            data=copy_data,
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        year_formset = response.context['year_formset']
-        first_form = year_formset.forms[0]
-
-        self.assertEqual(first_form.cleaned_data['with_block_1'], False)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], True)
 
         # With block 1 -> fwb credits
         response = self.client.post(
@@ -1364,13 +1356,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], 50)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], True)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], 10)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], 10)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], True)
 
         # With first cycle equivalent program -> fwb credits
@@ -1386,13 +1380,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], 50)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], True)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], 10)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], 10)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], True)
 
     def test_submit_fwb_master_data_if_necessary(self):
@@ -1406,14 +1402,14 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             'base_form-institute': self.experience.institute.pk,
             'base_form-program': self.second_cycle_diploma.pk,
             'base_form-fwb_equivalent_program': self.second_cycle_diploma.pk,
+            'base_form-block_1_acquired_credit_number': 50,
+            'base_form-with_complement': True,
+            'base_form-complement_registered_credit_number': 10,
+            'base_form-complement_acquired_credit_number': 9,
             'year_formset-TOTAL_FORMS': 1,
             'year_formset-INITIAL_FORMS': 1,
             'year_formset-2020-academic_year': 2020,
             'year_formset-2020-is_enrolled': True,
-            'year_formset-2020-with_block_1': True,
-            'year_formset-2020-with_complement': True,
-            'year_formset-2020-fwb_registered_credit_number': 10,
-            'year_formset-2020-fwb_acquired_credit_number': 10,
             'year_formset-2020-is_102_change_of_course': True,
         }
 
@@ -1428,13 +1424,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
         # No chosen institute -> no fwb data
@@ -1448,13 +1446,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
         # Obtained diploma -> no fwb data
@@ -1468,32 +1468,37 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
         # No complement -> no fwb credits
-        copy_data = default_data.copy()
-        copy_data.pop('year_formset-2020-with_complement')
         response = self.client.post(
             self.form_url,
-            data=copy_data,
+            data={
+                **default_data,
+                'base_form-with_complement': False,
+            },
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], False)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], False)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], None)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], None)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
         # With complement -> fwb credits
@@ -1504,13 +1509,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], True)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 10)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 9)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], True)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], 10)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], 10)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
         # With second cycle equivalent program -> fwb credits
@@ -1526,13 +1533,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], True)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 10)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 9)
+
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
-        self.assertEqual(first_form.cleaned_data['with_block_1'], None)
-        self.assertEqual(first_form.cleaned_data['with_complement'], True)
-        self.assertEqual(first_form.cleaned_data['fwb_registered_credit_number'], 10)
-        self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], 10)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
     @freezegun.freeze_time('2023-01-01')
