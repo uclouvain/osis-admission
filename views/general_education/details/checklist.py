@@ -44,14 +44,12 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.models import EPCInjection
-from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (
@@ -196,6 +194,9 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
     ADMISSION_EMAIL_SIC_APPROVAL_EU,
 )
+from admission.models import EPCInjection
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.online_payment import PaymentStatus, PaymentMethod
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     add_close_modal_into_htmx_response,
@@ -223,7 +224,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParco
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -3034,8 +3034,6 @@ class ChecklistView(
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
-                if admission_document.lecture_seule:
-                    read_only_documents.append(admission_document.identifiant)
                 document_tab_identifier = admission_document.onglet.split('.')
 
                 if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
