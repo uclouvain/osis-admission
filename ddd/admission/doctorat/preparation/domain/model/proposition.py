@@ -264,6 +264,7 @@ class Proposition(interface.RootEntity):
     information_a_propos_de_la_restriction: str = ''
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
+    approuvee_par_cdd_le: Optional[datetime.datetime] = None
 
     @property
     def sigle_formation(self):
@@ -1096,6 +1097,7 @@ class Proposition(interface.RootEntity):
 
         self.specifier_acceptation_par_cdd()
         self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
+        self.approuvee_par_cdd_le = datetime.datetime.now()
         self.auteur_derniere_modification = auteur_modification
 
     def refuser_par_cdd(self, auteur_modification: str):

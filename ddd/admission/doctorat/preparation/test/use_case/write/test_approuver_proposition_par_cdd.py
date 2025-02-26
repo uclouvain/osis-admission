@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,23 +32,31 @@ from django.test import TestCase
 from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverPropositionParCddCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    InformationsAcceptationNonSpecifieesException,
     SituationPropositionNonCddException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
-    InformationsAcceptationNonSpecifieesException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPFactory,
 )
-from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.admission.doctorat.preparation.test.factory.person import (
+    PersonneConnueUclDTOFactory,
+)
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     _PropositionIdentityFactory,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
+from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
+    TitreAccesSelectionnableFactory,
+)
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
@@ -59,10 +67,17 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -100,6 +115,7 @@ class TestApprouverPropositionParCdd(TestCase):
             est_confirmee=True,
             est_approuvee_par_fac=True,
             statut=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC,
+            approuvee_par_cdd_le=None,
         )
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.groupe_de_supervision_repository.save(
@@ -133,6 +149,7 @@ class TestApprouverPropositionParCdd(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
         self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(proposition.approuvee_par_cdd_le, datetime.datetime(2021, 11, 1))
 
     def test_should_lever_exception_si_statut_non_conforme(self):
         statuts_invalides = ChoixStatutPropositionDoctorale.get_names_except(

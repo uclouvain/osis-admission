@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,25 +35,26 @@ from unittest.mock import patch
 import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
-from django.test import TestCase
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_mail_template.models import MailTemplate
 from osis_notification.models import EmailNotification
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.models import DoctorateAdmission
-from admission.models.checklist import (
-    AdditionalApprovalCondition,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     DecisionCDDEnum,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.mail_templates import ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE
+from admission.models import DoctorateAdmission
+from admission.models.checklist import AdditionalApprovalCondition
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
@@ -61,16 +62,16 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
-from osis_profile.models import (
-    EducationalExperience,
-    ProfessionalExperience,
-)
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 class CddDecisionViewTestCase(TestCase):
@@ -1244,6 +1245,7 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.approved_by_cdd_at, datetime.datetime.now())
 
         # A certificate has been generated
         self.assertEqual(self.admission.cdd_approval_certificate, [self.file_uuid])
