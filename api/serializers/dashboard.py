@@ -31,6 +31,7 @@ from backoffice.settings.rest_framework.fields import ActionLinksField
 
 
 class DashboardSerializer(serializers.Serializer):
+    donnees_transferees_vers_compte_interne = serializers.BooleanField(default=False)
     links = ActionLinksField(
         actions={
             'list_propositions': ACTION_LINKS['list_propositions'],
