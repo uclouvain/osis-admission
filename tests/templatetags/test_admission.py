@@ -95,7 +95,6 @@ from admission.templatetags.admission import (
     checklist_experience_action_links_context,
     format_ways_to_find_out_about_the_course,
     get_document_details_url,
-    sport_affiliation_value,
     cotutelle_institute,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -1228,46 +1227,6 @@ class DisplayTagTestCase(TestCase):
                 experience=experience,
             ),
             '',
-        )
-
-    def test_sport_affiliation_value(self):
-        self.assertEqual(
-            sport_affiliation_value(None, None),
-            '',
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(None, 'Louvain-la-Neuve'),
-            '',
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, None),
-            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, 'Bruxelles Woluwe'),
-            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
-        )
-
-        for campus in [
-            None,
-            '',
-            'Bruxelles Saint-Gilles',
-            'Bruxelles Woluwe',
-            'Louvain-la-Neuve',
-            'Mons',
-            'Tournai',
-        ]:
-            self.assertEqual(
-                sport_affiliation_value(ChoixAffiliationSport.NON.name, campus),
-                ChoixAffiliationSport.NON.value,
-            )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.NON.name, 'Bruxelles Saint-Louis'),
-            _('No (access to sports facilities on the Saint-Louis campus is free)'),
         )
 
 
