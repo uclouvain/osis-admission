@@ -114,6 +114,7 @@ class TestApprouverPropositionParCdd(TestCase):
             est_confirmee=True,
             est_approuvee_par_fac=True,
             statut=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC,
+            approuvee_par_cdd_le=None,
         )
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.groupe_de_supervision_repository.save(
@@ -147,6 +148,7 @@ class TestApprouverPropositionParCdd(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
         self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(proposition.approuvee_par_cdd_le, datetime.datetime(2021, 11, 1))
 
     def test_should_lever_exception_si_statut_non_conforme(self):
         statuts_invalides = ChoixStatutPropositionDoctorale.get_names_except(

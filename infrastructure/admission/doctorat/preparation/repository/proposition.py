@@ -303,6 +303,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
         visa_etudes_d=admission.student_visa_d,
         certificat_autorisation_signe=admission.signed_enrollment_authorization,
+        approuvee_par_cdd_le=admission.approved_by_cdd_at,
     )
 
 
@@ -541,6 +542,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'student_visa_d': entity.visa_etudes_d,
                 'signed_enrollment_authorization': entity.certificat_autorisation_signe,
                 'last_signature_request_before_submission_at': entity.derniere_demande_signature_avant_soumission_le,
+                'approved_by_cdd_at': entity.approuvee_par_cdd_le,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
