@@ -311,6 +311,7 @@ class _PropositionFactory(factory.Factory):
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
             commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
+            approuvee_par_cdd_le=factory.Faker('past_datetime'),
         )
         est_approuvee_par_sic = factory.Trait(
             complements_formation=factory.List(
