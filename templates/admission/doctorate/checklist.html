@@ -132,7 +132,7 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
-          {% resultat_workflow_gestion_des_comptes_alert original_admission.candidate.global_id %}
+          {% resultat_workflow_gestion_des_comptes_alert matricule=original_admission.candidate.global_id outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
 
           {% if injection_signaletique %}
             <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">

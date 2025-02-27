@@ -332,7 +332,14 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['injection_possible'] = self.injection_possible[0]
         context['raison_injection_impossible'] = self.injection_possible[1]
         context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
+        context['outil_de_comparaison_et_fusion_url'] = self.get_outil_de_comparaison_et_fusion_url()
         return context
+
+    def get_outil_de_comparaison_et_fusion_url(self) -> str:
+        return resolve_url(
+            'admission:services:gestion-des-comptes:outil-comparaison-et-fusion',
+            uuid=self.admission_uuid
+        )
 
     def dispatch(self, request, *args, **kwargs):
         if (

@@ -25,7 +25,7 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% block tab_content %}
-  {% resultat_workflow_gestion_des_comptes_alert admission.matricule_candidat %}
+  {% resultat_workflow_gestion_des_comptes_alert matricule=admission.matricule_candidat outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
   {% if profil_candidat|is_profile_identification_different:person %}
     <p class="alert alert-info" role="alert">
       <i class="fa fa-question-circle" style="margin-right: 0.5em"></i>
