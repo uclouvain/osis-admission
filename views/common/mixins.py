@@ -273,12 +273,22 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "Le candidat n'a toujours pas d'email uclouvain"
         if self.admission.sent_to_epc:
             return False, "La demande a déjà été envoyée dans EPC"
-        if personmergeproposal and (
-            personmergeproposal.status in PersonMergeStatus.quarantine_statuses()
-            or personmergeproposal.validation.get('valid') is not True
-        ):
+        if self.demande_est_en_quarantaine:
             return False, "La demande est en quarantaine"
         return True, ''
+
+    @cached_property
+    def demande_est_en_quarantaine(self) -> bool:
+        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
+        if person_merge_proposal and (
+            person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+            or not person_merge_proposal.validation.get('valid', True)
+        ):
+            # Cas display warning when quarantaine
+            # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
+            return True
+        return False
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -321,6 +331,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['injection_inscription'] = self.injection_inscription
         context['injection_possible'] = self.injection_possible[0]
         context['raison_injection_impossible'] = self.injection_possible[1]
+        context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
         return context
 
     def dispatch(self, request, *args, **kwargs):

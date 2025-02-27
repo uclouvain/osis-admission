@@ -36,6 +36,7 @@ import attr
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
@@ -122,6 +123,7 @@ from admission.utils import (
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
@@ -306,6 +308,7 @@ class Tab:
     label: str = ''
     icon: str = ''
     badge: str = ''
+    icon_after: str = ''
 
     def __hash__(self):
         # Only hash the name, as lazy strings have different memory addresses
@@ -479,6 +482,19 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
                 parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL]).count()
             elif {ProgramManager} & set(roles):
                 parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL]).count()
+
+        # Add icon when folder in quarantine
+        if parent_tab == Tab('person') and getattr(permission_obj, 'candidate_id', None):
+            demande_est_en_quarantaine = PersonMergeProposal.objects.filter(
+                original_person_id=permission_obj.candidate_id,
+            ).filter(
+                Q(
+                    Q(status__in=PersonMergeStatus.quarantine_statuses()) |
+                    ~Q(validation__valid=True)
+                )
+            ).exists()
+            if demande_est_en_quarantaine:
+                parent_tab.icon_after = 'fas fa-warning text-warning'
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
