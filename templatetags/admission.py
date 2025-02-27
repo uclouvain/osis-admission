@@ -42,6 +42,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -127,7 +128,6 @@ from ddd.logic.financabilite.domain.model.enums.situation import SituationFinanc
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -1629,9 +1629,6 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
     )
 
     query_params = {}
-
-    if document.lecture_seule:
-        query_params['read-only'] = '1'
 
     if document.requis_automatiquement:
         query_params['mandatory'] = '1'

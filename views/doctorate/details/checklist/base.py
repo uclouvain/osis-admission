@@ -36,7 +36,6 @@ from django.views.generic import TemplateView, FormView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.ddd.admission.commands import GetStatutTicketPersonneQuery, RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,
@@ -50,7 +49,6 @@ from admission.ddd.admission.dtos.resume import (
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
-    DocumentsEtudesSecondaires,
     OngletsDemande,
     DocumentsProjetRecherche,
     DocumentsCotutelle,
@@ -69,6 +67,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
 )
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     get_access_titles_names,
@@ -421,8 +420,6 @@ class ChecklistView(
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
-                if admission_document.lecture_seule:
-                    read_only_documents.append(admission_document.identifiant)
                 document_tab_identifier = admission_document.onglet.split('.')
 
                 if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
