@@ -30,8 +30,11 @@ from django.http import HttpResponse, Http404
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _, get_language
 from django.views.generic import TemplateView, FormView, RedirectView
+from osis_document.utils import get_file_url
 from rest_framework.status import HTTP_204_NO_CONTENT
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     EMPLACEMENTS_FAC,
@@ -41,7 +44,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
@@ -56,13 +58,11 @@ from admission.forms.admission.document import (
     UploadManagerDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd import interface
 from osis_common.utils.htmx import HtmxMixin
-from osis_document.utils import get_file_url
 
 __namespace__ = 'document'
 

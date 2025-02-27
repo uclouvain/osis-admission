@@ -35,7 +35,6 @@ from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
-    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
@@ -81,14 +80,12 @@ class Attachment:
         candidate_language_label='',
         candidate_language='',
         label_interpolation: Optional[dict] = None,
-        readonly=False,
     ):
         self.identifier = f'{sub_identifier}.{identifier}' if sub_identifier else identifier
         self.label = self._get_label(label, sub_identifier_label, label_interpolation)
 
         self.uuids = [str(uuid) for uuid in uuids if uuid]
         self.required = required
-        self.readonly = readonly
 
         if candidate_language_label:
             self.candidate_language_label = candidate_language_label
@@ -172,7 +169,6 @@ def get_secondary_studies_attachments(
     attachments = []
     got_diploma = context.etudes_secondaires.diplome_etudes_secondaires
     if context.proposition.formation.type == TrainingType.BACHELOR.name:
-        readonly_document = bool(context.etudes_secondaires.epc_experience)
         if context.etudes_secondaires.diplome_belge:
             if got_diploma in CHOIX_DIPLOME_OBTENU:
                 attachments.append(
@@ -182,7 +178,6 @@ def get_secondary_studies_attachments(
                         uuids=context.etudes_secondaires.diplome_belge.diplome,
                         required=True,
                         candidate_language=context.identification.langue_contact,
-                        readonly=readonly_document,
                     )
                 )
         elif context.etudes_secondaires.diplome_etranger:
@@ -196,7 +191,6 @@ def get_secondary_studies_attachments(
                                 uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
                                 required=True,
                                 candidate_language=context.identification.langue_contact,
-                                readonly=readonly_document,
                             )
                         )
                     elif context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.PENDING.name:
@@ -207,7 +201,6 @@ def get_secondary_studies_attachments(
                                 uuids=context.etudes_secondaires.diplome_etranger.preuve_decision_equivalence,
                                 required=True,
                                 candidate_language=context.identification.langue_contact,
-                                readonly=readonly_document,
                             )
                         )
                 else:
@@ -218,7 +211,6 @@ def get_secondary_studies_attachments(
                             uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
                             required=True,
                             candidate_language=context.identification.langue_contact,
-                            readonly=readonly_document,
                         )
                     )
 
@@ -230,7 +222,6 @@ def get_secondary_studies_attachments(
                         uuids=context.etudes_secondaires.diplome_etranger.diplome,
                         required=True,
                         candidate_language=context.identification.langue_contact,
-                        readonly=readonly_document,
                     ),
                 )
 
@@ -242,7 +233,6 @@ def get_secondary_studies_attachments(
                             uuids=context.etudes_secondaires.diplome_etranger.traduction_diplome,
                             required=True,
                             candidate_language=context.identification.langue_contact,
-                            readonly=readonly_document,
                         )
                     )
 
@@ -253,7 +243,6 @@ def get_secondary_studies_attachments(
                     uuids=context.etudes_secondaires.diplome_etranger.releve_notes,
                     required=True,
                     candidate_language=context.identification.langue_contact,
-                    readonly=readonly_document,
                 )
             )
             if need_translations:
@@ -264,7 +253,6 @@ def get_secondary_studies_attachments(
                         uuids=context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
                         required=True,
                         candidate_language=context.identification.langue_contact,
-                        readonly=readonly_document,
                     )
                 )
 
@@ -276,7 +264,6 @@ def get_secondary_studies_attachments(
                     uuids=context.etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle,
                     required=not context.curriculum.candidat_est_potentiel_vae,
                     candidate_language=context.identification.langue_contact,
-                    readonly=readonly_document,
                 )
             )
 
@@ -347,7 +334,6 @@ def get_curriculum_academic_experience_attachments(
 ) -> List[Attachment]:
     """Returns the academic experience attachments."""
     attachments = []
-    readonly_document = bool(experience.epc_experience)
     if context.est_proposition_doctorale or context.est_proposition_generale:
         if experience.type_releve_notes == TranscriptType.ONE_FOR_ALL_YEARS.name:
             attachments.append(
@@ -357,7 +343,6 @@ def get_curriculum_academic_experience_attachments(
                     uuids=experience.releve_notes,
                     required=True,
                     candidate_language=context.identification.langue_contact,
-                    readonly=readonly_document,
                 )
             )
             if translation_required:
@@ -368,7 +353,6 @@ def get_curriculum_academic_experience_attachments(
                         uuids=experience.traduction_releve_notes,
                         required=True,
                         candidate_language=context.identification.langue_contact,
-                        readonly=readonly_document,
                     )
                 )
         elif experience.type_releve_notes == TranscriptType.ONE_A_YEAR.name:
@@ -384,7 +368,6 @@ def get_curriculum_academic_experience_attachments(
                         uuids=annee.releve_notes,
                         required=annee.resultat != Result.WAITING_RESULT.name,
                         candidate_language=context.identification.langue_contact,
-                        readonly=readonly_document,
                     )
                 )
                 if translation_required:
@@ -397,7 +380,6 @@ def get_curriculum_academic_experience_attachments(
                             uuids=annee.traduction_releve_notes,
                             required=annee.resultat != Result.WAITING_RESULT.name,
                             candidate_language=context.identification.langue_contact,
-                            readonly=readonly_document,
                         )
                     )
 
@@ -410,7 +392,6 @@ def get_curriculum_academic_experience_attachments(
                     uuids=experience.resume_memoire,
                     required=True,
                     candidate_language=context.identification.langue_contact,
-                    readonly=readonly_document,
                 )
             )
 
@@ -421,7 +402,6 @@ def get_curriculum_academic_experience_attachments(
                 uuids=experience.diplome,
                 required=True,
                 candidate_language=context.identification.langue_contact,
-                readonly=readonly_document,
             )
         )
 
@@ -433,7 +413,6 @@ def get_curriculum_academic_experience_attachments(
                     uuids=experience.traduction_diplome,
                     required=True,
                     candidate_language=context.identification.langue_contact,
-                    readonly=readonly_document,
                 )
             )
 
@@ -447,14 +426,12 @@ def get_curriculum_non_academic_experience_attachments(
     """Returns the non academic experience attachments."""
     attachments = []
     if context.est_proposition_doctorale or context.est_proposition_generale:
-        readonly_document = bool(experience.epc_experience)
         attachments.append(
             Attachment(
                 identifier='CERTIFICAT_EXPERIENCE',
                 label=CURRICULUM_ACTIVITY_LABEL[experience.type],
                 uuids=experience.certificat,
                 candidate_language=context.identification.langue_contact,
-                readonly=readonly_document,
             )
         )
         return attachments

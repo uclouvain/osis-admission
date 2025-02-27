@@ -232,7 +232,6 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             noms_documents_televerses=noms_documents_televerses,
             statut_reclamation=document_demande.get('request_status', ''),
             onglet_checklist_associe=document_demande.get('related_checklist_tab') or '',
-            lecture_seule=document.readonly,
         )
 
     @classmethod
