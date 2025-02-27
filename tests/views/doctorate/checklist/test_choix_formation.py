@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,21 +27,35 @@ import datetime
 
 import freezegun
 from django.conf import settings
-from django.core.exceptions import NON_FIELD_ERRORS
+from django.forms.widgets import Select, HiddenInput
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils.translation import gettext
 
-from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+    ENTITY_CDSS,
+    ENTITY_CLSM,
+    SIGLE_SCIENCES,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
+from base.tests.factories.entity_version import MainEntityVersionFactory
 
 
 class ChoixFormationDetailViewTestCase(TestCase):
@@ -109,31 +123,64 @@ class ChoixFormationDetailViewTestCase(TestCase):
 class ChoixFormationFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022, 2023]]
 
-        cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        main_entity = MainEntityVersionFactory().entity
 
-        cls.training = DoctorateFactory(
-            management_entity=cls.first_doctoral_commission,
+        cls.cde_entity = EntityWithVersionFactory(
+            version__parent=main_entity,
+            version__acronym=ENTITY_CDE,
+        )
+
+        cls.cde_training = DoctorateFactory(
+            management_entity=cls.cde_entity,
             academic_year=cls.academic_years[0],
         )
 
-        cls.other_training = DoctorateFactory(
-            management_entity=cls.first_doctoral_commission,
+        cls.other_cde_training = DoctorateFactory(
+            education_group=cls.cde_training.education_group,
+            management_entity=cls.cde_training.management_entity,
+            acronym=cls.cde_training.acronym,
+            partial_acronym=cls.cde_training.partial_acronym,
             academic_year=cls.academic_years[1],
         )
 
-        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.other_cdss_training = DoctorateFactory(
+            management_entity=EntityWithVersionFactory(
+                version__parent=main_entity,
+                version__acronym=ENTITY_CDSS,
+            ),
+            academic_year=cls.academic_years[1],
+        )
+
+        cls.other_clsm_training = DoctorateFactory(
+            management_entity=EntityWithVersionFactory(
+                version__parent=main_entity,
+                version__acronym=ENTITY_CLSM,
+            ),
+            academic_year=cls.academic_years[1],
+        )
+
+        cls.other_science_training = DoctorateFactory(
+            management_entity__version__parent=main_entity,
+            acronym=SIGLE_SCIENCES,
+        )
+
+        cls.other_training_without_proximity_commission = DoctorateFactory(
+            management_entity__version__parent=main_entity,
+            acronym='ABCDEF',
+        )
+
+        cls.sic_manager_user = SicManagementRoleFactory(entity=main_entity).person.user
 
         cls.program_manager_user = ProgramManagerRoleFactory(
-            education_group=cls.training.education_group,
+            education_group=cls.cde_training.education_group,
         ).person.user
 
         cls.data = {
             'type_demande': 'INSCRIPTION',
-            'annee_academique': cls.other_training.academic_year.year,
-            'formation': cls.other_training.acronym,
-            'poursuite_cycle': 'YES',
+            'annee_academique': cls.other_cde_training.academic_year.year,
+            'commission_proximite': ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
         }
 
         cls.default_headers = {'HTTP_HX-Request': 'true'}
@@ -142,7 +189,7 @@ class ChoixFormationFormViewTestCase(TestCase):
 
     def setUp(self):
         self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
-            training=self.training,
+            training=self.cde_training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
@@ -156,20 +203,99 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
 
+        admission_type_field = response.context['form'].fields['type_demande']
+        self.assertFalse(admission_type_field.disabled)
+        self.assertIsInstance(admission_type_field.widget, Select)
+
+        proximity_commission_field = response.context['form'].fields['commission_proximite']
+        self.assertTrue(proximity_commission_field.required)
+        self.assertFalse(proximity_commission_field.disabled)
+        self.assertIsInstance(proximity_commission_field.widget, Select)
+        self.assertCountEqual(proximity_commission_field.choices, ChoixCommissionProximiteCDEouCLSM.choices())
+
+        self.admission.training = self.other_cdss_training
+        self.admission.save(update_fields=['training'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+
+        proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
+        self.assertCountEqual(proximity_commission_choices, ChoixCommissionProximiteCDSS.choices())
+
+        self.admission.training = self.other_clsm_training
+        self.admission.save(update_fields=['training'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+
+        proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
+        self.assertCountEqual(proximity_commission_choices, ChoixCommissionProximiteCDEouCLSM.choices())
+
+        self.admission.training = self.other_science_training
+        self.admission.save(update_fields=['training'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+
+        proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
+        self.assertCountEqual(proximity_commission_choices, ChoixSousDomaineSciences.choices())
+
+        admission_type_field = response.context['form'].fields['type_demande']
+        self.assertFalse(admission_type_field.disabled)
+        self.assertIsInstance(admission_type_field.widget, Select)
+
+        self.admission.training = self.other_training_without_proximity_commission
+        self.admission.save(update_fields=['training'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+
+        proximity_commission_field = response.context['form'].fields['commission_proximite']
+        self.assertFalse(proximity_commission_field.required)
+        self.assertTrue(proximity_commission_field.disabled)
+        self.assertIsInstance(proximity_commission_field.widget, HiddenInput)
+        self.assertCountEqual(proximity_commission_field.choices, [])
+
     def test_post_htmx(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(self.url, data=self.data, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
+
         self.assertEqual(response.headers['HX-Refresh'], 'true')
 
         self.admission.refresh_from_db()
 
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.admission.training, self.other_training)
+        self.assertEqual(self.admission.training, self.other_cde_training)
         self.assertEqual(self.admission.type_demande, TypeDemande.INSCRIPTION.name)
+        self.assertEqual(self.admission.proximity_commission, ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
+
+    def test_get_with_program_manager(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.save(update_fields=['status'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['form']
+
+        self.assertTrue(form.fields['type_demande'].required)
+        self.assertTrue(form.fields['type_demande'].disabled)
+        self.assertIsInstance(form.fields['type_demande'].widget, HiddenInput)
 
     def test_post_with_program_manager(self):
         self.client.force_login(user=self.program_manager_user)
@@ -189,8 +315,9 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.last_update_author, self.program_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.admission.training, self.other_training)
-        self.assertEqual(self.admission.type_demande, TypeDemande.INSCRIPTION.name)
+        self.assertEqual(self.admission.training, self.other_cde_training)
+        self.assertEqual(self.admission.type_demande, TypeDemande.ADMISSION.name)  # Read-only for the CDD managers
+        self.assertEqual(self.admission.proximity_commission, ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
 
     def test_get_without_htmx(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -205,8 +332,8 @@ class ChoixFormationFormViewTestCase(TestCase):
             self.url,
             data={
                 'type_demande': 'INSCRIPTION',
-                'annee_academique': self.academic_years[1].year,
-                'formation': self.training.acronym,
+                'annee_academique': self.academic_years[2].year,
+                'commission_proximite': ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
             },
             **self.default_headers,
         )
@@ -216,5 +343,5 @@ class ChoixFormationFormViewTestCase(TestCase):
 
         self.assertIn(
             gettext('No training found for the specific year.'),
-            form.errors.get(NON_FIELD_ERRORS, []),
+            form.errors.get('annee_academique', []),
         )

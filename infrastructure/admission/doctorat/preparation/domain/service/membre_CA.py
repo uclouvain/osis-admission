@@ -55,9 +55,11 @@ class MembreCATranslator(IMembreCATranslator):
             nom=actor.last_name,
             prenom=actor.first_name,
             email=actor.email,
-            est_docteur=True
-            if not actor.is_external and hasattr(actor.person, 'tutor')
-            else actor.is_external and actor.is_doctor,
+            est_docteur=(
+                True
+                if not actor.is_external and hasattr(actor.person, 'tutor')
+                else actor.is_external and actor.is_doctor
+            ),
             institution=_('ucl') if not actor.is_external else actor.institute,
             ville=actor.city,
             code_pays=actor.country_id and actor.country.iso_code or '',

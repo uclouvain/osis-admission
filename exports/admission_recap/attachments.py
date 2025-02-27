@@ -408,7 +408,6 @@ def get_curriculum_academic_experience_attachments(
                     identifier='RESUME_MEMOIRE',
                     label=DocumentsCurriculum['RESUME_MEMOIRE'],
                     uuids=experience.resume_memoire,
-                    required=True,
                     candidate_language=context.identification.langue_contact,
                     readonly=readonly_document,
                 )

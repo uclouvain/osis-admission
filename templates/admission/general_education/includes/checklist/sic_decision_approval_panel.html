@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -156,7 +156,9 @@
           {% field_data _('Communication to the candidate about additional trainings') admission.commentaire_complements_formation|safe %}
         {% endif %}
 
+        {% if view.is_general %}
         {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}
+        {% endif %}
 
         {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
         {% field_data _('Contact person for the design of the annual program') contact_person %}

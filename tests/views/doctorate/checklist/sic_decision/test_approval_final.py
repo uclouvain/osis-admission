@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,27 +36,41 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.events import InscriptionDoctoraleApprouveeParSicEvent
-from admission.ddd.admission.doctorat.preparation.commands import EnvoyerEmailApprobationInscriptionAuCandidatCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.events import (
+    InscriptionDoctoraleApprouveeParSicEvent,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    EnvoyerEmailApprobationInscriptionAuCandidatCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    DroitsInscriptionMontant,
-    DispenseOuDroitsMajores,
     ChoixStatutChecklist,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import ENTITY_SIC, ENTITY_SICB
-from admission.mail_templates import (
-    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
-    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
+from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import (
+    ENTITY_SIC,
+    ENTITY_SICB,
 )
+from admission.mail_templates import (
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
+)
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
@@ -135,7 +149,6 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             ),
             status=ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
             with_prerequisite_courses=False,
-            program_planned_years_number=2,
             annual_program_contact_person_name='foo',
             annual_program_contact_person_email='bar@example.org',
             tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name,

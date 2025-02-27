@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,18 +27,20 @@ import attr
 from django.shortcuts import resolve_url
 from django.views.generic import FormView
 
-from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    CompleterPropositionCommand,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeFinancement,
     ChoixDoctoratDejaRealise,
     ChoixTypeAdmission,
+    ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    JustificationRequiseException,
     ContratTravailInconsistantException,
     DoctoratNonTrouveException,
-    InstitutionInconsistanteException,
     DomaineTheseInconsistantException,
+    InstitutionInconsistanteException,
+    JustificationRequiseException,
 )
 from admission.forms.admission.doctorate.project import DoctorateAdmissionProjectForm
 from admission.views.common.mixins import LoadDossierViewMixin
@@ -47,7 +49,9 @@ __all__ = [
     "DoctorateAdmissionProjectFormView",
 ]
 
-from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
+from admission.views.mixins.business_exceptions_form_view_mixin import (
+    BusinessExceptionFormViewMixin,
+)
 from infrastructure.messages_bus import message_bus_instance
 
 
@@ -78,11 +82,6 @@ class DoctorateAdmissionProjectFormView(
     def get_initial(self):
         return {
             **attr.asdict(self.proposition),
-            'sector': self.proposition.code_secteur_formation,
-            'doctorate': "{sigle}-{annee}".format(
-                sigle=self.proposition.doctorat.sigle,
-                annee=self.proposition.doctorat.annee,
-            ),
             'bourse_recherche': self.proposition.bourse_recherche and self.proposition.bourse_recherche.uuid,
         }
 
@@ -105,7 +104,6 @@ class DoctorateAdmissionProjectFormView(
 
         if data['doctorat_deja_realise'] not in [
             ChoixDoctoratDejaRealise.YES.name,
-            ChoixDoctoratDejaRealise.PARTIAL.name,
         ]:
             data['institution'] = ''
             data['domaine_these'] = ''
@@ -119,8 +117,6 @@ class DoctorateAdmissionProjectFormView(
             data['raison_non_soutenue'] = ''
 
         del data['non_soutenue']
-
-        data['commission_proximite'] = self.proposition.commission_proximite
 
         return data
 

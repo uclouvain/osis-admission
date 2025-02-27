@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 import freezegun
 import mock
@@ -37,69 +37,84 @@ from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
 from django.utils import translation
-from django.utils.translation import gettext as _, pgettext
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.views import View
 
 from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
-from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.enums import TypeItemFormulaire, Onglets, ChoixAffiliationSport
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixMoyensDecouverteFormation,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.enums import (
+    ChoixAffiliationSport,
+    Onglets,
+    TypeItemFormulaire,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixMoyensDecouverteFormation,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.test.factory.profil import (
+    AnneeExperienceAcademiqueDTOFactory,
+    EtudesSecondairesDTOFactory,
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
-    EtudesSecondairesDTOFactory,
-    AnneeExperienceAcademiqueDTOFactory,
 )
-from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
+from admission.ddd.admission.test.factory.question_specifique import (
+    QuestionSpecifiqueDTOFactory,
+)
+from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
+    admission_status,
+    admission_training_type,
+    admission_url,
+    authentication_css_class,
+    candidate_language,
+    checklist_experience_action_links_context,
+    cotutelle_institute,
     current_subtabs,
     detail_tab_path_from_update,
     display,
+    document_component,
+    experience_details_template,
+    experience_valuation_url,
     field_data,
+    format_ways_to_find_out_about_the_course,
+    formatted_language,
     formatted_reference,
     get_active_parent,
-    sortable_header_div,
-    strip,
-    update_tab_path_from_detail,
-    get_first_truthy_value,
-    get_item,
-    interpolate,
-    admission_training_type,
-    admission_url,
-    admission_status,
-    get_image_file_url,
     get_country_name,
-    formatted_language,
+    get_document_details_url,
+    get_first_truthy_value,
+    get_image_file_url,
+    get_item,
     get_item_or_default,
-    has_value,
-    document_component,
     get_item_or_none,
-    part_of_dict,
-    need_to_display_specific_questions,
-    authentication_css_class,
-    experience_details_template,
+    has_value,
+    interpolate,
     is_list,
     label_with_user_icon,
-    candidate_language,
-    experience_valuation_url,
-    checklist_experience_action_links_context,
-    format_ways_to_find_out_about_the_course,
-    get_document_details_url,
+    need_to_display_specific_questions,
+    part_of_dict,
+    sortable_header_div,
     sport_affiliation_value,
-    cotutelle_institute,
+    strip,
+    update_tab_path_from_detail,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.entity import Entity
@@ -107,10 +122,16 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity import EntityWithVersionFactory
-from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
+from base.tests.factories.entity_version import (
+    EntityVersionFactory,
+    MainEntityVersionFactory,
+)
 from base.tests.factories.entity_version_address import EntityVersionAddressFactory
 from osis_profile import BE_ISO_CODE
-from osis_profile.models.enums.curriculum import EvaluationSystem, CURRICULUM_ACTIVITY_LABEL
+from osis_profile.models.enums.curriculum import (
+    CURRICULUM_ACTIVITY_LABEL,
+    EvaluationSystem,
+)
 from osis_profile.tests.factories.curriculum import ExperienceParcoursInterneDTOFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.university import UniversityFactory
@@ -291,23 +312,8 @@ class AdmissionTabsTestCase(TestCase):
         result = current_subtabs(context)
         self.assertEqual(
             result['subtabs'],
-            TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap')],
+            TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap')],
         )
-
-    def test_current_tabs_with_hidden_tab(self):
-        context = {
-            'request': Mock(
-                resolver_match=Mock(
-                    namespaces=['admission', 'doctorate', 'confirmation'],
-                    url_name='failure',
-                ),
-            ),
-            'view': Mock(
-                get_permission_object=Mock(return_value=self.doctorate_admission),
-            ),
-        }
-        result = current_subtabs(context)
-        self.assertEqual(result['subtabs'], TAB_TREES['doctorate-after-enrolment'][Tab('confirmation', '')])
 
 
 class AdmissionPanelTagTestCase(TestCase):

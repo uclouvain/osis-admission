@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,9 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
+    DetailProjet,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     ExperiencePrecedenteRecherche,
 )
@@ -36,11 +38,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixDoctoratDejaRealise,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
-    ChoixDoctoratDejaRealise,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DetailProjetNonCompleteException
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DetailProjetNonCompleteException,
+)
 from base.ddd.utils.business_validator import BusinessValidator
 
 
@@ -87,10 +91,7 @@ class ShouldProjetEtreComplet(BusinessValidator):
             # research experience
             or (self.projet.deja_commence and not (self.projet.deja_commence_institution and self.projet.date_debut))
             or (
-                (
-                    self.experience_precedente_recherche.doctorat_deja_realise == ChoixDoctoratDejaRealise.YES
-                    or self.experience_precedente_recherche.doctorat_deja_realise == ChoixDoctoratDejaRealise.PARTIAL
-                )
+                self.experience_precedente_recherche.doctorat_deja_realise == ChoixDoctoratDejaRealise.YES
                 and not (
                     self.experience_precedente_recherche.institution
                     and self.experience_precedente_recherche.domaine_these

@@ -32,9 +32,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
-    IDoctoratTranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
     IHistorique,
 )
@@ -47,20 +44,16 @@ from ddd.logic.reference.domain.builder.bourse_identity import BourseIdentityBui
 def completer_proposition(
     cmd: 'CompleterPropositionCommand',
     proposition_repository: 'IPropositionRepository',
-    doctorat_translator: 'IDoctoratTranslator',
     historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
-    doctorat = doctorat_translator.get(proposition_candidat.sigle_formation, proposition_candidat.annee)
     bourse_recherche_id = BourseIdentityBuilder.build_from_uuid(cmd.bourse_recherche) if cmd.bourse_recherche else None
 
     # WHEN
     proposition_candidat.completer(
-        doctorat=doctorat,
         justification=cmd.justification,
-        commission_proximite=cmd.commission_proximite,
         type_financement=cmd.type_financement,
         type_contrat_travail=cmd.type_contrat_travail,
         eft=cmd.eft,

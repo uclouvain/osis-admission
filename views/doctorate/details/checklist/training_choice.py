@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,15 +28,15 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, FormView
+from django.views.generic import FormView, TemplateView
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierChecklistChoixFormationCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.forms.admission.checklist import (
-    ChoixFormationForm,
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DoctoratNonTrouveException,
 )
+from admission.forms.admission.doctorate.checklist import ChoixFormationForm
 from admission.views.common.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
@@ -53,7 +53,7 @@ __namespace__ = False
 class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     urlpatterns = 'choix-formation-update'
     permission_required = 'admission.checklist_change_training_choice'
-    template_name = 'admission/general_education/includes/checklist/choix_formation_form.html'
+    template_name = 'admission/doctorate/includes/checklist/choix_formation_form.html'
     form_class = ChoixFormationForm
 
     def dispatch(self, request, *args, **kwargs):
@@ -65,15 +65,15 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['formation'] = self.proposition.formation
-        kwargs['context'] = self.current_context
+        kwargs['training'] = self.proposition.formation
+        kwargs['hide_admission_type'] = self.is_fac
         return kwargs
 
     def get_initial(self):
         return {
             'type_demande': self.proposition.type,
             'annee_academique': self.proposition.annee_calculee,
-            'formation': self.proposition.formation.sigle,
+            'commission_proximite': self.proposition.commission_proximite,
         }
 
     def form_valid(self, form):
@@ -83,8 +83,8 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
                     uuid_proposition=str(self.kwargs['uuid']),
                     gestionnaire=self.request.user.person.global_id,
                     type_demande=form.cleaned_data['type_demande'],
-                    sigle_formation=form.cleaned_data['formation'],
                     annee_formation=form.cleaned_data['annee_academique'],
+                    commission_proximite=form.cleaned_data['commission_proximite'],
                 )
             )
         except MultipleBusinessExceptions as multiple_exceptions:
@@ -92,7 +92,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
                 form.add_error(None, exception.message)
             return self.form_invalid(form)
         except DoctoratNonTrouveException:
-            form.add_error(None, _('No training found for the specific year.'))
+            form.add_error('annee_academique', _('No training found for the specific year.'))
             return self.form_invalid(form)
         return HttpResponse(headers={'HX-Refresh': 'true'})
 
@@ -100,7 +100,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
 class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'choix-formation-detail'
     permission_required = 'admission.checklist_change_training_choice'
-    template_name = 'admission/general_education/includes/checklist/choix_formation_detail.html'
+    template_name = 'admission/doctorate/includes/checklist/choix_formation_detail.html'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.htmx:

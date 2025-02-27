@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,51 +24,81 @@
 #
 # ##############################################################################
 from datetime import date
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
 import attr
 
 from admission.ddd.admission.doctorat.preparation.business_types import *
-from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
+from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
+    Comptabilite,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
+    Cotutelle,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
+    DetailProjet,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     ExperiencePrecedenteRecherche,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.domain.model._financement import (
+    Financement,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
+    InstitutIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import (
+    MembreCAIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
+    SignaturePromoteur,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    DoctoratFormation,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
-    ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
     BesoinDeDerogation,
+    ChoixStatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    StatutsChecklistDoctorale,
     StatutChecklist,
+    StatutsChecklistDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
     ShouldStatutEtreEnAttenteDeSignature,
 )
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from base.ddd.utils.business_validator import (
+    BusinessValidator,
+    TwoStepsMultipleBusinessExceptionListValidator,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
+)
 from epc.models.enums.condition_acces import ConditionAcces
 
 
@@ -109,14 +139,12 @@ class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 @attr.dataclass(frozen=True, slots=True)
 class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    doctorat: DoctoratFormation
     type_financement: Optional[str] = ''
     justification: Optional[str] = ''
     type_contrat_travail: Optional[str] = ''
     doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
     institution: Optional[str] = ''
     domaine_these: Optional[str] = ''
-    commission_proximite: Optional[str] = ''
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -127,7 +155,6 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
             ShouldTypeContratTravailDependreTypeFinancement(self.type_financement, self.type_contrat_travail),
             ShouldInstitutionDependreDoctoratRealise(self.doctorat_deja_realise, self.institution),
             ShouldDomaineDependreDoctoratRealise(self.doctorat_deja_realise, self.domaine_these),
-            ShouldCommissionProximiteEtreValide(doctorat=self.doctorat, commission_proximite=self.commission_proximite),
         ]
 
 
@@ -530,8 +557,6 @@ class RefuserParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
 class ApprouverParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 
-    nombre_annees_prevoir_programme: Optional[int]
-
     titres_selectionnes: List[TitreAccesSelectionnable]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -541,9 +566,6 @@ class ApprouverParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidato
         return [
             ShouldCddPeutDonnerDecision(
                 statut=self.statut,
-            ),
-            ShouldSpecifierInformationsAcceptation(
-                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
             ),
             ShouldSelectionnerTitreAccesPourEnvoyerASIC(
                 titres_selectionnes=self.titres_selectionnes,
@@ -558,8 +580,6 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[ComplementFormationIdentity]]
 
-    nombre_annees_prevoir_programme: Optional[int]
-
     checklist: StatutsChecklistDoctorale
     documents_dto: List[EmplacementDocumentDTO]
 
@@ -573,9 +593,6 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
-            ),
-            ShouldSpecifierInformationsAcceptation(
-                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
             ),
             ShouldParcoursAnterieurEtreSuffisant(
                 statut=self.checklist.parcours_anterieur,
@@ -641,26 +658,6 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 statut=self.statut,
                 condition_acces=self.condition_acces,
                 millesime_condition_acces=self.millesime_condition_acces,
-            ),
-        ]
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SpecifierConditionAccesParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    avec_complements_formation: Optional[bool]
-
-    complements_formation: Optional[List[ComplementFormationIdentity]]
-    commentaire_complements_formation: str
-
-    def get_data_contract_validators(self) -> List[BusinessValidator]:
-        return []
-
-    def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [
-            ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation(
-                avec_complements_formation=self.avec_complements_formation,
-                complements_formation=self.complements_formation,
-                commentaire_complements_formation=self.commentaire_complements_formation,
             ),
         ]
 

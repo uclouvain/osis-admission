@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from dal import autocomplete, forward
+from dal import forward
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileUploadField
@@ -42,8 +42,12 @@ from admission.utils import (
     get_thesis_location_initial_choices,
 )
 from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils.autocomplete import ListSelect2
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.fields import RadioBooleanField
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import EntityType
+from base.models.enums.organization_type import MAIN
 from base.utils.mark_safe_lazy import mark_safe_lazy
 from reference.models.enums.scholarship_type import ScholarshipType
 
@@ -56,7 +60,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
         widget=forms.Textarea(
             attrs={
                 'rows': 2,
-                'placeholder': _("Reasons for provisional admission."),
+                'placeholder': _("Reasons for pre-admission."),
             }
         ),
         required=False,
@@ -93,7 +97,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
     bourse_recherche = forms.CharField(
         label=_("Research scholarship"),
         required=False,
-        widget=autocomplete.ListSelect2(
+        widget=ListSelect2(
             url='admission:autocomplete:scholarship',
             forward=[forward.Const(ScholarshipType.BOURSE_INTERNATIONALE_DOCTORAT.name, 'scholarship_type')],
         ),
@@ -159,7 +163,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
         required=False,
         help_text=_(
             "If known, indicate the name of the laboratory, clinical department or research centre where the thesis "
-            "will be carried out"
+            "will be carried out at UCLouvain"
         ),
         max_length=255,
     )
@@ -201,10 +205,21 @@ class DoctorateAdmissionProjectForm(forms.Form):
     )
     langue_redaction_these = forms.CharField(
         label=_("Thesis language"),
-        widget=autocomplete.ListSelect2(
+        widget=ListSelect2(
             url="admission:autocomplete:language",
         ),
         required=False,
+    )
+    institut_these = forms.CharField(
+        label=_('Research institute'),
+        required=False,
+        widget=ListSelect2(
+            url='admission:autocomplete:entities',
+            forward=[
+                forward.Const(MAIN, 'organization_type'),
+                forward.Const(EntityType.INSTITUTE.name, 'entity_type'),
+            ],
+        ),
     )
 
     projet_doctoral_deja_commence = RadioBooleanField(
@@ -230,7 +245,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
         help_text=_("Indicate any completed or interrupted PhD studies in which you are no longer enrolled."),
     )
     institution = forms.CharField(
-        label=_("Institution in which the PhD has been realised / started."),
+        label=_("Institution in which the PhD thesis has been realised / started"),
         required=False,
         max_length=255,
     )
@@ -282,6 +297,18 @@ class DoctorateAdmissionProjectForm(forms.Form):
         else:
             choices = get_language_initial_choices(lang_code)
         self.fields["langue_redaction_these"].widget.choices = choices
+
+        thesis_institute = self.data.get(self.add_prefix('institut_these'), self.initial.get('institut_these'))
+        if thesis_institute:
+            institute_obj = EntityVersion.objects.filter(uuid=thesis_institute).only('uuid', 'acronym', 'title').first()
+
+            if institute_obj:
+                self.fields['institut_these'].widget.choices = [
+                    (
+                        institute_obj.uuid,
+                        '{title} ({acronym})'.format(title=institute_obj.title, acronym=institute_obj.acronym),
+                    ),
+                ]
 
         # Initialize some fields if they are not already set in the input data
         for field in [

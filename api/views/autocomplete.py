@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 from django.conf import settings
-from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import (
     BooleanField,
     Exists,
@@ -34,19 +33,17 @@ from django.db.models import (
     Q,
     TextField,
 )
+from django.db.models.functions import Concat
 from django.utils.decorators import method_decorator
-from django.utils.translation import get_language, get_language_from_request
+from django.utils.translation import get_language
 from django.views.decorators.cache import cache_page
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
-from rules.contrib.views import LoginRequiredMixin
 
 from admission.api import serializers
 from admission.api.schema import (
     AuthorizationAwareSchema,
-    BetterChoicesSchema,
-    ResponseSpecificSchema,
 )
 from admission.api.serializers import PersonSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -329,6 +326,7 @@ class AutocompletePersonView(ListAPIView):
             # Remove unexistent users
             Q(user_id__isnull=True)
             | Q(global_id='')
+            | Q(global_id__isnull=True)
             | Q(first_name='')
             | Q(last_name='')
         )

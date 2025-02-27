@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,16 +31,29 @@ from osis_comment.models import CommentEntry
 
 from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.program_manager import ProgramManager as ProgramManagerAdmission
+from admission.auth.roles.program_manager import (
+    ProgramManager as ProgramManagerAdmission,
+)
 from admission.auth.roles.sic_management import SicManagement
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery, RecupererEtudesSecondairesQuery
+from admission.ddd.admission.commands import (
+    RechercherParcoursAnterieurQuery,
+    RecupererEtudesSecondairesQuery,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as DoctoratOngletsChecklist,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as ContinueOngletsChecklist
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as GeneralOngletsChecklist
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as ContinueOngletsChecklist,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as GeneralOngletsChecklist,
+)
 from admission.views.common.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
 from base.auth.roles.program_manager import ProgramManager
@@ -82,7 +95,10 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
 
         if self.is_general or self.is_doctorate:
             if self.is_doctorate:
-                context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = {DoctoratOngletsChecklist.decision_cdd.name}
+                context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = {
+                    DoctoratOngletsChecklist.decision_cdd.name,
+                    DoctoratOngletsChecklist.parcours_anterieur.name,
+                }
                 context['checklist_tags'] = DoctoratOngletsChecklist.choices_except(
                     DoctoratOngletsChecklist.experiences_parcours_anterieur
                 )
@@ -97,9 +113,11 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
                 RechercherParcoursAnterieurQuery(
                     global_id=self.proposition.matricule_candidat,
                     uuid_proposition=self.proposition.uuid,
-                    experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
-                    if self.proposition.est_non_soumise
-                    else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+                    experiences_cv_recuperees=(
+                        ExperiencesCVRecuperees.TOUTES
+                        if self.proposition.est_non_soumise
+                        else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+                    ),
                 )
             )
 

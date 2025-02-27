@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
                             ('experiences_parcours_anterieur', 'Previous experiences'),
                             ('financabilite', 'Financeability'),
                             ('choix_formation', 'Course choice'),
-                            ('projet_recherche', 'Research project'),
+                            ('projet_recherche', 'Research'),
                             ('decision_cdd', 'Decision of the CDD'),
                             ('decision_sic', 'Decision of SIC'),
                         ),

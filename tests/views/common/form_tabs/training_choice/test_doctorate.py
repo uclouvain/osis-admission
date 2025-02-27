@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,27 +30,30 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
     SIGLE_SCIENCES,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import Onglets
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+)
 from admission.tests.factories.roles import (
-    SicManagementRoleFactory,
     CandidateFactory,
     ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
@@ -262,7 +265,7 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
 
         # CDSS
         self.doctorate_admission.training.management_entity = self.cdss_commission
-        self.doctorate_admission.proximity_commission = ChoixCommissionProximiteCDSS.BCM.name
+        self.doctorate_admission.proximity_commission = ChoixCommissionProximiteCDSS.BCGIM.name
         self.doctorate_admission.training.save(update_fields=['management_entity'])
         self.doctorate_admission.save(update_fields=['proximity_commission'])
 
@@ -274,7 +277,7 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         form = response.context['form']
 
         self.assertEqual(form['proximity_commission_cde'].value(), None)
-        self.assertEqual(form['proximity_commission_cdss'].value(), ChoixCommissionProximiteCDSS.BCM.name)
+        self.assertEqual(form['proximity_commission_cdss'].value(), ChoixCommissionProximiteCDSS.BCGIM.name)
         self.assertEqual(form['science_sub_domain'].value(), None)
 
         # Sciences
@@ -303,7 +306,7 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
             'admission_type': ChoixTypeAdmission.ADMISSION.name,
             'justification': 'My justification',
             'proximity_commission_cde': ChoixCommissionProximiteCDEouCLSM.MANAGEMENT.name,
-            'proximity_commission_cdss': ChoixCommissionProximiteCDSS.BCM.name,
+            'proximity_commission_cdss': ChoixCommissionProximiteCDSS.BCGIM.name,
             'science_sub_domain': ChoixSousDomaineSciences.MATHEMATICS.name,
             'specific_question_answers_0': 'My answer 1 updated',
             'specific_question_answers_2': 'My answer 2 updated',
@@ -377,7 +380,7 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
 
         self.assertEqual(
             self.doctorate_admission.proximity_commission,
-            ChoixCommissionProximiteCDSS.BCM.name,
+            ChoixCommissionProximiteCDSS.BCGIM.name,
         )
 
         # Science proximity commission
@@ -403,7 +406,7 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
             'admission_type': ChoixTypeAdmission.ADMISSION.name,
             'justification': 'My justification',
             'proximity_commission_cde': ChoixCommissionProximiteCDEouCLSM.MANAGEMENT.name,
-            'proximity_commission_cdss': ChoixCommissionProximiteCDSS.BCM.name,
+            'proximity_commission_cdss': ChoixCommissionProximiteCDSS.BCGIM.name,
             'science_sub_domain': ChoixSousDomaineSciences.MATHEMATICS.name,
             'specific_question_answers_0': 'My answer 1 updated',
             'specific_question_answers_2': 'My answer 2 updated',

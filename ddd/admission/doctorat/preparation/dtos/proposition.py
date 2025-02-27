@@ -37,7 +37,11 @@ from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
 from ddd.logic.reference.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
-from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE, ChoixTypeAdmission
+
+from ..domain.model.enums import (
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+    ChoixTypeAdmission,
+)
 from ..domain.model.enums.checklist import DroitsInscriptionMontant
 from .doctorat_formation import DoctoratFormationDTO
 from .motif_refus import MotifRefusDTO
@@ -183,7 +187,6 @@ class PropositionGestionnaireDTO(PropositionDTO):
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[Union['PartimSearchDTO', 'LearningUnitSearchDTO']]]
     commentaire_complements_formation: str
-    nombre_annees_prevoir_programme: Optional[int]
     nom_personne_contact_programme_annuel_annuel: str
     email_personne_contact_programme_annuel_annuel: str
     commentaire_programme_conjoint: str

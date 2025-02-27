@@ -1,0 +1,55 @@
+{% load admission bootstrap3 i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div id="choix-formation-form">
+  {% panel _("Proposition features") %}
+    {% bootstrap_form_errors form %}
+    <form
+      hx-post="{% url 'admission:doctorate:choix-formation-update' uuid=view.kwargs.uuid %}"
+      hx-target="#choix-formation-form"
+      hx-swap="outerHTML"
+    >
+      {% csrf_token %}
+      {% bootstrap_field form.type_demande %}
+      {% bootstrap_field form.annee_academique %}
+      {% translate "Course" context 'admission' as course_title %}
+      {% field_data course_title admission.formation %}
+      {% bootstrap_field form.commission_proximite %}
+      {% translate 'Save' context 'admission' as save_label %}
+      {% bootstrap_button save_label button_type="submit" button_class='btn-primary pull-right' %}
+      <a
+        class="btn btn-secondary pull-right"
+        hx-swap="outerHTML"
+        hx-target="#choix-formation-form"
+        hx-push-url="false"
+        hx-get="{% url 'admission:doctorate:choix-formation-detail' uuid=view.kwargs.uuid %}"
+      >
+        {% trans "Cancel" %}
+      </a>
+    </form>
+  {% endpanel %}
+  {{ form.media }}
+</div>

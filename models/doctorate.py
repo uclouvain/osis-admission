@@ -486,12 +486,6 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         verbose_name=_('Other communication for the candidate about the prerequisite courses'),
     )
-    program_planned_years_number = models.SmallIntegerField(
-        blank=True,
-        null=True,
-        verbose_name=_('Number of years required for the full program (including prerequisite courses)'),
-        validators=[MinValueValidator(DUREE_MINIMALE_PROGRAMME), MaxValueValidator(DUREE_MAXIMALE_PROGRAMME)],
-    )
     annual_program_contact_person_name = models.CharField(
         blank=True,
         default='',

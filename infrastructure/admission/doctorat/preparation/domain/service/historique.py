@@ -71,8 +71,8 @@ class Historique(IHistorique):
         auteur = PersonneConnueUclTranslator().get(matricule_auteur)
         add_history_entry(
             proposition.entity_id.uuid,
-            "La proposition a été modifiée (Projet de recherche).",
-            "The proposition has been completed (Research project).",
+            "La proposition a été modifiée (Recherche).",
+            "The proposition has been completed (Research).",
             "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", 'modification'],
         )

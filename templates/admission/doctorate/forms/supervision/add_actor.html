@@ -98,9 +98,6 @@
           <div class="col-md-12">
             {% bootstrap_field add_form.internal_external %}
           </div>
-          <div id="tutor" class="col-md-6">
-            {% bootstrap_field add_form.tutor %}
-          </div>
           <div id="person" class="col-md-6">
             {% bootstrap_field add_form.person %}
           </div>
@@ -152,11 +149,7 @@
   $(function () {
     // Display autocompletion based on member type
     $('#person').length && $('#person').dependsOn({
-      'input[name=type]': { values: ['CA_MEMBER'] },
-      'input[name=internal_external]': { values: ['INTERNAL'] },
-    }, { duration: 0 });
-    $('#tutor').length && $('#tutor').dependsOn({
-      'input[name=type]': { values: ['MAIN_PROMOTER', 'PROMOTER'] },
+      'input[name=type]': { values: ['MAIN_PROMOTER', 'PROMOTER', 'CA_MEMBER'] },
       'input[name=internal_external]': { values: ['INTERNAL'] },
     }, { duration: 0 });
 

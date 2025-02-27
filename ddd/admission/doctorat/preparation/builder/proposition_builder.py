@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,9 +25,15 @@
 ##############################################################################
 from typing import Optional, Union
 
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import projet_non_rempli
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    InitierPropositionCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
+    projet_non_rempli,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -37,13 +43,17 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
+    PropositionIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
+    IDoctoratTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     InitierPropositionValidatorList,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from osis_common.ddd import interface
 
 
@@ -66,7 +76,6 @@ class PropositionBuilder(interface.RootEntityBuilder):
         if cmd.pre_admission_associee:
             return cls.initier_nouvelle_proposition_attachee_a_pre_admission(
                 cmd,
-                doctorat_translator,
                 proposition_repository,
             )
         else:
@@ -118,14 +127,9 @@ class PropositionBuilder(interface.RootEntityBuilder):
     def initier_nouvelle_proposition_attachee_a_pre_admission(
         cls,
         cmd: 'InitierPropositionCommand',
-        doctorat_translator: 'IDoctoratTranslator',
         proposition_repository: 'IPropositionRepository',
     ) -> 'Proposition':
         pre_admission = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.pre_admission_associee))
-
-        doctorat = doctorat_translator.get(
-            sigle=pre_admission.formation_id.sigle, annee=pre_admission.formation_id.annee
-        )
 
         reference = proposition_repository.recuperer_reference_suivante()
 
@@ -140,16 +144,15 @@ class PropositionBuilder(interface.RootEntityBuilder):
             auteur_derniere_modification=cmd.matricule_candidat,
             pre_admission_associee=pre_admission.entity_id,
             curriculum=pre_admission.curriculum,
+            commission_proximite=pre_admission.commission_proximite,
         )
 
         proposition.completer(
-            doctorat=doctorat,
             justification=pre_admission.justification,
-            commission_proximite=pre_admission.commission_proximite.name if pre_admission.commission_proximite else '',
             type_financement=pre_admission.financement.type.name if pre_admission.financement.type else '',
-            type_contrat_travail=pre_admission.financement.type_contrat_travail
-            if pre_admission.financement.type_contrat_travail
-            else '',
+            type_contrat_travail=(
+                pre_admission.financement.type_contrat_travail if pre_admission.financement.type_contrat_travail else ''
+            ),
             eft=pre_admission.financement.eft,
             bourse_recherche=pre_admission.financement.bourse_recherche,
             autre_bourse_recherche=pre_admission.financement.autre_bourse_recherche,
@@ -165,9 +168,11 @@ class PropositionBuilder(interface.RootEntityBuilder):
             lieu_these=pre_admission.projet.lieu_these,
             titre=pre_admission.projet.titre,
             resume=pre_admission.projet.resume,
-            doctorat_deja_realise=pre_admission.experience_precedente_recherche.doctorat_deja_realise.name
-            if pre_admission.experience_precedente_recherche.doctorat_deja_realise
-            else '',
+            doctorat_deja_realise=(
+                pre_admission.experience_precedente_recherche.doctorat_deja_realise.name
+                if pre_admission.experience_precedente_recherche.doctorat_deja_realise
+                else ''
+            ),
             institution=pre_admission.experience_precedente_recherche.institution,
             domaine_these=pre_admission.experience_precedente_recherche.domaine_these,
             date_soutenance=pre_admission.experience_precedente_recherche.date_soutenance,

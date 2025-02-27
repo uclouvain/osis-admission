@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,30 +37,42 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.models import DoctorateAdmission
-from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
     recuperer_conditions_acces_par_formation,
 )
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
+from admission.models import DoctorateAdmission
+from admission.models.base import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory
-from admission.tests.factories.doctorate import DoctorateFactory, DoctorateAdmissionPrerequisiteCoursesFactory
+from admission.tests.factories.doctorate import (
+    DoctorateAdmissionPrerequisiteCoursesFactory,
+    DoctorateFactory,
+)
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
@@ -80,11 +92,21 @@ from base.tests.factories.student import StudentFactory
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.statut_inscription_programme_annuel import (
+    StatutInscriptionProgrammAnnuel,
+)
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from epc.tests.factories.inscription_programme_cycle import (
+    InscriptionProgrammeCycleFactory,
+)
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
+)
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
@@ -295,7 +317,6 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + doctorate_choices)
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
-        self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
@@ -313,116 +334,6 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertTrue(form.fields['admission_requirement'].disabled)
         self.assertTrue(form.fields['admission_requirement_year'].disabled)
-        self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
-
-    @freezegun.freeze_time('2023-01-01', as_kwarg='frozen_time')
-    def test_post_form_with_with_prerequisite_courses(self, frozen_time):
-        self.client.force_login(user=self.sic_manager_user)
-
-        # Add prerequisite courses
-        self.admission.with_prerequisite_courses = True
-        self.admission.prerequisite_courses_fac_comment = 'Test'
-        self.admission.save()
-
-        DoctorateAdmissionPrerequisiteCoursesFactory(
-            admission=self.admission,
-        )
-
-        frozen_time.move_to('2023-01-02')
-
-        # With prerequisite courses
-        response = self.client.post(
-            self.url,
-            **self.default_headers,
-            data={
-                'with_prerequisite_courses': True,
-            },
-        )
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Check the admission
-        self.admission.refresh_from_db()
-
-        self.assertEqual(self.admission.with_prerequisite_courses, True)
-        self.assertEqual(self.admission.prerequisite_courses_fac_comment, 'Test')
-        self.assertEqual(self.admission.prerequisite_courses.count(), 1)
-        self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
-
-        previous_date = datetime.datetime.now()
-
-        self.admission.last_update_author = None
-        self.admission.save(update_fields=['last_update_author'])
-        frozen_time.move_to('2023-01-03')
-
-        # Without prerequisite courses
-        without_prerequisite_courses_error_message = gettext(
-            'If the answer to the additional courses question is no, there must be no additional LU and the '
-            'communication relating to the additional courses must be completely empty.'
-        )
-        response = self.client.post(
-            self.url,
-            **self.default_headers,
-            data={
-                'with_prerequisite_courses': False,
-            },
-        )
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDjangoMessage(response, without_prerequisite_courses_error_message)
-
-        # Check the form
-        form = response.context['past_experiences_admission_requirement_form']
-        self.assertEqual(form['with_prerequisite_courses'].value(), True)
-
-        # Check the admission
-        self.admission.refresh_from_db()
-
-        self.assertEqual(self.admission.with_prerequisite_courses, True)
-        self.assertEqual(self.admission.prerequisite_courses_fac_comment, 'Test')
-        self.assertEqual(self.admission.prerequisite_courses.count(), 1)
-        self.assertEqual(self.admission.last_update_author, None)
-        self.assertEqual(self.admission.modified_at, previous_date)
-
-        self.admission.prerequisite_courses.clear()
-        self.admission.prerequisite_courses_fac_comment = ''
-        self.admission.save(update_fields=['prerequisite_courses_fac_comment'])
-
-        response = self.client.post(
-            self.url,
-            **self.default_headers,
-            data={
-                'with_prerequisite_courses': False,
-            },
-        )
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertNotDjangoMessages(response, without_prerequisite_courses_error_message)
-
-        # Check the form
-        form = response.context['past_experiences_admission_requirement_form']
-        self.assertEqual(form['with_prerequisite_courses'].value(), False)
-
-        # Check the admission
-        self.admission.refresh_from_db()
-
-        self.assertEqual(self.admission.with_prerequisite_courses, False)
-        self.assertEqual(self.admission.prerequisite_courses_fac_comment, '')
-        self.assertEqual(self.admission.prerequisite_courses.count(), 0)
-        self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
-
-    def assertDjangoMessage(self, response, message):
-        messages = [m.message for m in response.context['messages']]
-        self.assertIn(message, messages)
-
-    def assertNotDjangoMessages(self, response, message):
-        messages = [m.message for m in response.context['messages']]
-        self.assertNotIn(message, messages)
 
     def test_post_form_with_admission_requirement_without_access_titles(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -457,62 +368,6 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(self.admission.admission_requirement, ConditionAcces.MASTER.name)
         self.assertEqual(self.admission.admission_requirement_year, self.academic_years[0])
-
-    def test_post_form_with_admission_requirement_and_with_prerequisite_courses(self):
-        other_admission: DoctorateAdmission = DoctorateAdmissionFactory(
-            training=DoctorateFactory(
-                management_entity=self.admission.training.management_entity,
-                academic_year=self.admission.training.academic_year,
-                education_group_type__name=TrainingType.MASTER_M1.name,
-            ),
-            candidate=self.candidate,
-            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
-        )
-
-        master_url = resolve_url(self.url_name, uuid=other_admission.uuid)
-
-        self.client.force_login(user=self.sic_manager_user)
-
-        # With explicit prerequisite courses
-        response = self.client.post(
-            master_url,
-            **self.default_headers,
-            data={
-                'admission_requirement': ConditionAcces.MASTER.name,
-                'admission_requirement_year': self.academic_years[0].pk,
-                'with_prerequisite_courses': False,
-            },
-        )
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Check the admission
-        other_admission.refresh_from_db()
-
-        self.assertEqual(other_admission.admission_requirement, ConditionAcces.MASTER.name)
-        self.assertEqual(other_admission.admission_requirement_year, self.academic_years[0])
-        self.assertEqual(other_admission.with_prerequisite_courses, False)
-
-        # With implicit prerequisite courses
-        response = self.client.post(
-            master_url,
-            **self.default_headers,
-            data={
-                'admission_requirement': ConditionAcces.SNU_TYPE_COURT.name,
-                'admission_requirement_year': self.academic_years[0].pk,
-            },
-        )
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Check the admission
-        other_admission.refresh_from_db()
-
-        self.assertEqual(other_admission.admission_requirement, ConditionAcces.SNU_TYPE_COURT.name)
-        self.assertEqual(other_admission.admission_requirement_year, self.academic_years[0])
-        self.assertEqual(other_admission.with_prerequisite_courses, True)
 
     def test_post_form_with_admission_requirement_with_access_titles(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -1219,8 +1074,8 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_specify_the_higher_education_experience_as_access_title(self, confirm_multiple_upload):
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         )
 
         self.client.force_login(user=self.sic_manager_user)

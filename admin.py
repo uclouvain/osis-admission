@@ -833,7 +833,7 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
         'admission__candidate__first_name',
         'admission__candidate__global_id',
         'admission__reference',
-        'payment_id'
+        'payment_id',
     ]
     list_display = ['admission', 'payment_id', 'status', 'method']
     list_filter = ['status', 'method']

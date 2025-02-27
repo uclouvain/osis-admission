@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 import datetime
 import json
 from collections import defaultdict
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 from ckeditor.widgets import CKEditorWidget
 from dal import forward
@@ -36,63 +36,66 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import F, Q
 from django.utils.safestring import mark_safe
-from django.utils.translation import (
-    gettext_lazy as _,
-    get_language,
-    ngettext_lazy,
-    pgettext_lazy,
-    pgettext,
-    gettext,
-    override,
-)
+from django.utils.translation import get_language, gettext
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext_lazy, override, pgettext, pgettext_lazy
+from osis_document.utils import is_uuid
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.domain.model.enums.condition_acces import recuperer_conditions_acces_par_formation
+from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    recuperer_conditions_acces_par_formation,
+)
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    PoursuiteDeCycle,
     BesoinDeDerogation,
-    DroitsInscriptionMontant,
-    TypeDeRefus,
     ChoixStatutChecklist,
-    DispenseOuDroitsMajores,
     DerogationFinancement,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+    PoursuiteDeCycle,
+    TypeDeRefus,
 )
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-    FilterFieldWidget,
     EMPTY_CHOICE_AS_LIST,
-    get_initial_choices_for_additional_approval_conditions,
     AdmissionHTMLCharField,
     AutoGrowTextareaWidget,
+    FilterFieldWidget,
+    get_academic_year_choices,
+    get_initial_choices_for_additional_approval_conditions,
 )
-from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
-from admission.models import GeneralEducationAdmission, DoctorateAdmission
+from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import training_campus_subquery
-from admission.models.checklist import (
-    RefusalReason,
-    AdditionalApprovalCondition,
+from admission.models.checklist import AdditionalApprovalCondition, RefusalReason
+from admission.views.autocomplete.learning_unit_years import (
+    LearningUnitYearAutocomplete,
 )
-from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import (
-    COMMENT_TAG_SIC,
-    COMMENT_TAG_FAC,
-    COMMENT_TAG_IUFC_FOR_FAC,
-    COMMENT_TAG_FAC_FOR_IUFC,
     COMMENT_TAG_CDD_FOR_SIC,
+    COMMENT_TAG_FAC,
+    COMMENT_TAG_FAC_FOR_IUFC,
+    COMMENT_TAG_IUFC_FOR_FAC,
+    COMMENT_TAG_SIC,
     COMMENT_TAG_SIC_FOR_CDD,
 )
-from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
+from base.forms.utils import (
+    EMPTY_CHOICE,
+    FIELD_REQUIRED_MESSAGE,
+    autocomplete,
+    get_example_text,
+)
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from base.forms.utils.choice_field import BLANK_CHOICE
@@ -103,12 +106,11 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
-    SituationFinancabilite,
     SITUATION_FINANCABILITE_PAR_ETAT,
+    SituationFinancabilite,
 )
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
-from osis_document.utils import is_uuid
 
 FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 
@@ -476,7 +478,6 @@ class CommonApprovalForm(forms.ModelForm):
         fields = [
             'prerequisite_courses',
             'prerequisite_courses_fac_comment',
-            'program_planned_years_number',
             'annual_program_contact_person_name',
             'annual_program_contact_person_email',
             'join_program_fac_comment',
@@ -490,10 +491,6 @@ class CommonApprovalForm(forms.ModelForm):
             'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
             'join_program_fac_comment': CKEditorWidget(config_name='comment_link_only'),
             'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
-            'program_planned_years_number': forms.Select(
-                choices=EMPTY_CHOICE_AS_LIST
-                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
-            ),
         }
 
     def __init__(
@@ -541,9 +538,6 @@ class CommonApprovalForm(forms.ModelForm):
             cleaned_data['prerequisite_courses'] = []
             cleaned_data['prerequisite_courses_fac_comment'] = ''
 
-        if not cleaned_data.get('program_planned_years_number'):
-            self.add_error('program_planned_years_number', FIELD_REQUIRED_MESSAGE)
-
         return cleaned_data
 
 
@@ -580,10 +574,15 @@ class FacDecisionApprovalForm(CommonApprovalForm):
         fields = CommonApprovalForm.Meta.fields + [
             'other_training_accepted_by_fac',
             'with_additional_approval_conditions',
+            'program_planned_years_number',
         ]
         widgets = {
             **CommonApprovalForm.Meta.widgets,
             'with_additional_approval_conditions': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'program_planned_years_number': forms.Select(
+                choices=EMPTY_CHOICE_AS_LIST
+                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
+            ),
         }
 
     def __init__(
@@ -710,6 +709,9 @@ class FacDecisionApprovalForm(CommonApprovalForm):
             cleaned_data['additional_approval_conditions'] = []
             cleaned_data['cv_experiences_additional_approval_conditions'] = []
 
+        if not cleaned_data.get('program_planned_years_number'):
+            self.add_error('program_planned_years_number', FIELD_REQUIRED_MESSAGE)
+
         return cleaned_data
 
 
@@ -754,6 +756,10 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
 class DoctoratePastExperiencesAdmissionRequirementForm(PastExperiencesAdmissionRequirementForm):
     class Meta(PastExperiencesAdmissionRequirementForm.Meta):
         model = DoctorateAdmission
+        fields = [
+            'admission_requirement',
+            'admission_requirement_year',
+        ]
 
 
 class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
@@ -897,7 +903,6 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
         fields = [
             'prerequisite_courses',
             'prerequisite_courses_fac_comment',
-            'program_planned_years_number',
             'annual_program_contact_person_name',
             'annual_program_contact_person_email',
             'with_prerequisite_courses',
@@ -917,10 +922,6 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
         widgets = {
             'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
             'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
-            'program_planned_years_number': forms.Select(
-                choices=EMPTY_CHOICE_AS_LIST
-                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
-            ),
             'is_mobility': forms.Select(choices=[(None, '-'), (True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
@@ -1001,7 +1002,6 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
         else:
             self.initial['must_report_to_sic'] = False
             self.fields['must_report_to_sic'].required = True
-            self.fields['program_planned_years_number'].required = True
             self.fields['communication_to_the_candidate'].required = False
             self.fields['with_prerequisite_courses'].required = True
 
@@ -1060,6 +1060,7 @@ class SicDecisionApprovalForm(CommonSicDecisionApprovalForm):
             'particular_cost',
             'rebilling_or_third_party_payer',
             'first_year_inscription_and_status',
+            'program_planned_years_number',
         ]
         widgets = {
             **CommonSicDecisionApprovalForm.Meta.widgets,
@@ -1067,6 +1068,10 @@ class SicDecisionApprovalForm(CommonSicDecisionApprovalForm):
             'particular_cost': forms.TextInput(),
             'rebilling_or_third_party_payer': forms.TextInput(),
             'first_year_inscription_and_status': forms.TextInput(),
+            'program_planned_years_number': forms.Select(
+                choices=EMPTY_CHOICE_AS_LIST
+                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
+            ),
         }
 
     def __init__(
@@ -1136,6 +1141,7 @@ class SicDecisionApprovalForm(CommonSicDecisionApprovalForm):
 
         if self.is_admission:
             self.fields['with_additional_approval_conditions'].required = True
+            self.fields['program_planned_years_number'].required = True
 
     def clean_all_additional_approval_conditions(self):
         # This field can contain uuids of existing conditions or free conditions as strings

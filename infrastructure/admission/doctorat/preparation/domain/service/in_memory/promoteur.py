@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,10 +26,16 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PromoteurNonTrouveException
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PromoteurNonTrouveException,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
-from admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur import IPromoteurTranslator
+from admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur import (
+    IPromoteurTranslator,
+)
 
 
 @dataclass
@@ -97,23 +103,35 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
         raise NotImplementedError
 
     @classmethod
+    def _build_dto_from_model(cls, promoteur: 'Promoteur') -> 'PromoteurDTO':
+        return PromoteurDTO(
+            uuid=promoteur.id.uuid,
+            matricule=promoteur.matricule,
+            nom=promoteur.nom,
+            prenom=promoteur.prenom,
+            email=promoteur.email,
+            est_docteur=promoteur.est_docteur,
+            institution=promoteur.institution,
+            ville=promoteur.ville,
+            pays=promoteur.pays,
+            est_externe=promoteur.externe,
+        )
+
+    @classmethod
     def get_dto(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurDTO':
         try:
             p = next(p for p in cls.promoteurs if p.id.uuid == promoteur_id.uuid)  # pragma: no branch
-            return PromoteurDTO(
-                uuid=p.id.uuid,
-                matricule=p.matricule,
-                nom=p.nom,
-                prenom=p.prenom,
-                email=p.email,
-                est_docteur=p.est_docteur,
-                institution=p.institution,
-                ville=p.ville,
-                pays=p.pays,
-                est_externe=p.externe,
-            )
+            return cls._build_dto_from_model(promoteur=p)
         except StopIteration:  # pragma: no cover
             raise PromoteurNonTrouveException
+
+    @classmethod
+    def search_dto(cls, promoteurs_ids: List[str] = None, terme_recherche: str = None) -> List['PromoteurDTO']:
+        return [
+            cls._build_dto_from_model(promoteur)
+            for promoteur in cls.promoteurs
+            if (terme_recherche is None or terme_recherche == promoteur.matricule)
+        ]
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:

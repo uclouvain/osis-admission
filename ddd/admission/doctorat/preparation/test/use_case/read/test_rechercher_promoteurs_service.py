@@ -23,40 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
 
-from ckeditor.fields import RichTextFormField
-from django import forms
-from django.utils.translation import gettext_lazy as _
+from django.test import SimpleTestCase
 
-from admission.models import DoctorateAdmission
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RechercherPromoteursQuery,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 
 
-class CddDoctorateSendMailForm(forms.Form):
-    recipient = forms.CharField(
-        label=_("Recipient"),
-        disabled=True,
-    )
-    cc_promoteurs = forms.BooleanField(
-        label=_("Carbon-copy the promoters"),
-        required=False,
-    )
-    cc_membres_ca = forms.BooleanField(
-        label=_("Carbon-copy the CA members"),
-        required=False,
-    )
-    subject = forms.CharField(
-        label=_("Message subject"),
-    )
-    body = RichTextFormField(
-        label=_("Message for the candidate"),
-        config_name='osis_mail_template',
-    )
+class TestRechercherPromoteursService(SimpleTestCase):
+    def setUp(self) -> None:
+        self.message_bus = message_bus_in_memory_instance
 
-    def __init__(self, admission: 'DoctorateAdmission', *args, **kwargs):
-        self.admission = admission
-        super().__init__(*args, **kwargs)
-        self.fields['recipient'].initial = (
-            '{candidate.first_name} {candidate.last_name} ({candidate.private_email})'.format(
-                candidate=self.admission.candidate
-            )
+    def test_should_rechercher_par_terme_recherche(self):
+        promoteurs_dtos: List[PromoteurDTO] = self.message_bus.invoke(
+            RechercherPromoteursQuery(terme_recherche='00987890'),
         )
+
+        self.assertEqual(len(promoteurs_dtos), 1)
+
+        self.assertEqual(promoteurs_dtos[0].matricule, '00987890')

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -62,6 +62,5 @@ ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES = {
     AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA,
 }
 CONTEXT_DOCTORATE = 'doctorate'
-CONTEXT_DOCTORATE_AFTER_ENROLMENT = 'doctorate-after-enrolment'  # TODO doctorate refactorization
 CONTEXT_GENERAL = 'general-education'
 CONTEXT_CONTINUING = 'continuing-education'

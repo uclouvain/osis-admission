@@ -585,33 +585,6 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurricul
             experience_year_args={},
         )
 
-    def test_get_curriculum_with_incomplete_educational_experience_dissertation_title_missing(self):
-        self._test_get_curriculum_with_incomplete_educational_experience(
-            experience_args={
-                'obtained_diploma': True,
-                'dissertation_title': '',
-            },
-            experience_year_args={},
-        )
-
-    def test_get_curriculum_with_incomplete_educational_experience_dissertation_score_missing(self):
-        self._test_get_curriculum_with_incomplete_educational_experience(
-            experience_args={
-                'obtained_diploma': True,
-                'dissertation_score': '',
-            },
-            experience_year_args={},
-        )
-
-    def test_get_curriculum_with_incomplete_educational_experience_dissertation_summary_missing(self):
-        self._test_get_curriculum_with_incomplete_educational_experience(
-            experience_args={
-                'obtained_diploma': True,
-                'dissertation_summary': [],
-            },
-            experience_year_args={},
-        )
-
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
 

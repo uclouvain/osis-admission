@@ -156,10 +156,12 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 None,
             ),
             cotutelle=cotutelle,
-            statut_signature=ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
-            if proposition.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
-            or proposition.status == ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name
-            else None,
+            statut_signature=(
+                ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
+                if proposition.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+                or proposition.status == ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name
+                else None
+            ),
         )
 
     @classmethod

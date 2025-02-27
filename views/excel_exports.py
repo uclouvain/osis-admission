@@ -86,7 +86,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from admission.models import AdmissionFormItem
+from admission.models import AdmissionFormItem, SupervisionActor
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
@@ -630,19 +630,17 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         mapping_filter_key_value = {}
 
         # Retrieve the names of the persons
-        field_name_by_global_id = {
-            formatted_filters[field_name]: field_name
-            for field_name in [
-                'matricule_candidat',
-                'matricule_promoteur',
-            ]
-            if formatted_filters.get(field_name)
-        }
+        candidate_global_id = formatted_filters.get('matricule_candidat')
+        if candidate_global_id:
+            candidate = Person.objects.filter(global_id=candidate_global_id).first()
+            if candidate:
+                mapping_filter_key_value['matricule_candidat'] = candidate.full_name
 
-        if field_name_by_global_id:
-            persons = Person.objects.filter(global_id__in=list(field_name_by_global_id.keys()))
-            for person in persons:
-                mapping_filter_key_value[field_name_by_global_id[person.global_id]] = person.full_name
+        promoter_uuid = formatted_filters.get('uuid_promoteur')
+        if promoter_uuid:
+            promoter = SupervisionActor.objects.filter(uuid=promoter_uuid).first()
+            if promoter:
+                mapping_filter_key_value['uuid_promoteur'] = promoter.complete_name
 
         # Retrieve the nationality
         country_of_citizenship_iso_code = formatted_filters.get('nationalite')
@@ -657,19 +655,13 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             if country:
                 mapping_filter_key_value['nationalite'] = getattr(country, country_field)
 
-        # Retrieve the names of the scholarships
-        field_name_by_global_id = {
-            uuid.UUID(formatted_filters[field_name]): field_name
-            for field_name in [
-                'bourse_recherche',
-            ]
-            if formatted_filters.get(field_name)
-        }
+        # Retrieve the name of the scholarship
+        scholarship_uuid = formatted_filters.get('bourse_recherche')
+        if scholarship_uuid:
+            scholarship = Scholarship.objects.filter(uuid=scholarship_uuid).first()
 
-        if field_name_by_global_id:
-            scholarships = Scholarship.objects.filter(uuid__in=list(field_name_by_global_id.keys()))
-            for scholarship in scholarships:
-                mapping_filter_key_value[field_name_by_global_id[scholarship.uuid]] = scholarship.short_name
+            if scholarship:
+                mapping_filter_key_value['bourse_recherche'] = scholarship.short_name
 
         # Format the checklist filters
         mapping_filter_key_value['filtres_etats_checklist'] = {}
@@ -770,7 +762,6 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters = form.cleaned_data
             filters.pop('taille_page', None)
             filters.pop('page', None)
-            filters.pop('liste_travail', None)
 
             ordering_field = self.request.GET.get('o')
             if ordering_field:

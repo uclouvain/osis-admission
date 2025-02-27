@@ -418,8 +418,6 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
 
         missing_fields = [
             'expected_graduation_date',
-            'dissertation_title',
-            'dissertation_score',
             'obtained_grade',
         ]
 

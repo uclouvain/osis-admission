@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,9 @@
 from typing import List
 
 from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery
-from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import IListerDemandesService
+from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import (
+    IListerDemandesService,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 
 
@@ -44,7 +46,7 @@ def lister_demandes(
         cdds=cmd.cdds,
         commission_proximite=cmd.commission_proximite,
         sigles_formations=cmd.sigles_formations,
-        matricule_promoteur=cmd.matricule_promoteur,
+        uuid_promoteur=cmd.uuid_promoteur,
         type_financement=cmd.type_financement,
         bourse_recherche=cmd.bourse_recherche,
         cotutelle=cmd.cotutelle,

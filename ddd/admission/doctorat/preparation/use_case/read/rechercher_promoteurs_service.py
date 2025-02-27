@@ -23,43 +23,18 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-from typing import List, Optional
-
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
-    PromoteurIdentity,
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RechercherPromoteursQuery,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
 
 
-class IPromoteurTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def get(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurIdentity':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_dto(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def search_dto(cls, promoteurs_ids: List[str] = None, terme_recherche: str = None) -> List['PromoteurDTO']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def est_externe(cls, promoteur_id: PromoteurIdentity) -> bool:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def verifier_existence(cls, matricule: Optional[str]) -> bool:
-        raise NotImplementedError
+def rechercher_promoteurs(
+    cmd: RechercherPromoteursQuery,
+    promoteur_translator: IPromoteurTranslator,
+):
+    return promoteur_translator.search_dto(
+        terme_recherche=cmd.terme_recherche,
+    )

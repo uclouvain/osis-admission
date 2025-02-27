@@ -131,13 +131,6 @@ class DoctorateAdmissionSupervisionForm(DoctorateAdmissionMemberSupervisionForm)
         initial="INTERNAL",
         widget=forms.RadioSelect(),
     )
-    tutor = forms.CharField(
-        label=_("Search a tutor by name"),
-        widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:tutor",
-        ),
-        required=False,
-    )
     person = forms.CharField(
         label=_("Search a person by surname"),
         widget=autocomplete.ListSelect2(
@@ -149,12 +142,7 @@ class DoctorateAdmissionSupervisionForm(DoctorateAdmissionMemberSupervisionForm)
     def clean(self):
         data = self.cleaned_data
         is_external = data.get('internal_external') == ACTOR_EXTERNAL
-        if not is_external and (
-            data.get('type') == ActorType.CA_MEMBER.name
-            and not data.get('person')
-            or data.get('type') == ActorType.PROMOTER.name
-            and not data.get('tutor')
-        ):
+        if not is_external and not data.get('person'):
             self.add_error(None, _("You must reference a person in UCLouvain."))
         elif is_external:
             self.clean_external_fields(data)

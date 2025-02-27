@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,25 +35,26 @@ from unittest.mock import patch
 import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
-from django.test import TestCase
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_mail_template.models import MailTemplate
 from osis_notification.models import EmailNotification
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.models import DoctorateAdmission
-from admission.models.checklist import (
-    AdditionalApprovalCondition,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     DecisionCDDEnum,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.mail_templates import ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE
+from admission.models import DoctorateAdmission
+from admission.models.checklist import AdditionalApprovalCondition
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
@@ -61,16 +62,16 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
-from osis_profile.models import (
-    EducationalExperience,
-    ProfessionalExperience,
-)
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 class CddDecisionViewTestCase(TestCase):
@@ -875,7 +876,6 @@ class CddApprovalDecisionViewTestCase(TestCase):
         self.admission.with_prerequisite_courses = None
         self.admission.prerequisite_courses.set([])
         self.admission.prerequisite_courses_fac_comment = ''
-        self.admission.program_planned_years_number = None
         self.admission.annual_program_contact_person_name = ''
         self.admission.annual_program_contact_person_email = ''
         self.admission.join_program_fac_comment = ''
@@ -890,7 +890,6 @@ class CddApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(form.initial.get('with_prerequisite_courses'), None)
         self.assertEqual(form.initial.get('prerequisite_courses'), [])
         self.assertEqual(form.initial.get('prerequisite_courses_fac_comment'), '')
-        self.assertEqual(form.initial.get('program_planned_years_number'), None)
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
         self.assertEqual(form.initial.get('join_program_fac_comment'), '')
@@ -944,43 +943,6 @@ class CddApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                "cdd-decision-approval-prerequisite_courses": [],
-                'cdd-decision-approval-with_prerequisite_courses': 'True',
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['cdd_decision_approval_form']
-
-        self.assertFalse(form.is_valid())
-
-        # Missing fields
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
-        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
-
-        response = self.client.post(
-            self.url,
-            data={
-                'cdd-decision-approval-with_prerequisite_courses': 'False',
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['cdd_decision_approval_form']
-
-        self.assertFalse(form.is_valid())
-
-        # Missing fields
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
-        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
-
-        response = self.client.post(
-            self.url,
-            data={
                 "cdd-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
                 'cdd-decision-approval-another_training': True,
                 'cdd-decision-approval-with_prerequisite_courses': 'True',
@@ -994,7 +956,6 @@ class CddApprovalDecisionViewTestCase(TestCase):
 
         self.assertFalse(form.is_valid())
 
-        # Prerequisite courses
         self.assertCountEqual(
             form.fields['prerequisite_courses'].choices,
             [
@@ -1017,6 +978,80 @@ class CddApprovalDecisionViewTestCase(TestCase):
             LearningUnitYearFactory(academic_year=self.admission.determined_academic_year),
         ]
 
+        # No data
+        response = self.client.post(self.url, data={}, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['cdd_decision_approval_form']
+
+        self.assertTrue(form.is_valid())
+
+        # Check that the admission has been updated
+        self.admission.refresh_from_db()
+
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
+        self.assertEqual(
+            self.admission.checklist['current']['decision_cdd']['statut'],
+            ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        )
+        self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.cdd_approval_certificate, [])
+        self.assertIsNone(self.admission.with_prerequisite_courses)
+        self.assertFalse(self.admission.prerequisite_courses.exists())
+        self.assertEqual(self.admission.prerequisite_courses_fac_comment, '')
+        self.assertEqual(self.admission.annual_program_contact_person_name, '')
+        self.assertEqual(self.admission.annual_program_contact_person_email, '')
+        self.assertEqual(self.admission.join_program_fac_comment, '')
+
+        # Some prerequisite courses are required but no one is specified for now
+        response = self.client.post(
+            self.url,
+            data={
+                "cdd-decision-approval-prerequisite_courses": [],
+                'cdd-decision-approval-with_prerequisite_courses': 'True',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['cdd_decision_approval_form']
+
+        self.assertTrue(form.is_valid())
+
+        # Check that the admission has been updated
+        self.admission.refresh_from_db()
+
+        self.assertTrue(self.admission.with_prerequisite_courses)
+        self.assertFalse(self.admission.prerequisite_courses.exists())
+
+        # No prerequisite course is required
+        response = self.client.post(
+            self.url,
+            data={
+                'cdd-decision-approval-with_prerequisite_courses': 'False',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['cdd_decision_approval_form']
+
+        self.assertTrue(form.is_valid())
+
+        # Check that the admission has been updated
+        self.admission.refresh_from_db()
+
+        self.assertFalse(self.admission.with_prerequisite_courses)
+        self.assertFalse(self.admission.prerequisite_courses.exists())
+
+        # Full data
         response = self.client.post(
             self.url,
             data={
@@ -1025,7 +1060,6 @@ class CddApprovalDecisionViewTestCase(TestCase):
                 ],
                 'cdd-decision-approval-with_prerequisite_courses': 'True',
                 'cdd-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
-                'cdd-decision-approval-program_planned_years_number': 5,
                 'cdd-decision-approval-annual_program_contact_person_name': 'John Doe',
                 'cdd-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
                 'cdd-decision-approval-join_program_fac_comment': 'Comment about the join program',
@@ -1059,7 +1093,6 @@ class CddApprovalDecisionViewTestCase(TestCase):
             self.admission.prerequisite_courses_fac_comment,
             'Comment about the additional trainings',
         )
-        self.assertEqual(self.admission.program_planned_years_number, 5)
         self.assertEqual(self.admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.admission.join_program_fac_comment, 'Comment about the join program')
@@ -1094,7 +1127,6 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             submitted=True,
             status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
-            program_planned_years_number=5,
         )
         self.default_checklist = copy.deepcopy(self.admission.checklist)
         self.url = resolve_url(
@@ -1178,7 +1210,6 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
 
         self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
         self.admission.with_prerequisite_courses = None
-        self.admission.program_planned_years_number = None
         self.admission.are_secondary_studies_access_title = True
         self.admission.save()
 
@@ -1192,18 +1223,7 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('subject', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('body', []))
 
-        # Invalid request -> We need to specify the missing data related to the approval decision
-        response = self.client.post(self.url, data=self.default_data, **self.default_headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            gettext(
-                'When accepting a proposition, all the required information in the approval form must be specified.'
-            ),
-            [m.message for m in response.context['messages']],
-        )
-
         self.admission.with_prerequisite_courses = False
-        self.admission.program_planned_years_number = 5
         self.admission.are_secondary_studies_access_title = False
         self.admission.save()
 

@@ -75,3 +75,7 @@ class SupervisionActor(Actor):
     is_reference_promoter = models.BooleanField(
         default=False,
     )
+
+    @property
+    def complete_name(self):
+        return f'{self.last_name}, {self.first_name}'

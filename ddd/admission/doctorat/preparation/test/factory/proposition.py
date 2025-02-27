@@ -308,10 +308,6 @@ class _PropositionFactory(factory.Factory):
             ),
             avec_complements_formation=True,
             commentaire_complements_formation=factory.fuzzy.FuzzyText(),
-            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
-                low=DUREE_MINIMALE_PROGRAMME,
-                high=DUREE_MAXIMALE_PROGRAMME,
-            ),
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
             commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
@@ -325,10 +321,6 @@ class _PropositionFactory(factory.Factory):
             ),
             avec_complements_formation=True,
             commentaire_complements_formation=factory.fuzzy.FuzzyText(),
-            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
-                low=DUREE_MINIMALE_PROGRAMME,
-                high=DUREE_MAXIMALE_PROGRAMME,
-            ),
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
             droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE,
