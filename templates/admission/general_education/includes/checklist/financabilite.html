@@ -87,7 +87,7 @@
       {% endif %}
     </div>
 
-    {% bootstrap_form comment_forms.financabilite %}
+    {% htmx_comment_form comment_forms.financabilite %}
 
     {% if original_admission.financability_dispensation_first_notification_on %}
       {% if original_admission.financability_dispensation_last_notification_on %}
@@ -103,7 +103,7 @@
       {% bootstrap_form financability_dispensation_form %}
       </form>
 
-      {% bootstrap_form comment_forms.financabilite__derogation %}
+      {% htmx_comment_form comment_forms.financabilite__derogation %}
 
       <script>
         $('input[name=financabilite_derogation-dispensation_status][value=CANDIDAT_NOTIFIE]').parent().append(' <i class="fa fa-solid fa-envelope"></i>');
@@ -126,14 +126,7 @@
         <dt>{% trans 'Financability dispensation needed' %}</dt>
         <dd>{{ original_admission.financability_dispensation_status|enum_display:"DerogationFinancement" }}</dd>
 
-        {% if comment_forms.financabilite_derogation.fields.comment.initial %}
-        <dt>{% trans 'Comment about financability dispensation' %}</dt>
-        <dd>
-          <div class="form-group">
-            <textarea class="form-control" disabled>{{ comment_forms.financabilite_derogation.fields.comment.initial|default_if_none:"" }}</textarea>
-          </div>
-        </dd>
-        {% endif %}
+        {% htmx_comment_form comment_forms.financabilite__derogation disabled=True %}
       </dl>
     {% endif %}
     {% if original_admission.financability_dispensation_status == 'REFUS_DE_DEROGATION_FACULTAIRE' %}
