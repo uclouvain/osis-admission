@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.114
+  version: 1.0.116
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5210,6 +5210,9 @@ components:
     Dashboard:
       type: object
       properties:
+        donnees_transferees_vers_compte_interne:
+          type: boolean
+          default: false
         links:
           type: object
           properties:
