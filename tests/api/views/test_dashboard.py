@@ -30,7 +30,6 @@ from rest_framework.test import APITestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.person import PersonFactory
-from gestion_des_comptes.models import HistoriqueMatriculeCompte
 
 
 class DashboardTestCase(APITestCase):
@@ -56,7 +55,6 @@ class DashboardTestCase(APITestCase):
         self.assertEqual(
             response.json(),
             {
-                'donnees_transferees_vers_compte_interne': False,
                 'links': {
                     'list_propositions': {'method': 'GET', 'url': f'{self.base_url}/api/v1/admission/propositions'},
                     'list_supervised': {'error': "Method 'GET' not allowed"},
@@ -70,7 +68,6 @@ class DashboardTestCase(APITestCase):
         self.assertEqual(
             response.json(),
             {
-                'donnees_transferees_vers_compte_interne': False,
                 'links': {
                     'list_propositions': {'method': 'GET', 'url': f'{self.base_url}/api/v1/admission/propositions'},
                     'list_supervised': {'error': "Method 'GET' not allowed"},
@@ -84,33 +81,12 @@ class DashboardTestCase(APITestCase):
         self.assertEqual(
             response.json(),
             {
-                'donnees_transferees_vers_compte_interne': False,
                 'links': {
                     'list_propositions': {'method': 'GET', 'url': f'{self.base_url}/api/v1/admission/propositions'},
                     'list_supervised': {
                         'method': 'GET',
                         'url': f'{self.base_url}/api/v1/admission/supervised_propositions',
                     },
-                }
-            },
-        )
-
-    def test_dashboard_after_external_account_switch_to_internal_account(self):
-        HistoriqueMatriculeCompte.objects.create(
-            matricule_interne='00989898',
-            matricule_interne_actif=True,
-            matricule_externe=self.candidate_user.person.global_id,
-        )
-
-        self.client.force_authenticate(self.candidate_user)
-        response = self.client.get(self.url)
-        self.assertEqual(
-            response.json(),
-            {
-                'donnees_transferees_vers_compte_interne': True,
-                'links': {
-                    'list_propositions': {'method': 'GET', 'url': f'{self.base_url}/api/v1/admission/propositions'},
-                    'list_supervised': {'error': "Method 'GET' not allowed"},
                 }
             },
         )

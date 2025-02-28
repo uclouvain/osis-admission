@@ -28,7 +28,6 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from gestion_des_comptes.models import HistoriqueMatriculeCompte
 
 
 class DashboardSchema(ResponseSpecificSchema):
@@ -49,19 +48,7 @@ class DashboardViewSet(RetrieveAPIView):
     def get(self, request, **kwargs):
         """Get the actions links for the application"""
         serializer = serializers.DashboardSerializer(
-            instance={
-                'donnees_transferees_vers_compte_interne': self.get_donnees_transferees_vers_compte_interne(
-                    matricule=request.user.person.global_id
-                )
-            },
+            instance={},
             context=self.get_serializer_context(),
         )
         return Response(serializer.data)
-
-    def get_donnees_transferees_vers_compte_interne(self, matricule: str) -> bool:
-        if matricule.startswith('8'):
-            return HistoriqueMatriculeCompte.objects.filter(
-                matricule_externe=matricule,
-                matricule_interne_actif=True
-            ).exists()
-        return False
