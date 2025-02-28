@@ -115,7 +115,6 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.admission.with_prerequisite_courses = None
         self.admission.prerequisite_courses.set([])
         self.admission.prerequisite_courses_fac_comment = ''
-        self.admission.program_planned_years_number = None
         self.admission.annual_program_contact_person_name = ''
         self.admission.annual_program_contact_person_email = ''
         self.admission.tuition_fees_amount = ''
@@ -137,7 +136,6 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('with_prerequisite_courses'), None)
         self.assertEqual(form.initial.get('prerequisite_courses'), [])
         self.assertEqual(form.initial.get('prerequisite_courses_fac_comment'), '')
-        self.assertEqual(form.initial.get('program_planned_years_number'), None)
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
         self.assertEqual(form.initial.get('tuition_fees_amount'), '')
@@ -224,7 +222,6 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             data={
                 "sic-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
                 'sic-decision-approval-with_prerequisite_courses': 'True',
-                'sic-decision-approval-program_planned_years_number': '',
             },
             **self.default_headers,
         )
@@ -268,7 +265,6 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             ],
             'sic-decision-approval-with_prerequisite_courses': 'True',
             'sic-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
-            'sic-decision-approval-program_planned_years_number': 5,
             'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
             'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
             'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
@@ -311,7 +307,6 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             self.admission.prerequisite_courses_fac_comment,
             'Comment about the additional trainings',
         )
-        self.assertEqual(self.admission.program_planned_years_number, 5)
         self.assertEqual(self.admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.admission.tuition_fees_amount, 'NOUVEAUX_DROITS_MAJORES')
@@ -423,7 +418,6 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         enrolment_fields = [
             'prerequisite_courses',
             'prerequisite_courses_fac_comment',
-            'program_planned_years_number',
             'annual_program_contact_person_name',
             'annual_program_contact_person_email',
             'with_prerequisite_courses',
@@ -436,7 +430,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         response = self.client.post(
             url,
-            data={'sic-decision-approval-program_planned_years_number': ''},
+            data={'sic-decision-approval-with_prerequisite_courses': ''},
             **self.default_headers,
         )
 
@@ -454,5 +448,4 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(admission.annual_program_contact_person_email, '')
         self.assertEqual(admission.annual_program_contact_person_name, '')
         self.assertEqual(admission.prerequisite_courses_fac_comment, '')
-        self.assertEqual(admission.program_planned_years_number, None)
         self.assertFalse(admission.prerequisite_courses.exists())

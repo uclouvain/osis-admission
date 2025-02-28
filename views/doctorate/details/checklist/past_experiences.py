@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,8 @@ from typing import Dict, Optional
 from django.forms import Form
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -38,34 +39,41 @@ from admission.ddd.admission.commands import (
     SpecifierExperienceEnTantQueTitreAccesCommand,
 )
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RecupererResumePropositionQuery,
+    ModifierAuthentificationExperienceParcoursAnterieurCommand,
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
+    RecupererResumePropositionQuery,
     SpecifierConditionAccesPropositionCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
-    ModifierAuthentificationExperienceParcoursAnterieurCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.dtos.resume import (
-    ResumePropositionDTO,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
 )
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
+)
+from admission.ddd.admission.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+)
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
 from admission.forms.admission.checklist import (
-    StatusForm,
     CommentForm,
-    can_edit_experience_authentication,
+    DoctoratePastExperiencesAdmissionAccessTitleForm,
+    DoctoratePastExperiencesAdmissionRequirementForm,
     ExperienceStatusForm,
     SinglePastExperienceAuthenticationForm,
-    DoctoratePastExperiencesAdmissionRequirementForm,
-    DoctoratePastExperiencesAdmissionAccessTitleForm,
+    StatusForm,
+    can_edit_experience_authentication,
 )
-from admission.utils import (
-    get_access_titles_names,
-)
+from admission.utils import get_access_titles_names
 from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin, get_internal_experiences
+from admission.views.doctorate.details.checklist.mixins import (
+    CheckListDefaultContextMixin,
+    get_internal_experiences,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -204,7 +212,6 @@ class PastExperiencesAdmissionRequirementView(
                     condition_acces=form.cleaned_data['admission_requirement'],
                     millesime_condition_acces=form.cleaned_data['admission_requirement_year']
                     and form.cleaned_data['admission_requirement_year'].year,
-                    avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
                 )
             )
 

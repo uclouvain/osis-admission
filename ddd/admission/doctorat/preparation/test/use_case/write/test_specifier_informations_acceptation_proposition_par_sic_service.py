@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,25 +37,34 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
-    MobiliteNombreDeMois,
-    DroitsInscriptionMontant,
     DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+    MobiliteNombreDeMois,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    SituationPropositionNonSICException,
     ParcoursAnterieurNonSuffisantException,
+    SituationPropositionNonSICException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 
 
 @freezegun.freeze_time('2020-11-01')
@@ -89,7 +98,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             'avec_complements_formation': False,
             'uuids_complements_formation': [],
             'commentaire_complements_formation': '',
-            'nombre_annees_prevoir_programme': 2,
             'nom_personne_contact_programme_annuel': '',
             'email_personne_contact_programme_annuel': '',
             'droits_inscription_montant': '',
@@ -121,7 +129,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.assertEqual(proposition.avec_complements_formation, False)
         self.assertEqual(proposition.complements_formation, [])
         self.assertEqual(proposition.commentaire_complements_formation, '')
-        self.assertEqual(proposition.nombre_annees_prevoir_programme, 2)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, '')
         self.assertIsNone(proposition.droits_inscription_montant)
@@ -162,7 +169,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 avec_complements_formation=True,
                 uuids_complements_formation=['uuid-complement-formation-1'],
                 commentaire_complements_formation='Mon commentaire concernant les compléments de formation',
-                nombre_annees_prevoir_programme=3,
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
                 droits_inscription_montant=DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_2505.name,
@@ -195,7 +201,6 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             proposition.commentaire_complements_formation,
             'Mon commentaire concernant les compléments de formation',
         )
-        self.assertEqual(proposition.nombre_annees_prevoir_programme, 3)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
         self.assertEqual(proposition.droits_inscription_montant, DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_2505)
