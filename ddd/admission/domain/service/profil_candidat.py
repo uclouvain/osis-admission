@@ -32,6 +32,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ComptabiliteValidatorList,
     CurriculumPostSoumissionValidatorList,
     CurriculumValidatorList,
+    ExperienceAcademiquePostSoumissionValidatorList,
     LanguesConnuesValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
@@ -65,6 +66,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleComptabiliteValidatorList,
     FormationGeneraleCurriculumPostSoumissionValidatorList,
     FormationGeneraleCurriculumValidatorList,
+    FormationGeneraleExperienceAcademiquePostSoumissionValidatorList,
     FormationGeneraleInformationsComplementairesValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
@@ -74,6 +76,7 @@ from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_y
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
     IAcademicYearRepository,
 )
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
@@ -205,7 +208,6 @@ class ProfilCandidat(interface.DomainService):
 
         experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
-            annee_courante=annee_courante,
         )
 
         CurriculumValidatorList(
@@ -233,7 +235,6 @@ class ProfilCandidat(interface.DomainService):
         )
         experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
-            annee_courante=annee_courante,
         )
 
         FormationGeneraleCurriculumValidatorList(
@@ -256,6 +257,7 @@ class ProfilCandidat(interface.DomainService):
         academic_year_repository: 'IAcademicYearRepository',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
+        verification_experiences_completees: bool,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         date_soumission = proposition.soumise_le.date()
@@ -279,14 +281,70 @@ class ProfilCandidat(interface.DomainService):
             else curriculum_dto
         )
 
+        experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
+            experiences=curriculum.experiences_academiques,
+            verification_apres_soumission=True,
+        ) if verification_experiences_completees else {}
+
         FormationGeneraleCurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
             annee_soumission=annee_soumission,
             experiences_academiques=curriculum.experiences_academiques,
+            experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
         ).validate()
+
+    @classmethod
+    def verifier_experience_curriculum_formation_generale_apres_soumission(
+        cls,
+        proposition,
+        uuid_experience: str,
+        type_experience: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ) -> None:
+        if type_experience == TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name:
+            experience = profil_candidat_translator.get_experience_academique(
+                matricule=proposition.matricule_candidat,
+                uuid_proposition=proposition.entity_id.uuid,
+                uuid_experience=uuid_experience,
+            )
+
+            experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
+                experiences=[experience],
+                verification_apres_soumission=True,
+            )
+
+            FormationGeneraleExperienceAcademiquePostSoumissionValidatorList(
+                experiences_academiques_incompletes=experiences_academiques_incompletes,
+            ).validate()
+
+    @classmethod
+    def verifier_experience_curriculum_formation_doctorale_apres_soumission(
+        cls,
+        proposition,
+        uuid_experience: str,
+        type_experience: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ) -> None:
+        if type_experience == TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name:
+            experience = profil_candidat_translator.get_experience_academique(
+                matricule=proposition.matricule_candidat,
+                uuid_proposition=proposition.entity_id.uuid,
+                uuid_experience=uuid_experience,
+            )
+
+            experiences_academiques_incompletes = (
+                VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
+                    experiences=[experience],
+                    verification_apres_soumission=True,
+                )
+            )
+
+            ExperienceAcademiquePostSoumissionValidatorList(
+                experiences_academiques_incompletes=experiences_academiques_incompletes,
+            ).validate()
 
     @classmethod
     def verifier_curriculum_formation_doctorale_apres_soumission(
@@ -295,6 +353,7 @@ class ProfilCandidat(interface.DomainService):
         academic_year_repository: 'IAcademicYearRepository',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
+        verification_experiences_completees: bool,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         # Le CV est soumis lors de l'envoi de la demande des signatures
@@ -319,10 +378,16 @@ class ProfilCandidat(interface.DomainService):
             else curriculum_dto
         )
 
+        experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
+            experiences=curriculum.experiences_academiques,
+            verification_apres_soumission=True,
+        ) if verification_experiences_completees else {}
+
         CurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
             annee_soumission=annee_soumission,
             experiences_academiques=curriculum.experiences_academiques,
+            experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,

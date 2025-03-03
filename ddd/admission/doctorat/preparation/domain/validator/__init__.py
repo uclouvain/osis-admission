@@ -72,6 +72,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
     ShouldSicPeutDonnerDecision,
     ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd,
+    ShouldStatutsChecklistExperiencesEtreValidees,
     ShouldTitreAccesEtreSelectionne,
 )
 from ._should_institution_dependre_doctorat_realise import (
@@ -159,4 +160,5 @@ __all__ = [
     "ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande",
     "ShouldPeutDemanderCandidatModificationCaFacultaire",
     "ShouldPropositionStatutEtreCorrectPourSoumissionCA",
+    "ShouldStatutsChecklistExperiencesEtreValidees",
 ]
