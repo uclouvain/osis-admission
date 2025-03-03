@@ -147,15 +147,15 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.general_campus_name = (
-            cls.general_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
+        cls.general_campus = (
+            cls.general_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         )
         cls.continuing_education_admission = ContinuingEducationAdmissionFactory(
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.continuing_campus_name = (
-            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
+        cls.continuing_campus = (
+            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         )
 
         # Users
@@ -229,7 +229,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'intitule': self.general_education_admission.training.title,
                 'intitule_fr': self.general_education_admission.training.title,
                 'intitule_en': self.general_education_admission.training.title_english,
-                'campus': self.general_campus_name,
+                'campus': self.general_campus.name,
+                'campus_uuid': str(self.general_campus.uuid),
                 'type': self.general_education_admission.training.education_group_type.name,
                 'code_domaine': self.general_education_admission.training.main_domain.code,
                 'campus_inscription': self.general_education_admission.training.enrollment_campus.name,
@@ -294,7 +295,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'intitule': self.continuing_education_admission.training.title,
                 'intitule_fr': self.continuing_education_admission.training.title,
                 'intitule_en': self.continuing_education_admission.training.title_english,
-                'campus': self.continuing_campus_name,
+                'campus': self.continuing_campus.name,
+                'campus_uuid': str(self.continuing_campus.uuid),
                 'type': self.continuing_education_admission.training.education_group_type.name,
                 'code_domaine': self.continuing_education_admission.training.main_domain.code,
                 'campus_inscription': self.continuing_education_admission.training.enrollment_campus.name,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Dict, Set
+from typing import Dict, List, Set
 
 import attr
 from django.conf import settings
@@ -32,59 +32,74 @@ from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, FormView
+from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.commands import (
+    RechercherParcoursAnterieurQuery,
+)
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import (
-    ResumePropositionDTO,
-    ResumeCandidatDTO,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist,
 )
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.dtos.resume import ResumeCandidatDTO, ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
-    DocumentsEtudesSecondaires,
-    OngletsDemande,
-    DocumentsProjetRecherche,
     DocumentsCotutelle,
+    DocumentsProjetRecherche,
+    OngletsDemande,
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
-    SinglePastExperienceAuthenticationForm,
-    CommentForm,
-    can_edit_experience_authentication,
     AssimilationForm,
+    CommentForm,
+    SinglePastExperienceAuthenticationForm,
+    can_edit_experience_authentication,
 )
-from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
 )
-from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
-from admission.utils import (
-    get_access_titles_names,
+from admission.models.epc_injection import (
+    EPCInjection,
+    EPCInjectionStatus,
+    EPCInjectionType,
 )
+from admission.templatetags.admission import (
+    authentication_css_class,
+    bg_class_by_checklist_experience,
+)
+from admission.utils import get_access_titles_names
 from admission.views.common.detail_tabs.comments import (
-    COMMENT_TAG_SIC_FOR_CDD,
     COMMENT_TAG_CDD_FOR_SIC,
+    COMMENT_TAG_SIC_FOR_CDD,
 )
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.cdd_decision import CddDecisionMixin
-from admission.views.doctorate.details.checklist.financeability import FinancabiliteContextMixin
-from admission.views.doctorate.details.checklist.mixins import get_internal_experiences, get_email
-from admission.views.doctorate.details.checklist.past_experiences import PastExperiencesMixin
-from admission.views.doctorate.details.checklist.projet_recherche import ProjetRechercheContextMixin
+from admission.views.doctorate.details.checklist.financeability import (
+    FinancabiliteContextMixin,
+)
+from admission.views.doctorate.details.checklist.mixins import (
+    get_email,
+    get_internal_experiences,
+)
+from admission.views.doctorate.details.checklist.past_experiences import (
+    PastExperiencesMixin,
+)
+from admission.views.doctorate.details.checklist.projet_recherche import (
+    ProjetRechercheContextMixin,
+)
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 
@@ -96,7 +111,10 @@ __all__ = [
 ]
 
 
-TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {'decision_cdd'}
+TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {
+    OngletsChecklist.decision_cdd.name,
+    OngletsChecklist.parcours_anterieur.name,
+}
 
 
 class ChecklistView(
@@ -222,10 +240,6 @@ class ChecklistView(
             }
 
             # Add forms
-            context['send_email_form'] = CddDoctorateSendMailForm(
-                admission=self.admission,
-            )
-
             context['comment_forms'] = {
                 tab_name: CommentForm(
                     comment=comments.get(tab_name, None),
@@ -284,9 +298,9 @@ class ChecklistView(
             )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
-            context[
-                'past_experiences_admission_access_title_equivalency_form'
-            ] = self.past_experiences_admission_access_title_equivalency_form
+            context['past_experiences_admission_access_title_equivalency_form'] = (
+                self.past_experiences_admission_access_title_equivalency_form
+            )
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()
