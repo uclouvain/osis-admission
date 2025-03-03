@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -39,24 +39,23 @@ from ._should_etudes_secondaires_etre_completees import (
     ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier,
 )
 from ._should_informations_checklist_etre_completees import (
+    ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
     ShouldDemandeEtreTypeAdmission,
     ShouldDemandeEtreTypeInscription,
     ShouldFacPeutDonnerDecision,
-    ShouldPeutSpecifierInformationsDecisionFacultaire,
-    ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire,
-    ShouldSpecifierInformationsAcceptationFacultaire,
-    ShouldSpecifierMotifRefusFacultaire,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
-    ShouldTitreAccesEtreSelectionne,
-    ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
-    ShouldSelectionnerTitreAccesPourEnvoyerASIC,
+    ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
     ShouldPropositionEtreReorientationExterneAvecConditionAcces,
-    ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
+    ShouldSelectionnerTitreAccesPourEnvoyerASIC,
+    ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire,
+    ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldSpecifierInformationsAcceptationFacultaire,
     ShouldSpecifierInformationsAcceptationFacultaireInscription,
+    ShouldSpecifierMotifRefusFacultaire,
+    ShouldStatutsChecklistExperiencesEtreValidees,
+    ShouldTitreAccesEtreSelectionne,
 )
-from ._should_informations_complementaires_etre_completes import (
-    ShouldVisaEtreComplete,
-)
+from ._should_informations_complementaires_etre_completes import ShouldVisaEtreComplete

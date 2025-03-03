@@ -718,8 +718,11 @@ class Proposition(interface.RootEntity):
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
+        uuids_experiences_valorisees: set[str],
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
+            checklist=self.checklist_actuelle,
+            uuids_experiences_valorisees=uuids_experiences_valorisees,
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
@@ -735,7 +738,17 @@ class Proposition(interface.RootEntity):
         statut_checklist_authentification: Optional[bool],
         uuid_experience: str,
         auteur_modification: str,
+        type_experience: str,
+        profil_candidat_translator: IProfilCandidatTranslator,
     ):
+        if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
+            # Une expérience académique ne peut passer à l'état suffisant que si elle est complète
+            ProfilCandidatService.verifier_experience_curriculum_formation_doctorale_apres_soumission(
+                proposition=self,
+                uuid_experience=uuid_experience,
+                type_experience=type_experience,
+                profil_candidat_translator=profil_candidat_translator,
+            )
         try:
             experience = self.checklist_actuelle.recuperer_enfant(
                 OngletsChecklist.parcours_anterieur.name,
@@ -1049,6 +1062,7 @@ class Proposition(interface.RootEntity):
                 academic_year_repository=academic_year_repository,
                 profil_candidat_translator=profil_candidat_translator,
                 experience_parcours_interne_translator=experience_parcours_interne_translator,
+                verification_experiences_completees=False,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])

@@ -415,6 +415,7 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             self.assertAnneesCurriculum(
                 context.exception.exceptions,
                 [
+                    'L\'expérience académique \'Formation AA\' est incomplète.',
                     'De Septembre 2010 à Février 2011',
                     'De Septembre 2012 à Février 2013',
                 ],

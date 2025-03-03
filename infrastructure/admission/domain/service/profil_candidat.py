@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import itertools
 import uuid
 from typing import Dict, List, Optional
 
@@ -79,6 +80,10 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.base import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
@@ -744,6 +749,23 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             )
         except Person.DoesNotExist:
             return None
+
+    @classmethod
+    def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
+        valuated_professionnal_experiences_uuids = AdmissionProfessionalValuatedExperiences.objects.filter(
+            baseadmission_id=uuid_proposition,
+        ).values_list('professionalexperience_id', flat=True)
+        valuated_educational_experiences_uuids = AdmissionEducationalValuatedExperiences.objects.filter(
+            baseadmission_id=uuid_proposition,
+        ).values_list('educationalexperience_id', flat=True)
+
+        return set(
+            str(uuid_experience)
+            for uuid_experience in itertools.chain(
+                valuated_educational_experiences_uuids,
+                valuated_professionnal_experiences_uuids,
+            )
+        )
 
     @classmethod
     def get_experience_academique(

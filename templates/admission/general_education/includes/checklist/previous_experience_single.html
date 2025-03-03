@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -31,13 +31,18 @@
   {% concat 'parcours_anterieur__' current.extra.identifiant as checklist_item_name %}
   <div class="form-group btn-group status-group" role="group">
     {% url view.base_namespace|add:':single-past-experience-change-status' uuid=view.kwargs.uuid as base_change_status_url %}
-    {% concat base_change_status_url '?identifier=' current.extra.identifiant as change_status_url %}
+    {% concat base_change_status_url '?identifier=' current.extra.identifiant '&type=' experience_type as change_status_url %}
     {% checklist_state_button tab=checklist_item_name label=_('To be processed') icon='xmark' state='INITIAL_CANDIDAT' class='muted' htmx_post=change_status_url %}
     {% checklist_state_button tab=checklist_item_name label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' htmx_post=change_status_url %}
     {% checklist_state_button tab=checklist_item_name label=_("Authentication") icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=change_status_url authentification='1' %}
     {% checklist_state_button tab=checklist_item_name label=_("Expert advice") icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=change_status_url authentification='0' %}
     {% checklist_state_button tab=checklist_item_name label=_("To complete after enrolment") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' htmx_post=change_status_url %}
-    {% checklist_state_button tab=checklist_item_name label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' htmx_post=change_status_url %}
+    {% if current.extra.identifiant in view.incomplete_curriculum_experiences %}
+      {% translate "This experience can't be validated if mandatory information is missing." as incomplete_experience_tooltip %}
+      {% checklist_state_button tab=checklist_item_name label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' disabled=True tooltip=incomplete_experience_tooltip %}
+    {% else %}
+      {% checklist_state_button tab=checklist_item_name label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' htmx_post=change_status_url %}
+    {% endif %}
   </div>
 
   <div id="comment-{{ current.extra.identifiant }}" hx-preserve="true">

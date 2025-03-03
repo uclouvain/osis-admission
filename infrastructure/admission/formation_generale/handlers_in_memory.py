@@ -599,6 +599,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -645,6 +646,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
             cmd,
             proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -789,6 +791,13 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=_profil_candidat_translator,
             academic_year_repository=_academic_year_repository,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        )
+    ),
+    VerifierExperienceCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_experience_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
         )
     ),
 }

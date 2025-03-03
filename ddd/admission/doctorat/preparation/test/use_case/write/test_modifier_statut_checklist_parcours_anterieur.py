@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,22 +26,39 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import ModifierStatutChecklistParcoursAnterieurCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ModifierStatutChecklistParcoursAnterieurCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
     ConditionAccesEtreSelectionneException,
+    PropositionNonTrouveeException,
+    StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
 )
-from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutChecklist,
+)
+from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
+    TitreAccesSelectionnableFactory,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from epc.models.enums.condition_acces import ConditionAcces
 
@@ -51,10 +68,15 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
 
+    @classmethod
+    def setUpClass(cls):
+        cls.profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
         self.addCleanup(self.proposition_repository.reset)
+        self.addCleanup(self.profil_candidat_translator.reset)
 
         self.message_bus = message_bus_in_memory_instance
 
@@ -121,7 +143,6 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                 selectionne=True,
             )
         )
-
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistParcoursAnterieurCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
@@ -135,6 +156,64 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             proposition.checklist_actuelle.parcours_anterieur.statut,
             ChoixStatutChecklist.GEST_REUSSITE,
         )
+
+        # Expériences avec un statut incorrect mais inconnues ou non valorisées -> non prises en compte
+        proposition.checklist_actuelle.parcours_anterieur.enfants.append(
+            StatutChecklist(
+                libelle='l1',
+                statut=ChoixStatutChecklist.GEST_BLOCAGE,
+                extra={'identifiant': 'INCONNUE'},
+            ),
+        )
+
+        proposition_id = self.message_bus.invoke(
+            ModifierStatutChecklistParcoursAnterieurCommand(
+                uuid_proposition='uuid-SC3DP-confirmee',
+                statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                gestionnaire='0123456789',
+            )
+        )
+        self.assertIsNotNone(proposition_id)
+
+        # Expérience valorisée et avec un statut incorrect -> lever une exception
+        checklist_premiere_experience = proposition.checklist_actuelle.parcours_anterieur.enfants[0]
+        identifiant_premiere_experience = checklist_premiere_experience.extra['identifiant']
+
+        self.profil_candidat_translator.valorisations[identifiant_premiere_experience] = ['uuid-SC3DP-confirmee']
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition='uuid-SC3DP-confirmee',
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    gestionnaire='0123456789',
+                )
+            )
+            self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
+
+        checklist_premiere_experience.statut = ChoixStatutChecklist.GEST_REUSSITE
+
+        proposition_id = self.message_bus.invoke(
+            ModifierStatutChecklistParcoursAnterieurCommand(
+                uuid_proposition='uuid-SC3DP-confirmee',
+                statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                gestionnaire='0123456789',
+            )
+        )
+        self.assertIsNotNone(proposition_id)
+
+        # Expérience valorisée mais sans checklist -> lever une exception
+        self.profil_candidat_translator.valorisations['INCONNUE-VALORISEE'] = ['uuid-SC3DP-confirmee']
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition='uuid-SC3DP-confirmee',
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    gestionnaire='0123456789',
+                )
+            )
+            self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):

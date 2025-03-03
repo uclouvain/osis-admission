@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -367,7 +367,7 @@
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
-                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant %}
+                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant experience_type=experience.type_experience %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True specific_questions=specific_questions_by_tab %}
                 </div>
@@ -697,7 +697,7 @@
               if (onFirstTabLoad) {
                   onFirstTabLoad = false;
                   if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                      // move info from the current tab to the info viewer 
+                      // move info from the current tab to the info viewer
                       $('#infos-shortcut').click();
                   } else {
                       // hide the info viewer
@@ -978,11 +978,17 @@
           });
 
           $('#parcours_anterieur').on('formValidation', '.checklist-state-button', function(event) {
-              {# The access titles can be updated only if the fac decision status is not sufficient. #}
               if (event.originalEvent.detail.select_access_title_perm !== undefined) {
+                {# The access titles can be updated only if the fac decision status is not sufficient. #}
                 const access_titles_checkboxes = $('input[name="access-title"]');
                 access_titles_checkboxes.prop('disabled', event.originalEvent.detail.select_access_title_perm === false);
                 access_titles_checkboxes.prop('title', event.originalEvent.detail.select_access_title_tooltip || '');
+              } else if (event.originalEvent.detail.error_messages !== undefined) {
+                  {# The past experiences status can only be validated if all experiences have been validated and if the access condition is specified. #}
+                  const previousExperiencesModal = $('#previous-experiences-prevent-to-choose-success-modal');
+                  const previousExperiencesModalError = previousExperiencesModal.find('.error-message');
+                  previousExperiencesModalError.html(event.originalEvent.detail.error_messages.reduce(((acc, message) => `${acc}<p>${message}</p>`), ''));
+                  previousExperiencesModal.modal('show');
               }
           });
 

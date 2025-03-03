@@ -53,6 +53,7 @@ def verifier_curriculum_apres_soumission(
         academic_year_repository=academic_year_repository,
         profil_candidat_translator=profil_candidat_translator,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
+        verification_experiences_completees=True,
     )
 
     # THEN
