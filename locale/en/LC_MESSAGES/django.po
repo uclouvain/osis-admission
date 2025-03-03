@@ -526,6 +526,11 @@ msgstr ""
 msgid "All CA members must have approved the proposition."
 msgstr "All supervisory panel members must have approved the proposition."
 
+msgid ""
+"All experiences must be in the 'Validated' status so that the previous "
+"experience can be changed to the 'Sufficient' status."
+msgstr ""
+
 msgid "All history"
 msgstr ""
 
@@ -6623,6 +6628,9 @@ msgid ""
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
 "find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
 "accomodation\">www.uclouvain.be/en/study/accomodation</a>."
+msgstr ""
+
+msgid "This experience can't be validated if mandatory information is missing."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."

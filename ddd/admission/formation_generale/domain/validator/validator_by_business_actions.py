@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,83 +24,100 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.domain.model.poste_diplomatique import (
+    PosteDiplomatiqueIdentity,
+)
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
 from admission.ddd.admission.domain.validator import (
-    ShouldAnneesCVRequisesCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
-    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldAnneesCVRequisesCompletees,
+    ShouldAssimilationEtreCompletee,
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldTypeCompteBancaireRemboursementEtreComplete,
-    ShouldAssimilationEtreCompletee,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
+    Comptabilite,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
     BesoinDeDerogation,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    StatutsChecklistGenerale,
     StatutChecklist,
+    StatutsChecklistGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator import (
-    ShouldCurriculumFichierEtreSpecifie,
-    ShouldEquivalenceEtreSpecifiee,
-    ShouldReductionDesDroitsInscriptionEtreCompletee,
     ShouldAffiliationsEtreCompletees,
-    ShouldSpecifieSiDiplomeEtudesSecondaires,
-    ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier,
+    ShouldAlternativeSecondairesEtreCompletee,
+    ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
+    ShouldConditionAccesEtreSelectionne,
+    ShouldCurriculumFichierEtreSpecifie,
+    ShouldDemandeEtreTypeAdmission,
     ShouldDiplomeBelgesEtudesSecondairesEtreComplete,
     ShouldDiplomeEtrangerEtudesSecondairesEtreComplete,
-    ShouldAlternativeSecondairesEtreCompletee,
-    ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire,
-    ShouldSpecifierMotifRefusFacultaire,
+    ShouldEquivalenceEtreSpecifiee,
     ShouldFacPeutDonnerDecision,
-    ShouldSpecifierInformationsAcceptationFacultaire,
-    ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
-    ShouldVisaEtreComplete,
-    ShouldTitreAccesEtreSelectionne,
-    ShouldConditionAccesEtreSelectionne,
-    ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
-    ShouldSelectionnerTitreAccesPourEnvoyerASIC,
+    ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
-    ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
-    ShouldDemandeEtreTypeAdmission,
-    ShouldSpecifierInformationsAcceptationFacultaireInscription,
     ShouldPropositionEtreReorientationExterneAvecConditionAcces,
+    ShouldReductionDesDroitsInscriptionEtreCompletee,
+    ShouldSelectionnerTitreAccesPourEnvoyerASIC,
+    ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire,
+    ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldSpecifierInformationsAcceptationFacultaire,
+    ShouldSpecifierInformationsAcceptationFacultaireInscription,
+    ShouldSpecifierMotifRefusFacultaire,
+    ShouldSpecifieSiDiplomeEtudesSecondaires,
+    ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier,
+    ShouldStatutsChecklistExperiencesEtreValidees,
+    ShouldTitreAccesEtreSelectionne,
+    ShouldVisaEtreComplete,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
-    ShouldSicPeutDonnerDecision,
-    ShouldParcoursAnterieurEtreSuffisant,
-    ShouldNePasAvoirDeDocumentReclameImmediat,
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
     ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande,
+    ShouldNePasAvoirDeDocumentReclameImmediat,
+    ShouldParcoursAnterieurEtreSuffisant,
+    ShouldSicPeutDonnerDecision,
 )
-from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
+from base.ddd.utils.business_validator import (
+    BusinessValidator,
+    TwoStepsMultipleBusinessExceptionListValidator,
+)
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
+)
 from epc.models.enums.condition_acces import ConditionAcces
 
 
@@ -154,22 +171,41 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
+    experiences_academiques_incompletes: Dict[str, str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldExperiencesAcademiquesEtreCompletees(
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+            ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_soumission,
                 experiences_academiques=self.experiences_academiques,
-                experiences_academiques_incompletes={},
+                experiences_academiques_incompletes={},  # Une expérience incomplète justifie quand même une période
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 date_soumission=self.date_soumission,
                 mois_debut_annee_academique_courante_facultatif=True,
                 experiences_parcours_interne=self.experiences_parcours_interne,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FormationGeneraleExperienceAcademiquePostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    experiences_academiques_incompletes: Dict[str, str]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldExperiencesAcademiquesEtreCompletees(
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
             ),
         ]
 
@@ -549,6 +585,9 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
+    uuids_experiences_valorisees: set[str]
+    checklist: StatutsChecklistGenerale
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -562,6 +601,11 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 statut=self.statut,
                 condition_acces=self.condition_acces,
                 millesime_condition_acces=self.millesime_condition_acces,
+            ),
+            ShouldStatutsChecklistExperiencesEtreValidees(
+                uuids_experiences_valorisees=self.uuids_experiences_valorisees,
+                checklist=self.checklist,
+                statut=self.statut,
             ),
         ]
 
