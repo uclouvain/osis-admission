@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import List, Optional
 
 import attr
 
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
@@ -38,42 +40,43 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutReclamationEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
+    OngletsDemande,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
-    ChoixStatutChecklist,
-    DecisionFacultaireEnum,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     BesoinDeDerogation,
-    DerogationFinancement,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    DecisionFacultaireEnum,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    StatutsChecklistGenerale,
     StatutChecklist,
+    StatutsChecklistGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    MotifRefusFacultaireNonSpecifieException,
-    InformationsAcceptationFacultaireNonSpecifieesException,
-    SituationPropositionNonSICException,
-    SituationPropositionNonFACException,
-    TitreAccesEtreSelectionneException,
-    ConditionAccesEtreSelectionneException,
-    TitreAccesEtreSelectionnePourEnvoyerASICException,
-    ParcoursAnterieurNonSuffisantException,
-    DocumentAReclamerImmediatException,
-    InscriptionTardiveAvecConditionAccesException,
     ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
+    ConditionAccesEtreSelectionneException,
     DemandeDoitEtreAdmissionException,
     DemandeDoitEtreInscriptionException,
+    DocumentAReclamerImmediatException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
+    InformationsAcceptationFacultaireNonSpecifieesException,
+    InscriptionTardiveAvecConditionAccesException,
+    MotifRefusFacultaireNonSpecifieException,
+    ParcoursAnterieurNonSuffisantException,
     ReorientationExterneAvecConditionAccesException,
+    SituationPropositionNonFACException,
+    SituationPropositionNonSICException,
+    StatutsChecklistExperiencesEtreValidesException,
+    TitreAccesEtreSelectionneException,
+    TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -258,6 +261,33 @@ class ShouldTitreAccesEtreSelectionne(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not self.titres_acces_selectionnes:
             raise TitreAccesEtreSelectionneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
+    uuids_experiences_valorisees: set[str]
+    checklist: StatutsChecklistGenerale
+    statut: ChoixStatutChecklist
+
+    def validate(self, *args, **kwargs):
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE:
+            # Le passage à l'état valide nécessite que toutes les expériences valorisées soient passées à l'état valide
+            uuids_experiences_valorisees = self.uuids_experiences_valorisees.copy()
+            uuids_experiences_valorisees.add(OngletsDemande.ETUDES_SECONDAIRES.name)
+
+            for experience in self.checklist.parcours_anterieur.enfants:
+                identifiant_experience = experience.extra.get('identifiant')
+
+                if identifiant_experience in uuids_experiences_valorisees:
+                    uuids_experiences_valorisees.discard(identifiant_experience)
+
+                    # Si une expérience valorisée n'est pas à l'état valide, lever l'exception
+                    if experience.statut != ChoixStatutChecklist.GEST_REUSSITE:
+                        raise StatutsChecklistExperiencesEtreValidesException
+
+            # Si une expérience valorisée n'a pas de checklist associée, lever l'exception
+            if uuids_experiences_valorisees:
+                raise StatutsChecklistExperiencesEtreValidesException
 
 
 @attr.dataclass(frozen=True, slots=True)

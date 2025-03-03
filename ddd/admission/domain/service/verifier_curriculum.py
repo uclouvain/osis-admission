@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Dict
+from typing import Dict, List
 
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.models.enums.curriculum import TranscriptType, Result
+from osis_profile.models.enums.curriculum import Result, TranscriptType
 from osis_profile.views.edit_experience_academique import (
-    SYSTEMES_EVALUATION_AVEC_CREDITS,
     PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE,
+    SYSTEMES_EVALUATION_AVEC_CREDITS,
 )
 
 
@@ -42,7 +42,7 @@ class VerifierCurriculum(interface.DomainService):
     def recuperer_experiences_academiques_incompletes(
         cls,
         experiences: List[ExperienceAcademiqueDTO],
-        annee_courante: int,
+        verification_apres_soumission=False,
     ) -> Dict[str, str]:
 
         experiences_incompletes = {}
@@ -58,6 +58,7 @@ class VerifierCurriculum(interface.DomainService):
             )
             releve_global_necessaire = experience.type_releve_notes == TranscriptType.ONE_FOR_ALL_YEARS.name
 
+            # Vérification des données non annualisées
             if (
                 not pays_belge
                 and not experience.regime_linguistique
@@ -71,10 +72,27 @@ class VerifierCurriculum(interface.DomainService):
                     or traduction_necessaire
                     and not experience.traduction_diplome
                 )
+                or verification_apres_soumission
+                and (
+                    # Bachelier FWB
+                    experience.est_formation_bachelier_fwb
+                    and experience.credits_acquis_bloc_1 is None
+                    # Master FWB
+                    or experience.est_formation_master_fwb
+                    and (
+                        experience.avec_complements is None
+                        or experience.avec_complements
+                        and (
+                            experience.credits_acquis_complements is None
+                            or experience.credits_inscrits_complements is None
+                        )
+                    )
+                )
             ):
                 experiences_incompletes[experience.uuid] = str(experience)
                 continue
 
+            # Vérification des données annualisées
             credits_necessaires_etranger = experience.systeme_evaluation in SYSTEMES_EVALUATION_AVEC_CREDITS
             for annee in experience.annees:
                 releve_annuel_manquant = (

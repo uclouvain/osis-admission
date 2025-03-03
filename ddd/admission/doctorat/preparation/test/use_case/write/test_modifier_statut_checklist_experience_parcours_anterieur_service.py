@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,22 +23,37 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
 
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    ExperiencesAcademiquesNonCompleteesException,
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 
 
 class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
@@ -50,6 +65,9 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             PropositionIdentity(uuid='uuid-SC3DP-confirmee'),
         )
         self.experience_uuid = '9cbdf4db-2454-4cbf-9e48-55d2a9881ee1'
+        self.candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.experiences_academiques = self.candidat_translator.experiences_academiques
+        self.experience = next(exp for exp in self.experiences_academiques if exp.uuid == self.experience_uuid)
 
     def test_should_verifier_etat_initial_checklist(self):
         proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-SC3DP-confirmee'))
@@ -76,6 +94,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
                 uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 statut=ChoixStatutChecklist.SYST_REUSSITE.name,
                 statut_authentification=None,
                 gestionnaire='0123456789',
@@ -103,6 +122,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
                 uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=True,
                 gestionnaire='0123456789',
@@ -131,6 +151,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
                 uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=False,
                 gestionnaire='0123456789',
@@ -160,17 +181,88 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                     statut_authentification=False,
                     gestionnaire='0123456789',
                 )
             )
 
+    def test_should_verifier_experience_academique_complete_pour_passage_a_valide(self):
+        with mock.patch.multiple(
+            self.experience,
+            diplome=[],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(
+                    ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                        uuid_proposition='uuid-SC3DP-confirmee',
+                        uuid_experience=self.experience_uuid,
+                        type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                        statut_authentification=False,
+                        gestionnaire='0123456789',
+                    )
+                )
+
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                ExperiencesAcademiquesNonCompleteesException,
+            )
+
+        with mock.patch.multiple(
+            self.experience,
+            diplome=[],
+        ):
+            proposition_id = self.message_bus.invoke(
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-SC3DP-confirmee',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
+                    statut_authentification=False,
+                    gestionnaire='0123456789',
+                )
+            )
+
+            self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+
+        with mock.patch.multiple(
+            self.experience,
+            diplome=[],
+        ):
+            proposition_id = self.message_bus.invoke(
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-SC3DP-confirmee',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
+                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
+                    statut_authentification=False,
+                    gestionnaire='0123456789',
+                )
+            )
+
+            self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+
+        proposition_id = self.message_bus.invoke(
+            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                uuid_proposition='uuid-SC3DP-confirmee',
+                uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
+                statut_authentification=False,
+                gestionnaire='0123456789',
+            )
+        )
+
+        self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+
     def test_should_creer_experience_si_non_trouvee(self):
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
                 uuid_experience='INCONNUE',
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=False,
                 gestionnaire='0123456789',

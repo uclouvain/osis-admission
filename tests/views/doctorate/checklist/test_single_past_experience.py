@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,18 +38,33 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
+from osis_profile.models.enums.curriculum import EvaluationSystem, Result
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -186,6 +201,78 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn('authentification', form.errors)
+
+    def test_change_the_checklist_status_to_the_validated_status_needs_a_complete_experience(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        # Add an incomplete experience
+        experience = EducationalExperienceFactory(
+            person=self.candidate,
+            obtained_diploma=False,
+            country=self.experiences[0].country,
+            evaluation_type='',
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=self.admission.training.academic_year,
+            result=Result.SUCCESS.name,
+            registered_credit_number=10,
+            acquired_credit_number=10,
+        )
+
+        url = (
+            resolve_url(
+                self.url_name,
+                uuid=self.admission.uuid,
+            )
+            + f'?identifier={experience.uuid}&type={TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name}'
+        )
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={'status': ChoixStatutChecklist.GEST_REUSSITE.name},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertIn(
+            "L'expérience académique 'Computer science' est incomplète.",
+            [m.message for m in response.context['messages']],
+        )
+
+        self.admission.refresh_from_db()
+
+        experiences_checklists = self.admission.checklist['current']['parcours_anterieur']['enfants']
+
+        self.assertEqual(len(experiences_checklists), 1)
+
+        experience.evaluation_type = EvaluationSystem.NO_CREDIT_SYSTEM.name
+        experience.save()
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={'status': ChoixStatutChecklist.GEST_REUSSITE.name},
+        )
+
+        self.assertNotIn(
+            "L'expérience académique 'Computer science' est incomplète.",
+            [m.message for m in response.context['messages']],
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.admission.refresh_from_db()
+
+        experiences_checklists = self.admission.checklist['current']['parcours_anterieur']['enfants']
+
+        self.assertEqual(len(experiences_checklists), 2)
+        self.assertEqual(experiences_checklists[1]['extra']['identifiant'], str(experience.uuid))
+        self.assertEqual(experiences_checklists[1]['statut'], ChoixStatutChecklist.GEST_REUSSITE.name)
+
+        self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
     def test_change_the_checklist_status_to_a_status_without_authentication_info(self):
         self.client.force_login(user=self.sic_manager_user)
