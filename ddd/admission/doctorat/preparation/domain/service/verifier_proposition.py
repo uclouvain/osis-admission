@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,16 +27,30 @@ from functools import partial
 from typing import List
 
 from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
-from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
+    GroupeDeSupervision,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
+    IDoctoratTranslator,
+)
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
+from admission.ddd.admission.domain.service.i_maximum_propositions import (
+    IMaximumPropositionsAutorisees,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
+from admission.ddd.admission.domain.service.verifier_questions_specifiques import (
+    VerifierQuestionsSpecifiques,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -67,45 +81,12 @@ class VerifierProposition(interface.DomainService):
             TrainingType.PHD,
         )
         execute_functions_and_aggregate_exceptions(
-            partial(
-                profil_candidat_service.verifier_identification,
-                matricule=proposition_candidat.matricule_candidat,
-                profil_candidat_translator=profil_candidat_translator,
-            ),
-            partial(
-                profil_candidat_service.verifier_coordonnees,
-                matricule=proposition_candidat.matricule_candidat,
-                profil_candidat_translator=profil_candidat_translator,
-            ),
-            partial(
-                profil_candidat_service.verifier_langues_connues,
-                matricule=proposition_candidat.matricule_candidat,
-                profil_candidat_translator=profil_candidat_translator,
-            ),
-            partial(
-                profil_candidat_service.verifier_curriculum,
-                matricule=proposition_candidat.matricule_candidat,
-                profil_candidat_translator=profil_candidat_translator,
-                annee_courante=annee_courante,
-                curriculum_pdf=proposition_candidat.curriculum,
-                uuid_proposition=proposition_candidat.entity_id.uuid,
-            ),
             groupe_de_supervision.verifier_tout_le_monde_a_approuve,
             partial(
                 profil_candidat_service.verifier_comptabilite_doctorat,
                 proposition=proposition_candidat,
                 profil_candidat_translator=profil_candidat_translator,
                 annee_courante=annee_courante,
-            ),
-            partial(
-                VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
-                proposition=proposition_candidat,
-                questions_specifiques=questions_specifiques,
-            ),
-            partial(
-                VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
-                proposition=proposition_candidat,
-                questions_specifiques=questions_specifiques,
             ),
             partial(
                 titres_acces.verifier_titres,

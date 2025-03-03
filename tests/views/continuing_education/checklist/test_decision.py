@@ -33,7 +33,7 @@ from django.test import TestCase
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.models import ContinuingEducationAdmission
+from admission.auth.scope import Scope
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
@@ -55,6 +55,10 @@ from admission.forms.admission.continuing_education.checklist import (
     DecisionValidationForm,
     CloseForm,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.historique import (
+    TAGS_APPROBATION_PROPOSITION,
+)
+from admission.models import ContinuingEducationAdmission
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
@@ -65,7 +69,6 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
-from admission.auth.scope import Scope
 
 
 class ChecklistViewTestCase(TestCase):
@@ -491,7 +494,7 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertCountEqual(
             [entry.tags for entry in historic_entries],
-            [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
+            [TAGS_APPROBATION_PROPOSITION, ['proposition', 'decision', 'message']],
         )
 
     def test_get_close_iufc(self):

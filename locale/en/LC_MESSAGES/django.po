@@ -439,6 +439,10 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
+msgctxt "dashboard-category"
+msgid "Admission"
+msgstr ""
+
 msgid "Admission applications"
 msgstr ""
 
@@ -910,6 +914,14 @@ msgid "Authorization"
 msgstr ""
 
 msgid "Authorization to validate"
+msgstr ""
+
+msgctxt "dashboard-indicator admission"
+msgid "Authorized SIC"
+msgstr ""
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Authorized SIC"
 msgstr ""
 
 msgid "Available information (Digit)"
@@ -1805,6 +1817,9 @@ msgstr ""
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr ""
 
+msgid "Dashboard indicator"
+msgstr ""
+
 msgid "Data protection"
 msgstr ""
 
@@ -1818,6 +1833,10 @@ msgid "Date the application is sent to the supervision group"
 msgstr ""
 
 msgid "Date the application was sent to the faculty"
+msgstr ""
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Deadline 3 months"
 msgstr ""
 
 msgid "Deadline for documents to be requested immediately"
@@ -3718,6 +3737,9 @@ msgstr ""
 msgid "Last registration id"
 msgstr ""
 
+msgid "Last signature request before submission at"
+msgstr ""
+
 msgid "Last update author"
 msgstr ""
 
@@ -4392,6 +4414,14 @@ msgstr ""
 msgid "Not fundable"
 msgstr ""
 
+msgctxt "dashboard-indicator admission"
+msgid "Not in order of registration"
+msgstr ""
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Not in order of registration"
+msgstr ""
+
 msgid "Not specified"
 msgstr ""
 
@@ -4877,6 +4907,10 @@ msgstr ""
 msgid "Postcode"
 msgstr ""
 
+msgid "Pre-admission"
+msgstr ""
+
+msgctxt "dashboard-category"
 msgid "Pre-admission"
 msgstr ""
 
@@ -5811,6 +5845,14 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Submitted"
+msgstr ""
+
+msgctxt "dashboard-indicator admission"
+msgid "Submitted dossiers"
+msgstr ""
+
+msgctxt "dashboard-indicator pre-admission"
+msgid "Submitted dossiers"
 msgstr ""
 
 msgid "Submitted from"

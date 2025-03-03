@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,9 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionGeneraleInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 
 
 class TestListerToutesDemandes(TestCase):
@@ -49,6 +51,6 @@ class TestListerToutesDemandes(TestCase):
 
     def test_should_rechercher_par_matricule(self):
         propositions = self.message_bus.invoke(self.cmd)
-        self.assertEqual(len(propositions), 11)
+        self.assertEqual(len(propositions), 20)
         for proposition in propositions:
             self.assertEqual(proposition.noma_candidat, '0123456789')

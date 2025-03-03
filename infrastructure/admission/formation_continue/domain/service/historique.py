@@ -37,6 +37,9 @@ from admission.infrastructure.utils import get_message_to_historize
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
+TAGS_CHANGEMENT_STATUT = ["proposition", "decision", "status-changed"]
+TAGS_APPROBATION_PROPOSITION = TAGS_CHANGEMENT_STATUT + ["proposition-accepted"]
+
 
 class Historique(IHistorique):
     @classmethod
@@ -82,7 +85,7 @@ class Historique(IHistorique):
             fr_message,
             en_message,
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "decision", "status-changed"],
+            tags=TAGS_CHANGEMENT_STATUT,
         )
 
     @classmethod
@@ -114,7 +117,7 @@ class Historique(IHistorique):
             fr_message,
             en_message,
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "decision", "status-changed"],
+            tags=TAGS_CHANGEMENT_STATUT,
         )
 
     @classmethod
@@ -141,7 +144,7 @@ class Historique(IHistorique):
             fr_message,
             en_message,
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "decision", "status-changed"],
+            tags=TAGS_CHANGEMENT_STATUT,
         )
 
     @classmethod
@@ -170,7 +173,7 @@ class Historique(IHistorique):
             fr_message,
             en_message,
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "decision", "status-changed"],
+            tags=TAGS_CHANGEMENT_STATUT,
         )
 
     @classmethod
@@ -199,7 +202,7 @@ class Historique(IHistorique):
             fr_message,
             en_message,
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "decision", "status-changed"],
+            tags=TAGS_APPROBATION_PROPOSITION,
         )
 
     @classmethod
@@ -216,5 +219,5 @@ class Historique(IHistorique):
             f"Le dossier a été clôturé le {now}.",
             f"The dossier has been closed on {now}.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "decision", "status-changed"],
+            tags=TAGS_CHANGEMENT_STATUT,
         )

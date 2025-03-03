@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,49 +25,61 @@
 # ##############################################################################
 
 import datetime
+import uuid
 from unittest.mock import ANY
 
 import freezegun
 import mock
-import uuid
 from django.shortcuts import resolve_url
 from django.test import override_settings
-
 from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
-from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
+from osis_profile.models import (
+    EducationalExperience,
+    EducationalExperienceYear,
+    ProfessionalExperience,
+)
 from osis_profile.models.enums.curriculum import (
-    ActivityType,
     ActivitySector,
-    Result,
+    ActivityType,
     EvaluationSystem,
-    TranscriptType,
     Grade,
+    Result,
+    TranscriptType,
 )
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
-from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
+from reference.tests.factories.superior_non_university import (
+    SuperiorNonUniversityFactory,
+)
 
 
 def create_professional_experiences(person):
@@ -232,14 +244,16 @@ class BaseCurriculumTestCase:
         )
         self.assertEqual(
             response.get('incomplete_periods'),
-            [
-                'De Septembre 2019 à Décembre 2019',
-                'De Septembre 2018 à Février 2019',
-                'De Septembre 2017 à Février 2018',
-                'De Septembre 2016 à Février 2017',
-            ]
-            if self.with_incomplete_periods
-            else [],
+            (
+                [
+                    'De Septembre 2019 à Décembre 2019',
+                    'De Septembre 2018 à Février 2019',
+                    'De Septembre 2017 à Février 2018',
+                    'De Septembre 2016 à Février 2017',
+                ]
+                if self.with_incomplete_periods
+                else []
+            ),
         )
 
         self.assertEqual(
@@ -298,12 +312,14 @@ class BaseCurriculumTestCase:
         )
         self.assertEqual(
             response.get('incomplete_periods'),
-            [
-                'De Septembre 2017 à Février 2018',
-                'De Septembre 2016 à Février 2017',
-            ]
-            if self.with_incomplete_periods
-            else [],
+            (
+                [
+                    'De Septembre 2017 à Février 2018',
+                    'De Septembre 2016 à Février 2017',
+                ]
+                if self.with_incomplete_periods
+                else []
+            ),
         )
 
     def test_get_curriculum_minimal_year_with_last_registration(self):
@@ -406,11 +422,13 @@ class BaseIncompleteCurriculumExperiencesTestCase:
 
         self.assertEqual(
             json_response.get('incomplete_experiences'),
-            {
-                str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
-            }
-            if desired_result is None
-            else desired_result,
+            (
+                {
+                    str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
+                }
+                if desired_result is None
+                else desired_result
+            ),
         )
 
     def test_get_curriculum_with_incomplete_educational_experience_transcript_missing(self):
@@ -610,6 +628,38 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurricul
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
         self.assertEqual(updated_admission.last_update_author, self.user.person)
+
+    def test_curriculum_with_candidate_depending_on_admission_statuses(self):
+        self.client.force_authenticate(self.user)
+
+        valid_statuses_on_get = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+        }
+        valid_statuses_on_update = {
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        }
+
+        other_admission = DoctorateAdmissionFactory(
+            candidate=self.user.person,
+        )
+        other_admission_url = resolve_url('doctorate_curriculum', uuid=other_admission.uuid)
+
+        for current_status in ChoixStatutPropositionDoctorale:
+            other_admission.status = current_status.name
+            other_admission.save(update_fields=['status'])
+
+            response = self.client.get(other_admission_url)
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK if current_status.name in valid_statuses_on_get else status.HTTP_403_FORBIDDEN,
+            )
+
+            response = self.client.put(other_admission_url, self.put_data)
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK if current_status.name in valid_statuses_on_update else status.HTTP_403_FORBIDDEN,
+            )
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')

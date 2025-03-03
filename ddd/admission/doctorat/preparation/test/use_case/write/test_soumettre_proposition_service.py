@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,16 +29,24 @@ import freezegun
 import mock
 from django.test import TestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import SoumettrePropositionCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    SoumettrePropositionCommand,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import IdentificationNonCompleteeException
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    ChoixStatutChecklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    IdentificationNonCompleteeException,
+)
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -51,21 +59,28 @@ from admission.infrastructure.admission.domain.service.in_memory.elements_confir
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.financabilite.dtos.catalogue import FormationDTO
 from ddd.logic.financabilite.dtos.parcours import (
-    ParcoursDTO,
-    ParcoursAcademiqueInterneDTO,
     ParcoursAcademiqueExterneDTO,
+    ParcoursAcademiqueInterneDTO,
+    ParcoursDTO,
 )
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
 from infrastructure.financabilite.domain.service.in_memory.financabilite import (
     FinancabiliteInMemoryFetcher,
 )
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 
 
 @freezegun.freeze_time('2020-11-01')
@@ -223,12 +238,6 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
-
-    def test_should_retourner_erreur_si_identification_non_completee(self):
-        with mock.patch.multiple(ProfilCandidatInMemoryTranslator.profil_candidats[0], pays_naissance=''):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.base_cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), IdentificationNonCompleteeException)
 
     def test_should_soumettre_proposition_en_nettoyant_reponses_questions_specifiques(self):
         proposition = self.proposition_repository.get(self.proposition.entity_id)

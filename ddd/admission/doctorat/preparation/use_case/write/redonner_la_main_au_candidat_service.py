@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,16 +27,28 @@
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.doctorat.preparation.commands import RedonnerLaMainAuCandidatCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RedonnerLaMainAuCandidatCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.domain.service.i_raccrocher_experiences_curriculum import (
+    IRaccrocherExperiencesCurriculum,
+)
 
 
 def redonner_la_main_au_candidat(
     cmd: 'RedonnerLaMainAuCandidatCommand',
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
@@ -46,6 +58,7 @@ def redonner_la_main_au_candidat(
 
     # THEN
     proposition_repository.save(proposition)
+    raccrocher_experiences_curriculum.decrocher(proposition=proposition)
     historique.historiser_send_back_to_candidate(proposition, cmd.matricule_gestionnaire)
 
     return proposition.entity_id

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,9 +25,13 @@
 # ##############################################################################
 
 from admission.ddd.admission.doctorat.preparation.commands import *
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
-from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
+from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import (
+    recuperer_doctorat,
+)
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
@@ -35,27 +39,61 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candid
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
-from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import (
+    soumettre_ca,
+)
+from admission.ddd.admission.use_case.read import (
+    recuperer_questions_specifiques_proposition,
+)
 from admission.ddd.admission.use_case.write import (
-    initialiser_emplacement_document_libre_non_reclamable,
-    initialiser_emplacement_document_libre_a_reclamer,
     annuler_reclamation_emplacement_document,
+    initialiser_emplacement_document_a_reclamer,
+    initialiser_emplacement_document_libre_a_reclamer,
+    initialiser_emplacement_document_libre_non_reclamable,
     modifier_reclamation_emplacement_document,
-    supprimer_emplacement_document,
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
-    initialiser_emplacement_document_a_reclamer,
+    supprimer_emplacement_document,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from infrastructure.financabilite.domain.service.financabilite import FinancabiliteFetcher
-from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
-from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
-from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
+from admission.infrastructure.admission.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
+from infrastructure.financabilite.domain.service.financabilite import (
+    FinancabiliteFetcher,
+)
+from infrastructure.shared_kernel.academic_year.repository.academic_year import (
+    AcademicYearRepository,
+)
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import (
+    UclouvainCampusRepository,
+)
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
+    PersonneConnueUclTranslator,
+)
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
+    ExperienceParcoursInterneTranslator,
+)
+
+from ...domain.service.calendrier_inscription import CalendrierInscription
+from ...domain.service.elements_confirmation import ElementsConfirmation
+from ...domain.service.emplacements_documents_proposition import (
+    EmplacementsDocumentsPropositionTranslator,
+)
+from ...domain.service.historique import Historique as HistoriqueGlobal
+from ...domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from ...domain.service.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculum,
+)
+from ...domain.service.titres_acces import TitresAcces
+from ...domain.service.unites_enseignement_translator import (
+    UnitesEnseignementTranslator,
+)
+from ...repository.digit import DigitRepository
+from ...repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from ..validation.repository.demande import DemandeRepository
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
@@ -69,16 +107,6 @@ from .repository.doctorat import DoctoratRepository
 from .repository.emplacement_document import EmplacementDocumentRepository
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
-from ..validation.repository.demande import DemandeRepository
-from ...domain.service.calendrier_inscription import CalendrierInscription
-from ...domain.service.elements_confirmation import ElementsConfirmation
-from ...domain.service.emplacements_documents_proposition import EmplacementsDocumentsPropositionTranslator
-from ...domain.service.historique import Historique as HistoriqueGlobal
-from ...domain.service.maximum_propositions import MaximumPropositionsAutorisees
-from ...domain.service.titres_acces import TitresAcces
-from ...domain.service.unites_enseignement_translator import UnitesEnseignementTranslator
-from ...repository.digit import DigitRepository
-from ...repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -129,6 +157,9 @@ COMMAND_HANDLERS = {
         promoteur_translator=PromoteurTranslator(),
         historique=Historique(),
         notification=Notification(),
+        academic_year_repository=AcademicYearRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
     ),
     RenvoyerInvitationSignatureExterneCommand: lambda msg_bus, cmd: renvoyer_invitation_signature_externe(
         cmd,
@@ -154,6 +185,8 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         promoteur_translator=PromoteurTranslator(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,
@@ -188,6 +221,7 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         historique=Historique(),
         notification=Notification(),
+        raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -240,6 +274,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
+        raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
     ),
     ApprouverPropositionParPdfCommand: lambda msg_bus, cmd: approuver_proposition_par_pdf(
         cmd,
@@ -664,6 +699,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
+        raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
     ),
     RecupererAdmissionDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
         cmd,
