@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.doctorat.events import FormationDuDossierAdmissionDoctoraleModifieeEvent
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -33,6 +34,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 
 
 def modifier_choix_formation_par_gestionnaire(
+    message_bus,
     cmd: 'ModifierChoixFormationParGestionnaireCommand',
     proposition_repository: 'IPropositionRepository',
     doctorat_translator: 'IDoctoratTranslator',
@@ -53,5 +55,11 @@ def modifier_choix_formation_par_gestionnaire(
 
     # THEN
     proposition_repository.save(proposition)
+    message_bus.publish(
+        FormationDuDossierAdmissionDoctoraleModifieeEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
+    )
 
     return proposition.entity_id

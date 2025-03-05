@@ -257,6 +257,7 @@ COMMAND_HANDLERS = {
         historique=_historique,
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_continue_translator,

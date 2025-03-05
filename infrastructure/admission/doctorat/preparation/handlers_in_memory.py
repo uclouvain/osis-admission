@@ -516,6 +516,7 @@ COMMAND_HANDLERS = {
         unites_enseignement_translator=_unites_enseignement_translator,
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         doctorat_translator=_doctorat_translator,
