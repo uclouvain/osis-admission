@@ -482,7 +482,7 @@ msgid "Add an academic course"
 msgstr "Ajouter une formation académique"
 
 msgid "Add validation of prior experience (VAE)"
-msgstr "Ajouter une valorisation des acquis d'expérience"
+msgstr "Ajouter une valorisation des acquis de l'expérience"
 
 msgid "Additional approval condition"
 msgstr "Condition complémentaire d'acceptation"
@@ -5264,9 +5264,6 @@ msgstr "Expérience de recherche doctorale"
 msgid "PhD research project"
 msgstr "Projet de recherche doctorale"
 
-msgid "PhD training"
-msgstr "Formation doctorale"
-
 msgid "Place of birth"
 msgstr "Lieu de naissance"
 
@@ -6142,9 +6139,6 @@ msgstr "Envoyer un e-mail au candidat"
 
 msgid "Send a mail to the faculty"
 msgstr "Envoyer un e-mail à la Faculté"
-
-msgid "Send an email"
-msgstr "Envoyer un e-mail"
 
 msgid "Send back to the candidate"
 msgstr "Redonner la main au candidat"
