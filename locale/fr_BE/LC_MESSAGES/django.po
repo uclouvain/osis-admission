@@ -587,6 +587,13 @@ msgid "All CA members must have approved the proposition."
 msgstr ""
 "Tous les membres du comité d'accompagnement doivent approuver la proposition."
 
+msgid ""
+"All experiences must be in the 'Validated' status so that the previous "
+"experience can be changed to the 'Sufficient' status."
+msgstr ""
+"L'ensemble des expériences doivent être à l'état 'Validé' pour que "
+"le parcours antérieur puisse passer à l'état 'Suffisant'."
+
 msgid "All history"
 msgstr "Historique complet"
 
@@ -7388,6 +7395,9 @@ msgstr ""
 "Cette autorisation d'inscription vous permet d'introduire une demande de "
 "logement auprès du service LOGE : <a href=\"https://www.uclouvain.be/etudier/"
 "logement\">www.uclouvain.be/etudier/logement</a>."
+
+msgid "This experience can't be validated if mandatory information is missing."
+msgstr "Cette expérience ne peut pas être validée tant que des informations obligatoires en sont manquantes."
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""

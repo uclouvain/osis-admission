@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -446,6 +446,7 @@ class ExperiencesAcademiquesNonCompleteesException(BusinessException):
 
     def __init__(self, reference, name, **kwargs):
         self.reference = reference
+        self.experience_name = name
         message = _("The educational experience '%(education_name)s' is not completed.") % {'education_name': name}
         super().__init__(message, **kwargs)
 
@@ -625,6 +626,17 @@ class InformationsAcceptationNonSpecifieesException(BusinessException):
     def __init__(self, **kwargs):
         message = _(
             "When accepting a proposition, all the required information in the approval form must be specified.",
+        )
+        super().__init__(message, **kwargs)
+
+
+class StatutsChecklistExperiencesEtreValidesException(BusinessException):
+    status_code = "PROPOSITION-70"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "All experiences must be in the 'Validated' status so that the previous experience "
+            "can be changed to the 'Sufficient' status."
         )
         super().__init__(message, **kwargs)
 

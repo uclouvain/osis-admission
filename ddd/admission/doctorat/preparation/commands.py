@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -676,6 +676,7 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    type_experience: str
     gestionnaire: str
     statut: str
     statut_authentification: Optional[bool]
@@ -762,6 +763,13 @@ class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class VerifierExperienceCurriculumApresSoumissionQuery(interface.QueryRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    type_experience: str
 
 
 @attr.dataclass(frozen=True, slots=True)

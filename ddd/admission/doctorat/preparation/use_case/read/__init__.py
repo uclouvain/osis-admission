@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
+from .determiner_annee_academique_et_pot_service import (
+    determiner_annee_academique_et_pot,
+)
 from .lister_demandes_service import lister_demandes
 from .lister_propositions_candidat_service import lister_propositions_candidat
 from .lister_propositions_supervisees_service import lister_propositions_supervisees
@@ -31,17 +33,28 @@ from .rechercher_doctorats_service import rechercher_doctorats
 from .recuperer_comptabilite_service import recuperer_comptabilite
 from .recuperer_cotutelle_service import recuperer_cotutelle
 from .recuperer_documents_proposition_service import recuperer_documents_proposition
-from .recuperer_documents_reclames_proposition_service import recuperer_documents_reclames_proposition
+from .recuperer_documents_reclames_proposition_service import (
+    recuperer_documents_reclames_proposition,
+)
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
-from .recuperer_pdf_temporaire_decision_sic_service import recuperer_pdf_temporaire_decision_sic
-from .recuperer_proposition_gestionnaire_service import recuperer_proposition_gestionnaire
+from .recuperer_pdf_temporaire_decision_sic_service import (
+    recuperer_pdf_temporaire_decision_sic,
+)
+from .recuperer_proposition_gestionnaire_service import (
+    recuperer_proposition_gestionnaire,
+)
 from .recuperer_proposition_service import recuperer_proposition
 from .recuperer_resume_et_emplacements_document_proposition_service import (
     recuperer_resume_et_emplacements_documents_proposition,
 )
 from .recuperer_resume_proposition_service import recuperer_resume_proposition
-from .verifier_curriculum_apres_soumission_service import verifier_curriculum_apres_soumission
+from .verifier_curriculum_apres_soumission_service import (
+    verifier_curriculum_apres_soumission,
+)
 from .verifier_curriculum_service import verifier_curriculum
+from .verifier_experience_curriculum_apres_soumission_service import (
+    verifier_experience_curriculum_apres_soumission,
+)
 from .verifier_projet_service import verifier_projet
 from .verifier_proposition_service import verifier_proposition
