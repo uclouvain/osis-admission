@@ -1039,6 +1039,9 @@ msgctxt "ways_hear_about_training"
 msgid "By someone who has already taken this course in a previous edition"
 msgstr ""
 
+msgid "CA"
+msgstr ""
+
 msgid "CA Member"
 msgstr "Supervisory panel member"
 
