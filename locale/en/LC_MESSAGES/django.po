@@ -5549,9 +5549,6 @@ msgstr ""
 msgid "Send a mail to the faculty"
 msgstr ""
 
-msgid "Send an email"
-msgstr ""
-
 msgid "Send back to the candidate"
 msgstr ""
 
