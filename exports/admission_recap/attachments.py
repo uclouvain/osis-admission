@@ -199,6 +199,15 @@ def get_secondary_studies_attachments(
                                 readonly=readonly_document,
                             )
                         )
+                        attachments.append(
+                            Attachment(
+                                identifier='DAES_UE',
+                                label=DocumentsEtudesSecondaires['DAES_UE'],
+                                uuids=context.etudes_secondaires.diplome_etranger.daes_ue,
+                                candidate_language=context.identification.langue_contact,
+                                readonly=readonly_document,
+                            )
+                        )
                     elif context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.PENDING.name:
                         attachments.append(
                             Attachment(
@@ -217,6 +226,15 @@ def get_secondary_studies_attachments(
                             label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE'],
                             uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
                             required=True,
+                            candidate_language=context.identification.langue_contact,
+                            readonly=readonly_document,
+                        )
+                    )
+                    attachments.append(
+                        Attachment(
+                            identifier='DAES_HORS_UE',
+                            label=DocumentsEtudesSecondaires['DAES_HORS_UE'],
+                            uuids=context.etudes_secondaires.diplome_etranger.daes_hors_ue,
                             candidate_language=context.identification.langue_contact,
                             readonly=readonly_document,
                         )
