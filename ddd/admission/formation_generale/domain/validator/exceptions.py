@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT,
+    ChoixStatutPropositionGenerale,
 )
 from osis_common.ddd.interface import BusinessException
 
@@ -284,7 +284,8 @@ class EtatChecklistDecisionSicNonValidePourApprouverUneInscription(BusinessExcep
     def __init__(self, **kwargs):
         message = _(
             'To approve an enrollment, the status of the checklist for the sic decision must be '
-            '"To be processed" or "Dispensation needed" (with management approval of the dispensation).'
+            '"To be processed" or "Non-progression dispensation needed" (with management approval '
+            'of the dispensation).'
         )
         super().__init__(message, **kwargs)
 
