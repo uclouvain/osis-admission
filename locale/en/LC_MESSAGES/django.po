@@ -1409,7 +1409,7 @@ msgstr ""
 msgid "Comment"
 msgstr ""
 
-msgid "Comment about dispensation"
+msgid "Comment about delegate/VRAE dispensation"
 msgstr ""
 
 msgid "Comment about the authentication"
@@ -1778,6 +1778,12 @@ msgstr ""
 msgid "DD/scholarship/EM?"
 msgstr ""
 
+msgid "DEROGATION_DELEGUE"
+msgstr "Delegate dispensation"
+
+msgid "DEROGATION_VRAE"
+msgstr "VRAE dispensation"
+
 msgid "DISPENSE_BOURSE"
 msgstr ""
 
@@ -1912,6 +1918,21 @@ msgstr ""
 msgid "Definitive admission date to doctorate"
 msgstr ""
 
+msgid "Delegate VRAE dispensation"
+msgstr ""
+
+msgid "Delegate VRAE dispensation certificate"
+msgstr ""
+
+msgid "Delegate VRAE dispensation comment"
+msgstr ""
+
+msgid "Delegate/VRAE dispensation"
+msgstr ""
+
+msgid "Delegate/VRAE dispensation certificate"
+msgstr ""
+
 msgctxt "admission"
 msgid "Delete"
 msgstr ""
@@ -2012,6 +2033,12 @@ msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr ""
 
 msgid "Dispensation"
+msgstr ""
+
+msgid "Dispensation certificate"
+msgstr ""
+
+msgid "Dispensation comment"
 msgstr ""
 
 msgid "Dispensation granted"
@@ -3043,6 +3070,9 @@ msgid "Grounds for denied"
 msgstr ""
 
 msgid "Has Erasmus Mundus scholarship"
+msgstr ""
+
+msgid "Has a dispensation been obtained by the candidate?"
 msgstr ""
 
 msgid "Has dual degree scholarship"
@@ -4310,6 +4340,12 @@ msgstr ""
 msgid "Non-academic activity"
 msgstr ""
 
+msgid "Non-progression dispensation comment"
+msgstr ""
+
+msgid "Non-progression dispensation needed"
+msgstr ""
+
 msgid "Non-resident (as defined by government decree)"
 msgstr ""
 
@@ -4547,6 +4583,9 @@ msgid ""
 "Our University is pleased to welcome you and wishes you an enriching and "
 "fruitful stay."
 msgstr ""
+
+msgid "PAS_DE_DEROGATION"
+msgstr "No dispensation"
 
 msgid "PAS_DE_DROITS_D_INSCRIPTION"
 msgstr ""
@@ -6632,6 +6671,12 @@ msgid ""
 "To approve an enrollment, the status of the checklist for the sic decision "
 "must be \"To be processed\" or \"Dispensation needed\" (with management "
 "approval of the dispensation)."
+msgstr ""
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Non-progression dispensation needed\" (with "
+"management approval of the dispensation)."
 msgstr ""
 
 msgid "To be completed"

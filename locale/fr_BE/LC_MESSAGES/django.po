@@ -1537,8 +1537,8 @@ msgstr "Clôturée"
 msgid "Comment"
 msgstr "Commentaire"
 
-msgid "Comment about dispensation"
-msgstr "Commentaire sur la dérogation"
+msgid "Comment about delegate/VRAE dispensation"
+msgstr "Commentaire sur la dérogation délégué·e/VRAE"
 
 msgid "Comment about the authentication"
 msgstr "Commentaire sur l'authentification"
@@ -1957,6 +1957,12 @@ msgstr "Poursuite de cycle"
 msgid "DD/scholarship/EM?"
 msgstr "DD/boursier/EM ?"
 
+msgid "DEROGATION_DELEGUE"
+msgstr "Dérogation délégué·e"
+
+msgid "DEROGATION_VRAE"
+msgstr "Dérogation VRAE"
+
 msgid "DISPENSE_BOURSE"
 msgstr "Dispense bourse"
 
@@ -2091,6 +2097,21 @@ msgstr "Définitive"
 msgid "Definitive admission date to doctorate"
 msgstr "Date de l'admission définitive au doctorat"
 
+msgid "Delegate VRAE dispensation"
+msgstr "Dérogation délégué·e/VRAE"
+
+msgid "Delegate VRAE dispensation certificate"
+msgstr "Justificatif de la dérogation délégué·e/VRAE"
+
+msgid "Delegate VRAE dispensation comment"
+msgstr "Commentaire de la dérogation délégué·e/VRAE"
+
+msgid "Delegate/VRAE dispensation"
+msgstr "Dérogation délégué·e/VRAE"
+
+msgid "Delegate/VRAE dispensation certificate"
+msgstr "Justificatif de la dérogation délégué·e/VRAE"
+
 msgctxt "admission"
 msgid "Delete"
 msgstr "Supprimer"
@@ -2196,6 +2217,12 @@ msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 
 msgid "Dispensation"
 msgstr "Dérogation"
+
+msgid "Dispensation certificate"
+msgstr "Justificatif de la dérogation"
+
+msgid "Dispensation comment"
+msgstr "Commentaire de la dérogation"
 
 msgid "Dispensation granted"
 msgstr "Dérogation accordée"
@@ -3341,6 +3368,9 @@ msgstr "Motif de refus"
 
 msgid "Has Erasmus Mundus scholarship"
 msgstr "A une bourse Erasmus Mundus"
+
+msgid "Has a dispensation been obtained by the candidate?"
+msgstr "Une dérogation a-t-elle été obtenue par le·la candidat·e"
 
 msgid "Has dual degree scholarship"
 msgstr "A une bourse double diplomation"
@@ -4815,6 +4845,12 @@ msgstr "Activités non-académiques"
 msgid "Non-academic activity"
 msgstr "Activité non-académique"
 
+msgid "Non-progression dispensation comment"
+msgstr "Commentaire dérogation non-progression"
+
+msgid "Non-progression dispensation needed"
+msgstr "Besoin dérogation non-progression"
+
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
 
@@ -5068,6 +5104,9 @@ msgid ""
 msgstr ""
 "Notre Université est heureuse de vous accueillir et vous souhaite un "
 "enrichissant et fructueux séjour."
+
+msgid "PAS_DE_DEROGATION"
+msgstr "Pas de dérogation"
 
 msgid "PAS_DE_DROITS_D_INSCRIPTION"
 msgstr "0 € - Pas de droits d'inscription"
@@ -7404,6 +7443,15 @@ msgstr ""
 "Pour approuver une inscription, le statut de la checklist pour la décision "
 "sic doit être \"A traiter\" ou \"Besoin dérogation\" (avec l'accord de la "
 "dérogation par la direction)."
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Non-progression dispensation needed\" (with "
+"management approval of the dispensation)."
+msgstr ""
+"Pour approuver une inscription, le statut de la checklist pour la décision "
+"sic doit être \"A traiter\" ou \"Besoin dérogation non-progression\" (avec "
+"l'accord de la dérogation par la direction)."
 
 msgid "To be completed"
 msgstr "À compléter"

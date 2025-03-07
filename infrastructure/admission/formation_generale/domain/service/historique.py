@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,12 +32,20 @@ from django.conf import settings
 from django.utils import formats
 from osis_history.utilities import add_history_entry
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_historique import (
+    IHistorique,
+)
 from admission.infrastructure.utils import get_message_to_historize
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
+    PersonneConnueUclTranslator,
+)
 
 TAGS_AUTORISATION_SIC = ["proposition", "sic-decision", "approval", "status-changed"]
 
@@ -373,4 +381,18 @@ class Historique(IHistorique):
             f'{gestionnaire_dto.nom}.',
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
             tags=['proposition', 'financabilite', 'financabilite-derogation'],
+        )
+
+    @classmethod
+    def historiser_derogation_delegue_vrae(cls, proposition: Proposition, gestionnaire: str):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        status = proposition.derogation_delegue_vrae.value
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f'Refus SIC : {status}',
+            f'SIC refusal: {status}',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'sic-decision', 'sic-decision-derogation'],
         )

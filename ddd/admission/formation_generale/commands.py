@@ -591,6 +591,15 @@ class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierDerogationDelegueVraeSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    derogation: str
+    commentaire: str = ''
+    justificatif: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierInformationsAcceptationPropositionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
