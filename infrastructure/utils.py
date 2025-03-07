@@ -474,8 +474,10 @@ CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_BELGES = {
 
 CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ETRANGERES = {
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE': 'final_equivalence_decision_ue',
+    'DAES_UE': 'access_diploma_to_higher_education_ue',
     'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE': 'equivalence_decision_proof',
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE': 'final_equivalence_decision_not_ue',
+    'DAES_HORS_UE': 'access_diploma_to_higher_education_not_ue',
     'DIPLOME_ETRANGER_DIPLOME': 'high_school_diploma',
     'DIPLOME_ETRANGER_TRADUCTION_DIPLOME': 'high_school_diploma_translation',
     'DIPLOME_ETRANGER_RELEVE_NOTES': 'high_school_transcript',

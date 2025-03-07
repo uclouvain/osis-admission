@@ -86,7 +86,9 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
             "high_school_transcript_translation",
             "high_school_diploma_translation",
             "final_equivalence_decision_ue",
+            "access_diploma_to_higher_education_ue",
             "final_equivalence_decision_not_ue",
+            "access_diploma_to_higher_education_not_ue",
             "equivalence_decision_proof",
         )
 

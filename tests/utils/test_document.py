@@ -467,6 +467,21 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.field, 'final_equivalence_decision_ue')
         self.assertEqual(document.uuids, [file_uuid])
 
+        # daes ue
+        file_uuid = uuid.uuid4()
+        self.general_admission.candidate.foreignhighschooldiploma.access_diploma_to_higher_education_ue = [file_uuid]
+        self.general_admission.candidate.foreignhighschooldiploma.save()
+
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.DAES_UE',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, self.general_admission.candidate.foreignhighschooldiploma)
+        self.assertEqual(document.field, 'access_diploma_to_higher_education_ue')
+        self.assertEqual(document.uuids, [file_uuid])
+
         # equivalence decision proof
         file_uuid = uuid.uuid4()
         self.general_admission.candidate.foreignhighschooldiploma.equivalence_decision_proof = [file_uuid]
@@ -496,6 +511,24 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.obj, self.general_admission.candidate.foreignhighschooldiploma)
         self.assertEqual(document.field, 'final_equivalence_decision_not_ue')
         self.assertEqual(document.uuids, [file_uuid])
+
+        # daes not ue
+        file_uuid = uuid.uuid4()
+        self.general_admission.candidate.foreignhighschooldiploma.access_diploma_to_higher_education_not_ue = [
+            file_uuid
+        ]
+        self.general_admission.candidate.foreignhighschooldiploma.save()
+
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.DAES_HORS_UE',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, self.general_admission.candidate.foreignhighschooldiploma)
+        self.assertEqual(document.field, 'access_diploma_to_higher_education_not_ue')
+        self.assertEqual(document.uuids, [file_uuid])
+
 
         # high school diploma
         file_uuid = uuid.uuid4()
