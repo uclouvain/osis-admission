@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.admission.doctorat.events import FormationDuDossierAdmissionDoctoraleModifieeEvent
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -42,9 +43,11 @@ from admission.ddd.admission.domain.builder.formation_identity import (
     FormationIdentityBuilder,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from infrastructure.utils import MessageBus
 
 
 def modifier_checklist_choix_formation(
+    message_bus: 'MessageBus',
     cmd: 'ModifierChecklistChoixFormationCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IDoctoratTranslator',
@@ -64,5 +67,11 @@ def modifier_checklist_choix_formation(
 
     # THEN
     proposition_repository.save(proposition)
+    message_bus.publish(
+        FormationDuDossierAdmissionDoctoraleModifieeEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
+    )
 
     return proposition.entity_id

@@ -236,6 +236,7 @@ COMMAND_HANDLERS = {
         bourse_translator=_bourse_translator,
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,

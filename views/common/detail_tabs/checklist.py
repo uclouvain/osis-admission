@@ -39,6 +39,7 @@ from rest_framework.views import APIView
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
+from admission.ddd.admission.formation_generale.events import DonneesPersonellesCandidatValidee
 from admission.forms.admission.checklist import (
     CommentForm,
 )
@@ -58,6 +59,8 @@ __all__ = [
 ]
 
 __namespace__ = False
+
+from infrastructure.messages_bus import message_bus_instance
 
 from osis_common.ddd.interface import BusinessException
 
@@ -105,6 +108,12 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
 
     admission.save(update_fields=update_fields)
 
+    if tab in ['donnees_personnelles'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
+        message_bus_instance.publish(
+            DonneesPersonellesCandidatValidee(
+                matricule=admission.candidate.global_id
+            )
+        )
     return serializer.data
 
 
