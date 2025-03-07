@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -66,6 +66,7 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
             cls.INSCRIPTION_REFUSEE: 1,
             cls.CLOTUREE: 1,
         }
+
 
 STATUTS_PROPOSITION_GENERALE_NON_SOUMISE = {
     ChoixStatutPropositionGenerale.EN_BROUILLON.name,
@@ -185,6 +186,12 @@ class BesoinDeDerogation(ChoiceEnum):
     BESOIN_DE_COMPLEMENT = _("BESOIN_DE_COMPLEMENT")
     REFUS_DIRECTION = _("REFUS_DIRECTION")
     ACCORD_DIRECTION = _("ACCORD_DIRECTION")
+
+
+class BesoinDeDerogationDelegueVrae(ChoiceEnum):
+    DEROGATION_DELEGUE = _("DEROGATION_DELEGUE")
+    DEROGATION_VRAE = _("DEROGATION_VRAE")
+    PAS_DE_DEROGATION = _("PAS_DE_DEROGATION")
 
 
 class DroitsInscriptionMontant(ChoiceEnum):

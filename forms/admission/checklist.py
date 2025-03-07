@@ -39,6 +39,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext_lazy, override, pgettext, pgettext_lazy
+from osis_document.contrib import FileUploadField
 from osis_document.utils import is_uuid
 
 from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL
@@ -59,6 +60,7 @@ from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
     ChoixStatutChecklist,
     DerogationFinancement,
     DispenseOuDroitsMajores,
@@ -100,6 +102,7 @@ from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
+from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
@@ -1213,6 +1216,40 @@ class SicDecisionDerogationForm(forms.Form):
             }
         ),
     )
+
+
+class SicDecisionDelegateVraeDerogationForm(forms.Form):
+    dispensation = forms.ChoiceField(
+        label=_('Has a dispensation been obtained by the candidate?'),
+        choices=BesoinDeDerogationDelegueVrae.choices(),
+        widget=forms.RadioSelect(),
+    )
+    certificate = MaxOneFileUploadField(
+        label=_('Dispensation certificate'),
+        required=False,
+    )
+    comment = forms.CharField(
+        label=_('Dispensation comment'),
+        widget=AutoGrowTextareaWidget(
+            attrs={
+                'rows': 2,
+            }
+        ),
+        required=False,
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data['dispensation'] != BesoinDeDerogationDelegueVrae.PAS_DE_DEROGATION.name:
+            if not cleaned_data.get('certificate'):
+                self.add_error(
+                    'certificate',
+                    forms.ValidationError(
+                        self.fields['certificate'].error_messages['required'],
+                        code='required',
+                    ),
+                )
+        return cleaned_data
 
 
 class SicDecisionFinalRefusalForm(forms.Form):

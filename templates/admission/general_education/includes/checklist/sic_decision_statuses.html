@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -33,14 +33,18 @@
   {% if not proposition|sic_can_edit %}
     {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
-    {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Non-progression dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
   {% elif current|sic_in_final_statut %}
-    {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' open_modal='#sic-decision-confirm-modal-INITIAL_CANDIDAT' %}
+    {% if current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'refusal' %}
+      {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' open_modal='#sic-decision-delegate-vrae-dispensation-modal' %}
+    {% else %}
+      {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' open_modal='#sic-decision-confirm-modal-INITIAL_CANDIDAT' %}
+    {% endif %}
     {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
-    {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
+    {% checklist_state_button tab='decision_sic' label=_("Non-progression dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
     {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
@@ -50,7 +54,7 @@
     {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-to_be_completed' as change_status_url %}
     {% checklist_state_button tab='decision_sic' label=_("Manager follow-up") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' htmx_post=change_status_url %}
     {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-derogation' as change_status_url %}
-    {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' htmx_post=change_status_url %}
+    {% checklist_state_button tab='decision_sic' label=_("Non-progression dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' htmx_post=change_status_url %}
     {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" open_modal='#sic-decision-refusal-modal' class='warning' %}
 
     {% if past_experiences_are_sufficient and admission.est_admission %}
@@ -89,4 +93,3 @@
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
   {% endif %}
 </div>
-

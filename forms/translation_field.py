@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import json
 from typing import Any
 
 from django import forms
@@ -31,7 +31,6 @@ from django.conf import settings
 from django.contrib.postgres.forms import SimpleArrayField
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-
 
 TRANSLATION_LANGUAGES = [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]
 
@@ -56,8 +55,22 @@ class TranslatedValueWidget(forms.MultiWidget):
         return [value.get(language, '') for language in TRANSLATION_LANGUAGES]
 
 
+class TranslatedHiddenInput(forms.HiddenInput):
+
+    def format_value(self, value):
+        return json.dumps(value)
+
+    def value_from_datadict(self, data, files, name):
+        """
+        Given a dictionary of data and this widget's name, return the value
+        of this widget or None if it's not provided.
+        """
+        return json.loads(data.get(name))
+
+
 class TranslatedValueField(forms.MultiValueField):
     widget = TranslatedValueWidget
+    hidden_widget = TranslatedHiddenInput
 
     def __init__(self, base_field=None, *args, **kwargs):
         # Remove arguments from JSONField

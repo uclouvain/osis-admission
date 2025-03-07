@@ -91,6 +91,7 @@ from admission.ddd.admission.formation_generale.domain.model._comptabilite impor
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
     DecisionFacultaireEnum,
@@ -216,6 +217,9 @@ class Proposition(interface.RootEntity):
     # Décision facultaire & sic
     certificat_approbation_fac: List[str] = attr.Factory(list)
     certificat_refus_fac: List[str] = attr.Factory(list)
+    derogation_delegue_vrae: Optional[BesoinDeDerogationDelegueVrae] = None
+    derogation_delegue_vrae_commentaire: str = ''
+    justificatif_derogation_delegue_vrae: List[str] = attr.Factory(list)
     certificat_approbation_sic: List[str] = attr.Factory(list)
     certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
     certificat_refus_sic: List[str] = attr.Factory(list)
@@ -928,6 +932,22 @@ class Proposition(interface.RootEntity):
     def specifier_besoin_de_derogation(self, besoin_de_derogation: BesoinDeDerogation, auteur_modification: str):
         self.besoin_de_derogation = besoin_de_derogation
         self.auteur_derniere_modification = auteur_modification
+
+    def specifier_derogation_delegue_vrae(
+        self,
+        derogation: BesoinDeDerogationDelegueVrae,
+        commentaire: str,
+        justificatif: List[str],
+        auteur_modification: str,
+    ):
+        self.derogation_delegue_vrae = derogation
+        self.derogation_delegue_vrae_commentaire = commentaire
+        self.justificatif_derogation_delegue_vrae = justificatif
+        self.auteur_derniere_modification = auteur_modification
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+            libelle=__('To be processed'),
+        )
 
     def _specifier_informations_de_base_acceptation_par_sic(
         self,

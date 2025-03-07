@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,22 +24,24 @@
 #
 # ##############################################################################
 import abc
-from typing import List, Dict
+from typing import Dict, List
 
-from django.utils.dateparse import parse_datetime, parse_date
+from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-    StatutEmplacementDocument,
-    IdentifiantBaseEmplacementDocument,
     DocumentsSysteme,
+    IdentifiantBaseEmplacementDocument,
+    StatutEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.exports.admission_recap.attachments import Attachment
-from admission.exports.admission_recap.section import get_sections, Section
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from admission.exports.admission_recap.section import Section, get_sections
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
+    IPersonneConnueUclTranslator,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
 
@@ -105,6 +107,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
                 ('ATTESTATION_ACCORD_FACULTAIRE', resume_dto.proposition.certificat_approbation_fac),
                 ('ATTESTATION_REFUS_FACULTAIRE', resume_dto.proposition.certificat_refus_fac),
                 ('ATTESTATION_ACCORD_SIC', resume_dto.proposition.certificat_approbation_sic),
+                ('JUSTIFICATIF_DEROGATION_DELEGUE_VRAE', resume_dto.proposition.justificatif_derogation_delegue_vrae),
                 ('ATTESTATION_ACCORD_ANNEXE_SIC', resume_dto.proposition.certificat_approbation_sic_annexe),
                 ('ATTESTATION_REFUS_SIC', resume_dto.proposition.certificat_refus_sic),
             )
@@ -203,30 +206,34 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             libelle_langue_candidat=document.candidate_language_label,
             document_uuids=document.uuids,
             type=document_demande.get('type', TypeEmplacementDocument.NON_LIBRE.name),
-            statut=document_demande['status']
-            if 'status' in document_demande
-            else StatutEmplacementDocument.A_RECLAMER.name
-            if est_requis_et_manquant
-            else StatutEmplacementDocument.NON_ANALYSE.name,
+            statut=(
+                document_demande['status']
+                if 'status' in document_demande
+                else (
+                    StatutEmplacementDocument.A_RECLAMER.name
+                    if est_requis_et_manquant
+                    else StatutEmplacementDocument.NON_ANALYSE.name
+                )
+            ),
             justification_gestionnaire=document_demande.get('reason', ''),
-            reclame_le=parse_datetime(document_demande['requested_at'])
-            if document_demande.get('requested_at')
-            else None,
+            reclame_le=(
+                parse_datetime(document_demande['requested_at']) if document_demande.get('requested_at') else None
+            ),
             dernier_acteur=acteurs.get(document_demande['last_actor']) if document_demande.get('last_actor') else None,
-            derniere_action_le=parse_datetime(document_demande['last_action_at'])
-            if document_demande.get('last_action_at')
-            else None,
+            derniere_action_le=(
+                parse_datetime(document_demande['last_action_at']) if document_demande.get('last_action_at') else None
+            ),
             a_echeance_le=parse_date(document_demande['deadline_at']) if document_demande.get('deadline_at') else None,
             onglet=section.identifier,
             nom_onglet=section.label,
             nom_onglet_langue_candidat=section.candidate_language_label,
             uuid_proposition=uuid_proposition,
-            document_soumis_par=acteurs.get(metadonnees_document['author'])
-            if metadonnees_document.get('author')
-            else None,
-            document_soumis_le=parse_datetime(metadonnees_document['uploaded_at'])
-            if metadonnees_document.get('uploaded_at')
-            else None,
+            document_soumis_par=(
+                acteurs.get(metadonnees_document['author']) if metadonnees_document.get('author') else None
+            ),
+            document_soumis_le=(
+                parse_datetime(metadonnees_document['uploaded_at']) if metadonnees_document.get('uploaded_at') else None
+            ),
             requis_automatiquement=document.required,
             types_documents=types_documents,
             noms_documents_televerses=noms_documents_televerses,
@@ -255,12 +262,12 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             type=type_document.name,
             statut=StatutEmplacementDocument.VALIDE.name,
             justification_gestionnaire='',
-            document_soumis_par=acteurs.get(metadonnees_document['author'])
-            if metadonnees_document.get('author')
-            else None,
-            document_soumis_le=parse_datetime(metadonnees_document['uploaded_at'])
-            if metadonnees_document.get('uploaded_at')
-            else None,
+            document_soumis_par=(
+                acteurs.get(metadonnees_document['author']) if metadonnees_document.get('author') else None
+            ),
+            document_soumis_le=(
+                parse_datetime(metadonnees_document['uploaded_at']) if metadonnees_document.get('uploaded_at') else None
+            ),
             reclame_le=None,
             derniere_action_le=None,
             dernier_acteur=None,
@@ -300,12 +307,12 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             type=TypeEmplacementDocument.SYSTEME.name,
             statut=StatutEmplacementDocument.VALIDE.name,
             justification_gestionnaire='',
-            document_soumis_par=acteurs.get(metadonnees_document['author'])
-            if metadonnees_document.get('author')
-            else None,
-            document_soumis_le=parse_datetime(metadonnees_document['uploaded_at'])
-            if metadonnees_document.get('uploaded_at')
-            else None,
+            document_soumis_par=(
+                acteurs.get(metadonnees_document['author']) if metadonnees_document.get('author') else None
+            ),
+            document_soumis_le=(
+                parse_datetime(metadonnees_document['uploaded_at']) if metadonnees_document.get('uploaded_at') else None
+            ),
             reclame_le=None,
             derniere_action_le=None,
             dernier_acteur=None,

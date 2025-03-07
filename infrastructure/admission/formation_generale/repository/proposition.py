@@ -79,6 +79,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
     BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
     PoursuiteDeCycle,
@@ -367,6 +368,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'last_update_author': last_update_author_person,
                 'fac_approval_certificate': entity.certificat_approbation_fac,
                 'fac_refusal_certificate': entity.certificat_refus_fac,
+                'delegate_vrae_dispensation': (
+                    entity.derogation_delegue_vrae.name if entity.derogation_delegue_vrae else ''
+                ),
+                'delegate_vrae_dispensation_comment': entity.derogation_delegue_vrae_commentaire,
+                'delegate_vrae_dispensation_certificate': entity.justificatif_derogation_delegue_vrae,
                 'sic_approval_certificate': entity.certificat_approbation_sic,
                 'sic_annexe_approval_certificate': entity.certificat_approbation_sic_annexe,
                 'sic_refusal_certificate': entity.certificat_refus_sic,
@@ -630,6 +636,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ),
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
+            derogation_delegue_vrae=(
+                BesoinDeDerogationDelegueVrae[admission.delegate_vrae_dispensation]
+                if admission.delegate_vrae_dispensation
+                else None
+            ),
+            derogation_delegue_vrae_commentaire=admission.delegate_vrae_dispensation_comment,
+            justificatif_derogation_delegue_vrae=admission.delegate_vrae_dispensation_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
             certificat_refus_sic=admission.sic_refusal_certificate,
@@ -858,6 +871,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ),
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
+            derogation_delegue_vrae=admission.delegate_vrae_dispensation,
+            derogation_delegue_vrae_commentaire=admission.delegate_vrae_dispensation_comment,
+            justificatif_derogation_delegue_vrae=admission.delegate_vrae_dispensation_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
             certificat_refus_sic=admission.sic_refusal_certificate,

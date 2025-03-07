@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,8 +27,7 @@
 import uuid
 from unittest import mock
 
-from django.test import TestCase
-from django.test import override_settings
+from django.test import TestCase, override_settings
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
@@ -45,17 +44,17 @@ class SicPatchMixin(TestCase):
             'osis_document.contrib.fields.FileField._confirm_multiple_upload'
         )
         patched = self.confirm_several_remote_upload_patcher.start()
-        patched.side_effect = lambda _, value, __: [str(uuid.uuid4())] if value else []
+        patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
         self.addCleanup(self.confirm_several_remote_upload_patcher.stop)
 
         self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf", "size": 1}
+        patched.return_value = {"name": "test.pdf", "size": 1, "mimetype": "application/pdf"}
         self.addCleanup(self.get_remote_metadata_patcher.stop)
 
         self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
         patched = self.get_several_remote_metadata_patcher.start()
-        patched.return_value = {"foo": {"name": "test.pdf", "size": 1}}
+        patched.return_value = {"foo": {"name": "test.pdf", "size": 1, "mimetype": "application/pdf"}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
         self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')

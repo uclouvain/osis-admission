@@ -42,6 +42,7 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
     DispenseOuDroitsMajores,
@@ -344,7 +345,25 @@ class GeneralEducationAdmission(BaseAdmission):
         max_length=50,
         default='',
         choices=BesoinDeDerogation.choices(),
-        verbose_name=_('Dispensation needed'),
+        verbose_name=_('Non-progression dispensation needed'),
+    )
+    delegate_vrae_dispensation = models.CharField(
+        max_length=50,
+        default='',
+        choices=BesoinDeDerogationDelegueVrae.choices(),
+        verbose_name=_('Delegate VRAE dispensation'),
+        blank=True,
+    )
+    delegate_vrae_dispensation_comment = models.TextField(
+        verbose_name=_('Delegate VRAE dispensation comment'),
+        default='',
+        blank=True,
+    )
+    delegate_vrae_dispensation_certificate = FileField(
+        verbose_name=_("Delegate VRAE dispensation certificate"),
+        upload_to=admission_directory_path,
+        blank=True,
+        mimetypes=[PDF_MIME_TYPE],
     )
     tuition_fees_amount = models.CharField(
         max_length=50,

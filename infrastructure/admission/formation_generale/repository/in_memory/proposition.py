@@ -345,6 +345,11 @@ class PropositionInMemoryRepository(
             certificat_refus_sic=proposition.certificat_refus_sic,
             documents_additionnels=proposition.documents_additionnels,
             poste_diplomatique=poste_diplomatique,
+            derogation_delegue_vrae=(
+                proposition.derogation_delegue_vrae.name if proposition.derogation_delegue_vrae else ''
+            ),
+            derogation_delegue_vrae_commentaire=proposition.derogation_delegue_vrae_commentaire,
+            justificatif_derogation_delegue_vrae=proposition.justificatif_derogation_delegue_vrae,
             financabilite_regle_calcule=(
                 proposition.financabilite_regle_calcule.name if proposition.financabilite_regle_calcule else ''
             ),
