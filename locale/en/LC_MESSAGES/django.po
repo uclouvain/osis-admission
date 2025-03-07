@@ -284,6 +284,9 @@ msgstr ""
 msgid "Acceptation condition"
 msgstr ""
 
+msgid "Access condition"
+msgstr ""
+
 msgid "Access condition:"
 msgstr ""
 
@@ -1036,6 +1039,9 @@ msgstr ""
 
 msgid "CANDIDAT_NOTIFIE"
 msgstr "Candidate notified"
+
+msgid "CC"
+msgstr ""
 
 msgid "CDD comment about the collaborative program"
 msgstr ""
@@ -2575,6 +2581,9 @@ msgstr ""
 msgid "Expected graduation date (signed diploma)"
 msgstr ""
 
+msgid "Experience"
+msgstr "Experience"
+
 msgid "Experience knowledge valorisation"
 msgstr ""
 
@@ -2582,9 +2591,6 @@ msgid "Experience merge proposal"
 msgstr ""
 
 msgid "Experience not found."
-msgstr "Expérience non trouvée."
-
-msgid "Experiences"
 msgstr ""
 
 msgid "Expert advice"
@@ -3113,6 +3119,9 @@ msgstr ""
 msgid "Hide the checklist menu"
 msgstr ""
 
+msgid "Hide the documents"
+msgstr ""
+
 msgid "Hide the states of the checklist"
 msgstr ""
 
@@ -3551,6 +3560,10 @@ msgstr ""
 
 msgid ""
 "Initialization of the predefined specific questions for an academic year"
+msgstr ""
+
+msgctxt "admission"
+msgid "Inst."
 msgstr ""
 
 msgctxt "admission"
@@ -5189,6 +5202,9 @@ msgctxt "X"
 msgid "Rector"
 msgstr ""
 
+msgid "Red."
+msgstr ""
+
 msgid "Reduced rights"
 msgstr ""
 
@@ -5665,6 +5681,9 @@ msgid "Show details"
 msgstr ""
 
 msgid "Show the checklist menu"
+msgstr ""
+
+msgid "Show the documents"
 msgstr ""
 
 msgid "Show the states of the checklist"
@@ -7153,9 +7172,6 @@ msgid "Year of birth"
 msgstr ""
 
 msgid "Year of the training"
-msgstr ""
-
-msgid "Years"
 msgstr ""
 
 msgid "Yes"
