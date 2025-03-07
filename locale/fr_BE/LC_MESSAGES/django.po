@@ -1544,11 +1544,17 @@ msgstr "Clôturée"
 msgid "Comment"
 msgstr "Commentaire"
 
+msgid "Comment about delegate/VRAE dispensation"
+msgstr "Commentaire sur la dérogation délégué·e/VRAE"
+
 msgid "Comment about dispensation"
 msgstr "Commentaire sur la dérogation"
 
 msgid "Comment about financability dispensation"
 msgstr "Commentaire sur la dérogation à la financabilité"
+
+msgid "Comment about non-progression dispensation"
+msgstr "Commentaire dérogation non-progression"
 
 msgid "Comment about the authentication"
 msgstr "Commentaire sur l'authentification"
@@ -1982,6 +1988,12 @@ msgstr "Poursuite de cycle"
 msgid "DD/scholarship/EM?"
 msgstr "DD/boursier/EM ?"
 
+msgid "DEROGATION_DELEGUE"
+msgstr "Dérogation délégué·e"
+
+msgid "DEROGATION_VRAE"
+msgstr "Dérogation VRAE"
+
 msgid "DISPENSE_BOURSE"
 msgstr "Dispense bourse"
 
@@ -2116,6 +2128,21 @@ msgstr "Définitive"
 msgid "Definitive admission date to doctorate"
 msgstr "Date de l'admission définitive au doctorat"
 
+msgid "Delegate VRAE dispensation"
+msgstr "Dérogation délégué·e/VRAE"
+
+msgid "Delegate VRAE dispensation certificate"
+msgstr "Justificatif de la dérogation délégué·e/VRAE"
+
+msgid "Delegate VRAE dispensation comment"
+msgstr "Commentaire de la dérogation délégué·e/VRAE"
+
+msgid "Delegate/VRAE dispensation"
+msgstr "Dérogation délégué·e/VRAE"
+
+msgid "Delegate/VRAE dispensation certificate"
+msgstr "Justificatif de la dérogation délégué·e/VRAE"
+
 msgctxt "admission"
 msgid "Delete"
 msgstr "Supprimer"
@@ -2221,6 +2248,12 @@ msgstr "Rejeter la fusion"
 
 msgid "Dispensation"
 msgstr "Dérogation"
+
+msgid "Dispensation certificate"
+msgstr "Justificatif de la dérogation"
+
+msgid "Dispensation comment"
+msgstr "Commentaire de la dérogation"
 
 msgid "Dispensation granted"
 msgstr "Dérogation accordée"
@@ -3372,6 +3405,9 @@ msgstr "Salutations en fonction du genre du candidat"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
+
+msgid "Has a dispensation been obtained by the candidate?"
+msgstr "Une dérogation a-t-elle été obtenue par le·la candidat·e"
 
 msgid "Has the PhD project already started?"
 msgstr "Le projet doctoral a-t-il déjà commencé ?"
@@ -4859,6 +4895,9 @@ msgstr "Activités non-académiques"
 msgid "Non-academic activity"
 msgstr "Activité non-académique"
 
+msgid "Non-progression dispensation needed"
+msgstr "Besoin dérogation non-progression"
+
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
 
@@ -5113,6 +5152,9 @@ msgstr ""
 "Notre Université est heureuse de vous accueillir et vous souhaite un "
 "enrichissant et fructueux séjour."
 
+msgid "PAS_DE_DEROGATION"
+msgstr "Pas de dérogation"
+
 msgid "PAS_DE_DROITS_D_INSCRIPTION"
 msgstr "0 € - Pas de droits d'inscription"
 
@@ -5263,9 +5305,6 @@ msgstr "Expérience de recherche doctorale"
 
 msgid "PhD research project"
 msgstr "Projet de recherche doctorale"
-
-msgid "PhD training"
-msgstr "Formation doctorale"
 
 msgid "Place of birth"
 msgstr "Lieu de naissance"
@@ -6142,9 +6181,6 @@ msgstr "Envoyer un e-mail au candidat"
 
 msgid "Send a mail to the faculty"
 msgstr "Envoyer un e-mail à la Faculté"
-
-msgid "Send an email"
-msgstr "Envoyer un e-mail"
 
 msgid "Send back to the candidate"
 msgstr "Redonner la main au candidat"
@@ -7434,6 +7470,15 @@ msgid ""
 msgstr ""
 "Pour approuver une inscription, le statut de la checklist pour la décision "
 "sic doit être \"A traiter\" ou \"Besoin dérogation\" (avec l'accord de la "
+"dérogation par la direction)."
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Non-progression dispensation needed\" (with "
+"management approval of the dispensation)."
+msgstr ""
+"Pour approuver une inscription, le statut de la checklist pour la décision "
+"sic doit être \"A traiter\" ou \"Besoin dérogation non-progression\" (avec l'accord de la "
 "dérogation par la direction)."
 
 msgid "To be completed"
