@@ -198,3 +198,12 @@ class IHistorique(interface.DomainService):
         message: Optional[EmailMessage] = None,
     ):
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_derogation_vrae_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        raise NotImplementedError

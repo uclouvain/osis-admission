@@ -122,7 +122,7 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierDerogationFinancabiliteCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
     SpecifierFinancabiliteNonConcerneeCommand,
-    ApprouverReorientationExterneParFaculteCommand,
+    ApprouverReorientationExterneParFaculteCommand, SpecifierDerogationVraeFinancabiliteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -158,7 +158,7 @@ from admission.forms.admission.checklist import (
     FinancabiliteDispensationForm,
     FinancabilityDispensationRefusalForm,
     FinancabiliteNotificationForm,
-    FinancabiliteNotFinanceableForm,
+    FinancabiliteNotFinanceableForm, FinancabiliteDispensationVraeForm,
 )
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -252,6 +252,7 @@ __all__ = [
     'FinancabiliteDerogationNotificationView',
     'FinancabiliteDerogationAbandonCandidatView',
     'FinancabiliteDerogationRefusView',
+    'FinancabiliteDerogationVraeView',
     'FinancabiliteDerogationAccordView',
     'FinancabiliteApprovalSetRuleView',
     'FinancabiliteNotFinanceableSetRuleView',
@@ -2239,6 +2240,10 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
             prefix='financabilite_derogation',
         )
 
+        context['financability_dispensation_vrae_form'] = FinancabiliteDispensationVraeForm(
+            instance=self.admission,
+            prefix='financabilite-dispensation-vrae',
+        )
         context['financability_dispensation_refusal_form'] = self.financability_dispensation_refusal_form
         context['financability_dispensation_notification_form'] = self.financability_dispensation_notification_form
 
@@ -2545,6 +2550,40 @@ class FinancabiliteDerogationRefusView(
                     gestionnaire=self.request.user.person.global_id,
                     refus_uuids_motifs=form.cleaned_data['reasons'],
                     refus_autres_motifs=form.cleaned_data['other_reasons'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+
+        self.htmx_refresh = True
+        return super().form_valid(form)
+
+
+class FinancabiliteDerogationVraeView(
+    AdmissionFormMixin,
+    FinancabiliteContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'financability-derogation-vrae': 'financability-derogation-vrae'}
+    permission_required = 'admission.checklist_financability_dispensation_fac'
+    template_name = (
+        htmx_template_name
+    ) = 'admission/general_education/includes/checklist/financabilite_derogation_vrae_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/financabilite_derogation_vrae_form.html'
+
+    def get_form(self, form_class=None):
+        return self.financability_dispensation_refusal_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierDerogationVraeFinancabiliteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    derogation_vrae=form.cleaned_data['financabilite_dispensation_vrae'],
+                    gestionnaire=self.request.user.person.global_id,
                 )
             )
         except MultipleBusinessExceptions as multiple_exceptions:

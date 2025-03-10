@@ -154,3 +154,11 @@ class HistoriqueInMemory(IHistorique):
         message: Optional[EmailMessage] = None,
     ):
         pass
+
+    @classmethod
+    def historiser_derogation_vrae_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        pass
