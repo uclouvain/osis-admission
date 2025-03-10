@@ -107,6 +107,9 @@ class PropositionDTO(interface.DTO):
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]
 
+    derogation_delegue_vrae: str
+    derogation_delegue_vrae_commentaire: str
+    justificatif_derogation_delegue_vrae: List[str]
     certificat_refus_fac: List[str]
     certificat_approbation_fac: List[str]
     certificat_approbation_sic: List[str]

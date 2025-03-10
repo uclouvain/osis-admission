@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,31 +26,33 @@
 
 import uuid
 from email.message import EmailMessage
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 from uuid import UUID
 
 import attr
 from django.conf import settings
-from django.db.models import Model, Q, Func
+from django.db.models import Func, Model, Q
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import SUPPORTED_MIME_TYPES
-from admission.models import (
-    SupervisionActor,
-    AdmissionFormItem,
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
 )
-from admission.models.base import BaseAdmission
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import CleConfigurationItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
-    OngletsDemande,
-    TypeEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
+    OngletsDemande,
     StatutEmplacementDocument,
+    TypeEmplacementDocument,
 )
-from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
+from admission.models import AdmissionFormItem, SupervisionActor
+from admission.models.base import BaseAdmission
+from base.models.entity_version import (
+    PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS,
+    EntityVersion,
+)
 from base.models.enums.entity_type import PEDAGOGICAL_ENTITY_TYPES
 from osis_profile.models import EducationalExperienceYear
 
@@ -293,7 +295,7 @@ def get_document_from_identifier(
         max_documents_number = 1
 
         if document_uuids:
-            from osis_document.api.utils import get_remote_token, get_remote_metadata
+            from osis_document.api.utils import get_remote_metadata, get_remote_token
 
             token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
             metadata = get_remote_metadata(token=token) or {}
@@ -430,7 +432,10 @@ def get_document_from_identifier(
     if obj and field and document_type:
         if document_uuids:
             if not metadata:
-                from osis_document.api.utils import get_remote_token, get_remote_metadata
+                from osis_document.api.utils import (
+                    get_remote_metadata,
+                    get_remote_token,
+                )
 
                 token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
                 metadata = get_remote_metadata(token=token)
@@ -591,6 +596,7 @@ CORRESPONDANCE_CHAMPS_SYSTEME = {
     'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
     'ATTESTATION_ACCORD_CDD': 'cdd_approval_certificate',
     'ATTESTATION_REFUS_FACULTAIRE': 'fac_refusal_certificate',
+    'JUSTIFICATIF_DEROGATION_DELEGUE_VRAE': 'delegate_vrae_dispensation_certificate',
     'ATTESTATION_ACCORD_SIC': 'sic_approval_certificate',
     'ATTESTATION_ACCORD_ANNEXE_SIC': 'sic_annexe_approval_certificate',
     'ATTESTATION_REFUS_SIC': 'sic_refusal_certificate',

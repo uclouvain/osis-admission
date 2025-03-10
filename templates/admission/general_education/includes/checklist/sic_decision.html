@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -48,14 +48,30 @@
 
     {% bootstrap_form comment_forms.decision_sic %}
 
-    {# Dispensation part #}
+    {# Delegate/VRAE dispensation part #}
+    {% if admission.derogation_delegue_vrae %}
+      <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-delegate-vrae-dispensation-modal"><i class="fas fa-edit"></i></button>
+      {% field_data _('Delegate/VRAE dispensation') admission.derogation_delegue_vrae|enum_display:'BesoinDeDerogationDelegueVrae' %}
+      {% if admission.derogation_delegue_vrae_commentaire %}
+        <dl>
+          <dt>{% trans 'Comment about delegate/VRAE dispensation' %}</dt>
+          <dd>
+            <div class="form-group">
+              <textarea class="form-control" disabled>{{ admission.derogation_delegue_vrae_commentaire }}</textarea>
+            </div>
+          </dd>
+        </dl>
+      {% endif %}
+    {% endif %}
+
+    {# Non-progression dispensation part #}
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' %}
       {% include 'admission/general_education/includes/checklist/sic_decision_dispensation_needed_form.html' %}
       {% bootstrap_form comment_forms.decision_sic__derogation %}
     {% elif original_admission.dispensation_need != 'NON_CONCERNE' %}
-      {% field_data _('Dispensation needed') original_admission.get_dispensation_needed_display %}
+      {% field_data _('Non-progression dispensation needed') original_admission.get_dispensation_needed_display %}
       <dl>
-        <dt>{% trans 'Comment about dispensation' %}</dt>
+        <dt>{% trans 'Comment about non-progression dispensation' %}</dt>
         <dd>
           <div class="form-group">
             <textarea class="form-control" disabled>{{ comment_forms.decision_sic__derogation.fields.comment.initial|default_if_none:"" }}</textarea>
