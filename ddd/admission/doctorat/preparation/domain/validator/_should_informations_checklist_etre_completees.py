@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,49 +23,52 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import List, Optional
 
 import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
     BesoinDeDerogation,
+    ChoixStatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    StatutsChecklistDoctorale,
     StatutChecklist,
+    StatutsChecklistDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    TitreAccesEtreSelectionneException,
+    ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
     ConditionAccesEtreSelectionneException,
-    SituationPropositionNonSICException,
-    SituationPropositionNonCddException,
-    InscriptionTardiveAvecConditionAccesException,
-    TitreAccesEtreSelectionnePourEnvoyerASICException,
-    EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     DemandeDoitEtreAdmissionException,
     DemandeDoitEtreInscriptionException,
-    ParcoursAnterieurNonSuffisantException,
-    ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
     DocumentAReclamerImmediatException,
+    EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
     InformationsAcceptationNonSpecifieesException,
+    InscriptionTardiveAvecConditionAccesException,
+    ParcoursAnterieurNonSuffisantException,
+    SituationPropositionNonCddException,
+    SituationPropositionNonSICException,
+    StatutsChecklistExperiencesEtreValidesException,
+    TitreAccesEtreSelectionneException,
+    TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutReclamationEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator
@@ -199,6 +202,32 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
             self.condition_acces and self.millesime_condition_acces
         ):
             raise ConditionAccesEtreSelectionneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
+    uuids_experiences_valorisees: set[str]
+    checklist: StatutsChecklistDoctorale
+    statut: ChoixStatutChecklist
+
+    def validate(self, *args, **kwargs):
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE:
+            # Le passage à l'état valide nécessite que toutes les expériences valorisées soient passées à l'état valide
+            uuids_experiences_valorisees = self.uuids_experiences_valorisees.copy()
+
+            for experience in self.checklist.parcours_anterieur.enfants:
+                identifiant_experience = experience.extra.get('identifiant')
+
+                if identifiant_experience in uuids_experiences_valorisees:
+                    uuids_experiences_valorisees.discard(identifiant_experience)
+
+                    # Si une expérience valorisée n'est pas à l'état valide, lever l'exception
+                    if experience.statut != ChoixStatutChecklist.GEST_REUSSITE:
+                        raise StatutsChecklistExperiencesEtreValidesException
+
+            # Si une expérience valorisée n'a pas de checklist associée, lever l'exception
+            if uuids_experiences_valorisees:
+                raise StatutsChecklistExperiencesEtreValidesException
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,40 +37,48 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.models import GeneralEducationAdmission
-from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
     recuperer_conditions_acces_par_formation,
 )
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    OngletsChecklist,
 )
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
-    GeneralEducationAdmissionFactory,
     AdmissionPrerequisiteCoursesFactory,
+    GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
-from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
+from admission.tests.views.general_education.checklist.sic_decision.base import (
+    SicPatchMixin,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.enums.community import CommunityEnum
@@ -85,11 +93,21 @@ from base.tests.factories.student import StudentFactory
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.statut_inscription_programme_annuel import (
+    StatutInscriptionProgrammAnnuel,
+)
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from epc.tests.factories.inscription_programme_cycle import (
+    InscriptionProgrammeCycleFactory,
+)
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
+)
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
@@ -117,6 +135,7 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
 
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
         cls.experiences = cls.candidate.educationalexperience_set.all()
+        cls.professional_experiences = cls.candidate.professionalexperience_set.all()
         cls.experiences.update(obtained_diploma=True)
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.commission).person.user
@@ -182,6 +201,26 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             status=ChoixStatutChecklist.GEST_REUSSITE.name,
         )
 
+        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name] = {
+            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+            'enfants': [
+                {
+                    'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+                    'extra': {
+                        'identifiant': 'UNKNOWN',
+                    },
+                },
+                {
+                    'statut': ChoixStatutChecklist.GEST_REUSSITE.name,
+                    'extra': {
+                        'identifiant': OngletsDemande.ETUDES_SECONDAIRES.name,
+                    },
+                },
+            ],
+        }
+
+        self.general_admission.save()
+
         # The success status requires at least one access title and an admission requirement
         error_message_if_missing_data = gettext("Some errors have been encountered.")
 
@@ -212,6 +251,53 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             educationalexperience=self.experiences[0],
             is_access_title=True,
         )
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(error_message_if_missing_data, messages)
+        self.assertNotIn(gettext('Your data have been saved.'), messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Add checklist data for the valuated experience
+        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'].append(
+            {
+                'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+                'extra': {
+                    'identifiant': self.experiences[0].uuid,
+                },
+            }
+        )
+        self.general_admission.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(error_message_if_missing_data, messages)
+        self.assertNotIn(gettext('Your data have been saved.'), messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Change the status of the experience checklist
+        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'][-1][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.save()
 
         response = self.client.post(success_url, **self.default_headers)
 
@@ -1405,8 +1491,8 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_specify_the_higher_education_experience_as_access_title(self, confirm_multiple_upload):
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         )
 
         self.client.force_login(user=self.sic_manager_user)
