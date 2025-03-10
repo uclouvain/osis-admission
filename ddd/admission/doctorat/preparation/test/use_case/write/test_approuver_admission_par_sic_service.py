@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,23 +33,26 @@ from django.test import TestCase
 from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverAdmissionParSicCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    ParcoursAnterieurNonSuffisantException,
     DocumentAReclamerImmediatException,
-    InformationsAcceptationNonSpecifieesException,
+    ParcoursAnterieurNonSuffisantException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPFactory,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
+    _PropositionIdentityFactory,
 )
-from admission.ddd.admission.doctorat.preparation.test.factory.proposition import _PropositionIdentityFactory
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocumentIdentity,
+)
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
@@ -65,15 +68,24 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.person_merge_proposal import PersonMergeStatus
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 
 
 @freezegun.freeze_time('2020-11-01')
@@ -193,15 +205,6 @@ class TestApprouverAdmissionParSic(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE)
         self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
-
-    def test_should_lever_exception_si_nombre_annees_prevoir_programme_non_specifie(self):
-        self.proposition.nombre_annees_prevoir_programme = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-        self.assertIsInstance(
-            context.exception.exceptions.pop(),
-            InformationsAcceptationNonSpecifieesException,
-        )
 
     def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):
         self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_EN_COURS

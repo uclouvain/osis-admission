@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,26 +26,44 @@
 from admission.ddd.admission.doctorat.preparation.commands import (
     SpecifierInformationsAcceptationPropositionParSicCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import IComptabiliteTranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
+    IComptabiliteTranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
+    IMembreCATranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
+    IPersonneConnueUclTranslator,
+)
 
 
 def specifier_informations_acceptation_proposition_par_sic(
@@ -92,7 +110,6 @@ def specifier_informations_acceptation_proposition_par_sic(
         avec_complements_formation=cmd.avec_complements_formation,
         uuids_complements_formation=cmd.uuids_complements_formation,
         commentaire_complements_formation=cmd.commentaire_complements_formation,
-        nombre_annees_prevoir_programme=cmd.nombre_annees_prevoir_programme,
         nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
         email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
         droits_inscription_montant=cmd.droits_inscription_montant,

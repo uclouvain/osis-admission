@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -40,9 +40,9 @@
             the administrative and social formalities that would require a prior registration for the doctorate. [...]
             Pre-admission is valid for a maximum period of 12 months. Recourse to a pre-admission phase must be
             justified, the objectives to be achieved planned and the duration of the pre-admission period fixed in
-            accordance with them. Unless exceptionally authorised by the CSD, FRIA or FNRS scholarship holders and, in
-            general, doctoral candidates engaged in a research project that has already been defined, are not
-            authorised to take a pre-admission phase for a doctorate."
+            accordance with them. Unless exceptionally authorised by the domain doctoral committee, FRIA or FNRS
+            scholarship holders and, in general, doctoral candidates engaged in a research project that has already
+            been defined, are not authorised to take a pre-admission phase for a doctorate."
             <br /> Please also consult the special provisions of the field for all pre-admission conditions.
           {% endblocktrans %}
         </p>
@@ -103,6 +103,11 @@
   {% panel _("PhD research project") %}
     {% bootstrap_field form.titre_projet label_class=form.label_classes.titre_projet placeholder="" %}
     {% bootstrap_field_with_tooltip form.resume_projet label_class=form.label_classes.resume_projet %}
+    <div class="row">
+      <div class="col-md-6">
+        {% bootstrap_field form.institut_these label_class=form.label_classes.institut_these %}
+      </div>
+    </div>
     <div class="row">
       <div class="col-md-4">
         {% bootstrap_field form.langue_redaction_these label_class=form.label_classes.langue_redaction_these %}
@@ -183,7 +188,7 @@
       '#id_type_financement': { not: [''] },
     });
     $('#previous_experience').dependsOn({
-      '#id_doctorat_deja_realise': { values: ['YES', 'PARTIAL'] },
+      '#id_doctorat_deja_realise': { values: ['YES'] },
     });
     $('#non-soutenue').dependsOn({
       '#id_non_soutenue': { checked: true },

@@ -32,7 +32,7 @@ repos:
       - id: diff-quality
         name: pycodestyle
         language: system
-        entry: diff-quality --violations=pycodestyle --compare-branch=origin/dev --fail-under=100 --options="--ignore=E501"
+        entry: diff-quality --violations=pycodestyle --compare-branch=origin/dev --fail-under=100 --options="--max-line-length=120"
         types: [ python ]
         pass_filenames: false
 

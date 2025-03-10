@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,13 +29,15 @@ from typing import Dict, Optional, Union
 from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import resolve_url
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, ngettext
-from django.views.generic import TemplateView, FormView
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
+from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -43,15 +45,17 @@ from osis_mail_template.models import MailTemplate
 
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RecupererDocumentsPropositionQuery,
-    SpecifierInformationsAcceptationPropositionParSicCommand,
-    SpecifierInformationsAcceptationInscriptionParSicCommand,
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,
-    SpecifierBesoinDeDerogationSicCommand,
+    RecupererDocumentsPropositionQuery,
     RecupererPdfTemporaireDecisionSicQuery,
+    SpecifierBesoinDeDerogationSicCommand,
+    SpecifierInformationsAcceptationInscriptionParSicCommand,
+    SpecifierInformationsAcceptationPropositionParSicCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     OngletsChecklist,
@@ -60,53 +64,55 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     onglet_decision_sic,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.enums.emplacement_document import (
-    OngletsDemande,
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
 )
 from admission.ddd.admission.enums.emplacement_document import (
+    OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.forms.admission.checklist import (
     CommentForm,
-    SicDecisionFinalApprovalForm,
     DoctorateSicDecisionApprovalForm,
-)
-from admission.forms.admission.checklist import (
-    SicDecisionDerogationForm,
     SicDecisionApprovalDocumentsForm,
+    SicDecisionDerogationForm,
+    SicDecisionFinalApprovalForm,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.mail_templates import (
-    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
-    ADMISSION_EMAIL_SIC_APPROVAL_EU_DOCTORATE,
     ADMISSION_EMAIL_SIC_APPROVAL_DOCTORATE,
+    ADMISSION_EMAIL_SIC_APPROVAL_EU_DOCTORATE,
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
     INSCRIPTION_EMAIL_SIC_APPROVAL_DOCTORATE,
 )
 from admission.mail_templates.checklist import (
+    EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
-    EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
 from admission.utils import (
+    format_academic_year,
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_salutation_prefix,
-    format_academic_year,
     get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
-from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.doctorate.details.checklist.mixins import (
+    CheckListDefaultContextMixin,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.utils import get_file_url
 
 __all__ = [
     'SicApprovalDecisionView',
@@ -250,10 +256,12 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return DoctorateSicDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
             instance=self.admission,
-            data=self.request.POST
-            if self.request.method == 'POST'
-            and 'sic-decision-approval-program_planned_years_number' in self.request.POST
-            else None,
+            data=(
+                self.request.POST
+                if self.request.method == 'POST'
+                and 'sic-decision-approval-with_prerequisite_courses' in self.request.POST
+                else None
+            ),
             prefix='sic-decision-approval',
             candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
         )
@@ -327,13 +335,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     ).format(contact=contact)
 
                 planned_years_paragraph = ''
-                years = self.proposition.nombre_annees_prevoir_programme
-                if years:
-                    planned_years_paragraph = ngettext(
-                        "<p>Course duration: 1 year</p>",
-                        "<p>Course duration: {years} years</p>",
-                        years,
-                    ).format(years=years)
 
                 prerequisite_courses_paragraph = ''
                 if self.proposition.avec_complements_formation:
@@ -495,7 +496,6 @@ class SicApprovalDecisionView(
             avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
             uuids_complements_formation=form.cleaned_data['prerequisite_courses'],
             commentaire_complements_formation=form.cleaned_data['prerequisite_courses_fac_comment'],
-            nombre_annees_prevoir_programme=form.cleaned_data['program_planned_years_number'],
             nom_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_name'],
             email_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_email'],
         )

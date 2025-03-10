@@ -87,6 +87,13 @@ msgstr[1] "%(years)s ans"
 msgid "(%(minutes)s ago)"
 msgstr "(il y a %(minutes)s)"
 
+msgctxt "admission"
+msgid "(Expected) date of graduation"
+msgstr "Date (prévue) de délivrance du diplôme"
+
+msgid "(Expected) graduation date (signed diploma)"
+msgstr "Date (prévue) de délivrance du diplôme (document signé)"
+
 msgid ", on"
 msgstr ", le"
 
@@ -118,6 +125,16 @@ msgstr ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s a soumis une demande pour "
 "%(training_title)s"
+
+#, python-format
+msgid ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s uploaded documents for "
+"%(training_title)s"
+msgstr ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s a téléversé des documents "
+"pour %(training_title)s"
 
 #, python-format
 msgid ""
@@ -465,7 +482,7 @@ msgid "Add an academic course"
 msgstr "Ajouter une formation académique"
 
 msgid "Add validation of prior experience (VAE)"
-msgstr "Ajouter une valorisation des acquis d'expérience"
+msgstr "Ajouter une valorisation des acquis de l'expérience"
 
 msgid "Additional approval condition"
 msgstr "Condition complémentaire d'acceptation"
@@ -1578,9 +1595,6 @@ msgstr "Poste diplomatique compétent"
 msgid "Complement"
 msgstr "Complément"
 
-msgid "Complementary training"
-msgstr "Formation complémentaire"
-
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
 
@@ -1628,18 +1642,11 @@ msgstr "Confirmer l'envoi"
 msgid "Confirmation"
 msgstr "Confirmation"
 
-msgctxt "tab"
-msgid "Confirmation"
-msgstr "Confirmation"
-
 msgid "Confirmation date"
 msgstr "Date confirmation"
 
 msgid "Confirmation date:"
 msgstr "Date de confirmation :"
-
-msgid "Confirmation exam"
-msgstr "Épreuve de confirmation"
 
 msgid "Confirmation exam date"
 msgstr "Date de l'épreuve de confirmation"
@@ -1930,9 +1937,6 @@ msgstr "Intitulé de la formation"
 msgid "Course type"
 msgstr "Type de formation"
 
-msgid "Course unit enrolment"
-msgstr "Inscriptions aux cours"
-
 msgctxt "admission"
 msgid "Courses"
 msgstr "Formations"
@@ -2065,9 +2069,6 @@ msgctxt "M"
 msgid "Dear %(name)s,"
 msgstr "Cher %(name)s,"
 
-msgid "Debug"
-msgstr "Debug"
-
 msgid "Decision"
 msgstr "Décision"
 
@@ -2103,10 +2104,6 @@ msgstr "Date de soutenance"
 
 msgid "Defense"
 msgstr "Soutenance"
-
-msgctxt "doctorate tab"
-msgid "Defense"
-msgstr "Défense"
 
 msgctxt "admission tab"
 msgid "Defense method"
@@ -2818,13 +2815,6 @@ msgstr "Pré-admission existante"
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
-msgctxt "admission"
-msgid "Expected date of graduation"
-msgstr "Date (prévue) de délivrance du diplôme"
-
-msgid "Expected graduation date (signed diploma)"
-msgstr "Date (prévue) de délivrance du diplôme (document signé)"
-
 msgid "Experience knowledge valorisation"
 msgstr "Valorisation des acquis d'expérience"
 
@@ -2879,11 +2869,11 @@ msgid ""
 "for a maximum period of 12 months. Recourse to a pre-admission phase must be "
 "justified, the objectives to be achieved planned and the duration of the pre-"
 "admission period fixed in accordance with them. Unless exceptionally "
-"authorised by the CSD, FRIA or FNRS scholarship holders and, in general, "
-"doctoral candidates engaged in a research project that has already been "
-"defined, are not authorised to take a pre-admission phase for a doctorate.\" "
-"<br /> Please also consult the special provisions of the field for all pre-"
-"admission conditions."
+"authorised by the domain doctoral committee, FRIA or FNRS scholarship "
+"holders and, in general, doctoral candidates engaged in a research project "
+"that has already been defined, are not authorised to take a pre-admission "
+"phase for a doctorate.\" <br /> Please also consult the special provisions "
+"of the field for all pre-admission conditions."
 msgstr ""
 "Extrait du Règlement doctoral (article 2.1) :<br /> « La pré-admission est "
 "une étape facultative du cursus doctoral. Elle vise à permettre au ou à la "
@@ -2892,12 +2882,12 @@ msgstr ""
 "est valable pour une période de 12 mois maximum. Le recours à une phase de "
 "pré-admission doit être motivé, les objectifs à atteindre planifiés et la "
 "durée de la période de pré-admission fixée en fonction de ceux-ci. Sauf "
-"autorisation exceptionnelle de la CDD, les boursiers·ières FRIA ou FNRS et, "
-"de manière générale, les doctorant·es engagé·es dans le cadre d'un projet de "
-"recherche déjà défini, ne sont pas autorisé·es à prendre une préadmission au "
-"doctorat. ». <br /> Veuillez également consulter les dispositions "
-"particulières du domaine afin de connaître toutes les conditions de pré-"
-"admission."
+"autorisation exceptionnelle de la Commission doctorale de domaine, les "
+"boursiers·ières FRIA ou FNRS et, de manière générale, les doctorant·es "
+"engagé·es dans le cadre d'un projet de recherche déjà défini, ne sont pas "
+"autorisé·es à prendre une préadmission au doctorat. ». <br /> Veuillez "
+"également consulter les dispositions particulières du domaine afin de "
+"connaître toutes les conditions de pré-admission."
 
 msgid "FAC"
 msgstr "FAC"
@@ -3810,10 +3800,10 @@ msgstr ""
 
 msgid ""
 "If known, indicate the name of the laboratory, clinical department or "
-"research centre where the thesis will be carried out"
+"research centre where the thesis will be carried out at UCLouvain"
 msgstr ""
 "Si connu, indiquez ici le nom du laboratoire, du service clinique ou du "
-"centre de recherche où sera réalisée la thèse"
+"centre de recherche où sera réalisée la thèse à l'UCLouvain"
 
 msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
@@ -4020,11 +4010,8 @@ msgstr "Institution de la Federation Wallonie-Bruxelles"
 msgid "Institution contacted"
 msgstr "Établissement contacté"
 
-msgid "Institution in which the PhD has been realised / started"
-msgstr "Institution où le PhD a été réalisé/entamé"
-
-msgid "Institution in which the PhD has been realised / started."
-msgstr "Institution où le PhD a été réalisé/entamé."
+msgid "Institution in which the PhD thesis has been realised / started"
+msgstr "Institution où la thèse de doctorat a été réalisée/entamée"
 
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
@@ -4479,10 +4466,6 @@ msgctxt "admission sex"
 msgid "Male"
 msgstr "Masculin"
 
-msgctxt "tab"
-msgid "Management"
-msgstr "Gestion"
-
 msgid "Management of the enrolment applications"
 msgstr "Gestion des demandes d'inscription"
 
@@ -4766,9 +4749,6 @@ msgstr "Nationalité"
 
 msgid "Nationality:"
 msgstr "Nationalité :"
-
-msgid "New deadline"
-msgstr "Nouvelle échéance"
 
 msgid "New thesis title (if applicable):"
 msgstr "Nouveau titre de la thèse (le cas échéant) :"
@@ -5133,9 +5113,6 @@ msgstr ""
 "Notre Université est heureuse de vous accueillir et vous souhaite un "
 "enrichissant et fructueux séjour."
 
-msgid "PARTIAL"
-msgstr "En partie"
-
 msgid "PAS_DE_DROITS_D_INSCRIPTION"
 msgstr "0 € - Pas de droits d'inscription"
 
@@ -5278,10 +5255,6 @@ msgstr "Lien du document de l'annexe de la Commission doctorale de domaine"
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
-msgctxt "tab"
-msgid "PhD project"
-msgstr "Projet doctoral"
-
 msgid "PhD proposal"
 msgstr "Projet de formation doctorale"
 
@@ -5290,9 +5263,6 @@ msgstr "Expérience de recherche doctorale"
 
 msgid "PhD research project"
 msgstr "Projet de recherche doctorale"
-
-msgid "PhD training"
-msgstr "Formation doctorale"
 
 msgid "Place of birth"
 msgstr "Lieu de naissance"
@@ -5605,9 +5575,6 @@ msgstr "Provisoire"
 msgid "Proximity Commission for Dental Sciences (DENT)"
 msgstr "Commission de proximité de sciences dentaires (DENT)"
 
-msgid "Proximity Commission for Genetics and Immunology (GIM)"
-msgstr "Commission de proximité de génétique et immunologie (GIM)"
-
 msgid "Proximity Commission for Motricity Sciences (MOTR)"
 msgstr "Commission de proximité de sciences de la motricité (MOTR)"
 
@@ -5624,10 +5591,11 @@ msgid "Proximity commission / Subdomain"
 msgstr "Commission de proximité"
 
 msgid ""
-"Proximity commission for cellular and molecular biology, biochemistry (BCM)"
+"Proximity commission for biochemistry, cellular and molecular biology, "
+"genetics, immunology (BCGIM)"
 msgstr ""
-"Commission de proximité de biologie cellulaire et moléculaire, biochimie "
-"(BCM)"
+"Commission de proximité de biochimie, biologie cellulaire et moléculaire, "
+"génétique, immunologie (BCGIM)"
 
 msgid "Proximity commission for experimental and clinical research (ECLI)"
 msgstr "Commission de proximité de recherche expérimentale et clinique (ECLI)"
@@ -5732,8 +5700,8 @@ msgstr "Motifs"
 msgid "Reasons for not accepting"
 msgstr "Motif de refus"
 
-msgid "Reasons for provisional admission."
-msgstr "Détaillez ici les raisons justifiant une admission provisoire."
+msgid "Reasons for pre-admission."
+msgstr "Détaillez ici les raisons justifiant une préadmission."
 
 msgid "Reasons for putting on hold"
 msgstr "Motif de mise en attente"
@@ -5921,15 +5889,15 @@ msgctxt "masculine"
 msgid "Required"
 msgstr "Requis"
 
+msgctxt "tab"
+msgid "Research"
+msgstr "Recherche"
+
 msgid "Research institute"
 msgstr "Institut de recherche"
 
 msgid "Research project"
 msgstr "Projet de recherche"
-
-msgctxt "tab"
-msgid "Research project"
-msgstr "Projet de recherche doctorale"
 
 msgid "Research scholarship"
 msgstr "Bourse de recherche"
@@ -6113,9 +6081,6 @@ msgstr "Rechercher"
 msgid "Search a person by surname"
 msgstr "Rechercher une personne par son nom"
 
-msgid "Search a tutor by name"
-msgstr "Rechercher un tuteur par son nom"
-
 msgid "Search on portal"
 msgstr "Voir sur le portail"
 
@@ -6174,9 +6139,6 @@ msgstr "Envoyer un e-mail au candidat"
 
 msgid "Send a mail to the faculty"
 msgstr "Envoyer un e-mail à la Faculté"
-
-msgid "Send an email"
-msgstr "Envoyer un e-mail"
 
 msgid "Send back to the candidate"
 msgstr "Redonner la main au candidat"
@@ -8249,9 +8211,9 @@ msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
 
-msgid "You must add at least two CA member in order to request signatures."
+msgid "You must add at least two CA members in order to request signatures."
 msgstr ""
-"Vous devez ajouter au moins deux membre du comité d'accompagnement afin de "
+"Vous devez ajouter au moins deux membres du comité d'accompagnement afin de "
 "demander les signatures."
 
 msgid "You must answer the question about external enrollment change."

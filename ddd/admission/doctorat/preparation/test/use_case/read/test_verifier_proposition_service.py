@@ -30,7 +30,6 @@ import freezegun
 import mock
 from django.test import TestCase
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.commands import (
     VerifierPropositionQuery,
 )
@@ -41,23 +40,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeDoctoratException,
-    AdresseCorrespondanceNonCompleteeException,
-    AdresseDomicileLegalNonCompleteeException,
-    AnneesCurriculumNonSpecifieesException,
     AssimilationNonCompleteeDoctoratException,
     CandidatNonTrouveException,
     CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException,
     CarteBancaireRemboursementIbanNonCompleteDoctoratException,
-    CarteIdentiteeNonSpecifieeException,
-    DateOuAnneeNaissanceNonSpecifieeException,
-    DetailsPasseportNonSpecifiesException,
-    ExperiencesAcademiquesNonCompleteesException,
-    FichierCurriculumNonRenseigneException,
-    IdentificationNonCompleteeException,
-    LanguesConnuesNonSpecifieesException,
-    NomEtPrenomNonSpecifiesException,
-    NumeroIdentiteBelgeNonSpecifieException,
-    NumeroIdentiteNonSpecifieException,
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
@@ -73,8 +59,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 )
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
-    QuestionsSpecifiquesCurriculumNonCompleteesException,
-    QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
 )
 from admission.ddd.admission.enums import (
     ChoixAssimilation1,
@@ -93,16 +77,12 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    AnneeExperienceAcademique,
-    ExperienceAcademique,
-    ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from base.models.enums.establishment_type import EstablishmentTypeEnum
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
     AcademicYearIdentity,
@@ -110,16 +90,10 @@ from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
     AcademicYearInMemoryRepository,
 )
-from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,
-    EvaluationSystem,
-    Grade,
-    Result,
-    TranscriptType,
 )
-from reference.models.enums.cycle import Cycle
 
 
 class TestVerifierPropositionServiceCommun(TestCase):

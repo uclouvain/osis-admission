@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,12 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.commands import (
     SpecifierInformationsAcceptationPropositionParCddCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 
 
 def specifier_informations_acceptation_proposition_par_cdd(
@@ -44,7 +48,6 @@ def specifier_informations_acceptation_proposition_par_cdd(
         avec_complements_formation=cmd.avec_complements_formation,
         uuids_complements_formation=cmd.uuids_complements_formation,
         commentaire_complements_formation=cmd.commentaire_complements_formation,
-        nombre_annees_prevoir_programme=cmd.nombre_annees_prevoir_programme,
         nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
         email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
         commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,

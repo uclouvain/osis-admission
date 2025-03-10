@@ -126,6 +126,6 @@ class OngletsChecklist(ChoiceEnum):
     experiences_parcours_anterieur = _('Previous experiences')
     financabilite = _('Financeability')
     choix_formation = _('Course choice')
-    projet_recherche = pgettext_lazy('tab', 'Research project')
+    projet_recherche = pgettext_lazy('tab', 'Research')
     decision_cdd = _('Decision of the CDD')
     decision_sic = _('Decision of SIC')
