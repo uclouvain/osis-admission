@@ -67,6 +67,9 @@ from admission.ddd.admission.formation_generale.use_case.write.retyper_document_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_delegue_vrae_service import (
+    specifier_derogation_delegue_vrae,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
@@ -654,6 +657,12 @@ COMMAND_HANDLERS = {
     ),
     SpecifierBesoinDeDerogationSicCommand: (
         lambda msg_bus, cmd: specifier_besoin_de_derogation(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierDerogationDelegueVraeSicCommand: (
+        lambda msg_bus, cmd: specifier_derogation_delegue_vrae(
             cmd,
             proposition_repository=PropositionRepository(),
         )
