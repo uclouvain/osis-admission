@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,12 +23,24 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
-from admission.ddd.admission.doctorat.preparation.commands import SpecifierConditionAccesPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    SpecifierConditionAccesPropositionCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
 
 
 def specifier_condition_acces_proposition(
@@ -45,7 +57,6 @@ def specifier_condition_acces_proposition(
         condition_acces=cmd.condition_acces,
         millesime_condition_acces=cmd.millesime_condition_acces,
         titre_acces_selectionnable_repository=titre_acces_selectionnable_repository,
-        avec_complements_formation=cmd.avec_complements_formation,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
     )
 

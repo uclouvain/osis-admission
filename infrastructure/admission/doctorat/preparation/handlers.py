@@ -120,7 +120,6 @@ COMMAND_HANDLERS = {
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
-        doctorat_translator=DoctoratTranslator(),
         historique=Historique(),
     ),
     RechercherDoctoratQuery: lambda msg_bus, cmd: rechercher_doctorats(
@@ -716,5 +715,9 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=Historique(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
+    ),
+    RechercherPromoteursQuery: lambda msg_bus, cmd: rechercher_promoteurs(
+        cmd,
+        promoteur_translator=PromoteurTranslator(),
     ),
 }

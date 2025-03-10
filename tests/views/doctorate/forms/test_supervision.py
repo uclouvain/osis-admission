@@ -139,7 +139,7 @@ class SupervisionTestCase(TestCase):
 
     def test_should_add_supervision_member_error(self):
         self.client.force_login(user=self.program_manager_user)
-        response = self.client.post(self.update_url, {'type': ActorType.CA_MEMBER.name, 'tutor': "0123456978"})
+        response = self.client.post(self.update_url, {'type': ActorType.CA_MEMBER.name})
         self.assertEqual(response.status_code, 200)
         self.assertIn('__all__', response.context['add_form'].errors)
 
@@ -156,7 +156,7 @@ class SupervisionTestCase(TestCase):
 
     def test_should_add_supervision_member_error_already_in(self):
         self.client.force_login(user=self.program_manager_user)
-        response = self.client.post(self.update_url, {'type': ActorType.PROMOTER.name, 'person': "0123456978"})
+        response = self.client.post(self.update_url, {'type': ActorType.PROMOTER.name})
         self.assertEqual(response.status_code, 200)
         self.assertIn('__all__', response.context['add_form'].errors)
 
@@ -166,7 +166,7 @@ class SupervisionTestCase(TestCase):
         data = {
             'type': ActorType.PROMOTER.name,
             'internal_external': "INTERNAL",
-            'tutor': self.person.global_id,
+            'person': self.person.global_id,
             'email': "test@test.fr",
         }
         response = self.client.post(self.update_url, data)
@@ -199,7 +199,7 @@ class SupervisionTestCase(TestCase):
         data = {
             'type': ActorType.PROMOTER.name,
             'internal_external': ACTOR_EXTERNAL,
-            'tutor': self.person.global_id,
+            'person': self.person.global_id,
             **external_data,
         }
         response = self.client.post(self.update_url, data)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,16 +27,23 @@
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.doctorat.preparation.commands import ModifierChecklistChoixFormationCommand
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-    DoctoratNonTrouveException,
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ModifierChecklistChoixFormationCommand,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixSousDomaineSciences,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DoctoratNonTrouveException,
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 
 
 class TestModifierChecklistChoixFormationPropositionService(SimpleTestCase):
@@ -47,17 +54,17 @@ class TestModifierChecklistChoixFormationPropositionService(SimpleTestCase):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = ModifierChecklistChoixFormationCommand(
             gestionnaire='0123456789',
-            sigle_formation='AGRO3DP',
-            annee_formation=2022,
+            annee_formation=2023,
             uuid_proposition='uuid-SC3DP-confirmee',
-            type_demande='ADMISSION',
+            type_demande=TypeDemande.ADMISSION.name,
+            commission_proximite=ChoixSousDomaineSciences.BIOLOGY.name,
         )
 
     def test_should_modifier_choix_formation(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)
-        self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.type_demande, TypeDemande[self.cmd.type_demande])
+        self.assertEqual(proposition.commission_proximite, ChoixSousDomaineSciences.BIOLOGY)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')
@@ -65,11 +72,6 @@ class TestModifierChecklistChoixFormationPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_empecher_si_formation_non_trouvee(self):
-        cmd = attr.evolve(self.cmd, sigle_formation='INCONNUE')
-        with self.assertRaises(DoctoratNonTrouveException):
-            self.message_bus.invoke(cmd)
-
-    def test_should_empecher_si_pas_formation_doctorale(self):
-        cmd = attr.evolve(self.cmd, sigle_formation='CERTIF-BUS')
+        cmd = attr.evolve(self.cmd, annee_formation=1900)
         with self.assertRaises(DoctoratNonTrouveException):
             self.message_bus.invoke(cmd)

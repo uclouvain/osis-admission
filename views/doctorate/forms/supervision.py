@@ -99,12 +99,13 @@ class DoctorateAdmissionAddActorFormView(LoadDossierViewMixin, BusinessException
 
     def prepare_data(self, data):
         is_external = data.pop('internal_external') == ACTOR_EXTERNAL
-        promoter = data.pop('tutor')
-        ca_member = data.pop('person')
-        matricule = (ca_member if data['type'] == ActorType.CA_MEMBER.name else promoter) if not is_external else ""
+        person = data.pop('person')
         if not is_external:
+            matricule = person
             # Remove data about external actor
             data = {**data, **{f: '' for f in EXTERNAL_FIELDS}}
+        else:
+            matricule = ''
         return {
             'matricule_auteur': self.request.user.person.global_id,
             'type': data['type'],

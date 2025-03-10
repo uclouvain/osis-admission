@@ -28,14 +28,14 @@
 {% block actions-group %}{% endblock %}
 
 {% block tab_content %}
-  <div class="comment-viewer"
+  <div class="comment-thread-viewer"
        data-url="{% url base_namespace|add:':sic-comments' view.kwargs.uuid %}"
        data-tags="{{ COMMENT_TAG_SIC }}"
        data-header-title="{% if view.is_continuing %}{% trans "Global IUFC comments" %}{% else %}{% trans "Global SIC comments" %}{% endif %}"
        data-rich-text-config="{{ ckeditor_config }}"
        data-panel-class="panel panel-primary"
   ></div>
-  <div class="comment-viewer"
+  <div class="comment-thread-viewer"
      data-url="{% url base_namespace|add:':fac-comments' view.kwargs.uuid %}"
      data-tags="{{ COMMENT_TAG_FAC }}"
      data-header-title="{% trans "Global FAC comments" %}"
@@ -46,17 +46,17 @@
   {% if view.is_general or view.is_doctorate %}
     {% for checklist_tag, checklist_title in checklist_tags %}
       {% if checklist_tag in CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS %}
-        <div class="comment-thread panel panel-panel panel-info">
+        <div class="comment-panel panel panel-panel panel-info">
           <div class="panel-heading clearfix">
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-viewer"
+            <div class="comment-thread-viewer"
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }},SIC"
                  data-header-title="{% translate 'SIC comment for the faculty' %}"
             ></div>
-            <div class="comment-viewer"
+            <div class="comment-thread-viewer"
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }},FAC"
                  data-header-title="{% translate 'Faculty comment for the SIC' %}"
@@ -64,17 +64,17 @@
           </div>
         </div>
       {% elif checklist_tag == 'financabilite' %}
-        <div class="comment-thread panel panel-panel panel-info">
+        <div class="comment-panel panel panel-panel panel-info">
           <div class="panel-heading clearfix">
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-viewer"
+            <div class="comment-thread-viewer"
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }}"
                  data-header-title="{% translate 'Global' %}"
             ></div>
-            <div class="comment-viewer"
+            <div class="comment-thread-viewer"
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }},derogation"
                  data-header-title="{% translate 'Financability dispensation' %}"
@@ -83,23 +83,23 @@
         </div>
       {% elif checklist_tag == 'parcours_anterieur' %}
         {# Display the global comment and the comments related to each experience (general and authentication comments) #}
-        <div class="comment-thread panel panel-panel panel-info">
+        <div class="comment-panel panel panel-panel panel-info">
           <div class="panel-heading clearfix">
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-viewer"
+            <div class="comment-thread-viewer"
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }}"
                  data-header-title="{% translate 'Global' %}"
             ></div>
             {% for experience_uuid, experience_name in experiences_names_by_uuid.items %}
-              <div class="comment-viewer"
+              <div class="comment-thread-viewer"
                    data-url="{{ other_comments_url }}"
                    data-tags="{{ checklist_tag }},{{ experience_uuid }}"
                    data-header-title="{{ experience_name }} > {% translate 'Global comment' %}"
               ></div>
-              <div class="comment-viewer"
+              <div class="comment-thread-viewer"
                    data-url="{{ other_comments_url }}"
                    data-tags="{{ checklist_tag }},{{ experience_uuid }},authentication"
                    data-header-title="{{ experience_name }} > {% translate 'Comment about the authentication' %}"
@@ -108,17 +108,17 @@
           </div>
         </div>
       {% elif checklist_tag == 'decision_sic' %}
-        <div class="comment-thread panel panel-panel panel-info">
+        <div class="comment-panel panel panel-panel panel-info">
           <div class="panel-heading clearfix">
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-viewer"
+            <div class="comment-thread-viewer"
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }}"
                  data-header-title="{% translate 'Global' %}"
             ></div>
-            <div class="comment-viewer"
+            <div class="comment-thread-viewer"
                  data-url="{{ other_comments_url }}"
                  data-tags="{{ checklist_tag }},derogation"
                  data-header-title="{% translate 'Dispensation' %}"
@@ -126,7 +126,7 @@
           </div>
         </div>
       {% else %}
-        <div class="comment-viewer"
+        <div class="comment-thread-viewer"
              data-url="{{ other_comments_url }}"
              data-tags="{{ checklist_tag }}"
              data-header-title="{{ checklist_title }}"
@@ -137,20 +137,20 @@
   {% elif view.is_continuing %}
     {% for checklist_tag, checklist_title in checklist_tags %}
       {% if checklist_tag == 'decision' %}
-        <div class="comment-viewer"
+        <div class="comment-thread-viewer"
              data-url="{{ other_comments_url }}"
              data-tags="decision,IUFC_for_FAC"
              data-header-title="{{ checklist_title }} - {% translate 'IUFC comment for the Faculty' %}"
              data-panel-class="panel panel-info"
         ></div>
-        <div class="comment-viewer"
+        <div class="comment-thread-viewer"
              data-url="{{ other_comments_url }}"
              data-tags="decision,FAC_for_IUFC"
              data-header-title="{{ checklist_title }} - {% translate 'Faculty comment for IUFC' %}"
              data-panel-class="panel panel-info"
         ></div>
       {% else %}
-        <div class="comment-viewer"
+        <div class="comment-thread-viewer"
              data-url="{{ other_comments_url }}"
              data-tags="{{ checklist_tag }}"
              data-header-title="{{ checklist_title }}"
