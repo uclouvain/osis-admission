@@ -5229,6 +5229,9 @@ components:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
+        donnees_transferees_vers_compte_interne:
+          type: boolean
+          default: false
         doctorate_propositions:
           type: array
           items:

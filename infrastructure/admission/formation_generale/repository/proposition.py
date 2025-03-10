@@ -55,9 +55,6 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.periode_soumission_ticket_digit import (
-    PeriodeSoumissionTicketDigit,
-)
 from admission.ddd.admission.domain.model.poste_diplomatique import (
     PosteDiplomatiqueIdentity,
 )
@@ -157,45 +154,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         # Return dtos
         return [cls._load_dto(proposition) for proposition in qs]
-
-    @classmethod
-    def get_active_period_submitted_proposition(
-        cls, matricule_candidat: str, periodes_actives: List['PeriodeSoumissionTicketDigit']
-    ) -> 'Proposition':
-        first_submitted_proposition = (
-            GeneralEducationAdmissionProxy.objects.prefetch_related(
-                'additional_approval_conditions',
-                'freeadditionalapprovalcondition_set',
-                'prerequisite_courses',
-                'refusal_reasons',
-            )
-            .select_related(
-                'other_training_accepted_by_fac__academic_year',
-                'admission_requirement_year',
-                'last_update_author',
-            )
-            .filter(
-                candidate__global_id=matricule_candidat,
-                status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE,
-                determined_academic_year__year__in=[p.annee for p in periodes_actives],
-            )
-            .annotate(
-                status_priority=Case(
-                    *[
-                        When(status=status, then=priority)
-                        for status, priority in ChoixStatutPropositionGenerale.get_status_priorities().items()
-                    ],
-                    default=0,
-                    output_field=IntegerField(),
-                )
-            )
-            .order_by('-status_priority', 'created_at')
-            .first()
-        )
-
-        if first_submitted_proposition:
-            return cls._load(first_submitted_proposition)
-        raise PremierePropositionSoumisesNonTrouveeException
 
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:

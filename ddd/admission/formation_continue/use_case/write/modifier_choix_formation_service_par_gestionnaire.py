@@ -31,10 +31,12 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
+from admission.ddd.admission.formation_continue.events import FormationDuDossierAdmissionFCModifieeEvent
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 
 
 def modifier_choix_formation_par_gestionnaire(
+    message_bus,
     cmd: 'ModifierChoixFormationParGestionnaireCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
@@ -57,5 +59,10 @@ def modifier_choix_formation_par_gestionnaire(
 
     # THEN
     proposition_repository.save(proposition)
-
+    message_bus.publish(
+        FormationDuDossierAdmissionFCModifieeEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
+    )
     return proposition.entity_id

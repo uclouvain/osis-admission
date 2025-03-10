@@ -468,6 +468,7 @@ COMMAND_HANDLERS = {
         unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
@@ -690,6 +691,7 @@ COMMAND_HANDLERS = {
         )
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=DoctoratTranslator(),

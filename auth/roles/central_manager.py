@@ -43,7 +43,7 @@ from admission.auth.predicates.common import (
     is_scoped_entity_manager,
     is_sent_to_epc,
     past_experiences_checklist_tab_is_not_sufficient,
-    pending_digit_ticket_response,
+    workflow_injection_signaletique_en_cours,
 )
 from admission.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
@@ -98,7 +98,7 @@ class CentralManager(EntityRoleModel):
                 | ((doctorate.in_sic_status | doctorate.in_progress) & ~candidate_has_other_general_admissions)
             )
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
             & (
@@ -110,12 +110,12 @@ class CentralManager(EntityRoleModel):
                 | doctorate.in_progress
             )
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,

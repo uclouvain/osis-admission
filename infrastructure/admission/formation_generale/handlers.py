@@ -23,22 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 import waffle
 
 from admission.ddd.admission.commands import (
-    DefairePropositionFusionCommand,
-    GetStatutTicketPersonneQuery,
-    InitialiserPropositionFusionPersonneCommand,
-    RechercherCompteExistantCommand,
     RechercherParcoursAnterieurQuery,
-    RefuserPropositionFusionCommand,
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
-    RetrieveListePropositionFusionEnErreurQuery,
-    RetrieveListeTicketsEnAttenteQuery,
-    SoumettreTicketPersonneCommand,
-    ValiderTicketPersonneCommand,
 )
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -82,20 +71,8 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
-from admission.ddd.admission.use_case.read.rechercher_compte_existant import (
-    rechercher_compte_existant,
-)
 from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import (
     rechercher_parcours_anterieur,
-)
-from admission.ddd.admission.use_case.read.recuperer_propositions_en_erreur_service import (
-    recuperer_propositions_en_erreur,
-)
-from admission.ddd.admission.use_case.read.recuperer_statut_ticket_personne import (
-    recuperer_statut_ticket_personne,
-)
-from admission.ddd.admission.use_case.read.recuperer_tickets_en_attente import (
-    recuperer_tickets_en_attente,
 )
 from admission.ddd.admission.use_case.write import (
     annuler_reclamation_emplacement_document,
@@ -107,34 +84,12 @@ from admission.ddd.admission.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
-from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import (
-    defaire_proposition_fusion_personne,
-)
-from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import (
-    initialiser_proposition_fusion_personne,
-)
-from admission.ddd.admission.use_case.write.recuperer_statut_ticket_personne_de_digit import (
-    recuperer_statut_ticket_personne_de_digit,
-)
-from admission.ddd.admission.use_case.write.refuser_proposition_fusion_personne import (
-    refuser_proposition_fusion_personne,
-)
-from admission.ddd.admission.use_case.write.soumettre_ticket_creation_personne import (
-    soumettre_ticket_creation_personne,
-)
-from admission.ddd.admission.use_case.write.valider_ticket_creation_personne import (
-    valider_ticket_creation_personne,
-)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.infrastructure.admission.domain.service.calendrier_inscription import (
     CalendrierInscription,
 )
-from admission.infrastructure.admission.domain.service.client_comptabilite_translator import (
-    ClientComptabiliteTranslator,
-)
-from admission.infrastructure.admission.domain.service.digit import DigitService
 from admission.infrastructure.admission.domain.service.elements_confirmation import (
     ElementsConfirmation,
 )
@@ -146,9 +101,6 @@ from admission.infrastructure.admission.domain.service.historique import (
 )
 from admission.infrastructure.admission.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
-)
-from admission.infrastructure.admission.domain.service.periode_soumission_ticket_digit import (
-    PeriodeSoumissionTicketDigitTranslator,
 )
 from admission.infrastructure.admission.domain.service.poste_diplomatique import (
     PosteDiplomatiqueTranslator,
@@ -197,9 +149,6 @@ from admission.infrastructure.admission.formation_generale.repository.propositio
     PropositionRepository,
 )
 from admission.infrastructure.admission.repository.digit import DigitRepository
-from admission.infrastructure.admission.repository.proposition_fusion_personne import (
-    PropositionPersonneFusionRepository,
-)
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
@@ -221,9 +170,6 @@ from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import
 )
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
     ExperienceParcoursInterneTranslator,
-)
-from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import (
-    CompteurAnnuelPourNomaRepository,
 )
 
 
@@ -268,6 +214,7 @@ COMMAND_HANDLERS = {
         bourse_translator=BourseTranslator(),
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
@@ -616,24 +563,6 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
         )
     ),
-    RechercherCompteExistantCommand: lambda msg_bus, cmd: _call_if_digit_switch_active(
-        partial(rechercher_compte_existant, cmd, digit_service=DigitService())
-    ),
-    InitialiserPropositionFusionPersonneCommand: lambda msg_bus, cmd: initialiser_proposition_fusion_personne(
-        msg_bus,
-        cmd,
-        proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
-    ),
-    DefairePropositionFusionCommand: lambda msg_bus, cmd: defaire_proposition_fusion_personne(
-        msg_bus,
-        cmd,
-        proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
-    ),
-    RefuserPropositionFusionCommand: lambda msg_bus, cmd: refuser_proposition_fusion_personne(
-        msg_bus,
-        cmd,
-        proposition_fusion_personne_repository=PropositionPersonneFusionRepository(),
-    ),
     ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
         cmd,
         proposition_repository=PropositionRepository(),
@@ -804,48 +733,6 @@ COMMAND_HANDLERS = {
         cmd,
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
-    ),
-    SoumettreTicketPersonneCommand: lambda msg_bus, cmd: _call_if_digit_switch_active(
-        partial(
-            soumettre_ticket_creation_personne,
-            cmd,
-            digit_repository=DigitRepository(),
-            digit_service=DigitService(),
-            compteur_noma=CompteurAnnuelPourNomaRepository(),
-            proposition_repository=PropositionRepository(),
-            formation_translator=FormationGeneraleTranslator(),
-            client_comptabilite_translator=ClientComptabiliteTranslator(),
-            periode_soumission_ticket_digit_translator=PeriodeSoumissionTicketDigitTranslator(),
-        )
-    ),
-    GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(
-        cmd,
-        digit_repository=DigitRepository(),
-    ),
-    RetrieveListeTicketsEnAttenteQuery: lambda msg_bus, cmd: recuperer_tickets_en_attente(
-        cmd,
-        digit_repository=DigitRepository(),
-    ),
-    RetrieveListePropositionFusionEnErreurQuery: lambda msg_bus, query: recuperer_propositions_en_erreur(
-        query,
-        digit_repository=DigitRepository(),
-    ),
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand: (
-        lambda msg_bus, cmd: recuperer_statut_ticket_personne_de_digit(
-            cmd,
-            digit_repository=DigitRepository(),
-        )
-    ),
-    ValiderTicketPersonneCommand: lambda msg_bus, cmd: _call_if_digit_switch_active(
-        partial(
-            valider_ticket_creation_personne,
-            cmd,
-            digit_repository=DigitRepository(),
-            proposition_repository=PropositionRepository(),
-            formation_translator=FormationGeneraleTranslator(),
-            client_comptabilite_translator=ClientComptabiliteTranslator(),
-            periode_soumission_ticket_digit_translator=PeriodeSoumissionTicketDigitTranslator(),
-        )
     ),
     SpecifierDerogationFinancabiliteCommand: (
         lambda msg_bus, cmd: specifier_derogation_financabilite(

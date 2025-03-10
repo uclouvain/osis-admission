@@ -1,4 +1,4 @@
-{% load i18n admission bootstrap3 %}
+{% load i18n admission bootstrap3 gestion_des_comptes %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,6 +26,8 @@
 
 {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
 <div role="tabpanel" class="tab-pane" id="decision" hx-swap-oob="true">
+  {% resultat_workflow_gestion_des_comptes_alert matricule=original_admission.candidate.global_id outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
+
   {% has_perm 'admission.change_checklist_iufc' as is_iufc %}
   {% not_bool is_iufc as is_not_iufc %}
 

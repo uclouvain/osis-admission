@@ -56,7 +56,6 @@ from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (
     ListerToutesDemandesQuery,
-    GetStatutTicketPersonneQuery,
     RechercherParcoursAnterieurQuery,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
@@ -215,7 +214,6 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeStatus
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
@@ -316,13 +314,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             if has_comment:
                 checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
 
-        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
-        if person_merge_proposal and (
-            person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-            or not person_merge_proposal.validation.get('valid', True)
-        ):
-            # Cas display warning when quarantaine
-            # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
+        if self.demande_est_en_quarantaine:
             checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
 
         if self.proposition.est_inscription_tardive:
@@ -3125,11 +3117,6 @@ class ChecklistView(
                 if context.get('past_experiences_are_sufficient')
                 else ''
             )
-
-            context['digit_ticket'] = message_bus_instance.invoke(
-                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
-            )
-
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 
