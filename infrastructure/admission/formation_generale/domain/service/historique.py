@@ -396,3 +396,39 @@ class Historique(IHistorique):
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
             tags=['proposition', 'sic-decision', 'sic-decision-derogation'],
         )
+
+    @classmethod
+    def historiser_derogation_vrae_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+
+        if proposition.financabilite_derogation_vrae:
+            message_fr = (
+                f'La dérogation VRAE à la financabilité a été accordé le {now} par {gestionnaire_dto.prenom} '
+                f'{gestionnaire_dto.nom}.'
+            )
+            message_en = (
+                f'Financability VRAE dispensation has been approved on {now} by {gestionnaire_dto.prenom} '
+                f'{gestionnaire_dto.nom}.'
+            )
+        else:
+            message_fr = (
+                f'La dérogation VRAE à la financabilité a été supprimé le {now} par {gestionnaire_dto.prenom} '
+                f'{gestionnaire_dto.nom}.'
+            )
+            message_en = (
+                f'Financability VRAE dispensation has been removed on {now} by {gestionnaire_dto.prenom} '
+                f'{gestionnaire_dto.nom}.'
+            )
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            message_fr,
+            message_en,
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'financabilite', 'financabilite-derogation'],
+        )
