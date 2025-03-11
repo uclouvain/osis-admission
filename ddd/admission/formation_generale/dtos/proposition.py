@@ -101,6 +101,7 @@ class PropositionDTO(interface.DTO):
     financabilite_etabli_le: Optional[datetime.datetime]
 
     financabilite_derogation_statut: str
+    financabilite_derogation_vrae: bool
     financabilite_derogation_premiere_notification_le: Optional[datetime.datetime]
     financabilite_derogation_premiere_notification_par: str
     financabilite_derogation_derniere_notification_le: Optional[datetime.datetime]
