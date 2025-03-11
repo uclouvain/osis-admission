@@ -351,6 +351,7 @@ class PropositionInMemoryRepository(
             financabilite_derogation_statut=(
                 proposition.financabilite_derogation_statut.name if proposition.financabilite_derogation_statut else ''
             ),
+            financabilite_derogation_vrae=proposition.financabilite_derogation_vrae,
             financabilite_derogation_premiere_notification_le=(
                 proposition.financabilite_derogation_premiere_notification_le
             ),

@@ -1268,6 +1268,14 @@ class FinancabilityDispensationRefusalForm(FacDecisionRefusalForm):
         )
 
 
+class FinancabiliteDispensationVraeForm(forms.ModelForm):
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'financabilite_dispensation_vrae',
+        ]
+
+
 class FinancabiliteApprovalForm(forms.ModelForm):
     class Meta:
         model = GeneralEducationAdmission

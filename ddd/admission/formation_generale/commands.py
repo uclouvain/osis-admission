@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -547,6 +547,13 @@ class SpecifierDerogationFinancabiliteCommand(interface.CommandRequest):
     gestionnaire: str
     refus_uuids_motifs: List[str] = attr.Factory(list)
     refus_autres_motifs: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierDerogationVraeFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    derogation_vrae: bool
+    gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)

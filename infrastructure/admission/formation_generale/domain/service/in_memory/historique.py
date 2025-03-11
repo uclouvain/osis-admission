@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,9 +27,15 @@
 from email.message import EmailMessage
 from typing import Optional
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_historique import (
+    IHistorique,
+)
 
 
 class HistoriqueInMemory(IHistorique):
@@ -152,5 +158,13 @@ class HistoriqueInMemory(IHistorique):
         proposition: Proposition,
         gestionnaire: str,
         message: Optional[EmailMessage] = None,
+    ):
+        pass
+
+    @classmethod
+    def historiser_derogation_vrae_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
     ):
         pass

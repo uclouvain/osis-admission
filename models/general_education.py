@@ -203,6 +203,11 @@ class GeneralEducationAdmission(BaseAdmission):
         default='',
         blank=True,
     )
+    financabilite_dispensation_vrae = models.BooleanField(
+        verbose_name=_('Financability VRAE dispensation'),
+        default=False,
+        blank=True,
+    )
     financability_dispensation_first_notification_on = models.DateTimeField(
         verbose_name=_('Financability dispensation first notification on'),
         null=True,

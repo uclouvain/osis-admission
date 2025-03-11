@@ -199,6 +199,7 @@ class Proposition(interface.RootEntity):
     financabilite_etabli_le: Optional[datetime.datetime] = None
 
     financabilite_derogation_statut: DerogationFinancement = ''
+    financabilite_derogation_vrae: bool = False
     financabilite_derogation_premiere_notification_le: Optional[datetime.datetime] = None
     financabilite_derogation_premiere_notification_par: str = ''
     financabilite_derogation_derniere_notification_le: Optional[datetime.datetime] = None
@@ -915,6 +916,14 @@ class Proposition(interface.RootEntity):
         if statut == DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE:
             self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in refus_uuids_motifs]
             self.autres_motifs_refus = refus_autres_motifs
+
+    def specifier_derogation_vrae_financabilite(
+        self,
+        derogation_vrae: bool,
+        auteur_modification: str,
+    ):
+        self.auteur_derniere_modification = auteur_modification
+        self.financabilite_derogation_vrae = derogation_vrae
 
     def notifier_candidat_derogation_financabilite(self, gestionnaire: str):
         self.financabilite_derogation_statut = DerogationFinancement.CANDIDAT_NOTIFIE

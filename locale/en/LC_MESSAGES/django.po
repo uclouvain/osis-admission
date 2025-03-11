@@ -2033,6 +2033,9 @@ msgstr ""
 msgid "Dispensation needed"
 msgstr ""
 
+msgid "Dispensation obtained by the VRAE"
+msgstr ""
+
 msgid "Dispensation or increased fees"
 msgstr ""
 
@@ -2716,6 +2719,9 @@ msgstr ""
 
 msgctxt "tab"
 msgid "Finalization"
+msgstr ""
+
+msgid "Financability VRAE dispensation"
 msgstr ""
 
 msgid "Financability computed rule"
@@ -5946,7 +5952,8 @@ msgstr ""
 
 msgid ""
 "The 'Dispensation granted' status is reserved to enrolment application with "
-"financability dispensation status set to 'Faculty dispensation granted'."
+"financability dispensation status set to 'Faculty dispensation granted' or "
+"with VRAE dispensation."
 msgstr ""
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."

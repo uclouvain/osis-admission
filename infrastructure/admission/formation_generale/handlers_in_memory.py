@@ -60,6 +60,9 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_vrae_financabilite_service import (
+    specifier_derogation_vrae_financabilite,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_non_concernee_service import (
     specifier_financabilite_non_concernee,
 )
@@ -753,6 +756,13 @@ COMMAND_HANDLERS = {
     ),
     SpecifierDerogationFinancabiliteCommand: (
         lambda msg_bus, cmd: specifier_derogation_financabilite(
+            cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique_formation_generale,
+        )
+    ),
+    SpecifierDerogationVraeFinancabiliteCommand: (
+        lambda msg_bus, cmd: specifier_derogation_vrae_financabilite(
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
