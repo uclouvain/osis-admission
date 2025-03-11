@@ -46,6 +46,9 @@ from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    message_candidat_avec_pae_avant_2015,
+)
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
@@ -1181,6 +1184,48 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(context['delete_url'], '')
         self.assertEqual(context['duplicate_url'], '')
         self.assertEqual(context['experience_uuid'], str(experience.uuid))
+        self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
+    def test_checklist_experience_action_links_context_with_a_curriculum_message(self):
+        general_admission = GeneralEducationAdmissionFactory()
+        proposition_uuid = general_admission.uuid
+
+        perms = {
+            'admission.change_admission_curriculum': True,
+            'admission.change_admission_secondary_studies': True,
+            'admission.delete_admission_curriculum': True,
+            'profil.can_edit_parcours_externe': True,
+            'profil.can_see_parcours_externe': True,
+        }
+
+        kwargs = {
+            'context': {
+                'request': Mock(
+                    path='mypath',
+                    user=MagicMock(
+                        _computed_permissions=perms,
+                    ),
+                ),
+                'view': MagicMock(
+                    base_namespace='admission:general-education',
+                    kwargs={'uuid': proposition_uuid},
+                    admission=general_admission,
+                    proposition=MagicMock(noma_candidat='0123456'),
+                ),
+            },
+            'prefix': 'prefix',
+            'experience': message_candidat_avec_pae_avant_2015,
+            'current_year': 2020,
+            'parcours_tab_id': 'tabID',
+        }
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['prefix'], 'prefix')
+        self.assertEqual(context['update_url'], '')
+        self.assertEqual(context['delete_url'], '')
+        self.assertEqual(context['duplicate_url'], '')
+        self.assertEqual(context['experience_uuid'], '')
         self.assertEqual(context['edit_link_button_in_new_tab'], False)
 
     def test_experience_valuation_url_with_an_educational_experience(self):

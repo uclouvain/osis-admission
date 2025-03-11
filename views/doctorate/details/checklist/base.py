@@ -45,6 +45,9 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    message_candidat_avec_pae_avant_2015,
+)
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO, ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
@@ -102,6 +105,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
+from parcours_interne import etudiants_PCE_avant_2015
 
 __namespace__ = False
 
@@ -547,12 +551,20 @@ class ChecklistView(
                 if str(experience_academique.uuid) in curex_a_fusionner:
                     resume.curriculum.experiences_academiques.append(experience_academique)
 
+    def curriculum_additional_messages(self):
+        # Get the messages to display into the past experiences views
+        additional_messages = []
+        if self.proposition.noma_candidat in etudiants_PCE_avant_2015.nomas:
+            additional_messages.append(message_candidat_avec_pae_avant_2015)
+        return additional_messages
+
     def _get_experiences(self, resume: ResumePropositionDTO):
         return groupe_curriculum_par_annee_decroissante(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
             experiences_parcours_interne=self.internal_experiences,
+            additional_messages=self.curriculum_additional_messages(),
         )
 
     def _get_financabilite(self):
