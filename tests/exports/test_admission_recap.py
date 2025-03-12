@@ -1512,6 +1512,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
             type=TypeDemande.ADMISSION.name,
             financabilite_derogation_statut='',
+            financabilite_derogation_vrae=False,
             financabilite_derogation_premiere_notification_le=None,
             financabilite_derogation_premiere_notification_par='',
             financabilite_derogation_derniere_notification_le=None,

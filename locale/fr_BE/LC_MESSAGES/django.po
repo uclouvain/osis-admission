@@ -2228,6 +2228,9 @@ msgstr "Dérogation accordée"
 msgid "Dispensation needed"
 msgstr "Besoin dérogation"
 
+msgid "Dispensation obtained by the VRAE"
+msgstr "Dérogation obtenue par le VRAE"
+
 msgid "Dispensation or increased fees"
 msgstr "Dispense ou droits majorés"
 
@@ -2989,6 +2992,9 @@ msgstr "Filtrer par documents"
 msgctxt "tab"
 msgid "Finalization"
 msgstr "Finalisation"
+
+msgid "Financability VRAE dispensation"
+msgstr "Dérogation VRAE à la financabilité"
 
 msgid "Financability computed rule"
 msgstr "Règle calculé de financabilité"
@@ -6580,11 +6586,12 @@ msgstr ""
 
 msgid ""
 "The 'Dispensation granted' status is reserved to enrolment application with "
-"financability dispensation status set to 'Faculty dispensation granted'."
+"financability dispensation status set to 'Faculty dispensation granted' or "
+"with VRAE dispensation."
 msgstr ""
 "Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
 "inscription dont la situation de dérogation à la finançabilité est 'accord "
-"de dérogation facultaire'."
+"de dérogation facultaire' ou avec la dérogation VRAE."
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
