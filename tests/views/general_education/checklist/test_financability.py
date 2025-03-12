@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,21 +31,26 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils import timezone
 
-from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
     DerogationFinancement,
 )
+from admission.models import GeneralEducationAdmission
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -122,10 +127,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
             self.general_admission.checklist['current']['financabilite']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
-        self.assertEqual(
-            self.general_admission.financability_established_by,
-            self.sic_manager_user.person
-        )
+        self.assertEqual(self.general_admission.financability_established_by, self.sic_manager_user.person)
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -465,6 +467,26 @@ class FinancabiliteDerogationViewTestCase(TestCase):
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
         )
         self.assertIsNone(self.general_admission.financability_established_by)
+
+    def test_refus_vrae_post(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:financability-derogation-vrae',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={'financabilite-dispensation-vrae-financabilite_dispensation_vrae': 'on'},
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('admission/general_education/includes/checklist/financabilite.html')
+
+        self.general_admission.refresh_from_db()
+        self.assertIs(self.general_admission.financabilite_dispensation_vrae, True)
 
     def test_refus_post_with_other_reasons(self):
         self.client.force_login(user=self.sic_manager_user)
