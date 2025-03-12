@@ -1573,12 +1573,6 @@ msgstr "Communication avec votre école secondaire"
 msgid "Competent diplomatic post"
 msgstr "Poste diplomatique compétent"
 
-msgid "Complement"
-msgstr "Complément"
-
-msgid "Complementary training"
-msgstr "Formation complémentaire"
-
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
 
@@ -5162,6 +5156,15 @@ msgstr "Méthode de paiement"
 msgid "Pending application fee"
 msgstr "Frais de dossier en attente"
 
+#, python-format
+msgid ""
+"Pending the publication of the results of the medical and dental entrance "
+"examination, your application can only be submitted from %(start_date)s."
+msgstr ""
+"Dans l'attente de la publication des résultats du concours d'entrée en "
+"médecine et dentisterie, votre demande ne pourra être soumise qu'à partir du "
+"%(start_date)s."
+
 msgid "Period"
 msgstr "Période"
 
@@ -7342,7 +7345,8 @@ msgstr "Cet état n’est pas accessible pour les demandes de type Inscription."
 msgid ""
 "This student has a pathway prior to 2015 which can only be consulted in EPC."
 msgstr ""
-"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable uniquement dans EPC."
+"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable "
+"uniquement dans EPC."
 
 msgid "Tick boxes"
 msgstr "Cases à cocher"
@@ -8268,6 +8272,10 @@ msgid ""
 msgstr ""
 "Il n'est pas possible de soumettre votre dossier d'admission car la "
 "formation %(acronym)s est fermée."
+
+msgid "Your application cannot be submitted now."
+msgstr ""
+"Il n'est pas possible de soumettre votre dossier d'admission maintenant."
 
 msgid "Your application is currently being reviewed by the course exam board"
 msgstr "Votre dossier est en cours de vérification par le jury de la formation"

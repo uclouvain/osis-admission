@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,81 +33,99 @@ from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    ReductionDesDroitsInscriptionNonCompleteeException,
     AbsenceDeDetteNonCompleteeException,
-    AssimilationNonCompleteeException,
-    CarteBancaireRemboursementIbanNonCompleteException,
-    CarteBancaireRemboursementAutreFormatNonCompleteException,
     AffiliationsNonCompleteesException,
+    AssimilationNonCompleteeException,
+    CarteBancaireRemboursementAutreFormatNonCompleteException,
+    CarteBancaireRemboursementIbanNonCompleteException,
     ExperiencesAcademiquesNonCompleteesException,
+    ReductionDesDroitsInscriptionNonCompleteeException,
     TypeCompteBancaireRemboursementNonCompleteException,
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
+    HorsPeriodeSpecifiqueInscription,
+    NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
-    NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
+from admission.ddd.admission.dtos.periode import PeriodeDTO
 from admission.ddd.admission.enums import (
-    TypeSituationAssimilation,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
-    LienParente,
     ChoixAssimilation5,
     ChoixAssimilation6,
     ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EquivalenceNonRenseigneeException,
-    FichierCurriculumNonRenseigneException,
     EtudesSecondairesNonCompleteesException,
-    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
+    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
+    FichierCurriculumNonRenseigneException,
     InformationsVisaNonCompleteesException,
 )
-from admission.ddd.admission.formation_generale.test.factory.proposition import _ComptabiliteFactory
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    _ComptabiliteFactory,
+)
+from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
-    ProfilCandidatInMemoryTranslator,
     ExperienceNonAcademique,
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
+    EvaluationSystem,
+    Grade,
     Result,
     TranscriptType,
-    Grade,
-    EvaluationSystem,
-    ActivityType,
-    ActivitySector,
 )
-from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
+from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 
 
 class TestVerifierPropositionService(TestCase):
@@ -1829,3 +1847,53 @@ class TestVerifierPropositionService(TestCase):
         # Adresse de résidence en belgique + Nationalité hors UE+5
         self.adresse_residentielle.pays = 'BE'
         self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+    def test_should_verifier_periode_inscription_specifique_bachelier_medecine_ou_dentisterie(self):
+        # Pas de période définie
+        proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
+        self.assertEqual(proposition_id.uuid, self.bachelier_veto_proposition.entity_id.uuid)
+
+        # Une période définie
+        with mock.patch.object(
+            CalendrierInscriptionInMemory,
+            'recuperer_periode_inscription_specifique_medecine_dentisterie',
+            return_value=PeriodeDTO(
+                date_debut=datetime.date(2020, 9, 6),
+                date_fin=datetime.date(2021, 2, 15),
+            ),
+        ):
+            # Une période définie mais la date du jour est en dehors
+            with freezegun.freeze_time('2020-09-05'):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
+
+                    desired_exception = next(
+                        (
+                            exception
+                            for exception in context.exception.exceptions
+                            if isinstance(exception, HorsPeriodeSpecifiqueInscription)
+                        ),
+                        None,
+                    )
+
+                    self.assertIsNotNone(desired_exception)
+                    self.assertEqual(
+                        desired_exception.message,
+                        (
+                            "Dans l'attente de la publication des résultats du concours d'entrée en médecine et "
+                            "dentisterie, votre demande ne pourra être soumise qu'à partir du 6 septembre 2020."
+                        ),
+                    )
+
+                # Pas de vérification pour les bacheliers hors medecine ou dentisterie
+                proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
+                self.assertEqual(proposition_id.uuid, self.bachelier_proposition.entity_id.uuid)
+
+            # Une période définie et la date du jour est dedans
+            with freezegun.freeze_time('2020-09-06'):
+                proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
+                self.assertEqual(proposition_id.uuid, self.bachelier_veto_proposition.entity_id.uuid)
+
+            with freezegun.freeze_time('2021-02-15'):
+                proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
+                self.assertEqual(proposition_id.uuid, self.bachelier_veto_proposition.entity_id.uuid)

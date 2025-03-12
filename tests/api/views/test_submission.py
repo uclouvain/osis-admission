@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 import datetime
 import uuid
 from email import message_from_string
-from unittest.mock import patch, PropertyMock, MagicMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import freezegun
 import mock
@@ -39,34 +39,46 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.models import AdmissionTask
-from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.domain.service.i_elements_confirmation import (
+    IElementsConfirmation,
+)
 from admission.ddd.admission.domain.validator.exceptions import (
+    HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
-from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets, TypeSituationAssimilation
+from admission.ddd.admission.enums import (
+    CritereItemFormulaireFormation,
+    Onglets,
+    TypeSituationAssimilation,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
-from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
+from admission.models import AdmissionTask
+from admission.tests.factories.calendar import (
+    AdmissionAcademicCalendarFactory,
+    AdmissionMedDentEnrollmentAcademicCalendarFactory,
 )
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
+from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.faculty_decision import (
     FreeAdditionalApprovalConditionFactory,
 )
 from admission.tests.factories.form_item import (
+    AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
     TextAdmissionFormItemFactory,
-    AdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -127,6 +139,8 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             candidate__private_email='candidate2@test.be',
             bachelor_with_access_conditions_met=True,
             determined_academic_year__year=1980,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__main_domain__code='11A',
         )
         FreeAdditionalApprovalConditionFactory(
             admission=cls.admission_ok,
@@ -176,6 +190,8 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
+                'convention_cadre_stages': IElementsConfirmation.CONVENTION_CADRE_STAGE,
+                'communication_hopitaux': IElementsConfirmation.COMMUNICATION_HOPITAUX,
             },
         }
 
@@ -287,6 +303,79 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             admission.detailed_status,
         )
 
+    def test_general_proposition_verification_specific_enrolment_period_for_medicine_dentistry_bachelor(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        # Add a specific period
+        current_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+            data_year=self.admission_ok.determined_academic_year,
+            start_date=datetime.date(1980, 2, 1),
+            end_date=datetime.date(1980, 2, 15),
+        )
+
+        next_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+            data_year__year=self.admission_ok.determined_academic_year.year + 1,
+            start_date=datetime.date(1980, 3, 1),
+            end_date=datetime.date(1980, 3, 15),
+        )
+
+        # Outside a period
+        with freezegun.freeze_time("1980-01-31"):
+            response = self.client.get(self.ok_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            ret = response.json()
+            self.assertEqual(len(ret['errors']), 1)
+
+            not_in_period_error = next(
+                (
+                    error
+                    for error in ret['errors']
+                    if error['status_code'] == HorsPeriodeSpecifiqueInscription.status_code
+                ),
+                None,
+            )
+
+            self.assertIsNotNone(not_in_period_error)
+
+            self.assertEqual(
+                not_in_period_error['detail'],
+                "Dans l'attente de la publication des résultats du concours d'entrée en médecine et dentisterie, "
+                "votre demande ne pourra être soumise qu'à partir du 1 février 1980.",
+            )
+
+        with freezegun.freeze_time("1980-02-16"):
+            response = self.client.get(self.ok_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            ret = response.json()
+            self.assertEqual(len(ret['errors']), 1)
+
+            not_in_period_error = next(
+                (
+                    error
+                    for error in ret['errors']
+                    if error['status_code'] == HorsPeriodeSpecifiqueInscription.status_code
+                ),
+                None,
+            )
+
+            self.assertIsNotNone(not_in_period_error)
+
+            self.assertEqual(
+                not_in_period_error['detail'],
+                "Dans l'attente de la publication des résultats du concours d'entrée en médecine et dentisterie, "
+                "votre demande ne pourra être soumise qu'à partir du 1 mars 1980.",
+            )
+
+        # Inside a period
+        with freezegun.freeze_time("1980-02-01"):
+            response = self.client.get(self.ok_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            ret = response.json()
+            self.assertEqual(len(ret['errors']), 0)
+
     def test_general_proposition_verification_contingent_est_interdite(self):
         admission = GeneralEducationAdmissionFactory(
             is_non_resident=True,
@@ -388,12 +477,50 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertNotIn('inscription tardive', notifications[0].payload)
         self.assertNotIn('payement des frais de dossier', notifications[0].payload)
 
+    def test_general_proposition_submission_with_specific_enrolment_period_for_medicine_dentistry_bachelor(self):
+        current_admission = GeneralEducationAdmissionFactory(
+            training__academic_year__year=1980,
+            candidate__country_of_citizenship__european_union=True,
+            candidate__private_email='candidate2@test.be',
+            bachelor_with_access_conditions_met=True,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__main_domain__code='11A',
+        )
+
+        specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+            data_year=current_admission.determined_academic_year,
+            start_date=datetime.date(1980, 2, 1),
+            end_date=datetime.date(1980, 2, 15),
+        )
+
+        self.client.force_authenticate(user=current_admission.candidate.user)
+        current_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=current_admission.uuid)
+
+        # Outside the period
+        with freezegun.freeze_time(datetime.date(1980, 1, 31)):
+            response = self.client.post(current_url, self.data_ok)
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
+            self.assertIn(HorsPeriodeSpecifiqueInscription.status_code, errors_statuses)
+
+        # Inside the period
+        with freezegun.freeze_time(datetime.date(1980, 2, 1)):
+            response = self.client.post(current_url, self.data_ok)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            current_admission.refresh_from_db()
+            self.assertEqual(current_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+
     def test_general_proposition_submission_ok_is_an_enrollment_or_an_admission(self):
         current_admission = GeneralEducationAdmissionFactory(
             training__academic_year__year=1980,
             candidate__country_of_citizenship__european_union=True,
             candidate__private_email='candidate2@test.be',
             bachelor_with_access_conditions_met=True,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__main_domain__code='11A',
         )
 
         self.client.force_authenticate(user=current_admission.candidate.user)
@@ -482,6 +609,8 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
+                'convention_cadre_stages': IElementsConfirmation.CONVENTION_CADRE_STAGE,
+                'communication_hopitaux': IElementsConfirmation.COMMUNICATION_HOPITAUX,
             },
         }
         self.client.force_authenticate(user=self.candidate_ok.user)
