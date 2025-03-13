@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,34 +32,44 @@ from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 from django.db.models import (
-    Exists,
-    OuterRef,
-    Subquery,
-    Prefetch,
-    F,
-    Value,
-    Case,
-    When,
-    ExpressionWrapper,
-    Q,
     BooleanField,
+    Case,
+    Exists,
+    ExpressionWrapper,
+    F,
+    OuterRef,
+    Prefetch,
+    Q,
     QuerySet,
+    Subquery,
+    Value,
+    When,
 )
-from django.db.models.functions import ExtractYear, ExtractMonth, Concat
+from django.db.models.functions import Concat, ExtractMonth, ExtractYear
 from django.utils.translation import get_language
 
-from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.models.functions import ArrayLength
-from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
-from admission.ddd import NB_MOIS_MIN_VAE
+from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
-from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import (
+    ConnaissanceLangueDTO,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+)
+from admission.ddd.admission.dtos import (
+    AdressePersonnelleDTO,
+    CoordonneesDTO,
+    IdentificationDTO,
+)
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
@@ -68,6 +78,12 @@ from admission.ddd.admission.enums.valorisation_experience import (
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.functions import ArrayLength
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -75,29 +91,29 @@ from base.models.person_address import PersonAddress
 from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
+    CurriculumAExperiencesDTO,
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-    CurriculumAExperiencesDTO,
 )
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
+    EducationalExperience,
     EducationalExperienceYear,
     ProfessionalExperience,
-    EducationalExperience,
 )
 from osis_profile.models.education import LanguageKnowledge
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 
 
 # TODO: a mettre dans infra/shared_kernel/profil
@@ -185,9 +201,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 code_postal=address.postal_code or '',
                 ville=address.city or '',
                 pays=address.country.iso_code if address.country else '',
-                nom_pays=getattr(address.country, 'name' if has_default_language else 'name_en')
-                if address.country
-                else '',
+                nom_pays=(
+                    getattr(address.country, 'name' if has_default_language else 'name_en') if address.country else ''
+                ),
                 boite_postale=address.postal_box,
                 numero_rue=address.street_number,
             )
@@ -264,56 +280,77 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 est_valorise_par_epc=candidate.is_valuated_by_epc,  # From annotation
                 types_formations_admissions_valorisees=candidate.valuated_training_types,  # From annotation
             ),
-            annee_diplome_etudes_secondaires=candidate.graduated_from_high_school_year.year
-            if candidate.graduated_from_high_school_year
-            else None,
-            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                uuid=belgian_high_school_diploma.uuid,
-                diplome=belgian_high_school_diploma.high_school_diploma,
-                type_enseignement=belgian_high_school_diploma.educational_type,
-                autre_type_enseignement=belgian_high_school_diploma.educational_other,
-                nom_institut=belgian_high_school_diploma.institute.name
-                if belgian_high_school_diploma.institute_id
-                else belgian_high_school_diploma.other_institute_name,
-                adresse_institut=getattr(candidate, 'belgian_highschool_diploma_institute_address', '')
-                if belgian_high_school_diploma.institute_id
-                else belgian_high_school_diploma.other_institute_address,
-                communaute=belgian_high_school_diploma.community or '',
-            )
-            if belgian_high_school_diploma
-            else None,
-            diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
-                uuid=foreign_high_school_diploma.uuid,
-                type_diplome=foreign_high_school_diploma.foreign_diploma_type,
-                regime_linguistique=foreign_high_school_diploma.linguistic_regime.code
-                if foreign_high_school_diploma.linguistic_regime
-                else foreign_high_school_diploma.other_linguistic_regime,
-                pays_regime_linguistique=getattr(
-                    foreign_high_school_diploma.linguistic_regime,
-                    'name' if has_default_language else 'name_en',
+            annee_diplome_etudes_secondaires=(
+                candidate.graduated_from_high_school_year.year if candidate.graduated_from_high_school_year else None
+            ),
+            diplome_belge=(
+                DiplomeBelgeEtudesSecondairesDTO(
+                    uuid=belgian_high_school_diploma.uuid,
+                    diplome=belgian_high_school_diploma.high_school_diploma,
+                    type_enseignement=belgian_high_school_diploma.educational_type,
+                    autre_type_enseignement=belgian_high_school_diploma.educational_other,
+                    nom_institut=(
+                        belgian_high_school_diploma.institute.name
+                        if belgian_high_school_diploma.institute_id
+                        else belgian_high_school_diploma.other_institute_name
+                    ),
+                    adresse_institut=(
+                        getattr(candidate, 'belgian_highschool_diploma_institute_address', '')
+                        if belgian_high_school_diploma.institute_id
+                        else belgian_high_school_diploma.other_institute_address
+                    ),
+                    communaute=belgian_high_school_diploma.community or '',
                 )
-                if foreign_high_school_diploma.linguistic_regime
-                else foreign_high_school_diploma.other_linguistic_regime,
-                pays_membre_ue=foreign_high_school_diploma.country.european_union,
-                pays_iso_code=foreign_high_school_diploma.country.iso_code,
-                pays_nom=getattr(foreign_high_school_diploma.country, 'name' if has_default_language else 'name_en'),
-                releve_notes=foreign_high_school_diploma.high_school_transcript,
-                traduction_releve_notes=foreign_high_school_diploma.high_school_transcript_translation,
-                diplome=foreign_high_school_diploma.high_school_diploma,
-                traduction_diplome=foreign_high_school_diploma.high_school_diploma_translation,
-                equivalence=foreign_high_school_diploma.equivalence,
-                decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
-                decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
-                preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
-            )
-            if foreign_high_school_diploma
-            else None,
-            alternative_secondaires=AlternativeSecondairesDTO(
-                uuid=high_school_diploma_alternative.uuid,
-                examen_admission_premier_cycle=high_school_diploma_alternative.first_cycle_admission_exam,
-            )
-            if high_school_diploma_alternative
-            else None,
+                if belgian_high_school_diploma
+                else None
+            ),
+            diplome_etranger=(
+                DiplomeEtrangerEtudesSecondairesDTO(
+                    uuid=foreign_high_school_diploma.uuid,
+                    type_diplome=foreign_high_school_diploma.foreign_diploma_type,
+                    regime_linguistique=(
+                        foreign_high_school_diploma.linguistic_regime.code
+                        if foreign_high_school_diploma.linguistic_regime
+                        else foreign_high_school_diploma.other_linguistic_regime
+                    ),
+                    pays_regime_linguistique=(
+                        getattr(
+                            foreign_high_school_diploma.linguistic_regime,
+                            'name' if has_default_language else 'name_en',
+                        )
+                        if foreign_high_school_diploma.linguistic_regime
+                        else foreign_high_school_diploma.other_linguistic_regime
+                    ),
+                    pays_membre_ue=foreign_high_school_diploma.country.european_union,
+                    pays_iso_code=foreign_high_school_diploma.country.iso_code,
+                    pays_nom=getattr(
+                        foreign_high_school_diploma.country, 'name' if has_default_language else 'name_en'
+                    ),
+                    releve_notes=foreign_high_school_diploma.high_school_transcript,
+                    traduction_releve_notes=foreign_high_school_diploma.high_school_transcript_translation,
+                    diplome=foreign_high_school_diploma.high_school_diploma,
+                    traduction_diplome=foreign_high_school_diploma.high_school_diploma_translation,
+                    equivalence=foreign_high_school_diploma.equivalence,
+                    decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
+                    decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
+                    preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
+                )
+                if foreign_high_school_diploma
+                else None
+            ),
+            alternative_secondaires=(
+                AlternativeSecondairesDTO(
+                    uuid=high_school_diploma_alternative.uuid,
+                    examen_admission_premier_cycle=high_school_diploma_alternative.first_cycle_admission_exam,
+                    examen_admission_premier_cycle_annee=(
+                        high_school_diploma_alternative.first_cycle_admission_exam_year.year
+                        if high_school_diploma_alternative.first_cycle_admission_exam_year
+                        else None
+                    ),
+                )
+                if high_school_diploma_alternative
+                else None
+            ),
             identifiant_externe=potential_diploma.external_id if potential_diploma else None,
             injectee=candidate.secondaire_injecte_par_admission or candidate.secondaire_injecte_par_cv,
         )
@@ -477,12 +514,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     program_info['est_autre_formation'] = False
 
                 if experience_year.educational_experience.fwb_equivalent_program_id:
-                    program_info[
-                        'nom_formation_equivalente_communaute_fr'
-                    ] = experience_year.educational_experience.fwb_equivalent_program.title
-                    program_info[
-                        'cycle_formation'
-                    ] = experience_year.educational_experience.fwb_equivalent_program.cycle
+                    program_info['nom_formation_equivalente_communaute_fr'] = (
+                        experience_year.educational_experience.fwb_equivalent_program.title
+                    )
+                    program_info['cycle_formation'] = (
+                        experience_year.educational_experience.fwb_equivalent_program.cycle
+                    )
 
                 educational_experience_dtos[experience_year.educational_experience.pk] = ExperienceAcademiqueDTO(
                     uuid=experience_year.educational_experience.uuid,

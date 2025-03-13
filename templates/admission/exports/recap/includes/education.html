@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -99,6 +99,11 @@
     {% if not hide_files %}
       {% panel _('Attachments') %}
         {% field_data _("Certificate of passing the bachelor's course entrance exam") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
+        {% if etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee %}
+          {% field_data _("Year of obtaining this proof") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee|add:1 %}
+        {% else %}
+          {% field_data _("Year of obtaining this proof") "" %}
+        {% endif %}
       {% endpanel %}
     {% endif %}
 

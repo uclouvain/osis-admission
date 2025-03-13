@@ -625,14 +625,6 @@ msgstr "Un courrier d'autorisation a été envoyé au candidat."
 msgid "An education type"
 msgstr "Un type de formation"
 
-msgid "An error occured during digit ticket creation : {}"
-msgstr "Une erreur est survenue lors de la création de ticket DigIT: {}"
-
-msgid "An error occured during digit ticket creation validation"
-msgstr ""
-"Une erreur est survenue lors de la validation du ticket de création dans "
-"DigIT"
-
 msgid "An holding mail has already been sent to the candidate."
 msgstr "Un courrier  de mise en attente a déjà été envoyé au candidat."
 
@@ -1059,10 +1051,6 @@ msgstr "Biologie"
 msgid "Bachelor"
 msgstr "Bachelier"
 
-msgid "Bachelor's course entrance exam"
-msgstr ""
-"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
-
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
 
@@ -1360,13 +1348,6 @@ msgid "Cannot delete the experience because it is used in another context."
 msgstr ""
 "Impossible de supprimer l'expérience parce qu'elle est utilisée dans un "
 "autre contexte."
-
-msgid ""
-"Cannot discard merge because at least one known person has the same national "
-"number"
-msgstr ""
-"Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le "
-"même numéro de registre national"
 
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du groupe de supervision"
@@ -2216,9 +2197,6 @@ msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 
-msgid "Discard fusion"
-msgstr "Rejeter la fusion"
-
 msgid "Dispensation"
 msgstr "Dérogation"
 
@@ -2817,9 +2795,6 @@ msgstr "Quitter sans enregistrer"
 
 msgid "Experience knowledge valorisation"
 msgstr "Valorisation des acquis d'expérience"
-
-msgid "Experience merge proposal"
-msgstr "Proposition de fusion du parcours antérieur"
 
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
@@ -4563,18 +4538,11 @@ msgstr "Affiliations"
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
 
-msgctxt "admission"
-msgid "Merge"
-msgstr "Fusionner"
-
 msgid "Merge all non-empty data from digit match to merge form"
 msgstr "Fusionner toutes les données valides provenant de la correspondance"
 
 msgid "Merge all non-empty data from original to merge form"
 msgstr "Fusionner toutes les données valides provenant de l'original"
-
-msgid "Merge with existing entry"
-msgstr "Fusionner avec l'entrée existante"
 
 msgid "Merging of each document field of a continuing proposition into one PDF"
 msgstr "Fusion de chaque champ document d'une proposition continue en un PDF"
@@ -4753,9 +4721,6 @@ msgstr "Nationalité :"
 msgid "New thesis title (if applicable):"
 msgstr "Nouveau titre de la thèse (le cas échéant) :"
 
-msgid "Next"
-msgstr "Suivant"
-
 msgid "Next admission"
 msgstr "Demande suivante"
 
@@ -4781,10 +4746,6 @@ msgstr "Aucune étude en français"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
-
-msgctxt "admission"
-msgid "No data"
-msgstr "Aucune données"
 
 msgid "No defense"
 msgstr "Non soutenue"
@@ -6049,9 +6010,6 @@ msgstr "Enregistrer"
 msgid "Save and transfer to SIC"
 msgstr "Enregistrer et transmettre en SIC"
 
-msgid "Save fusion proposal"
-msgstr "Enregistrer la proposition de fusion"
-
 msgid "Scholarship"
 msgstr "Boursier"
 
@@ -6142,9 +6100,6 @@ msgstr "Envoyer un e-mail à la Faculté"
 
 msgid "Send back to the candidate"
 msgstr "Redonner la main au candidat"
-
-msgid "Send selected candidate to digit"
-msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
 
 msgid "Send the message"
 msgstr "Envoyer le message"
@@ -7694,9 +7649,6 @@ msgstr "Diplômes ou expériences valorisées :"
 msgid "Values"
 msgstr "Valeurs"
 
-msgid "Verify"
-msgstr "Vérifier"
-
 msgid "Viewed at"
 msgstr "Vue le"
 
@@ -7800,9 +7752,6 @@ msgstr ""
 
 msgid "Whole view"
 msgstr "Vue complète"
-
-msgid "Will be automatically retrieved from candidate"
-msgstr "Sera automatiquement récupéré du parcours fourni par le candidat"
 
 msgid "With academic year"
 msgstr "Avec une année académique"
@@ -7939,6 +7888,9 @@ msgstr "Année"
 
 msgid "Year of birth"
 msgstr "Année de naissance"
+
+msgid "Year of obtaining this proof"
+msgstr "Année d’obtention de cette attestation"
 
 msgid "Year of the training"
 msgstr "Année de la formation"
@@ -8380,33 +8332,6 @@ msgstr "Votre adresse e-mail professionnelle"
 
 msgid "Your training does not cover the useful prerequisites in mathematics."
 msgstr "Votre formation ne couvre pas les prérequis utiles en mathématiques."
-
-#, python-format
-msgid "[%(matricule_candidat)s] Account creation period calendar is closed"
-msgstr "[%(matricule_candidat)s] Période de création de compte fermée"
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
-"validation"
-msgstr ""
-"[%(matricule_candidat)s] Le candidat a une proposition de fusion avec des "
-"erreurs dans la validation syntaxique"
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate has pending merge proposal: status "
-"%(merge_status)s"
-msgstr ""
-"[%(matricule_candidat)s] Le candidat a une proposition de fusion en attente: "
-"statut %(merge_status)s"
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Type is admission and application is not accepted"
-msgstr ""
-"[%(matricule_candidat)s] Le type de demande est admission et n'est pas "
-"autorisée à s'inscrire"
 
 msgid "academic year"
 msgstr "année académique"
