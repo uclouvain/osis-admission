@@ -1249,6 +1249,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
             alternative_secondaires=AlternativeSecondairesDTO(
                 examen_admission_premier_cycle=['uuid-examen-admission-premier-cycle'],
+                examen_admission_premier_cycle_annee=2024,
             ),
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2015,

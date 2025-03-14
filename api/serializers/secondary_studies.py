@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,10 +29,12 @@ from django.utils.functional import cached_property
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
-from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
+from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU, GotDiploma
 from base.models.organization import Organization
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
@@ -92,9 +94,14 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
 
 
 class HighSchoolDiplomaAlternativeSerializer(serializers.ModelSerializer):
+    first_cycle_admission_exam_year = RelatedAcademicYearField()
+
     class Meta:
         model = HighSchoolDiplomaAlternative
-        fields = ("first_cycle_admission_exam",)
+        fields = (
+            "first_cycle_admission_exam",
+            "first_cycle_admission_exam_year",
+        )
 
 
 class HighSchoolDiplomaSerializer(serializers.Serializer):
