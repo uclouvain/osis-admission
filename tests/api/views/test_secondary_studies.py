@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,9 @@ from rest_framework.test import APITestCase
 from admission.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.secondary_studies import (
@@ -524,6 +526,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
             "graduated_from_high_school": GotDiploma.NO.name,
             "high_school_diploma_alternative": {
                 "first_cycle_admission_exam": [cls.file_uuid],
+                "first_cycle_admission_exam_year": cls.admission.determined_academic_year.year + 1,
             },
         }
         AdmissionAcademicCalendarFactory.produce_all_required()

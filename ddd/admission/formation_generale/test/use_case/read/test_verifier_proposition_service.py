@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,81 +33,94 @@ from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    ReductionDesDroitsInscriptionNonCompleteeException,
     AbsenceDeDetteNonCompleteeException,
-    AssimilationNonCompleteeException,
-    CarteBancaireRemboursementIbanNonCompleteException,
-    CarteBancaireRemboursementAutreFormatNonCompleteException,
     AffiliationsNonCompleteesException,
+    AssimilationNonCompleteeException,
+    CarteBancaireRemboursementAutreFormatNonCompleteException,
+    CarteBancaireRemboursementIbanNonCompleteException,
     ExperiencesAcademiquesNonCompleteesException,
+    ReductionDesDroitsInscriptionNonCompleteeException,
     TypeCompteBancaireRemboursementNonCompleteException,
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
+    NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
-    NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
 from admission.ddd.admission.enums import (
-    TypeSituationAssimilation,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
-    LienParente,
     ChoixAssimilation5,
     ChoixAssimilation6,
     ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EquivalenceNonRenseigneeException,
-    FichierCurriculumNonRenseigneException,
     EtudesSecondairesNonCompleteesException,
-    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
+    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
+    FichierCurriculumNonRenseigneException,
     InformationsVisaNonCompleteesException,
 )
-from admission.ddd.admission.formation_generale.test.factory.proposition import _ComptabiliteFactory
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    _ComptabiliteFactory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
-    ProfilCandidatInMemoryTranslator,
     ExperienceNonAcademique,
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
+    EvaluationSystem,
+    Grade,
     Result,
     TranscriptType,
-    Grade,
-    EvaluationSystem,
-    ActivityType,
-    ActivitySector,
 )
-from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
+from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 
 
 class TestVerifierPropositionService(TestCase):
@@ -1248,7 +1261,10 @@ class TestVerifierPropositionService(TestCase):
     def test_should_etre_ok_si_alternative_etudes_secondaires_complet_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name,
-            alternative_secondaires=AlternativeSecondairesDTO(examen_admission_premier_cycle=['examen.pdf']),
+            alternative_secondaires=AlternativeSecondairesDTO(
+                examen_admission_premier_cycle=['examen.pdf'],
+                examen_admission_premier_cycle_annee=2025,
+            ),
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
