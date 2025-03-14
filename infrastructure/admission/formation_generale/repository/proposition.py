@@ -496,7 +496,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         checklist_actuelle = admission.checklist.get('current')
 
         return Proposition(
-            entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
+            entity_id=PropositionIdentityBuilder().build_from_uuid(str(admission.uuid)),
             matricule_candidat=admission.candidate.global_id,
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
