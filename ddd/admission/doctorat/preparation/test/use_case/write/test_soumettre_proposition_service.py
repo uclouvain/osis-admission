@@ -137,6 +137,11 @@ class TestVerifierPropositionServiceCommun(TestCase):
             elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(),
         )
 
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(self.base_cmd)
 
