@@ -144,7 +144,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
     checklist_actuelle = admission.checklist.get('current')
 
     return Proposition(
-        entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
+        entity_id=PropositionIdentityBuilder().build_from_uuid(str(admission.uuid)),
         commission_proximite=commission_proximite,
         type_admission=ChoixTypeAdmission[admission.type],
         formation_id=FormationIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
