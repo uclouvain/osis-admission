@@ -46,6 +46,7 @@ from admission.api.views.documents import (
     DoctorateRequestedDocumentListView,
     GeneralRequestedDocumentListView,
 )
+from admission.api.views.exam import GeneralExamView
 from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
 from admission.api.views.payment import (
     ApplicationFeesListView,
