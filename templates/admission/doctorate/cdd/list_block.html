@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -71,12 +71,12 @@
   <td>{{ admission.date_confirmation|date:'SHORT_DATE_FORMAT'|default:'' }}</td>
   <td>{{ admission.derniere_modification_le|date:'SHORT_DATE_FORMAT' }}</td>
   <td>{{ admission.derniere_modification_par }}</td>
-  <td>
+  <td class="text-center">
     {% if admission.type_admission == 'PRE_ADMISSION' %}
       <i class="fa-solid fa-flag" style="color: #c01c28;"></i>
     {% endif %}
     </td>
-  <td>
+  <td class="text-center">
     {% if admission.cotutelle %}
       <i class="fa-solid fa-seedling" style="color: #26a269;"></i>
     {% endif %}

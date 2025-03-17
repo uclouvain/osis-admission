@@ -93,7 +93,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     RefuserParCDDValidatorList,
     SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
     SoumettreCAValidatorList,
-    SpecifierConditionAccesParcoursAnterieurValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionCDDValidatorList,
 )
@@ -239,7 +238,6 @@ class Proposition(interface.RootEntity):
     complements_formation: Optional[List[ComplementFormationIdentity]] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     commentaire_complements_formation: str = ''
-    nombre_annees_prevoir_programme: Optional[int] = None
     nom_personne_contact_programme_annuel_annuel: str = ''
     email_personne_contact_programme_annuel_annuel: str = ''
     commentaire_programme_conjoint: str = ''
@@ -284,9 +282,7 @@ class Proposition(interface.RootEntity):
 
     def completer(
         self,
-        doctorat: DoctoratFormation,
         justification: Optional[str],
-        commission_proximite: Optional[str],
         type_financement: Optional[str],
         type_contrat_travail: Optional[str],
         eft: Optional[int],
@@ -326,10 +322,8 @@ class Proposition(interface.RootEntity):
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
             domaine_these=domaine_these,
-            doctorat=doctorat,
-            commission_proximite=commission_proximite,
         ).validate()
-        self._completer_proposition(justification, commission_proximite)
+        self.justification = justification or ''
         self._completer_financement(
             type=type_financement,
             type_contrat_travail=type_contrat_travail,
@@ -367,15 +361,7 @@ class Proposition(interface.RootEntity):
             raison_non_soutenue=raison_non_soutenue,
         )
 
-    def _completer_proposition(
-        self,
-        justification: Optional[str],
-        commission_proximite: Optional[str],
-    ):
-        self.justification = justification or ''
-        self._definir_commission(commission_proximite)
-
-    def _definir_commission(self, commission_proximite):
+    def _definir_commission(self, commission_proximite: Optional[str]):
         self.commission_proximite = None
         if commission_proximite and commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
@@ -774,7 +760,6 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         condition_acces: str,
         millesime_condition_acces: Optional[int],
-        avec_complements_formation: Optional[bool],
         titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
@@ -793,24 +778,9 @@ class Proposition(interface.RootEntity):
             if len(titres_selectionnes) == 1:
                 nouveau_millesime_condition_acces = titres_selectionnes[0].annee
 
-            # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
-            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
-                avec_complements_formation = True
-
-        SpecifierConditionAccesParcoursAnterieurValidatorList(
-            avec_complements_formation=avec_complements_formation,
-            complements_formation=self.complements_formation,
-            commentaire_complements_formation=self.commentaire_complements_formation,
-        ).validate()
-
         self.auteur_derniere_modification = auteur_modification
         self.condition_acces = nouvelle_condition_acces
         self.millesime_condition_acces = nouveau_millesime_condition_acces
-        self.avec_complements_formation = avec_complements_formation
-
-        if not avec_complements_formation:
-            self.complements_formation = []
-            self.commentaire_complements_formation = ''
 
     def specifier_equivalence_titre_acces(
         self,
@@ -914,7 +884,6 @@ class Proposition(interface.RootEntity):
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
-        nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
     ):
@@ -929,8 +898,6 @@ class Proposition(interface.RootEntity):
         )
         self.commentaire_complements_formation = commentaire_complements_formation
 
-        self.nombre_annees_prevoir_programme = nombre_annees_prevoir_programme
-
         self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
         self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
 
@@ -941,7 +908,6 @@ class Proposition(interface.RootEntity):
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
-        nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
         droits_inscription_montant: str,
@@ -971,7 +937,6 @@ class Proposition(interface.RootEntity):
             avec_complements_formation=avec_complements_formation,
             uuids_complements_formation=uuids_complements_formation,
             commentaire_complements_formation=commentaire_complements_formation,
-            nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
         )
@@ -997,7 +962,6 @@ class Proposition(interface.RootEntity):
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
-        nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
     ):
@@ -1010,7 +974,6 @@ class Proposition(interface.RootEntity):
             avec_complements_formation=avec_complements_formation,
             uuids_complements_formation=uuids_complements_formation,
             commentaire_complements_formation=commentaire_complements_formation,
-            nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
         )
@@ -1037,7 +1000,6 @@ class Proposition(interface.RootEntity):
                 statut=self.statut,
                 avec_complements_formation=self.avec_complements_formation,
                 complements_formation=self.complements_formation,
-                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
             ).validate()
@@ -1090,7 +1052,6 @@ class Proposition(interface.RootEntity):
     def approuver_par_cdd(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
         ApprouverParCDDValidatorList(
             statut=self.statut,
-            nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
             titres_selectionnes=titres_selectionnes,
         ).validate()
 
@@ -1118,7 +1079,6 @@ class Proposition(interface.RootEntity):
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
-        nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
         commentaire_programme_conjoint: str,
@@ -1136,8 +1096,6 @@ class Proposition(interface.RootEntity):
         )
         self.commentaire_complements_formation = commentaire_complements_formation
 
-        self.nombre_annees_prevoir_programme = nombre_annees_prevoir_programme
-
         self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
         self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
 
@@ -1148,11 +1106,13 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         type_demande: 'TypeDemande',
         formation_id: FormationIdentity,
+        commission_proximite: Optional[str],
     ):
         self.auteur_derniere_modification = auteur_modification
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
+        self._definir_commission(commission_proximite)
 
     def nettoyer_reponses_questions_specifiques(self, questions_specifiques: List[QuestionSpecifique]):
         self.reponses_questions_specifiques = ISuperQuestionSpecifiqueTranslator.clean_specific_question_answers(

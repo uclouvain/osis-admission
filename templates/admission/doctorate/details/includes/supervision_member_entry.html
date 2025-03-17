@@ -154,7 +154,18 @@
           <div class="">
             <div class="panel panel-default col-md-6">
               <div class="panel-body">
-                {% bootstrap_form edit_external_member_form %}
+                {% csrf_token %}
+                {% bootstrap_form_errors edit_external_member_form %}
+
+                {% bootstrap_field edit_external_member_form.prenom form_group_class="form-group required_field" %}
+                {% bootstrap_field edit_external_member_form.nom form_group_class="form-group required_field" %}
+                {% bootstrap_field edit_external_member_form.email form_group_class="form-group required_field" %}
+                {% bootstrap_field edit_external_member_form.est_docteur %}
+                {% bootstrap_field edit_external_member_form.institution form_group_class="form-group required_field" %}
+                {% bootstrap_field edit_external_member_form.ville form_group_class="form-group required_field" %}
+                {% bootstrap_field edit_external_member_form.pays form_group_class="form-group required_field" %}
+                {% bootstrap_field edit_external_member_form.langue form_group_class="form-group required_field" %}
+
                 <button type="submit" class="btn btn-primary pull-right" name="edit_external_member_form">
                   {% trans "Save" context 'admission'  %}
                 </button>
