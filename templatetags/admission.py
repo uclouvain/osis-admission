@@ -152,6 +152,7 @@ from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
+    MessageCurriculumDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
@@ -1318,7 +1319,7 @@ def checklist_experience_action_links_context(
         'duplicate_url': '',
     }
 
-    if experience.__class__ == ExperienceParcoursInterneDTO:
+    if isinstance(experience, (ExperienceParcoursInterneDTO, MessageCurriculumDTO)):
         return result_context
 
     elif (

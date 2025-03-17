@@ -6578,6 +6578,10 @@ msgstr ""
 msgid "This status is not available for the inscription type admissions."
 msgstr ""
 
+msgid ""
+"This student has a pathway prior to 2015 which can only be consulted in EPC."
+msgstr ""
+
 msgid "Tick boxes"
 msgstr ""
 

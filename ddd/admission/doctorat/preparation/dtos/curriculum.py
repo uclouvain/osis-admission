@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,15 @@ from functools import reduce
 import attr
 
 from admission.ddd import NB_MOIS_MIN_VAE
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import CurriculumDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    CurriculumDTO,
+    MessageCurriculumDTO,
+)
+
+message_candidat_avec_pae_avant_2015 = MessageCurriculumDTO(
+    annee=2015,
+    gabarit='admission/general_education/includes/checklist/curriculum_pae_avant_2015_message.html',
+)
 
 
 @attr.dataclass(frozen=True, slots=True)

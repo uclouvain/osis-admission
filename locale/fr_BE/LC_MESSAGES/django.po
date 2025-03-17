@@ -7341,6 +7341,11 @@ msgstr ""
 msgid "This status is not available for the inscription type admissions."
 msgstr "Cet état n’est pas accessible pour les demandes de type Inscription."
 
+msgid ""
+"This student has a pathway prior to 2015 which can only be consulted in EPC."
+msgstr ""
+"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable uniquement dans EPC."
+
 msgid "Tick boxes"
 msgstr "Cases à cocher"
 
