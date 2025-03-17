@@ -816,6 +816,9 @@ msgctxt "admission decision"
 msgid "Approved"
 msgstr "Approuvée"
 
+msgid "Approved by CDD at"
+msgstr "Approuvée par la CDD à"
+
 msgid "Approximate date for completing the thesis:"
 msgstr "Date approximative d'achèvement de la thèse :"
 
