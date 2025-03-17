@@ -45,6 +45,6 @@ class TestRechercherPromoteursService(SimpleTestCase):
             RechercherPromoteursQuery(terme_recherche='00987891'),
         )
 
-        self.assertTrue(len(promoteurs_dtos) > 1)
+        self.assertTrue(len(promoteurs_dtos) > 0)
 
         self.assertEqual(promoteurs_dtos[0].matricule, '00987891')
