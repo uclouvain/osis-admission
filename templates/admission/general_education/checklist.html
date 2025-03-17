@@ -692,7 +692,7 @@
               if (onFirstTabLoad) {
                   onFirstTabLoad = false;
                   if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                      // move info from the current tab to the info viewer 
+                      // move info from the current tab to the info viewer
                       $('#infos-shortcut').click();
                   } else {
                       // hide the info viewer
@@ -1431,6 +1431,15 @@
 
     .experience-authentication-message.collapse.in {
       height: auto;
+    }
+
+    {# Customize the comments to make them as disabled if necessary #}
+    .disabled-comment {
+      cursor: not-allowed;
+    }
+
+    .disabled-comment textarea {
+      background-color: #eee;
     }
   </style>
 {% endblock style %}

@@ -1400,9 +1400,6 @@ msgstr ""
 msgid "Comment about dispensation"
 msgstr ""
 
-msgid "Comment about financability dispensation"
-msgstr ""
-
 msgid "Comment about the authentication"
 msgstr ""
 
