@@ -3036,6 +3036,15 @@ msgstr ""
 msgid "Grounds for denied"
 msgstr ""
 
+msgid "Has Erasmus Mundus scholarship"
+msgstr ""
+
+msgid "Has dual degree scholarship"
+msgstr ""
+
+msgid "Has international scholarship"
+msgstr ""
+
 msgid "Has the PhD project already started?"
 msgstr ""
 
@@ -6206,6 +6215,11 @@ msgstr ""
 msgid ""
 "The global status of the application must be one of the following in order "
 "to submit the dossier to the faculty: %(statuses)s."
+msgstr ""
+
+msgid ""
+"The information about the scholarships must be specified in the 'Course "
+"choice' tab."
 msgstr ""
 
 #, python-format

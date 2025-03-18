@@ -74,6 +74,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    BoursesEtudesNonRenseignees,
     EquivalenceNonRenseigneeException,
     EtudesSecondairesNonCompleteesException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
@@ -265,6 +266,9 @@ class TestVerifierPropositionService(TestCase):
         self.capaes_proposition = self.proposition_in_memory.get(
             entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-CAPAES-ECO'),
         )
+        self.certificate_proposition = self.proposition_in_memory.get(
+            entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-CERTIFICATE-CONFIRMED')
+        )
 
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
 
@@ -329,6 +333,55 @@ class TestVerifierPropositionService(TestCase):
                 self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
             self.assertEqual(len(context.exception.exceptions), 1)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)
+
+    def test_should_retourner_erreur_si_bourses_non_remplies_pour_certificat(self):
+        with mock.patch.multiple(self.certificate_proposition, avec_bourse_double_diplome=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.certificate_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+    def test_should_retourner_erreur_si_bourses_non_remplies_pour_master(self):
+        with mock.patch.multiple(self.master_proposition, avec_bourse_double_diplome=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(self.master_proposition, avec_bourse_internationale=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(self.master_proposition, avec_bourse_erasmus_mundus=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(
+            self.master_proposition,
+            avec_bourse_double_diplome=None,
+            bourse_double_diplome_id=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(
+            self.master_proposition,
+            avec_bourse_internationale=None,
+            bourse_internationale_id=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(
+            self.master_proposition,
+            avec_bourse_erasmus_mundus=None,
+            bourse_erasmus_mundus_id=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
 
     def test_should_retourner_erreur_si_equivalence_non_fournie_aggregation(self):
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):

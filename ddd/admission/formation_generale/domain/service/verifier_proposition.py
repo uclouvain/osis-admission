@@ -110,6 +110,11 @@ class VerifierProposition(interface.DomainService):
                 formation,
             ),
             partial(
+                profil_candidat_service.verifier_choix_formation_generale,
+                proposition_candidat,
+                formation,
+            ),
+            partial(
                 profil_candidat_service.verifier_informations_complementaires_formation_generale,
                 proposition=proposition_candidat,
                 profil_candidat_translator=profil_candidat_translator,

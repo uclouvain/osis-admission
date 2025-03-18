@@ -479,6 +479,9 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'matricule_candidat': cls.candidate.global_id,
+            'avec_bourse_erasmus_mundus': True,
+            'avec_bourse_internationale': True,
+            'avec_bourse_double_diplome': True,
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'bourse_internationale': str(cls.international_scholarship.uuid),
             'bourse_double_diplome': str(cls.double_degree_scholarship.uuid),
@@ -501,6 +504,9 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
+        self.assertTrue(admission.has_international_scholarship)
+        self.assertTrue(admission.has_erasmus_mundus_scholarship)
+        self.assertTrue(admission.has_double_degree_scholarship)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
 
         history_entry: HistoryEntry = HistoryEntry.objects.filter(
@@ -634,6 +640,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'uuid_proposition': cls.admission.uuid,
+            'avec_bourse_erasmus_mundus': True,
+            'avec_bourse_internationale': True,
+            'avec_bourse_double_diplome': True,
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'bourse_internationale': str(cls.international_scholarship.uuid),
             'bourse_double_diplome': str(cls.double_degree_scholarship.uuid),
@@ -703,6 +712,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
+        self.assertTrue(admission.has_international_scholarship)
+        self.assertTrue(admission.has_erasmus_mundus_scholarship)
+        self.assertTrue(admission.has_double_degree_scholarship)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
