@@ -4718,11 +4718,6 @@ msgstr ""
 "Aucune erreur de validation ne doit être déclenchée avec les données "
 "spécifiées."
 
-msgid "No (access to sports facilities on the Saint-Louis campus is free)"
-msgstr ""
-"Non (l'accès aux infrastructures sportives sur le campus Saint-Louis est "
-"gratuit)"
-
 msgid "No English studies"
 msgstr "Aucune étude en anglais"
 
@@ -7921,6 +7916,9 @@ msgstr "Oui, sur Mons uniquement (12 EUR)"
 
 msgid "Yes, only in Saint-Gilles (E12)"
 msgstr "Oui, sur Saint-Gilles uniquement (12 EUR)"
+
+msgid "Yes, only in Saint-Louis (free)"
+msgstr "Oui, sur Saint-Louis uniquement (gratuit)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Oui, sur Tournai uniquement (12 EUR)"
