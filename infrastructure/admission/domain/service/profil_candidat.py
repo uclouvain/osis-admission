@@ -106,9 +106,10 @@ from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,
-    ProfessionalExperience,
+    ProfessionalExperience, Exam,
 )
 from osis_profile.models.education import LanguageKnowledge
+from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
@@ -271,7 +272,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     ):
         belgian_high_school_diploma = getattr(candidate, 'belgianhighschooldiploma', None)
         foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
-        high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
+        if candidate.exam_high_school_diploma_alternative:
+            high_school_diploma_alternative = candidate.exam_high_school_diploma_alternative[0]
+        else:
+            high_school_diploma_alternative = None
 
         potential_diploma = belgian_high_school_diploma or foreign_high_school_diploma
         return EtudesSecondairesAdmissionDTO(
@@ -637,10 +641,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         candidate: Person = (
             Person.objects.select_related(
                 'graduated_from_high_school_year',
-                'highschooldiplomaalternative',
                 'belgianhighschooldiploma__institute',
                 'foreignhighschooldiploma__country',
                 'foreignhighschooldiploma__linguistic_regime',
+            )
+            .prefetch_related(
+                Prefetch('exams', queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name), to_attr='exam_high_school_diploma_alternative'),
             )
             .annotate(
                 secondaire_injecte_par_admission=Exists(
@@ -957,10 +963,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 'birth_country',
                 'last_registration_year',
                 'graduated_from_high_school_year',
-                'highschooldiplomaalternative',
                 'belgianhighschooldiploma__institute',
                 'foreignhighschooldiploma__country',
                 'foreignhighschooldiploma__linguistic_regime',
+            )
+            .prefetch_related(
+                Prefetch('exams', queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name), to_attr='exam_high_school_diploma_alternative'),
             )
             .annotate(
                 secondaire_injecte_par_admission=Exists(

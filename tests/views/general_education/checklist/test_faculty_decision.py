@@ -99,7 +99,6 @@ from osis_profile.models import (
     ProfessionalExperience,
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
 )
 
 
@@ -845,7 +844,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         # > High school diploma alternative
         BelgianHighSchoolDiploma.objects.filter(person=candidate).delete()
         ForeignHighSchoolDiploma.objects.filter(person=candidate).delete()
-        HighSchoolDiplomaAlternative.objects.filter(person=candidate).delete()
+        Exam.objects.filter(person=candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
         diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=candidate)
 
         candidate.graduated_from_high_school = GotDiploma.NO.name

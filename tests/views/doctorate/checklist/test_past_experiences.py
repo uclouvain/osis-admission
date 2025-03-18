@@ -104,10 +104,10 @@ from epc.tests.factories.inscription_programme_cycle import (
 )
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
+    ForeignHighSchoolDiploma, Exam,
 )
 from osis_profile.models.enums.education import ForeignDiplomaTypes
+from osis_profile.models.enums.exam import ExamTypes
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
@@ -970,7 +970,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         # Select a known and valuated experience (with fwb equivalent program)
         BelgianHighSchoolDiploma.objects.filter(person=self.candidate).delete()
         ForeignHighSchoolDiploma.objects.filter(person=self.candidate).delete()
-        HighSchoolDiplomaAlternative.objects.filter(person=self.candidate).delete()
+        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
 
         valuated_experience.educationalexperience.fwb_equivalent_program = self.second_diploma
         valuated_experience.educationalexperience.save()
@@ -1184,7 +1184,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertTrue(self.admission.are_secondary_studies_access_title)
 
         # The candidate specified that he has secondary education but without more information
-        self.candidate.highschooldiplomaalternative.delete()
+        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
 
         self.admission.are_secondary_studies_access_title = False
         self.admission.save()

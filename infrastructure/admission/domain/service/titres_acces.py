@@ -36,11 +36,11 @@ from osis_profile.models import (
     BelgianHighSchoolDiploma,
     EducationalExperience,
     ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
     ProfessionalExperience,
-    EducationalExperienceYear,
+    EducationalExperienceYear, Exam,
 )
 from osis_profile.models.enums.curriculum import Result
+from osis_profile.models.enums.exam import ExamTypes
 from reference.models.enums.cycle import Cycle
 
 
@@ -57,7 +57,7 @@ class TitresAcces(ITitresAcces):
                     ForeignHighSchoolDiploma.objects.filter(person_id=models.OuterRef('pk'))
                 ),
                 diplome_alternatif=models.Exists(
-                    HighSchoolDiplomaAlternative.objects.filter(person_id=models.OuterRef('pk'))
+                    Exam.objects.filter(person_id=models.OuterRef('pk'), type=ExamTypes.PREMIER_CYCLE.name)
                 ),
             )
             .annotate(

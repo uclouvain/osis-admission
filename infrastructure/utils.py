@@ -53,6 +53,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
 from base.models.enums.entity_type import PEDAGOGICAL_ENTITY_TYPES
 from osis_profile.models import EducationalExperienceYear
+from osis_profile.models.enums.exam import ExamTypes
 
 FORMATTED_EMAIL_FOR_HISTORY = """{sender_label} : {sender}
 {recipient_label} : {recipient}
@@ -343,7 +344,7 @@ def get_document_from_identifier(
                 obj = getattr(admission.candidate, 'foreignhighschooldiploma', None)
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ETRANGERES[domain_identifier]
             elif domain_identifier in CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES:
-                obj = getattr(admission.candidate, 'highschooldiplomaalternative', None)
+                obj = admission.candidate.exams.filter(type=ExamTypes.PREMIER_CYCLE.name).first()
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES[domain_identifier]
 
         elif base_identifier == OngletsDemande.LANGUES.name:

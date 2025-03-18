@@ -565,11 +565,10 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
 
         self.assertIsNone(document)
 
-        HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
 
         # first cycle admission exam
         file_uuid = uuid.uuid4()
-        self.general_admission.candidate.highschooldiplomaalternative.first_cycle_admission_exam = [file_uuid]
+        exam = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate, certificate=[file_uuid])
         self.general_admission.candidate.foreignhighschooldiploma.save()
 
         document = get_document_from_identifier(
@@ -578,7 +577,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         )
 
         self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission.candidate.highschooldiplomaalternative)
+        self.assertEqual(document.obj, exam)
         self.assertEqual(document.field, 'first_cycle_admission_exam')
         self.assertEqual(document.uuids, [file_uuid])
 
