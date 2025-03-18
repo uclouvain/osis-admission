@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@
     </div>
   {% endpanel %}
 
-  {% if view.is_general and admission.formation.type|admission_training_type == 'MASTER' %}
+  {% if view.is_general and admission.formation.est_formation_avec_bourse %}
     {% translate 'Specific profile' context 'admission' as specific_profile_title %}
     {% panel specific_profile_title id="student-profile" %}
       <div class="required_field">
@@ -179,7 +179,7 @@
               duration: 0,
           };
 
-          {% if view.is_general and admission.formation.type|admission_training_type == 'MASTER' %}
+          {% if view.is_general and admission.formation.est_formation_avec_bourse %}
               {# Display scholarship search fields when it's required #}
               $('#double-degree-scholarship-field').dependsOn({
                   'input[name="has_double_degree_scholarship"]': {

@@ -59,8 +59,11 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
         self.cmd = ModifierChoixFormationCommand(
             sigle_formation='MASTER-SCI',
             annee_formation=2022,
+            avec_bourse_erasmus_mundus=True,
             bourse_erasmus_mundus=BourseInMemoryTranslator.bourse_em_1.entity_id.uuid,
+            avec_bourse_internationale=True,
             bourse_internationale=BourseInMemoryTranslator.bourse_ifg_2.entity_id.uuid,
+            avec_bourse_double_diplome=True,
             bourse_double_diplome=BourseInMemoryTranslator.bourse_dd_2.entity_id.uuid,
             uuid_proposition='uuid-BACHELIER-ECO1',
         )
@@ -72,8 +75,11 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.EN_BROUILLON)
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
+        self.assertEqual(proposition.avec_bourse_erasmus_mundus, self.cmd.avec_bourse_erasmus_mundus)
         self.assertEqual(proposition.bourse_erasmus_mundus_id.uuid, self.cmd.bourse_erasmus_mundus)
+        self.assertEqual(proposition.avec_bourse_internationale, self.cmd.avec_bourse_internationale)
         self.assertEqual(proposition.bourse_internationale_id.uuid, self.cmd.bourse_internationale)
+        self.assertEqual(proposition.avec_bourse_double_diplome, self.cmd.avec_bourse_double_diplome)
         self.assertEqual(proposition.bourse_double_diplome_id.uuid, self.cmd.bourse_double_diplome)
 
     def test_should_empecher_si_proposition_non_trouvee(self):

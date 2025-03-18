@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,8 +29,12 @@ from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.domain.enums import TYPES_FORMATION_GENERALE
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.service.i_formation import (
+    IFormationGeneraleTranslator,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    FormationNonTrouveeException,
+)
 from admission.ddd.admission.test.factory.formation import FormationFactory
 from base.models.enums.education_group_types import TrainingType
 
@@ -205,6 +209,13 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='ABCD2MC',
             entity_id__annee=2024,
             type=TrainingType.MASTER_M1,
+            campus__nom='Louvain-la-Neuve',
+        ),
+        FormationFactory(
+            intitule='Bachelier en sciences',
+            entity_id__sigle='ABCD1BA',
+            entity_id__annee=2024,
+            type=TrainingType.BACHELOR,
             campus__nom='Louvain-la-Neuve',
         ),
     ]

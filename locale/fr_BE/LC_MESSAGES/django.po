@@ -2393,7 +2393,7 @@ msgid "Dossier submission date"
 msgstr "Date de soumission du dossier"
 
 msgid "Double degree:"
-msgstr "Bourse double diplomation:"
+msgstr "Bourse double diplomation :"
 
 msgid "Download as PDF"
 msgstr "Télécharger en tant que PDF"
@@ -3332,6 +3332,15 @@ msgstr "Salutations en fonction du genre du candidat"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
+
+msgid "Has Erasmus Mundus scholarship"
+msgstr "A une bourse Erasmus Mundus"
+
+msgid "Has dual degree scholarship"
+msgstr "A une bourse double diplomation"
+
+msgid "Has international scholarship"
+msgstr "A une bourse internationale"
 
 msgid "Has the PhD project already started?"
 msgstr "Le projet doctoral a-t-il déjà commencé ?"
@@ -6884,6 +6893,13 @@ msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "envoyer le dossier en faculté : %(statuses)s."
 
+msgid ""
+"The information about the scholarships must be specified in the 'Course "
+"choice' tab."
+msgstr ""
+"Les informations concernant les bourses doivent être spécifiées dans "
+"l'onglet 'Choix de formation'."
+
 #, python-format
 msgid ""
 "The inscription type admission was authorised the %(date)s by %(author)s."
@@ -7339,7 +7355,8 @@ msgstr "Cet état n’est pas accessible pour les demandes de type Inscription."
 msgid ""
 "This student has a pathway prior to 2015 which can only be consulted in EPC."
 msgstr ""
-"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable uniquement dans EPC."
+"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable "
+"uniquement dans EPC."
 
 msgid "Tick boxes"
 msgstr "Cases à cocher"

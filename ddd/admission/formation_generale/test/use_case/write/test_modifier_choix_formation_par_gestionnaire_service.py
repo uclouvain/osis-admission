@@ -58,8 +58,11 @@ class TestModifierChoixFormationParGestionnaireService(SimpleTestCase):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = ModifierChoixFormationParGestionnaireCommand(
             gestionnaire='0123456789',
+            avec_bourse_erasmus_mundus=True,
             bourse_erasmus_mundus=BourseInMemoryTranslator.bourse_em_1.entity_id.uuid,
+            avec_bourse_internationale=True,
             bourse_internationale=BourseInMemoryTranslator.bourse_ifg_2.entity_id.uuid,
+            avec_bourse_double_diplome=True,
             bourse_double_diplome=BourseInMemoryTranslator.bourse_dd_2.entity_id.uuid,
             reponses_questions_specifiques={'35db2d60-9874-41fc-9f5a-ebfea38277d0': 'valeur'},
             uuid_proposition='uuid-BACHELIER-ECO1',
@@ -75,8 +78,11 @@ class TestModifierChoixFormationParGestionnaireService(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.EN_BROUILLON)
+        self.assertEqual(proposition.avec_bourse_erasmus_mundus, self.cmd.avec_bourse_erasmus_mundus)
         self.assertEqual(proposition.bourse_erasmus_mundus_id.uuid, self.cmd.bourse_erasmus_mundus)
+        self.assertEqual(proposition.avec_bourse_internationale, self.cmd.avec_bourse_internationale)
         self.assertEqual(proposition.bourse_internationale_id.uuid, self.cmd.bourse_internationale)
+        self.assertEqual(proposition.avec_bourse_double_diplome, self.cmd.avec_bourse_double_diplome)
         self.assertEqual(proposition.bourse_double_diplome_id.uuid, self.cmd.bourse_double_diplome)
         self.assertEqual(proposition.reponses_questions_specifiques, self.cmd.reponses_questions_specifiques)
 

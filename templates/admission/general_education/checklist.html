@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@
               {% field_data course_label resume_proposition.proposition.formation %}
             {% endif %}
 
-            {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
+            {% if resume_proposition.proposition.formation.est_formation_avec_bourse and resume_proposition.proposition.candidat_vip %}
               {% include 'admission/general_education/includes/checklist/vip_profile.html' with url=contextual_training_choice %}
             {% endif %}
 
@@ -292,7 +292,7 @@
               {% field_data _("External reorientation/modification") _("Modification asked by the candidate") %}
             {% endif %}
 
-            {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
+            {% if resume_proposition.proposition.formation.est_formation_avec_bourse and resume_proposition.proposition.candidat_vip %}
               {% include 'admission/general_education/includes/checklist/vip_profile.html' with url=training_choice_url|add:next_url %}
             {% endif %}
           </div>
@@ -411,7 +411,7 @@
           {% bootstrap_field comment_forms.decision_facultaire__SIC.comment %}
 
           <div class="info-part">
-            {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
+            {% if resume_proposition.proposition.formation.est_formation_avec_bourse and resume_proposition.proposition.candidat_vip %}
               {% include 'admission/general_education/includes/checklist/vip_profile.html' with url=training_choice_url|add:next_url %}
             {% else %}
               {% firstof training_choice_url|add:next_url as contextual_training_choice_url %}

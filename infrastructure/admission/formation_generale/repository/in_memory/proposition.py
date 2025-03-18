@@ -193,6 +193,9 @@ class PropositionInMemoryRepository(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-ECO1'),
                 matricule_candidat='0000000001',
                 formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
+                avec_bourse_double_diplome=None,
+                avec_bourse_internationale=None,
+                avec_bourse_erasmus_mundus=None,
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-VET'),
@@ -299,16 +302,19 @@ class PropositionInMemoryRepository(
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
             date_fin_pot=None,
             soumise_le=None,
+            avec_bourse_double_diplome=bool(proposition.avec_bourse_double_diplome),
             bourse_double_diplome=(
                 BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
                 if proposition.bourse_double_diplome_id
                 else None
             ),
+            avec_bourse_erasmus_mundus=bool(proposition.avec_bourse_erasmus_mundus),
             bourse_erasmus_mundus=(
                 BourseInMemoryTranslator.get_dto(proposition.bourse_erasmus_mundus_id.uuid)
                 if proposition.bourse_erasmus_mundus_id
                 else None
             ),
+            avec_bourse_internationale=bool(proposition.avec_bourse_internationale),
             bourse_internationale=(
                 BourseInMemoryTranslator.get_dto(proposition.bourse_internationale_id.uuid)
                 if proposition.bourse_internationale_id

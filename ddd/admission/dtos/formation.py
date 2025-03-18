@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,10 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
+from admission.ddd.admission.domain.model.formation import (
+    FORMATIONS_AVEC_BOURSES,
+    est_formation_medecine_ou_dentisterie,
+)
 from admission.ddd.admission.dtos.campus import CampusDTO
 from osis_common.ddd import interface
 
@@ -59,6 +62,10 @@ class FormationDTO(interface.DTO):
     @property
     def est_formation_medecine_ou_dentisterie(self) -> bool:
         return est_formation_medecine_ou_dentisterie(self.code_domaine)
+
+    @property
+    def est_formation_avec_bourse(self) -> bool:
+        return self.type in FORMATIONS_AVEC_BOURSES
 
 
 @attr.dataclass(frozen=True, slots=True)
