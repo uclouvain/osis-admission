@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -66,6 +66,7 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
             cls.INSCRIPTION_REFUSEE: 1,
             cls.CLOTUREE: 1,
         }
+
 
 STATUTS_PROPOSITION_GENERALE_NON_SOUMISE = {
     ChoixStatutPropositionGenerale.EN_BROUILLON.name,
@@ -235,7 +236,10 @@ class MobiliteNombreDeMois(ChoiceEnum):
 class TypeDeRefus(ChoiceEnum):
     REFUS_EQUIVALENCE = _("REFUS_EQUIVALENCE")
     REFUS_BAC_HUE_ACADEMIQUE = _("REFUS_BAC_HUE_ACADEMIQUE")
-    REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS = _("REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS")
+    REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER = _("REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER")
+    REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER_SPECIALISATION = _(
+        "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER_SPECIALISATION"
+    )
     REFUS_ARTICLE_95_JURY = _("REFUS_ARTICLE_95_JURY")
     REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE = _("REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE")
     REFUS_AGREGATION = _("REFUS_AGREGATION")
