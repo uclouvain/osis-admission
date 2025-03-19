@@ -24,17 +24,20 @@
 #
 # ##############################################################################
 
+from django.utils.translation import gettext_lazy as _
 from rest_framework import mixins
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.views.mixins import (
     GeneralEducationPersonRelatedMixin,
 )
+from osis_profile.models import EducationGroupYearExam
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class BaseSecondaryStudiesViewSet(
+class BaseExamViewSet(
     APIPermissionRequiredMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -43,6 +46,12 @@ class BaseSecondaryStudiesViewSet(
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.ExamSerializer
+
+    def check_permissions(self, request):
+        admission = self.get_permission_object()
+        if not EducationGroupYearExam.objects.filter(education_group_year=admission.training).exists():
+            raise PermissionDenied(_("There is no exam for this training."))
+        return super().check_permissions(request)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -55,7 +64,7 @@ class BaseSecondaryStudiesViewSet(
         return response
 
 
-class GeneralExamView(GeneralEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
+class GeneralExamView(GeneralEducationPersonRelatedMixin, BaseExamViewSet):
     name = "general_exam"
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission_exam',
