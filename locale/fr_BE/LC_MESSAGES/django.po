@@ -5602,8 +5602,11 @@ msgstr "Refus 95 générique - irrecevabilité"
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr "Refus article 95 Jury"
 
-msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
-msgstr "Refus 95 SIC - conditions publiées"
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER"
+msgstr "Refus 95 SIC - conditions publiées master"
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER_SPECIALISATION"
+msgstr "Refus 95 SIC - conditions publiées master de spécialisation"
 
 msgid "REFUS_ARTICLE_96_HUE_NON_PROGRESSION"
 msgstr "96 HUE – non progression (art. 3)"
