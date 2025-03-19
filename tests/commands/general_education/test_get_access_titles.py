@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,28 +31,32 @@ from uuid import UUID
 import freezegun
 from django.test import TestCase
 
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
+)
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererTitresAccesSelectionnablesPropositionQuery,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.models import GeneralEducationAdmission
 from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.ddd.admission.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.commands import RecupererTitresAccesSelectionnablesPropositionQuery
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
@@ -65,10 +69,16 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.student import StudentFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.statut_inscription_programme_annuel import (
+    StatutInscriptionProgrammAnnuel,
+)
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from epc.tests.factories.inscription_programme_cycle import (
+    InscriptionProgrammeCycleFactory,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result
@@ -78,6 +88,7 @@ from osis_profile.models.enums.curriculum import Result
 class GetAccessTitlesViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+        cls.previous_academic_years = [AcademicYearFactory(year=year) for year in [2019, 2020]]
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
         cls.training = GeneralEducationTrainingFactory(
@@ -280,8 +291,8 @@ class GetAccessTitlesViewTestCase(TestCase):
 
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_get_access_title_with_high_school_diploma(self, confirm_multiple_upload):
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         )
 
         access_titles: Dict[str, TitreAccesSelectionnableDTO]
@@ -471,6 +482,7 @@ class GetAccessTitlesViewTestCase(TestCase):
 
         student = StudentFactory(person=general_admission.candidate)
 
+        # Will be selected as the diploma has been obtained
         pce_a = InscriptionProgrammeCycleFactory(
             etudiant=student,
             decision=DecisionResultatCycle.DISTINCTION.name,
@@ -492,6 +504,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             type_duree=TypeDuree.NORMAL.name,
         )
 
+        # Will be selected as the diploma will be obtained
         pce_b = InscriptionProgrammeCycleFactory(
             etudiant=student,
             decision=DecisionResultatCycle.DIPLOMABLE.name,
@@ -506,11 +519,14 @@ class GetAccessTitlesViewTestCase(TestCase):
             type_duree=TypeDuree.NORMAL.name,
         )
 
+        # Will not be selected as the diploma is not obtained and the last year is not the same or the previous year
+        # of the enrolment
         pce_c = InscriptionProgrammeCycleFactory(
             etudiant=student,
             decision='',
             sigle_formation="SF3",
         )
+        pce_c_uuid = str(UUID(int=pce_c.pk))
         pce_c_pae_a = InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_c,
             statut='',
@@ -526,6 +542,52 @@ class GetAccessTitlesViewTestCase(TestCase):
             type_duree=TypeDuree.NORMAL.name,
         )
 
+        # Will be selected as the last year is the same year of the enrolment
+        pce_d = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision='',
+            sigle_formation="SF4",
+        )
+        pce_d_uuid = str(UUID(int=pce_d.pk))
+        pce_d_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_d,
+            statut='',
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__root_group__academic_year=self.academic_years[0],
+            type_duree=TypeDuree.NORMAL.name,
+        )
+
+        # Will be selected as the last year is the previous year of the enrolment
+        pce_e = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision='',
+            sigle_formation="SF5",
+        )
+        pce_e_uuid = str(UUID(int=pce_e.pk))
+        pce_e_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_e,
+            statut='',
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__root_group__academic_year=self.previous_academic_years[1],
+            type_duree=TypeDuree.NORMAL.name,
+        )
+
+        # Will not be selected as the diploma is not obtained and the last year is not the same or the previous year
+        # of the enrolment
+        pce_f = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision='',
+            sigle_formation="SF6",
+        )
+        pce_f_uuid = str(UUID(int=pce_f.pk))
+        pce_f_pae_a = InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_f,
+            statut='',
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__root_group__academic_year=self.previous_academic_years[0],
+            type_duree=TypeDuree.NORMAL.name,
+        )
+
         # We retrieve the experience with diploma (or leading to one)
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
@@ -533,10 +595,12 @@ class GetAccessTitlesViewTestCase(TestCase):
             )
         )
 
-        self.assertEqual(len(access_titles), 2)
+        self.assertEqual(len(access_titles), 4)
 
         self.assertIn(pce_a_uuid, access_titles)
         self.assertIn(pce_b_uuid, access_titles)
+        self.assertIn(pce_d_uuid, access_titles)
+        self.assertIn(pce_e_uuid, access_titles)
 
         self.assertEqual(access_titles[pce_b_uuid].uuid_experience, pce_b_uuid)
         self.assertEqual(
@@ -565,10 +629,12 @@ class GetAccessTitlesViewTestCase(TestCase):
             )
         )
 
-        self.assertEqual(len(access_titles), 2)
+        self.assertEqual(len(access_titles), 4)
 
         self.assertIn(pce_a_uuid, access_titles)
         self.assertIn(pce_b_uuid, access_titles)
+        self.assertIn(pce_d_uuid, access_titles)
+        self.assertIn(pce_e_uuid, access_titles)
 
         self.assertEqual(access_titles[pce_b_uuid].uuid_experience, pce_b_uuid)
         self.assertEqual(access_titles[pce_b_uuid].selectionne, False)
