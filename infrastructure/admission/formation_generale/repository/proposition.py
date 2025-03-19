@@ -267,10 +267,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'reference': entity.reference,
                 'type_demande': entity.type_demande.name,
                 'submitted_at': entity.soumise_le,
+                'has_double_degree_scholarship': entity.avec_bourse_double_diplome,
                 'double_degree_scholarship': scholarships.get(ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION.name),
+                'has_international_scholarship': entity.avec_bourse_internationale,
                 'international_scholarship': scholarships.get(
                     ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name
                 ),
+                'has_erasmus_mundus_scholarship': entity.avec_bourse_erasmus_mundus,
                 'erasmus_mundus_scholarship': scholarships.get(ScholarshipType.ERASMUS_MUNDUS.name),
                 'is_belgian_bachelor': entity.est_bachelier_belge,
                 'is_external_reorientation': entity.est_reorientation_inscription_externe,
@@ -510,16 +513,19 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
             statut=ChoixStatutPropositionGenerale[admission.status],
+            avec_bourse_internationale=admission.has_international_scholarship,
             bourse_internationale_id=(
                 BourseIdentity(uuid=str(admission.international_scholarship.uuid))
                 if admission.international_scholarship
                 else None
             ),
+            avec_bourse_double_diplome=admission.has_double_degree_scholarship,
             bourse_double_diplome_id=(
                 BourseIdentity(uuid=str(admission.double_degree_scholarship.uuid))
                 if admission.double_degree_scholarship
                 else None
             ),
+            avec_bourse_erasmus_mundus=admission.has_erasmus_mundus_scholarship,
             bourse_erasmus_mundus_id=(
                 BourseIdentity(uuid=str(admission.erasmus_mundus_scholarship.uuid))
                 if admission.erasmus_mundus_scholarship
@@ -759,16 +765,19 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
+            avec_bourse_double_diplome=admission.has_double_degree_scholarship,
             bourse_double_diplome=(
                 BourseTranslator.build_dto(admission.double_degree_scholarship)
                 if admission.double_degree_scholarship
                 else None
             ),
+            avec_bourse_internationale=admission.has_international_scholarship,
             bourse_internationale=(
                 BourseTranslator.build_dto(admission.international_scholarship)
                 if admission.international_scholarship
                 else None
             ),
+            avec_bourse_erasmus_mundus=admission.has_erasmus_mundus_scholarship,
             bourse_erasmus_mundus=(
                 BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
                 if admission.erasmus_mundus_scholarship

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,19 +38,24 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 )
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces, Titres
 from admission.ddd.admission.domain.validator.exceptions import (
+    AucunPoolCorrespondantException,
     FormationNonTrouveeException,
     ModificationInscriptionExterneNonConfirmeeException,
     PoolNonResidentContingenteNonOuvertException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
-    AucunPoolCorrespondantException,
 )
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.test.factory.proposition import (
     PropositionFactory as PropositionContinueFactory,
 )
-from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
-from admission.ddd.admission.test.factory.formation import FormationFactory, FormationIdentityFactory
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    PropositionFactory,
+)
+from admission.ddd.admission.test.factory.formation import (
+    FormationFactory,
+    FormationIdentityFactory,
+)
 from admission.ddd.admission.test.factory.profil import ProfilCandidatFactory
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
@@ -529,7 +534,14 @@ class CalendrierInscriptionTestCase(TestCase):
 
     @freezegun.freeze_time('01/03/2022')
     def test_ue5_belge_pour_certificat(self):
-        proposition = PropositionFactory()
+        proposition = PropositionFactory(
+            avec_bourse_double_diplome=False,
+            avec_bourse_internationale=False,
+            avec_bourse_erasmus_mundus=False,
+            bourse_double_diplome_id=None,
+            bourse_internationale_id=None,
+            bourse_erasmus_mundus_id=None,
+        )
         profil = ProfilCandidatFactory(
             matricule=proposition.matricule_candidat,
             identification__pays_nationalite="FR",
@@ -545,6 +557,28 @@ class CalendrierInscriptionTestCase(TestCase):
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN)
+
+        proposition = PropositionFactory(
+            avec_bourse_internationale=False,
+            avec_bourse_erasmus_mundus=False,
+            bourse_internationale_id=None,
+            bourse_erasmus_mundus_id=None,
+        )
+        profil = ProfilCandidatFactory(
+            matricule=proposition.matricule_candidat,
+            identification__pays_nationalite="FR",
+        )
+        self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+            formation_id=FormationFactory(type=TrainingType.CERTIFICATE).entity_id,
+            proposition=proposition,
+            matricule_candidat=proposition.matricule_candidat,
+            titres_acces=Titres(AdmissionConditionsDTOFactory()),
+            type_formation=TrainingType.CERTIFICATE,
+            profil_candidat_translator=self.profil_candidat_translator,
+        )
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_VIP)
 
     @freezegun.freeze_time('22/10/2022')
     def test_ue5_non_belge(self):

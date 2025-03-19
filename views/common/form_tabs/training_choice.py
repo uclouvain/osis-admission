@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationDoctoraleParGestionnaireCommand,
 )
@@ -38,9 +38,9 @@ from admission.ddd.admission.formation_generale.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationGeneraleParGestionnaireCommand,
 )
 from admission.forms.admission.training_choice import (
-    GeneralTrainingChoiceForm,
     ContinuingTrainingChoiceForm,
     DoctorateTrainingChoiceForm,
+    GeneralTrainingChoiceForm,
 )
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -74,8 +74,11 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
                 ModifierChoixFormationGeneraleParGestionnaireCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
+                    avec_bourse_double_diplome=form.cleaned_data['has_double_degree_scholarship'],
                     bourse_double_diplome=form.cleaned_data['double_degree_scholarship'],
+                    avec_bourse_internationale=form.cleaned_data['has_international_scholarship'],
                     bourse_internationale=form.cleaned_data['international_scholarship'],
+                    avec_bourse_erasmus_mundus=form.cleaned_data['has_erasmus_mundus_scholarship'],
                     bourse_erasmus_mundus=form.cleaned_data['erasmus_mundus_scholarship'],
                     reponses_questions_specifiques=form.cleaned_data['specific_question_answers'],
                 )

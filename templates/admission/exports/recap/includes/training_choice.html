@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -40,17 +40,23 @@
   {% endif %}
 {% endpanel %}
 
-{% if formation.type|admission_training_type == 'MASTER' %}
+{% if formation.est_formation_avec_bourse %}
   {% panel _('Specific profile') %}
-    {% with proposition.bourse_double_diplome.nom_court|default:_('No') as short_name %}
-      {% field_data _('Dual degree scholarship') proposition.bourse_double_diplome.nom_long|default:short_name %}
-    {% endwith %}
-    {% with proposition.bourse_internationale.nom_court|default:_('No') as short_name %}
-      {% field_data _('International scholarship') proposition.bourse_internationale.nom_long|default:short_name %}
-    {% endwith %}
-    {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
-      {% field_data _('Erasmus Mundus') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
-    {% endwith %}
+    {% if proposition.avec_bourse_double_diplome %}
+      {% field_data _('Dual degree scholarship') proposition.bourse_double_diplome %}
+    {% else %}
+      {% field_data _('Dual degree scholarship') proposition.avec_bourse_double_diplome %}
+    {% endif %}
+    {% if proposition.avec_bourse_internationale %}
+      {% field_data _('International scholarship') proposition.bourse_internationale %}
+    {% else %}
+      {% field_data _('International scholarship') proposition.avec_bourse_internationale %}
+    {% endif %}
+    {% if proposition.avec_bourse_erasmus_mundus %}
+      {% field_data _('Erasmus Mundus') proposition.bourse_erasmus_mundus %}
+    {% else %}
+      {% field_data _('Erasmus Mundus') proposition.avec_bourse_erasmus_mundus %}
+    {% endif %}
   {% endpanel %}
 {% endif %}
 

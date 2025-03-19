@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,81 +33,95 @@ from django.test import TestCase
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    ReductionDesDroitsInscriptionNonCompleteeException,
     AbsenceDeDetteNonCompleteeException,
-    AssimilationNonCompleteeException,
-    CarteBancaireRemboursementIbanNonCompleteException,
-    CarteBancaireRemboursementAutreFormatNonCompleteException,
     AffiliationsNonCompleteesException,
+    AssimilationNonCompleteeException,
+    CarteBancaireRemboursementAutreFormatNonCompleteException,
+    CarteBancaireRemboursementIbanNonCompleteException,
     ExperiencesAcademiquesNonCompleteesException,
+    ReductionDesDroitsInscriptionNonCompleteeException,
     TypeCompteBancaireRemboursementNonCompleteException,
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
+    NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
-    NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
 from admission.ddd.admission.enums import (
-    TypeSituationAssimilation,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
-    LienParente,
     ChoixAssimilation5,
     ChoixAssimilation6,
     ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    BoursesEtudesNonRenseignees,
     EquivalenceNonRenseigneeException,
-    FichierCurriculumNonRenseigneException,
     EtudesSecondairesNonCompleteesException,
-    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
+    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
+    FichierCurriculumNonRenseigneException,
     InformationsVisaNonCompleteesException,
 )
-from admission.ddd.admission.formation_generale.test.factory.proposition import _ComptabiliteFactory
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    _ComptabiliteFactory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
-    ProfilCandidatInMemoryTranslator,
     ExperienceNonAcademique,
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
+    EvaluationSystem,
+    Grade,
     Result,
     TranscriptType,
-    Grade,
-    EvaluationSystem,
-    ActivityType,
-    ActivitySector,
 )
-from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
+from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 
 
 class TestVerifierPropositionService(TestCase):
@@ -247,6 +261,9 @@ class TestVerifierPropositionService(TestCase):
         self.capaes_proposition = self.proposition_in_memory.get(
             entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-CAPAES-ECO'),
         )
+        self.certificate_proposition = self.proposition_in_memory.get(
+            entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-CERTIFICATE-CONFIRMED')
+        )
 
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
 
@@ -311,6 +328,55 @@ class TestVerifierPropositionService(TestCase):
                 self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
             self.assertEqual(len(context.exception.exceptions), 1)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)
+
+    def test_should_retourner_erreur_si_bourses_non_remplies_pour_certificat(self):
+        with mock.patch.multiple(self.certificate_proposition, avec_bourse_double_diplome=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.certificate_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+    def test_should_retourner_erreur_si_bourses_non_remplies_pour_master(self):
+        with mock.patch.multiple(self.master_proposition, avec_bourse_double_diplome=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(self.master_proposition, avec_bourse_internationale=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(self.master_proposition, avec_bourse_erasmus_mundus=None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(
+            self.master_proposition,
+            avec_bourse_double_diplome=None,
+            bourse_double_diplome_id=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(
+            self.master_proposition,
+            avec_bourse_internationale=None,
+            bourse_internationale_id=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
+
+        with mock.patch.multiple(
+            self.master_proposition,
+            avec_bourse_erasmus_mundus=None,
+            bourse_erasmus_mundus_id=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
 
     def test_should_retourner_erreur_si_equivalence_non_fournie_aggregation(self):
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):

@@ -70,10 +70,13 @@ class TestInitierPropositionService(SimpleTestCase):
             sigle_formation='MASTER-SCI',
             annee_formation=2020,
             matricule_candidat='01234567',
+            avec_bourse_erasmus_mundus=True,
             bourse_erasmus_mundus=self._get_une_bourse_par_type(ScholarshipType.ERASMUS_MUNDUS),
+            avec_bourse_internationale=True,
             bourse_internationale=self._get_une_bourse_par_type(
                 ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE
             ),
+            avec_bourse_double_diplome=True,
             bourse_double_diplome=self._get_une_bourse_par_type(ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION),
         )
 
@@ -85,8 +88,11 @@ class TestInitierPropositionService(SimpleTestCase):
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
         self.assertEqual(proposition.matricule_candidat, self.cmd.matricule_candidat)
+        self.assertEqual(proposition.avec_bourse_erasmus_mundus, self.cmd.avec_bourse_erasmus_mundus)
         self.assertEqual(proposition.bourse_erasmus_mundus_id.uuid, self.cmd.bourse_erasmus_mundus)
+        self.assertEqual(proposition.avec_bourse_internationale, self.cmd.avec_bourse_internationale)
         self.assertEqual(proposition.bourse_internationale_id.uuid, self.cmd.bourse_internationale)
+        self.assertEqual(proposition.avec_bourse_double_diplome, self.cmd.avec_bourse_double_diplome)
         self.assertEqual(proposition.bourse_double_diplome_id.uuid, self.cmd.bourse_double_diplome)
 
     def test_should_empecher_si_pas_formation_generale(self):

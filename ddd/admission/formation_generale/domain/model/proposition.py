@@ -166,8 +166,11 @@ class Proposition(interface.RootEntity):
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
 
     bourse_double_diplome_id: Optional[BourseIdentity] = None
+    avec_bourse_double_diplome: Optional[bool] = None
     bourse_internationale_id: Optional[BourseIdentity] = None
+    avec_bourse_internationale: Optional[bool] = None
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+    avec_bourse_erasmus_mundus: Optional[bool] = None
 
     est_bachelier_belge: Optional[bool] = None
     est_reorientation_inscription_externe: Optional[bool] = None
@@ -268,16 +271,22 @@ class Proposition(interface.RootEntity):
         self,
         formation_id: FormationIdentity,
         bourses_ids: Dict[str, BourseIdentity],
+        avec_bourse_double_diplome: Optional[bool],
         bourse_double_diplome: Optional[str],
+        avec_bourse_internationale: Optional[bool],
         bourse_internationale: Optional[str],
+        avec_bourse_erasmus_mundus: Optional[bool],
         bourse_erasmus_mundus: Optional[str],
         reponses_questions_specifiques: Dict,
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
+        self.avec_bourse_double_diplome = avec_bourse_double_diplome
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
+        self.avec_bourse_internationale = avec_bourse_internationale
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
+        self.avec_bourse_erasmus_mundus = avec_bourse_erasmus_mundus
         self.auteur_derniere_modification = self.matricule_candidat
 
         self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
@@ -286,16 +295,22 @@ class Proposition(interface.RootEntity):
         self,
         auteur_modification: str,
         bourses_ids: Dict[str, BourseIdentity],
+        avec_bourse_double_diplome: Optional[bool],
         bourse_double_diplome: Optional[str],
+        avec_bourse_internationale: Optional[bool],
         bourse_internationale: Optional[str],
+        avec_bourse_erasmus_mundus: Optional[bool],
         bourse_erasmus_mundus: Optional[str],
         reponses_questions_specifiques: Dict,
     ):
         self.auteur_derniere_modification = auteur_modification
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
+        self.avec_bourse_double_diplome = avec_bourse_double_diplome
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
+        self.avec_bourse_internationale = avec_bourse_internationale
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
+        self.avec_bourse_erasmus_mundus = avec_bourse_erasmus_mundus
 
     def modifier_checklist_choix_formation(
         self,

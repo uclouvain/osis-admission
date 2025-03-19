@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,17 @@
 {% with proposition=resume_proposition.proposition %}
   <dl>
     <dt>{{ _('Specific profile')|edit_button:url|safe }}</dt>
-    {% if resume_proposition.proposition.bourse_erasmus_mundus %}
+    {% if resume_proposition.proposition.avec_bourse_erasmus_mundus %}
       <dd>
         {% translate 'Erasmus mundus:' %} {{ resume_proposition.proposition.bourse_erasmus_mundus }}
       </dd>
     {% endif %}
-    {% if resume_proposition.proposition.bourse_double_diplome %}
+    {% if resume_proposition.proposition.avec_bourse_double_diplome %}
       <dd>
         {% translate 'Double degree:' %} {{ resume_proposition.proposition.bourse_double_diplome }}
       </dd>
     {% endif %}
-    {% if resume_proposition.proposition.bourse_internationale %}
+    {% if resume_proposition.proposition.avec_bourse_internationale %}
       <dd>
         {% translate 'International:' %} {{ resume_proposition.proposition.bourse_internationale }}
       </dd>

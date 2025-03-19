@@ -61,6 +61,7 @@ from admission.ddd.admission.formation_continue.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     BachelierEtudesSecondairesValidatorList,
+    ChoixFormationValidatorList,
     EtudesSecondairesValidatorList,
     FormationGeneraleComptabiliteValidatorList,
     FormationGeneraleCurriculumPostSoumissionValidatorList,
@@ -379,6 +380,13 @@ class ProfilCandidat(interface.DomainService):
                 conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr
             ),
             comptabilite=proposition.comptabilite,
+            formation=formation,
+        ).validate()
+
+    @classmethod
+    def verifier_choix_formation_generale(cls, proposition, formation: Formation):
+        ChoixFormationValidatorList(
+            proposition=proposition,
             formation=formation,
         ).validate()
 

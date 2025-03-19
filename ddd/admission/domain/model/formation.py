@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,6 +35,11 @@ from base.ddd.utils.converters import to_upper_case_converter
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
+FORMATIONS_AVEC_BOURSES = {
+    TrainingType.CERTIFICATE.name,
+    *AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[TypeFormation.MASTER.name],
+}
+
 
 @attr.dataclass(frozen=True, slots=True)
 class FormationIdentity(interface.EntityIdentity):
@@ -60,3 +65,7 @@ class Formation(interface.Entity):
     @property
     def est_formation_medecine_ou_dentisterie(self) -> bool:
         return est_formation_medecine_ou_dentisterie(self.code_domaine)
+
+    @property
+    def est_formation_avec_bourse(self) -> bool:
+        return self.type.name in FORMATIONS_AVEC_BOURSES

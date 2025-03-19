@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,37 +30,46 @@ from typing import Optional
 import factory
 from factory.fuzzy import FuzzyText
 
-from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.enums import (
-    TypeSituationAssimilation,
     ChoixAffiliationSport,
-    ChoixTypeCompteBancaire,
     ChoixAssimilation1,
-    LienParente,
-    ChoixAssimilation6,
-    ChoixAssimilation5,
-    ChoixAssimilation3,
     ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
+    Comptabilite,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
     DroitsInscriptionMontant,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    StatutsChecklistGenerale,
     StatutChecklist,
+    StatutsChecklistGenerale,
 )
 from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
-from admission.ddd.admission.test.factory.poste_diplomatique import PosteDiplomatiqueIdentityFactory
+from admission.ddd.admission.test.factory.poste_diplomatique import (
+    PosteDiplomatiqueIdentityFactory,
+)
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
@@ -205,6 +214,9 @@ class PropositionFactory(factory.Factory):
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
 
+    avec_bourse_double_diplome = True
+    avec_bourse_internationale = True
+    avec_bourse_erasmus_mundus = True
     bourse_double_diplome_id = factory.SubFactory(BourseIdentityFactory, uuid='a0e94dd5-3715-49a1-8953-8cc0f99372cb')
     bourse_internationale_id = factory.SubFactory(BourseIdentityFactory, uuid='c0e94dd5-3715-49a1-8953-8cc0f99372cb')
     bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory, uuid='e0e94dd5-3715-49a1-8953-8cc0f99372cb')
