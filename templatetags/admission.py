@@ -80,13 +80,13 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums.emplacement_document import (
-    StatutReclamationEmplacementDocument,
-)
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.enums import (
     TypeItemFormulaire,
     Onglets,
+)
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -145,14 +145,11 @@ from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeSt
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
     MessageCurriculumDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -1500,9 +1497,6 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
     )
 
     query_params = {}
-
-    if document.lecture_seule:
-        query_params['read-only'] = '1'
 
     if document.requis_automatiquement:
         query_params['mandatory'] = '1'

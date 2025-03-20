@@ -74,6 +74,8 @@ from admission.ddd.admission.test.factory.question_specifique import (
     QuestionSpecifiqueDTOFactory,
 )
 from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
+from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
+from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -1532,7 +1534,6 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 
         document = Mock(
             identifiant='foo',
-            lecture_seule=None,
             requis_automatiquement=None,
         )
 
@@ -1547,21 +1548,6 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             base_url,
         )
 
-        document.lecture_seule = True
-        document.requis_automatiquement = False
-        self.assertEqual(
-            get_document_details_url(context, document),
-            f'{base_url}?read-only=1',
-        )
-
-        document.lecture_seule = True
-        document.requis_automatiquement = True
-        self.assertEqual(
-            get_document_details_url(context, document),
-            f'{base_url}?read-only=1&mandatory=1',
-        )
-
-        document.lecture_seule = False
         document.requis_automatiquement = True
         self.assertEqual(
             get_document_details_url(context, document),
