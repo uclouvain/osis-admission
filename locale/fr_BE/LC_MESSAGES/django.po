@@ -2069,6 +2069,12 @@ msgstr "Cher %(name)s,"
 msgid "Decision"
 msgstr "Décision"
 
+msgid "Decision > Faculty comment for IUFC"
+msgstr "Décision - Commentaire de la Faculté pour l'IUFC"
+
+msgid "Decision > IUFC comment for the Faculty"
+msgstr "Décision - Commentaire de l'IUFC pour la Faculté"
+
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr "Décision confirmant l'octroi de la protection subsidiaire"
 
@@ -8507,6 +8513,10 @@ msgstr "éléments par page"
 msgctxt "feminine"
 msgid "modified"
 msgstr "modifiée"
+
+#, python-format
+msgid "on %(date)s at %(hour)s"
+msgstr "le %(date)s at %(hour)s"
 
 msgctxt "payment"
 msgid "open"
