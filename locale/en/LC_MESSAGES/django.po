@@ -1888,6 +1888,12 @@ msgstr ""
 msgid "Decision"
 msgstr ""
 
+msgid "Decision > Faculty comment for IUFC"
+msgstr ""
+
+msgid "Decision > IUFC comment for the Faculty"
+msgstr ""
+
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr ""
 
@@ -7598,6 +7604,10 @@ msgstr ""
 
 msgctxt "feminine"
 msgid "modified"
+msgstr ""
+
+#, python-format
+msgid "on %(date)s at %(hour)s"
 msgstr ""
 
 msgctxt "payment"
