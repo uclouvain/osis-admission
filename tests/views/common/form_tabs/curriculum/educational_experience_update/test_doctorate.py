@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,17 +34,24 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.models import DoctorateAdmission
 from admission.models.base import AdmissionEducationalValuatedExperiences
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
 )
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -58,7 +65,13 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, Reduction, Grade
+from osis_profile.models.enums.curriculum import (
+    EvaluationSystem,
+    Grade,
+    Reduction,
+    Result,
+    TranscriptType,
+)
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -128,18 +141,20 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             institute_name='University of Louvain',
             institute_address='Rue de Louvain, 1000 Bruxelles',
             expected_graduation_date=datetime.date(2024, 1, 1),
+            block_1_acquired_credit_number=40,
+            with_complement=True,
+            complement_registered_credit_number=30,
+            complement_acquired_credit_number=29,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[0],
-            with_block_1=True,
             reduction='',
             is_102_change_of_course=True,
         )
         self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[2],
-            with_complement=True,
             reduction=Reduction.A150.name,
         )
 
@@ -220,26 +235,21 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
 
         # Country
         self.assertEqual(base_form['country'].value(), self.experience.country.iso_code)
-        self.assertEqual(
-            getattr(base_form.fields['country'], 'is_ue_country', None),
-            self.experience.country.european_union,
-        )
+        self.assertEqual(base_form.initial.get('is_ue_country'), self.experience.country.european_union)
 
         # Institute
         self.assertEqual(base_form['other_institute'].value(), True)
         self.assertEqual(base_form['institute_name'].value(), self.experience.institute_name)
         self.assertEqual(base_form['institute_address'].value(), self.experience.institute_address)
         self.assertEqual(base_form['institute'].value(), self.experience.institute.pk)
-        self.assertEqual(getattr(base_form.fields['institute'], 'community', None), self.experience.institute.community)
+        self.assertEqual(base_form.initial.get('community'), self.experience.institute.community)
+        self.assertEqual(base_form.initial.get('establishment_type'), self.experience.institute.establishment_type)
 
         # Program
         self.assertEqual(base_form['program'].value(), self.experience.program.pk)
-        self.assertEqual(getattr(base_form.fields['program'], 'cycle', None), self.experience.program.cycle)
+        self.assertEqual(base_form.initial.get('cycle'), self.experience.program.cycle)
         self.assertEqual(base_form['fwb_equivalent_program'].value(), self.experience.fwb_equivalent_program.pk)
-        self.assertEqual(
-            getattr(base_form.fields['fwb_equivalent_program'], 'cycle', None),
-            self.experience.fwb_equivalent_program.cycle,
-        )
+        self.assertEqual(base_form.initial.get('fwb_cycle'), self.experience.fwb_equivalent_program.cycle)
         self.assertEqual(base_form['other_program'].value(), True)
         self.assertEqual(base_form['education_name'].value(), self.experience.education_name)
 
@@ -284,6 +294,26 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
 
         # Dissertation summary
         self.assertEqual(base_form['dissertation_summary'].value(), self.experience.dissertation_summary)
+
+        # Block 1 field
+        self.assertEqual(
+            base_form['block_1_acquired_credit_number'].value(),
+            self.experience.block_1_acquired_credit_number,
+        )
+
+        # With complements fields
+        self.assertEqual(
+            base_form['with_complement'].value(),
+            self.experience.with_complement,
+        )
+        self.assertEqual(
+            base_form['complement_registered_credit_number'].value(),
+            self.experience.complement_registered_credit_number,
+        )
+        self.assertEqual(
+            base_form['complement_acquired_credit_number'].value(),
+            self.experience.complement_acquired_credit_number,
+        )
 
         # Check that no field is disabled
         for field in base_form.fields:
@@ -345,38 +375,6 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         self.assertEqual(
             first_year_form['transcript_translation'].value(),
             self.first_experience_year.transcript_translation,
-        )
-
-        # With block 1
-        self.assertEqual(third_year_form['with_block_1'].value(), self.second_experience_year.with_block_1)
-        self.assertEqual(second_year_form['with_block_1'].value(), None)
-        self.assertEqual(first_year_form['with_block_1'].value(), self.first_experience_year.with_block_1)
-
-        # With complement
-        self.assertEqual(third_year_form['with_complement'].value(), self.second_experience_year.with_complement)
-        self.assertEqual(second_year_form['with_complement'].value(), None)
-        self.assertEqual(first_year_form['with_complement'].value(), self.first_experience_year.with_complement)
-
-        # Fwb registered credit number
-        self.assertEqual(
-            third_year_form['fwb_registered_credit_number'].value(),
-            self.second_experience_year.fwb_registered_credit_number,
-        )
-        self.assertEqual(second_year_form['fwb_registered_credit_number'].value(), None)
-        self.assertEqual(
-            first_year_form['fwb_registered_credit_number'].value(),
-            self.first_experience_year.fwb_registered_credit_number,
-        )
-
-        # Fwb acquired credit number
-        self.assertEqual(
-            third_year_form['fwb_acquired_credit_number'].value(),
-            self.second_experience_year.fwb_acquired_credit_number,
-        )
-        self.assertEqual(second_year_form['fwb_acquired_credit_number'].value(), None)
-        self.assertEqual(
-            first_year_form['fwb_acquired_credit_number'].value(),
-            self.first_experience_year.fwb_acquired_credit_number,
         )
 
         # With reduction
@@ -479,6 +477,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
                 'base_form-graduate_degree_0': ['uuid2'],
                 'base_form-graduate_degree_translation_0': ['uuid3'],
                 'base_form-transcript_0': self.files_uuids[0],
+                'base_form-with_complement': False,
                 'base_form-rank_in_diploma': 'My rank',
                 'year_formset-TOTAL_FORMS': 1,
                 'year_formset-INITIAL_FORMS': 0,

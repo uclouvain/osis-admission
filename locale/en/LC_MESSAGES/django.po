@@ -86,9 +86,6 @@ msgstr ""
 msgid ", on"
 msgstr ""
 
-msgid "102 change of course"
-msgstr ""
-
 msgid "12"
 msgstr ""
 
@@ -326,6 +323,12 @@ msgid "Accounting"
 msgstr ""
 
 msgid "Achieved additional training"
+msgstr ""
+
+msgid "Acquired bloc 1 credits total number"
+msgstr ""
+
+msgid "Acquired complements credits total number"
 msgstr ""
 
 msgid "Acquired credit number"
@@ -1011,9 +1014,6 @@ msgstr ""
 msgid "Billing address type"
 msgstr ""
 
-msgid "Block 1"
-msgstr ""
-
 msgid "Box"
 msgstr ""
 
@@ -1297,6 +1297,9 @@ msgid ""
 "uclouvain.be/en/study/iufc</a>."
 msgstr ""
 
+msgid "Cessation for 102 change of course"
+msgstr ""
+
 msgid "Change of course"
 msgstr ""
 
@@ -1443,7 +1446,13 @@ msgstr ""
 msgid "Complement"
 msgstr ""
 
+msgid "Complementary training"
+msgstr ""
+
 msgid "Complementary training proposition"
+msgstr ""
+
+msgid "Complements credits total number"
 msgstr ""
 
 msgctxt "equivalence_status"
@@ -2605,12 +2614,6 @@ msgid "FRESH"
 msgstr ""
 
 msgid "FRIA"
-msgstr ""
-
-msgid "FWB - Credits earned"
-msgstr ""
-
-msgid "FWB - Registered credits"
 msgstr ""
 
 msgid "FWB Cotutelle"
@@ -6910,6 +6913,9 @@ msgid ""
 msgstr ""
 
 msgid "Weight"
+msgstr ""
+
+msgid "Were there any prerequisite courses?"
 msgstr ""
 
 msgid "What diploma have you obtained (or will obtain)?"
