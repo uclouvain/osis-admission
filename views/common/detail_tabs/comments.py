@@ -124,22 +124,28 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
             experiences_names_by_uuid = {}
 
             for experience in curriculum.experiences_academiques:
-                experiences_names_by_uuid[experience.uuid] = experience.titre_formate
+                experiences_names_by_uuid[str(experience.uuid)] = experience.titre_formate
 
             for experience in curriculum.experiences_non_academiques:
-                experiences_names_by_uuid[experience.uuid] = experience.titre_formate
+                experiences_names_by_uuid[str(experience.uuid)] = experience.titre_formate
 
             if self.is_general:
                 secondary_studies = message_bus_instance.invoke(
                     RecupererEtudesSecondairesQuery(matricule_candidat=self.proposition.matricule_candidat)
                 )
                 if secondary_studies:
-                    experiences_names_by_uuid[secondary_studies.uuid] = secondary_studies.titre_formate
+                    experiences_names_by_uuid[str(secondary_studies.uuid)] = secondary_studies.titre_formate
 
             context['experiences_names_by_uuid'] = experiences_names_by_uuid
 
         elif self.is_continuing:
             context['checklist_tags'] = ContinueOngletsChecklist.choices()
+
+        # Load the non-editable comments
+        context['comments'] = {
+            '__'.join(comment.tags): comment
+            for comment in CommentEntry.objects.filter(object_uuid=self.admission_uuid).select_related('author')
+        }
 
         return context
 
