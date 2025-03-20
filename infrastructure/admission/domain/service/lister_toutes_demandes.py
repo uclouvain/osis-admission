@@ -60,7 +60,6 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import AdmissionViewer
 from admission.models.base import BaseAdmission
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
@@ -101,6 +100,11 @@ class ListerToutesDemandes(IListerToutesDemandes):
         prefetch_viewers_queryset = (
             AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(hours=1))
             .select_related('person')
+            .only(
+                'person__last_name',
+                'person__first_name',
+                'viewed_at',
+            )
             .order_by('-viewed_at')
         )
 
@@ -151,7 +155,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'last_update_author',
                 'determined_academic_year',
                 'training__academic_year',
-                'training__enrollment_campus',
                 'training__education_group_type',
             )
             .prefetch_related(
@@ -162,6 +165,31 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 ),
                 'candidate__student_set',
                 'candidate__personmergeproposal',
+            )
+            .only(
+                'uuid',
+                'candidate__last_name',
+                'candidate__first_name',
+                'candidate__country_of_citizenship__european_union',
+                'candidate__country_of_citizenship__name',
+                'candidate__country_of_citizenship__name_en',
+                'candidate__private_email',
+                'training__acronym',
+                'training__partial_acronym',
+                'training__title',
+                'training__title_english',
+                'training__education_group_type__name',
+                'training__academic_year__year',
+                'type_demande',
+                'modified_at',
+                'last_update_author__first_name',
+                'last_update_author__last_name',
+                'last_update_author_id',
+                'candidate_id',
+                'submitted_at',
+                'determined_academic_year__year',
+                'determined_academic_year_id',
+                'specific_question_answers',
             )
         )
 
@@ -448,10 +476,11 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 admission.candidate.country_of_citizenship,
                 'name' if language_is_french else 'name_en',
             )
-            if admission.candidate.country_of_citizenship
+            if admission.candidate.country_of_citizenship_id
             else '',
-            nationalite_ue_candidat=admission.candidate.country_of_citizenship
-            and admission.candidate.country_of_citizenship.european_union,
+            nationalite_ue_candidat=admission.candidate.country_of_citizenship.european_union
+            if admission.candidate.country_of_citizenship_id
+            else None,
             vip=admission.is_vip,
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
@@ -474,7 +503,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             date_confirmation=admission.submitted_at,
             est_premiere_annee=admission.est_premiere_annee,
             poursuite_de_cycle=admission.cycle_pursuit,
-            annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year else None,
+            annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year_id else None,
             adresse_email_candidat=admission.candidate.private_email,
             reponses_questions_specifiques=admission.specific_question_answers,
         )
