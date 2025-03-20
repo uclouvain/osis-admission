@@ -144,7 +144,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
     checklist_actuelle = admission.checklist.get('current')
 
     return Proposition(
-        entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
+        entity_id=PropositionIdentityBuilder().build_from_uuid(str(admission.uuid)),
         commission_proximite=commission_proximite,
         type_admission=ChoixTypeAdmission[admission.type],
         formation_id=FormationIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
@@ -260,7 +260,6 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             for admission_training in admission.prerequisite_courses.all()
         ],
         commentaire_complements_formation=admission.prerequisite_courses_fac_comment,
-        nombre_annees_prevoir_programme=admission.program_planned_years_number,
         nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
         email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
         commentaire_programme_conjoint=admission.join_program_fac_comment,
@@ -508,7 +507,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'other_refusal_reasons': entity.autres_motifs_refus,
                 'with_prerequisite_courses': entity.avec_complements_formation,
                 'prerequisite_courses_fac_comment': entity.commentaire_complements_formation,
-                'program_planned_years_number': entity.nombre_annees_prevoir_programme,
                 'annual_program_contact_person_name': entity.nom_personne_contact_programme_annuel_annuel,
                 'annual_program_contact_person_email': entity.email_personne_contact_programme_annuel_annuel,
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
@@ -924,7 +922,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             avec_complements_formation=admission.with_prerequisite_courses,
             complements_formation=prerequisite_courses,
             commentaire_complements_formation=admission.prerequisite_courses_fac_comment,
-            nombre_annees_prevoir_programme=admission.program_planned_years_number,
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -55,7 +55,6 @@ class CompleterPropositionCommand(interface.CommandRequest):
     uuid: str
     matricule_auteur: str
     justification: Optional[str] = ''
-    commission_proximite: Optional[str] = ''
     type_financement: Optional[str] = ''
     type_contrat_travail: Optional[str] = ''
     eft: Optional[int] = None
@@ -499,7 +498,7 @@ class ListerDemandesQuery(SortedQueryRequest):
     cdds: Optional[List[str]] = None
     commission_proximite: Optional[str] = ''
     sigles_formations: Optional[List[str]] = None
-    matricule_promoteur: Optional[str] = ''
+    uuid_promoteur: Optional[str] = ''
     type_financement: Optional[str] = ''
     bourse_recherche: Optional[str] = ''
     cotutelle: Optional[bool] = None
@@ -589,8 +588,8 @@ class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
     gestionnaire: str
 
     type_demande: str
-    sigle_formation: str
     annee_formation: int
+    commission_proximite: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -600,7 +599,6 @@ class SpecifierInformationsAcceptationPropositionParCddCommand(interface.Command
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''
-    nombre_annees_prevoir_programme: Optional[int] = None
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
@@ -619,7 +617,6 @@ class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
     gestionnaire: str
     condition_acces: str = ''
     millesime_condition_acces: Optional[int] = None
-    avec_complements_formation: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -703,7 +700,6 @@ class SpecifierInformationsAcceptationPropositionParSicCommand(interface.Command
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''
-    nombre_annees_prevoir_programme: Optional[int] = None
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     droits_inscription_montant: str = ''
@@ -723,7 +719,6 @@ class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.Command
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''
-    nombre_annees_prevoir_programme: Optional[int] = None
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
 
@@ -785,3 +780,8 @@ class SoumettreCACommand(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ListerPreAdmissionsCandidatQuery(interface.QueryRequest):
     matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RechercherPromoteursQuery(interface.QueryRequest):
+    terme_recherche: str

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,32 +28,43 @@ from rest_framework import serializers
 
 from admission.api.serializers.fields import (
     ACTION_LINKS,
-    AnswerToSpecificQuestionField,
     CONTINUING_EDUCATION_ACTION_LINKS,
     DOCTORATE_ACTION_LINKS,
     GENERAL_EDUCATION_ACTION_LINKS,
+    AnswerToSpecificQuestionField,
     RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    CompleterPropositionCommand,
+    InitierPropositionCommand,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
     ChoixSousDomaineSciences,
-    ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    DoctoratFormationDTO,
     PropositionDTO as DoctoratPropositionDTO,
 )
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.dtos import (
+    PropositionDTO as FormationContinuePropositionDTO,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.dtos import (
+    PropositionDTO as FormationGeneralePropositionDTO,
+)
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
@@ -171,6 +182,7 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
 
 class DoctoratDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
+    campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
 
     date_debut = None
@@ -184,6 +196,7 @@ class DoctoratDTOSerializer(DTOSerializer):
 
 class FormationGeneraleDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
+    campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
 
     class Meta:
@@ -192,6 +205,7 @@ class FormationGeneraleDTOSerializer(DTOSerializer):
 
 class FormationContinueDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
+    campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
 
     class Meta:
@@ -392,7 +406,7 @@ class PropositionSearchSerializer(serializers.Serializer):
             'create_training_choice': ACTION_LINKS['create_training_choice'],
         }
     )
-
+    donnees_transferees_vers_compte_interne = serializers.BooleanField(default=False)
     doctorate_propositions = DoctoratePropositionSearchDTOSerializer(many=True)
     general_education_propositions = GeneralEducationPropositionSearchDTOSerializer(many=True)
     continuing_education_propositions = ContinuingEducationPropositionSearchDTOSerializer(many=True)
@@ -726,12 +740,6 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
     )
     langue_redaction_these = RelatedLanguageField(required=False)
     institut_these = RelatedInstituteField(required=False)
-    commission_proximite = serializers.ChoiceField(
-        choices=ChoixCommissionProximiteCDEouCLSM.choices()
-        + ChoixCommissionProximiteCDSS.choices()
-        + ChoixSousDomaineSciences.choices(),
-        allow_blank=True,
-    )
     type_admission = None
     matricule_auteur = None
 

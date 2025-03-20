@@ -120,7 +120,6 @@ COMMAND_HANDLERS = {
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
-        doctorat_translator=DoctoratTranslator(),
         historique=Historique(),
     ),
     RechercherDoctoratQuery: lambda msg_bus, cmd: rechercher_doctorats(
@@ -469,6 +468,7 @@ COMMAND_HANDLERS = {
         unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
@@ -691,6 +691,7 @@ COMMAND_HANDLERS = {
         )
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=DoctoratTranslator(),
@@ -716,5 +717,9 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=Historique(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
+    ),
+    RechercherPromoteursQuery: lambda msg_bus, cmd: rechercher_promoteurs(
+        cmd,
+        promoteur_translator=PromoteurTranslator(),
     ),
 }

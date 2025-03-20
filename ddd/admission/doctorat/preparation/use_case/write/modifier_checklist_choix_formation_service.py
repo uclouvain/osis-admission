@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,37 +23,55 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierChecklistChoixFormationCommand,
-)
+from admission.ddd.admission.doctorat.events import FormationDuDossierAdmissionDoctoraleModifieeEvent
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ModifierChecklistChoixFormationCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
+    IDoctoratTranslator,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.domain.builder.formation_identity import (
+    FormationIdentityBuilder,
+)
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from infrastructure.utils import MessageBus
 
 
 def modifier_checklist_choix_formation(
+    message_bus: 'MessageBus',
     cmd: 'ModifierChecklistChoixFormationCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IDoctoratTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
-    formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
-    formation = formation_translator.get(formation_id.sigle, formation_id.annee)
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+    formation_id = FormationIdentityBuilder.build(sigle=proposition.formation_id.sigle, annee=cmd.annee_formation)
+    formation = formation_translator.get(formation_id.sigle, formation_id.annee)
 
     # WHEN
     proposition.modifier_checklist_choix_formation(
         auteur_modification=cmd.gestionnaire,
         type_demande=TypeDemande[cmd.type_demande],
         formation_id=formation.entity_id,
+        commission_proximite=cmd.commission_proximite,
     )
 
     # THEN
     proposition_repository.save(proposition)
+    message_bus.publish(
+        FormationDuDossierAdmissionDoctoraleModifieeEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
+    )
 
     return proposition.entity_id

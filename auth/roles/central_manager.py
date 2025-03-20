@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,17 +29,21 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import general, continuing, doctorate
+from admission.auth.predicates import continuing, doctorate, general
 from admission.auth.predicates.common import (
-    has_scope,
-    is_debug,
-    is_entity_manager as is_entity_manager_without_scope,
-    is_scoped_entity_manager,
-    is_sent_to_epc,
-    pending_digit_ticket_response,
-    past_experiences_checklist_tab_is_not_sufficient,
     candidate_has_other_doctorate_or_general_admissions,
     candidate_has_other_general_admissions,
+    has_scope,
+    is_debug,
+)
+from admission.auth.predicates.common import (
+    is_entity_manager as is_entity_manager_without_scope,
+)
+from admission.auth.predicates.common import (
+    is_scoped_entity_manager,
+    is_sent_to_epc,
+    past_experiences_checklist_tab_is_not_sufficient,
+    workflow_injection_signaletique_en_cours,
 )
 from admission.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
@@ -94,7 +98,7 @@ class CentralManager(EntityRoleModel):
                 | ((doctorate.in_sic_status | doctorate.in_progress) & ~candidate_has_other_general_admissions)
             )
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
             & (
@@ -106,12 +110,12 @@ class CentralManager(EntityRoleModel):
                 | doctorate.in_progress
             )
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
             & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,
@@ -214,8 +218,8 @@ class CentralManager(EntityRoleModel):
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
             'admission.can_inject_to_epc': ~is_sent_to_epc,
-            'admission.send_message': is_entity_manager,
             # Fusion
-            'admission.merge_candidate_with_known_person': is_entity_manager & ~is_sent_to_epc,
+            'admission.merge_candidate_with_known_person':
+                has_scope(Scope.GENERAL) & is_entity_manager & ~is_sent_to_epc,
         }
         return RuleSet(ruleset)

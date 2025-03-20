@@ -1,0 +1,50 @@
+{% load admission enums i18n academic_year_display %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% has_perm 'admission.checklist_change_training_choice' as can_change_checklist_training_choice %}
+
+{% if can_change_checklist_training_choice %}
+  {% url 'admission:doctorate:choix-formation-update' uuid=view.kwargs.uuid as edit_choix_formation_url %}
+{% endif %}
+
+<div id="choix-formation-details"
+     hx-boost="true"
+     hx-target="#choix-formation-details"
+     hx-swap="outerHTML"
+     hx-push-url="false"
+>
+  {% panel _("Proposition features") edit_link_button=edit_choix_formation_url %}
+    {% if not view.is_fac %}
+      {% field_data _("Proposition type") admission.type|enum_display:'TypeDemande' %}
+    {% endif %}
+    {% field_data _("Academic year") admission.annee_calculee|get_short_academic_year %}
+    {% translate "Course" context 'admission' as course_title %}
+    {% field_data course_title admission.formation %}
+    {% if admission.commission_proximite %}
+      {% field_data _("Proximity commission / Subdomain") admission.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
+    {% endif %}
+  {% endpanel %}
+</div>

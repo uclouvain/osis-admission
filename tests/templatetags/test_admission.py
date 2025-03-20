@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 import freezegun
 import mock
@@ -37,69 +37,87 @@ from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
 from django.utils import translation
-from django.utils.translation import gettext as _, pgettext
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.views import View
 
 from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.enums import TypeItemFormulaire, Onglets, ChoixAffiliationSport
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixMoyensDecouverteFormation,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    message_candidat_avec_pae_avant_2015,
+)
+from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.enums import (
+    Onglets,
+    TypeItemFormulaire,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixMoyensDecouverteFormation,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.test.factory.profil import (
+    AnneeExperienceAcademiqueDTOFactory,
+    EtudesSecondairesDTOFactory,
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
-    EtudesSecondairesDTOFactory,
-    AnneeExperienceAcademiqueDTOFactory,
 )
+from admission.ddd.admission.test.factory.question_specifique import (
+    QuestionSpecifiqueDTOFactory,
+)
+from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
 from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
+    admission_status,
+    admission_training_type,
+    admission_url,
+    authentication_css_class,
     current_subtabs,
     detail_tab_path_from_update,
     display,
+    document_component,
+    experience_details_template,
     field_data,
+    formatted_language,
     formatted_reference,
     get_active_parent,
+    get_country_name,
+    get_first_truthy_value,
+    get_image_file_url,
+    get_item,
+    get_item_or_default,
+    get_item_or_none,
+    has_value,
+    interpolate,
+    is_list,
+    label_with_user_icon,
+    need_to_display_specific_questions,
+    part_of_dict,
     sortable_header_div,
     strip,
     update_tab_path_from_detail,
-    get_first_truthy_value,
-    get_item,
-    interpolate,
-    admission_training_type,
-    admission_url,
-    admission_status,
-    get_image_file_url,
-    get_country_name,
-    formatted_language,
-    get_item_or_default,
-    has_value,
-    document_component,
-    get_item_or_none,
-    part_of_dict,
-    need_to_display_specific_questions,
-    authentication_css_class,
-    experience_details_template,
-    is_list,
-    label_with_user_icon,
     candidate_language,
     experience_valuation_url,
     checklist_experience_action_links_context,
     format_ways_to_find_out_about_the_course,
     get_document_details_url,
-    sport_affiliation_value,
     cotutelle_institute,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.entity import Entity
@@ -107,10 +125,16 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity import EntityWithVersionFactory
-from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
+from base.tests.factories.entity_version import (
+    EntityVersionFactory,
+    MainEntityVersionFactory,
+)
 from base.tests.factories.entity_version_address import EntityVersionAddressFactory
 from osis_profile import BE_ISO_CODE
-from osis_profile.models.enums.curriculum import EvaluationSystem, CURRICULUM_ACTIVITY_LABEL
+from osis_profile.models.enums.curriculum import (
+    CURRICULUM_ACTIVITY_LABEL,
+    EvaluationSystem,
+)
 from osis_profile.tests.factories.curriculum import ExperienceParcoursInterneDTOFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.university import UniversityFactory
@@ -291,23 +315,8 @@ class AdmissionTabsTestCase(TestCase):
         result = current_subtabs(context)
         self.assertEqual(
             result['subtabs'],
-            TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap')],
+            TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap')],
         )
-
-    def test_current_tabs_with_hidden_tab(self):
-        context = {
-            'request': Mock(
-                resolver_match=Mock(
-                    namespaces=['admission', 'doctorate', 'confirmation'],
-                    url_name='failure',
-                ),
-            ),
-            'view': Mock(
-                get_permission_object=Mock(return_value=self.doctorate_admission),
-            ),
-        }
-        result = current_subtabs(context)
-        self.assertEqual(result['subtabs'], TAB_TREES['doctorate-after-enrolment'][Tab('confirmation', '')])
 
 
 class AdmissionPanelTagTestCase(TestCase):
@@ -642,8 +651,10 @@ class DisplayTagTestCase(TestCase):
 
         self.assertEqual(
             template_params['curex_link_button'],
-            '/osis_profile/{noma}/parcours_externe/'.format(
+            '/osis_profile/{noma}/parcours_externe/edit/experience_academique/{annee_experience_uuid}'.format(
                 noma='0123456',
+                annee_experience_uuid=kwargs['experience'].annees[0].uuid,
+                experience_uuid=kwargs['experience'].uuid,
             ),
         )
         self.assertEqual(template_params['edit_link_button'], '')
@@ -654,16 +665,15 @@ class DisplayTagTestCase(TestCase):
         perms['profil.can_see_parcours_externe'] = False
         template_params = experience_details_template(**kwargs)
 
-        self.assertEqual(template_params['curex_link_button'], '')
         self.assertEqual(
-            template_params['edit_link_button'],
-            '/osis_profile/{noma}/parcours_externe/edit/experience_academique/{annee_experience_uuid}'
-            '?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+            template_params['curex_link_button'],
+            '/osis_profile/{noma}/parcours_externe/edit/experience_academique/{annee_experience_uuid}'.format(
                 noma='0123456',
                 annee_experience_uuid=kwargs['experience'].annees[0].uuid,
                 experience_uuid=kwargs['experience'].uuid,
             ),
         )
+        self.assertEqual(template_params['edit_link_button'], '')
         self.assertEqual(template_params['duplicate_link_button'], '')
         self.assertEqual(template_params['delete_link_button'], '')
 
@@ -985,7 +995,7 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(context['edit_link_button_in_new_tab'], True)
         self.assertEqual(
             context['curex_url'],
-            '/osis_profile/0123456/parcours_externe/',
+            f'/osis_profile/0123456/parcours_externe/edit/experience_academique/{experience.annees[0].uuid}',
         )
         self.assertEqual(context['delete_url'], '')
 
@@ -1177,6 +1187,48 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(context['experience_uuid'], str(experience.uuid))
         self.assertEqual(context['edit_link_button_in_new_tab'], False)
 
+    def test_checklist_experience_action_links_context_with_a_curriculum_message(self):
+        general_admission = GeneralEducationAdmissionFactory()
+        proposition_uuid = general_admission.uuid
+
+        perms = {
+            'admission.change_admission_curriculum': True,
+            'admission.change_admission_secondary_studies': True,
+            'admission.delete_admission_curriculum': True,
+            'profil.can_edit_parcours_externe': True,
+            'profil.can_see_parcours_externe': True,
+        }
+
+        kwargs = {
+            'context': {
+                'request': Mock(
+                    path='mypath',
+                    user=MagicMock(
+                        _computed_permissions=perms,
+                    ),
+                ),
+                'view': MagicMock(
+                    base_namespace='admission:general-education',
+                    kwargs={'uuid': proposition_uuid},
+                    admission=general_admission,
+                    proposition=MagicMock(noma_candidat='0123456'),
+                ),
+            },
+            'prefix': 'prefix',
+            'experience': message_candidat_avec_pae_avant_2015,
+            'current_year': 2020,
+            'parcours_tab_id': 'tabID',
+        }
+
+        context = checklist_experience_action_links_context(**kwargs)
+
+        self.assertEqual(context['prefix'], 'prefix')
+        self.assertEqual(context['update_url'], '')
+        self.assertEqual(context['delete_url'], '')
+        self.assertEqual(context['duplicate_url'], '')
+        self.assertEqual(context['experience_uuid'], '')
+        self.assertEqual(context['edit_link_button_in_new_tab'], False)
+
     def test_experience_valuation_url_with_an_educational_experience(self):
         proposition_uuid = uuid.uuid4()
         experience = ExperienceAcademiqueDTOFactory()
@@ -1228,46 +1280,6 @@ class DisplayTagTestCase(TestCase):
                 experience=experience,
             ),
             '',
-        )
-
-    def test_sport_affiliation_value(self):
-        self.assertEqual(
-            sport_affiliation_value(None, None),
-            '',
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(None, 'Louvain-la-Neuve'),
-            '',
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, None),
-            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
-        )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.LOUVAIN_WOLUWE.name, 'Bruxelles Woluwe'),
-            ChoixAffiliationSport.LOUVAIN_WOLUWE.value,
-        )
-
-        for campus in [
-            None,
-            '',
-            'Bruxelles Saint-Gilles',
-            'Bruxelles Woluwe',
-            'Louvain-la-Neuve',
-            'Mons',
-            'Tournai',
-        ]:
-            self.assertEqual(
-                sport_affiliation_value(ChoixAffiliationSport.NON.name, campus),
-                ChoixAffiliationSport.NON.value,
-            )
-
-        self.assertEqual(
-            sport_affiliation_value(ChoixAffiliationSport.NON.name, 'Bruxelles Saint-Louis'),
-            _('No (access to sports facilities on the Saint-Louis campus is free)'),
         )
 
 

@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -89,8 +89,8 @@
       {% endif %}
       {% field_data _("Have you previously enrolled for a PhD?") admission.doctorat_deja_realise|enum_display:'ChoixDoctoratDejaRealise' %}
         {% if admission.doctorat_deja_realise != "NO" %}
-            {% field_data _("Institution") admission.institution %}
-            {% field_data _("Thesis field") admission.domaine_these %}
+            {% field_data _("Institution in which the PhD thesis has been realised / started") admission.institution %}
+            {% field_data _("Doctorate thesis field") admission.domaine_these %}
             {% if admission.date_soutenance %}
                 {% field_data _("Defence date") admission.date_soutenance %}
             {% elif admission.raison_non_soutenue %}

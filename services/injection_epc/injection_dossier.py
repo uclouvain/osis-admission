@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand
     as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
-from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums import TypeItemFormulaire, TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )
@@ -71,15 +71,13 @@ from admission.models.base import (
 from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.models.enums.actor_type import ActorType
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.services.injection_epc.injection_signaletique import (
-    InjectionEPCSignaletique,
-)
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.sap_client_creation_source import SAPClientCreationSource
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.models.person_merge_proposal import PersonMergeProposal
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
 from infrastructure.messages_bus import message_bus_instance
@@ -275,7 +273,7 @@ class InjectionEPCAdmission:
         return {
             "dossier_uuid": str(admission.uuid),
             'auteur_autorisation_sic': auteur_autorisation_sic,
-            "signaletique": InjectionEPCSignaletique._get_signaletique(
+            "signaletique": cls._get_signaletique(
                 candidat=candidat,
                 adresse_domicile=adresse_domicile,
             ),
@@ -286,7 +284,7 @@ class InjectionEPCAdmission:
                 cls._get_curriculum_autres_activites(candidat=candidat, admission=admission)
                 + ([alternative] if alternative else [])
             ),
-            "inscription_annee_academique": InjectionEPCSignaletique._get_inscription_annee_academique(
+            "inscription_annee_academique": cls._get_inscription_annee_academique(
                 admission=admission,
                 comptabilite=comptabilite,
             ),
@@ -397,6 +395,108 @@ class InjectionEPCAdmission:
             except ValueError:
                 return False
         return False
+
+    @classmethod
+    def _get_signaletique(cls, candidat: Person, adresse_domicile: PersonAddress) -> Dict:
+        documents = InjectionEPCCurriculum._recuperer_documents(candidat)
+        fusion = PersonMergeProposal.objects.filter(original_person=candidat).first()
+        return {
+            'noma': fusion.registration_id_sent_to_digit if fusion else '',
+            'email': candidat.private_email,
+            'nom': candidat.last_name,
+            'prenom': candidat.first_name,
+            'prenom_suivant': candidat.middle_name,
+            'date_de_naissance': candidat.birth_date.strftime("%d/%m/%Y") if candidat.birth_date else None,
+            'lieu_de_naissance': candidat.birth_place,
+            'pays_de_naissance': candidat.birth_country.iso_code,
+            'annee_de_naissance': candidat.birth_year or None,
+            'sexe': candidat.sex,
+            'etat_civil': candidat.civil_state,
+            'numero_gsm': candidat.phone_mobile,
+            'numero_registre_national': candidat.national_number,
+            'commune_domicile': adresse_domicile.place,
+            'pays_domicile': adresse_domicile.country.iso_code,
+            'num_carte_identite': candidat.id_card_number,
+            'num_passeport': candidat.passport_number,
+            'documents': documents,
+        }
+
+    @staticmethod
+    def _get_inscription_annee_academique(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
+        candidat = admission.candidate  # type: Person
+        assimilation_checklist = admission.checklist.get('current', {}).get('assimilation', {})
+        date_assimilation = assimilation_checklist.get('extra', {}).get('date_debut', None)
+        return {
+            'annee_academique': admission.training.academic_year.year,
+            'nationalite': candidat.country_of_citizenship.iso_code,
+            'type_demande': admission.type_demande,
+            'contexte': admission.get_admission_context().upper().replace('-', '_'),
+            'carte_sport_lln_woluwe': (
+                comptabilite.sport_affiliation in [ChoixAffiliationSport.LOUVAIN_WOLUWE.name] + SPORT_TOUT_CAMPUS
+                if comptabilite
+                else False
+            ),
+            'carte_sport_mons': (
+                comptabilite.sport_affiliation in [ChoixAffiliationSport.MONS.name] + SPORT_TOUT_CAMPUS
+                if comptabilite
+                else False
+            ),
+            'carte_sport_tournai': (
+                comptabilite.sport_affiliation in [ChoixAffiliationSport.TOURNAI.name] + SPORT_TOUT_CAMPUS
+                if comptabilite
+                else False
+            ),
+            'carte_sport_st_louis': comptabilite.sport_affiliation in SPORT_TOUT_CAMPUS if comptabilite else False,
+            'carte_sport_st_gilles': (
+                comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_GILLES.name] + SPORT_TOUT_CAMPUS
+                if comptabilite
+                else False
+            ),
+            'carte_solidaire': comptabilite.solidarity_student or False if comptabilite else False,
+            'assimilation_resident_belge': (
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE.name
+                if comptabilite
+                else False
+            ),
+            'assimilation_refugie': (
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name
+                if comptabilite
+                else False
+            ),
+            'assimilation_revenus': (
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT.name
+                if comptabilite
+                else False
+            ),
+            'assimilation_cpas': (
+                comptabilite.assimilation_situation == TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name
+                if comptabilite
+                else False
+            ),
+            'assimilation_parents_ue': (
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name
+                if comptabilite
+                else False
+            ),
+            'assimilation_boursier': (
+                comptabilite.assimilation_situation == TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2.name
+                if comptabilite
+                else False
+            ),
+            'assimilation_ue': (
+                comptabilite.assimilation_situation
+                == TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name
+                if comptabilite
+                else False
+            ),
+            'date_assimilation': (
+                datetime.strptime(date_assimilation, '%Y-%m-%d').strftime('%d/%m/%Y') if date_assimilation else None
+            ),
+        }
 
     @classmethod
     def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:

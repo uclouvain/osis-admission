@@ -64,7 +64,7 @@ def payer_frais_dossier_proposition_suite_soumission(
 
     message_bus.publish(
         FraisDossierPayeEvent(
-            entity_id=proposition_id,
+            entity_id=proposition.entity_id,
             numero_dossier=reference,
             montant=MONTANT_FRAIS_DOSSIER,
             matricule=proposition.matricule_candidat,

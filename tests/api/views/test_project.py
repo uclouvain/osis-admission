@@ -106,6 +106,7 @@ from base.tests.factories.person import PersonFactory
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory
+from gestion_des_comptes.models import HistoriqueMatriculeCompte
 
 
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
@@ -133,6 +134,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             status=ChoixStatutPropositionDoctorale.ANNULEE.name,  # set the status to cancelled so we have access to creation
             training__management_entity=cls.commission,
             supervision_group=cls.promoter.process,
+            candidate__global_id='89654685'
         )
         cls.other_admission = DoctorateAdmissionFactory(
             status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
@@ -145,15 +147,15 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.general_campus_name = (
-            cls.general_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
+        cls.general_campus = (
+            cls.general_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         )
         cls.continuing_education_admission = ContinuingEducationAdmissionFactory(
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.continuing_campus_name = (
-            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
+        cls.continuing_campus = (
+            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         )
 
         # Users
@@ -183,6 +185,22 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             forbidden_actions=[],
         )
 
+        self.assertTrue('donnees_transferees_vers_compte_interne' in response.data)
+        self.assertFalse(response.data['donnees_transferees_vers_compte_interne'])
+
+    def test_list_propositions_after_external_account_switch_to_internal_account(self):
+        HistoriqueMatriculeCompte.objects.create(
+            matricule_interne='00989898',
+            matricule_interne_actif=True,
+            matricule_externe=self.candidate.global_id,
+        )
+
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.url, format="json")
+        self.assertTrue('donnees_transferees_vers_compte_interne' in response.data)
+        self.assertTrue(response.data['donnees_transferees_vers_compte_interne'])
+
     def test_list_propositions_candidate_for_general_education(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -211,7 +229,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'intitule': self.general_education_admission.training.title,
                 'intitule_fr': self.general_education_admission.training.title,
                 'intitule_en': self.general_education_admission.training.title_english,
-                'campus': self.general_campus_name,
+                'campus': self.general_campus.name,
+                'campus_uuid': str(self.general_campus.uuid),
                 'type': self.general_education_admission.training.education_group_type.name,
                 'code_domaine': self.general_education_admission.training.main_domain.code,
                 'campus_inscription': self.general_education_admission.training.enrollment_campus.name,
@@ -276,7 +295,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'intitule': self.continuing_education_admission.training.title,
                 'intitule_fr': self.continuing_education_admission.training.title,
                 'intitule_en': self.continuing_education_admission.training.title_english,
-                'campus': self.continuing_campus_name,
+                'campus': self.continuing_campus.name,
+                'campus_uuid': str(self.continuing_campus.uuid),
                 'type': self.continuing_education_admission.training.education_group_type.name,
                 'code_domaine': self.continuing_education_admission.training.main_domain.code,
                 'campus_inscription': self.continuing_education_admission.training.enrollment_campus.name,

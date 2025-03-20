@@ -30,7 +30,6 @@ import freezegun
 import mock
 from django.test import TestCase
 
-from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
@@ -87,7 +86,6 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.addCleanup(patcher.stop)
 
     @freezegun.freeze_time('2023-11-01')
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
@@ -121,7 +119,6 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.assertEqual(updated_proposition.auteur_derniere_modification, self.candidat.matricule)
 
     @freezegun.freeze_time('22/10/2024')
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_tardive(self):
         with patch.multiple(
             self.candidat,
@@ -171,7 +168,6 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.assertEqual(proposition.est_inscription_tardive, True)
 
     @freezegun.freeze_time('22/09/2024')
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_non_tardive_avant_limite(self):
         with patch.multiple(
             self.candidat,
@@ -221,7 +217,6 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.assertEqual(proposition.est_inscription_tardive, False)
 
     @freezegun.freeze_time('22/10/2024')
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_non_tardive_pot_sans_possibilite_inscription_tardive(self):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
@@ -249,7 +244,6 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.assertEqual(updated_proposition.est_inscription_tardive, False)
 
     @freezegun.freeze_time('22/09/2021')
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_en_nettoyant_reponses_questions_specifiques(self):
         proposition = self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI"))
 

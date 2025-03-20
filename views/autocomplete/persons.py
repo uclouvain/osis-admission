@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,24 +26,28 @@
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchVector
-from django.db.models import Q, Exists, OuterRef, F
+from django.db.models import Exists, F, OuterRef, Q
+from django.db.models.functions import Concat
 
-from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.candidate import Candidate
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RechercherPromoteursQuery,
+)
 from base.auth.roles.tutor import Tutor
 from base.models.person import Person
 
 __all__ = [
     'CandidatesAutocomplete',
-    'PromotersAutocomplete',
     'JuryMembersAutocomplete',
     'PersonAutocomplete',
+    'PromotersAutocomplete',
     'TutorAutocomplete',
 ]
 
 __namespace__ = False
 
 from base.models.student import Student
+from infrastructure.messages_bus import message_bus_instance
 
 
 class PersonsAutocomplete(LoginRequiredMixin):
@@ -88,25 +92,6 @@ class CandidatesAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetVi
         )
 
 
-class PromotersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
-    urlpatterns = 'promoters'
-
-    def get_queryset(self):
-        q = self.request.GET.get('q', '')
-
-        qs = (
-            Person.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
-            .filter(Exists(Promoter.objects.filter(person=OuterRef('pk'))))  # Is a promoter
-            .order_by('last_name', 'first_name')
-            .values(
-                'first_name',
-                'last_name',
-                'global_id',
-            )
-        )
-        return qs if q else []
-
-
 class JuryMembersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
     urlpatterns = 'jury-members'
 
@@ -135,10 +120,10 @@ class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         if q:
             qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
         qs = (
-            qs
-            .exclude(
+            qs.exclude(
                 Q(user_id__isnull=True)
                 | Q(global_id='')
+                | Q(global_id__isnull=True)
                 | Q(first_name='')
                 | Q(last_name='')
             )
@@ -163,8 +148,7 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         if q:
             qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
         qs = (
-            qs
-            .annotate(
+            qs.annotate(
                 first_name=F("person__first_name"),
                 last_name=F("person__last_name"),
                 global_id=F("person__global_id"),
@@ -179,3 +163,22 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
             .order_by('last_name', 'first_name')
         )
         return qs
+
+
+class PromotersAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    urlpatterns = 'promoters'
+
+    def get_results(self, context):
+        return [
+            {
+                'id': actor.uuid,
+                'text': ', '.join([actor.nom, actor.prenom]),
+            }
+            for actor in context['object_list']
+        ]
+
+    def get_queryset(self):
+        if not self.q:
+            return []
+
+        return message_bus_instance.invoke(RechercherPromoteursQuery(terme_recherche=self.q))

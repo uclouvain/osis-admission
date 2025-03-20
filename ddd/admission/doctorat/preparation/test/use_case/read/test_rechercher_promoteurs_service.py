@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,26 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.commands import RetrieveListePropositionFusionEnErreurQuery
-from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from admission.ddd.admission.repository.i_digit import IDigitRepository
+from django.test import SimpleTestCase
+
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RechercherPromoteursQuery,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 
 
-def recuperer_propositions_en_erreur(
-    query: 'RetrieveListePropositionFusionEnErreurQuery',
-    digit_repository: 'IDigitRepository',
-) -> List[PropositionFusionPersonneDTO]:
-    return digit_repository.retrieve_list_error_merge_proposals()
+class TestRechercherPromoteursService(SimpleTestCase):
+    def setUp(self) -> None:
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_should_rechercher_par_terme_recherche(self):
+        promoteurs_dtos: List[PromoteurDTO] = self.message_bus.invoke(
+            RechercherPromoteursQuery(terme_recherche='00987891'),
+        )
+
+        self.assertTrue(len(promoteurs_dtos) > 0)
+
+        self.assertEqual(promoteurs_dtos[0].matricule, '00987891')

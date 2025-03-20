@@ -87,6 +87,13 @@ msgstr[1] "%(years)s ans"
 msgid "(%(minutes)s ago)"
 msgstr "(il y a %(minutes)s)"
 
+msgctxt "admission"
+msgid "(Expected) date of graduation"
+msgstr "Date (prévue) de délivrance du diplôme"
+
+msgid "(Expected) graduation date (signed diploma)"
+msgstr "Date (prévue) de délivrance du diplôme (document signé)"
+
 msgid ", on"
 msgstr ", le"
 
@@ -118,6 +125,16 @@ msgstr ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s a soumis une demande pour "
 "%(training_title)s"
+
+#, python-format
+msgid ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s uploaded documents for "
+"%(training_title)s"
+msgstr ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s a téléversé des documents "
+"pour %(training_title)s"
 
 #, python-format
 msgid ""
@@ -465,7 +482,7 @@ msgid "Add an academic course"
 msgstr "Ajouter une formation académique"
 
 msgid "Add validation of prior experience (VAE)"
-msgstr "Ajouter une valorisation des acquis d'expérience"
+msgstr "Ajouter une valorisation des acquis de l'expérience"
 
 msgid "Additional approval condition"
 msgstr "Condition complémentaire d'acceptation"
@@ -607,14 +624,6 @@ msgstr "Un courrier d'autorisation a été envoyé au candidat."
 
 msgid "An education type"
 msgstr "Un type de formation"
-
-msgid "An error occured during digit ticket creation : {}"
-msgstr "Une erreur est survenue lors de la création de ticket DigIT: {}"
-
-msgid "An error occured during digit ticket creation validation"
-msgstr ""
-"Une erreur est survenue lors de la validation du ticket de création dans "
-"DigIT"
 
 msgid "An holding mail has already been sent to the candidate."
 msgstr "Un courrier  de mise en attente a déjà été envoyé au candidat."
@@ -1042,10 +1051,6 @@ msgstr "Biologie"
 msgid "Bachelor"
 msgstr "Bachelier"
 
-msgid "Bachelor's course entrance exam"
-msgstr ""
-"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
-
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
 
@@ -1344,13 +1349,6 @@ msgstr ""
 "Impossible de supprimer l'expérience parce qu'elle est utilisée dans un "
 "autre contexte."
 
-msgid ""
-"Cannot discard merge because at least one known person has the same national "
-"number"
-msgstr ""
-"Vous ne pouvez pas rejeter la fusion car au moins une personne connue a le "
-"même numéro de registre national"
-
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du groupe de supervision"
 
@@ -1530,9 +1528,6 @@ msgstr "Commentaire"
 msgid "Comment about dispensation"
 msgstr "Commentaire sur la dérogation"
 
-msgid "Comment about financability dispensation"
-msgstr "Commentaire sur la dérogation à la financabilité"
-
 msgid "Comment about the authentication"
 msgstr "Commentaire sur l'authentification"
 
@@ -1577,9 +1572,6 @@ msgstr "Poste diplomatique compétent"
 
 msgid "Complement"
 msgstr "Complément"
-
-msgid "Complementary training"
-msgstr "Formation complémentaire"
 
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
@@ -1628,18 +1620,11 @@ msgstr "Confirmer l'envoi"
 msgid "Confirmation"
 msgstr "Confirmation"
 
-msgctxt "tab"
-msgid "Confirmation"
-msgstr "Confirmation"
-
 msgid "Confirmation date"
 msgstr "Date confirmation"
 
 msgid "Confirmation date:"
 msgstr "Date de confirmation :"
-
-msgid "Confirmation exam"
-msgstr "Épreuve de confirmation"
 
 msgid "Confirmation exam date"
 msgstr "Date de l'épreuve de confirmation"
@@ -1810,24 +1795,9 @@ msgstr ""
 "%(person_concerned)s"
 
 msgid ""
-"Copy of both sides of the definitive equivalency decision (accompanied, "
-"where applicable, by the DAES or undergraduate exam, in the case of "
-"restrictive equivalency)"
-msgstr ""
-"Copie recto-verso de la décision d'équivalence définitive (accompagnée "
-"éventuellement du DAES ou de l'examen aux études de premier cycle, en cas "
-"d'équivalence restrictive)"
-
-msgid ""
-"Copy of both sides of the definitive equivalency decision by the Ministry of "
-"the French-speaking Community of Belgium (possibly accompanied by the DAES "
-"or the undergraduate studies exam, if your equivalency does not confer "
-"eligibility for the desired programme)"
-msgstr ""
-"Copie recto-verso de la décision d'équivalence définitive délivrée par le "
-"Ministère de la Communauté française de Belgique (accompagnée éventuellement "
-"du DAES ou de l'examen aux études de premier cycle, si votre équivalence ne "
-"donne pas accès au programme souhaité)"
+"Copy of both sides of the equivalency decision by the Ministry of the French-"
+"speaking Community of Belgium"
+msgstr "Copie recto-verso de la décision d'équivalence"
 
 msgid "Copy of decision to grant CFWB scholarship"
 msgstr ""
@@ -1929,9 +1899,6 @@ msgstr "Intitulé de la formation"
 
 msgid "Course type"
 msgstr "Type de formation"
-
-msgid "Course unit enrolment"
-msgstr "Inscriptions aux cours"
 
 msgctxt "admission"
 msgid "Courses"
@@ -2065,9 +2032,6 @@ msgctxt "M"
 msgid "Dear %(name)s,"
 msgstr "Cher %(name)s,"
 
-msgid "Debug"
-msgstr "Debug"
-
 msgid "Decision"
 msgstr "Décision"
 
@@ -2103,10 +2067,6 @@ msgstr "Date de soutenance"
 
 msgid "Defense"
 msgstr "Soutenance"
-
-msgctxt "doctorate tab"
-msgid "Defense"
-msgstr "Défense"
 
 msgctxt "admission tab"
 msgid "Defense method"
@@ -2183,6 +2143,9 @@ msgstr "Équivalence du diplôme"
 msgid "Diploma nationality"
 msgstr "Nationalité du diplôme"
 
+msgid "Diploma of aptitude for access to higher education (DAES)"
+msgstr "Diplôme d'Aptitude à accéder à l'Enseignement supérieur (DAES)"
+
 msgid "Diploma translation"
 msgstr "Traduction du diplôme"
 
@@ -2218,9 +2181,6 @@ msgstr "Directeur du Service des inscriptions Saint-Louis Bruxelles"
 msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
-
-msgid "Discard fusion"
-msgstr "Rejeter la fusion"
 
 msgid "Dispensation"
 msgstr "Dérogation"
@@ -2818,18 +2778,8 @@ msgstr "Pré-admission existante"
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
-msgctxt "admission"
-msgid "Expected date of graduation"
-msgstr "Date (prévue) de délivrance du diplôme"
-
-msgid "Expected graduation date (signed diploma)"
-msgstr "Date (prévue) de délivrance du diplôme (document signé)"
-
 msgid "Experience knowledge valorisation"
 msgstr "Valorisation des acquis d'expérience"
-
-msgid "Experience merge proposal"
-msgstr "Proposition de fusion du parcours antérieur"
 
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
@@ -2879,11 +2829,11 @@ msgid ""
 "for a maximum period of 12 months. Recourse to a pre-admission phase must be "
 "justified, the objectives to be achieved planned and the duration of the pre-"
 "admission period fixed in accordance with them. Unless exceptionally "
-"authorised by the CSD, FRIA or FNRS scholarship holders and, in general, "
-"doctoral candidates engaged in a research project that has already been "
-"defined, are not authorised to take a pre-admission phase for a doctorate.\" "
-"<br /> Please also consult the special provisions of the field for all pre-"
-"admission conditions."
+"authorised by the domain doctoral committee, FRIA or FNRS scholarship "
+"holders and, in general, doctoral candidates engaged in a research project "
+"that has already been defined, are not authorised to take a pre-admission "
+"phase for a doctorate.\" <br /> Please also consult the special provisions "
+"of the field for all pre-admission conditions."
 msgstr ""
 "Extrait du Règlement doctoral (article 2.1) :<br /> « La pré-admission est "
 "une étape facultative du cursus doctoral. Elle vise à permettre au ou à la "
@@ -2892,12 +2842,12 @@ msgstr ""
 "est valable pour une période de 12 mois maximum. Le recours à une phase de "
 "pré-admission doit être motivé, les objectifs à atteindre planifiés et la "
 "durée de la période de pré-admission fixée en fonction de ceux-ci. Sauf "
-"autorisation exceptionnelle de la CDD, les boursiers·ières FRIA ou FNRS et, "
-"de manière générale, les doctorant·es engagé·es dans le cadre d'un projet de "
-"recherche déjà défini, ne sont pas autorisé·es à prendre une préadmission au "
-"doctorat. ». <br /> Veuillez également consulter les dispositions "
-"particulières du domaine afin de connaître toutes les conditions de pré-"
-"admission."
+"autorisation exceptionnelle de la Commission doctorale de domaine, les "
+"boursiers·ières FRIA ou FNRS et, de manière générale, les doctorant·es "
+"engagé·es dans le cadre d'un projet de recherche déjà défini, ne sont pas "
+"autorisé·es à prendre une préadmission au doctorat. ». <br /> Veuillez "
+"également consulter les dispositions particulières du domaine afin de "
+"connaître toutes les conditions de pré-admission."
 
 msgid "FAC"
 msgstr "FAC"
@@ -3810,10 +3760,10 @@ msgstr ""
 
 msgid ""
 "If known, indicate the name of the laboratory, clinical department or "
-"research centre where the thesis will be carried out"
+"research centre where the thesis will be carried out at UCLouvain"
 msgstr ""
 "Si connu, indiquez ici le nom du laboratoire, du service clinique ou du "
-"centre de recherche où sera réalisée la thèse"
+"centre de recherche où sera réalisée la thèse à l'UCLouvain"
 
 msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
@@ -4020,11 +3970,8 @@ msgstr "Institution de la Federation Wallonie-Bruxelles"
 msgid "Institution contacted"
 msgstr "Établissement contacté"
 
-msgid "Institution in which the PhD has been realised / started"
-msgstr "Institution où le PhD a été réalisé/entamé"
-
-msgid "Institution in which the PhD has been realised / started."
-msgstr "Institution où le PhD a été réalisé/entamé."
+msgid "Institution in which the PhD thesis has been realised / started"
+msgstr "Institution où la thèse de doctorat a été réalisée/entamée"
 
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
@@ -4479,10 +4426,6 @@ msgctxt "admission sex"
 msgid "Male"
 msgstr "Masculin"
 
-msgctxt "tab"
-msgid "Management"
-msgstr "Gestion"
-
 msgid "Management of the enrolment applications"
 msgstr "Gestion des demandes d'inscription"
 
@@ -4580,18 +4523,11 @@ msgstr "Affiliations"
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
 
-msgctxt "admission"
-msgid "Merge"
-msgstr "Fusionner"
-
 msgid "Merge all non-empty data from digit match to merge form"
 msgstr "Fusionner toutes les données valides provenant de la correspondance"
 
 msgid "Merge all non-empty data from original to merge form"
 msgstr "Fusionner toutes les données valides provenant de l'original"
-
-msgid "Merge with existing entry"
-msgstr "Fusionner avec l'entrée existante"
 
 msgid "Merging of each document field of a continuing proposition into one PDF"
 msgstr "Fusion de chaque champ document d'une proposition continue en un PDF"
@@ -4767,14 +4703,8 @@ msgstr "Nationalité"
 msgid "Nationality:"
 msgstr "Nationalité :"
 
-msgid "New deadline"
-msgstr "Nouvelle échéance"
-
 msgid "New thesis title (if applicable):"
 msgstr "Nouveau titre de la thèse (le cas échéant) :"
-
-msgid "Next"
-msgstr "Suivant"
 
 msgid "Next admission"
 msgstr "Demande suivante"
@@ -4788,11 +4718,6 @@ msgstr ""
 "Aucune erreur de validation ne doit être déclenchée avec les données "
 "spécifiées."
 
-msgid "No (access to sports facilities on the Saint-Louis campus is free)"
-msgstr ""
-"Non (l'accès aux infrastructures sportives sur le campus Saint-Louis est "
-"gratuit)"
-
 msgid "No English studies"
 msgstr "Aucune étude en anglais"
 
@@ -4801,10 +4726,6 @@ msgstr "Aucune étude en français"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
-
-msgctxt "admission"
-msgid "No data"
-msgstr "Aucune données"
 
 msgid "No defense"
 msgstr "Non soutenue"
@@ -5133,9 +5054,6 @@ msgstr ""
 "Notre Université est heureuse de vous accueillir et vous souhaite un "
 "enrichissant et fructueux séjour."
 
-msgid "PARTIAL"
-msgstr "En partie"
-
 msgid "PAS_DE_DROITS_D_INSCRIPTION"
 msgstr "0 € - Pas de droits d'inscription"
 
@@ -5278,10 +5196,6 @@ msgstr "Lien du document de l'annexe de la Commission doctorale de domaine"
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
-msgctxt "tab"
-msgid "PhD project"
-msgstr "Projet doctoral"
-
 msgid "PhD proposal"
 msgstr "Projet de formation doctorale"
 
@@ -5290,9 +5204,6 @@ msgstr "Expérience de recherche doctorale"
 
 msgid "PhD research project"
 msgstr "Projet de recherche doctorale"
-
-msgid "PhD training"
-msgstr "Formation doctorale"
 
 msgid "Place of birth"
 msgstr "Lieu de naissance"
@@ -5605,9 +5516,6 @@ msgstr "Provisoire"
 msgid "Proximity Commission for Dental Sciences (DENT)"
 msgstr "Commission de proximité de sciences dentaires (DENT)"
 
-msgid "Proximity Commission for Genetics and Immunology (GIM)"
-msgstr "Commission de proximité de génétique et immunologie (GIM)"
-
 msgid "Proximity Commission for Motricity Sciences (MOTR)"
 msgstr "Commission de proximité de sciences de la motricité (MOTR)"
 
@@ -5624,10 +5532,11 @@ msgid "Proximity commission / Subdomain"
 msgstr "Commission de proximité"
 
 msgid ""
-"Proximity commission for cellular and molecular biology, biochemistry (BCM)"
+"Proximity commission for biochemistry, cellular and molecular biology, "
+"genetics, immunology (BCGIM)"
 msgstr ""
-"Commission de proximité de biologie cellulaire et moléculaire, biochimie "
-"(BCM)"
+"Commission de proximité de biochimie, biologie cellulaire et moléculaire, "
+"génétique, immunologie (BCGIM)"
 
 msgid "Proximity commission for experimental and clinical research (ECLI)"
 msgstr "Commission de proximité de recherche expérimentale et clinique (ECLI)"
@@ -5732,8 +5641,8 @@ msgstr "Motifs"
 msgid "Reasons for not accepting"
 msgstr "Motif de refus"
 
-msgid "Reasons for provisional admission."
-msgstr "Détaillez ici les raisons justifiant une admission provisoire."
+msgid "Reasons for pre-admission."
+msgstr "Détaillez ici les raisons justifiant une préadmission."
 
 msgid "Reasons for putting on hold"
 msgstr "Motif de mise en attente"
@@ -5921,15 +5830,15 @@ msgctxt "masculine"
 msgid "Required"
 msgstr "Requis"
 
+msgctxt "tab"
+msgid "Research"
+msgstr "Recherche"
+
 msgid "Research institute"
 msgstr "Institut de recherche"
 
 msgid "Research project"
 msgstr "Projet de recherche"
-
-msgctxt "tab"
-msgid "Research project"
-msgstr "Projet de recherche doctorale"
 
 msgid "Research scholarship"
 msgstr "Bourse de recherche"
@@ -6081,9 +5990,6 @@ msgstr "Enregistrer"
 msgid "Save and transfer to SIC"
 msgstr "Enregistrer et transmettre en SIC"
 
-msgid "Save fusion proposal"
-msgstr "Enregistrer la proposition de fusion"
-
 msgid "Scholarship"
 msgstr "Boursier"
 
@@ -6112,9 +6018,6 @@ msgstr "Rechercher"
 
 msgid "Search a person by surname"
 msgstr "Rechercher une personne par son nom"
-
-msgid "Search a tutor by name"
-msgstr "Rechercher un tuteur par son nom"
 
 msgid "Search on portal"
 msgstr "Voir sur le portail"
@@ -6175,14 +6078,8 @@ msgstr "Envoyer un e-mail au candidat"
 msgid "Send a mail to the faculty"
 msgstr "Envoyer un e-mail à la Faculté"
 
-msgid "Send an email"
-msgstr "Envoyer un e-mail"
-
 msgid "Send back to the candidate"
 msgstr "Redonner la main au candidat"
-
-msgid "Send selected candidate to digit"
-msgstr "Envoyer le(s) candidat(s) selectionnés à DigIT"
 
 msgid "Send the message"
 msgstr "Envoyer le message"
@@ -7385,12 +7282,12 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
-"accomodation\">www.uclouvain.be/en/study/accomodation</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/fr/logement\">www."
+"uclouvain.be/fr/logement</a>."
 msgstr ""
 "Cette autorisation d'inscription vous permet d'introduire une demande de "
-"logement auprès du service LOGE : <a href=\"https://www.uclouvain.be/etudier/"
-"logement\">www.uclouvain.be/etudier/logement</a>."
+"logement auprès du service LOGE : <a href=\"https://www.uclouvain.be/fr/"
+"logement\">www.uclouvain.be/fr/logement</a>."
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
@@ -7438,6 +7335,11 @@ msgstr ""
 
 msgid "This status is not available for the inscription type admissions."
 msgstr "Cet état n’est pas accessible pour les demandes de type Inscription."
+
+msgid ""
+"This student has a pathway prior to 2015 which can only be consulted in EPC."
+msgstr ""
+"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable uniquement dans EPC."
 
 msgid "Tick boxes"
 msgstr "Cases à cocher"
@@ -7732,9 +7634,6 @@ msgstr "Diplômes ou expériences valorisées :"
 msgid "Values"
 msgstr "Valeurs"
 
-msgid "Verify"
-msgstr "Vérifier"
-
 msgid "Viewed at"
 msgstr "Vue le"
 
@@ -7838,9 +7737,6 @@ msgstr ""
 
 msgid "Whole view"
 msgstr "Vue complète"
-
-msgid "Will be automatically retrieved from candidate"
-msgstr "Sera automatiquement récupéré du parcours fourni par le candidat"
 
 msgid "With academic year"
 msgstr "Avec une année académique"
@@ -8020,6 +7916,9 @@ msgstr "Oui, sur Mons uniquement (12 EUR)"
 
 msgid "Yes, only in Saint-Gilles (E12)"
 msgstr "Oui, sur Saint-Gilles uniquement (12 EUR)"
+
+msgid "Yes, only in Saint-Louis (free)"
+msgstr "Oui, sur Saint-Louis uniquement (gratuit)"
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Oui, sur Tournai uniquement (12 EUR)"
@@ -8249,9 +8148,9 @@ msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
 
-msgid "You must add at least two CA member in order to request signatures."
+msgid "You must add at least two CA members in order to request signatures."
 msgstr ""
-"Vous devez ajouter au moins deux membre du comité d'accompagnement afin de "
+"Vous devez ajouter au moins deux membres du comité d'accompagnement afin de "
 "demander les signatures."
 
 msgid "You must answer the question about external enrollment change."
@@ -8418,33 +8317,6 @@ msgstr "Votre adresse e-mail professionnelle"
 
 msgid "Your training does not cover the useful prerequisites in mathematics."
 msgstr "Votre formation ne couvre pas les prérequis utiles en mathématiques."
-
-#, python-format
-msgid "[%(matricule_candidat)s] Account creation period calendar is closed"
-msgstr "[%(matricule_candidat)s] Période de création de compte fermée"
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
-"validation"
-msgstr ""
-"[%(matricule_candidat)s] Le candidat a une proposition de fusion avec des "
-"erreurs dans la validation syntaxique"
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate has pending merge proposal: status "
-"%(merge_status)s"
-msgstr ""
-"[%(matricule_candidat)s] Le candidat a une proposition de fusion en attente: "
-"statut %(merge_status)s"
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Type is admission and application is not accepted"
-msgstr ""
-"[%(matricule_candidat)s] Le type de demande est admission et n'est pas "
-"autorisée à s'inscrire"
 
 msgid "academic year"
 msgstr "année académique"

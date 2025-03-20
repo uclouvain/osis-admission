@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,20 +34,40 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 from rest_framework import status
 
-from admission.models import EPCInjection as AdmissionEPCInjection, ContinuingEducationAdmission
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.models import ContinuingEducationAdmission
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
     ForeignHighSchoolDiplomaFactory,
@@ -62,28 +82,32 @@ from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import (
-    Master120TrainingFactory,
-    EducationGroupYearBachelorFactory,
     ContinuingEducationTrainingFactory,
+    EducationGroupYearBachelorFactory,
+    Master120TrainingFactory,
 )
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
+)
 from osis_profile.models.enums.education import (
     EducationalType,
-    ForeignDiplomaTypes,
     Equivalence,
+    ForeignDiplomaTypes,
     HighSchoolDiplomaTypes,
 )
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
-from reference.tests.factories.language import LanguageFactory, FrenchLanguageFactory
+from reference.tests.factories.language import FrenchLanguageFactory, LanguageFactory
 
 
 @freezegun.freeze_time("2022-01-01")
@@ -854,7 +878,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                 'high_school_transcript_translation',
                 'high_school_diploma_translation',
                 'final_equivalence_decision_not_ue',
+                'access_diploma_to_higher_education_ue',
                 'final_equivalence_decision_ue',
+                'access_diploma_to_higher_education_not_ue',
                 'equivalence_decision_proof',
             ]
         }
@@ -1062,8 +1088,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Final equivalence decision not UE
         self.assertEqual(foreign_diploma_form['final_equivalence_decision_not_ue'].value(), [])
 
+        # Access diploma to higher education not UE
+        self.assertEqual(foreign_diploma_form['access_diploma_to_higher_education_not_ue'].value(), [])
+
         # Final equivalence decision UE
         self.assertEqual(foreign_diploma_form['final_equivalence_decision_ue'].value(), [])
+
+        # Access diploma to higher education UE
+        self.assertEqual(foreign_diploma_form['access_diploma_to_higher_education_ue'].value(), [])
 
         # Equivalence decision proof
         self.assertEqual(foreign_diploma_form['equivalence_decision_proof'].value(), [])
@@ -1161,8 +1193,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Final equivalence decision not UE
         self.assertEqual(foreign_diploma_form['final_equivalence_decision_not_ue'].value(), [])
 
+        # Access diploma to higher education not UE
+        self.assertEqual(foreign_diploma_form['access_diploma_to_higher_education_not_ue'].value(), [])
+
         # Final equivalence decision UE
         self.assertEqual(foreign_diploma_form['final_equivalence_decision_ue'].value(), [])
+
+        # Access diploma to higher education UE
+        self.assertEqual(foreign_diploma_form['access_diploma_to_higher_education_ue'].value(), [])
 
         # Equivalence decision proof
         self.assertEqual(foreign_diploma_form['equivalence_decision_proof'].value(), [])
@@ -1182,7 +1220,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             high_school_transcript_translation=[self.files_uuids['high_school_transcript_translation']],
             high_school_diploma_translation=[self.files_uuids['high_school_diploma_translation']],
             final_equivalence_decision_not_ue=[self.files_uuids['final_equivalence_decision_not_ue']],
+            access_diploma_to_higher_education_not_ue=[self.files_uuids['access_diploma_to_higher_education_not_ue']],
             final_equivalence_decision_ue=[self.files_uuids['final_equivalence_decision_ue']],
+            access_diploma_to_higher_education_ue=[self.files_uuids['access_diploma_to_higher_education_ue']],
             equivalence_decision_proof=[self.files_uuids['equivalence_decision_proof']],
         )
 
@@ -1284,10 +1324,22 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             [self.files_uuids['final_equivalence_decision_not_ue']],
         )
 
+        # Access diploma to higher education not UE
+        self.assertEqual(
+            foreign_diploma_form['access_diploma_to_higher_education_not_ue'].value(),
+            [self.files_uuids['access_diploma_to_higher_education_not_ue']],
+        )
+
         # Final equivalence decision UE
         self.assertEqual(
             foreign_diploma_form['final_equivalence_decision_ue'].value(),
             [self.files_uuids['final_equivalence_decision_ue']],
+        )
+
+        # Access diploma to higher education UE
+        self.assertEqual(
+            foreign_diploma_form['access_diploma_to_higher_education_ue'].value(),
+            [self.files_uuids['access_diploma_to_higher_education_ue']],
         )
 
         # Equivalence decision proof
@@ -1359,7 +1411,6 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         foreign_diploma_form = response.context['foreign_diploma_form']
 
         # Foreign diploma type
-        # Foreign diploma type
         self.assertEqual(foreign_diploma_form['foreign_diploma_type'].value(), None)
 
         # Equivalence
@@ -1386,8 +1437,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Final equivalence decision not UE
         self.assertEqual(foreign_diploma_form['final_equivalence_decision_not_ue'].value(), [])
 
+        # Access diploma to higher education not UE
+        self.assertEqual(foreign_diploma_form['access_diploma_to_higher_education_not_ue'].value(), [])
+
         # Final equivalence decision UE
         self.assertEqual(foreign_diploma_form['final_equivalence_decision_ue'].value(), [])
+
+        # Access diploma to higher education UE
+        self.assertEqual(foreign_diploma_form['access_diploma_to_higher_education_ue'].value(), [])
 
         # Equivalence decision proof
         self.assertEqual(foreign_diploma_form['equivalence_decision_proof'].value(), [])
@@ -1641,7 +1698,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             high_school_transcript_translation=[self.files_uuids['high_school_transcript_translation']],
             high_school_diploma_translation=[self.files_uuids['high_school_diploma_translation']],
             final_equivalence_decision_not_ue=[self.files_uuids['final_equivalence_decision_not_ue']],
+            access_diploma_to_higher_education_not_ue=[self.files_uuids['access_diploma_to_higher_education_not_ue']],
             final_equivalence_decision_ue=[self.files_uuids['final_equivalence_decision_ue']],
+            access_diploma_to_higher_education_ue=[self.files_uuids['access_diploma_to_higher_education_ue']],
             equivalence_decision_proof=[self.files_uuids['equivalence_decision_proof']],
         )
 
@@ -1778,7 +1837,13 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                     self.files_uuids['final_equivalence_decision_not_ue']
                 ],
                 'foreign_diploma-final_equivalence_decision_ue_0': [self.files_uuids['final_equivalence_decision_ue']],
+                'foreign_diploma-access_diploma_to_higher_education_not_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_not_ue']
+                ],
                 'foreign_diploma-equivalence_decision_proof_0': [self.files_uuids['equivalence_decision_proof']],
+                'foreign_diploma-access_diploma_to_higher_education_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_ue']
+                ],
             },
         )
 
@@ -1812,9 +1877,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertEqual(foreign_diploma.high_school_diploma_translation, [])
         self.assertEqual(foreign_diploma.equivalence, Equivalence.YES.name)
         self.assertEqual(foreign_diploma.final_equivalence_decision_not_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_not_ue, [])
         self.assertEqual(
             foreign_diploma.final_equivalence_decision_ue,
             [self.files_uuids['final_equivalence_decision_ue']],
+        )
+        self.assertEqual(
+            foreign_diploma.access_diploma_to_higher_education_ue,
+            [self.files_uuids['access_diploma_to_higher_education_ue']],
         )
         self.assertEqual(foreign_diploma.equivalence_decision_proof, [])
 
@@ -1833,7 +1903,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             high_school_transcript_translation=[self.files_uuids['high_school_transcript_translation']],
             high_school_diploma_translation=[self.files_uuids['high_school_diploma_translation']],
             final_equivalence_decision_not_ue=[self.files_uuids['final_equivalence_decision_not_ue']],
+            access_diploma_to_higher_education_not_ue=[self.files_uuids['access_diploma_to_higher_education_not_ue']],
             final_equivalence_decision_ue=[self.files_uuids['final_equivalence_decision_ue']],
+            access_diploma_to_higher_education_ue=[self.files_uuids['access_diploma_to_higher_education_ue']],
             equivalence_decision_proof=[self.files_uuids['equivalence_decision_proof']],
         )
 
@@ -1860,7 +1932,13 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                 'foreign_diploma-final_equivalence_decision_not_ue_0': [
                     self.files_uuids['final_equivalence_decision_not_ue']
                 ],
+                'foreign_diploma-access_diploma_to_higher_education_not_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_not_ue']
+                ],
                 'foreign_diploma-final_equivalence_decision_ue_0': [self.files_uuids['final_equivalence_decision_ue']],
+                'foreign_diploma-access_diploma_to_higher_education_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_ue']
+                ],
                 'foreign_diploma-equivalence_decision_proof_0': [self.files_uuids['equivalence_decision_proof']],
             },
         )
@@ -1897,7 +1975,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         )
         self.assertEqual(foreign_diploma.equivalence, '')
         self.assertEqual(foreign_diploma.final_equivalence_decision_not_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_not_ue, [])
         self.assertEqual(foreign_diploma.final_equivalence_decision_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_ue, [])
         self.assertEqual(foreign_diploma.equivalence_decision_proof, [])
 
     def test_submit_valid_data_for_foreign_diploma_with_existing_diploma_alternative(self):
@@ -1930,7 +2010,13 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                 'foreign_diploma-final_equivalence_decision_not_ue_0': [
                     self.files_uuids['final_equivalence_decision_not_ue']
                 ],
+                'foreign_diploma-access_diploma_to_higher_education_not_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_not_ue']
+                ],
                 'foreign_diploma-final_equivalence_decision_ue_0': [self.files_uuids['final_equivalence_decision_ue']],
+                'foreign_diploma-access_diploma_to_higher_education_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_ue']
+                ],
                 'foreign_diploma-equivalence_decision_proof_0': [self.files_uuids['equivalence_decision_proof']],
             },
         )
@@ -1971,7 +2057,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         )
         self.assertEqual(foreign_diploma.equivalence, '')
         self.assertEqual(foreign_diploma.final_equivalence_decision_not_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_not_ue, [])
         self.assertEqual(foreign_diploma.final_equivalence_decision_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_ue, [])
         self.assertEqual(foreign_diploma.equivalence_decision_proof, [])
 
     def test_submit_foreign_diploma_with_ue_equivalence(self):
@@ -1988,9 +2076,15 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                 'foreign_diploma-country': self.france_country.iso_code,
                 'foreign_diploma-linguistic_regime': self.french_linguistic_regime.code,
                 'foreign_diploma-final_equivalence_decision_ue_0': [self.files_uuids['final_equivalence_decision_ue']],
+                'foreign_diploma-access_diploma_to_higher_education_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_ue']
+                ],
                 'foreign_diploma-equivalence_decision_proof_0': [self.files_uuids['equivalence_decision_proof']],
                 'foreign_diploma-final_equivalence_decision_not_ue_0': [
                     self.files_uuids['final_equivalence_decision_not_ue']
+                ],
+                'foreign_diploma-access_diploma_to_higher_education_not_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_not_ue']
                 ],
             },
         )
@@ -2006,8 +2100,13 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             foreign_diploma.final_equivalence_decision_ue,
             [self.files_uuids['final_equivalence_decision_ue']],
         )
+        self.assertEqual(
+            foreign_diploma.access_diploma_to_higher_education_ue,
+            [self.files_uuids['access_diploma_to_higher_education_ue']],
+        )
         self.assertEqual(foreign_diploma.equivalence_decision_proof, [])
         self.assertEqual(foreign_diploma.final_equivalence_decision_not_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_not_ue, [])
 
     def test_submit_foreign_diploma_with_pending_ue_equivalence(self):
         self.client.force_login(self.sic_manager_user)
@@ -2026,9 +2125,15 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                 'foreign_diploma-country': self.us_country.iso_code,
                 'foreign_diploma-linguistic_regime': self.french_linguistic_regime.code,
                 'foreign_diploma-final_equivalence_decision_ue_0': [self.files_uuids['final_equivalence_decision_ue']],
+                'foreign_diploma-access_diploma_to_higher_education_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_ue']
+                ],
                 'foreign_diploma-equivalence_decision_proof_0': [self.files_uuids['equivalence_decision_proof']],
                 'foreign_diploma-final_equivalence_decision_not_ue_0': [
                     self.files_uuids['final_equivalence_decision_not_ue']
+                ],
+                'foreign_diploma-access_diploma_to_higher_education_not_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_not_ue']
                 ],
             },
         )
@@ -2041,8 +2146,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
 
         self.assertEqual(foreign_diploma.equivalence, Equivalence.PENDING.name)
         self.assertEqual(foreign_diploma.final_equivalence_decision_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_ue, [])
         self.assertEqual(foreign_diploma.equivalence_decision_proof, [self.files_uuids['equivalence_decision_proof']])
         self.assertEqual(foreign_diploma.final_equivalence_decision_not_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_not_ue, [])
 
     def test_submit_foreign_diploma_with_no_ue_equivalence(self):
         self.client.force_login(self.sic_manager_user)
@@ -2058,9 +2165,15 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                 'foreign_diploma-country': self.france_country.iso_code,
                 'foreign_diploma-linguistic_regime': self.french_linguistic_regime.code,
                 'foreign_diploma-final_equivalence_decision_ue_0': [self.files_uuids['final_equivalence_decision_ue']],
+                'foreign_diploma-access_diploma_to_higher_education_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_ue']
+                ],
                 'foreign_diploma-equivalence_decision_proof_0': [self.files_uuids['equivalence_decision_proof']],
                 'foreign_diploma-final_equivalence_decision_not_ue_0': [
                     self.files_uuids['final_equivalence_decision_not_ue']
+                ],
+                'foreign_diploma-access_diploma_to_higher_education_not_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_not_ue']
                 ],
             },
         )
@@ -2073,8 +2186,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
 
         self.assertEqual(foreign_diploma.equivalence, Equivalence.NO.name)
         self.assertEqual(foreign_diploma.final_equivalence_decision_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_ue, [])
         self.assertEqual(foreign_diploma.equivalence_decision_proof, [])
         self.assertEqual(foreign_diploma.final_equivalence_decision_not_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_not_ue, [])
 
     def test_submit_foreign_diploma_with_not_ue_equivalence(self):
         self.client.force_login(self.sic_manager_user)
@@ -2090,9 +2205,15 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
                 'foreign_diploma-equivalence': Equivalence.NO.name,
                 'foreign_diploma-linguistic_regime': self.french_linguistic_regime.code,
                 'foreign_diploma-final_equivalence_decision_ue_0': [self.files_uuids['final_equivalence_decision_ue']],
+                'foreign_diploma-access_diploma_to_higher_education_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_ue']
+                ],
                 'foreign_diploma-equivalence_decision_proof_0': [self.files_uuids['equivalence_decision_proof']],
                 'foreign_diploma-final_equivalence_decision_not_ue_0': [
                     self.files_uuids['final_equivalence_decision_not_ue']
+                ],
+                'foreign_diploma-access_diploma_to_higher_education_not_ue_0': [
+                    self.files_uuids['access_diploma_to_higher_education_not_ue']
                 ],
             },
         )
@@ -2105,9 +2226,15 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
 
         self.assertEqual(foreign_diploma.equivalence, '')
         self.assertEqual(foreign_diploma.final_equivalence_decision_ue, [])
+        self.assertEqual(foreign_diploma.access_diploma_to_higher_education_ue, [])
         self.assertEqual(foreign_diploma.equivalence_decision_proof, [])
         self.assertEqual(
-            foreign_diploma.final_equivalence_decision_not_ue, [self.files_uuids['final_equivalence_decision_not_ue']]
+            foreign_diploma.final_equivalence_decision_not_ue,
+            [self.files_uuids['final_equivalence_decision_not_ue']],
+        )
+        self.assertEqual(
+            foreign_diploma.access_diploma_to_higher_education_not_ue,
+            [self.files_uuids['access_diploma_to_higher_education_not_ue']],
         )
 
     def test_submit_diploma_alternative_without_existing_diploma(self):

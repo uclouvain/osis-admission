@@ -210,7 +210,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(ret['pot_calcule'], AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name)
         self.assertIsNotNone(ret['date_fin_pot'])
 
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_verification_ok_valuate_experiences(self):
         educational_experience = self.second_candidate_ok.educationalexperience_set.first()
         professional_experience = self.second_candidate_ok.professionalexperience_set.first()
@@ -288,7 +287,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             admission.detailed_status,
         )
 
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_verification_contingent_est_interdite(self):
         admission = GeneralEducationAdmissionFactory(
             is_non_resident=True,
@@ -309,7 +307,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             admission.detailed_status,
         )
 
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
@@ -439,7 +436,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertNotIn('juillet 1980', notifications[0].payload)
 
     @freezegun.freeze_time("1980-10-22")
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_submission_with_late_enrollment(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
@@ -463,7 +459,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIn('inscription tardive', notifications[0].payload)
 
     @freezegun.freeze_time("1980-11-25")
-    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_general_proposition_submission_ok_hors_delai(self):
         ProfessionalExperienceFactory(
             person=self.candidate_ok,

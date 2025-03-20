@@ -475,9 +475,11 @@ class Notification(INotification):
             'candidate_first_name': proposition.prenom_candidat,
             'candidate_last_name': proposition.nom_candidat,
             'salutation': get_salutation_prefix(person=admission.candidate),
-            'training_title': admission.training.title
-            if admission.candidate.language == settings.LANGUAGE_CODE_FR
-            else admission.training.title_english,
+            'training_title': (
+                admission.training.title
+                if admission.candidate.language == settings.LANGUAGE_CODE_FR
+                else admission.training.title_english
+            ),
             'training_acronym': proposition.doctorat.sigle,
             'training_campus': proposition.doctorat.campus,
             'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
@@ -490,14 +492,37 @@ class Notification(INotification):
         }
 
         email_message = generate_email(
-            ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE
-            if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
-            else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
+            (
+                ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE
+                if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
+                else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE
+            ),
             admission.candidate.language,
             tokens,
             recipients=[admission.candidate.private_email],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+        web_notification_tokens = cls.get_common_tokens(proposition, admission.candidate)
+        web_notification_tokens["admission_link_back"] = get_backoffice_admission_url(
+            'doctorate',
+            proposition.uuid,
+            url_suffix='documents',
+        )
+
+        # Envoyer une notification aux gestionnaires CDD
+        for manager in get_admission_cdd_managers(admission.training.education_group_id):
+            with translation.override(manager.language):
+                content = (
+                    _(
+                        '<a href="%(admission_link_back)s">%(reference)s</a> - '
+                        '%(candidate_first_name)s %(candidate_last_name)s uploaded '
+                        'documents for %(training_title)s'
+                    )
+                    % web_notification_tokens
+                )
+                web_notification = WebNotification(recipient=manager, content=str(content))
+            WebNotificationHandler.create(web_notification)
 
         # Create the async task to create the folder analysis containing the submitted documents
         task = AsyncTask.objects.create(

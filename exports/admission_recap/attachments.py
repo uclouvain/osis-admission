@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,37 +24,40 @@
 #
 # ##############################################################################
 from io import BytesIO
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import img2pdf
-from PIL.Image import DecompressionBombError
 from django.utils.translation import override
 from osis_document.api.utils import get_raw_content_remotely
+from PIL.Image import DecompressionBombError
 
 from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeFinancement,
     ChoixEtatSignature,
+    ChoixTypeAdmission,
+    ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
-from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import recuperer_champs_requis_dto
+from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import (
+    recuperer_champs_requis_dto,
+)
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
-    DocumentsIdentification,
-    DocumentsEtudesSecondaires,
-    DocumentsConnaissancesLangues,
-    DocumentsCurriculum,
-    DocumentsQuestionsSpecifiques,
     DocumentsComptabilite,
-    DocumentsProjetRecherche,
+    DocumentsConnaissancesLangues,
     DocumentsCotutelle,
+    DocumentsCurriculum,
+    DocumentsEtudesSecondaires,
+    DocumentsIdentification,
+    DocumentsProjetRecherche,
+    DocumentsQuestionsSpecifiques,
+    DocumentsSuiteAutorisation,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
-    DocumentsSuiteAutorisation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -63,9 +66,16 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from osis_profile.models.enums.curriculum import TranscriptType, CURRICULUM_ACTIVITY_LABEL, Result
-from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
+from osis_profile.models.enums.curriculum import (
+    CURRICULUM_ACTIVITY_LABEL,
+    Result,
+    TranscriptType,
+)
+from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 
 
 class Attachment:
@@ -193,6 +203,14 @@ def get_secondary_studies_attachments(
                                 candidate_language=context.identification.langue_contact,
                             )
                         )
+                        attachments.append(
+                            Attachment(
+                                identifier='DAES_UE',
+                                label=DocumentsEtudesSecondaires['DAES_UE'],
+                                uuids=context.etudes_secondaires.diplome_etranger.daes_ue,
+                                candidate_language=context.identification.langue_contact,
+                            )
+                        )
                     elif context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.PENDING.name:
                         attachments.append(
                             Attachment(
@@ -211,6 +229,15 @@ def get_secondary_studies_attachments(
                             uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
                             required=True,
                             candidate_language=context.identification.langue_contact,
+                        )
+                    )
+                    attachments.append(
+                        Attachment(
+                            identifier='DAES_HORS_UE',
+                            label=DocumentsEtudesSecondaires['DAES_HORS_UE'],
+                            uuids=context.etudes_secondaires.diplome_etranger.daes_hors_ue,
+                            candidate_language=context.identification.langue_contact,
+                            readonly=readonly_document,
                         )
                     )
 
@@ -390,7 +417,6 @@ def get_curriculum_academic_experience_attachments(
                     identifier='RESUME_MEMOIRE',
                     label=DocumentsCurriculum['RESUME_MEMOIRE'],
                     uuids=experience.resume_memoire,
-                    required=True,
                     candidate_language=context.identification.langue_contact,
                 )
             )

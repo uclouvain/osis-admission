@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,10 +46,10 @@ from admission.calendar.admission_calendar import (
 from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeFinancement,
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
+    ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConnaissanceLangueDTO,
@@ -60,12 +60,22 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.dtos import (
+    AdressePersonnelleDTO,
+    CoordonneesDTO,
+    IdentificationDTO,
+)
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -83,55 +93,61 @@ from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.enums.emplacement_document import (
-    DocumentsIdentification,
-    DocumentsEtudesSecondaires,
-    DocumentsCurriculum,
-    DocumentsQuestionsSpecifiques,
     DocumentsComptabilite,
     DocumentsConnaissancesLangues,
-    DocumentsProjetRecherche,
     DocumentsCotutelle,
+    DocumentsCurriculum,
+    DocumentsEtudesSecondaires,
+    DocumentsIdentification,
+    DocumentsProjetRecherche,
+    DocumentsQuestionsSpecifiques,
+    DocumentsSuiteAutorisation,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
-    DocumentsSuiteAutorisation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import RecupererQuestionsSpecifiquesQuery
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererQuestionsSpecifiquesQuery,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
     ChoixInscriptionATitre,
     ChoixStatutPropositionContinue,
-    ChoixEdition,
 )
-from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionFormationContinueDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_continue.dtos import (
+    PropositionDTO as PropositionFormationContinueDTO,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
 from admission.ddd.admission.formation_generale.dtos import (
-    ComptabiliteDTO,
     PropositionDTO as PropositionFormationGeneraleDTO,
 )
-from admission.exports.admission_recap.attachments import (
-    Attachment,
-)
+from admission.exports.admission_recap.attachments import Attachment
 from admission.exports.admission_recap.section import (
     get_accounting_section,
+    get_authorization_section,
     get_cotutelle_section,
     get_curriculum_section,
+    get_dynamic_questions_by_tab,
     get_educational_experience_section,
     get_identification_section,
     get_languages_section,
     get_non_educational_experience_section,
+    get_requestable_free_document_section,
     get_research_project_section,
     get_secondary_studies_section,
     get_specific_questions_section,
     get_supervision_section,
-    get_dynamic_questions_by_tab,
     get_training_choice_section,
-    get_authorization_section,
-    get_requestable_free_document_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
 from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
@@ -143,9 +159,9 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import (
-    CompletePersonForIUFCFactory,
-    CompletePersonForBachelorFactory,
     CompletePersonFactory,
+    CompletePersonForBachelorFactory,
+    CompletePersonForIUFCFactory,
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -174,13 +190,13 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
+    CURRICULUM_ACTIVITY_LABEL,
     ActivitySector,
     ActivityType,
     EvaluationSystem,
     Grade,
     Result,
     TranscriptType,
-    CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -467,7 +483,9 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             status=ChoixStatutPropositionContinue.EN_BROUILLON.name,
         )
 
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         pdf_token = admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -527,7 +545,9 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             submitted=True,
         )
 
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -591,7 +611,9 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             candidate=candidate,
         )
 
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -646,7 +668,9 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             candidate=candidate,
         )
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -706,7 +730,9 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
         )
 
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -749,7 +775,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
-        self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctorale')
+        self.assertEqual(call_args_by_tab['project'].title, 'Recherche')
         self.assertEqual(call_args_by_tab['cotutelle'].title, 'Cotutelle')
         self.assertEqual(call_args_by_tab['supervision'].title, 'Supervision')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
@@ -764,7 +790,9 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         educational_experience = candidate.educationalexperience_set.first()
         non_educational_experience = candidate.professionalexperience_set.first()
 
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -1214,7 +1242,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 traduction_diplome=['uuid-traduction-diplome'],
                 equivalence=Equivalence.YES.name,
                 decision_final_equivalence_ue=['uuid-decision-final-equivalence-ue'],
+                daes_ue=['uuid-access-diploma-to-higher-education-ue'],
                 decision_final_equivalence_hors_ue=['uuid-decision-final-equivalence-hors-ue'],
+                daes_hors_ue=['uuid-access-diploma-to-higher-education-hors-ue'],
                 preuve_decision_equivalence=['uuid-preuve-decision-equivalence'],
             ),
             alternative_secondaires=AlternativeSecondairesDTO(
@@ -2321,7 +2351,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 3)
+            self.assertEqual(len(attachments), 4)
 
             self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE')
             self.assertEqual(
@@ -2334,21 +2364,33 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
+            self.assertEqual(attachments[1].identifier, 'DAES_HORS_UE')
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsEtudesSecondaires['DAES_HORS_UE'],
+            )
             self.assertEqual(
                 attachments[1].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.daes_hors_ue,
             )
-            self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[2].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[2].required)
+
+            self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[3].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(
+                attachments[3].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_equival(
         self,
@@ -2369,7 +2411,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 3)
+            self.assertEqual(len(attachments), 4)
 
             self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE')
             self.assertEqual(
@@ -2382,21 +2424,33 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
+            self.assertEqual(attachments[1].identifier, 'DAES_UE')
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsEtudesSecondaires['DAES_UE'],
+            )
             self.assertEqual(
                 attachments[1].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.daes_ue,
             )
-            self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[2].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[2].required)
+
+            self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[3].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(
+                attachments[3].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_pending_eq(
         self,
@@ -2893,7 +2947,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[1].identifier, 'RESUME_MEMOIRE')
         self.assertEqual(attachments[1].label, DocumentsCurriculum['RESUME_MEMOIRE'])
         self.assertEqual(attachments[1].uuids, experience.resume_memoire)
-        self.assertTrue(attachments[1].required)
+        self.assertFalse(attachments[1].required)
 
         self.assertEqual(attachments[2].identifier, 'DIPLOME')
         self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])

@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document statici18n strings %}
+{% load i18n static admission bootstrap3 enums osis_document statici18n strings gestion_des_comptes %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -132,12 +132,7 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
-
-          {% search_account_digit_result_msg original_admission %}
-          {% validation_syntaxique_resultat_digit original_admission %}
-          {% if digit_ticket %}
-            {% digit_ticket_status_msg digit_ticket %}
-          {% endif %}
+          {% resultat_workflow_gestion_des_comptes_alert matricule=original_admission.candidate.global_id outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
 
           {% if injection_signaletique %}
             <div class="panel panel-{% if injection_signaletique.status == 'ERROR' %}danger{% else %}warning{% endif %}">
@@ -220,7 +215,7 @@
           </div>
 
           {% bootstrap_form comment_forms.choix_formation %}
-          {% include "admission/general_education/includes/checklist/choix_formation_detail.html" %}
+          {% include "admission/doctorate/includes/checklist/choix_formation_detail.html" %}
 
           <div class="info-part">
             {% field_data _("Proposition submission") admission.soumise_le %}
@@ -263,7 +258,8 @@
       {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur next_url=next_base_url|add:'parcours_anterieur' %}
         <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
           {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
-          {% bootstrap_form comment_forms.parcours_anterieur %}
+          {% bootstrap_form comment_forms.parcours_anterieur__SIC_FOR_CDD %}
+          {% bootstrap_form comment_forms.parcours_anterieur__CDD_FOR_SIC %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
           {% panel _("Previous experience") %}
             {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' show_actions=can_update_curriculum %}
@@ -403,11 +399,6 @@
         </div>
 
       </div>
-
-      <div role="tabpanel" class="tab-pane" id="send-email">
-        {% include "admission/doctorate/includes/checklist/send_mail.html" %}
-        <div class="info-part"></div>
-      </div>
     </div>
 
     <div id="info-viewer-tab" class="viewer-tab">
@@ -469,6 +460,7 @@
   <script src="{% statici18n LANGUAGE_CODE %}"></script>
   <script src="{% static 'js/jquery.formset.js' %}"></script>
   {{ assimilation_form.media.js }}
+  {{ cdd_decision_approval_form.media.js }}
   {{ cdd_decision_refusal_form.media.js }}
   {{ sic_decision_refusal_form.media.js }}
   {{ sic_decision_approval_form.media.js }}
@@ -1308,6 +1300,15 @@
 
     .experience-authentication-message.collapse.in {
       height: auto;
+    }
+
+    {# Customize the comments to make them as disabled if necessary #}
+    .disabled-comment {
+      cursor: not-allowed;
+    }
+
+    .disabled-comment textarea {
+      background-color: #eee;
     }
   </style>
 {% endblock style %}

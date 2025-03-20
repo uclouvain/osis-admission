@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from collections import defaultdict
 
 from ckeditor.fields import RichTextFormField
 from django import forms
@@ -56,6 +55,8 @@ class CddDoctorateSendMailForm(forms.Form):
     def __init__(self, admission: 'DoctorateAdmission', *args, **kwargs):
         self.admission = admission
         super().__init__(*args, **kwargs)
-        self.fields['recipient'].initial = '{candidate.first_name} {candidate.last_name} ({candidate.email})'.format(
-            candidate=self.admission.candidate,
+        self.fields['recipient'].initial = (
+            '{candidate.first_name} {candidate.last_name} ({candidate.private_email})'.format(
+                candidate=self.admission.candidate
+            )
         )
