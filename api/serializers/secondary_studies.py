@@ -94,7 +94,7 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
 
 
 class HighSchoolDiplomaAlternativeSerializer(serializers.ModelSerializer):
-    year = RelatedAcademicYearField()
+    year = RelatedAcademicYearField(required=False)
 
     class Meta:
         model = Exam

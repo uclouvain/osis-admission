@@ -33,7 +33,8 @@ from admission.api import serializers
 from admission.api.views.mixins import (
     GeneralEducationPersonRelatedMixin,
 )
-from osis_profile.models import EducationGroupYearExam
+from osis_profile.models import EducationGroupYearExam, Exam
+from osis_profile.models.enums.exam import ExamTypes
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -50,8 +51,24 @@ class BaseExamViewSet(
     def check_permissions(self, request):
         admission = self.get_permission_object()
         if not EducationGroupYearExam.objects.filter(education_group_year=admission.training).exists():
-            raise PermissionDenied(_("There is no exam for this training."))
+            raise PermissionDenied(_("There is no required exam for this training."))
         return super().check_permissions(request)
+
+    def get_object(self):
+        admission = self.get_permission_object()
+        try:
+            return Exam.objects.get(
+                person=admission.candidate,
+                type=ExamTypes.FORMATION.name,
+                education_group_year_exam__education_group_year=admission.training,
+            )
+        except Exam.DoesNotExist:
+            return None
+
+    def get_serializer_context(self):
+        serializer_context = super().get_serializer_context()
+        serializer_context['admission'] = self.get_permission_object()
+        return serializer_context
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -70,3 +87,6 @@ class GeneralExamView(GeneralEducationPersonRelatedMixin, BaseExamViewSet):
         'GET': 'admission.view_generaleducationadmission_exam',
         'PUT': 'admission.change_generaleducationadmission_exam',
     }
+
+    def get_object(self):
+        return BaseExamViewSet.get_object(self)

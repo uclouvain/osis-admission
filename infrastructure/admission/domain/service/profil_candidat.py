@@ -345,10 +345,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             alternative_secondaires=(
                 AlternativeSecondairesDTO(
                     uuid=high_school_diploma_alternative.uuid,
-                    examen_admission_premier_cycle=high_school_diploma_alternative.first_cycle_admission_exam,
+                    examen_admission_premier_cycle=high_school_diploma_alternative.certificate,
                     examen_admission_premier_cycle_annee=(
-                        high_school_diploma_alternative.first_cycle_admission_exam_year.year
-                        if high_school_diploma_alternative.first_cycle_admission_exam_year
+                        high_school_diploma_alternative.year.year
+                        if high_school_diploma_alternative.year
                         else None
                     ),
                 )

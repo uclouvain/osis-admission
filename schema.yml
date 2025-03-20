@@ -8074,6 +8074,18 @@ components:
     Exam:
       type: object
       properties:
+        title_fr:
+          type: string
+          readOnly: true
+        title_en:
+          type: string
+          readOnly: true
+        help_text_fr:
+          type: string
+          readOnly: true
+        help_text_en:
+          type: string
+          readOnly: true
         certificate:
           type: array
           items:
@@ -8082,8 +8094,6 @@ components:
         year:
           type: integer
           nullable: true
-      required:
-      - year
     PropositionIdentityDTO:
       type: object
       properties:

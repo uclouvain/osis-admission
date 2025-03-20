@@ -23,19 +23,55 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.utils.functional import cached_property
 from rest_framework import serializers
 
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
-from osis_profile.models import Exam
+from osis_profile.models import Exam, EducationGroupYearExam
+from osis_profile.models.enums.exam import ExamTypes
 
 
 class ExamSerializer(serializers.ModelSerializer):
-    year = RelatedAcademicYearField()
+    title_fr = serializers.CharField(source="education_group_year_exam.title_fr", read_only=True)
+    title_en = serializers.CharField(source="education_group_year_exam.title_en", read_only=True)
+    help_text_fr = serializers.CharField(source="education_group_year_exam.help_text_fr", read_only=True)
+    help_text_en = serializers.CharField(source="education_group_year_exam.help_text_en", read_only=True)
+    is_valuated = serializers.SerializerMethodField()
+
+    year = RelatedAcademicYearField(required=False)
 
     class Meta:
         model = Exam
         fields = (
+            "title_fr",
+            "title_en",
+            "help_text_fr",
+            "help_text_en",
             "certificate",
             "year",
+            "is_valuated",
         )
+
+    def get_is_valuated(self, exam):
+        return self.valuation.est_valorise
+
+    @cached_property
+    def valuation(self):
+        return ProfilCandidatTranslator.valorisation_etudes_secondaires(matricule=self.context['admission'].candidate.global_id)
+
+    def update(self, instance, validated_data):
+        try:
+            education_group_year_exam = EducationGroupYearExam.objects.get(education_group_year=self.context['admission'].training)
+        except EducationGroupYearExam.DoesNotExist:
+            return instance
+        Exam.objects.update_or_create(
+            person=self.context['admission'].candidate,
+            type=ExamTypes.FORMATION.name,
+            education_group_year_exam=education_group_year_exam,
+            defaults={
+                "certificate": validated_data.get("certificate", None),
+                "year": validated_data.get("year", None),
+            },
+        )
+        return instance
