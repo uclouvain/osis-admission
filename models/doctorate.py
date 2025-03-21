@@ -79,6 +79,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
+from admission.constants import CONTEXT_DOCTORATE
 
 __all__ = [
     "DoctorateAdmission",
@@ -663,6 +664,9 @@ class DoctorateAdmission(BaseAdmission):
     @duplicate_documents_when_saving.setter
     def duplicate_documents_when_saving(self, value):
         self._duplicate_documents_when_saving = value
+
+    def get_admission_context(self):
+        return CONTEXT_DOCTORATE
 
     # The following properties are here to alias the training_id field to doctorate_id
     @property
