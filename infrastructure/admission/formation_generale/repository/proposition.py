@@ -205,30 +205,44 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None
         )
 
-        last_update_author_person = None
-        if entity.auteur_derniere_modification:
-            last_update_author_person = Person.objects.filter(global_id=entity.auteur_derniere_modification).first()
+        persons = {
+            person.global_id: person
+            for person in Person.objects.filter(
+                global_id__in=[
+                    matricule
+                    for matricule in [
+                        entity.matricule_candidat,
+                        entity.auteur_derniere_modification,
+                        entity.financabilite_derogation_premiere_notification_par,
+                        entity.financabilite_derogation_derniere_notification_par,
+                        entity.financabilite_etabli_par,
+                    ]
+                    if matricule
+                ]
+            )
+        }
 
-        candidate = Person.objects.get(global_id=entity.matricule_candidat)
+        last_update_author_person = (
+            persons[entity.auteur_derniere_modification] if entity.auteur_derniere_modification in persons else None
+        )
 
-        financabilite_etabli_par_person = None
-        if entity.financabilite_etabli_par:
-            with suppress(Person.DoesNotExist):
-                financabilite_etabli_par_person = Person.objects.get(global_id=entity.financabilite_etabli_par)
+        candidate = persons[entity.matricule_candidat]
 
-        financabilite_derogation_premiere_notification_par_person = None
-        if entity.financabilite_derogation_premiere_notification_par:
-            with suppress(Person.DoesNotExist):
-                financabilite_derogation_premiere_notification_par_person = Person.objects.get(
-                    global_id=entity.financabilite_derogation_premiere_notification_par
-                )
+        financabilite_etabli_par_person = (
+            persons[entity.financabilite_etabli_par] if entity.financabilite_etabli_par in persons else None
+        )
 
-        financabilite_derogation_derniere_notification_par_person = None
-        if entity.financabilite_derogation_derniere_notification_par:
-            with suppress(Person.DoesNotExist):
-                financabilite_derogation_derniere_notification_par_person = Person.objects.get(
-                    global_id=entity.financabilite_derogation_derniere_notification_par
-                )
+        financabilite_derogation_premiere_notification_par_person = (
+            persons[entity.financabilite_derogation_premiere_notification_par]
+            if entity.financabilite_derogation_premiere_notification_par in persons
+            else None
+        )
+
+        financabilite_derogation_derniere_notification_par_person = (
+            persons[entity.financabilite_derogation_derniere_notification_par]
+            if entity.financabilite_derogation_derniere_notification_par in persons
+            else None
+        )
 
         scholarships_uuids = list(
             scholarship.uuid
@@ -1011,7 +1025,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     'admission_requirement_year',
                 )
                 .prefetch_related(
-                    'prerequisite_courses__academic_year',
                     'additional_approval_conditions',
                     'freeadditionalapprovalcondition_set',
                     Prefetch(

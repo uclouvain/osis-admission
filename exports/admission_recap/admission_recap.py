@@ -70,12 +70,7 @@ def admission_pdf_recap(
 
         default_content = BytesIO(get_pdf_from_template('admission/exports/recap/default_content.html', [], {}))
 
-        if commands.RecupererResumePropositionQuery == doctorate_education_commands.RecupererResumePropositionQuery:
-            specific_questions = context.questions_specifiques_dtos
-        else:
-            specific_questions = message_bus_instance.invoke(
-                commands.RecupererQuestionsSpecifiquesQuery(uuid_proposition=admission.uuid),
-            )
+        specific_questions = context.questions_specifiques_dtos
 
         pdf_sections = get_sections(
             context,

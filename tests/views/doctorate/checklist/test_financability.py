@@ -24,11 +24,12 @@
 #
 # ##############################################################################
 import datetime
+from unittest import mock
 
 import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from admission.models import DoctorateAdmission
@@ -38,12 +39,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     DerogationFinancement,
 )
+from admission.tests import OsisDocumentMockTestMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -52,7 +55,8 @@ from ddd.logic.financabilite.domain.model.enums.situation import SituationFinanc
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 
 
-class FinancabiliteChangeStatusViewTestCase(TestCase):
+# @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl.com/document/')
+class FinancabiliteChangeStatusViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -101,7 +105,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
 
 
 @freezegun.freeze_time('2022-01-01')
-class FinancabiliteApprovalSetRuleViewTestCase(TestCase):
+class FinancabiliteApprovalSetRuleViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -163,7 +167,7 @@ class FinancabiliteApprovalSetRuleViewTestCase(TestCase):
 
 
 @freezegun.freeze_time('2022-01-01')
-class FinancabiliteApprovalViewTestCase(TestCase):
+class FinancabiliteApprovalViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -235,7 +239,7 @@ class FinancabiliteApprovalViewTestCase(TestCase):
 
 
 @freezegun.freeze_time('2022-01-01')
-class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
+class FinancabiliteNotFinanceableSetRuleViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -306,7 +310,7 @@ class FinancabiliteNotFinanceableSetRuleViewTestCase(TestCase):
 
 
 @freezegun.freeze_time('2022-01-01')
-class FinancabiliteNotFinanceableViewTestCase(TestCase):
+class FinancabiliteNotFinanceableViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -377,7 +381,7 @@ class FinancabiliteNotFinanceableViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
-class FinancabiliteDerogationViewTestCase(TestCase):
+class FinancabiliteDerogationViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -620,7 +624,7 @@ class FinancabiliteDerogationViewTestCase(TestCase):
 
 
 @freezegun.freeze_time('2022-01-01')
-class FinancabiliteNotConcernedViewTestCase(TestCase):
+class FinancabiliteNotConcernedViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(year=2022)

@@ -1686,41 +1686,41 @@ class AdmissionGetImageFileUrlTestCase(TestCase):
 
     def test_get_image_file_url_without_file_uuid(self):
         self.assertEqual(
-            get_image_file_url(file_uuids=[]),
+            get_image_file_url(file_uuid=None),
             '',
         )
 
     def test_get_image_file_url_with_not_accessible_token(self):
         self.token_patcher.return_value = None
         self.assertEqual(
-            get_image_file_url(file_uuids=['file_uuid']),
+            get_image_file_url(file_uuid='file_uuid'),
             '',
         )
 
     def test_get_image_file_url_with_not_accessible_metadata(self):
         self.metadata_patcher.return_value = None
         self.assertEqual(
-            get_image_file_url(file_uuids=['file_uuid']),
+            get_image_file_url(file_uuid='file_uuid'),
             '',
         )
 
     def test_get_image_file_url_with_pdf_file(self):
         self.metadata_patcher.return_value['mimetype'] = PDF_MIME_TYPE
         self.assertEqual(
-            get_image_file_url(file_uuids=['file_uuid']),
+            get_image_file_url(file_uuid='file_uuid'),
             '',
         )
 
     def test_get_image_file_url_with_jpeg_file(self):
         self.metadata_patcher.return_value['mimetype'] = JPEG_MIME_TYPE
         self.assertEqual(
-            get_image_file_url(file_uuids=['file_uuid']),
+            get_image_file_url(file_uuid='file_uuid'),
             self.image_url,
         )
 
     def test_get_image_file_url_with_png_file(self):
         self.metadata_patcher.return_value['mimetype'] = PNG_MIME_TYPE
         self.assertEqual(
-            get_image_file_url(file_uuids=['file_uuid']),
+            get_image_file_url(file_uuid='file_uuid'),
             self.image_url,
         )

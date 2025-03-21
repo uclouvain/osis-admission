@@ -317,8 +317,6 @@ COMMAND_HANDLERS = {
     GetGroupeDeSupervisionCommand: lambda msg_bus, cmd: recuperer_groupe_de_supervision(
         cmd,
         groupe_supervision_repository=_groupe_supervision_repository,
-        promoteur_translator=_promoteur_translator,
-        membre_ca_translator=_membre_ca_translator,
     ),
     GetCotutelleCommand: lambda msg_bus, cmd: recuperer_cotutelle(
         cmd,
@@ -372,8 +370,6 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=_profil_candidat_translator,
         i_comptabilite_translator=_comptabilite_translator,
         groupe_supervision_repository=_groupe_supervision_repository,
-        promoteur_translator=_promoteur_translator,
-        membre_ca_translator=_membre_ca_translator,
         academic_year_repository=_academic_year_repository,
         question_specifique_translator=_question_specific_translator,
     ),
@@ -391,8 +387,6 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         personne_connue_translator=_personne_connue_translator,
         groupe_supervision_repository=_groupe_supervision_repository,
-        promoteur_translator=_promoteur_translator,
-        membre_ca_translator=_membre_ca_translator,
     ),
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
@@ -404,8 +398,6 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         personne_connue_translator=_personne_connue_translator,
         groupe_supervision_repository=_groupe_supervision_repository,
-        promoteur_translator=_promoteur_translator,
-        membre_ca_translator=_membre_ca_translator,
     ),
     AnnulerReclamationDocumentsAuCandidatCommand: (
         lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
@@ -420,8 +412,6 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             comptabilite_translator=_comptabilite_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
-            promoteur_translator=_promoteur_translator,
-            membre_ca_translator=_membre_ca_translator,
         )
     ),
     CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
@@ -438,8 +428,6 @@ COMMAND_HANDLERS = {
             notification=_notification,
             comptabilite_translator=_comptabilite_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
-            promoteur_translator=_promoteur_translator,
-            membre_ca_translator=_membre_ca_translator,
         )
     ),
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand: (
@@ -452,8 +440,6 @@ COMMAND_HANDLERS = {
             emplacement_document_repository=_emplacement_document_repository,
             comptabilite_translator=_comptabilite_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
-            promoteur_translator=_promoteur_translator,
-            membre_ca_translator=_membre_ca_translator,
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -538,8 +524,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
-            promoteur_translator=_promoteur_translator,
-            membre_ca_translator=_membre_ca_translator,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -583,8 +568,6 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
         groupe_supervision_repository=_groupe_supervision_repository,
-        membre_ca_translator=_membre_ca_translator,
-        promoteur_translator=_promoteur_translator,
         notification=_notification,
     ),
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
@@ -650,8 +633,6 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
-            promoteur_translator=_promoteur_translator,
-            membre_ca_translator=_membre_ca_translator,
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
@@ -680,8 +661,6 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             digit_repository=_digit_repository,
             groupe_supervision_repository=_groupe_supervision_repository,
-            promoteur_translator=_promoteur_translator,
-            membre_ca_translator=_membre_ca_translator,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -698,8 +677,6 @@ COMMAND_HANDLERS = {
             personne_connue_translator=_personne_connue_ucl_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
-            promoteur_translator=_promoteur_translator,
-            membre_ca_translator=_membre_ca_translator,
         )
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (

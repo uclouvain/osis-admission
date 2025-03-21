@@ -42,16 +42,3 @@
     </label>
   </div>
 {% endif %}
-{% if request.htmx %}
-  <div id='fac-decision-access-titles' hx-swap-oob="true">
-    {% if selected_access_titles_names %}
-      <ul>
-        {% for access_title in selected_access_titles_names %}
-          <li>{{ access_title }}</li>
-        {% endfor  %}
-      </ul>
-    {% else %}
-      {% translate 'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving access to the chosen program.' %}
-    {% endif %}
-  </div>
-{% endif %}

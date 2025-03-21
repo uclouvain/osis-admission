@@ -29,6 +29,7 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission import commands
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
@@ -182,8 +183,10 @@ class RecupererDocumentsReclamesPropositionQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
+class RecupererResumeEtEmplacementsDocumentsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    avec_document_libres: bool = False
+    experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
 
 
 @attr.dataclass(frozen=True, slots=True)

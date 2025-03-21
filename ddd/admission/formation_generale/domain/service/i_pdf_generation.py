@@ -48,7 +48,6 @@ class IPDFGeneration(DomainService):
         unites_enseignement_translator: IUnitesEnseignementTranslator,
         profil_candidat_translator: IProfilCandidatTranslator,
         titres_selectionnes: List[TitreAccesSelectionnable],
-        annee_courante: int,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ) -> None:
         raise NotImplementedError

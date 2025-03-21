@@ -25,10 +25,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div id="document-details">
-  <div id="document-spinner">
-    <span class="fa fa-spinner"></span>
-  </div>
+<div id="document-details" class="element-with-spinner">
   {% if several_files %}
     {% blocktranslate trimmed asvar display_problem_message %}
       There has been a problem when merging the documents, this document contains several files and only the first one

@@ -137,9 +137,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         ]:
             self.assertIsNone(form.fields.get(field))
 
-        formset = response.context['sic_decision_free_approval_condition_formset']
-        self.assertEqual(len(formset.forms), 0)
-
     def test_approval_decision_form_initialization_other_training(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -245,10 +242,8 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertTrue(response.headers.get('HX-Refresh'))
 
         form = response.context['sic_decision_approval_form']
-        formset = response.context['sic_decision_free_approval_condition_formset']
 
         self.assertTrue(form.is_valid(), form.errors)
-        self.assertTrue(formset.is_valid())
 
         # Check that the admission has been updated
         self.admission.refresh_from_db()

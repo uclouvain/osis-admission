@@ -48,16 +48,7 @@
 {% block panel-heading %}
   {% display admission.nom_candidat ',' admission.prenom_candidat as full_candidate_name %}
   <div class="min-width">
-    {% get_image_file_url admission.photo_identite_candidat as id_photo_url %}
-    <img
-        {% if id_photo_url %}
-          src="{{ id_photo_url }}"
-        {% else %}
-          src="{% static 'img/men_unknown.png' %}"
-        {% endif %}
-          alt="{% translate 'Identification photo of the candidate' %}"
-          class="img-thumbnail"
-    />
+    {% include 'admission/includes/candidate_id_photo.html' %}
   </div>
   <div>
     <span>

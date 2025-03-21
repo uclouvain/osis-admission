@@ -24,9 +24,10 @@
 #
 ##############################################################################
 from admission.ddd.admission.formation_generale.dtos.comptabilite import ComptabiliteDTO
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionDTO, PropositionGestionnaireDTO
 
 __all__ = [
     "PropositionDTO",
-    "ComptabiliteDTO"
+    "PropositionGestionnaireDTO",
+    "ComptabiliteDTO",
 ]

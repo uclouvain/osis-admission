@@ -170,6 +170,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'uuid',
                 'candidate__last_name',
                 'candidate__first_name',
+                'candidate__country_of_citizenship_id',
                 'candidate__country_of_citizenship__european_union',
                 'candidate__country_of_citizenship__name',
                 'candidate__country_of_citizenship__name_en',
@@ -481,7 +482,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             nationalite_ue_candidat=admission.candidate.country_of_citizenship.european_union
             if admission.candidate.country_of_citizenship_id
             else None,
-            vip=admission.is_vip,
+            vip=admission.is_vip,  # From annotation
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
             derniere_modification_le=admission.modified_at,
@@ -501,8 +502,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 for viewer in admission.other_admission_viewers
             ],
             date_confirmation=admission.submitted_at,
-            est_premiere_annee=admission.est_premiere_annee,
-            poursuite_de_cycle=admission.cycle_pursuit,
+            est_premiere_annee=admission.est_premiere_annee,  # From annotation
+            poursuite_de_cycle=admission.cycle_pursuit,  # From annotation
             annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year_id else None,
             adresse_email_candidat=admission.candidate.private_email,
             reponses_questions_specifiques=admission.specific_question_answers,

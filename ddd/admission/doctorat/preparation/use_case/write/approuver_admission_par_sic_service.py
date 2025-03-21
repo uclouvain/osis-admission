@@ -72,8 +72,6 @@ def approuver_admission_par_sic(
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     digit_repository: 'IDigitRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -85,8 +83,6 @@ def approuver_admission_par_sic(
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
         question_specifique_translator=question_specifique_translator,
     )
     documents_dto = emplacements_documents_demande_translator.recuperer_emplacements_dto(

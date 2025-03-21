@@ -44,6 +44,12 @@ AdmissionPropositionDTO = Union[
     dtos_formation_generale.PropositionDTO,
 ]
 
+AdmissionPropositionGestionnaireDTO = Union[
+    dtos_doctorat.PropositionGestionnaireDTO,
+    dtos_formation_continue.PropositionDTO,
+    dtos_formation_generale.PropositionGestionnaireDTO,
+]
+
 AdmissionComptabiliteDTO = Union[
     dtos_doctorat.ComptabiliteDTO,
     dtos_formation_generale.ComptabiliteDTO,
@@ -88,10 +94,15 @@ class ResumePropositionDTO(ResumeCandidatDTO):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ResumePropositionGestionnaireDTO(ResumePropositionDTO):
+    proposition = AdmissionPropositionGestionnaireDTO
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ResumeEtEmplacementsDocumentsPropositionDTO:
     """
     DTO contenant l'ensemble des informations relatives à la proposition et au candidat associé.
     """
 
-    resume: ResumePropositionDTO
+    resume: ResumePropositionGestionnaireDTO
     emplacements_documents: List[EmplacementDocumentDTO]

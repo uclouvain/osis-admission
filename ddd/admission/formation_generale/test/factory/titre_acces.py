@@ -48,6 +48,7 @@ class TitreAccesSelectionnableFactory(factory.Factory):
     annee = factory.Faker('year')
     selectionne = False
     pays_iso_code = factory.Faker('country_code')
+    nom = factory.Faker('name')
 
     class Meta:
         model = TitreAccesSelectionnable

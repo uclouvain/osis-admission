@@ -106,7 +106,7 @@
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
-      <div id="document-content" hx-indicator="#document-spinner">
+      <div id="document-content" hx-indicator="#document-details">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
@@ -619,21 +619,18 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      font-size: 2em;
+      width: 2em;
+      height: 2em;
       margin-top: -1em;
-      content: "\f110";
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      -webkit-animation-name: fa-spin;
-      animation-name: fa-spin;
-      -webkit-animation-direction: normal;
-      animation-direction: normal;
-      -webkit-animation-duration: 1s;
-      animation-duration: 1s;
-      -webkit-animation-iteration-count: infinite;
-      animation-iteration-count: infinite;
-      -webkit-animation-timing-function: steps(8);
-      animation-timing-function: steps(8);
+      content: '';
+      border-radius: 50%;
+      -moz-animation: spin-loader 2s linear infinite;
+      -webkit-animation: spin-loader 2s linear infinite;
+      animation: spin-loader 2s linear infinite;
+      border-color: #286090;
+      border-style: solid;
+      border-top-color: transparent;
+      z-index: 100;
     }
 
     #tabs-content a.saving::before {

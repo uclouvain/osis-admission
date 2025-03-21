@@ -44,3 +44,4 @@ class TitreAccesSelectionnable(interface.RootEntity):
     selectionne: bool
     annee: Optional[int]
     pays_iso_code: str
+    nom: str

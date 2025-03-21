@@ -63,8 +63,6 @@ def annuler_reclamation_documents_au_candidat(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
     # GIVEN
@@ -76,8 +74,6 @@ def annuler_reclamation_documents_au_candidat(
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
         question_specifique_translator=question_specifique_translator,
     )
 

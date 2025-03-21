@@ -1424,6 +1424,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             motif_de_refus="",
             motif_de_refus_autre="",
             motif_d_annulation="",
+            photo_identite_candidat=[],
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
@@ -1620,6 +1621,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_derogation_premiere_notification_par='',
             financabilite_derogation_derniere_notification_le=None,
             financabilite_derogation_derniere_notification_par='',
+            nom_langue_redaction_these='',
         )
         cls.continuing_context = _ResumePropositionDTO(
             identification=identification_dto,

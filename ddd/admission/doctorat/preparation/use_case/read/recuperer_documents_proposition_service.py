@@ -56,8 +56,6 @@ def recuperer_documents_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
 ) -> 'List[EmplacementDocumentDTO]':
     # GIVEN
     resume_dto = ResumeProposition.get_resume_demande_doctorat(
@@ -67,8 +65,6 @@ def recuperer_documents_proposition(
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
         question_specifique_translator=question_specifique_translator,
     )
 

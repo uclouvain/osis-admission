@@ -863,7 +863,6 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_submitted_profile_countries_names()
             .annotate_last_status_update()
             .prefetch_related(
-                'prerequisite_courses__academic_year',
                 Prefetch(
                     'refusal_reasons',
                     queryset=RefusalReason.objects.select_related('category').order_by('category__order', 'order'),

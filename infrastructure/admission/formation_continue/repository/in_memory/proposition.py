@@ -221,6 +221,7 @@ class PropositionInMemoryRepository(
             nom_pays_nationalite_candidat=candidat.nationalite,
             noma_candidat=candidat.noma_candidat,
             adresse_email_candidat=candidat.adresse_email_candidat,
+            photo_identite_candidat=[],
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
             modifiee_le=proposition.modifiee_le,

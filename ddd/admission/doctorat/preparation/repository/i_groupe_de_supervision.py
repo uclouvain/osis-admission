@@ -25,7 +25,7 @@
 # ##############################################################################
 import abc
 from abc import abstractmethod
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
@@ -131,6 +131,13 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
     @abc.abstractmethod
     def get_members(cls, groupe_id: 'GroupeDeSupervisionIdentity') -> List[Union['PromoteurDTO', 'MembreCADTO']]:
         raise NotImplementedError
+
+    @classmethod
+    def get_members_by_member_id(
+        cls,
+        groupe_id: 'GroupeDeSupervisionIdentity',
+    ) -> Dict[str, Union['PromoteurDTO', 'MembreCADTO']]:
+        return {str(membre.uuid): membre for membre in cls.get_members(groupe_id=groupe_id)}
 
     @classmethod
     def get_cotutelle_dto_from_model(cls, cotutelle: Optional[Cotutelle]) -> 'CotutelleDTO':

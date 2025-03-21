@@ -43,11 +43,9 @@ from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueD
 from admission.ddd.admission.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
 from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
-    RecupererQuestionsSpecifiquesQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -75,6 +73,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_DECISION_IUFC_COMMENT_FOR_FAC,
 )
 from admission.utils import get_salutation_prefix, get_portal_admission_url, get_backoffice_admission_url
+from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
 from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
@@ -404,6 +403,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
 
 class ChecklistView(
+    PropositionFromResumeMixin,
     CheckListDefaultContextMixin,
     TemplateView,
 ):
@@ -433,6 +433,12 @@ class ChecklistView(
         }
         return documents_by_tab
 
+    @cached_property
+    def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        return message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid)
+        )
+
     def get_template_names(self):
         if self.request.htmx:
             return ["admission/continuing_education/checklist_menu.html"]
@@ -444,22 +450,11 @@ class ChecklistView(
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition
-            command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
-            )
+            command_result = self.proposition_resume
 
             context['resume_proposition'] = command_result.resume
 
-            specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
-                RecupererQuestionsSpecifiquesQuery(
-                    uuid_proposition=self.admission_uuid,
-                    onglets=[
-                        Onglets.INFORMATIONS_ADDITIONNELLES.name,
-                        Onglets.ETUDES_SECONDAIRES.name,
-                        Onglets.CURRICULUM.name,
-                    ],
-                )
-            )
+            specific_questions = command_result.resume.questions_specifiques_dtos
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 

@@ -33,6 +33,9 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.service.i_comptabilite import IComptabiliteTranslator
+from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -43,11 +46,15 @@ def recuperer_resume_proposition(
     i_profil_candidat_translator: 'IProfilCandidatTranslator',
     i_comptabilite_translator: 'IComptabiliteTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    question_specifique_translator: 'IQuestionSpecifiqueTranslator',
 ) -> 'ResumePropositionDTO':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_dto = proposition_repository.get_dto(entity_id=proposition_id)
     comptabilite_dto = i_comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
+    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
+        proposition_uuid=cmd.uuid_proposition,
+    )
 
     # WHEN
     resume_dto = ResumeProposition.get_resume(
@@ -55,6 +62,7 @@ def recuperer_resume_proposition(
         academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
+        questions_specifiques_dtos=questions_specifiques_dtos,
         experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
         if proposition_dto.est_non_soumise
         else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,

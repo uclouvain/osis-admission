@@ -61,8 +61,6 @@ def approuver_proposition_par_cdd(
     academic_year_repository: 'IAcademicYearRepository',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
     notification: 'INotification',
 ) -> PropositionIdentity:
     # GIVEN
@@ -79,8 +77,6 @@ def approuver_proposition_par_cdd(
     groupe_supervision_dto = GroupeDeSupervisionDto().get(
         uuid_proposition=cmd.uuid_proposition,
         repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
     )
 
     titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(

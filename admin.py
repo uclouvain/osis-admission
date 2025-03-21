@@ -833,6 +833,7 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
     ]
     list_display = ['admission', 'payment_id', 'status', 'method']
     list_filter = ['status', 'method']
+    autocomplete_fields = ['admission']
 
 
 @admin.register(EPCInjection)

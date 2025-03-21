@@ -30,6 +30,7 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission import commands
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from osis_common.ddd import interface
 
 
@@ -391,7 +392,7 @@ class RemplirEmplacementDocumentParGestionnaireCommand(commands.RemplirEmplaceme
 class RecupererResumeEtEmplacementsDocumentsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
     avec_document_libres: bool = False
-
+    experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.SEULEMENT_VALORISEES
 
 # Paiement des frais de dossier
 @attr.dataclass(frozen=True, slots=True)
