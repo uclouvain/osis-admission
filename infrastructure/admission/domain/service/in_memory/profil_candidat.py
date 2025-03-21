@@ -36,10 +36,12 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     ConnaissanceLangueDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
@@ -1022,6 +1024,14 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 est_valorise_par_epc=False,
                 types_formations_admissions_valorisees=[],
             ),
+        )
+
+    @classmethod
+    def get_examen(cls, matricule: str, formation: 'Formation') -> 'ExamenDTO':
+        return ExamenDTO(
+            requis=False,
+            attestation=[],
+            annee=None,
         )
 
     @classmethod

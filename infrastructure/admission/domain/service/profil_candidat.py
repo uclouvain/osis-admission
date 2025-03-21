@@ -56,6 +56,7 @@ from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue impor
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
+from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -70,6 +71,7 @@ from admission.ddd.admission.dtos import (
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
+from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
@@ -106,7 +108,7 @@ from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,
-    ProfessionalExperience, Exam,
+    ProfessionalExperience, Exam, EducationGroupYearExam,
 )
 from osis_profile.models.education import LanguageKnowledge
 from osis_profile.models.enums.exam import ExamTypes
@@ -672,6 +674,23 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             candidate,
             cls.has_default_language(),
         )
+
+    @classmethod
+    def get_examen(cls, matricule: str, formation: 'Formation') -> 'ExamenDTO':
+        education_group_year_exam = EducationGroupYearExam.objects.filter(
+            education_group_year__acronym=formation.entity_id.sigle,
+            education_group_year__academic_year__year=formation.entity_id.annee,
+        ).first()
+        if education_group_year_exam is None:
+            return ExamenDTO(requis=False, attestation=[], annee=None)
+        exam = Exam.objects.filter(
+            person__global_id=matricule,
+            type=ExamTypes.FORMATION.name,
+            education_group_year_exam=education_group_year_exam,
+        ).first()
+        if exam is None:
+            return ExamenDTO(requis=True, attestation=[], annee=None)
+        return ExamenDTO(requis=True, attestation=exam.certificate, annee=exam.year.year)
 
     @classmethod
     def get_experiences_non_academiques(

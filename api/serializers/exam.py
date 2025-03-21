@@ -33,10 +33,10 @@ from osis_profile.models.enums.exam import ExamTypes
 
 
 class ExamSerializer(serializers.ModelSerializer):
-    title_fr = serializers.CharField(source="education_group_year_exam.title_fr", read_only=True)
-    title_en = serializers.CharField(source="education_group_year_exam.title_en", read_only=True)
-    help_text_fr = serializers.CharField(source="education_group_year_exam.help_text_fr", read_only=True)
-    help_text_en = serializers.CharField(source="education_group_year_exam.help_text_en", read_only=True)
+    title_fr = serializers.SerializerMethodField()
+    title_en = serializers.SerializerMethodField()
+    help_text_fr = serializers.SerializerMethodField()
+    help_text_en = serializers.SerializerMethodField()
     is_valuated = serializers.SerializerMethodField()
 
     year = RelatedAcademicYearField(required=False)
@@ -53,6 +53,26 @@ class ExamSerializer(serializers.ModelSerializer):
             "is_valuated",
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title_fr'].field_schema = {'type': 'string'}
+        self.fields['title_en'].field_schema = {'type': 'string'}
+        self.fields['help_text_fr'].field_schema = {'type': 'string'}
+        self.fields['help_text_en'].field_schema = {'type': 'string'}
+        self.fields['is_valuated'].field_schema = {'type': 'boolean'}
+
+    def get_title_fr(self, exam):
+        return getattr(self.education_group_year_exam, 'title_fr', '')
+
+    def get_title_en(self, exam):
+        return getattr(self.education_group_year_exam, 'title_en', '')
+
+    def get_help_text_fr(self, exam):
+        return getattr(self.education_group_year_exam, 'help_text_fr', '')
+
+    def get_help_text_en(self, exam):
+        return getattr(self.education_group_year_exam, 'help_text_en', '')
+
     def get_is_valuated(self, exam):
         return self.valuation.est_valorise
 
@@ -60,15 +80,20 @@ class ExamSerializer(serializers.ModelSerializer):
     def valuation(self):
         return ProfilCandidatTranslator.valorisation_etudes_secondaires(matricule=self.context['admission'].candidate.global_id)
 
-    def update(self, instance, validated_data):
+    @cached_property
+    def education_group_year_exam(self):
         try:
-            education_group_year_exam = EducationGroupYearExam.objects.get(education_group_year=self.context['admission'].training)
+            return EducationGroupYearExam.objects.get(education_group_year=self.context['admission'].training)
         except EducationGroupYearExam.DoesNotExist:
+            return None
+
+    def update(self, instance, validated_data):
+        if self.education_group_year_exam is None:
             return instance
         Exam.objects.update_or_create(
             person=self.context['admission'].candidate,
             type=ExamTypes.FORMATION.name,
-            education_group_year_exam=education_group_year_exam,
+            education_group_year_exam=self.education_group_year_exam,
             defaults={
                 "certificate": validated_data.get("certificate", None),
                 "year": validated_data.get("year", None),

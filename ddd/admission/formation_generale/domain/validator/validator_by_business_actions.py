@@ -85,6 +85,8 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldSpecifierInformationsAcceptationFacultaireInscription,
     ShouldPropositionEtreReorientationExterneAvecConditionAcces,
 )
+from admission.ddd.admission.formation_generale.domain.validator._should_examen_etre_completees import \
+    ShouldSpecifieExamenSiRequis
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
     ShouldParcoursAnterieurEtreSuffisant,
@@ -238,6 +240,25 @@ class EtudesSecondairesValidatorList(TwoStepsMultipleBusinessExceptionListValida
             ShouldSpecifieSiDiplomeEtudesSecondaires(
                 diplome_etudes_secondaires=self.diplome_etudes_secondaires,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ExamenValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    requis: bool
+    attestation: list[str]
+    annee: Optional[int]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSpecifieExamenSiRequis(
+                requis=self.requis,
+                attestation=self.attestation,
+                annee=self.annee,
             ),
         ]
 

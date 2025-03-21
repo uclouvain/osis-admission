@@ -65,7 +65,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleComptabiliteValidatorList,
     FormationGeneraleCurriculumPostSoumissionValidatorList,
     FormationGeneraleCurriculumValidatorList,
-    FormationGeneraleInformationsComplementairesValidatorList,
+    FormationGeneraleInformationsComplementairesValidatorList, ExamenValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
@@ -187,6 +187,21 @@ class ProfilCandidat(interface.DomainService):
                 diplome_etudes_secondaires=etudes_secondaires.diplome_etudes_secondaires,
                 annee_diplome_etudes_secondaires=etudes_secondaires.annee_diplome_etudes_secondaires,
             ).validate()
+
+    @classmethod
+    def verifier_examens(
+        cls,
+        matricule: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        formation: Formation,
+    ) -> None:
+        examen = profil_candidat_translator.get_examen(matricule, formation)
+
+        ExamenValidatorList(
+            requis=examen.requis,
+            attestation=examen.attestation,
+            annee=examen.annee,
+        ).validate()
 
     @classmethod
     def verifier_curriculum(

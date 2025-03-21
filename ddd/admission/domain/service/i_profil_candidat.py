@@ -35,8 +35,10 @@ from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
@@ -79,6 +81,11 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_examen(cls, matricule: str, formation: 'Formation') -> 'ExamenDTO':
         raise NotImplementedError
 
     @classmethod

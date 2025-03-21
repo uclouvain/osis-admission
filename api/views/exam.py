@@ -63,11 +63,13 @@ class BaseExamViewSet(
                 education_group_year_exam__education_group_year=admission.training,
             )
         except Exam.DoesNotExist:
-            return None
+            return Exam()
 
     def get_serializer_context(self):
         serializer_context = super().get_serializer_context()
-        serializer_context['admission'] = self.get_permission_object()
+        # Avoid error during generateschema command
+        if 'uuid' in self.kwargs:
+            serializer_context['admission'] = self.get_permission_object()
         return serializer_context
 
     def get(self, request, *args, **kwargs):

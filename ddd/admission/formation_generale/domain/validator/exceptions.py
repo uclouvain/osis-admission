@@ -322,3 +322,11 @@ class ReorientationExterneAvecConditionAccesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The proposition must involve a change of course and must have a defined access condition.")
         super().__init__(message, **kwargs)
+        
+        
+class ExamenNonCompletesException(BusinessException):
+    status_code = "FORMATION-GENERALE-36"
+
+    def __init__(self, **kwargs):
+        message = _("Exam must be completed for this training.")
+        super().__init__(message, **kwargs)

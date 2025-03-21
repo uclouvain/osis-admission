@@ -6246,8 +6246,6 @@ components:
             year:
               type: integer
               nullable: true
-          required:
-          - year
           nullable: true
         specific_question_answers:
           type: object
@@ -8094,6 +8092,9 @@ components:
         year:
           type: integer
           nullable: true
+        is_valuated:
+          type: boolean
+          readOnly: true
     PropositionIdentityDTO:
       type: object
       properties:
