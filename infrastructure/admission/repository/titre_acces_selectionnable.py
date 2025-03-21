@@ -67,7 +67,6 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__highschooldiplomaalternative',
                 'candidate__graduated_from_high_school_year',
             )
-            .prefetch_related('internal_access_titles')
             .only(
                 'are_secondary_studies_access_title',
                 'candidate__global_id',
