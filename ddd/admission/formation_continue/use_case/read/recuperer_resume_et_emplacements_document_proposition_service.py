@@ -33,7 +33,7 @@ from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPro
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -46,8 +46,8 @@ from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAc
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def recuperer_resume_et_emplacements_documents_non_libres_proposition(
-    cmd: 'RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery',
+def recuperer_resume_et_emplacements_documents_proposition(
+    cmd: 'RecupererResumeEtEmplacementsDocumentsPropositionQuery',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
@@ -58,16 +58,15 @@ def recuperer_resume_et_emplacements_documents_non_libres_proposition(
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_dto = proposition_repository.get_dto(entity_id=proposition_id)
-    resume_dto = ResumeProposition.get_resume(
+    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
+        proposition_uuid=cmd.uuid_proposition,
+    )
+    resume_dto = ResumeProposition.get_resume_pour_gestionnaire(
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
-        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
-    )
-
-    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
-        proposition_uuid=cmd.uuid_proposition,
-        type=TypeItemFormulaire.DOCUMENT.name,
+        experiences_cv_recuperees=cmd.experiences_cv_recuperees,
+        questions_specifiques_dtos=questions_specifiques_dtos,
     )
 
     # WHEN

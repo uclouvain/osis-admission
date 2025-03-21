@@ -104,8 +104,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
             form_kwargs['data'] = self.request.POST
         else:
             form_kwargs['initial'] = {
-                'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
-                + self.admission.other_refusal_reasons,
+                'reasons': self.admission_refusal_reasons,
             }
 
         return FinancabilityDispensationRefusalForm(**form_kwargs)
@@ -143,7 +142,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
             'greetings': greetings,
             'greetings_end': greetings_ends,
             'contact_link': get_training_url(
-                training_type=self.admission.training.education_group_type.name,
+                training_type=self.proposition.formation.type,
                 training_acronym=self.admission.training.acronym,
                 partial_training_acronym=self.admission.training.partial_acronym,
                 suffix='contacts',
@@ -229,7 +228,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                 for c in CommentEntry.objects.filter(
                     object_uuid=self.admission_uuid,
                     tags__contains=['financabilite'],
-                )
+                ).select_related('author')
             }
 
             context['comment_forms'] = {

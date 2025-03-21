@@ -45,6 +45,7 @@ class TitreAccesSelectionnableBuilder(interface.RootEntityBuilder):
             selectionne=cmd.selectionne,
             annee=None,
             pays_iso_code='',
+            nom='',
         )
 
     @classmethod

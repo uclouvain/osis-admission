@@ -28,10 +28,10 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
     IEmplacementsDocumentsPropositionTranslator,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
@@ -56,23 +56,27 @@ def recuperer_resume_et_emplacements_documents_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> ResumeEtEmplacementsDocumentsPropositionDTO:
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition_dto = proposition_repository.get_dto(entity_id=proposition_id)
+    proposition_dto = proposition_repository.get_dto_for_gestionnaire(
+        entity_id=proposition_id,
+        unites_enseignement_translator=unites_enseignement_translator,
+    )
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
 
-    resume_dto = ResumeProposition.get_resume(
+    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
+        proposition_uuid=cmd.uuid_proposition,
+    )
+
+    resume_dto = ResumeProposition.get_resume_pour_gestionnaire(
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
-        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
-    )
-
-    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
-        proposition_uuid=cmd.uuid_proposition,
-        type=TypeItemFormulaire.DOCUMENT.name,
+        experiences_cv_recuperees=cmd.experiences_cv_recuperees,
+        questions_specifiques_dtos=questions_specifiques_dtos,
     )
 
     # WHEN

@@ -34,11 +34,13 @@ from django.utils.translation import gettext as _
 from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
-from admission.auth.roles.program_manager import ProgramManager
+from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_FAC,
@@ -46,10 +48,10 @@ from admission.ddd.admission.enums.emplacement_document import (
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
-from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.document import (
     RequestAllDocumentsForm,
@@ -61,7 +63,6 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
     ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
 )
-from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
@@ -133,10 +134,25 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
     form_class = RequestAllDocumentsForm
     name = 'document-list'
 
-    retrieve_documents_command = {
-        CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
-        CONTEXT_CONTINUING: continuing_education_commands.RecupererDocumentsPropositionQuery,
-        CONTEXT_DOCTORATE: doctorate_education_commands.RecupererDocumentsPropositionQuery,
+    @cached_property
+    def resume_proposition_and_documents(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        return message_bus_instance.invoke(
+            self.retrieve_resume_and_documents_command[self.current_context](
+                uuid_proposition=self.admission_uuid,
+                avec_document_libres=True,
+                experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+            )
+        )
+
+    @cached_property
+    def proposition(self):
+        # Override it to avoid unuseful request
+        return self.resume_proposition_and_documents.resume.proposition
+
+    retrieve_resume_and_documents_command = {
+        CONTEXT_GENERAL: general_education_commands.RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+        CONTEXT_CONTINUING: continuing_education_commands.RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+        CONTEXT_DOCTORATE: doctorate_education_commands.RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     }
     fac_documents_request_command = {
         CONTEXT_GENERAL: general_education_commands.ReclamerDocumentsAuCandidatParFACCommand,
@@ -187,15 +203,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
 
     @cached_property
     def documents(self) -> List[EmplacementDocumentDTO]:
-        return (
-            message_bus_instance.invoke(
-                self.retrieve_documents_command[self.current_context](
-                    uuid_proposition=self.admission_uuid,
-                )
-            )
-            if self.current_context in self.retrieve_documents_command
-            else []
-        )
+        return self.resume_proposition_and_documents.emplacements_documents
 
     @cached_property
     def requestable_documents(self):
@@ -263,7 +271,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
                 CONTEXT_DOCTORATE: ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
                 CONTEXT_CONTINUING: ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
             }
-            if ProgramManager.belong_to(self.request.user.person)
+            if self.is_fac
             else {
                 CONTEXT_GENERAL: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL,
                 CONTEXT_DOCTORATE: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,

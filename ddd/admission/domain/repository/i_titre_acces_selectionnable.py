@@ -84,4 +84,5 @@ class ITitreAccesSelectionnableRepository(interface.AbstractRepository):
             type_titre=entity.entity_id.type_titre.name,
             annee=entity.annee,
             pays_iso_code=entity.pays_iso_code,
+            nom=entity.nom,
         )

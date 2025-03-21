@@ -47,6 +47,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=None,
                 pays_iso_code='',
+                nom='',
             )
         ]
 
@@ -60,6 +61,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2020,
                 pays_iso_code='BE',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name,
@@ -67,6 +69,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2021,
                 pays_iso_code='FR',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE.name,
@@ -74,6 +77,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2022,
                 pays_iso_code='',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name,
@@ -81,6 +85,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2015,
                 pays_iso_code='UK',
+                nom='',
             ),
         ]
 
@@ -94,6 +99,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2020,
                 pays_iso_code='BE',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name,
@@ -101,6 +107,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2020,
                 pays_iso_code='FR',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE.name,
@@ -108,6 +115,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2022,
                 pays_iso_code='',
+                nom='',
             ),
         ]
 

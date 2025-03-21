@@ -35,6 +35,7 @@ from admission.auth.roles.program_manager import (
     ProgramManager as ProgramManagerAdmission,
 )
 from admission.auth.roles.sic_management import SicManagement
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL
 from admission.ddd.admission.commands import (
     RechercherParcoursAnterieurQuery,
     RecupererEtudesSecondairesQuery,
@@ -63,21 +64,15 @@ from osis_role.contrib.permissions import _get_roles_assigned_to_user
 __all__ = [
     "AdmissionCommentsView",
     "AdmissionCommentApiView",
-    "COMMENT_TAG_SIC",
-    "COMMENT_TAG_FAC",
-    "COMMENT_TAG_GLOBAL",
     "COMMENT_TAG_IUFC_FOR_FAC",
     "COMMENT_TAG_FAC_FOR_IUFC",
 ]
 __namespace__ = False
 
-COMMENT_TAG_SIC = 'SIC'
-COMMENT_TAG_FAC = 'FAC'
 COMMENT_TAG_IUFC_FOR_FAC = 'IUFC_for_FAC'
 COMMENT_TAG_FAC_FOR_IUFC = 'FAC_for_IUFC'
 COMMENT_TAG_SIC_FOR_CDD = 'SIC_FOR_CDD'
 COMMENT_TAG_CDD_FOR_SIC = 'CDD_FOR_SIC'
-COMMENT_TAG_GLOBAL = 'GLOBAL'
 
 
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):

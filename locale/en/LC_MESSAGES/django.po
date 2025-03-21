@@ -970,6 +970,9 @@ msgstr "Biology"
 msgid "Bachelor"
 msgstr ""
 
+msgid "Bachelor's course entrance exam"
+msgstr ""
+
 msgid "Back to checklist"
 msgstr ""
 
@@ -1078,6 +1081,9 @@ msgid "CEP"
 msgstr ""
 
 msgid "CERTIFICAT_60_CREDITS"
+msgstr ""
+
+msgid "CESS"
 msgstr ""
 
 msgctxt "equivalence_type"
@@ -4350,6 +4356,9 @@ msgid "No longer designate the document as to be requested"
 msgstr ""
 
 msgid "No one invited"
+msgstr ""
+
+msgid "No payment"
 msgstr ""
 
 msgid "No pool was found to match."

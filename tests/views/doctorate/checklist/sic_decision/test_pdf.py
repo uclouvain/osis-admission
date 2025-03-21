@@ -83,7 +83,6 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
             with_prerequisite_courses=False,
-            program_planned_years_number=2,
             annual_program_contact_person_name='foo',
             annual_program_contact_person_email='bar@example.org',
             tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name,

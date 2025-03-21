@@ -1,0 +1,42 @@
+{% load static %}
+{% load i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if access_title_country %}
+  {% if access_title_country == 'BE' %}
+    <img class="flag-icon" src="{% static "img/be-square.svg" %}" alt="{% translate 'Belgian flag' %}">
+  {% else %}
+    <i class="fa fa-earth"></i>
+  {% endif %}
+{% elif access_title_country == None and not request.htmx %}
+  <span
+    hx-get="{% url view.base_namespace|add:':access-title-country' view.kwargs.uuid %}"
+    hx-trigger="load"
+    hx-swap="outerHTML"
+    class="inline-element-with-spinner htmx-request"
+    hx-indicator="closest .inline-element-with-spinner"
+  ></span>
+{% endif %}

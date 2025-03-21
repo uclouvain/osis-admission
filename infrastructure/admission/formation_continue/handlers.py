@@ -184,6 +184,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         i_profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
@@ -207,7 +208,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
     ),
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),

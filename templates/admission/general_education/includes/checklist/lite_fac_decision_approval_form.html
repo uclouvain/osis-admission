@@ -33,12 +33,14 @@
     id="fac-decision-approval-form"
     style="overflow: auto;"
 >
+  <div id="fac-decision-approval-modal-header" hx-preserve="true"></div>
+
   <div class="modal-body">
 
     {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic_with_decision' as can_transfer_to_sic %}
 
     {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to') additional_class='panel-with-default-header-font-size' %}
-      <div id='fac-decision-access-titles' hx-preserve="true">
+      <div id='fac-decision-access-titles'>
         {% if selected_access_titles_names %}
           <ul>
             {% for access_title in selected_access_titles_names %}

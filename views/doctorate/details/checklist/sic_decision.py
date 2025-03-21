@@ -37,6 +37,8 @@ from django.utils.translation import ngettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+
+from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -51,7 +53,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPdfTemporaireDecisionSicQuery,
     SpecifierBesoinDeDerogationSicCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
-    SpecifierInformationsAcceptationPropositionParSicCommand,
+    SpecifierInformationsAcceptationPropositionParSicCommand, RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
@@ -98,7 +100,7 @@ from admission.utils import (
     get_salutation_prefix,
     get_training_url,
 )
-from admission.views.common.detail_tabs.checklist import change_admission_status
+from admission.views.common.detail_tabs.checklist import change_admission_status, PropositionFromResumeMixin
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
@@ -176,10 +178,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
         if self.request.htmx:
-            comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).first()
+            comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).select_related('author').first()
             comment_derogation = CommentEntry.objects.filter(
                 object_uuid=self.admission_uuid, tags=['decision_sic', 'derogation']
-            ).first()
+            ).select_related('author').first()
             context['comment_forms'] = {
                 'decision_sic': CommentForm(
                     comment=comment,
@@ -236,11 +238,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def sic_decision_approval_form_requestable_documents(self):
-        documents = message_bus_instance.invoke(
-            RecupererDocumentsPropositionQuery(
-                uuid_proposition=self.admission_uuid,
-            )
-        )
+        documents = self.proposition_resume.emplacements_documents
         return [document for document in documents if document.est_reclamable and document.est_a_reclamer]
 
     @cached_property
@@ -366,26 +364,25 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     prerequisite_courses_detail_paragraph += self.proposition.commentaire_complements_formation
 
                 # Documents
-                curriculum: CurriculumAdmissionDTO = message_bus_instance.invoke(
-                    RechercherParcoursAnterieurQuery(
-                        global_id=self.proposition.matricule_candidat,
-                        uuid_proposition=self.proposition.uuid,
-                    )
-                )
+                documents_resume = self.proposition_resume
 
                 experiences_curriculum_par_uuid: Dict[
                     str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]
                 ] = {
                     str(experience.uuid): experience
                     for experience in itertools.chain(
-                        curriculum.experiences_non_academiques,
-                        curriculum.experiences_academiques,
+                        documents_resume.resume.curriculum.experiences_non_academiques,
+                        documents_resume.resume.curriculum.experiences_academiques,
                     )
                 }
+                documents = documents_resume.emplacements_documents
 
                 documents_names = []
 
-                for document in self.sic_decision_approval_form_requestable_documents:
+                for document in documents:
+                    if not document.est_a_reclamer:
+                        continue
+
                     document_identifier = document.identifiant.split('.')
 
                     if (
@@ -459,6 +456,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
 
 class SicApprovalDecisionView(
+    PropositionFromResumeMixin,
     SicDecisionMixin,
     AdmissionFormMixin,
     HtmxPermissionRequiredMixin,
@@ -523,8 +521,6 @@ class SicApprovalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
-        # Reset cached proposition
-        del self.proposition
         return super().form_valid(form)
 
 
@@ -542,6 +538,7 @@ class SicApprovalEnrolmentDecisionView(SicApprovalDecisionView):
 
 
 class SicApprovalFinalDecisionView(
+    PropositionFromResumeMixin,
     SicDecisionMixin,
     AdmissionFormMixin,
     HtmxPermissionRequiredMixin,
@@ -595,8 +592,6 @@ class SicApprovalFinalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
-        # Invalidate cached_property for status update
-        del self.proposition
         return super().form_valid(form)
 
 
@@ -707,7 +702,12 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
         return response
 
 
-class SicDecisionApprovalPanelView(HtmxPermissionRequiredMixin, SicDecisionMixin, TemplateView):
+class SicDecisionApprovalPanelView(
+    PropositionFromResumeMixin,
+    HtmxPermissionRequiredMixin,
+    SicDecisionMixin,
+    TemplateView,
+):
     urlpatterns = {'sic-decision-approval-panel': 'sic-decision-approval-panel'}
     template_name = 'admission/general_education/includes/checklist/sic_decision_approval_panel.html'
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_panel.html'

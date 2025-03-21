@@ -203,7 +203,6 @@ class PDFGeneration(IPDFGeneration):
         unites_enseignement_translator: IUnitesEnseignementTranslator,
         profil_candidat_translator: IProfilCandidatTranslator,
         titres_selectionnes: List[TitreAccesSelectionnable],
-        annee_courante: int,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ) -> None:
         # Get the information to display on the pdf
@@ -216,7 +215,6 @@ class PDFGeneration(IPDFGeneration):
 
         # Get the names of the access titles
         secondary_studies_dto = None
-        cv_dto = None
         internal_experiences_dtos = None
 
         context['access_titles_names'] = []
@@ -257,25 +255,24 @@ class PDFGeneration(IPDFGeneration):
                     )
                 context['access_titles_names'].append(secondary_studies_dto.titre_formate)
 
-            # Curriculum experiences
-            else:
-                if cv_dto is None:
-                    cv_dto = profil_candidat_translator.get_curriculum(
-                        matricule=proposition.matricule_candidat,
-                        annee_courante=annee_courante,
-                        uuid_proposition=proposition.entity_id.uuid,
-                    )
-
-                context['access_titles_names'].append(
-                    next(
-                        experience.titre_pdf_decision_fac
-                        for experience in {
-                            TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE: cv_dto.experiences_non_academiques,
-                            TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE: cv_dto.experiences_academiques,
-                        }[access_title.entity_id.type_titre]
-                        if experience.uuid == access_title.entity_id.uuid_experience
-                    )
+            # Curriculum academic experience
+            elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE:
+                experience = profil_candidat_translator.get_experience_academique(
+                    matricule=proposition.matricule_candidat,
+                    uuid_proposition=proposition.entity_id.uuid,
+                    uuid_experience=access_title.entity_id.uuid_experience,
                 )
+                context['access_titles_names'].append(experience.titre_pdf_decision_fac)
+
+
+            # Curriculum non academic experience
+            elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE:
+                experience = profil_candidat_translator.get_experience_non_academique(
+                    matricule=proposition.matricule_candidat,
+                    uuid_proposition=proposition.entity_id.uuid,
+                    uuid_experience=access_title.entity_id.uuid_experience,
+                )
+                context['access_titles_names'].append(experience.titre_pdf_decision_fac)
 
         # Generate the pdf
         token = admission_generate_pdf(
@@ -367,18 +364,16 @@ class PDFGeneration(IPDFGeneration):
     ) -> Optional[str]:
         from infrastructure.messages_bus import message_bus_instance
 
-        proposition_dto = proposition_repository.get_dto_for_gestionnaire(
-            proposition.entity_id, UnitesEnseignementTranslator
-        )
-        profil_candidat_identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
-        profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
-
         documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
             RecupererResumeEtEmplacementsDocumentsPropositionQuery(
-                uuid_proposition=proposition_dto.uuid,
+                uuid_proposition=proposition.entity_id.uuid,
                 avec_document_libres=True,
             )
         )
+
+        proposition_dto = documents_resume.resume.proposition
+        profil_candidat_identification = documents_resume.resume.identification
+        profil_candidat_coordonnees = documents_resume.resume.coordonnees
 
         experiences_curriculum_par_uuid: Dict[str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]] = {
             str(experience.uuid): experience

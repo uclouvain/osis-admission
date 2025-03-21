@@ -36,12 +36,8 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 def recuperer_groupe_de_supervision(
     cmd: 'GetGroupeDeSupervisionCommand',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
 ) -> 'GroupeDeSupervisionDTO':
     return GroupeDeSupervisionDto().get(
         uuid_proposition=cmd.uuid_proposition,
         repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
     )

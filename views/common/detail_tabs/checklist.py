@@ -43,9 +43,8 @@ from admission.ddd.admission.formation_generale.events import DonneesPersonelles
 from admission.forms.admission.checklist import (
     CommentForm,
 )
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.views.common.detail_tabs.comments import (
-    COMMENT_TAG_SIC,
-    COMMENT_TAG_FAC,
     COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_FAC_FOR_IUFC,
     COMMENT_TAG_CDD_FOR_SIC,
@@ -56,6 +55,7 @@ from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMix
 __all__ = [
     'ChangeStatusView',
     'SaveCommentView',
+    'PropositionFromResumeMixin',
 ]
 
 __namespace__ = False
@@ -203,3 +203,11 @@ class SaveCommentView(AdmissionFormMixin, FormView):
             },
         )
         return super().form_valid(CommentForm(comment=comment, **self.get_form_kwargs()))
+
+
+class PropositionFromResumeMixin:
+    """Load the proposition from the resume (needs a 'proposition_resume' attribute)"""
+    @cached_property
+    def proposition(self):
+        # Override it to avoid unuseful request
+        return self.proposition_resume.resume.proposition

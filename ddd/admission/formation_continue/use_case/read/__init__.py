@@ -32,8 +32,8 @@ from .recuperer_documents_reclames_proposition_service import recuperer_document
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_formation_service import recuperer_formation
 from .recuperer_proposition_service import recuperer_proposition
-from .recuperer_resume_et_emplacements_document_non_libres_proposition_service import (
-    recuperer_resume_et_emplacements_documents_non_libres_proposition,
+from .recuperer_resume_et_emplacements_document_proposition_service import (
+    recuperer_resume_et_emplacements_documents_proposition,
 )
 from .recuperer_resume_proposition_service import recuperer_resume_proposition
 from .verifier_proposition_service import verifier_proposition

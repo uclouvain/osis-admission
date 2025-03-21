@@ -36,3 +36,4 @@ class TitreAccesSelectionnableDTO(DTO):
     uuid_experience: str
     annee: Optional[int]
     pays_iso_code: str
+    nom: str

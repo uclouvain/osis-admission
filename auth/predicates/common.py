@@ -177,7 +177,10 @@ def has_education_group_of_types(*education_group_types):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Admission has been sent to EPC."))
 def is_sent_to_epc(self, user: User, obj: BaseAdmission):
-    return obj.sent_to_epc
+    cache_key = f'admission_{obj.pk}_sent_to_epc'
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, obj.sent_to_epc)
+    return getattr(user, cache_key)
 
 
 @predicate(bind=True)

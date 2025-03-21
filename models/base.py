@@ -64,7 +64,6 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (
@@ -114,6 +113,7 @@ from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
+from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -226,9 +226,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
         return self.annotate(
             person_merge_proposal_noma=F('candidate__personmergeproposal__registration_id_sent_to_digit'),
             existing_student_noma=models.Subquery(
-                Student.objects.filter(
-                    person_id=OuterRef('candidate_id'),
-                ).values(
+                Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
                     'registration_id'
                 )[:1]
             ),
