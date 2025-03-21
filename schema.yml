@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.116
+  version: 1.0.117
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -112,6 +112,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PropositionCreatePermissions'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/specific-enrolment-periods:
+    get:
+      operationId: retrieveSpecificEnrolmentPeriods
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecificEnrolmentPeriods'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5638,6 +5663,44 @@ components:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
+    SpecificEnrolmentPeriods:
+      type: object
+      properties:
+        medicine_dentistry_bachelor:
+          type: object
+          properties:
+            date_debut:
+              type: string
+              format: date
+              nullable: true
+            date_fin:
+              type: string
+              format: date
+              nullable: true
+          readOnly: true
+          nullable: true
+    ActionLink:
+      type: object
+      properties:
+        error:
+          type: string
+        method:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+        url:
+          type: string
+          format: uri
+      oneOf:
+      - required:
+        - method
+        - url
+      - required:
+        - error
     IdentificationDTO:
       type: object
       properties:
@@ -5738,28 +5801,6 @@ components:
       - nom_langue_contact
       - email
       - noma_derniere_inscription_ucl
-    ActionLink:
-      type: object
-      properties:
-        error:
-          type: string
-        method:
-          type: string
-          enum:
-          - DELETE
-          - GET
-          - PATCH
-          - POST
-          - PUT
-        url:
-          type: string
-          format: uri
-      oneOf:
-      - required:
-        - method
-        - url
-      - required:
-        - error
     DoctoratePropositionSearchDTO:
       type: object
       properties:

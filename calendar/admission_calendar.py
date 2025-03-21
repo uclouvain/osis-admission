@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,10 +35,17 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
     Date,
     IAnneeInscriptionFormationTranslator,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess, ITitresAcces
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_titres_acces import (
+    ConditionAccess,
+    ITitresAcces,
+)
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionGenerale,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -63,6 +70,7 @@ __all__ = [
     "DoctorateAdmissionCalendar",
     "GeneralEducationAdmissionCalendar",
     "AdmissionAccessConditionsUrl",
+    "AdmissionMedicineDentistryEnrollmentCalendar",
     "SIGLES_WITH_QUOTA",
     "est_formation_contingentee_et_non_resident",
     "PoolCalendar",
@@ -132,6 +140,21 @@ class AdmissionAccessConditionsUrl(AcademicEventSessionCalendarHelper):
             cutover_date=cls.cutover_date,
             end_date=cls.end_date,
             title="Publication du catalogue de formation sur le site UCLouvain",
+        )
+
+
+class AdmissionMedicineDentistryEnrollmentCalendar(AcademicEventSessionCalendarHelper):
+    event_reference = AcademicCalendarTypes.ADMISSION_MEDICINE_DENTISTRY_BACHELOR_ENROLLMENT.name
+    cutover_date = Date(jour=6, mois=9, annee=0)
+    end_date = Date(jour=15, mois=2, annee=1)
+
+    @classmethod
+    def ensure_consistency_until_n_plus_6(cls):
+        ensure_consistency_until_n_plus_6(
+            event_reference=cls.event_reference,
+            cutover_date=cls.cutover_date,
+            end_date=cls.end_date,
+            title="Admission - Périodes d'inscription en médecine et dentisterie",
         )
 
 

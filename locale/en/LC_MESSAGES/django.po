@@ -1443,12 +1443,6 @@ msgstr ""
 msgid "Competent diplomatic post"
 msgstr ""
 
-msgid "Complement"
-msgstr ""
-
-msgid "Complementary training"
-msgstr ""
-
 msgid "Complementary training proposition"
 msgstr ""
 
@@ -4641,6 +4635,12 @@ msgstr ""
 msgid "Pending application fee"
 msgstr ""
 
+#, python-format
+msgid ""
+"Pending the publication of the results of the medical and dental entrance "
+"examination, your application can only be submitted from %(start_date)s."
+msgstr ""
+
 msgid "Period"
 msgstr ""
 
@@ -7374,6 +7374,9 @@ msgstr ""
 msgid ""
 "Your application cannot be submitted because the %(acronym)s course is "
 "closed."
+msgstr ""
+
+msgid "Your application cannot be submitted now."
 msgstr ""
 
 msgid "Your application is currently being reviewed by the course exam board"

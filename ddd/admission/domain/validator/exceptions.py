@@ -25,8 +25,9 @@
 ##############################################################################
 from typing import Optional
 
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from django.utils.translation import gettext_lazy as _
+
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd.interface import BusinessException
 
 
@@ -230,3 +231,10 @@ class EnQuarantaineException(BusinessException):
 
     def __init__(self, **kwargs):
         super().__init__(self.message, **kwargs)
+
+
+class HorsPeriodeSpecifiqueInscription(BusinessException):
+    status_code = "ADMISSION-24"
+
+    def __init__(self, message, **kwargs):
+        super().__init__(message, **kwargs)

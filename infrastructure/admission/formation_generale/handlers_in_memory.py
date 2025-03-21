@@ -775,4 +775,10 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
         )
     ),
+    RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery: (
+        lambda msg_bus, cmd: recuperer_periode_inscription_specifique_bachelier_medecine_dentisterie(
+            cmd,
+            calendrier_inscription=CalendrierInscriptionInMemory(),
+        )
+    ),
 }
