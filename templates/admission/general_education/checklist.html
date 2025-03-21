@@ -525,7 +525,6 @@
   {{ assimilation_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
   {{ sic_decision_refusal_form.media.js }}
-  {{ sic_decision_approval_form.media.js }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   {{ read_only_documents|json_script:"read-only-documents" }}
@@ -1073,7 +1072,6 @@
   {{ fac_decision_refusal_form.media.css }}
   {{ fac_decision_approval_form.media.css }}
   {{ sic_decision_refusal_form.media.css }}
-  {{ sic_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'admission/autogrow_textarea.css' %}" rel="stylesheet" />

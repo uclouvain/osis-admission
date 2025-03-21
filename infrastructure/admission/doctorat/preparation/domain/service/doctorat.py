@@ -37,7 +37,8 @@ from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.dtos.campus import CampusDTO
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
+from ddd.logic.formation_catalogue.commands import SearchFormationsCommand, RecupererFormationQuery
+from ddd.logic.formation_catalogue.domain.validators.exceptions import TrainingNotFoundException
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity  # FIXME reuse from shared_kernel
 from ddd.logic.shared_kernel.academic_year.commands import SearchAcademicYearCommand
@@ -132,28 +133,29 @@ class DoctoratTranslator(IDoctoratTranslator):
     def get_dto(cls, sigle: str, annee: int) -> 'DoctoratFormationDTO':  # pragma: no cover
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
-        )
-        if dtos:
-            return cls._build_dto(dtos[0])
-        raise DoctoratNonTrouveException()
+        try:
+            training_dto: TrainingDto = message_bus_instance.invoke(
+                RecupererFormationQuery(sigle_formation=sigle, annee_formation=annee)
+            )
+            return cls._build_dto(training_dto)
+        except TrainingNotFoundException:
+            raise DoctoratNonTrouveException
 
     @classmethod
     def get(cls, sigle: str, annee: int) -> 'DoctoratFormation':
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
-        )
-        if dtos:
-            dto: TrainingDto = dtos[0]
+        try:
+            dto: TrainingDto = message_bus_instance.invoke(
+                RecupererFormationQuery(sigle_formation=sigle, annee_formation=annee)
+            )
             return DoctoratFormation(
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 entite_ucl_id=UCLEntityIdentity(code=dto.management_entity_acronym),
                 type=TrainingType[dto.type],
             )
-        raise DoctoratNonTrouveException()
+        except TrainingNotFoundException:
+            raise DoctoratNonTrouveException
 
     @classmethod
     def search(

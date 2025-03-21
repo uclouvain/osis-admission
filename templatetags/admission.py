@@ -628,10 +628,10 @@ def field_data(
 
 
 @register.simple_tag
-def get_image_file_url(file_uuids):
-    """Returns the url of the file whose uuid is the first of the specified ones, if it is an image."""
-    if file_uuids:
-        token = get_remote_token(file_uuids[0], for_modified_upload=True)
+def get_image_file_url(file_uuid):
+    """Returns the url of the file, if it is an image."""
+    if file_uuid:
+        token = get_remote_token(file_uuid, for_modified_upload=True)
         if token:
             metadata = get_remote_metadata(token)
             if metadata and metadata.get('mimetype') in IMAGE_MIME_TYPES:

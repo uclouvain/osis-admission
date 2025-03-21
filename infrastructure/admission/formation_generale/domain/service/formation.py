@@ -41,7 +41,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
+from ddd.logic.formation_catalogue.commands import SearchFormationsCommand, RecupererFormationQuery
+from ddd.logic.formation_catalogue.domain.validators.exceptions import TrainingNotFoundException
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 from ddd.logic.shared_kernel.academic_year.commands import SearchAcademicYearCommand
 from ddd.logic.shared_kernel.campus.commands import GetCampusQuery
@@ -115,26 +116,25 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
     def get_dto(cls, sigle: str, annee: int) -> 'FormationDTO':  # pragma: no cover
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(SearchFormationsCommand(sigles_annees=[(sigle, annee)]))
-
-        if dtos:
-            return cls._build_dto(dtos[0])
-
-        raise FormationNonTrouveeException
+        try:
+            training_dto: TrainingDto = message_bus_instance.invoke(
+                RecupererFormationQuery(sigle_formation=sigle, annee_formation=annee)
+            )
+            return cls._build_dto(training_dto)
+        except TrainingNotFoundException:
+            raise FormationNonTrouveeException
 
     @classmethod
     def get(cls, entity_id: FormationIdentity) -> 'Formation':
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(
-                sigles_annees=[(entity_id.sigle, entity_id.annee)],
-                types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
+        try:
+            dto: TrainingDto = message_bus_instance.invoke(
+                RecupererFormationQuery(
+                    sigle_formation=entity_id.sigle,
+                    annee_formation=entity_id.annee,
+                )
             )
-        )
-
-        if dtos:
-            dto: TrainingDto = dtos[0]
 
             try:
                 campus: 'UclouvainCampusDTO' = message_bus_instance.invoke(
@@ -162,7 +162,8 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 else None,
             )
 
-        raise FormationNonTrouveeException
+        except TrainingNotFoundException:
+            raise FormationNonTrouveeException
 
     @classmethod
     def search(

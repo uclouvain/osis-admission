@@ -356,7 +356,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             request.method == 'GET'
             and self.admission_uuid
             and getattr(request.user, 'person', None)
-            and (SicManagement.belong_to(request.user.person) or CentralManager.belong_to(request.user.person))
+            and self.is_sic
         ):
             AdmissionViewer.add_viewer(person=request.user.person, admission=self.admission)
 
