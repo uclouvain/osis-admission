@@ -229,7 +229,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                 for c in CommentEntry.objects.filter(
                     object_uuid=self.admission_uuid,
                     tags__contains=['financabilite'],
-                )
+                ).select_related('author')
             }
 
             context['comment_forms'] = {

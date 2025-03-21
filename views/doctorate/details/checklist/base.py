@@ -230,7 +230,10 @@ class ChecklistView(
 
             comments = {
                 ('__'.join(c.tags)): c
-                for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__overlap=tab_names)
+                for c in CommentEntry.objects.filter(
+                    object_uuid=self.admission_uuid,
+                    tags__overlap=tab_names,
+                ).select_related('author')
             }
 
             for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
@@ -277,6 +280,10 @@ class ChecklistView(
                 ]
                 for tab_name, tab_documents in documents_by_tab.items()
             }
+
+            context['requested_documents_dtos'] = [
+                document for document in admission_documents if document.est_reclamable and document.est_a_reclamer
+            ]
 
             # Experiences
             if self.proposition_fusion:

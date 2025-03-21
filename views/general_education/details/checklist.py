@@ -310,6 +310,20 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     }
 
     @cached_property
+    def candidate_cv_program_names_by_experience_uuid(self):
+        experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
+            person=self.admission.candidate
+        )
+        return {
+            str(experience.uuid): experience.program.title if experience.program else experience.education_name
+            for experience in experiences
+        }
+
+    @cached_property
+    def admission_refusal_reasons(self):
+        return [reason.uuid for reason in self.admission.refusal_reasons.all()] + self.admission.other_refusal_reasons
+
+    @cached_property
     def can_update_checklist_tab(self):
         return has_perm('admission.change_checklist', user=self.request.user, obj=self.admission)
 
@@ -546,21 +560,10 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             form_kwargs['data'] = self.request.POST
         else:
             form_kwargs['initial'] = {
-                'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
-                + self.admission.other_refusal_reasons,
+                'reasons': self.admission_refusal_reasons,
             }
 
         return FacDecisionRefusalForm(**form_kwargs)
-
-    @property
-    def candidate_cv_program_names_by_experience_uuid(self):
-        experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
-            person=self.admission.candidate
-        )
-        return {
-            str(experience.uuid): experience.program.title if experience.program else experience.education_name
-            for experience in experiences
-        }
 
     @cached_property
     def fac_decision_approval_form(self):
@@ -583,9 +586,11 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         formset = FreeApprovalConditionFormSet(
             prefix='fac-decision',
             initial=(
-                self.admission.freeadditionalapprovalcondition_set.filter(
-                    related_experience__isnull=True,
-                ).values('name_fr', 'name_en')
+                [
+                    {'name_fr': condition.nom_fr, 'name_en': condition.nom_en}
+                    for condition in self.proposition.conditions_complementaires
+                    if condition.libre and not condition.uuid_experience
+                ]
                 if self.request.method != 'POST'
                 else None
             ),
@@ -915,11 +920,8 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['sic_decision_refusal_form'] = self.sic_decision_refusal_form
-        context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
-        context['sic_decision_approval_form'] = self.sic_decision_approval_form
         context['sic_decision_free_approval_condition_formset'] = self.sic_decision_free_approval_condition_formset
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
-        context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
         context['display_sic_decision_approval_info_panel'] = self.display_sic_decision_approval_info_panel()
 
         # Get information about the decision sending by the SIC if any and only in the final statuses
@@ -960,27 +962,16 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 'dispensation_needed': self.admission.dispensation_needed,
             },
         )
-        context['requested_documents'] = {
-            document.identifiant: {
-                'reason': self.proposition.documents_demandes.get(document.identifiant, {}).get('reason', ''),
-                'label': document.libelle_langue_candidat,
-                'tab_label': document.nom_onglet,
-                'candidate_language_tab_label': document.nom_onglet_langue_candidat,
-                'tab': document.onglet,
-            }
-            for document in self.sic_decision_approval_form_requestable_documents
-        }
-        context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
-        context['a_des_documents_requis_immediat'] = any(
-            document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
-            for document in self.sic_decision_approval_form_requestable_documents
-        )
 
         if self.request.htmx:
-            comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).first()
+            comment = CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags=['decision_sic'],
+            ).select_related('author').first()
             comment_derogation = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags=['decision_sic', 'derogation']
-            ).first()
+                object_uuid=self.admission_uuid,
+                tags=['decision_sic', 'derogation'],
+            ).select_related('author').first()
             context['comment_forms'] = {
                 'decision_sic': CommentForm(
                     comment=comment,
@@ -1044,8 +1035,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             form_kwargs['data'] = self.request.POST
         else:
             form_kwargs['initial'] = {
-                'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
-                + self.admission.other_refusal_reasons,
+                'reasons': self.admission_refusal_reasons,
             }
 
         return SicDecisionRefusalForm(**form_kwargs)
@@ -1060,9 +1050,12 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         formset = FreeApprovalConditionFormSet(
             prefix='sic-decision',
             initial=(
-                self.admission.freeadditionalapprovalcondition_set.filter(
-                    related_experience__isnull=True,
-                ).values('name_fr', 'name_en')
+                [
+                    {'name_fr': condition.nom_fr, 'name_en': condition.nom_en}
+                    for condition in self.proposition.conditions_complementaires
+                    if condition.libre and not condition.uuid_experience
+                ]
+
                 if self.request.method != 'POST'
                 else None
             ),
@@ -1073,16 +1066,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
         return formset
-
-    @property
-    def candidate_cv_program_names_by_experience_uuid(self):
-        experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
-            person=self.admission.candidate
-        )
-        return {
-            str(experience.uuid): experience.program.title if experience.program else experience.education_name
-            for experience in experiences
-        }
 
     @cached_property
     def sic_decision_approval_form_requestable_documents(self):
@@ -1375,6 +1358,22 @@ class SicApprovalDecisionView(
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_form_for_admission.html'
     permission_required = 'admission.checklist_change_sic_decision'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['requested_documents'] = {
+            document.identifiant: {
+                'reason': self.proposition.documents_demandes.get(document.identifiant, {}).get('reason', ''),
+                'label': document.libelle_langue_candidat,
+                'tab_label': document.nom_onglet,
+                'candidate_language_tab_label': document.nom_onglet_langue_candidat,
+                'tab': document.onglet,
+            }
+            for document in self.sic_decision_approval_form_requestable_documents
+        }
+        context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
+        context['sic_decision_approval_form'] = self.sic_decision_approval_form
+        return context
+
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         formset = self.sic_decision_free_approval_condition_formset
@@ -1563,6 +1562,15 @@ class SicApprovalFinalDecisionView(
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_final_form.html'
     permission_required = 'admission.checklist_change_sic_decision'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
+        context['a_des_documents_requis_immediat'] = any(
+            document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            for document in self.sic_decision_approval_form_requestable_documents
+        )
+        return context
+
     def dispatch(self, request, *args, **kwargs):
         if self.admission.is_in_quarantine:
             return HttpResponseForbidden()
@@ -1714,6 +1722,10 @@ class SicDecisionApprovalPanelView(HtmxPermissionRequiredMixin, SicDecisionMixin
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_panel.html'
     permission_required = 'admission.view_checklist'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
+        return context
 
 class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
     urlpatterns = {'sic-decision-pdf-preview': 'sic-decision-pdf-preview/<str:pdf>'}
@@ -2275,7 +2287,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                 for c in CommentEntry.objects.filter(
                     object_uuid=self.admission_uuid,
                     tags__contains=['financabilite'],
-                )
+                ).select_related('author')
             }
 
             context['comment_forms'] = {
@@ -2636,6 +2648,8 @@ class SinglePastExperienceMixin(
             comment=CommentEntry.objects.filter(
                 object_uuid=self.admission_uuid,
                 tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
+            ).select_related(
+                'author'
             ).first(),
             form_url=resolve_url(
                 f'{self.base_namespace}:save-comment',
@@ -2864,6 +2878,7 @@ class ChecklistView(
             comments = {
                 ('__'.join(c.tags)): c
                 for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__overlap=tab_names)
+                .select_related('author')
             }
 
             for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
@@ -2912,6 +2927,10 @@ class ChecklistView(
                 ]
                 for tab_name, tab_documents in documents_by_tab.items()
             }
+
+            context['requested_documents_dtos'] = [
+                document for document in admission_documents if document.est_reclamable and document.est_a_reclamer
+            ]
 
             # Experiences
             if self.proposition_fusion:

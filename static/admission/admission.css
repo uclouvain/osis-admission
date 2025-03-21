@@ -526,3 +526,27 @@ a.no-link {
 .multi-widget ul label {
   font-weight: normal;
 }
+
+.element-with-spinner.htmx-request {
+  position: relative;
+  display: block;
+}
+
+.element-with-spinner.htmx-request::after {
+  font-family: "Font Awesome 5 Pro";
+  content: '\f110';
+  font-size: 30px;
+  animation: spin-loader 2s linear infinite;
+  padding: 33%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.element-with-spinner.htmx-request::before {
+  content: '';
+  display: block;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 50%;
+}

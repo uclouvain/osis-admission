@@ -176,10 +176,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
         if self.request.htmx:
-            comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).first()
+            comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).select_related('author').first()
             comment_derogation = CommentEntry.objects.filter(
                 object_uuid=self.admission_uuid, tags=['decision_sic', 'derogation']
-            ).first()
+            ).select_related('author').first()
             context['comment_forms'] = {
                 'decision_sic': CommentForm(
                     comment=comment,

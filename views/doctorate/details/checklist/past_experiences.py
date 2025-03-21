@@ -393,7 +393,7 @@ class SinglePastExperienceMixin(
             comment=CommentEntry.objects.filter(
                 object_uuid=self.admission_uuid,
                 tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
-            ).first(),
+            ).select_related('author').first(),
             form_url=resolve_url(
                 f'{self.base_namespace}:save-comment',
                 uuid=self.admission_uuid,
