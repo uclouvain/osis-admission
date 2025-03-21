@@ -1046,7 +1046,7 @@ class SpecificEnrolmentPeriodsApiViewTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_none_if_there_is_no_period(self):
-        self.client.force_login(user=self.candidate)
+        self.client.force_authenticate(user=self.candidate)
 
         response = self.client.get(self.url, format='json')
 
@@ -1054,7 +1054,7 @@ class SpecificEnrolmentPeriodsApiViewTestCase(APITestCase):
         self.assertEqual(response.json().get('medicine_dentistry_bachelor'), None)
 
     def test_get_current_period_if_the_today_date_is_inside_it(self):
-        self.client.force_login(user=self.candidate)
+        self.client.force_authenticate(user=self.candidate)
 
         academic_calendar = AdmissionMedDentEnrollmentAcademicCalendarFactory(data_year=self.academic_year_2023)
 
@@ -1085,7 +1085,7 @@ class SpecificEnrolmentPeriodsApiViewTestCase(APITestCase):
             )
 
     def test_get_next_period_if_the_today_date_is_not_inside_an_existing_one(self):
-        self.client.force_login(user=self.candidate)
+        self.client.force_authenticate(user=self.candidate)
 
         academic_calendar_2023 = AdmissionMedDentEnrollmentAcademicCalendarFactory(data_year=self.academic_year_2023)
         academic_calendar_2024 = AdmissionMedDentEnrollmentAcademicCalendarFactory(data_year=self.academic_year_2024)
