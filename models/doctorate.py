@@ -36,6 +36,7 @@ from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
+from admission.constants import CONTEXT_DOCTORATE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -648,6 +649,9 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
                 financabilite_regle_calcule_situation=financabilite.situation,
             )
         )
+
+    def get_admission_context(self):
+        return CONTEXT_DOCTORATE
 
     # The following properties are here to alias the training_id field to doctorate_id
     @property
