@@ -29,6 +29,8 @@ from contextlib import suppress
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from admission.constants import CONTEXT_CONTINUING
 from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
@@ -314,6 +316,9 @@ class ContinuingEducationAdmission(BaseAdmission):
         verbose_name = _("Continuing education admission")
         ordering = ('-created_at',)
         permissions = []
+
+    def get_admission_context(self):
+        return CONTEXT_CONTINUING
 
     def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.formation_continue.commands import (
