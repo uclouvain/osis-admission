@@ -183,7 +183,7 @@ class CddDecisionViewTestCase(TestCase):
         self.assertEqual(self.admission.checklist['current']['decision_cdd']['extra'], {})
 
 
-@override_settings(ADMISSION_BACKEND_LINK_PREFIX='https//example.com')
+@override_settings(BACKEND_LINK_PREFIX='https//example.com')
 class CddDecisionSendToCddViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
