@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _, pgettext_lazy, ngettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext_lazy, pgettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
@@ -154,15 +155,14 @@ DocumentsSysteme = {
 DocumentsEtudesSecondaires = {
     'DIPLOME_BELGE_DIPLOME': _('Secondary school diploma'),
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE': _(
-        "Copy of both sides of the definitive equivalency decision (accompanied, "
-        "where applicable, by the DAES or undergraduate exam, in the case of restrictive equivalency)"
+        "Copy of both sides of the equivalency decision by the Ministry of the French-speaking Community of Belgium"
     ),
     'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE': _('Proof of equivalency request'),
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE': _(
-        "Copy of both sides of the definitive equivalency decision by the Ministry of the French-speaking Community "
-        "of Belgium (possibly accompanied by the DAES or the undergraduate studies exam, if your equivalency does "
-        "not confer eligibility for the desired programme)"
+        "Copy of both sides of the equivalency decision by the Ministry of the French-speaking Community of Belgium"
     ),
+    'DAES_UE': _('Diploma of aptitude for access to higher education (DAES)'),
+    'DAES_HORS_UE': _('Diploma of aptitude for access to higher education (DAES)'),
     'DIPLOME_ETRANGER_DIPLOME': _('Secondary school diploma'),
     'DIPLOME_ETRANGER_TRADUCTION_DIPLOME': _('A translation of your secondary school diploma by a sworn translator'),
     'DIPLOME_ETRANGER_RELEVE_NOTES': _('A transcript for your last year of secondary school'),

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,35 +30,49 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.models import DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
+    ProfessionalExperienceFactory,
 )
-from admission.tests.factories.roles import ProgramManagerRoleFactory, CentralManagerRoleFactory
+from admission.tests.factories.roles import (
+    CentralManagerRoleFactory,
+    ProgramManagerRoleFactory,
+)
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import EducationalExperienceYear, EducationalExperience, ProfessionalExperience
-from osis_profile.models.enums.curriculum import (
-    EvaluationSystem,
-    TranscriptType,
-    Grade,
-    Result,
-    Reduction,
-    ActivityType,
-    ActivitySector,
+from osis_profile.models import (
+    EducationalExperience,
+    EducationalExperienceYear,
+    ProfessionalExperience,
 )
-from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
+    EvaluationSystem,
+    Grade,
+    Reduction,
+    Result,
+    TranscriptType,
+)
+from osis_profile.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
-from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
+from reference.tests.factories.superior_non_university import (
+    SuperiorNonUniversityFactory,
+)
 
 
 @freezegun.freeze_time('2024-06-01')
@@ -137,6 +151,10 @@ class CurriculumGlobalDetailsViewForDoctorateTestCase(TestCase):
             dissertation_title='Dissertation title',
             dissertation_score='15/20',
             dissertation_summary=[uuid.uuid4()],
+            block_1_acquired_credit_number=30,
+            with_complement=True,
+            complement_registered_credit_number=40,
+            complement_acquired_credit_number=39,
         )
 
         educational_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
@@ -147,10 +165,6 @@ class CurriculumGlobalDetailsViewForDoctorateTestCase(TestCase):
             result=Result.SUCCESS.name,
             transcript=[uuid.uuid4()],
             transcript_translation=[uuid.uuid4()],
-            with_block_1=True,
-            with_complement=True,
-            fwb_registered_credit_number=30,
-            fwb_acquired_credit_number=29,
             reduction=Reduction.A150.name,
             is_102_change_of_course=True,
         )

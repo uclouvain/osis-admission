@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,15 +24,21 @@
 #
 # ##############################################################################
 from datetime import date
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from django.db.models import Q
+
+from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
 from admission.ddd.admission.dtos import IdentificationDTO
+from admission.ddd.admission.dtos.periode import PeriodeDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.academic_calendar import AcademicCalendar
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_profile import PLUS_5_ISO_CODES
 
@@ -50,6 +56,22 @@ class CalendrierInscription(ICalendrierInscription):
             start_date__lte=today,
             end_date__gte=today,
         ).values_list('reference', 'data_year__year')
+
+    @classmethod
+    def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
+        today = date.today()
+        academic_calendar = (
+            AcademicCalendar.objects.filter(
+                reference=AcademicCalendarTypes.ADMISSION_MEDICINE_DENTISTRY_BACHELOR_ENROLLMENT.name,
+            )
+            .filter(
+                Q(start_date__lte=today, end_date__gte=today) | Q(start_date__gt=today),
+            )
+            .order_by('start_date')[:1]
+        )
+
+        if academic_calendar:
+            return PeriodeDTO(date_debut=academic_calendar[0].start_date, date_fin=academic_calendar[0].end_date)
 
     @classmethod
     def est_ue_plus_5(

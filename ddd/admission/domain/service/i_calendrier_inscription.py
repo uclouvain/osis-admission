@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,34 +23,45 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import logging
 from pprint import pformat
 from typing import List, Optional, Tuple, Union
 
 import attr
+from django.utils.formats import date_format
+from django.utils.translation import gettext
 
 from admission.calendar.admission_calendar import *
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.domain.service.i_formation_translator import (
+    IFormationTranslator,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.ddd.admission.domain.service.i_titres_acces import Titres
 from admission.ddd.admission.domain.validator.exceptions import (
     AucunPoolCorrespondantException,
     FormationNonTrouveeException,
+    HorsPeriodeSpecifiqueInscription,
     ModificationInscriptionExterneNonConfirmeeException,
     PoolNonResidentContingenteNonOuvertException,
     PoolOuAnneeDifferentException,
     ReorientationInscriptionExterneNonConfirmeeException,
-    ResidenceAuSensDuDecretNonRenseigneeException,
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
+    ResidenceAuSensDuDecretNonRenseigneeException,
 )
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
+from admission.ddd.admission.dtos.periode import PeriodeDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -197,6 +208,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         formation_translator: 'IFormationTranslator',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
+        formation: 'Formation' = None,
     ) -> None:
         determination = cls.determiner_annee_academique_et_pot(
             formation_id,
@@ -211,6 +223,8 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             if not formation_translator.verifier_existence(formation_id.sigle, determination.annee):
                 raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
 
+        cls.verifier_periode_inscription_specifique(formation=formation)
+
         # Vérifier la concordance entre l'année/pool soumis et ceux calculés
         if (
             annee_soumise is not None
@@ -218,6 +232,37 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             and (determination.annee != annee_soumise or determination.pool != pool_soumis)
         ):
             raise PoolOuAnneeDifferentException(determination.annee, determination.pool, annee_soumise, pool_soumis)
+
+    @classmethod
+    def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
+        raise NotImplementedError()
+
+    @classmethod
+    def verifier_periode_inscription_specifique(cls, formation: Optional[Formation]):
+        """
+        Vérifier, si une période d'inscription spécifique est définie pour une formation, si la soumission de la demande
+        est possible.
+        :param formation: La formation souhaitée
+        :return:
+        """
+        if not formation:
+            return
+
+        periode_inscription: Optional[PeriodeDTO] = None
+        message = gettext('Your application cannot be submitted now.')
+        date_jour = datetime.date.today()
+
+        if formation.type == TrainingType.BACHELOR and formation.est_formation_medecine_ou_dentisterie:
+            periode_inscription = cls.recuperer_periode_inscription_specifique_medecine_dentisterie()
+
+            if periode_inscription:
+                message = gettext(
+                    "Pending the publication of the results of the medical and dental entrance examination, "
+                    "your application can only be submitted from %(start_date)s."
+                ) % {'start_date': date_format(periode_inscription.date_debut, 'j F Y')}
+
+        if periode_inscription and not periode_inscription.date_debut <= date_jour <= periode_inscription.date_fin:
+            raise HorsPeriodeSpecifiqueInscription(message=message)
 
     @classmethod
     def verifier_reorientation_renseignee_si_eligible(

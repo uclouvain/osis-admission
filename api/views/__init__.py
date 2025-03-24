@@ -98,4 +98,5 @@ from admission.api.views.training_choice import (
     DoctorateUpdateAdmissionTypeAPIView,
     GeneralTrainingChoiceAPIView,
     GeneralUpdateTrainingChoiceAPIView,
+    SpecificEnrolmentPeriodsApiView,
 )
