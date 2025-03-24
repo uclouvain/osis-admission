@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,10 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from math import ceil, floor
 
+import factory
+
 from admission.calendar.admission_calendar import *
-from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
+from admission.calendar.admission_digit_ticket_submission import (
+    AdmissionDigitTicketSubmissionCalendar,
+)
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 
@@ -57,6 +63,12 @@ class AdmissionAcademicCalendarFactory(AcademicCalendarFactory):
                 AdmissionPoolNonResidentQuotaCalendar,
                 AdmissionAccessConditionsUrl,
                 GeneralEducationAdmissionCalendar,
-                AdmissionDigitTicketSubmissionCalendar
+                AdmissionDigitTicketSubmissionCalendar,
             ]
         ]
+
+
+class AdmissionMedDentEnrollmentAcademicCalendarFactory(AcademicCalendarFactory):
+    reference = AcademicCalendarTypes.ADMISSION_MEDICINE_DENTISTRY_BACHELOR_ENROLLMENT.name
+    start_date = factory.LazyAttribute(lambda obj: datetime.date(obj.data_year.year, 9, 6))
+    end_date = factory.LazyAttribute(lambda obj: datetime.date(obj.data_year.year + 1, 2, 15))

@@ -23,17 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from mock.mock import Mock
 
-from admission.ddd.admission.commands import (
-    GetStatutTicketPersonneQuery,
-    RechercherCompteExistantCommand,
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand,
-    RetrieveListePropositionFusionEnErreurQuery,
-    RetrieveListeTicketsEnAttenteQuery,
-    SoumettreTicketPersonneCommand,
-    ValiderTicketPersonneCommand,
-)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
@@ -246,6 +236,7 @@ COMMAND_HANDLERS = {
         bourse_translator=_bourse_translator,
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
@@ -775,13 +766,6 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
         )
     ),
-    SoumettreTicketPersonneCommand: lambda *args, **kwargs: Mock(),
-    RechercherCompteExistantCommand: lambda *args, **kwargs: Mock(),
-    GetStatutTicketPersonneQuery: lambda *args, **kwargs: Mock(),
-    RetrieveListeTicketsEnAttenteQuery: lambda *args, **kwargs: Mock(),
-    RetrieveListePropositionFusionEnErreurQuery: lambda *args, **kwargs: Mock(),
-    RetrieveAndStoreStatutTicketPersonneFromDigitCommand: lambda *args, **kwargs: Mock(),
-    ValiderTicketPersonneCommand: lambda *args, **kwargs: Mock(),
     VerifierCurriculumApresSoumissionQuery: (
         lambda msg_bus, cmd: verifier_curriculum_apres_soumission(
             cmd,
@@ -789,6 +773,12 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=_profil_candidat_translator,
             academic_year_repository=_academic_year_repository,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        )
+    ),
+    RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery: (
+        lambda msg_bus, cmd: recuperer_periode_inscription_specifique_bachelier_medecine_dentisterie(
+            cmd,
+            calendrier_inscription=CalendrierInscriptionInMemory(),
         )
     ),
 }

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,24 +35,37 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import DoctorateAdmission, ContinuingEducationAdmission
-from admission.models.base import AdmissionEducationalValuatedExperiences
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
+)
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission
+from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.teaching_type import TeachingTypeEnum
@@ -61,7 +74,13 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, Reduction, Grade
+from osis_profile.models.enums.curriculum import (
+    EvaluationSystem,
+    Grade,
+    Reduction,
+    Result,
+    TranscriptType,
+)
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -164,6 +183,10 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             dissertation_title='Dissertations',
             dissertation_score='15',
             dissertation_summary=[self.files_uuids[4]],
+            block_1_acquired_credit_number=30,
+            with_complement=True,
+            complement_registered_credit_number=40,
+            complement_acquired_credit_number=39,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             external_id='custom_id_11',
@@ -174,10 +197,6 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             result=Result.SUCCESS.name,
             transcript=[self.files_uuids[5]],
             transcript_translation=[self.files_uuids[7]],
-            with_block_1=True,
-            with_complement=True,
-            fwb_registered_credit_number=11,
-            fwb_acquired_credit_number=10,
             reduction=Reduction.A150.name,
             is_102_change_of_course=True,
         )
@@ -190,10 +209,6 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             result=Result.SUCCESS.name,
             transcript=[self.files_uuids[6]],
             transcript_translation=[self.files_uuids[8]],
-            with_block_1=False,
-            with_complement=False,
-            fwb_registered_credit_number=13,
-            fwb_acquired_credit_number=12,
             reduction=Reduction.A151.name,
             is_102_change_of_course=False,
         )
@@ -314,6 +329,10 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             'expected_graduation_date',
             'dissertation_title',
             'dissertation_score',
+            'block_1_acquired_credit_number',
+            'with_complement',
+            'complement_registered_credit_number',
+            'complement_acquired_credit_number',
         ]
 
         fields_to_update = [
@@ -330,10 +349,6 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
             'registered_credit_number',
             'acquired_credit_number',
             'result',
-            'with_block_1',
-            'with_complement',
-            'fwb_registered_credit_number',
-            'fwb_acquired_credit_number',
             'reduction',
             'is_102_change_of_course',
         ]

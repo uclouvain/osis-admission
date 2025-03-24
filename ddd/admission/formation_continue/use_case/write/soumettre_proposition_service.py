@@ -44,11 +44,13 @@ from admission.ddd.admission.formation_continue.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_continue.domain.service.verifier_proposition import VerifierProposition
+from admission.ddd.admission.formation_continue.events import PropositionFormationContinueSoumiseEvent
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 
 def soumettre_proposition(
+    msg_bus: 'MessageBus',
     cmd: 'SoumettrePropositionCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
@@ -111,5 +113,12 @@ def soumettre_proposition(
 
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
+
+    msg_bus.publish(
+        PropositionFormationContinueSoumiseEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
+    )
 
     return proposition_id

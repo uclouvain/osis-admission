@@ -54,6 +54,8 @@ from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from gestion_des_comptes.models import HistoriqueMatriculeCompte
+
 
 __all__ = [
     "PropositionCreatePermissionsView",
@@ -124,11 +126,22 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
                 "doctorate_propositions": doctorate_list,
                 "general_education_propositions": general_education_list,
                 "continuing_education_propositions": continuing_education_list,
+                'donnees_transferees_vers_compte_interne': self.get_donnees_transferees_vers_compte_interne(
+                    matricule=candidate_global_id
+                )
             },
             context=self.get_serializer_context(),
         )
 
         return Response(serializer.data)
+
+    def get_donnees_transferees_vers_compte_interne(self, matricule: str) -> bool:
+        if matricule.startswith('8'):
+            return HistoriqueMatriculeCompte.objects.filter(
+                matricule_externe=matricule,
+                matricule_interne_actif=True
+            ).exists()
+        return False
 
     def create(self, request, **kwargs):
         """Not implemented"""

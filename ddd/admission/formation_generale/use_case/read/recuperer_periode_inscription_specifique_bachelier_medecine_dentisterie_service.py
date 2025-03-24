@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,14 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
+)
 
-from osis_common.ddd import interface
 
-
-@attr.dataclass(frozen=True, slots=True, eq=False)
-class PropositionFusionPersonneIdentity(interface.EntityIdentity):
-    uuid: str
-
-    def __eq__(self, other):
-        return self.uuid == other.uuid
+def recuperer_periode_inscription_specifique_bachelier_medecine_dentisterie(
+    cmd: RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
+    calendrier_inscription: 'ICalendrierInscription',
+):
+    return calendrier_inscription.recuperer_periode_inscription_specifique_medecine_dentisterie()

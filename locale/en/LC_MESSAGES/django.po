@@ -86,9 +86,6 @@ msgstr ""
 msgid ", on"
 msgstr ""
 
-msgid "102 change of course"
-msgstr ""
-
 msgid "12"
 msgstr ""
 
@@ -328,6 +325,12 @@ msgstr ""
 msgid "Achieved additional training"
 msgstr ""
 
+msgid "Acquired bloc 1 credits total number"
+msgstr ""
+
+msgid "Acquired complements credits total number"
+msgstr ""
+
 msgid "Acquired credit number"
 msgstr ""
 
@@ -559,12 +562,6 @@ msgid "An approval mail has been sent to the candidate."
 msgstr ""
 
 msgid "An education type"
-msgstr ""
-
-msgid "An error occured during digit ticket creation : {}"
-msgstr ""
-
-msgid "An error occured during digit ticket creation validation"
 msgstr ""
 
 msgid "An holding mail has already been sent to the candidate."
@@ -956,9 +953,6 @@ msgstr "Biology"
 msgid "Bachelor"
 msgstr ""
 
-msgid "Bachelor's course entrance exam"
-msgstr ""
-
 msgid "Back to checklist"
 msgstr ""
 
@@ -1018,9 +1012,6 @@ msgid "Billing address street number"
 msgstr ""
 
 msgid "Billing address type"
-msgstr ""
-
-msgid "Block 1"
 msgstr ""
 
 msgid "Box"
@@ -1245,11 +1236,6 @@ msgstr ""
 msgid "Cannot delete the experience because it is used in another context."
 msgstr ""
 
-msgid ""
-"Cannot discard merge because at least one known person has the same national "
-"number"
-msgstr ""
-
 msgid "Carbon-copy the CA members"
 msgstr ""
 
@@ -1309,6 +1295,9 @@ msgid ""
 "obtaining a visa and residence permit in Belgium. More information: <a "
 "target=\"_blank\" href=\"https://uclouvain.be/en/study/iufc\">https://"
 "uclouvain.be/en/study/iufc</a>."
+msgstr ""
+
+msgid "Cessation for 102 change of course"
 msgstr ""
 
 msgid "Change of course"
@@ -1414,9 +1403,6 @@ msgstr ""
 msgid "Comment about dispensation"
 msgstr ""
 
-msgid "Comment about financability dispensation"
-msgstr ""
-
 msgid "Comment about the authentication"
 msgstr ""
 
@@ -1457,10 +1443,10 @@ msgstr ""
 msgid "Competent diplomatic post"
 msgstr ""
 
-msgid "Complement"
+msgid "Complementary training proposition"
 msgstr ""
 
-msgid "Complementary training proposition"
+msgid "Complements credits total number"
 msgstr ""
 
 msgctxt "equivalence_status"
@@ -1648,16 +1634,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Copy of both sides of the definitive equivalency decision (accompanied, "
-"where applicable, by the DAES or undergraduate exam, in the case of "
-"restrictive equivalency)"
-msgstr ""
-
-msgid ""
-"Copy of both sides of the definitive equivalency decision by the Ministry of "
-"the French-speaking Community of Belgium (possibly accompanied by the DAES "
-"or the undergraduate studies exam, if your equivalency does not confer "
-"eligibility for the desired programme)"
+"Copy of both sides of the equivalency decision by the Ministry of the French-"
+"speaking Community of Belgium"
 msgstr ""
 
 msgid "Copy of decision to grant CFWB scholarship"
@@ -1985,6 +1963,9 @@ msgstr ""
 msgid "Diploma nationality"
 msgstr ""
 
+msgid "Diploma of aptitude for access to higher education (DAES)"
+msgstr ""
+
 msgid "Diploma translation"
 msgstr ""
 
@@ -2019,9 +2000,6 @@ msgstr ""
 
 msgctxt "X"
 msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
-msgstr ""
-
-msgid "Discard fusion"
 msgstr ""
 
 msgid "Dispensation"
@@ -2559,9 +2537,6 @@ msgstr ""
 msgid "Experience knowledge valorisation"
 msgstr ""
 
-msgid "Experience merge proposal"
-msgstr ""
-
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
 
@@ -2633,12 +2608,6 @@ msgid "FRESH"
 msgstr ""
 
 msgid "FRIA"
-msgstr ""
-
-msgid "FWB - Credits earned"
-msgstr ""
-
-msgid "FWB - Registered credits"
 msgstr ""
 
 msgid "FWB Cotutelle"
@@ -4052,17 +4021,10 @@ msgstr ""
 msgid "Membre CA not found."
 msgstr "Supervisory panel member not found."
 
-msgctxt "admission"
-msgid "Merge"
-msgstr ""
-
 msgid "Merge all non-empty data from digit match to merge form"
 msgstr ""
 
 msgid "Merge all non-empty data from original to merge form"
-msgstr ""
-
-msgid "Merge with existing entry"
 msgstr ""
 
 msgid "Merging of each document field of a continuing proposition into one PDF"
@@ -4239,9 +4201,6 @@ msgstr ""
 msgid "New thesis title (if applicable):"
 msgstr ""
 
-msgid "Next"
-msgstr ""
-
 msgid "Next admission"
 msgstr ""
 
@@ -4252,9 +4211,6 @@ msgid ""
 "No 'ValidationError' exception must be triggered with the the provided data."
 msgstr ""
 
-msgid "No (access to sports facilities on the Saint-Louis campus is free)"
-msgstr ""
-
 msgid "No English studies"
 msgstr ""
 
@@ -4262,10 +4218,6 @@ msgid "No French studies"
 msgstr ""
 
 msgid "No PhD found."
-msgstr ""
-
-msgctxt "admission"
-msgid "No data"
 msgstr ""
 
 msgid "No defense"
@@ -4681,6 +4633,12 @@ msgid "Payment method"
 msgstr ""
 
 msgid "Pending application fee"
+msgstr ""
+
+#, python-format
+msgid ""
+"Pending the publication of the results of the medical and dental entrance "
+"examination, your application can only be submitted from %(start_date)s."
 msgstr ""
 
 msgid "Period"
@@ -5458,9 +5416,6 @@ msgstr ""
 msgid "Save and transfer to SIC"
 msgstr ""
 
-msgid "Save fusion proposal"
-msgstr ""
-
 msgid "Scholarship"
 msgstr ""
 
@@ -5550,9 +5505,6 @@ msgid "Send a mail to the faculty"
 msgstr ""
 
 msgid "Send back to the candidate"
-msgstr ""
-
-msgid "Send selected candidate to digit"
 msgstr ""
 
 msgid "Send the message"
@@ -6583,8 +6535,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
-"accomodation\">www.uclouvain.be/en/study/accomodation</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/fr/logement\">www."
+"uclouvain.be/fr/logement</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -6624,6 +6576,10 @@ msgid ""
 msgstr ""
 
 msgid "This status is not available for the inscription type admissions."
+msgstr ""
+
+msgid ""
+"This student has a pathway prior to 2015 which can only be consulted in EPC."
 msgstr ""
 
 msgid "Tick boxes"
@@ -6895,9 +6851,6 @@ msgstr ""
 msgid "Values"
 msgstr ""
 
-msgid "Verify"
-msgstr ""
-
 msgid "Viewed at"
 msgstr ""
 
@@ -6962,6 +6915,9 @@ msgstr ""
 msgid "Weight"
 msgstr ""
 
+msgid "Were there any prerequisite courses?"
+msgstr ""
+
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr ""
 
@@ -6987,9 +6943,6 @@ msgid ""
 msgstr ""
 
 msgid "Whole view"
-msgstr ""
-
-msgid "Will be automatically retrieved from candidate"
 msgstr ""
 
 msgid "With academic year"
@@ -7150,6 +7103,9 @@ msgstr "Yes, only in Mons (€12)"
 
 msgid "Yes, only in Saint-Gilles (E12)"
 msgstr "Yes, only in Saint-Gilles (€12)"
+
+msgid "Yes, only in Saint-Louis (free)"
+msgstr ""
 
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"
@@ -7420,6 +7376,9 @@ msgid ""
 "closed."
 msgstr ""
 
+msgid "Your application cannot be submitted now."
+msgstr ""
+
 msgid "Your application is currently being reviewed by the course exam board"
 msgstr ""
 
@@ -7466,27 +7425,6 @@ msgid "Your professional email address"
 msgstr ""
 
 msgid "Your training does not cover the useful prerequisites in mathematics."
-msgstr ""
-
-#, python-format
-msgid "[%(matricule_candidat)s] Account creation period calendar is closed"
-msgstr ""
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate has merge proposal with error in syntax "
-"validation"
-msgstr ""
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Candidate has pending merge proposal: status "
-"%(merge_status)s"
-msgstr ""
-
-#, python-format
-msgid ""
-"[%(matricule_candidat)s] Type is admission and application is not accepted"
 msgstr ""
 
 msgid "academic year"

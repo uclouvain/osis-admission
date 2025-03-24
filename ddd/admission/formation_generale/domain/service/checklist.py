@@ -31,7 +31,6 @@ from django.utils.translation import gettext_noop as _
 
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.model.formation import Formation
-from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets

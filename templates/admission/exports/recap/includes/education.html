@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -66,12 +66,14 @@
         {% if ue_or_assimilated %}
           {% field_data _('Has this diploma been recognised as equivalent by the French Community of Belgium?') etudes_secondaires.diplome_etranger.equivalence|enum_display:'Equivalence' %}
           {% if etudes_secondaires.diplome_etranger.equivalence == 'YES' %}
-            {% field_data _("Copy of both sides of the definitive equivalency decision (accompanied, where applicable, by the DAES or undergraduate exam, in the case of restrictive equivalency)") etudes_secondaires.diplome_etranger.decision_final_equivalence_ue %}
+            {% field_data _("Copy of both sides of the equivalency decision by the Ministry of the French-speaking Community of Belgium") etudes_secondaires.diplome_etranger.decision_final_equivalence_ue %}
+            {% field_data _("Diploma of aptitude for access to higher education (DAES)") etudes_secondaires.diplome_etranger.daes_ue %}
           {% elif etudes_secondaires.diplome_etranger.equivalence == 'PENDING' %}
             {% field_data _('Proof of equivalency request') etudes_secondaires.diplome_etranger.preuve_decision_equivalence %}
           {% endif %}
         {% else %}
-          {% field_data _("Copy of both sides of the definitive equivalency decision by the Ministry of the French-speaking Community of Belgium (possibly accompanied by the DAES or the undergraduate studies exam, if your equivalency does not confer eligibility for the desired programme)") etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue %}
+          {% field_data _("Copy of both sides of the equivalency decision by the Ministry of the French-speaking Community of Belgium") etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue %}
+          {% field_data _("Diploma of aptitude for access to higher education (DAES)") etudes_secondaires.diplome_etranger.daes_hors_ue %}
         {% endif %}
       {% endif %}
 
