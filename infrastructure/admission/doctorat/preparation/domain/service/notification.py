@@ -33,6 +33,8 @@ from django.utils import translation
 from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _, gettext
 from osis_async.models import AsyncTask
+from osis_document.api.utils import get_remote_token, get_remote_tokens
+from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
@@ -41,10 +43,6 @@ from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
 
-from admission.models import AdmissionTask, SupervisionActor, DoctorateAdmission
-from admission.models.base import BaseAdmission
-from admission.models.doctorate import PropositionProxy
-from admission.models.enums.actor_type import ActorType
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
@@ -82,6 +80,10 @@ from admission.mail_templates import (
     EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
+from admission.models import AdmissionTask, SupervisionActor, DoctorateAdmission
+from admission.models.base import BaseAdmission
+from admission.models.doctorate import PropositionProxy
+from admission.models.enums.actor_type import ActorType
 from admission.utils import (
     get_admission_cdd_managers,
     get_salutation_prefix,
@@ -90,8 +92,6 @@ from admission.utils import (
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from osis_document.api.utils import get_remote_token, get_remote_tokens
-from osis_document.utils import get_file_url
 
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
@@ -157,7 +157,7 @@ class Notification(INotification):
         candidat = Person.objects.get(global_id=proposition.matricule_candidat)
         common_tokens = cls.get_common_tokens(proposition, candidat)
         common_tokens["admission_link_back"] = "{}{}".format(
-            settings.ADMISSION_BACKEND_LINK_PREFIX,
+            settings.BACKEND_LINK_PREFIX,
             resolve_url('admission:doctorate:supervision', uuid=proposition.entity_id.uuid),
         )
         common_tokens["admission_link_front"] = "{}{}".format(

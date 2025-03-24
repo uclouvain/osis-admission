@@ -30,18 +30,6 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
-
-from admission.ddd import MAIL_INSCRIPTION_DEFAUT
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.formation_continue.dtos import PropositionDTO
-from admission.infrastructure.utils import get_requested_documents_html_lists
-from admission.mail_templates import (
-    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING,
-    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
-)
-from base.utils.utils import format_academic_year
 from osis_document.api.utils import get_remote_token
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
@@ -50,14 +38,24 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
 from admission.auth.roles.program_manager import ProgramManager
-from admission.models import AdmissionTask, ContinuingEducationAdmission
-from admission.models.base import BaseAdmission
+from admission.ddd import MAIL_INSCRIPTION_DEFAUT
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO
+from admission.infrastructure.utils import get_requested_documents_html_lists
+from admission.mail_templates import (
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING,
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
+)
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING
+from admission.models import AdmissionTask, ContinuingEducationAdmission
+from admission.models.base import BaseAdmission
 from admission.utils import get_salutation_prefix, get_portal_admission_url, get_backoffice_admission_url
-
 from base.models.person import Person
+from base.utils.utils import format_academic_year
 
 
 class Notification(INotification):
@@ -88,7 +86,7 @@ class Notification(INotification):
             uuid=admission.uuid,
         )
         backend_link = '{}{}'.format(
-            settings.ADMISSION_BACKEND_LINK_PREFIX,
+            settings.BACKEND_LINK_PREFIX,
             resolve_url('admission:continuing-education', uuid=admission.uuid),
         )
         return {
