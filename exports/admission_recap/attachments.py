@@ -52,6 +52,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
+    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -310,6 +311,20 @@ def get_secondary_studies_attachments(
     attachments.extend(get_dynamic_questions_attachments(specific_questions))
 
     return attachments
+
+
+def get_exams_attachments(context: ResumePropositionDTO) -> List[Attachment]:
+    readonly_document = bool(context.etudes_secondaires.epc_experience)
+    return [
+        Attachment(
+            identifier='ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
+            label=DocumentsExamens['ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION'],
+            uuids=context.examens.attestation,
+            required=context.examens.requis,
+            candidate_language=context.identification.langue_contact,
+            readonly=readonly_document,
+        )
+    ]
 
 
 def get_languages_attachments(context: ResumePropositionDTO) -> List[Attachment]:

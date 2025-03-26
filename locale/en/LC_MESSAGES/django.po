@@ -2572,6 +2572,12 @@ msgstr ""
 msgid "Every education"
 msgstr ""
 
+msgid "Exam must be completed for this training."
+msgstr ""
+
+msgid "Exams"
+msgstr ""
+
 msgid "Excel export of admission"
 msgstr ""
 
@@ -4153,6 +4159,9 @@ msgstr ""
 msgid "Modification date"
 msgstr ""
 
+msgid "Modification of the exams"
+msgstr ""
+
 msgid "Modification of the secondary studies"
 msgstr ""
 
@@ -5001,6 +5010,9 @@ msgid "Promotion"
 msgstr ""
 
 msgid "Proof of equivalency request"
+msgstr ""
+
+msgid "Proof of passing the exam"
 msgstr ""
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
@@ -6542,6 +6554,9 @@ msgid ""
 "switching to edit mode."
 msgstr ""
 
+msgid "There is no required exam for this training."
+msgstr ""
+
 msgid "Thesis field"
 msgstr ""
 
@@ -7174,6 +7189,9 @@ msgid "Year"
 msgstr ""
 
 msgid "Year of birth"
+msgstr ""
+
+msgid "Year of obtaining this proof"
 msgstr ""
 
 msgid "Year of the training"

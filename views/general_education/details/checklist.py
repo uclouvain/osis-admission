@@ -72,6 +72,7 @@ from admission.ddd.admission.domain.model.enums.condition_acces import (
 from admission.ddd.admission.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
+from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -86,6 +87,7 @@ from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
+    DocumentsExamens,
     OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
@@ -257,7 +259,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_profile.models import EducationalExperience
+from osis_profile.models import EducationalExperience, EducationGroupYearExam, Exam
+from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
@@ -539,6 +542,32 @@ class PastExperiencesMixin:
             f'{self.base_namespace}:past-experiences-access-title',
             uuid=self.kwargs['uuid'],
         )
+
+    @cached_property
+    def education_group_year_exam(self):
+        return EducationGroupYearExam.objects.filter(education_group_year=self.admission.training).first()
+
+    @cached_property
+    def examen(self):
+        try:
+            exam = Exam.objects.get(
+                person=self.admission.candidate,
+                type=ExamTypes.FORMATION.name,
+                education_group_year_exam__education_group_year=self.admission.training,
+            )
+            return ExamenDTO(
+                requis=self.education_group_year_exam is not None,
+                attestation=exam.certificate,
+                annee=exam.year.year if exam.year else None,
+            )
+        except Exam.DoesNotExist:
+            return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['education_group_year_exam'] = self.education_group_year_exam
+        context['examen'] = self.examen
+        return context
 
 
 # Fac decision
@@ -2961,6 +2990,7 @@ class ChecklistView(
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
                 'ADDITIONAL_DOCUMENTS',
+                'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
                 *secondary_studies_attachments,
             },
             'donnees_personnelles': assimilation_documents,

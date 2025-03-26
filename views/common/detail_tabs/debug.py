@@ -31,7 +31,6 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 
 from admission.ddd.admission.doctorat.preparation.commands import DeterminerAnneeAcademiqueEtPotQuery as DoctorateCmd
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery as ContinuingCmd
 from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery as GeneralCmd
@@ -95,5 +94,8 @@ class DebugView(LoadDossierViewMixin, TemplateView):
             data['financabilite'] = financabilite
             data['financabilite_logs'] = buffer.getvalue()
             logger.removeHandler(handler)
+
+        self.admission.update_detailed_status(self.request.user.person)
+        data['verify_project'] = self.admission.detailed_status
 
         return data

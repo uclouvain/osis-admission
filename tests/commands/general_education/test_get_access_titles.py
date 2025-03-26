@@ -394,7 +394,7 @@ class GetAccessTitlesViewTestCase(TestCase):
 
         self.assertEqual(len(access_titles), 0)
 
-        high_school_diploma_alternative.first_cycle_admission_exam = ['file.pdf']
+        high_school_diploma_alternative.certificate = ['file.pdf']
         high_school_diploma_alternative.save()
 
         access_titles = message_bus_instance.invoke(

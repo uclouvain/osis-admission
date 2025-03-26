@@ -26,7 +26,7 @@
 import uuid
 from typing import List, Optional
 
-from django.db.models import F, Max, Q, QuerySet
+from django.db.models import F, Max, Prefetch, Q, QuerySet
 
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
@@ -53,7 +53,9 @@ from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
 from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
+from osis_profile.models import Exam
 from osis_profile.models.enums.curriculum import Result
+from osis_profile.models.enums.exam import ExamTypes
 
 
 class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
@@ -70,11 +72,17 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__belgianhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__country',
-                'candidate__highschooldiplomaalternative',
                 'candidate__graduated_from_high_school_year',
                 'training__academic_year',
             )
-            .prefetch_related('internal_access_titles')
+            .prefetch_related(
+                'internal_access_titles',
+                Prefetch(
+                    'candidate__exams',
+                    queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name),
+                    to_attr='exam_high_school_diploma_alternative',
+                ),
+            )
             .only(
                 'training__academic_year__year',
                 'are_secondary_studies_access_title',
@@ -84,7 +92,6 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__belgianhighschooldiploma__academic_graduation_year__year',
                 'candidate__foreignhighschooldiploma__academic_graduation_year__year',
                 'candidate__foreignhighschooldiploma__country__iso_code',
-                'candidate__highschooldiplomaalternative__uuid',
                 'candidate__graduated_from_high_school_year__year',
             )
             .get(uuid=proposition_identity.uuid)
@@ -154,10 +161,10 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             if getattr(admission.candidate.foreignhighschooldiploma, 'country', None):
                 high_school_diploma_country = admission.candidate.foreignhighschooldiploma.country.iso_code
         elif (
-            getattr(admission.candidate, 'highschooldiplomaalternative', None)
-            and admission.candidate.highschooldiplomaalternative.first_cycle_admission_exam
+            admission.candidate.exam_high_school_diploma_alternative
+            and admission.candidate.exam_high_school_diploma_alternative[0].certificate
         ):
-            high_school_diploma = admission.candidate.highschooldiplomaalternative
+            high_school_diploma = admission.candidate.exam_high_school_diploma_alternative[0]
 
         if high_school_diploma:
             high_school_diploma_experience_uuid = high_school_diploma.uuid

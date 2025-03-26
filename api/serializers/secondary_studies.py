@@ -38,11 +38,8 @@ from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU, GotDiploma
 from base.models.organization import Organization
-from osis_profile.models import (
-    BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
-)
+from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
+from osis_profile.models.enums.exam import ExamTypes
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
 
@@ -98,9 +95,14 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
 
 
 class HighSchoolDiplomaAlternativeSerializer(serializers.ModelSerializer):
+    year = RelatedAcademicYearField(required=False)
+
     class Meta:
-        model = HighSchoolDiplomaAlternative
-        fields = ("first_cycle_admission_exam",)
+        model = Exam
+        fields = (
+            "certificate",
+            "year",
+        )
 
 
 class HighSchoolDiplomaSerializer(serializers.Serializer):
@@ -126,7 +128,9 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
     def load_diploma(instance):
         instance.belgian_diploma = BelgianHighSchoolDiploma.objects.filter(person=instance).first()
         instance.foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person=instance).first()
-        instance.high_school_diploma_alternative = HighSchoolDiplomaAlternative.objects.filter(person=instance).first()
+        instance.high_school_diploma_alternative = Exam.objects.filter(
+            person=instance, type=ExamTypes.PREMIER_CYCLE.name
+        ).first()
 
     def to_representation(self, instance):
         self.load_diploma(instance)
@@ -146,8 +150,9 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
 
     @staticmethod
     def update_high_school_diploma_alternative(instance, high_school_diploma_alternative_data):
-        HighSchoolDiplomaAlternative.objects.update_or_create(
+        Exam.objects.update_or_create(
             person=instance,
+            type=ExamTypes.PREMIER_CYCLE.name,
             defaults=high_school_diploma_alternative_data,
         )
         HighSchoolDiplomaSerializer.clean_belgian_diploma(instance)
