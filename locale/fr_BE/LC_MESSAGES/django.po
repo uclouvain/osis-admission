@@ -2837,6 +2837,12 @@ msgstr "Système d'évaluation"
 msgid "Every education"
 msgstr "Toutes les formations"
 
+msgid "Exam must be completed for this training."
+msgstr "L'examen est nécessaire pour cette formation."
+
+msgid "Exams"
+msgstr "Examens"
+
 msgid "Excel export of admission"
 msgstr "Export excel à partir d'admission"
 
@@ -4673,6 +4679,9 @@ msgstr "Auteur modif."
 msgid "Modification date"
 msgstr "Date modif."
 
+msgid "Modification of the exams"
+msgstr "Modification des examens"
+
 msgid "Modification of the secondary studies"
 msgstr "Modification des études secondaires"
 
@@ -5589,6 +5598,9 @@ msgstr "Promotion"
 
 msgid "Proof of equivalency request"
 msgstr "Preuve de la demande d'équivalence"
+
+msgid "Proof of passing the exam"
+msgstr "Attestation de réussite de l'examen"
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
 msgstr ""
@@ -7297,6 +7309,9 @@ msgstr ""
 "consulter les autres fichiers soit dans les onglets répliqués du candidat "
 "soit en vous mettant en mode modification."
 
+msgid "There is no required exam for this training."
+msgstr "Il n'y a pas d'examen requis pour cette formation."
+
 msgid "Thesis field"
 msgstr "Domaine de la thèse"
 
@@ -8025,6 +8040,9 @@ msgstr "Année"
 
 msgid "Year of birth"
 msgstr "Année de naissance"
+
+msgid "Year of obtaining this proof"
+msgstr "Année d’obtention de cette attestation"
 
 msgid "Year of the training"
 msgstr "Année de la formation"
