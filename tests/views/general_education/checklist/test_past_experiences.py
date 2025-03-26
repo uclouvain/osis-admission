@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,40 +37,47 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.models import GeneralEducationAdmission
-from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
     recuperer_conditions_acces_par_formation,
 )
 from admission.ddd.admission.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
 )
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
+from admission.models import GeneralEducationAdmission
+from admission.models.base import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
-    GeneralEducationAdmissionFactory,
     AdmissionPrerequisiteCoursesFactory,
+    GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
-from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
+from admission.tests.views.general_education.checklist.sic_decision.base import (
+    SicPatchMixin,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.enums.community import CommunityEnum
@@ -85,11 +92,17 @@ from base.tests.factories.student import StudentFactory
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.statut_inscription_programme_annuel import (
+    StatutInscriptionProgrammAnnuel,
+)
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from epc.tests.factories.inscription_programme_cycle import (
+    InscriptionProgrammeCycleFactory,
+)
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
@@ -1301,7 +1314,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         # Select a known and valuated experience (with fwb equivalent program)
         BelgianHighSchoolDiploma.objects.filter(person=self.candidate).delete()
         ForeignHighSchoolDiploma.objects.filter(person=self.candidate).delete()
-        HighSchoolDiplomaAlternative.objects.filter(person=self.candidate).delete()
+        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
 
         valuated_experience.educationalexperience.fwb_equivalent_program = self.second_diploma
         valuated_experience.educationalexperience.save()
@@ -1405,8 +1418,8 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_specify_the_higher_education_experience_as_access_title(self, confirm_multiple_upload):
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         )
 
         self.client.force_login(user=self.sic_manager_user)
@@ -1497,7 +1510,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(
             person=self.candidate,
-            first_cycle_admission_exam=['token.pdf'],
+            certificate=['token.pdf'],
         )
 
         response = self.client.post(
@@ -1515,7 +1528,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertTrue(self.general_admission.are_secondary_studies_access_title)
 
         # The candidate specified that he has secondary education but without more information
-        self.candidate.highschooldiplomaalternative.delete()
+        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
 
         self.general_admission.are_secondary_studies_access_title = False
         self.general_admission.save()

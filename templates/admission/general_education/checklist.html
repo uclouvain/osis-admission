@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -323,6 +323,15 @@
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_prevent_to_choose_success_modal.html' %}
+
+          {% if education_group_year_exam %}
+            {% has_perm 'admission.change_admission_exam' as can_change_exam %}
+            {% if can_change_exam %}
+              {% url 'admission:general-education:update:exam' uuid=view.kwargs.uuid as edit_exams_url %}
+              {% concat edit_exams_url next_url as edit_exams_url %}
+            {% endif %}
+            {% include 'admission/exports/recap/includes/exams.html' with hide_files=False edit_link_button=edit_exams_url %}
+          {% endif %}
         </div>
 
         {% for child in current.enfants %}

@@ -76,6 +76,7 @@ from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
+from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -98,6 +99,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
+    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -132,6 +134,7 @@ from admission.exports.admission_recap.section import (
     get_curriculum_section,
     get_dynamic_questions_by_tab,
     get_educational_experience_section,
+    get_exams_section,
     get_identification_section,
     get_languages_section,
     get_non_educational_experience_section,
@@ -217,6 +220,11 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 @attr.dataclass
 class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
+    pass
+
+
+@attr.dataclass
+class _ExamenDTO(UnfrozenDTO, ExamenDTO):
     pass
 
 
@@ -632,6 +640,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
                     'curriculum_academic_experience',
                     'curriculum_non_academic_experience',
                     'curriculum',
+                    'exams',
                     'specific_question',
                     'accounting',
                     'confirmation',
@@ -653,6 +662,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
+        self.assertEqual(call_args_by_tab['exams'].title, 'Exams')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
@@ -678,7 +688,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
 
-        self.assertEqual(len(tabs_titles), 8)
+        self.assertEqual(len(tabs_titles), 9)
 
         self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
         self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
@@ -700,7 +710,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
 
-        self.assertEqual(len(tabs_titles), 8)
+        self.assertEqual(len(tabs_titles), 9)
 
         self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
         self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
@@ -720,7 +730,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
 
-        self.assertEqual(len(tabs_titles), 10)
+        self.assertEqual(len(tabs_titles), 11)
 
         self.assertIn('Curriculum > Computer science 2021-2022', tabs_titles)
         self.assertIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
@@ -862,7 +872,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(14):
+        with self.assertNumQueriesLessThan(16):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -887,7 +897,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(15):
+        with self.assertNumQueriesLessThan(17):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -1222,6 +1232,11 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 types_formations_admissions_valorisees=[],
             ),
         )
+        examens_dto = _ExamenDTO(
+            requis=False,
+            attestation=[],
+            annee=None,
+        )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
                 diplome=['uuid-diplome'],
@@ -1251,6 +1266,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
             alternative_secondaires=AlternativeSecondairesDTO(
                 examen_admission_premier_cycle=['uuid-examen-admission-premier-cycle'],
+                examen_admission_premier_cycle_annee=2024,
             ),
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2015,
@@ -1624,6 +1640,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=continuing_proposition_dto,
             comptabilite=None,
             groupe_supervision=None,
+            examens=examens_dto,
         )
         cls.general_bachelor_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1634,6 +1651,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=bachelor_proposition_dto,
             comptabilite=accounting_dto,
             groupe_supervision=None,
+            examens=examens_dto,
         )
         cls.doctorate_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1713,6 +1731,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     autre_institution_adresse='',
                 ),
             ),
+            examens=examens_dto,
         )
 
     @classmethod
@@ -3104,6 +3123,64 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.LANGUAGE_TRAVEL.name))
             self.assertEqual(attachments[0].uuids, experience.certificat)
             self.assertFalse(attachments[0].required)
+            self.assertTrue(attachments[0].readonly)
+
+    def test_exam_not_required(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.examens,
+            requis=False,
+            attestation=['attestation-examen'],
+            annee=2022,
+        ):
+            section = get_exams_section(
+                self.general_bachelor_context,
+                False,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION')
+            self.assertEqual(
+                attachments[0].label,
+                DocumentsExamens['ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION'],
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                ['attestation-examen'],
+            )
+            # Required because it is not a VAE access
+            self.assertFalse(attachments[0].required)
+
+            self.assertTrue(attachments[0].readonly)
+
+    def test_exam_required(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.examens,
+            requis=True,
+            attestation=[],
+            annee=None,
+        ):
+            section = get_exams_section(
+                self.general_bachelor_context,
+                False,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION')
+            self.assertEqual(
+                attachments[0].label,
+                DocumentsExamens['ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION'],
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                [],
+            )
+            # Required because it is not a VAE access
+            self.assertTrue(attachments[0].required)
+
             self.assertTrue(attachments[0].readonly)
 
     def test_specific_questions_attachments_with_continuing_proposition(self):

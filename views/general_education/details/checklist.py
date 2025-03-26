@@ -46,6 +46,7 @@ from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -66,6 +67,7 @@ from admission.ddd.admission.domain.model.enums.condition_acces import (
 from admission.ddd.admission.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
+from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -80,6 +82,7 @@ from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
+    DocumentsExamens,
     OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
@@ -241,8 +244,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.utils import get_file_url
-from osis_profile.models import EducationalExperience
+from osis_profile.models import EducationalExperience, EducationGroupYearExam, Exam
+from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
@@ -490,6 +493,32 @@ class PastExperiencesMixin:
             f'{self.base_namespace}:past-experiences-access-title',
             uuid=self.kwargs['uuid'],
         )
+
+    @cached_property
+    def education_group_year_exam(self):
+        return EducationGroupYearExam.objects.filter(education_group_year=self.admission.training).first()
+
+    @cached_property
+    def examen(self):
+        try:
+            exam = Exam.objects.get(
+                person=self.admission.candidate,
+                type=ExamTypes.FORMATION.name,
+                education_group_year_exam__education_group_year=self.admission.training,
+            )
+            return ExamenDTO(
+                requis=self.education_group_year_exam is not None,
+                attestation=exam.certificate,
+                annee=exam.year.year if exam.year else None,
+            )
+        except Exam.DoesNotExist:
+            return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['education_group_year_exam'] = self.education_group_year_exam
+        context['examen'] = self.examen
+        return context
 
 
 # Fac decision
@@ -2499,9 +2528,9 @@ class FinancabiliteDerogationNotificationView(
 ):
     urlpatterns = {'financability-derogation-notification': 'financability-derogation-notification'}
     permission_required = 'admission.checklist_financability_dispensation'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    )
     htmx_template_name = (
         'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
     )
@@ -2555,9 +2584,9 @@ class FinancabiliteDerogationRefusView(
 ):
     urlpatterns = {'financability-derogation-refus': 'financability-derogation-refus'}
     permission_required = 'admission.checklist_financability_dispensation_fac'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    )
     htmx_template_name = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
 
     def get_form(self, form_class=None):
@@ -2777,6 +2806,7 @@ class ChecklistView(
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
                 'ADDITIONAL_DOCUMENTS',
+                'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
                 *secondary_studies_attachments,
             },
             'donnees_personnelles': assimilation_documents,
@@ -2937,9 +2967,9 @@ class ChecklistView(
             )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
-            context[
-                'past_experiences_admission_access_title_equivalency_form'
-            ] = self.past_experiences_admission_access_title_equivalency_form
+            context['past_experiences_admission_access_title_equivalency_form'] = (
+                self.past_experiences_admission_access_title_equivalency_form
+            )
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()

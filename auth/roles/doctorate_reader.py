@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ class DoctorateReader(RoleModel):
             'admission.view_admission_person': always_allow,
             'admission.view_admission_coordinates': always_allow,
             'admission.view_admission_secondary_studies': always_allow,
+            'admission.view_admission_exam': always_allow,
             'admission.view_admission_languages': always_allow,
             'admission.view_admission_curriculum': always_allow,
             'admission.view_admission_project': always_allow,
