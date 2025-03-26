@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load static enums %}
+{% load bootstrap3 i18n static admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -25,29 +25,38 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions-group %}{% endblock %}
+{% block form %}
+  <div class="panel panel-default">
+    <div class="panel-heading flex-content-no-wrap">
+      <div class="panel-title">{% translate "Modification of the exams" %}</div>
+      {% if is_general %}
+      <a
+        class="prevent-quitting-link"
+        {% if next_url %}
+        href="{{ next_url }}"
+        {% else %}
+        href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur__EXAMS"
+        {% endif %}
+      >
+        <i class="fa fa-stream"></i>
+        {% translate "Back to checklist" %}
+      </a>
+      {% endif %}
+    </div>
+    <div class="panel-body">
 
-{% block tab_content %}
-  <h2>Calcul du pot</h2>
-  {% if exception %}
-    <p>
-      <strong>Exception</strong>: {{ exception.status_code }} ({{ exception.message }})<br/>
-    </p>
-  {% else %}
-    <p>
-      <strong>Date calcul</strong>: {{ date_calcul }}<br/>
-      <strong>Pot déterminé</strong>: {{ determined_pool|enum_display:'AcademicCalendarTypes' }}<br/>
-      <strong>Année déterminée</strong>: {{ determined_academic_year }}
-    </p>
-  {% endif %}
-  <pre>{{ pool_logs }}</pre>
-  <h2>Calcul de la financabilité</h2>
-  <p>
-    <strong>Etat</strong>: {{ financabilite.etat }}<br/>
-    {% if financabilite.situation %}<strong>Situation</strong>: {{ financabilite.situation }}{% endif %}
-  </p>
-  <pre>{{ financabilite_logs }}</pre>
+      {% bootstrap_form_errors form %}
 
-  <h2>Vérification du projet</h2>
-  <pre>{{ verify_project|pprint }}</pre>
+      <div class="row">
+        <div class="col-md-12 required_field">
+          {% bootstrap_field_with_tooltip form.certificate %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 required_field">
+          {% bootstrap_field form.year %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
