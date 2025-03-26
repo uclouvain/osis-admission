@@ -27,7 +27,7 @@ import uuid
 from typing import List, Optional
 
 from django.conf import settings
-from django.db.models import F, Max, Q, QuerySet
+from django.db.models import F, Max, Prefetch, Q, QuerySet
 from django.utils.translation import get_language, gettext
 
 from admission.ddd.admission.domain.model.enums.condition_acces import (
@@ -56,7 +56,9 @@ from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
 from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
+from osis_profile.models import Exam
 from osis_profile.models.enums.curriculum import ActivityType, Result
+from osis_profile.models.enums.exam import ExamTypes
 
 
 class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
@@ -73,9 +75,14 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             'candidate__belgianhighschooldiploma__institute',
             'candidate__foreignhighschooldiploma__academic_graduation_year',
             'candidate__foreignhighschooldiploma__country',
-            'candidate__highschooldiplomaalternative',
             'candidate__graduated_from_high_school_year',
             'training__academic_year',
+        ).prefetch_related(
+            Prefetch(
+                'candidate__exams',
+                queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name),
+                to_attr='exam_high_school_diploma_alternative',
+            ),
         ).get(uuid=proposition_identity.uuid)
 
         additional_filters = {'is_access_title': True} if seulement_selectionnes else {}
@@ -164,10 +171,10 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     high_school_diploma.country.name if has_default_language else high_school_diploma.country.name_en
                 )
         elif (
-            getattr(admission.candidate, 'highschooldiplomaalternative', None)
-            and admission.candidate.highschooldiplomaalternative.first_cycle_admission_exam
+            admission.candidate.exam_high_school_diploma_alternative
+            and admission.candidate.exam_high_school_diploma_alternative[0].certificate
         ):
-            high_school_diploma = admission.candidate.highschooldiplomaalternative
+            high_school_diploma = admission.candidate.exam_high_school_diploma_alternative[0]
             formatted_high_school_diploma_name = '{title}'
             formatted_high_school_diploma_name_variables['title'] = gettext("Bachelor's course entrance exam")
 

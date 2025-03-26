@@ -66,6 +66,7 @@ class Promoter(RoleModel):
             'admission.view_admission_person': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_coordinates': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_exam': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_languages': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_curriculum': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_accounting': is_admission_request_promoter & is_being_enrolled,

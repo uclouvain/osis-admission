@@ -331,6 +331,16 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    'retrieve_exam': {
+        'path_name': 'admission_api_v1:general_exam',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_exam': {
+        'path_name': 'admission_api_v1:general_exam',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
     'retrieve_curriculum': {
         'path_name': 'admission_api_v1:general_curriculum',
         'method': 'GET',
