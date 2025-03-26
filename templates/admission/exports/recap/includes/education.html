@@ -101,6 +101,11 @@
     {% if not hide_files %}
       {% panel _('Attachments') %}
         {% field_data _("Certificate of passing the bachelor's course entrance exam") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
+        {% if etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee %}
+          {% field_data _("Year of obtaining this proof") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee|add:1 %}
+        {% else %}
+          {% field_data _("Year of obtaining this proof") "" %}
+        {% endif %}
       {% endpanel %}
     {% endif %}
 

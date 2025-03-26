@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,28 +31,32 @@ from uuid import UUID
 import freezegun
 from django.test import TestCase
 
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
+)
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererTitresAccesSelectionnablesPropositionQuery,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.models import GeneralEducationAdmission
 from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.ddd.admission.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.commands import RecupererTitresAccesSelectionnablesPropositionQuery
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
@@ -65,10 +69,16 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.student import StudentFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.statut_inscription_programme_annuel import (
+    StatutInscriptionProgrammAnnuel,
+)
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from epc.tests.factories.inscription_programme_cycle import (
+    InscriptionProgrammeCycleFactory,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result
@@ -280,8 +290,8 @@ class GetAccessTitlesViewTestCase(TestCase):
 
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_get_access_title_with_high_school_diploma(self, confirm_multiple_upload):
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         )
 
         access_titles: Dict[str, TitreAccesSelectionnableDTO]
@@ -383,7 +393,7 @@ class GetAccessTitlesViewTestCase(TestCase):
 
         self.assertEqual(len(access_titles), 0)
 
-        high_school_diploma_alternative.first_cycle_admission_exam = ['file.pdf']
+        high_school_diploma_alternative.certificate = ['file.pdf']
         high_school_diploma_alternative.save()
 
         access_titles = message_bus_instance.invoke(
