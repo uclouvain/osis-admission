@@ -113,6 +113,22 @@
     <br>
   </div>
   <div id="admission-badges" class="min-width">
+    {% if original_admission.sent_to_epc %}
+      <span class="label label-danger">{% translate 'Sent to EPC' %}</span>
+    {% else %}
+        <form hx-post="{% url 'admission:services:epc-injection' uuid=view.kwargs.uuid %}">
+            {% csrf_token %}
+            <button title="{% if injection_possible %}{% trans 'Send to EPC' %}{% else %}{{ raison_injection_impossible }}{% endif %}"
+               type="submit" class="btn btn-default fa-xs" {% if not injection_possible %}disabled{% endif %}
+               data-toggle="tooltip" data-placement="top">
+                <span class="fa-stack">
+                    <i class="fas fa-database fa-stack-2x"></i>
+                    <i class="fas fa-arrow-right fa-stack-1x fa-inverse"></i>
+                </span>
+                <span class="btn-text">&nbsp;{% trans 'Send to EPC' %}</span>
+            </button>
+        </form>
+    {% endif %}
     {% if admission.candidat_a_plusieurs_demandes %}
       <span
         class="label label-admission-primary"

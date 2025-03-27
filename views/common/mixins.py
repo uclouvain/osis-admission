@@ -29,7 +29,6 @@ from typing import Optional, Union
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.http import Http404
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -51,22 +50,12 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    DoctoratNonTrouveException,
-    PropositionNonTrouveeException,
-)
 from admission.ddd.admission.doctorat.preparation.dtos import (
     CotutelleDTO,
     PropositionDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
-from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import (
-    DemandeNonTrouveeException,
-)
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
 from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
     TypeGestionnaire,
@@ -119,8 +108,8 @@ from admission.utils import (
 )
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
-from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -291,6 +280,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                     False,
                     "Il manque soit la situation de financabilité, soit la date ou l'auteur de la financabilité",
                 )
+        elif contexte == CONTEXT_CONTINUING:
+            if not self.admission.training.specificiufcinformations.registration_required:
+                return False, "La formation doit avoir l'inscription au rôle requise"
         personmergeproposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if not (personmergeproposal and personmergeproposal.registration_id_sent_to_digit):
             return False, "Il manque le noma"
@@ -318,7 +310,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        admission_status = self.admission.status
         context['base_namespace'] = self.base_namespace
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
         context['original_admission'] = self.admission
