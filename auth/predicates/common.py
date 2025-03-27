@@ -30,11 +30,11 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 from waffle import switch_is_active
 
+from admission.auth.scope import Scope
+from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
-from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
-from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
-from admission.auth.scope import Scope
+from gestion_des_comptes.models import InjectionSignaletiqueOrchtestrator, InjectionSignaletiqueStep
 from osis_role.errors import predicate_failed_msg
 
 
@@ -181,17 +181,18 @@ def is_sent_to_epc(self, user: User, obj: BaseAdmission):
 
 
 @predicate(bind=True)
-def pending_digit_ticket_response(self, user: User, obj: BaseAdmission):
+def workflow_injection_signaletique_en_cours(self, user: User, obj: BaseAdmission):
     return (
         obj.candidate.global_id[0] in ['8', '9']
-        and PersonTicketCreation.objects.filter(
-            person_id=obj.candidate_id,
-            status__in=[
-                PersonTicketCreationStatus.CREATED.name,
-                PersonTicketCreationStatus.IN_PROGRESS.name,
-                PersonTicketCreationStatus.ERROR.name,
-            ],
-        ).exists()
+        and InjectionSignaletiqueOrchtestrator.objects.filter(
+                person_id=obj.candidate_id,
+                current_step__in=[
+                    InjectionSignaletiqueStep.INJECTION_SIGNALETIQUE_EPC.name,
+                    InjectionSignaletiqueStep.RECUPERATION_ETAT_INJECTION_SIGNALETIQUE_EPC.name,
+                    InjectionSignaletiqueStep.SOUMISSION_TICKET_DIGIT.name,
+                    InjectionSignaletiqueStep.RECUPERATION_ETAT_TICKET_DIGIT.name,
+                ]
+            ).exists()
     )
 
 

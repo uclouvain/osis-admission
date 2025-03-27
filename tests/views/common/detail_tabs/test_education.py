@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,12 +32,17 @@ from django.urls import resolve, reverse
 from rest_framework import status
 
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
 )
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
     ForeignHighSchoolDiplomaFactory,
@@ -51,14 +56,18 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.entity_version_address import EntityVersionAddressFactory
 from base.tests.factories.organization import OrganizationFactory
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    ValorisationEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
+    ValorisationEtudesSecondairesDTO,
 )
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import BelgianHighSchoolDiploma, HighSchoolDiplomaAlternative, ForeignHighSchoolDiploma
-from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
+)
+from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 from reference.tests.factories.country import CountryFactory
 
 
@@ -228,7 +237,9 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
             high_school_diploma_translation=[uuid.uuid4()],
             equivalence=Equivalence.YES.name,
             final_equivalence_decision_ue=[uuid.uuid4()],
+            access_diploma_to_higher_education_ue=[uuid.uuid4()],
             final_equivalence_decision_not_ue=[uuid.uuid4()],
+            access_diploma_to_higher_education_not_ue=[uuid.uuid4()],
             equivalence_decision_proof=[uuid.uuid4()],
             restrictive_equivalence_daes=[uuid.uuid4()],
             restrictive_equivalence_admission_test=[uuid.uuid4()],
@@ -263,7 +274,9 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
                 traduction_diplome=diploma.high_school_diploma_translation,
                 equivalence=diploma.equivalence,
                 decision_final_equivalence_ue=diploma.final_equivalence_decision_ue,
+                daes_ue=diploma.access_diploma_to_higher_education_ue,
                 decision_final_equivalence_hors_ue=diploma.final_equivalence_decision_not_ue,
+                daes_hors_ue=diploma.access_diploma_to_higher_education_not_ue,
                 preuve_decision_equivalence=diploma.equivalence_decision_proof,
             ),
         )

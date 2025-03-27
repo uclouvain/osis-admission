@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import uuid
+from unittest import mock
 
 import attr
 from django.test import SimpleTestCase
@@ -68,6 +69,11 @@ class TestModifierChoixFormationParGestionnaireService(SimpleTestCase):
                 str(uuid.uuid4()): '1',
             },
         )
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_should_modifier_choix_formation(self):
         proposition_id = self.message_bus.invoke(self.cmd)

@@ -41,7 +41,6 @@ from admission.calendar.admission_digit_ticket_submission import (
     AdmissionDigitTicketSubmissionCalendar,
 )
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetCotutelleCommand,
     RecupererAdmissionDoctoratQuery,
@@ -120,6 +119,7 @@ from admission.utils import (
 )
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
+from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -196,7 +196,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     @cached_property
     def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
-        return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))
+        return message_bus_instance.invoke(GetPropositionFusionQuery(matricule=self.admission.candidate.global_id))
 
     @cached_property
     def dossier(self) -> 'DemandeDTO':
@@ -300,12 +300,21 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return False, "Le candidat n'a toujours pas d'email uclouvain"
         if self.admission.sent_to_epc:
             return False, "La demande a déjà été envoyée dans EPC"
-        if personmergeproposal and (
-            personmergeproposal.status in PersonMergeStatus.quarantine_statuses()
-            or personmergeproposal.validation.get('valid') is not True
-        ):
+        if self.demande_est_en_quarantaine:
             return False, "La demande est en quarantaine"
         return True, ''
+
+    @cached_property
+    def demande_est_en_quarantaine(self) -> bool:
+        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
+        if person_merge_proposal and (
+                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+                or not person_merge_proposal.validation.get('valid', True)
+        ):
+            # Cas display warning when quarantaine
+            # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
+            return True
+        return False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -341,7 +350,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['injection_inscription'] = self.injection_inscription
         context['injection_possible'] = self.injection_possible[0]
         context['raison_injection_impossible'] = self.injection_possible[1]
+        context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
+        context['outil_de_comparaison_et_fusion_url'] = self.get_outil_de_comparaison_et_fusion_url()
         return context
+
+    def get_outil_de_comparaison_et_fusion_url(self) -> str:
+        return resolve_url(
+            'admission:services:gestion-des-comptes:outil-comparaison-et-fusion',
+            uuid=self.admission_uuid
+        )
 
     def dispatch(self, request, *args, **kwargs):
         if (

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@ from backoffice.celery import app as celery_app
 from . import check_academic_calendar
 from . import injecter_dossier_a_epc
 from . import process_admission_tasks
-from . import retrieve_digit_tickets_status
-from . import retry_digit_duplicates_finding
 from . import verifier_paiements_faits
 
 tasks = {
@@ -44,14 +42,6 @@ tasks = {
         'task': 'admission.tasks.check_academic_calendar.run',
         'schedule': crontab(minute=0, hour=0, day_of_month='*', month_of_year='*', day_of_week=0),
     },
-    '|Admission| Retrieve digit person tickets status': {
-        'task': 'admission.tasks.retrieve_digit_tickets_status.run',
-        'schedule': crontab(minute='*/5'),
-    },
-    '|Admission| Retry digit duplicates finding': {
-        'task': 'admission.tasks.retry_digit_duplicates_finding.run',
-        'schedule': crontab(minute='*/5'),
-    },
     '|Admission| Injection dossiers valides': {
         'task': 'admission.tasks.injecter_dossier_a_epc.run',
         'schedule': crontab(minute=0, hour=3),  # Every day at 3 am
@@ -60,11 +50,6 @@ tasks = {
         'task': 'admission.tasks.verifier_paiements_faits.run',
         'schedule': crontab(minute=0, hour=1),
     },
-    # couvre le basculement de la période de création de compte dans DigIT
-    # '|Admission| Bulk create digit persons tickets': {
-    #     'task': 'admission.tasks.bulk_create_digit_persons_tickets.run',
-    #     'schedule': crontab(minute=0, hour=0, day_of_month='1', month_of_year='*'),
-    # }
 }
 
 celery_app.conf.beat_schedule.update(tasks)

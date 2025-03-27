@@ -34,7 +34,7 @@ from admission.auth.predicates.common import (
     is_part_of_education_group,
     is_debug,
     is_sent_to_epc,
-    pending_digit_ticket_response,
+    workflow_injection_signaletique_en_cours,
     past_experiences_checklist_tab_is_not_sufficient,
     candidate_has_other_doctorate_or_general_admissions,
 )
@@ -89,13 +89,13 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.change_admission_person': is_part_of_education_group
             & continuing.in_manager_status
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response
+            & ~workflow_injection_signaletique_en_cours
             & ~candidate_has_other_doctorate_or_general_admissions,
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.change_admission_coordinates': is_part_of_education_group
             & continuing.in_manager_status
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
             'admission.change_admission_secondary_studies': is_part_of_education_group
             & continuing.in_manager_status
@@ -130,7 +130,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.change_admission_training_choice': is_part_of_education_group
             & (continuing.in_manager_status | doctorate.in_fac_status)
             & ~is_sent_to_epc
-            & ~pending_digit_ticket_response,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_accounting': is_part_of_education_group,
             'admission.view_admission_specific_questions': is_part_of_education_group,
             'admission.change_admission_specific_questions': is_part_of_education_group

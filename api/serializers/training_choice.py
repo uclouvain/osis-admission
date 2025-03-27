@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,29 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.serializers.fields import AnswerToSpecificQuestionField
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
-from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from rest_framework.serializers import Serializer
 
+from admission.api.serializers.fields import AnswerToSpecificQuestionField
+from admission.ddd.admission.doctorat.preparation import (
+    commands as doctorate_education_commands,
+)
+from admission.ddd.admission.dtos.periode import PeriodeDTO
+from admission.ddd.admission.formation_continue import (
+    commands as continuing_education_commands,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
 from base.utils.serializers import DTOSerializer
+
+
+class PeriodSerializer(DTOSerializer):
+    class Meta:
+        source = PeriodeDTO
+
+
+class SpecificEnrolmentPeriodsSerializer(Serializer):
+    medicine_dentistry_bachelor = PeriodSerializer(allow_null=True, read_only=True)
 
 
 class InitierPropositionGeneraleCommandSerializer(DTOSerializer):

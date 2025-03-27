@@ -523,18 +523,19 @@ def get_experience_urls(
 
         if experience.epc_experience:
             if candidate_noma:
-                if computed_permissions['profil.can_see_parcours_externe']:
-                    res_context['curex_url'] = resolve_url(
-                        'parcours-externe-view',
-                        noma=candidate_noma,
-                    )
                 if computed_permissions['profil.can_edit_parcours_externe']:
                     res_context['edit_url'] = resolve_url(
                         'edit-experience-academique-view',
                         noma=candidate_noma,
                         experience_uuid=experience.annees[0].uuid,
                     )
+                    res_context['curex_url'] = res_context['edit_url']
                     res_context['edit_new_link_tab'] = True
+                elif computed_permissions['profil.can_see_parcours_externe']:
+                    res_context['curex_url'] = resolve_url(
+                        'parcours-externe-view',
+                        noma=candidate_noma,
+                    )
 
         else:
             res_context['duplicate_url'] = resolve_url(

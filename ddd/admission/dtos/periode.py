@@ -23,35 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from functools import reduce
+import datetime
+from typing import Optional
 
 import attr
 
-from admission.ddd import NB_MOIS_MIN_VAE
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    CurriculumDTO,
-    MessageCurriculumDTO,
-)
-
-message_candidat_avec_pae_avant_2015 = MessageCurriculumDTO(
-    annee=2015,
-    gabarit='admission/general_education/includes/checklist/curriculum_pae_avant_2015_message.html',
-)
+from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
-class CurriculumAdmissionDTO(CurriculumDTO):
-    @property
-    def candidat_est_potentiel_vae(self) -> bool:
-        """
-        Un candidat est potentiel vae si la durée de l'ensemble de ses expériences non academiques est supérieure à 36.
-        """
-        return (
-            reduce(
-                lambda total, experience: self._compte_nombre_mois(total, experience),
-                self.experiences_non_academiques,
-                0,
-            )
-            >= NB_MOIS_MIN_VAE
-        )
+class PeriodeDTO(interface.DTO):
+    date_debut: Optional[datetime.date]
+    date_fin: Optional[datetime.date]

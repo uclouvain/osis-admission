@@ -84,7 +84,6 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 
 
 @freezegun.freeze_time('2020-11-01')
-@mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
 class TestVerifierPropositionServiceCommun(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -137,6 +136,11 @@ class TestVerifierPropositionServiceCommun(TestCase):
             annee=2020,
             elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(),
         )
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(self.base_cmd)

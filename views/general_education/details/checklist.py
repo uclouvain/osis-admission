@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import itertools
-from typing import Dict, Set, Optional, List, Union
+from typing import Dict, List, Optional, Set, Union
 
 import attr
 from django.conf import settings
@@ -33,14 +33,16 @@ from django.db.models import QuerySet
 from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
-from django.shortcuts import resolve_url, redirect
+from django.shortcuts import redirect, resolve_url
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, ngettext, pgettext, override, gettext
-from django.views.generic import TemplateView, FormView
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext, override, pgettext
+from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
@@ -49,177 +51,193 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.models import EPCInjection
-from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MAIL_VERIFICATEUR_CURSUS
-from admission.ddd import MONTANT_FRAIS_DOSSIER
+from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import (
     ListerToutesDemandesQuery,
-    GetStatutTicketPersonneQuery,
     RechercherParcoursAnterieurQuery,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    message_candidat_avec_pae_avant_2015,
+)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
+)
+from admission.ddd.admission.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+)
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
     ResumeCandidatDTO,
+    ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumePropositionDTO,
 )
-from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
+    DocumentsEtudesSecondaires,
+    OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.enums.emplacement_document import (
-    OngletsDemande,
-    DocumentsEtudesSecondaires,
-)
 from admission.ddd.admission.enums.statut import (
-    STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
+    STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
-    ModifierChecklistChoixFormationCommand,
-    SpecifierPaiementNecessaireCommand,
-    EnvoyerRappelPaiementCommand,
-    SpecifierPaiementPlusNecessaireCommand,
-    RecupererQuestionsSpecifiquesQuery,
-    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
-    SpecifierMotifsRefusPropositionParFaculteCommand,
-    SpecifierInformationsAcceptationPropositionParFaculteCommand,
+    ApprouverAdmissionParSicCommand,
+    ApprouverInscriptionParSicCommand,
+    ApprouverInscriptionTardiveParFaculteCommand,
     ApprouverPropositionParFaculteCommand,
-    RefuserPropositionParFaculteCommand,
-    RecupererListePaiementsPropositionQuery,
+    ApprouverReorientationExterneParFaculteCommand,
+    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
+    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
+    EnvoyerRappelPaiementCommand,
+    ModifierAuthentificationExperienceParcoursAnterieurCommand,
+    ModifierChecklistChoixFormationCommand,
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
+    NotifierCandidatDerogationFinancabiliteCommand,
+    RecupererDocumentsPropositionQuery,
+    RecupererListePaiementsPropositionQuery,
+    RecupererPdfTemporaireDecisionSicQuery,
+    RecupererQuestionsSpecifiquesQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+    RecupererResumePropositionQuery,
+    RecupererTitresAccesSelectionnablesPropositionQuery,
+    RefuserAdmissionParSicCommand,
+    RefuserInscriptionParSicCommand,
+    RefuserPropositionParFaculteCommand,
+    SpecifierBesoinDeDerogationSicCommand,
     SpecifierConditionAccesPropositionCommand,
+    SpecifierDerogationFinancabiliteCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
     SpecifierExperienceEnTantQueTitreAccesCommand,
-    SpecifierFinancabiliteRegleCommand,
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
-    ModifierAuthentificationExperienceParcoursAnterieurCommand,
-    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
-    SpecifierBesoinDeDerogationSicCommand,
-    SpecifierInformationsAcceptationPropositionParSicCommand,
-    SpecifierMotifsRefusPropositionParSicCommand,
-    RecupererDocumentsPropositionQuery,
-    RefuserAdmissionParSicCommand,
-    ApprouverAdmissionParSicCommand,
-    RecupererPdfTemporaireDecisionSicQuery,
-    RefuserInscriptionParSicCommand,
-    ApprouverInscriptionParSicCommand,
-    RecupererTitresAccesSelectionnablesPropositionQuery,
-    RecupererResumePropositionQuery,
-    ApprouverInscriptionTardiveParFaculteCommand,
-    SpecifierInformationsAcceptationInscriptionParSicCommand,
-    SpecifierDerogationFinancabiliteCommand,
-    NotifierCandidatDerogationFinancabiliteCommand,
     SpecifierFinancabiliteNonConcerneeCommand,
-    ApprouverReorientationExterneParFaculteCommand,
+    SpecifierFinancabiliteRegleCommand,
+    SpecifierInformationsAcceptationInscriptionParSicCommand,
+    SpecifierInformationsAcceptationPropositionParFaculteCommand,
+    SpecifierInformationsAcceptationPropositionParSicCommand,
+    SpecifierMotifsRefusPropositionParFaculteCommand,
+    SpecifierMotifsRefusPropositionParSicCommand,
+    SpecifierPaiementNecessaireCommand,
+    SpecifierPaiementPlusNecessaireCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
-    ChoixStatutPropositionGenerale,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
-    PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
-    TypeDeRefus,
-    OngletsChecklist,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
     DerogationFinancement,
+    OngletsChecklist,
+    PoursuiteDeCycle,
+    TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+    onglet_decision_sic,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import onglet_decision_sic
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    FormationNonTrouveeException,
+)
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
 from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
     InformationsDestinatairePasTrouvee,
 )
-from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import (
+    RecupererInformationsDestinataireQuery,
+)
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
-    ChoixFormationForm,
-    SicDecisionDerogationForm,
-    FinancabiliteApprovalForm,
-    SicDecisionApprovalDocumentsForm,
-    FreeAdditionalApprovalConditionForm,
-    FinancabiliteDispensationForm,
-    FinancabilityDispensationRefusalForm,
-    FinancabiliteNotificationForm,
-    FinancabiliteNotFinanceableForm,
-)
-from admission.forms.admission.checklist import (
-    CommentForm,
     AssimilationForm,
-    FacDecisionRefusalForm,
-    FacDecisionApprovalForm,
-    SicDecisionRefusalForm,
-    SicDecisionApprovalForm,
-    SicDecisionFinalRefusalForm,
-    SicDecisionFinalApprovalForm,
-)
-from admission.forms.admission.checklist import (
+    ChoixFormationForm,
+    CommentForm,
     ExperienceStatusForm,
-    can_edit_experience_authentication,
-)
-from admission.forms.admission.checklist import (
-    StatusForm,
-    PastExperiencesAdmissionRequirementForm,
+    FacDecisionApprovalForm,
+    FacDecisionRefusalForm,
+    FinancabiliteApprovalForm,
+    FinancabiliteDispensationForm,
+    FinancabiliteNotFinanceableForm,
+    FinancabiliteNotificationForm,
+    FinancabilityDispensationRefusalForm,
+    FreeAdditionalApprovalConditionForm,
     PastExperiencesAdmissionAccessTitleForm,
+    PastExperiencesAdmissionRequirementForm,
+    SicDecisionApprovalDocumentsForm,
+    SicDecisionApprovalForm,
+    SicDecisionDerogationForm,
+    SicDecisionFinalApprovalForm,
+    SicDecisionFinalRefusalForm,
+    SicDecisionRefusalForm,
     SinglePastExperienceAuthenticationForm,
+    StatusForm,
+    can_edit_experience_authentication,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.mail_templates import (
-    ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
-    INSCRIPTION_EMAIL_SIC_APPROVAL,
+    ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
+    INSCRIPTION_EMAIL_SIC_APPROVAL,
 )
 from admission.mail_templates.checklist import (
-    ADMISSION_EMAIL_SIC_REFUSAL,
-    ADMISSION_EMAIL_SIC_APPROVAL,
-    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+    ADMISSION_EMAIL_SIC_APPROVAL,
+    ADMISSION_EMAIL_SIC_APPROVAL_EU,
+    ADMISSION_EMAIL_SIC_REFUSAL,
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
-    ADMISSION_EMAIL_SIC_APPROVAL_EU,
 )
-from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
+from admission.models import EPCInjection
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.online_payment import PaymentMethod, PaymentStatus
+from admission.templatetags.admission import (
+    authentication_css_class,
+    bg_class_by_checklist_experience,
+)
 from admission.utils import (
     add_close_modal_into_htmx_response,
-    get_portal_admission_list_url,
-    get_backoffice_admission_url,
-    get_portal_admission_url,
-    get_access_titles_names,
-    get_salutation_prefix,
     format_academic_year,
-    get_training_url,
+    get_access_titles_names,
+    get_backoffice_admission_url,
     get_missing_curriculum_periods,
+    get_portal_admission_list_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
+    get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
-from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeStatus
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from ddd.logic.shared_kernel.profil.commands import (
+    RecupererExperiencesParcoursInterneQuery,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
+)
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -227,6 +245,7 @@ from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
+from parcours_interne import etudiants_PCE_avant_2015
 
 __all__ = [
     'ChecklistView',
@@ -316,13 +335,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             if has_comment:
                 checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
 
-        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
-        if person_merge_proposal and (
-            person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-            or not person_merge_proposal.validation.get('valid', True)
-        ):
-            # Cas display warning when quarantaine
-            # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
+        if self.demande_est_en_quarantaine:
             checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
 
         if self.proposition.est_inscription_tardive:
@@ -569,11 +582,13 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
 
         formset = FreeApprovalConditionFormSet(
             prefix='fac-decision',
-            initial=self.admission.freeadditionalapprovalcondition_set.filter(
-                related_experience__isnull=True,
-            ).values('name_fr', 'name_en')
-            if self.request.method != 'POST'
-            else None,
+            initial=(
+                self.admission.freeadditionalapprovalcondition_set.filter(
+                    related_experience__isnull=True,
+                ).values('name_fr', 'name_en')
+                if self.request.method != 'POST'
+                else None
+            ),
             data=self.request.POST if self.request.method == 'POST' else None,
             form_kwargs={
                 'candidate_language': self.admission.candidate.language,
@@ -670,15 +685,17 @@ class FacultyDecisionSendToSicView(
                     gestionnaire=self.request.user.person.global_id,
                 )
                 if self.request.GET.get('approval') and self.is_fac
-                else RefuserPropositionParFaculteCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                )
-                if self.request.GET.get('refusal') and self.is_fac
-                else EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                    envoi_par_fac=self.is_fac,
+                else (
+                    RefuserPropositionParFaculteCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                    )
+                    if self.request.GET.get('refusal') and self.is_fac
+                    else EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                        envoi_par_fac=self.is_fac,
+                    )
                 )
             )
 
@@ -789,9 +806,11 @@ class FacultyApprovalDecisionView(
     def form_valid(self, form):
         base_params = {
             'uuid_proposition': self.admission_uuid,
-            'sigle_autre_formation': form.cleaned_data['other_training_accepted_by_fac'].acronym
-            if form.cleaned_data['other_training_accepted_by_fac']
-            else '',
+            'sigle_autre_formation': (
+                form.cleaned_data['other_training_accepted_by_fac'].acronym
+                if form.cleaned_data['other_training_accepted_by_fac']
+                else ''
+            ),
             'avec_conditions_complementaires': form.cleaned_data['with_additional_approval_conditions'],
             'uuids_conditions_complementaires_existantes': [
                 condition for condition in form.cleaned_data['additional_approval_conditions']
@@ -1040,11 +1059,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
         formset = FreeApprovalConditionFormSet(
             prefix='sic-decision',
-            initial=self.admission.freeadditionalapprovalcondition_set.filter(
-                related_experience__isnull=True,
-            ).values('name_fr', 'name_en')
-            if self.request.method != 'POST'
-            else None,
+            initial=(
+                self.admission.freeadditionalapprovalcondition_set.filter(
+                    related_experience__isnull=True,
+                ).values('name_fr', 'name_en')
+                if self.request.method != 'POST'
+                else None
+            ),
             data=self.request.POST if self.request.method == 'POST' else None,
             form_kwargs={
                 'candidate_language': self.admission.candidate.language,
@@ -1085,10 +1106,12 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return SicDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
             instance=self.admission,
-            data=self.request.POST
-            if self.request.method == 'POST'
-            and 'sic-decision-approval-program_planned_years_number' in self.request.POST
-            else None,
+            data=(
+                self.request.POST
+                if self.request.method == 'POST'
+                and 'sic-decision-approval-program_planned_years_number' in self.request.POST
+                else None
+            ),
             prefix='sic-decision-approval',
             educational_experience_program_name_by_uuid=self.candidate_cv_program_names_by_experience_uuid,
             candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
@@ -1120,11 +1143,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             tokens = {
                 "admission_reference": self.proposition.reference,
                 "candidate": (
-                    f"{self.proposition.profil_soumis_candidat.prenom} "
-                    f"{self.proposition.profil_soumis_candidat.nom}"
-                )
-                if self.proposition.profil_soumis_candidat
-                else "",
+                    (
+                        f"{self.proposition.profil_soumis_candidat.prenom} "
+                        f"{self.proposition.profil_soumis_candidat.nom}"
+                    )
+                    if self.proposition.profil_soumis_candidat
+                    else ""
+                ),
                 "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
                 "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
                 "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
@@ -1143,9 +1168,11 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 body = ''
 
         return SicDecisionFinalRefusalForm(
-            data=self.request.POST
-            if self.request.method == 'POST' and 'sic-decision-refusal-final-submitted' in self.request.POST
-            else None,
+            data=(
+                self.request.POST
+                if self.request.method == 'POST' and 'sic-decision-refusal-final-submitted' in self.request.POST
+                else None
+            ),
             prefix='sic-decision-refusal-final',
             initial={
                 'subject': subject,
@@ -3125,16 +3152,18 @@ class ChecklistView(
                 if context.get('past_experiences_are_sufficient')
                 else ''
             )
-
-            context['digit_ticket'] = message_bus_instance.invoke(
-                GetStatutTicketPersonneQuery(global_id=self.proposition.matricule_candidat)
-            )
-
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 
         context['injection_signaletique'] = self.injection_signaletique
         return context
+
+    def curriculum_additional_messages(self):
+        # Get the messages to display into the past experiences views
+        additional_messages = []
+        if self.proposition.noma_candidat in etudiants_PCE_avant_2015.nomas:
+            additional_messages.append(message_candidat_avec_pae_avant_2015)
+        return additional_messages
 
     def _merge_with_known_curriculum(self, curex_a_fusionner, resume):
         if curex_a_fusionner:
@@ -3157,6 +3186,7 @@ class ChecklistView(
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
             experiences_parcours_interne=self.internal_experiences,
+            additional_messages=self.curriculum_additional_messages(),
         )
 
     def _get_financabilite(self):

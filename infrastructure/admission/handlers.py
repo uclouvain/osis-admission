@@ -26,25 +26,12 @@
 from django.conf import settings
 
 from admission.ddd.admission.commands import *
-from admission.ddd.admission.events import PropositionFusionInitialiseeEvent, PropositionFusionRefuseeEvent
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
 from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
-from admission.ddd.admission.use_case.read.recuperer_matricule_digit import recuperer_matricule_digit
 from admission.ddd.admission.use_case.write import specifier_experience_en_tant_que_titre_acces
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.event_handler import (
-    reagir_modification_signaletique_candidat,
-    reagir_proposition_fusion_initialisee,
-    reagir_refus_proposition_fusion,
-)
-from admission.infrastructure.admission.event_handler.reagir_a_proposition_soumise import recherche_et_validation_digit
-from admission.infrastructure.admission.repository.digit import DigitRepository
-from admission.infrastructure.admission.repository.proposition_fusion_personne import (
-    PropositionPersonneFusionRepository,
-)
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
     EmailDestinataireRepository,
@@ -59,14 +46,6 @@ COMMAND_HANDLERS = {
     RecupererInformationsDestinataireQuery: lambda msg_bus, query: recuperer_informations_destinataire(
         query,
         email_destinataire_repository=EmailDestinataireRepository(),
-    ),
-    GetPropositionFusionQuery: lambda msg_bus, query: get_proposition_fusion_personne(
-        query,
-        proposition_fusion_repository=PropositionPersonneFusionRepository(),
-    ),
-    RecupererMatriculeDigitQuery: lambda msg_bus, query: recuperer_matricule_digit(
-        query,
-        digit_repository=DigitRepository(),
     ),
     RecupererEtudesSecondairesQuery: lambda msg_bus, query: recuperer_etudes_secondaires(
         query,
@@ -101,14 +80,10 @@ EVENT_HANDLERS = {}
 
 if 'admission' in settings.INSTALLED_APPS:
     from admission.ddd.admission.formation_generale.events import (
-        PropositionSoumiseEvent,
         InscriptionApprouveeParSicEvent,
         AdmissionApprouveeParSicEvent,
-        DonneesIdentificationCandidatModifiee,
-        CoordonneesCandidatModifiees,
     )
     from admission.ddd.admission.doctorat.events import (
-        PropositionDoctoraleSoumiseEvent,
         InscriptionDoctoraleApprouveeParSicEvent,
         AdmissionDoctoraleApprouveeParSicEvent,
     )
@@ -118,14 +93,8 @@ if 'admission' in settings.INSTALLED_APPS:
 
     EVENT_HANDLERS = {
         **EVENT_HANDLERS,
-        PropositionSoumiseEvent: [recherche_et_validation_digit],
         InscriptionApprouveeParSicEvent: [reagir_a_approuver_proposition],
         AdmissionApprouveeParSicEvent: [reagir_a_approuver_proposition],
-        DonneesIdentificationCandidatModifiee: [reagir_modification_signaletique_candidat.process],
-        CoordonneesCandidatModifiees: [reagir_modification_signaletique_candidat.process],
-        PropositionFusionInitialiseeEvent: [reagir_proposition_fusion_initialisee.process],
-        PropositionFusionRefuseeEvent: [reagir_refus_proposition_fusion.process],
-        PropositionDoctoraleSoumiseEvent: [recherche_et_validation_digit],
         InscriptionDoctoraleApprouveeParSicEvent: [reagir_a_approuver_proposition],
         AdmissionDoctoraleApprouveeParSicEvent: [reagir_a_approuver_proposition],
     }
