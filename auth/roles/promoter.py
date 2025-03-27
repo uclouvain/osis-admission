@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates.doctorate import (
+    is_admission,
     is_admission_request_promoter,
     is_being_enrolled,
     is_part_of_committee_and_invited,
-    is_admission,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -62,6 +62,7 @@ class Promoter(RoleModel):
             'admission.view_admission_person': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_coordinates': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_exam': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_languages': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_curriculum': is_admission_request_promoter & is_being_enrolled,
             'admission.view_admission_accounting': is_admission_request_promoter & is_being_enrolled,

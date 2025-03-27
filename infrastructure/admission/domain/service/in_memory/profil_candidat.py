@@ -26,7 +26,7 @@
 
 import datetime
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import attr
 
@@ -36,6 +36,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
     ConnaissanceLangueDTO,
+    DoctoratFormationDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
@@ -54,6 +55,8 @@ from admission.ddd.admission.dtos import (
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
+from admission.ddd.admission.dtos.examen import ExamenDTO
+from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
@@ -1045,6 +1048,14 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def get_examen(cls, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
+        return ExamenDTO(
+            requis=False,
+            attestation=[],
+            annee=None,
+        )
+
+    @classmethod
     def get_curriculum(
         cls,
         matricule: str,
@@ -1216,7 +1227,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     def recuperer_toutes_informations_candidat(
         cls,
         matricule: str,
-        formation: str,
+        formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
@@ -1227,6 +1238,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             curriculum=cls.get_curriculum(matricule, annee_courante, uuid_proposition),
             etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
+            examens=cls.get_examen(matricule, formation.sigle, formation.annee),
         )
 
     @classmethod

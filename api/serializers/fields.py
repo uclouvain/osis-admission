@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -328,6 +328,16 @@ GENERAL_EDUCATION_ACTION_LINKS = {
     },
     'update_secondary_studies': {
         'path_name': 'admission_api_v1:general_secondary_studies',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_exam': {
+        'path_name': 'admission_api_v1:general_exam',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_exam': {
+        'path_name': 'admission_api_v1:general_exam',
         'method': 'PUT',
         'params': ['uuid'],
     },

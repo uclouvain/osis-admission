@@ -2351,6 +2351,72 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/general-education/{uuid}/exam:
+    get:
+      operationId: retrieveExamGeneralEducationAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exam'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateExamGeneralEducationAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Exam'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exam'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/general-education/{uuid}/identification:
     get:
       operationId: retrieve_general_identification
@@ -6223,11 +6289,14 @@ components:
         high_school_diploma_alternative:
           type: object
           properties:
-            first_cycle_admission_exam:
+            certificate:
               type: array
               items:
                 type: string
               maxItems: 1
+            year:
+              type: integer
+              nullable: true
           nullable: true
         specific_question_answers:
           type: object
@@ -7907,6 +7976,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_secondary_studies:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_exam:
+              $ref: '#/components/schemas/ActionLink'
+            update_exam:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_curriculum:
               $ref: '#/components/schemas/ActionLink'
             update_curriculum:
@@ -8047,6 +8120,32 @@ components:
       - equivalence_diplome
       - pdf_recapitulatif
       - documents_additionnels
+    Exam:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          readOnly: true
+        title_en:
+          type: string
+          readOnly: true
+        help_text_fr:
+          type: string
+          readOnly: true
+        help_text_en:
+          type: string
+          readOnly: true
+        certificate:
+          type: array
+          items:
+            type: string
+          maxItems: 1
+        year:
+          type: integer
+          nullable: true
+        is_valuated:
+          type: boolean
+          readOnly: true
     PropositionIdentityDTO:
       type: object
       properties:
