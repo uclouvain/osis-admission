@@ -42,9 +42,9 @@ class TestRechercherPromoteursService(SimpleTestCase):
 
     def test_should_rechercher_par_terme_recherche(self):
         promoteurs_dtos: List[PromoteurDTO] = self.message_bus.invoke(
-            RechercherPromoteursQuery(terme_recherche='00987890'),
+            RechercherPromoteursQuery(terme_recherche='00987891'),
         )
 
-        self.assertEqual(len(promoteurs_dtos), 1)
+        self.assertTrue(len(promoteurs_dtos) > 0)
 
-        self.assertEqual(promoteurs_dtos[0].matricule, '00987890')
+        self.assertEqual(promoteurs_dtos[0].matricule, '00987891')

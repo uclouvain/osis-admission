@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import contextlib
 import datetime
 
 from django.contrib import messages
@@ -37,19 +36,10 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from admission.ddd.admission.commands import (
-    ValiderTicketPersonneCommand,
-    SoumettreTicketPersonneCommand,
-    RechercherCompteExistantCommand,
-)
-from admission.ddd.admission.domain.validator.exceptions import (
-    NotInAccountCreationPeriodException,
-    AdmissionDansUnStatutPasAutoriseASInscrireException,
-    PropositionFusionATraiterException,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
+from admission.ddd.admission.formation_generale.events import DonneesPersonellesCandidatValidee
 from admission.forms.admission.checklist import (
     CommentForm,
 )
@@ -70,6 +60,8 @@ __all__ = [
 
 __namespace__ = False
 
+from infrastructure.messages_bus import message_bus_instance
+
 from osis_common.ddd.interface import BusinessException
 
 COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
@@ -84,20 +76,6 @@ class ChangeStatusSerializer(serializers.Serializer):
 def change_admission_status(tab, admission_status, extra, admission, author, replace_extra=False, global_status=None):
     """Change the status of the admission of a specific tab"""
     update_fields = ['checklist', 'last_update_author', 'modified_at']
-
-    if tab in ['decision_sic'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
-        # TODO : add intermediary status to support async process (waiting for digit response)
-
-        from infrastructure.messages_bus import message_bus_instance
-
-        message_bus_instance.invoke(RechercherCompteExistantCommand(matricule=admission.candidate.global_id))
-        message_bus_instance.invoke(ValiderTicketPersonneCommand(global_id=admission.candidate.global_id))
-        with contextlib.suppress(
-            NotInAccountCreationPeriodException,
-            AdmissionDansUnStatutPasAutoriseASInscrireException,
-            PropositionFusionATraiterException,
-        ):
-            message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=admission.candidate.global_id))
 
     admission.last_update_author = author
     admission.modified_at = datetime.datetime.now()
@@ -130,6 +108,12 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
 
     admission.save(update_fields=update_fields)
 
+    if tab in ['donnees_personnelles'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
+        message_bus_instance.publish(
+            DonneesPersonellesCandidatValidee(
+                matricule=admission.candidate.global_id
+            )
+        )
     return serializer.data
 
 

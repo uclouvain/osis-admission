@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
 
 import attr
 from django.test import SimpleTestCase
@@ -59,6 +60,11 @@ class TestModifierChecklistChoixFormationPropositionService(SimpleTestCase):
             type_demande=TypeDemande.ADMISSION.name,
             commission_proximite=ChoixSousDomaineSciences.BIOLOGY.name,
         )
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_should_modifier_choix_formation(self):
         proposition_id = self.message_bus.invoke(self.cmd)

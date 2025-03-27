@@ -1115,12 +1115,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     traduction_releve_notes=['uuid-traduction-releve-notes'],
                     credits_inscrits=220,
                     credits_acquis=220,
-                    avec_bloc_1=None,
-                    avec_complement=None,
                     allegement='',
                     est_reorientation_102=None,
-                    credits_inscrits_communaute_fr=None,
-                    credits_acquis_communaute_fr=None,
                 )
             ],
             a_obtenu_diplome=True,
@@ -1140,6 +1136,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
             identifiant_externe='123456789',
+            credits_acquis_bloc_1=None,
+            avec_complements=None,
+            credits_inscrits_complements=None,
+            credits_acquis_complements=None,
         )
         cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -1163,12 +1163,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     traduction_releve_notes=['uuid-traduction-releve-notes'],
                     credits_inscrits=220,
                     credits_acquis=220,
-                    avec_bloc_1=None,
-                    avec_complement=None,
                     allegement='',
                     est_reorientation_102=None,
-                    credits_inscrits_communaute_fr=None,
-                    credits_acquis_communaute_fr=None,
                 )
             ],
             a_obtenu_diplome=True,
@@ -1188,6 +1184,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
             identifiant_externe='123456789',
+            credits_acquis_bloc_1=None,
+            avec_complements=None,
+            credits_inscrits_complements=None,
+            credits_acquis_complements=None,
         )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[
@@ -1244,7 +1244,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 traduction_diplome=['uuid-traduction-diplome'],
                 equivalence=Equivalence.YES.name,
                 decision_final_equivalence_ue=['uuid-decision-final-equivalence-ue'],
+                daes_ue=['uuid-access-diploma-to-higher-education-ue'],
                 decision_final_equivalence_hors_ue=['uuid-decision-final-equivalence-hors-ue'],
+                daes_hors_ue=['uuid-access-diploma-to-higher-education-hors-ue'],
                 preuve_decision_equivalence=['uuid-preuve-decision-equivalence'],
             ),
             alternative_secondaires=AlternativeSecondairesDTO(
@@ -2389,7 +2391,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 3)
+            self.assertEqual(len(attachments), 4)
 
             self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE')
             self.assertEqual(
@@ -2403,23 +2405,35 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertTrue(attachments[0].required)
             self.assertTrue(attachments[0].readonly)
 
-            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
+            self.assertEqual(attachments[1].identifier, 'DAES_HORS_UE')
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsEtudesSecondaires['DAES_HORS_UE'],
+            )
             self.assertEqual(
                 attachments[1].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.daes_hors_ue,
             )
-            self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].required)
             self.assertTrue(attachments[1].readonly)
 
-            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[2].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[2].required)
             self.assertTrue(attachments[2].readonly)
+
+            self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[3].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(
+                attachments[3].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_equival(
         self,
@@ -2440,7 +2454,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 3)
+            self.assertEqual(len(attachments), 4)
 
             self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE')
             self.assertEqual(
@@ -2454,23 +2468,35 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertTrue(attachments[0].required)
             self.assertTrue(attachments[0].readonly)
 
-            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
+            self.assertEqual(attachments[1].identifier, 'DAES_UE')
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsEtudesSecondaires['DAES_UE'],
+            )
             self.assertEqual(
                 attachments[1].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.daes_ue,
             )
-            self.assertTrue(attachments[1].required)
+            self.assertFalse(attachments[1].required)
             self.assertTrue(attachments[1].readonly)
 
-            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[2].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[2].required)
             self.assertTrue(attachments[2].readonly)
+
+            self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[3].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
+            self.assertEqual(
+                attachments[3].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[3].required)
+            self.assertTrue(attachments[3].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_pending_eq(
         self,

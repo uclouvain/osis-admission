@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,45 +30,62 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.models import ContinuingEducationAdmission, EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.models import ContinuingEducationAdmission
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
 )
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
+    ProfessionalExperienceFactory,
 )
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import EducationalExperienceYear, EducationalExperience, ProfessionalExperience
-from osis_profile.models.enums.curriculum import (
-    EvaluationSystem,
-    TranscriptType,
-    Grade,
-    Result,
-    Reduction,
-    ActivityType,
-    ActivitySector,
+from osis_profile.models import (
+    EducationalExperience,
+    EducationalExperienceYear,
+    ProfessionalExperience,
 )
-from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
+    EvaluationSystem,
+    Grade,
+    Reduction,
+    Result,
+    TranscriptType,
+)
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
+from osis_profile.models.epc_injection import (
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
+from osis_profile.models.epc_injection import ExperienceType
+from osis_profile.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
-from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
-from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
-    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+from reference.tests.factories.superior_non_university import (
+    SuperiorNonUniversityFactory,
 )
 
 
@@ -181,6 +198,10 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             dissertation_title='Dissertation title',
             dissertation_score='15/20',
             dissertation_summary=[uuid.uuid4()],
+            block_1_acquired_credit_number=30,
+            with_complement=True,
+            complement_registered_credit_number=40,
+            complement_acquired_credit_number=39,
         )
 
         educational_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
@@ -191,10 +212,6 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             result=Result.SUCCESS.name,
             transcript=[uuid.uuid4()],
             transcript_translation=[uuid.uuid4()],
-            with_block_1=True,
-            with_complement=True,
-            fwb_registered_credit_number=30,
-            fwb_acquired_credit_number=29,
             reduction=Reduction.A150.name,
             is_102_change_of_course=True,
         )
@@ -243,6 +260,16 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.injectee, False)
         self.assertEqual(experience.valorisee_par_admissions, [other_valuation.baseadmission.uuid])
         self.assertEqual(experience.identifiant_externe, None)
+        self.assertEqual(experience.credits_acquis_bloc_1, educational_experience.block_1_acquired_credit_number)
+        self.assertEqual(experience.avec_complements, educational_experience.with_complement)
+        self.assertEqual(
+            experience.credits_inscrits_complements,
+            educational_experience.complement_registered_credit_number,
+        )
+        self.assertEqual(
+            experience.credits_acquis_complements,
+            educational_experience.complement_acquired_credit_number,
+        )
 
         self.assertEqual(len(experience.annees), 1)
         annee = experience.annees[0]
@@ -254,10 +281,6 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(annee.traduction_releve_notes, educational_experience_year.transcript_translation)
         self.assertEqual(annee.credits_inscrits, educational_experience_year.registered_credit_number)
         self.assertEqual(annee.credits_acquis, educational_experience_year.acquired_credit_number)
-        self.assertEqual(annee.avec_bloc_1, educational_experience_year.with_block_1)
-        self.assertEqual(annee.avec_complement, educational_experience_year.with_complement)
-        self.assertEqual(annee.credits_inscrits_communaute_fr, educational_experience_year.fwb_registered_credit_number)
-        self.assertEqual(annee.credits_acquis_communaute_fr, educational_experience_year.fwb_acquired_credit_number)
         self.assertEqual(annee.allegement, educational_experience_year.reduction)
         self.assertEqual(annee.est_reorientation_102, educational_experience_year.is_102_change_of_course)
 

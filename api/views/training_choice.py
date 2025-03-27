@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,23 +25,51 @@
 # ##############################################################################
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
-from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
-from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.api.schema import ChoicesEnumSchema, ResponseSpecificSchema
+from admission.api.serializers.training_choice import SpecificEnrolmentPeriodsSerializer
+from admission.ddd.admission.doctorat.preparation import (
+    commands as doctorate_education_commands,
+)
+from admission.ddd.admission.formation_continue import (
+    commands as continuing_education_commands,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
+)
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
 )
-from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
+from backoffice.settings.rest_framework.common_views import (
+    DisplayExceptionsByFieldNameAPIMixin,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+
+class SpecificEnrolmentPeriodsApiView(APIPermissionRequiredMixin, RetrieveAPIView):
+    name = "specific_enrolment_periods"
+    schema = ChoicesEnumSchema()
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    serializer_class = SpecificEnrolmentPeriodsSerializer
+    pagination_class = None
+    filter_backends = []
+
+    def get_object(self):
+        return {
+            'medicine_dentistry_bachelor': message_bus_instance.invoke(
+                RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(),
+            ),
+        }
 
 
 class GeneralTrainingChoiceSchema(ResponseSpecificSchema):

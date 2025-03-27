@@ -406,7 +406,7 @@ class PropositionSearchSerializer(serializers.Serializer):
             'create_training_choice': ACTION_LINKS['create_training_choice'],
         }
     )
-
+    donnees_transferees_vers_compte_interne = serializers.BooleanField(default=False)
     doctorate_propositions = DoctoratePropositionSearchDTOSerializer(many=True)
     general_education_propositions = GeneralEducationPropositionSearchDTOSerializer(many=True)
     continuing_education_propositions = ContinuingEducationPropositionSearchDTOSerializer(many=True)
