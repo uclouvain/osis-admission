@@ -8420,9 +8420,6 @@ msgstr "la <strong>non-poursuite</strong> du doctorat."
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
 
-msgid "the UCLouvain Registration Service"
-msgstr "au Service des Inscriptions de l'UCLouvain"
-
 msgid "the faculty"
 msgstr "la faculté"
 
@@ -8435,6 +8432,9 @@ msgstr "à"
 
 msgid "to the UCLouvain Registration Service"
 msgstr "au Service des Inscriptions de l'UCLouvain"
+
+msgid "to the faculty"
+msgstr "à la faculté"
 
 msgid "ucl"
 msgstr "UCLouvain"
