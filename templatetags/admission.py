@@ -475,6 +475,8 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
                 # Cas display warning when quarantaine
                 # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
                 parent_tab.icon_after = 'fas fa-warning text-warning'
+            else:
+                parent_tab.icon_after = ''
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
