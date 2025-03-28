@@ -540,6 +540,11 @@ msgstr ""
 msgid "All CA members must have approved the proposition."
 msgstr "All supervisory panel members must have approved the proposition."
 
+msgid ""
+"All experiences must be in the 'Validated' status so that the previous "
+"experience can be changed to the 'Sufficient' status."
+msgstr ""
+
 msgid "All history"
 msgstr ""
 
@@ -1030,6 +1035,9 @@ msgctxt "ways_hear_about_training"
 msgid "By someone who has already taken this course in a previous edition"
 msgstr ""
 
+msgid "CA"
+msgstr ""
+
 msgid "CA Member"
 msgstr "Supervisory panel member"
 
@@ -1441,6 +1449,9 @@ msgid "Communication with your secondary school"
 msgstr ""
 
 msgid "Competent diplomatic post"
+msgstr ""
+
+msgid "Complementary training"
 msgstr ""
 
 msgid "Complementary training proposition"
@@ -6537,6 +6548,9 @@ msgid ""
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
 "find out how, go to <a href=\"https://www.uclouvain.be/fr/logement\">www."
 "uclouvain.be/fr/logement</a>."
+msgstr ""
+
+msgid "This experience can't be validated if mandatory information is missing."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."

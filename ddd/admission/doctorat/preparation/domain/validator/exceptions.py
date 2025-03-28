@@ -446,6 +446,7 @@ class ExperiencesAcademiquesNonCompleteesException(BusinessException):
 
     def __init__(self, reference, name, **kwargs):
         self.reference = reference
+        self.experience_name = name
         message = _("The educational experience '%(education_name)s' is not completed.") % {'education_name': name}
         super().__init__(message, **kwargs)
 
@@ -616,6 +617,27 @@ class SituationPropositionNonCddException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("The proposition must be managed by the CDD to realized this action.")
+        super().__init__(message, **kwargs)
+
+
+class InformationsAcceptationNonSpecifieesException(BusinessException):
+    status_code = "PROPOSITION-69"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "When accepting a proposition, all the required information in the approval form must be specified.",
+        )
+        super().__init__(message, **kwargs)
+
+
+class StatutsChecklistExperiencesEtreValidesException(BusinessException):
+    status_code = "PROPOSITION-70"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "All experiences must be in the 'Validated' status so that the previous experience "
+            "can be changed to the 'Sufficient' status."
+        )
         super().__init__(message, **kwargs)
 
 

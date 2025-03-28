@@ -566,6 +566,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -612,6 +613,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -760,6 +762,13 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_periode_inscription_specifique_bachelier_medecine_dentisterie(
             cmd,
             calendrier_inscription=CalendrierInscription(),
+        )
+    ),
+    VerifierExperienceCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_experience_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
         )
     ),
 }

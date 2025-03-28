@@ -45,9 +45,15 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererResumePropositionQuery,
     SpecifierConditionAccesPropositionCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
+    VerifierExperienceCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    ConditionAccesEtreSelectionneException,
+    ExperiencesAcademiquesNonCompleteesException,
+    TitreAccesEtreSelectionneException,
 )
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
@@ -122,10 +128,6 @@ class PastExperiencesStatusView(
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     form_class = StatusForm
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.valid_operation = False
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['past_experiences_admission_requirement_form'] = DoctoratePastExperiencesAdmissionRequirementForm(
@@ -150,7 +152,6 @@ class PastExperiencesStatusView(
                     gestionnaire=self.request.user.person.global_id,
                 )
             )
-            self.valid_operation = True
             self.htmx_trigger_form_extra = {
                 'select_access_title_perm': self.request.user.has_perm(
                     'admission.checklist_select_access_title',
@@ -165,7 +166,22 @@ class PastExperiencesStatusView(
                     'Changes for the access title are not available when the state of the Previous experience '
                     'is "Sufficient".'
                 )
-        except MultipleBusinessExceptions:
+        except MultipleBusinessExceptions as exceptions:
+            error_messages = set()
+
+            for exception in exceptions.exceptions:
+                if isinstance(exception, (TitreAccesEtreSelectionneException, ConditionAccesEtreSelectionneException)):
+                    error_messages.add(
+                        gettext(
+                            'To move to this state, an admission requirement must have been selected and at least'
+                            ' one access title line must be selected in the past experience views.'
+                        )
+                    )
+                else:
+                    error_messages.add(str(exception.message))
+
+                self.htmx_trigger_form_extra = {'error_messages': list(error_messages)}
+
             return super().form_invalid(form)
 
         return super().form_valid(form)
@@ -372,6 +388,10 @@ class SinglePastExperienceMixin(
     def experience_uuid(self):
         return self.request.GET.get('identifier')
 
+    @cached_property
+    def experience_type(self):
+        return self.request.GET.get('type', '')
+
     @property
     def experience(self):
         return next(
@@ -387,6 +407,7 @@ class SinglePastExperienceMixin(
         context = super().get_context_data(**kwargs)
         context['current'] = self.experience
         context['initial'] = self.experience or {}
+        context['experience_type'] = self.experience_type
         authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
         context.setdefault('comment_forms', {})
         context['comment_forms'][authentication_comment_identifier] = CommentForm(
@@ -427,7 +448,29 @@ class SinglePastExperienceMixin(
         except ExperienceNonTrouveeException as exception:
             self.message_on_failure = exception.message
             return super().form_invalid(form)
+        except MultipleBusinessExceptions as exception:
+            self.message_on_failure = exception.exceptions.pop().message
+            return super().form_invalid(form)
         return super().form_valid(form)
+
+    @cached_property
+    def incomplete_curriculum_experiences(self):
+        # Override it to only check a single experience
+        try:
+            message_bus_instance.invoke(
+                VerifierExperienceCurriculumApresSoumissionQuery(
+                    uuid_proposition=self.admission_uuid,
+                    uuid_experience=self.experience_uuid,
+                    type_experience=self.experience_type,
+                )
+            )
+            return set()
+        except MultipleBusinessExceptions as multiple_exceptions:
+            return {
+                str(e.reference)
+                for e in multiple_exceptions.exceptions
+                if isinstance(e, ExperiencesAcademiquesNonCompleteesException)
+            }
 
 
 class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
@@ -448,6 +491,7 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
+                type_experience=self.experience_type,
                 gestionnaire=self.request.user.person.global_id,
                 statut=form.cleaned_data['status'],
                 statut_authentification=form.cleaned_data['authentification'],
