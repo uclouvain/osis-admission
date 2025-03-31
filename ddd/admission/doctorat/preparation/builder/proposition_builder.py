@@ -25,6 +25,8 @@
 ##############################################################################
 from typing import Optional, Union
 
+from django.apps import apps
+
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -54,6 +56,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from infrastructure.utils import MessageBus
 from osis_common.ddd import interface
 
 
@@ -72,11 +75,13 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cmd: 'InitierPropositionCommand',
         doctorat_translator: 'IDoctoratTranslator',
         proposition_repository: 'IPropositionRepository',
+        message_bus: 'MessageBus',
     ) -> 'Proposition':
-        if cmd.pre_admission_associee:
+        if cmd.pre_admission_associee and apps.is_installed('parcours_doctoral'):
             return cls.initier_nouvelle_proposition_attachee_a_pre_admission(
-                cmd,
-                proposition_repository,
+                cmd=cmd,
+                proposition_repository=proposition_repository,
+                message_bus=message_bus,
             )
         else:
             return cls.initier_nouvelle_proposition_non_attachee_a_pre_admission(
@@ -128,8 +133,20 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cls,
         cmd: 'InitierPropositionCommand',
         proposition_repository: 'IPropositionRepository',
+        message_bus: 'MessageBus',
     ) -> 'Proposition':
+        from parcours_doctoral.ddd.commands import (
+            RecupererParcoursDoctoralPropositionQuery,
+        )
+        from parcours_doctoral.ddd.dtos import ParcoursDoctoralDTO
+
         pre_admission = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.pre_admission_associee))
+
+        parcours_doctoral: ParcoursDoctoralDTO = message_bus.invoke(
+            RecupererParcoursDoctoralPropositionQuery(
+                proposition_uuid=cmd.pre_admission_associee,
+            )
+        )
 
         reference = proposition_repository.recuperer_reference_suivante()
 
@@ -139,52 +156,134 @@ class PropositionBuilder(interface.RootEntityBuilder):
             statut=ChoixStatutPropositionDoctorale.EN_BROUILLON,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
             formation_id=pre_admission.formation_id,
-            matricule_candidat=pre_admission.matricule_candidat,
+            matricule_candidat=parcours_doctoral.matricule_doctorant,
             projet=projet_non_rempli,
-            auteur_derniere_modification=cmd.matricule_candidat,
+            auteur_derniere_modification=parcours_doctoral.matricule_doctorant,
             pre_admission_associee=pre_admission.entity_id,
             curriculum=pre_admission.curriculum,
-            commission_proximite=pre_admission.commission_proximite,
         )
 
+        proposition.definir_commission(parcours_doctoral.commission_proximite)
+
         proposition.completer(
-            justification=pre_admission.justification,
-            type_financement=pre_admission.financement.type.name if pre_admission.financement.type else '',
-            type_contrat_travail=(
-                pre_admission.financement.type_contrat_travail if pre_admission.financement.type_contrat_travail else ''
+            justification=parcours_doctoral.justification,
+            type_financement=parcours_doctoral.financement.type,
+            type_contrat_travail=parcours_doctoral.financement.type_contrat_travail,
+            eft=parcours_doctoral.financement.eft,
+            bourse_recherche=parcours_doctoral.financement.bourse_recherche,
+            autre_bourse_recherche=parcours_doctoral.financement.autre_bourse_recherche,
+            bourse_date_debut=parcours_doctoral.financement.bourse_date_debut,
+            bourse_date_fin=parcours_doctoral.financement.bourse_date_fin,
+            bourse_preuve=parcours_doctoral.financement.bourse_preuve,
+            duree_prevue=parcours_doctoral.financement.duree_prevue,
+            temps_consacre=parcours_doctoral.financement.temps_consacre,
+            est_lie_fnrs_fria_fresh_csc=parcours_doctoral.financement.est_lie_fnrs_fria_fresh_csc,
+            commentaire_financement=parcours_doctoral.financement.commentaire,
+            langue_redaction_these=parcours_doctoral.projet.langue_redaction_these,
+            institut_these=(
+                str(parcours_doctoral.projet.institut_these) if parcours_doctoral.projet.institut_these else ''
             ),
-            eft=pre_admission.financement.eft,
-            bourse_recherche=pre_admission.financement.bourse_recherche,
-            autre_bourse_recherche=pre_admission.financement.autre_bourse_recherche,
-            bourse_date_debut=pre_admission.financement.bourse_date_debut,
-            bourse_date_fin=pre_admission.financement.bourse_date_fin,
-            bourse_preuve=pre_admission.financement.bourse_preuve,
-            duree_prevue=pre_admission.financement.duree_prevue,
-            temps_consacre=pre_admission.financement.temps_consacre,
-            est_lie_fnrs_fria_fresh_csc=pre_admission.financement.est_lie_fnrs_fria_fresh_csc,
-            commentaire_financement=pre_admission.financement.commentaire,
-            langue_redaction_these=pre_admission.projet.langue_redaction_these,
-            institut_these=str(pre_admission.projet.institut_these.uuid) if pre_admission.projet.institut_these else '',
-            lieu_these=pre_admission.projet.lieu_these,
-            titre=pre_admission.projet.titre,
-            resume=pre_admission.projet.resume,
-            doctorat_deja_realise=(
-                pre_admission.experience_precedente_recherche.doctorat_deja_realise.name
-                if pre_admission.experience_precedente_recherche.doctorat_deja_realise
+            lieu_these=parcours_doctoral.projet.lieu_these,
+            titre=parcours_doctoral.projet.titre,
+            resume=parcours_doctoral.projet.resume,
+            doctorat_deja_realise=parcours_doctoral.projet.doctorat_deja_realise,
+            institution=parcours_doctoral.projet.institution,
+            domaine_these=parcours_doctoral.projet.domaine_these,
+            date_soutenance=parcours_doctoral.projet.date_soutenance,
+            raison_non_soutenue=parcours_doctoral.projet.raison_non_soutenue,
+            projet_doctoral_deja_commence=parcours_doctoral.projet.projet_doctoral_deja_commence,
+            projet_doctoral_institution=parcours_doctoral.projet.projet_doctoral_institution,
+            projet_doctoral_date_debut=parcours_doctoral.projet.projet_doctoral_date_debut,
+            documents=parcours_doctoral.projet.documents_projet,
+            graphe_gantt=parcours_doctoral.projet.graphe_gantt,
+            proposition_programme_doctoral=parcours_doctoral.projet.proposition_programme_doctoral,
+            projet_formation_complementaire=parcours_doctoral.projet.projet_formation_complementaire,
+            lettres_recommandation=parcours_doctoral.projet.lettres_recommandation,
+        )
+
+        proposition.completer_comptabilite(
+            auteur_modification=parcours_doctoral.matricule_doctorant,
+            attestation_absence_dette_etablissement=pre_admission.comptabilite.attestation_absence_dette_etablissement,
+            type_situation_assimilation=(
+                pre_admission.comptabilite.type_situation_assimilation.name
+                if pre_admission.comptabilite.type_situation_assimilation
                 else ''
             ),
-            institution=pre_admission.experience_precedente_recherche.institution,
-            domaine_these=pre_admission.experience_precedente_recherche.domaine_these,
-            date_soutenance=pre_admission.experience_precedente_recherche.date_soutenance,
-            raison_non_soutenue=pre_admission.experience_precedente_recherche.raison_non_soutenue,
-            projet_doctoral_deja_commence=pre_admission.projet.deja_commence,
-            projet_doctoral_institution=pre_admission.projet.deja_commence_institution,
-            projet_doctoral_date_debut=pre_admission.projet.date_debut,
-            documents=pre_admission.projet.documents,
-            graphe_gantt=pre_admission.projet.graphe_gantt,
-            proposition_programme_doctoral=pre_admission.projet.proposition_programme_doctoral,
-            projet_formation_complementaire=pre_admission.projet.projet_formation_complementaire,
-            lettres_recommandation=pre_admission.projet.lettres_recommandation,
+            sous_type_situation_assimilation_1=(
+                pre_admission.comptabilite.sous_type_situation_assimilation_1.name
+                if pre_admission.comptabilite.sous_type_situation_assimilation_1
+                else ''
+            ),
+            carte_resident_longue_duree=pre_admission.comptabilite.carte_resident_longue_duree,
+            carte_cire_sejour_illimite_etranger=pre_admission.comptabilite.carte_cire_sejour_illimite_etranger,
+            carte_sejour_membre_ue=pre_admission.comptabilite.carte_sejour_membre_ue,
+            carte_sejour_permanent_membre_ue=pre_admission.comptabilite.carte_sejour_permanent_membre_ue,
+            sous_type_situation_assimilation_2=(
+                pre_admission.comptabilite.sous_type_situation_assimilation_2.name
+                if pre_admission.comptabilite.sous_type_situation_assimilation_2
+                else ''
+            ),
+            carte_a_b_refugie=pre_admission.comptabilite.carte_a_b_refugie,
+            annexe_25_26_refugies_apatrides=pre_admission.comptabilite.annexe_25_26_refugies_apatrides,
+            attestation_immatriculation=pre_admission.comptabilite.attestation_immatriculation,
+            preuve_statut_apatride=pre_admission.comptabilite.preuve_statut_apatride,
+            carte_a_b=pre_admission.comptabilite.carte_a_b,
+            decision_protection_subsidiaire=pre_admission.comptabilite.decision_protection_subsidiaire,
+            decision_protection_temporaire=pre_admission.comptabilite.decision_protection_temporaire,
+            carte_a=pre_admission.comptabilite.carte_a,
+            sous_type_situation_assimilation_3=(
+                pre_admission.comptabilite.sous_type_situation_assimilation_3.name
+                if pre_admission.comptabilite.sous_type_situation_assimilation_3
+                else ''
+            ),
+            titre_sejour_3_mois_professionel=pre_admission.comptabilite.titre_sejour_3_mois_professionel,
+            fiches_remuneration=pre_admission.comptabilite.fiches_remuneration,
+            titre_sejour_3_mois_remplacement=pre_admission.comptabilite.titre_sejour_3_mois_remplacement,
+            preuve_allocations_chomage_pension_indemnite=(
+                pre_admission.comptabilite.preuve_allocations_chomage_pension_indemnite
+            ),
+            attestation_cpas=pre_admission.comptabilite.attestation_cpas,
+            relation_parente=(
+                pre_admission.comptabilite.relation_parente.name if pre_admission.comptabilite.relation_parente else ''
+            ),
+            sous_type_situation_assimilation_5=(
+                pre_admission.comptabilite.sous_type_situation_assimilation_5.name
+                if pre_admission.comptabilite.sous_type_situation_assimilation_5
+                else ''
+            ),
+            composition_menage_acte_naissance=pre_admission.comptabilite.composition_menage_acte_naissance,
+            acte_tutelle=pre_admission.comptabilite.acte_tutelle,
+            composition_menage_acte_mariage=pre_admission.comptabilite.composition_menage_acte_mariage,
+            attestation_cohabitation_legale=pre_admission.comptabilite.attestation_cohabitation_legale,
+            carte_identite_parent=pre_admission.comptabilite.carte_identite_parent,
+            titre_sejour_longue_duree_parent=pre_admission.comptabilite.titre_sejour_longue_duree_parent,
+            annexe_25_26_protection_parent=(
+                pre_admission.comptabilite.annexe_25_26_refugies_apatrides_decision_protection_parent
+            ),
+            titre_sejour_3_mois_parent=pre_admission.comptabilite.titre_sejour_3_mois_parent,
+            fiches_remuneration_parent=pre_admission.comptabilite.fiches_remuneration_parent,
+            attestation_cpas_parent=pre_admission.comptabilite.attestation_cpas_parent,
+            sous_type_situation_assimilation_6=(
+                pre_admission.comptabilite.sous_type_situation_assimilation_6.name
+                if pre_admission.comptabilite.sous_type_situation_assimilation_6
+                else ''
+            ),
+            decision_bourse_cfwb=pre_admission.comptabilite.decision_bourse_cfwb,
+            attestation_boursier=pre_admission.comptabilite.attestation_boursier,
+            titre_identite_sejour_longue_duree_ue=pre_admission.comptabilite.titre_identite_sejour_longue_duree_ue,
+            titre_sejour_belgique=pre_admission.comptabilite.titre_sejour_belgique,
+            etudiant_solidaire=pre_admission.comptabilite.etudiant_solidaire,
+            type_numero_compte=(
+                pre_admission.comptabilite.type_numero_compte.name
+                if pre_admission.comptabilite.type_numero_compte
+                else ''
+            ),
+            numero_compte_iban=pre_admission.comptabilite.numero_compte_iban,
+            iban_valide=pre_admission.comptabilite.iban_valide,
+            numero_compte_autre_format=pre_admission.comptabilite.numero_compte_autre_format,
+            code_bic_swift_banque=pre_admission.comptabilite.code_bic_swift_banque,
+            prenom_titulaire_compte=pre_admission.comptabilite.prenom_titulaire_compte,
+            nom_titulaire_compte=pre_admission.comptabilite.nom_titulaire_compte,
         )
 
         return proposition

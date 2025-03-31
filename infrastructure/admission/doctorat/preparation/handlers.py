@@ -110,6 +110,7 @@ from .repository.proposition import PropositionRepository
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
