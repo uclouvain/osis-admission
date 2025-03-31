@@ -45,6 +45,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
+    OngletsChecklist,
 )
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
@@ -192,6 +193,20 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             status=ChoixStatutChecklist.GEST_REUSSITE.name,
         )
 
+        self.admission.checklist['current'][OngletsChecklist.parcours_anterieur.name] = {
+            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+            'enfants': [
+                {
+                    'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+                    'extra': {
+                        'identifiant': 'UNKNOWN',
+                    },
+                },
+            ],
+        }
+
+        self.admission.save()
+
         # The success status requires at least one access title and an admission requirement
         error_message_if_missing_data = gettext("Some errors have been encountered.")
 
@@ -222,6 +237,53 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             educationalexperience=self.experiences[0],
             is_access_title=True,
         )
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(error_message_if_missing_data, messages)
+        self.assertNotIn(gettext('Your data have been saved.'), messages)
+
+        # Check admission
+        self.admission.refresh_from_db()
+        self.assertNotEqual(
+            self.admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Add checklist data for the valuated experience
+        self.admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'].append(
+            {
+                'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+                'extra': {
+                    'identifiant': self.experiences[0].uuid,
+                },
+            }
+        )
+        self.admission.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(error_message_if_missing_data, messages)
+        self.assertNotIn(gettext('Your data have been saved.'), messages)
+
+        # Check admission
+        self.admission.refresh_from_db()
+        self.assertNotEqual(
+            self.admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Change the status of the experience checklist
+        self.admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'][-1][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.admission.save()
 
         response = self.client.post(success_url, **self.default_headers)
 

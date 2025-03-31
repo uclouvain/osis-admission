@@ -236,6 +236,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     etudes_secondaires = {}
     experiences_academiques: List[ExperienceAcademique] = []
     experiences_non_academiques: List[ExperienceNonAcademique] = []
+    valorisations: Dict[str, List[str]] = []
     pays_union_europeenne = {
         "AT",
         "BE",
@@ -929,6 +930,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 ),
             ),
         }
+        cls.valorisations = {}
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
@@ -1266,3 +1268,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
         return None
+
+    @classmethod
+    def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
+        return set(
+            uuid_experience
+            for uuid_experience, uuids_propositions in cls.valorisations.items()
+            if uuid_proposition in uuids_propositions
+        )
