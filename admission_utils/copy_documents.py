@@ -26,12 +26,17 @@
 import uuid
 
 
-def copy_documents(objs):
+def copy_documents(objs, id_attribute='uuid'):
     """
     Create copies of the files of the specified objects and affect them to the specified objects.
     :param objs: The list of objects.
+    :param id_attribute: The attribute identifying the objects.
     """
-    from osis_document.api.utils import get_several_remote_metadata, get_remote_tokens, documents_remote_duplicate
+    from osis_document.api.utils import (
+        documents_remote_duplicate,
+        get_remote_tokens,
+        get_several_remote_metadata,
+    )
     from osis_document.contrib import FileField
     from osis_document.utils import generate_filename
 
@@ -41,14 +46,14 @@ def copy_documents(objs):
 
     # Get all the document fields and the uuids of the documents to duplicate
     for obj in objs:
-        document_fields_by_obj_uuid[obj.uuid] = {}
+        document_fields_by_obj_uuid[getattr(obj, id_attribute)] = {}
 
         for field in obj._meta.get_fields():
             if isinstance(field, FileField):
                 document_uuids = getattr(obj, field.name)
 
                 if document_uuids:
-                    document_fields_by_obj_uuid[obj.uuid][field.name] = field
+                    document_fields_by_obj_uuid[getattr(obj, id_attribute)][field.name] = field
                     all_document_uuids += [document_uuid for document_uuid in document_uuids if document_uuid]
 
     all_tokens = get_remote_tokens(all_document_uuids)
@@ -56,7 +61,7 @@ def copy_documents(objs):
 
     # Get the upload paths of the documents to duplicate
     for obj in objs:
-        for field_name, field in document_fields_by_obj_uuid[obj.uuid].items():
+        for field_name, field in document_fields_by_obj_uuid[getattr(obj, id_attribute)].items():
             document_uuids = getattr(obj, field_name)
 
             for document_uuid in document_uuids:
@@ -82,7 +87,7 @@ def copy_documents(objs):
 
     # Update the uuids of the documents with the uuids of the copied documents
     for obj in objs:
-        for field_name in document_fields_by_obj_uuid[obj.uuid]:
+        for field_name in document_fields_by_obj_uuid[getattr(obj, id_attribute)]:
             setattr(
                 obj,
                 field_name,

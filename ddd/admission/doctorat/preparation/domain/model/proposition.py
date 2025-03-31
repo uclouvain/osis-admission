@@ -362,7 +362,7 @@ class Proposition(interface.RootEntity):
             raison_non_soutenue=raison_non_soutenue,
         )
 
-    def _definir_commission(self, commission_proximite: Optional[str]):
+    def definir_commission(self, commission_proximite: Optional[str]):
         self.commission_proximite = None
         if commission_proximite and commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
@@ -650,7 +650,7 @@ class Proposition(interface.RootEntity):
             commission_proximite=commission_proximite,
             doctorat=doctorat,
         ).validate()
-        self._definir_commission(commission_proximite)
+        self.definir_commission(commission_proximite)
         self.formation_id = doctorat.entity_id
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
@@ -673,7 +673,7 @@ class Proposition(interface.RootEntity):
             doctorat=doctorat,
         ).validate()
 
-        self._definir_commission(commission_proximite)
+        self.definir_commission(commission_proximite)
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -1128,7 +1128,7 @@ class Proposition(interface.RootEntity):
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
-        self._definir_commission(commission_proximite)
+        self.definir_commission(commission_proximite)
 
     def nettoyer_reponses_questions_specifiques(self, questions_specifiques: List[QuestionSpecifique]):
         self.reponses_questions_specifiques = ISuperQuestionSpecifiqueTranslator.clean_specific_question_answers(
