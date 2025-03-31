@@ -230,8 +230,8 @@ class BaseAdmissionQuerySet(models.QuerySet):
             ),
         ).annotate(
             student_registration_id=Case(
-                When(person_merge_proposal_noma__isnull=False, then='person_merge_proposal_noma'),
                 When(existing_student_noma__isnull=False, then='existing_student_noma'),
+                When(person_merge_proposal_noma__isnull=False, then='person_merge_proposal_noma'),
                 default=Value(''),
             )
         )
