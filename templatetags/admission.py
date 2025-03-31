@@ -465,15 +465,18 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
 
         # Add icon when folder in quarantine
         if parent_tab == Tab('person') and getattr(permission_obj, 'candidate_id', None):
-            demande_est_en_quarantaine = (
-                PersonMergeProposal.objects.filter(
-                    original_person_id=permission_obj.candidate_id,
-                )
-                .filter(Q(Q(status__in=PersonMergeStatus.quarantine_statuses()) | ~Q(validation__valid=True)))
-                .exists()
-            )
-            if demande_est_en_quarantaine:
+            person_merge_proposal = PersonMergeProposal.objects.filter(
+                original_person_id=permission_obj.candidate_id,
+            ).first()
+            if person_merge_proposal and (
+                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+                or not person_merge_proposal.validation.get('valid', True)
+            ):
+                # Cas display warning when quarantaine
+                # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
                 parent_tab.icon_after = 'fas fa-warning text-warning'
+            else:
+                parent_tab.icon_after = ''
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
