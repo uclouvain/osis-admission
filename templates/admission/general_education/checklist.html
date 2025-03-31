@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document statici18n strings %}
+{% load i18n static admission bootstrap3 enums osis_document statici18n strings gestion_des_comptes %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -132,22 +132,17 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
+          {% resultat_workflow_gestion_des_comptes_alert matricule=original_admission.candidate.global_id outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
 
-        {% search_account_digit_result_msg original_admission %}
-        {% validation_syntaxique_resultat_digit original_admission %}
-        {% if digit_ticket %}
-            {% digit_ticket_status_msg digit_ticket %}
-        {% endif %}
-
-        {% if injection_signaletique %}
-            <div class="panel panel-{% if injection_signaletique.in_error %}danger{% else %}warning{% endif %}">
-                <div class="panel-body bg-{% if injection_signaletique.in_error %}danger{% else %}warning{% endif %}">
-                    <div>
-                        <strong>Injection de la signalétique</strong> : {% if injection_signaletique.in_error %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
+          {% if injection_signaletique %}
+              <div class="panel panel-{% if injection_signaletique.in_error %}danger{% else %}warning{% endif %}">
+                  <div class="panel-body bg-{% if injection_signaletique.in_error %}danger{% else %}warning{% endif %}">
+                      <div>
+                          <strong>Injection de la signalétique</strong> : {% if injection_signaletique.in_error %}{{ injection_signaletique.html_errors }}{% else %}En attente d'injection vers EPC{% endif %}
+                      </div>
+                  </div>
+              </div>
+          {% endif %}
 
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
@@ -697,7 +692,7 @@
               if (onFirstTabLoad) {
                   onFirstTabLoad = false;
                   if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                      // move info from the current tab to the info viewer 
+                      // move info from the current tab to the info viewer
                       $('#infos-shortcut').click();
                   } else {
                       // hide the info viewer
@@ -1436,6 +1431,15 @@
 
     .experience-authentication-message.collapse.in {
       height: auto;
+    }
+
+    {# Customize the comments to make them as disabled if necessary #}
+    .disabled-comment {
+      cursor: not-allowed;
+    }
+
+    .disabled-comment textarea {
+      background-color: #eee;
     }
   </style>
 {% endblock style %}

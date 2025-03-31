@@ -111,6 +111,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
@@ -234,6 +235,7 @@ COMMAND_HANDLERS = {
         lister_demandes_service=ListerDemandesService(),
     ),
     ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),

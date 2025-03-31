@@ -38,7 +38,9 @@ class DashboardTestCase(APITestCase):
         cls.url = resolve_url('admission_api_v1:dashboard')
         promoter = PromoterFactory()
         cls.promoter_user = promoter.person.user
-        admission = DoctorateAdmissionFactory()
+        admission = DoctorateAdmissionFactory(
+            candidate__global_id='84169898'   # External account
+        )
         cls.candidate_user = admission.candidate.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
         cls.base_url = 'http://testserver'

@@ -1,4 +1,5 @@
-{% load i18n strings %}
+{% extends 'osis_profile/ligne_parcours_message.html' %}
+{% load i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -7,8 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain
-  (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,10 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-<a
-    href="{{ curex_url }}"
-    class="btn btn-link"
-    aria-label="Aller vers le parcours externe"
-    title="Aller vers le parcours externe"
-    {% if edit_link_button_in_new_tab %}
-    target="_blank"
-    {% endif %}
->
-    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><i class="fa-regular fa-badge-check" aria-hidden="true" style="margin-left: 5px; font-size: 1.1em;"></i>
-</a>
+
+{% block message %}
+  <p style="background-color: #f0ad4e; color: white; padding: 8px; margin: 0;">
+    <span class="fa-solid fa-triangle-exclamation"></span>
+    {% translate _('This student has a pathway prior to 2015 which can only be consulted in EPC.') %}
+  </p>
+{% endblock %}

@@ -1,6 +1,4 @@
-{% extends "admission/details/person.html" %}
-{% load i18n static admission enums gestion_des_comptes %}
-
+{% load bootstrap3 %}
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
 * designed to manage the core business of higher education institutions,
@@ -24,16 +22,10 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% block tab_content %}
-  {% resultat_workflow_gestion_des_comptes_alert matricule=admission.matricule_candidat outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
-  {% if profil_candidat|is_profile_identification_different:person %}
-    <p class="alert alert-info" role="alert">
-      <i class="fa fa-question-circle" style="margin-right: 0.5em"></i>
-      {% trans "The dossier has been confirmed as:" %}
-      {{ profil_candidat.nom }}, {{ profil_candidat.prenom }}
-      ({{ profil_candidat.genre|enum_display:'ChoixGenre' }}) -
-      {{ profil_candidat.nom_pays_nationalite|default:_('Unknown citizenship') }}
-    </p>
-  {% endif %}
-  {{ block.super }}
-{% endblock %}
+<div{% if disabled %} class="disabled-comment"{% endif %}>
+  <div{% if disabled %} inert{% endif %}>
+    <div id="id-{{ form.prefix }}-comment-form" hx-preserve="true">
+      {% bootstrap_form form %}
+    </div>
+  </div>
+</div>

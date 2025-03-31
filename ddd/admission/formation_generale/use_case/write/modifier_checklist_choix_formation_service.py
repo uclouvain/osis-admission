@@ -34,10 +34,13 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.events import FormationDuDossierAdmissionModifieeEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from infrastructure.utils import MessageBus
 
 
 def modifier_checklist_choix_formation(
+    message_bus: 'MessageBus',
     cmd: 'ModifierChecklistChoixFormationCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
@@ -58,5 +61,10 @@ def modifier_checklist_choix_formation(
 
     # THEN
     proposition_repository.save(proposition)
-
+    message_bus.publish(
+        FormationDuDossierAdmissionModifieeEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
+    )
     return proposition.entity_id

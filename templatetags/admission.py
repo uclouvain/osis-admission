@@ -36,6 +36,7 @@ import attr
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
@@ -79,17 +80,13 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
-from admission.ddd.admission.enums import (
-    LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE,
-    ChoixAffiliationSport,
-    Onglets,
-    TypeItemFormulaire,
-)
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
+)
+from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.enums import (
+    TypeItemFormulaire,
+    Onglets,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -144,12 +141,14 @@ from admission.utils import (
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
+    MessageCurriculumDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
@@ -332,6 +331,7 @@ class Tab:
     label: str = ''
     icon: str = ''
     badge: str = ''
+    icon_after: str = ''
 
     def __hash__(self):
         # Only hash the name, as lazy strings have different memory addresses
@@ -462,6 +462,21 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
                 parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL]).count()
             elif {ProgramManager} & set(roles):
                 parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL]).count()
+
+        # Add icon when folder in quarantine
+        if parent_tab == Tab('person') and getattr(permission_obj, 'candidate_id', None):
+            person_merge_proposal = PersonMergeProposal.objects.filter(
+                original_person_id=permission_obj.candidate_id,
+            ).first()
+            if person_merge_proposal and (
+                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+                or not person_merge_proposal.validation.get('valid', True)
+            ):
+                # Cas display warning when quarantaine
+                # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
+                parent_tab.icon_after = 'fas fa-warning text-warning'
+            else:
+                parent_tab.icon_after = ''
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
@@ -1049,33 +1064,6 @@ def render_display_field_name(field_name: str, context: str = None) -> str:
     return pgettext(context, msg) if context else _(msg)
 
 
-@register.inclusion_tag('admission/search_account_digit_result_message.html', takes_context=True)
-def search_account_digit_result_msg(context, admission):
-    status = None
-    if hasattr(admission.candidate, 'personmergeproposal'):
-        status = admission.candidate.personmergeproposal.status
-    context['uuid'] = admission.uuid
-    context['result_code'] = status
-    return context
-
-
-@register.inclusion_tag('admission/digit/validation_syntaxique_resultat_digit.html', takes_context=False)
-def validation_syntaxique_resultat_digit(admission):
-    if hasattr(admission.candidate, 'personmergeproposal'):
-        validation_digit = admission.candidate.personmergeproposal.validation
-        return {
-            'a_une_syntaxe_valide': validation_digit.get('valid', True),
-            'erreurs': validation_digit.get('errors', []),
-        }
-    return {}
-
-
-@register.inclusion_tag('admission/digit_ticket_status_message.html', takes_context=True)
-def digit_ticket_status_msg(context, digit_ticket):
-    context['digit_ticket'] = digit_ticket
-    return context
-
-
 @register.filter
 def to_niss_format(s):
     return f"{s[:2]}.{s[2:4]}.{s[4:6]}-{s[6:9]}.{s[9:]}"
@@ -1330,7 +1318,7 @@ def checklist_experience_action_links_context(
         'duplicate_url': '',
     }
 
-    if experience.__class__ == ExperienceParcoursInterneDTO:
+    if isinstance(experience, (ExperienceParcoursInterneDTO, MessageCurriculumDTO)):
         return result_context
 
     elif (
@@ -1486,100 +1474,6 @@ def format_matricule(matricule):
 
 
 @register.filter
-def digit_error_description(error_code):
-    error_mapping = {
-        "ITYPE0001": "Le type d'identité est différent de celle déjà connue",
-        "INAME0001": "Les champs nom ET prénom sont vides ou null",
-        "ILASTNAME0001": "Le nom de famille est null",
-        "ILASTNAME0002": "Le nom de famille comporte plus de 40 caractères",
-        "ILASTNAME0003": "Le nom de famille comporte des caractères invalides",
-        "IFIRSTNAME0001": "Le prénom comporte plus de 20 caractères",
-        "IFIRSTNAME0002": "Le prénom comporte des caractères invalides",
-        "IGENRE0001": "Le genre est null",
-        "IGENRE0002": "La valeur du genre est incorrecte",
-        "IBIRTHDATE0001": "La date de naissance est null",
-        "IBIRTHDATE0002": "L'âge de la personne n'est pas entre 12 et 99 ans",
-        "IBIRTHDATE0003": "La date de naissance est d'un format incorrect",
-        "INATIONALITY0001": "La nationalité est null",
-        "INATIONALITY0002": "Le code nationalité est invalide",
-        "INISS0001": "Le numéro national ne comporte pas 11 caractères",
-        "INISS0002": "Le numéro national comporte des caractères invalides",
-        "INISS0003": "Le format du numéro national est incorrect",
-        "INISS0004": "Problème de cohérence entre la date de naissance et le numéro national",
-        "INISS0005": "Problème de cohérence entre le genre et le numéro national",
-        "INISS0006": "Impossible de vérifier l'existence de celui-ci sur un autre dossier, service inaccessible.",
-        "INISS0007": "Impossible de vérifier la concordance avec la date de naissance",
-        "INISS0008": "Problème de cohérence entre le genre et le numéro niss temporaire",
-        "INISS0009": "Problème de cohérence entre la date de naissance et le numéro niss temporaire",
-        "IDISPLAYLASTNAME0001": "Le display lastname comporte plus de 50 caractères",
-        "IDISPLAYLASTNAME0002": "Le display lastname comporte des caractères invalides",
-        "IDISPLAYFIRSTNAME0001": "Le display firstname comporte plus de 50 caractères",
-        "IDISPLAYFIRSTNAME0002": "Le display firstname comporte des caractères invalides",
-        "IUID0001": "L'UID est null",
-        "IUID0002": "L'UID comporte plus de 12 caractères",
-        "IEMAIL0001": "L'email est null",
-        "IEMAIL0002": "Le format de l'email est incorrect",
-        "IDECEASED0001": "La valeur du champs 'deceased' est null",
-        "IDEGRADATION0001": "Suspicion de dégradation de signalétique",
-        "IDOUBLON": "Suspicion de doublon",
-        "AADDRESSES0001": "La liste d'adresses est null",
-        "AADDRESSES0002": "La liste d'adresses est vide",
-        "AADDRESSTYPE0001": "Le type d'adresse est null",
-        "AADDRESSTYPE0002": "La valeur du type d'adresse est incorrecte",
-        "ACOUNTRY0001": "Le pays est null",
-        "ACOUNTRY0002": "Le pays n'est pas valide",
-        "APOSTALCODE0001": "Le code postal est null",
-        "APOSTALCODE0002": "Le code postal n'est pas valide pour le pays",
-        "APOSTALCODE0003": "La sémantique de code postal est incorrect",
-        "APOSTALCODE0005": "Le code postal n'a pas de correspondance avec le pays et la localité",
-        "ACITY0001": "La ville est null",
-        "ACITY0002": "La ville est inconnue",
-        "ACITY0003": "La ville est trop longue, elle sera tronquée dans le fgs",
-        "ASTREET0001": "La rue est null",
-        "ASTREET0002": "La rue n'existe pas",
-        "ASTREET0003": "La rue est trop longue, elle sera tronquée dans le fgs",
-        "ANUMBER0001": "Le numéro de maison est trop long (plus de 12 caractères)",
-        "AISOCODE0001": "Le code iso est null",
-        "AISOCODE0002": "Le code iso est inconnu",
-        "PAPPLICATION0001": "L'identifiant du fournisseur est null",
-        "PAPPLICATION0002": "L'identifiant du fournisseur est incorrecte",
-        "PAPPLICATION0003": "Fournisseur avec plusieurs matricules",
-        "PAPPLICATIONFGS": "Fournisseur avec plusieurs matricules FGS",
-        "PAPPLICATION0004": "Fournisseur inactif absent du referentiel",
-        "PAPPLICATION0005": "Le fournisseur est déjà présent sur un signalétique different,false",
-        "PAPPLICATION0006": "Le fournisseur est déjà présent sur un signalétique d'une personne non physique",
-        "PACCOUNT0001": "Le matricule est null",
-        "PACCOUNT0002": "Le matricule comporte plus de 8 caractères",
-        "PIDENTITY0001": "L'identityId du fournisseur est null",
-        "PIDENTITY0002": "L'identityId du fournisseur n'existe pas ou plus",
-        "PACTIVE0001": "La valeur 'active' du fournisseur est null",
-        "LADDRESSES0001": "Le niveau de contrôle est dégradé",
-        "CCOMMTYPE0001": "Le type de communication est null",
-        "CCOMMTYPE0002": "Le type de communication est invalide",
-        "CCOMMGSMVALUE0001": "La longueur du numéro de gsm est supérieure à 20 caractères",
-        "TAPPLICATION0001": "L'identifiant du fournisseur est null",
-        "TAPPLICATION0002": "L'identifiant du fournisseur est incorrecte",
-        "TAPPLICATION0003": "L'identifiant du fournisseur client est null",
-        "TAPPLICATION0004": "L'identifiant du fournisseur client est incorrecte",
-        "TAPPLICATION0005": "Fournisseur avec plusieurs clients",
-        "TAPPLICATION0006": "Fournisseur n'est pas lié à une identité",
-        "TACCOUNT0001": "Le matricule client est null",
-        "TACCOUNT0002": "Le matricule client comporte plus de 8 caractères",
-        "RGRIDNUMBER0001": "Le numéro de grille idm est null",
-        "RGRIDNUMBER0002": "Le numéro de grille idm est incorrecte",
-        "RSTARTDATE0001": "La date de début est null",
-        "RSTARTDATE0002": "La date de début est d'un format incorrect",
-        "RSTOPDATE0001": "La date de début est null",
-        "RSTOPDATE0002": "La date de début est d'un format incorrect",
-        "OSIS_CAN_NOT_REACH_DIGIT": "Service DigIT non disponible",
-        "DIGIT_RETURN_BAD_FORMAT": "Erreur de communication (Format) avec le Service DigIT",
-        "ABOX0001": "Le numéro de boite est trop long (plus de 12 caractères)",
-    }
-
-    return error_mapping[error_code]
-
-
-@register.filter
 def format_ways_to_find_out_about_the_course(proposition: PropositionContinueDTO):
     """
     Format the list of ways to find out about the course of a proposition.
@@ -1620,18 +1514,6 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
         return f'{base_url}?{urlencode(query_params)}'
 
     return base_url
-
-
-@register.filter
-def sport_affiliation_value(affiliation: Optional[str], campus_name: Optional[str]) -> str:
-    """Return the label of the sport affiliation based on the affiliation value and the campus."""
-    if not affiliation:
-        return ''
-
-    if not campus_name or affiliation != ChoixAffiliationSport.NON.name:
-        return ChoixAffiliationSport.get_value(affiliation)
-
-    return LABEL_AFFILIATION_SPORT_SI_NEGATIF_SELON_SITE.get(campus_name, ChoixAffiliationSport.NON.value)
 
 
 @register.filter
@@ -1696,3 +1578,23 @@ def edit_external_member_form(context, membre):
         prefix=f"member-{membre.uuid}",
         initial=initial,
     )
+
+
+@register.inclusion_tag('admission/includes/comment_form.html')
+def htmx_comment_form(form, disabled=None):
+    """
+    Return the HTML form for a comment form whose content will be preserved after an htmx request.
+    The input will be visually disabled if necessary (if specified by the param or if the form field is disabled).
+    :param form: The comment form
+    :param disabled: If True, visually disabled the comment input.
+    """
+    if disabled is None:
+        disabled = form.fields['comment'].disabled
+
+    # As the input content is preserved, we must be sure the input will be editable if necessary
+    form.fields['comment'].disabled = False
+
+    return {
+        'form': form,
+        'disabled': disabled,
+    }

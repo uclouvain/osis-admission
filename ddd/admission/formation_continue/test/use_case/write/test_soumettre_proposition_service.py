@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,21 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
+
 import freezegun
 from django.test import TestCase
 
-from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
+from admission.ddd.admission.formation_continue.commands import (
+    SoumettrePropositionCommand,
+)
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 
@@ -47,6 +55,11 @@ class TestSoumettrePropositionContinue(TestCase):
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition = self.proposition_repository.get(PropositionIdentityBuilder.build_from_uuid("uuid-USCC1"))

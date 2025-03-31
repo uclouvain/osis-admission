@@ -328,8 +328,12 @@ class GeneralAccountingFormViewTestCase(TestCase):
                     ChoixAffiliationSport.SAINT_LOUIS_UCL.value,
                 ),
                 (
+                    ChoixAffiliationSport.SAINT_LOUIS.name,
+                    ChoixAffiliationSport.SAINT_LOUIS.value,
+                ),
+                (
                     ChoixAffiliationSport.NON.name,
-                    gettext('No (access to sports facilities on the Saint-Louis campus is free)'),
+                    ChoixAffiliationSport.NON.value,
                 ),
             ],
         )

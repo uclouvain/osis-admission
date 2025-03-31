@@ -90,3 +90,9 @@ class DonneesIdentificationCandidatModifiee(Event):
 class CoordonneesCandidatModifiees(Event):
     entity_id: 'EntityIdentity' = None
     matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class DonneesPersonellesCandidatValidee(Event):
+    entity_id: 'EntityIdentity' = None
+    matricule: str

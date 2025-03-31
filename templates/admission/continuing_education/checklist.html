@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document strings %}
+{% load i18n static admission bootstrap3 enums osis_document strings  %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -515,6 +515,13 @@
               htmx.trigger('#' + this.id, 'modal-reload');
           });
 
+          // Pass the ckeditor data to the form data if necessary
+          $(document).on('click', '.ckeditor-form [name="save"]', function(event) {
+            $(this).closest('form').find("textarea").each(function() {
+                const editor = CKEDITOR.instances[$(this).attr('id')];
+                if (editor) editor.updateElement();
+            });
+          });
       })(jQuery);
   </script>
 {% endblock script %}

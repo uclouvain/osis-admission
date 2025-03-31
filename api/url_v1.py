@@ -86,6 +86,7 @@ urlpatterns = [
     path('dashboard', views.DashboardViewSet),
     path('propositions', views.PropositionListView),
     path('propositions/permissions', views.PropositionCreatePermissionsView),
+    path('propositions/specific-enrolment-periods', views.SpecificEnrolmentPeriodsApiView),
     path('identification', views.IdentificationDTOView, views.IdentificationDTOView),
     # > Doctorate education
     path('supervised_propositions', views.SupervisedPropositionListView),

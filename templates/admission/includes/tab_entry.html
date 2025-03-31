@@ -37,5 +37,6 @@
     {% endif %}
     {{ tab_label }}
     {% if badge is not None %}<span class="badge badge-secondary">{{ badge }}</span>{% endif %}
+    {% if icon_after is not None %}<span class="fa fa-{{ icon_after }}"></span>{% endif %}
   </a>
 </li>
