@@ -26,6 +26,7 @@
 from collections import defaultdict
 from typing import List, Optional, Union
 
+from django.apps import apps
 from django.db.models import F, Prefetch
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language, gettext_lazy as _
@@ -393,29 +394,31 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             proposition.supervision_group = Process.objects.create()
             proposition.save(update_fields=['supervision_group'])
 
-        if not uuid_proposition_originale:
+        if not uuid_proposition_originale or 'parcours_doctoral' not in apps.app_configs:
             return
 
-        # Copy members of the supervision group of the original proposition
-        for admission_actor in SupervisionActor.objects.filter(
-            process__doctorateadmission__uuid=uuid_proposition_originale,
+        from parcours_doctoral.models import ParcoursDoctoralSupervisionActor
+
+        # Copy members of the supervision group of the doctorate of the original proposition
+        for doctorate_actor in ParcoursDoctoralSupervisionActor.objects.filter(
+            process__parcoursdoctoral__admission__uuid=uuid_proposition_originale,
         ):
             SupervisionActor.objects.create(
                 process=proposition.supervision_group,
-                type=admission_actor.type,
-                is_doctor=admission_actor.is_doctor,
-                is_reference_promoter=admission_actor.is_reference_promoter,
+                type=doctorate_actor.type,
+                is_doctor=doctorate_actor.is_doctor,
+                is_reference_promoter=doctorate_actor.is_reference_promoter,
                 **(
-                    {'person_id': admission_actor.person_id}
-                    if admission_actor.person_id
+                    {'person_id': doctorate_actor.person_id}
+                    if doctorate_actor.person_id
                     else {
-                        'first_name': admission_actor.first_name,
-                        'last_name': admission_actor.last_name,
-                        'email': admission_actor.email,
-                        'institute': admission_actor.institute,
-                        'city': admission_actor.city,
-                        'country_id': admission_actor.country_id,
-                        'language': admission_actor.language,
+                        'first_name': doctorate_actor.first_name,
+                        'last_name': doctorate_actor.last_name,
+                        'email': doctorate_actor.email,
+                        'institute': doctorate_actor.institute,
+                        'city': doctorate_actor.city,
+                        'country_id': doctorate_actor.country_id,
+                        'language': doctorate_actor.language,
                     }
                 ),
             )

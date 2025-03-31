@@ -165,6 +165,7 @@ _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         doctorat_translator=_doctorat_translator,

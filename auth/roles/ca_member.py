@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
@@ -48,6 +49,8 @@ class CommitteeMember(RoleModel):
         verbose_name = _("Role: Committee member")
         verbose_name_plural = _("Role: Committee members")
         group_name = "committee_members"
+        constraints = [UniqueConstraint(fields=['person'], name='admission_unique_committee_member_by_person')]
+
 
     @classmethod
     def rule_set(cls):

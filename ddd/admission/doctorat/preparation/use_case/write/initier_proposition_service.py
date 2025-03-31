@@ -33,9 +33,11 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from infrastructure.utils import MessageBus
 
 
 def initier_proposition(
+    message_bus: 'MessageBus',
     cmd: 'InitierPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     doctorat_translator: 'IDoctoratTranslator',
@@ -48,9 +50,10 @@ def initier_proposition(
 
     # WHEN
     proposition = PropositionBuilder().initier_proposition(
-        cmd,
-        doctorat_translator,
-        proposition_repository,
+        cmd=cmd,
+        doctorat_translator=doctorat_translator,
+        proposition_repository=proposition_repository,
+        message_bus=message_bus,
     )
 
     # THEN

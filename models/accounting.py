@@ -23,11 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from osis_document.contrib import FileField
 
-from admission.models.base import BaseAdmission
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -39,6 +38,9 @@ from admission.ddd.admission.enums import (
     LienParente,
     TypeSituationAssimilation,
 )
+from admission.models.base import BaseAdmission
+from admission.models.mixins import DocumentCopyModelMixin
+from osis_document.contrib import FileField
 
 
 def admission_accounting_directory_path(accounting, filename: str):
@@ -50,7 +52,9 @@ def admission_accounting_directory_path(accounting, filename: str):
     )
 
 
-class Accounting(models.Model):
+class Accounting(DocumentCopyModelMixin, models.Model):
+    ID_ATTRIBUTE = 'pk'
+
     admission = models.OneToOneField(
         BaseAdmission,
         on_delete=models.CASCADE,
