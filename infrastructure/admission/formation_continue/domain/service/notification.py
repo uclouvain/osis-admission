@@ -30,6 +30,8 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
+
+from admission.admission_utils.valuate_experiences import valuate_experiences
 from osis_document.api.utils import get_remote_token
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
@@ -108,10 +110,13 @@ class Notification(INotification):
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
         admission = (
-            BaseAdmission.objects.with_training_management_and_reference()
+            ContinuingEducationAdmission.objects.with_training_management_and_reference()
             .select_related('candidate', 'training')
             .get(uuid=proposition.entity_id.uuid)
         )
+
+        # Valuate the experiences
+        valuate_experiences(admission)
 
         # Generate the pdf recap
         token = admission_pdf_recap(admission, admission.candidate.language, ContinuingEducationAdmission)

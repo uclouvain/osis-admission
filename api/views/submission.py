@@ -23,28 +23,21 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Union
-
 from django.utils import timezone
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from admission.admission_utils.valuate_experiences import valuate_experiences
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import PropositionErrorsSerializer
-from admission.models import (
-    GeneralEducationAdmission,
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-)
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoralQuery,
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
     VerifierProjetQuery,
 )
-from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     PoolNonResidentContingenteNonOuvertException,
@@ -67,7 +60,6 @@ from admission.utils import (
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 __all__ = [
@@ -76,26 +68,6 @@ __all__ = [
     "SubmitGeneralEducationPropositionView",
     "SubmitContinuingEducationPropositionView",
 ]
-
-
-def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission]):
-    # Valuate the secondary studies of the candidate
-    if isinstance(
-        instance,
-        (GeneralEducationAdmission, ContinuingEducationAdmission),
-    ):
-        instance.valuated_secondary_studies_person_id = instance.candidate_id
-        instance.save(update_fields=['valuated_secondary_studies_person_id'])
-
-    # Valuate curriculum experiences
-    instance.educational_valuated_experiences.add(
-        *EducationalExperience.objects.filter(person_id=instance.candidate_id)
-    )
-
-    # Valuate curriculum experiences
-    instance.professional_valuated_experiences.add(
-        *ProfessionalExperience.objects.filter(person_id=instance.candidate_id)
-    )
 
 
 class VerifySchema(ResponseSpecificSchema):
@@ -343,6 +315,5 @@ class SubmitContinuingEducationPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionContinueCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
-        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
