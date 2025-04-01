@@ -30,10 +30,12 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_continue.events import PropositionFormationContinueValideeEvent
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 
 
 def valider_proposition(
+    msg_bus,
     cmd: 'ValiderPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
@@ -61,4 +63,12 @@ def valider_proposition(
         gestionnaire=cmd.gestionnaire,
         message=message,
     )
+
+    msg_bus.publish(
+        PropositionFormationContinueValideeEvent(
+            entity_id=proposition.entity_id,
+            matricule=proposition.matricule_candidat,
+        )
+    )
+
     return proposition.entity_id
