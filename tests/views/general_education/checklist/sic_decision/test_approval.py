@@ -98,6 +98,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             status=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
             determined_academic_year=cls.academic_years[0],
         )
+        cls.original_country_of_citizenship = cls.general_admission.candidate.country_of_citizenship
         cls.experience_uuid = str(cls.general_admission.candidate.educationalexperience_set.first().uuid)
         cls.general_admission.checklist['current']['parcours_anterieur'][
             'statut'
@@ -111,6 +112,12 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'admission:general-education:sic-decision-enrolment-approval',
             uuid=cls.general_admission.uuid,
         )
+
+    def setUp(self) -> None:
+        super().setUp()
+
+        self.general_admission.candidate.country_of_citizenship = self.original_country_of_citizenship
+        self.general_admission.candidate.save(update_fields=['country_of_citizenship'])
 
     def test_submit_approval_decision_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)

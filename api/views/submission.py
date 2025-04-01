@@ -34,17 +34,11 @@ from rest_framework.settings import api_settings
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import PropositionErrorsSerializer
-from admission.models import (
-    GeneralEducationAdmission,
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-)
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoralQuery,
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
     VerifierProjetQuery,
 )
-from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     PoolNonResidentContingenteNonOuvertException,
@@ -57,6 +51,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
+from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.utils import (
     gather_business_exceptions,
     get_cached_admission_perm_obj,
@@ -343,6 +338,5 @@ class SubmitContinuingEducationPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionContinueCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
-        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
