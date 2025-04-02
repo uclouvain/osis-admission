@@ -258,9 +258,7 @@ class InjectionEPCAdmission:
     def recuperer_donnees(cls, admission: BaseAdmission):
         candidat = admission.candidate  # Person
         comptabilite = getattr(admission, "accounting", None)  # type: Accounting
-        adresses = candidat.personaddress_set.select_related("country").exclude(
-            label=PersonAddressType.PROFESSIONAL.name,
-        )
+        adresses = candidat.personaddress_set.select_related("country")
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
@@ -659,7 +657,9 @@ class InjectionEPCAdmission:
             return [
                 {
                     "lieu_dit": adresse.place,
-                    "rue": str(adresse),
+                    "rue": adresse.street.strip() if adresse.street else '',
+                    "numero_rue": adresse.street_number,
+                    "numero_boite": adresse.postal_box,
                     "code_postal": adresse.postal_code,
                     "localite": adresse.city,
                     "pays": adresse.country.iso_code,
