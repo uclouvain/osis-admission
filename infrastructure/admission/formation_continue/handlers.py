@@ -219,6 +219,7 @@ COMMAND_HANDLERS = {
         notification=Notification(),
     ),
     ValiderPropositionCommand: lambda msg_bus, cmd: valider_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),

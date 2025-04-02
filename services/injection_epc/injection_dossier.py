@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand
     as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
-from admission.ddd.admission.enums import TypeItemFormulaire, TypeSituationAssimilation
+from admission.ddd.admission.enums import TypeItemFormulaire, TypeSituationAssimilation, ChoixAffiliationSport
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )
@@ -204,6 +204,13 @@ DOCUMENT_MAPPING = {
     "VISA_D'ETUDES": "STUDENT_VISA_D",
     "VISA_ETUDES": "STUDENT_VISA_D",
 }
+
+SPORT_TOUT_CAMPUS = [
+    ChoixAffiliationSport.MONS_UCL.name,
+    ChoixAffiliationSport.TOURNAI_UCL.name,
+    ChoixAffiliationSport.SAINT_GILLES_UCL.name,
+    ChoixAffiliationSport.SAINT_LOUIS_UCL.name,
+]
 
 
 class InjectionEPCAdmission:
