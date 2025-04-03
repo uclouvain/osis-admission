@@ -53,11 +53,11 @@ class ExportPdfTestCase(TestCase):
     @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
     @patch('admission.exports.admission_archive.confirm_remote_upload')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_pdf_archive(self, confirm, admission_confirm, confirm_multiple_upload, save, get_metadata, post_processing):
+    def test_pdf_archive(self, confirm, adm_confirm, confirm_multiple_upload, save, get_metadata, post_processing):
         get_metadata.return_value = {"name": "test.pdf", "size": 1}
         save.return_value = 'a-token'
         confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-        admission_confirm.return_value = confirm.return_value
+        adm_confirm.return_value = confirm.return_value
         post_processing.return_value = {
             PostProcessingType.MERGE.name: {
                 'output': {
@@ -77,7 +77,7 @@ class ExportPdfTestCase(TestCase):
         )
         call_command("process_admission_tasks")
         save.assert_called()
-        admission_confirm.assert_called_with(
+        adm_confirm.assert_called_with(
             'a-token', document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value
         )
         post_processing.assert_called()
