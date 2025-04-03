@@ -1264,6 +1264,7 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.approved_by_cdd_at, datetime.datetime.now())
 
         # A certificate has been generated
         self.assertEqual(self.admission.cdd_approval_certificate, [self.file_uuid])
