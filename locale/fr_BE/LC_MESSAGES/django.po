@@ -2399,7 +2399,7 @@ msgid "Dossier submission date"
 msgstr "Date de soumission du dossier"
 
 msgid "Double degree:"
-msgstr "Bourse double diplomation:"
+msgstr "Bourse double diplomation :"
 
 msgid "Download as PDF"
 msgstr "Télécharger en tant que PDF"
@@ -3332,6 +3332,15 @@ msgstr "Salutations en fonction du genre du candidat"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
+
+msgid "Has Erasmus Mundus scholarship"
+msgstr "A une bourse Erasmus Mundus"
+
+msgid "Has dual degree scholarship"
+msgstr "A une bourse double diplomation"
+
+msgid "Has international scholarship"
+msgstr "A une bourse internationale"
 
 msgid "Has the PhD project already started?"
 msgstr "Le projet doctoral a-t-il déjà commencé ?"
@@ -6892,6 +6901,13 @@ msgid ""
 msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "envoyer le dossier en faculté : %(statuses)s."
+
+msgid ""
+"The information about the scholarships must be specified in the 'Course "
+"choice' tab."
+msgstr ""
+"Les informations concernant les bourses doivent être spécifiées dans "
+"l'onglet 'Choix de formation'."
 
 #, python-format
 msgid ""
