@@ -281,7 +281,7 @@ class GeneralEducationAdmission(BaseAdmission):
     )
     refusal_type = models.CharField(
         verbose_name=_('Refusal type'),
-        max_length=50,
+        max_length=64,
         default='',
         choices=TypeDeRefus.choices(),
     )
