@@ -850,7 +850,13 @@ msgstr ""
 msgid "Assessment test succeeded"
 msgstr ""
 
+msgid "Assim."
+msgstr ""
+
 msgid "Assimilated,Non-assimilated"
+msgstr ""
+
+msgid "Assimilation"
 msgstr ""
 
 msgid "Assimilation 1"
