@@ -72,6 +72,12 @@ class GeneralEducationAdmission(BaseAdmission):
         default=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
     )
 
+    has_double_degree_scholarship = models.BooleanField(
+        verbose_name=_("Has dual degree scholarship"),
+        null=True,
+        blank=True,
+    )
+
     double_degree_scholarship = models.ForeignKey(
         to="reference.Scholarship",
         verbose_name=_("Dual degree scholarship"),
@@ -81,11 +87,23 @@ class GeneralEducationAdmission(BaseAdmission):
         blank=True,
     )
 
+    has_international_scholarship = models.BooleanField(
+        verbose_name=_("Has international scholarship"),
+        null=True,
+        blank=True,
+    )
+
     international_scholarship = models.ForeignKey(
         to="reference.Scholarship",
         verbose_name=_("International scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+
+    has_erasmus_mundus_scholarship = models.BooleanField(
+        verbose_name=_("Has Erasmus Mundus scholarship"),
         null=True,
         blank=True,
     )
@@ -263,7 +281,7 @@ class GeneralEducationAdmission(BaseAdmission):
     )
     refusal_type = models.CharField(
         verbose_name=_('Refusal type'),
-        max_length=50,
+        max_length=64,
         default='',
         choices=TypeDeRefus.choices(),
     )

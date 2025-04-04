@@ -29,6 +29,7 @@ from admission.ddd.admission.domain.service.i_elements_confirmation import IElem
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_raccrocher_experiences_curriculum import IRaccrocherExperiencesCurriculum
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
 from admission.ddd.admission.enums import Onglets
@@ -62,6 +63,7 @@ def soumettre_proposition(
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     historique: 'IHistorique',
+    raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -111,6 +113,7 @@ def soumettre_proposition(
     )
     proposition_repository.save(proposition)
 
+    raccrocher_experiences_curriculum.raccrocher(proposition)
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 

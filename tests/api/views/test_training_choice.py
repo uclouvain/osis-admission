@@ -222,6 +222,8 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         self.documents_remote_duplicate_patched.return_value = self.duplicated_documents_tokens_by_uuid
         self.addCleanup(self.documents_remote_duplicate_patcher.stop)
 
+        DoctorateAdmission.objects.all().delete()
+
     @freezegun.freeze_time('2023-01-01')
     def test_admission_doctorate_creation_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -314,10 +316,6 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             phd_already_done_no_defense_reason='No defense reason',
             curriculum=self.documents_tokens['curriculum'],
         )
-
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT last_value FROM %(sequence)s' % {'sequence': REFERENCE_SEQ_NAME})
-            seq_value = cursor.fetchone()[0]
 
         response = self.client.post(
             self.url,
@@ -479,6 +477,9 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'matricule_candidat': cls.candidate.global_id,
+            'avec_bourse_erasmus_mundus': True,
+            'avec_bourse_internationale': True,
+            'avec_bourse_double_diplome': True,
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'bourse_internationale': str(cls.international_scholarship.uuid),
             'bourse_double_diplome': str(cls.double_degree_scholarship.uuid),
@@ -501,6 +502,9 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
+        self.assertTrue(admission.has_international_scholarship)
+        self.assertTrue(admission.has_erasmus_mundus_scholarship)
+        self.assertTrue(admission.has_double_degree_scholarship)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
 
         history_entry: HistoryEntry = HistoryEntry.objects.filter(
@@ -634,6 +638,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'uuid_proposition': cls.admission.uuid,
+            'avec_bourse_erasmus_mundus': True,
+            'avec_bourse_internationale': True,
+            'avec_bourse_double_diplome': True,
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'bourse_internationale': str(cls.international_scholarship.uuid),
             'bourse_double_diplome': str(cls.double_degree_scholarship.uuid),
@@ -703,6 +710,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
+        self.assertTrue(admission.has_international_scholarship)
+        self.assertTrue(admission.has_erasmus_mundus_scholarship)
+        self.assertTrue(admission.has_double_degree_scholarship)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',

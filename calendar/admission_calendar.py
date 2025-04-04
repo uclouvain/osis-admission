@@ -95,6 +95,7 @@ SECOND_CYCLE_TYPES = [
     TrainingType.AGGREGATION.name,
     TrainingType.CAPAES.name,
     TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.name,
+    TrainingType.CERTIFICATE.name,
 ] + AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[TypeFormation.MASTER.name]
 
 DAY_BEFORE_NEXT = object()

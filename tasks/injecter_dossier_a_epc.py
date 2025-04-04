@@ -29,9 +29,10 @@ from django.conf import settings
 from django.db.models import Q, Exists, OuterRef, When, Case, Value
 
 from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.models.base import BaseAdmission
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus, EPCInjection
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from backoffice.celery import app as celery_app
 from base.models.person_merge_proposal import PersonMergeStatus
 
@@ -47,10 +48,11 @@ def run():  # pragma: no cover
         'generaleducationadmission',
         'candidate__personmergeproposal',
     ).filter(
+        # Dossier doit être en INSCRIPTION AUTORISEE
+        Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name)
+        | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name),
         # Dossier doit etre sur la bonne annee
         determined_academic_year__year=annee_ouverte,
-        # Dossier doit être en INSCRIPTION AUTORISEE
-        generaleducationadmission__status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
         # Doit avoir un matricule fgs interne
         candidate__global_id__startswith='00',
         # Doit avoir un email uclouvain
@@ -93,9 +95,21 @@ def run():  # pragma: no cover
                 then=Value(False),
             ),
             default=Value(True),
-        )
+        ),
     ).exclude(
         financabilite_completee=False
+    ).annotate(
+        inscription_au_role_requise=Case(
+            When(
+                Q(continuingeducationadmission__isnull=False,
+                  training__specificiufcinformations__registration_required=True)
+                | Q(continuingeducationadmission__isnull=True),
+                then=Value(True)
+            ),
+            default=Value(False),
+        )
+    ).exclude(
+        inscription_au_role_requise=False
     )
     logger.info(f"[TASK - INJECTION EPC] {admissions.count()} dossiers a traiter")
     from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission

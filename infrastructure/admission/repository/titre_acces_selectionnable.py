@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,27 +26,33 @@
 import uuid
 from typing import List, Optional
 
-from django.db.models import QuerySet, Max, Q, F
+from django.db.models import F, Max, Q, QuerySet
 
-from admission.models.base import (
-    BaseAdmission,
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
 )
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
     TitreAccesSelectionnableIdentity,
 )
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
+)
 from admission.ddd.admission.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
     ExperienceNonTrouveeException,
+    PropositionNonTrouveeException,
 )
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
-from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE, BE_ISO_CODE
+from admission.models.base import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+    BaseAdmission,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
+from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models.enums.curriculum import Result
 
 
@@ -66,9 +72,11 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__foreignhighschooldiploma__country',
                 'candidate__highschooldiplomaalternative',
                 'candidate__graduated_from_high_school_year',
+                'training__academic_year',
             )
             .prefetch_related('internal_access_titles')
             .only(
+                'training__academic_year__year',
                 'are_secondary_studies_access_title',
                 'candidate__global_id',
                 'candidate__belgianhighschooldiploma__uuid',
@@ -187,9 +195,11 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     ),
                     selectionne=bool(experience.is_access_title),
                     annee=experience.last_year,
-                    pays_iso_code=experience.educationalexperience.country.iso_code
-                    if experience.educationalexperience.country
-                    else '',
+                    pays_iso_code=(
+                        experience.educationalexperience.country.iso_code
+                        if experience.educationalexperience.country
+                        else ''
+                    ),
                 )
             )
 
@@ -214,10 +224,28 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 )
             )
 
+        selectable_internal_experience_years = {
+            admission.training.academic_year.year,
+            admission.training.academic_year.year - 1,
+        }
+
         for experience in internal_experiences:
             is_selected = experience.uuid in internal_access_titles_uuids
+            last_year = experience.derniere_annee.annee
 
-            if not experience.est_diplome_ou_diplomable or seulement_selectionnes and not is_selected:
+            # Add the experience
+            if (
+                # > if it can be chosen because
+                not (
+                    # > the diploma has already been or will be obtained
+                    experience.est_diplome_ou_diplomable
+                    # > the last year is the same year or the previous year of the enrolment
+                    or last_year in selectable_internal_experience_years
+                )
+                # > if it has already been selected if we only want the selected ones
+                or seulement_selectionnes
+                and not is_selected
+            ):
                 continue
 
             access_titles.append(
@@ -228,7 +256,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                         type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE,
                     ),
                     selectionne=is_selected,
-                    annee=experience.derniere_annee.annee,
+                    annee=last_year,
                     pays_iso_code=BE_ISO_CODE,
                 )
             )

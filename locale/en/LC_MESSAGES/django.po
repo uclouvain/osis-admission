@@ -733,6 +733,9 @@ msgctxt "admission decision"
 msgid "Approved"
 msgstr ""
 
+msgid "Approved by CDD at"
+msgstr ""
+
 msgid "Approximate date for completing the thesis:"
 msgstr ""
 
@@ -3033,6 +3036,15 @@ msgstr ""
 msgid "Grounds for denied"
 msgstr ""
 
+msgid "Has Erasmus Mundus scholarship"
+msgstr ""
+
+msgid "Has dual degree scholarship"
+msgstr ""
+
+msgid "Has international scholarship"
+msgstr ""
+
 msgid "Has the PhD project already started?"
 msgstr ""
 
@@ -5017,7 +5029,10 @@ msgstr ""
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr ""
 
-msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER_SPECIALISATION"
 msgstr ""
 
 msgid "REFUS_ARTICLE_96_HUE_NON_PROGRESSION"
@@ -6205,6 +6220,11 @@ msgid ""
 "to submit the dossier to the faculty: %(statuses)s."
 msgstr ""
 
+msgid ""
+"The information about the scholarships must be specified in the 'Course "
+"choice' tab."
+msgstr ""
+
 #, python-format
 msgid ""
 "The inscription type admission was authorised the %(date)s by %(author)s."
@@ -6535,8 +6555,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/fr/logement\">www."
-"uclouvain.be/fr/logement</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
+"uclouvain.be/en/logement</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7515,12 +7535,6 @@ msgstr ""
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr ""
 
-msgid "the UCLouvain Registration Service"
-msgstr ""
-
-msgid "the faculty"
-msgstr ""
-
 msgid "the person concerned"
 msgstr ""
 
@@ -7529,6 +7543,9 @@ msgid "to"
 msgstr ""
 
 msgid "to the UCLouvain Registration Service"
+msgstr ""
+
+msgid "to the faculty"
 msgstr ""
 
 msgid "ucl"

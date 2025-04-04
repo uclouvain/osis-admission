@@ -50,6 +50,9 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.domain.service.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculum,
+)
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.historique import Historique
@@ -123,6 +126,7 @@ COMMAND_HANDLERS = {
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         historique=HistoriqueGlobal(),
+        raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -219,6 +223,7 @@ COMMAND_HANDLERS = {
         notification=Notification(),
     ),
     ValiderPropositionCommand: lambda msg_bus, cmd: valider_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),

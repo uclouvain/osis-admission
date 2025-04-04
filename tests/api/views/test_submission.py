@@ -824,7 +824,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the faculty")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
-                % {'to_service': _("the faculty")},
+                % {'to_service': _("to the faculty")},
                 'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }
@@ -1060,6 +1060,40 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             self.second_admission_ok.professional_valuated_experiences.first().uuid,
             professional_experience.uuid,
         )
+
+        # Check that the pdf recap has been generated with the right sections
+        call_args = self.outline_root.append.call_args_list
+
+        pdf_sections = [
+            'identification',
+            'coordinates',
+            'training_choice',
+            'education',
+            'curriculum_academic_experience',
+            'curriculum_non_academic_experience',
+            'specific_question',
+            'confirmation',
+        ]
+
+        self.assertEqual(len(call_args), len(pdf_sections))
+
+        call_args_by_tab = {tab: call_args[index][0][0] for index, tab in enumerate(pdf_sections)}
+
+        # Check that all pdf sections have been added
+        self.assertEqual(call_args_by_tab['identification'].title, 'Identification')
+        self.assertEqual(call_args_by_tab['coordinates'].title, 'Coordonnées')
+        self.assertEqual(call_args_by_tab['training_choice'].title, 'Choix de formation')
+        self.assertEqual(call_args_by_tab['education'].title, 'Études secondaires')
+        self.assertEqual(
+            call_args_by_tab['curriculum_academic_experience'].title,
+            'Curriculum > Computer science 2021-2022',
+        )
+        self.assertEqual(
+            call_args_by_tab['curriculum_non_academic_experience'].title,
+            'Curriculum > Travail 01/2021-03/2021',
+        )
+        self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
+        self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
         # Second submission
         response = self.client.post(self.third_ok_url, data=self.submitted_data)
