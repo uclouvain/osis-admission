@@ -340,18 +340,16 @@ class PDFGeneration(IPDFGeneration):
     ) -> Optional[str]:
         from infrastructure.messages_bus import message_bus_instance
 
-        proposition_dto = proposition_repository.get_dto_for_gestionnaire(
-            proposition.entity_id, UnitesEnseignementTranslator
-        )
-        profil_candidat_identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
-        profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
-
         documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
             RecupererResumeEtEmplacementsDocumentsPropositionQuery(
-                uuid_proposition=proposition_dto.uuid,
+                uuid_proposition=proposition.entity_id.uuid,
                 avec_document_libres=True,
             )
         )
+
+        proposition_dto = documents_resume.resume.proposition
+        profil_candidat_identification = documents_resume.resume.identification
+        profil_candidat_coordonnees = documents_resume.resume.coordonnees
 
         experiences_curriculum_par_uuid: Dict[str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]] = {
             str(experience.uuid): experience

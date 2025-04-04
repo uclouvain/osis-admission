@@ -492,6 +492,7 @@ COMMAND_HANDLERS = {
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
             membre_ca_translator=MembreCATranslator(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     EnvoyerPropositionACddLorsDeLaDecisionCddCommand: (

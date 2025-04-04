@@ -179,7 +179,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
     ),
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),

@@ -38,7 +38,7 @@ from admission.ddd.admission.dtos.resume import (
 )
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     RecupererQuestionsSpecifiquesQuery,
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -132,7 +132,7 @@ class ChecklistView(
         if not self.request.htmx:
             # Retrieve data related to the proposition
             command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
+                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
             )
 
             context['resume_proposition'] = command_result.resume

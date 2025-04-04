@@ -310,6 +310,15 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     }
 
     @cached_property
+    def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        return message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                avec_document_libres=True,
+            ),
+        )
+
+    @cached_property
     def candidate_cv_program_names_by_experience_uuid(self):
         experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
             person=self.admission.candidate
@@ -1070,11 +1079,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def sic_decision_approval_form_requestable_documents(self):
-        documents = message_bus_instance.invoke(
-            RecupererDocumentsPropositionQuery(
-                uuid_proposition=self.admission_uuid,
-            )
-        )
+        documents = self.proposition_resume.emplacements_documents
         return [document for document in documents if document.est_reclamable and document.est_a_reclamer]
 
     @cached_property
@@ -1253,12 +1258,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     prerequisite_courses_detail_paragraph += self.proposition.commentaire_complements_formation
 
                 # Documents
-                documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                    RecupererResumeEtEmplacementsDocumentsPropositionQuery(
-                        uuid_proposition=self.admission_uuid,
-                        avec_document_libres=True,
-                    )
-                )
+                documents_resume = self.proposition_resume
 
                 experiences_curriculum_par_uuid: Dict[
                     str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]
@@ -1454,8 +1454,6 @@ class SicApprovalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
-        # Reset cached proposition
-        del self.proposition
         return super().form_valid(form)
 
 
@@ -1546,8 +1544,6 @@ class SicRefusalFinalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
-        # Invalidate cached_property for status update
-        del self.proposition
         return super().form_valid(form)
 
 
@@ -1562,6 +1558,14 @@ class SicApprovalFinalDecisionView(
     template_name = 'admission/general_education/includes/checklist/sic_decision_approval_final_form.html'
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_final_form.html'
     permission_required = 'admission.checklist_change_sic_decision'
+
+    @cached_property
+    def proposition(self):
+        # Override it to avoid unuseful request
+        if self.admission.type_demande == TypeDemande.ADMISSION.name:
+            return super().proposition
+
+        return self.proposition_resume.resume.proposition
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1605,8 +1609,6 @@ class SicApprovalFinalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
-        # Invalidate cached_property for status update
-        del self.proposition
         return super().form_valid(form)
 
 
@@ -2757,6 +2759,11 @@ class ChecklistView(
     permission_required = 'admission.view_checklist'
 
     @cached_property
+    def proposition(self):
+        # Override it to avoid unuseful request
+        return self.proposition_resume.resume.proposition
+
+    @cached_property
     def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
         return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
 
@@ -2854,10 +2861,7 @@ class ChecklistView(
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition
-            command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
-            )
-
+            command_result = self.proposition_resume
             context['resume_proposition'] = command_result.resume
 
             specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
@@ -2929,9 +2933,7 @@ class ChecklistView(
                 for tab_name, tab_documents in documents_by_tab.items()
             }
 
-            context['requested_documents_dtos'] = [
-                document for document in admission_documents if document.est_reclamable and document.est_a_reclamer
-            ]
+            context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
 
             # Experiences
             if self.proposition_fusion:

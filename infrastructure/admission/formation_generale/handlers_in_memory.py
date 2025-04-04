@@ -448,6 +448,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             question_specifique_translator=_question_specific_translator,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(

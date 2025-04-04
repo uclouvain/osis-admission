@@ -40,6 +40,7 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
     IEmplacementsDocumentsPropositionTranslator,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
@@ -59,9 +60,10 @@ def recuperer_resume_et_emplacements_documents_proposition(
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     promoteur_translator: 'IPromoteurTranslator',
     membre_ca_translator: 'IMembreCATranslator',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> ResumeEtEmplacementsDocumentsPropositionDTO:
     # GIVEN
-    resume_dto = ResumeProposition.get_resume_demande_doctorat(
+    resume_dto = ResumeProposition.get_resume_demande_doctorat_pour_gestionnaire(
         uuid_proposition=cmd.uuid_proposition,
         proposition_repository=proposition_repository,
         comptabilite_translator=comptabilite_translator,
@@ -71,7 +73,8 @@ def recuperer_resume_et_emplacements_documents_proposition(
         promoteur_translator=promoteur_translator,
         membre_ca_translator=membre_ca_translator,
         question_specifique_translator=question_specifique_translator,
-        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
+        experiences_cv_recuperees=cmd.experiences_cv_recuperees,
+        unites_enseignement_translator=unites_enseignement_translator,
     )
 
     # WHEN

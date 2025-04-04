@@ -424,6 +424,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(

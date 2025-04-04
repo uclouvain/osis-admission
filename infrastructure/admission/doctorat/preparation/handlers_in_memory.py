@@ -540,6 +540,7 @@ COMMAND_HANDLERS = {
             groupe_supervision_repository=_groupe_supervision_repository,
             promoteur_translator=_promoteur_translator,
             membre_ca_translator=_membre_ca_translator,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (

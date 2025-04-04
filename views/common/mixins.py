@@ -63,6 +63,7 @@ from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
 from admission.ddd.admission.dtos.proposition_fusion_personne import (
     PropositionFusionPersonneDTO,
 )
+from admission.ddd.admission.dtos.resume import ResumePropositionGestionnaireDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,

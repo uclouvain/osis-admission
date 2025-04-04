@@ -37,6 +37,8 @@ from django.utils.translation import ngettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+
+from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -51,7 +53,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPdfTemporaireDecisionSicQuery,
     SpecifierBesoinDeDerogationSicCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
-    SpecifierInformationsAcceptationPropositionParSicCommand,
+    SpecifierInformationsAcceptationPropositionParSicCommand, RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
@@ -366,26 +368,25 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     prerequisite_courses_detail_paragraph += self.proposition.commentaire_complements_formation
 
                 # Documents
-                curriculum: CurriculumAdmissionDTO = message_bus_instance.invoke(
-                    RechercherParcoursAnterieurQuery(
-                        global_id=self.proposition.matricule_candidat,
-                        uuid_proposition=self.proposition.uuid,
-                    )
-                )
+                documents_resume = self.proposition_resume
 
                 experiences_curriculum_par_uuid: Dict[
                     str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]
                 ] = {
                     str(experience.uuid): experience
                     for experience in itertools.chain(
-                        curriculum.experiences_non_academiques,
-                        curriculum.experiences_academiques,
+                        documents_resume.resume.curriculum.experiences_non_academiques,
+                        documents_resume.resume.curriculum.experiences_academiques,
                     )
                 }
+                documents = documents_resume.emplacements_documents
 
                 documents_names = []
 
-                for document in self.sic_decision_approval_form_requestable_documents:
+                for document in documents:
+                    if not document.est_a_reclamer:
+                        continue
+
                     document_identifier = document.identifiant.split('.')
 
                     if (
@@ -552,6 +553,24 @@ class SicApprovalFinalDecisionView(
     template_name = 'admission/general_education/includes/checklist/sic_decision_approval_final_form.html'
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_final_form.html'
     permission_required = 'admission.checklist_change_sic_decision'
+
+    @cached_property
+    def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        # Override it to get the free documents
+        return message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                avec_document_libres=True,
+            ),
+        )
+
+    @cached_property
+    def proposition(self):
+        # Override it to avoid unuseful request
+        if self.admission.type_demande == TypeDemande.ADMISSION.name:
+            return super().proposition
+
+        return self.proposition_resume.resume.proposition
 
     def dispatch(self, request, *args, **kwargs):
         if self.admission.is_in_quarantine:

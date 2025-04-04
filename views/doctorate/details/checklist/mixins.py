@@ -96,6 +96,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
         )
 
+    @cached_property
+    def proposition(self):
+        return self.proposition_resume.resume.proposition
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         checklist_additional_icons = {}

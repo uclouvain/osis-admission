@@ -46,7 +46,7 @@ from admission.ddd.admission.dtos.resume import (
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
 from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     RecupererQuestionsSpecifiquesQuery,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
@@ -445,7 +445,7 @@ class ChecklistView(
         if not self.request.htmx:
             # Retrieve data related to the proposition
             command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
+                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
             )
 
             context['resume_proposition'] = command_result.resume
