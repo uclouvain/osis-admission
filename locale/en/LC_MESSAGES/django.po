@@ -7535,9 +7535,6 @@ msgstr ""
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr ""
 
-msgid "the UCLouvain Registration Service"
-msgstr ""
-
 msgid "the faculty"
 msgstr ""
 
@@ -7549,6 +7546,9 @@ msgid "to"
 msgstr ""
 
 msgid "to the UCLouvain Registration Service"
+msgstr ""
+
+msgid "to the faculty"
 msgstr ""
 
 msgid "ucl"
