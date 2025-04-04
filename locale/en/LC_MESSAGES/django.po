@@ -7535,9 +7535,6 @@ msgstr ""
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr ""
 
-msgid "the faculty"
-msgstr ""
-
 msgid "the person concerned"
 msgstr ""
 

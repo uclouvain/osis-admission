@@ -8442,9 +8442,6 @@ msgstr "la <strong>non-poursuite</strong> du doctorat."
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
 
-msgid "the faculty"
-msgstr "la faculté"
-
 msgid "the person concerned"
 msgstr "la personne concernée"
 
