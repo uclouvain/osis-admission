@@ -38,6 +38,9 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat impo
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
     IHistorique,
 )
+from admission.ddd.admission.doctorat.preparation.domain.service.parcours_doctoral import (
+    ParcoursDoctoralTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -62,12 +65,17 @@ def initier_proposition(
     # GIVEN
     maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
 
+    parcours_doctoral_pre_admission_associee = ParcoursDoctoralTranslator.recuperer(
+        message_bus=message_bus,
+        uuid_proposition=cmd.pre_admission_associee,
+    )
+
     # WHEN
     proposition = PropositionBuilder().initier_proposition(
         cmd=cmd,
         doctorat_translator=doctorat_translator,
         proposition_repository=proposition_repository,
-        message_bus=message_bus,
+        parcours_doctoral_pre_admission_associee=parcours_doctoral_pre_admission_associee,
     )
 
     # THEN

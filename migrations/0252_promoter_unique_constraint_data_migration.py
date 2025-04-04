@@ -24,7 +24,7 @@ def remove_duplicate_roles(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("admission", "0248_alter_generaleducationadmission_refusal_type"),
+        ("admission", "0251_merge_20250505_0951"),
     ]
 
     operations = [

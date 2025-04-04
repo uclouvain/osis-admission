@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("admission", "0249_promoter_unique_constraint_data_migration"),
+        ("admission", "0252_promoter_unique_constraint_data_migration"),
     ]
 
     operations = [

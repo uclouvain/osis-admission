@@ -25,8 +25,6 @@
 ##############################################################################
 from typing import Optional, Union
 
-from django.apps import apps
-
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -43,6 +41,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.parcours_doctoral import (
+    ParcoursDoctoral,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
     PropositionIdentity,
@@ -56,7 +57,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from infrastructure.utils import MessageBus
 from osis_common.ddd import interface
 
 
@@ -75,13 +75,13 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cmd: 'InitierPropositionCommand',
         doctorat_translator: 'IDoctoratTranslator',
         proposition_repository: 'IPropositionRepository',
-        message_bus: 'MessageBus',
+        parcours_doctoral_pre_admission_associee: 'Optional[ParcoursDoctoral]',
     ) -> 'Proposition':
-        if cmd.pre_admission_associee and apps.is_installed('parcours_doctoral'):
+        if cmd.pre_admission_associee and parcours_doctoral_pre_admission_associee:
             return cls.initier_nouvelle_proposition_attachee_a_pre_admission(
                 cmd=cmd,
                 proposition_repository=proposition_repository,
-                message_bus=message_bus,
+                parcours_doctoral_pre_admission=parcours_doctoral_pre_admission_associee,
             )
         else:
             return cls.initier_nouvelle_proposition_non_attachee_a_pre_admission(
@@ -133,20 +133,9 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cls,
         cmd: 'InitierPropositionCommand',
         proposition_repository: 'IPropositionRepository',
-        message_bus: 'MessageBus',
+        parcours_doctoral_pre_admission: 'ParcoursDoctoral',
     ) -> 'Proposition':
-        from parcours_doctoral.ddd.commands import (
-            RecupererParcoursDoctoralPropositionQuery,
-        )
-        from parcours_doctoral.ddd.dtos import ParcoursDoctoralDTO
-
         pre_admission = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.pre_admission_associee))
-
-        parcours_doctoral: ParcoursDoctoralDTO = message_bus.invoke(
-            RecupererParcoursDoctoralPropositionQuery(
-                proposition_uuid=cmd.pre_admission_associee,
-            )
-        )
 
         reference = proposition_repository.recuperer_reference_suivante()
 
@@ -156,53 +145,51 @@ class PropositionBuilder(interface.RootEntityBuilder):
             statut=ChoixStatutPropositionDoctorale.EN_BROUILLON,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
             formation_id=pre_admission.formation_id,
-            matricule_candidat=parcours_doctoral.matricule_doctorant,
+            matricule_candidat=parcours_doctoral_pre_admission.matricule_doctorant,
             projet=projet_non_rempli,
-            auteur_derniere_modification=parcours_doctoral.matricule_doctorant,
+            auteur_derniere_modification=parcours_doctoral_pre_admission.matricule_doctorant,
             pre_admission_associee=pre_admission.entity_id,
             curriculum=pre_admission.curriculum,
         )
 
-        proposition.definir_commission(parcours_doctoral.commission_proximite)
+        proposition.definir_commission(parcours_doctoral_pre_admission.commission_proximite)
 
         proposition.completer(
-            justification=parcours_doctoral.justification,
-            type_financement=parcours_doctoral.financement.type,
-            type_contrat_travail=parcours_doctoral.financement.type_contrat_travail,
-            eft=parcours_doctoral.financement.eft,
-            bourse_recherche=parcours_doctoral.financement.bourse_recherche,
-            autre_bourse_recherche=parcours_doctoral.financement.autre_bourse_recherche,
-            bourse_date_debut=parcours_doctoral.financement.bourse_date_debut,
-            bourse_date_fin=parcours_doctoral.financement.bourse_date_fin,
-            bourse_preuve=parcours_doctoral.financement.bourse_preuve,
-            duree_prevue=parcours_doctoral.financement.duree_prevue,
-            temps_consacre=parcours_doctoral.financement.temps_consacre,
-            est_lie_fnrs_fria_fresh_csc=parcours_doctoral.financement.est_lie_fnrs_fria_fresh_csc,
-            commentaire_financement=parcours_doctoral.financement.commentaire,
-            langue_redaction_these=parcours_doctoral.projet.langue_redaction_these,
-            institut_these=(
-                str(parcours_doctoral.projet.institut_these) if parcours_doctoral.projet.institut_these else ''
-            ),
-            lieu_these=parcours_doctoral.projet.lieu_these,
-            titre=parcours_doctoral.projet.titre,
-            resume=parcours_doctoral.projet.resume,
-            doctorat_deja_realise=parcours_doctoral.projet.doctorat_deja_realise,
-            institution=parcours_doctoral.projet.institution,
-            domaine_these=parcours_doctoral.projet.domaine_these,
-            date_soutenance=parcours_doctoral.projet.date_soutenance,
-            raison_non_soutenue=parcours_doctoral.projet.raison_non_soutenue,
-            projet_doctoral_deja_commence=parcours_doctoral.projet.projet_doctoral_deja_commence,
-            projet_doctoral_institution=parcours_doctoral.projet.projet_doctoral_institution,
-            projet_doctoral_date_debut=parcours_doctoral.projet.projet_doctoral_date_debut,
-            documents=parcours_doctoral.projet.documents_projet,
-            graphe_gantt=parcours_doctoral.projet.graphe_gantt,
-            proposition_programme_doctoral=parcours_doctoral.projet.proposition_programme_doctoral,
-            projet_formation_complementaire=parcours_doctoral.projet.projet_formation_complementaire,
-            lettres_recommandation=parcours_doctoral.projet.lettres_recommandation,
+            justification=parcours_doctoral_pre_admission.justification,
+            type_financement=parcours_doctoral_pre_admission.financement_type,
+            type_contrat_travail=parcours_doctoral_pre_admission.financement_type_contrat_travail,
+            eft=parcours_doctoral_pre_admission.financement_eft,
+            bourse_recherche=parcours_doctoral_pre_admission.financement_bourse_recherche,
+            autre_bourse_recherche=parcours_doctoral_pre_admission.financement_autre_bourse_recherche,
+            bourse_date_debut=parcours_doctoral_pre_admission.financement_bourse_date_debut,
+            bourse_date_fin=parcours_doctoral_pre_admission.financement_bourse_date_fin,
+            bourse_preuve=parcours_doctoral_pre_admission.financement_bourse_preuve,
+            duree_prevue=parcours_doctoral_pre_admission.financement_duree_prevue,
+            temps_consacre=parcours_doctoral_pre_admission.financement_temps_consacre,
+            est_lie_fnrs_fria_fresh_csc=parcours_doctoral_pre_admission.financement_est_lie_fnrs_fria_fresh_csc,
+            commentaire_financement=parcours_doctoral_pre_admission.financement_commentaire,
+            langue_redaction_these=parcours_doctoral_pre_admission.projet_langue_redaction_these,
+            institut_these=parcours_doctoral_pre_admission.projet_institut_these,
+            lieu_these=parcours_doctoral_pre_admission.projet_lieu_these,
+            titre=parcours_doctoral_pre_admission.projet_titre,
+            resume=parcours_doctoral_pre_admission.projet_resume,
+            doctorat_deja_realise=parcours_doctoral_pre_admission.projet_doctorat_deja_realise,
+            institution=parcours_doctoral_pre_admission.projet_institution,
+            domaine_these=parcours_doctoral_pre_admission.projet_domaine_these,
+            date_soutenance=parcours_doctoral_pre_admission.projet_date_soutenance,
+            raison_non_soutenue=parcours_doctoral_pre_admission.projet_raison_non_soutenue,
+            projet_doctoral_deja_commence=parcours_doctoral_pre_admission.projet_projet_doctoral_deja_commence,
+            projet_doctoral_institution=parcours_doctoral_pre_admission.projet_projet_doctoral_institution,
+            projet_doctoral_date_debut=parcours_doctoral_pre_admission.projet_projet_doctoral_date_debut,
+            documents=parcours_doctoral_pre_admission.projet_documents_projet,
+            graphe_gantt=parcours_doctoral_pre_admission.projet_graphe_gantt,
+            proposition_programme_doctoral=parcours_doctoral_pre_admission.projet_proposition_programme_doctoral,
+            projet_formation_complementaire=parcours_doctoral_pre_admission.projet_projet_formation_complementaire,
+            lettres_recommandation=parcours_doctoral_pre_admission.projet_lettres_recommandation,
         )
 
         proposition.completer_comptabilite(
-            auteur_modification=parcours_doctoral.matricule_doctorant,
+            auteur_modification=parcours_doctoral_pre_admission.matricule_doctorant,
             attestation_absence_dette_etablissement=pre_admission.comptabilite.attestation_absence_dette_etablissement,
             type_situation_assimilation=(
                 pre_admission.comptabilite.type_situation_assimilation.name
