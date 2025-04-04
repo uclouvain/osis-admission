@@ -376,6 +376,7 @@ class DoctorateTrainingChoiceForm(BaseTrainingChoiceForm):
         initial=ChoixTypeAdmission.ADMISSION.name,
         label=_('Admission type'),
         widget=forms.RadioSelect,
+        disabled=True,
     )
 
     justification = forms.CharField(
