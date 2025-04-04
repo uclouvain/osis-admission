@@ -25,48 +25,49 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.auth.roles.promoter import Promoter
+from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.migrations.utils.remove_duplicates_candidates import remove_duplicate_candidates
-from admission.tests.factories.roles import PromoterRoleFactory
+from admission.tests.factories.roles import DoctorateReaderRoleFactory
 
 
 class RemoveDuplicateCandidatesTestCase(TestCase):
-    # Note that we use here the Promoter role instead of the Candidate role because it hasn't got the unique constraint
+    # Note that we use here the DoctorateReader role instead of the Candidate role because it hasn't got the unique
+    # constraint
 
     @classmethod
     def setUpTestData(cls):
-        Promoter.objects.all().delete()
+        DoctorateReader.objects.all().delete()
 
     @staticmethod
     def _remove_duplicates():
-        remove_duplicate_candidates(Promoter)
+        remove_duplicate_candidates(DoctorateReader)
 
     def test_with_no_role(self):
         self._remove_duplicates()
-        self.assertFalse(Promoter.objects.exists())
+        self.assertFalse(DoctorateReader.objects.exists())
 
     def test_with_no_duplicate_role(self):
-        roles = [PromoterRoleFactory() for _ in range(5)]
+        roles = [DoctorateReaderRoleFactory() for _ in range(5)]
 
         self._remove_duplicates()
 
-        self.assertEqual(Promoter.objects.count(), len(roles))
+        self.assertEqual(DoctorateReader.objects.count(), len(roles))
 
     def test_with_duplicate_roles(self):
-        original_roles = [PromoterRoleFactory() for _ in range(5)]
+        original_roles = [DoctorateReaderRoleFactory() for _ in range(5)]
 
         # Add duplicate roles
         for _ in range(2):
-            Promoter.objects.create(person=original_roles[0].person)
+            DoctorateReader.objects.create(person=original_roles[0].person)
         for _ in range(3):
-            Promoter.objects.create(person=original_roles[2].person)
+            DoctorateReader.objects.create(person=original_roles[2].person)
         for _ in range(1):
-            Promoter.objects.create(person=original_roles[3].person)
+            DoctorateReader.objects.create(person=original_roles[3].person)
 
-        self.assertEqual(Promoter.objects.all().count(), 11)
+        self.assertEqual(DoctorateReader.objects.all().count(), 11)
 
         self._remove_duplicates()
 
-        roles_persons_ids = Promoter.objects.all().values_list('person_id', flat=True)
+        roles_persons_ids = DoctorateReader.objects.all().values_list('person_id', flat=True)
 
         self.assertCountEqual(roles_persons_ids, [role.person_id for role in original_roles])

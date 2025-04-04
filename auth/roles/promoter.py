@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,14 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates.doctorate import (
+    is_admission,
     is_admission_request_promoter,
     is_being_enrolled,
     is_part_of_committee_and_invited,
-    is_admission,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -48,6 +49,9 @@ class Promoter(RoleModel):
         verbose_name = _("Role: Promoter")
         verbose_name_plural = _("Role: Promoters")
         group_name = "promoters"
+        constraints = [
+            UniqueConstraint(fields=['person'], name='admission_unique_promoter_by_person'),
+        ]
 
     @classmethod
     def rule_set(cls):

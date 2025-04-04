@@ -30,6 +30,7 @@ from typing import Dict, List
 from unittest.mock import patch
 
 import freezegun
+from django.apps import apps
 from django.db import connection
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
@@ -52,6 +53,16 @@ from admission.ddd.admission.doctorat.preparation.domain.validator import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DoctoratNonTrouveException,
+)
+from admission.ddd.admission.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -93,7 +104,6 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import (
     CaMemberFactory,
-    ExternalPromoterFactory,
     PromoterFactory,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -163,6 +173,38 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             'additional_training_project',
             'recommendation_letters',
             'curriculum',
+            'institute_absence_debts_certificate',
+            'long_term_resident_card',
+            'cire_unlimited_stay_foreigner_card',
+            'ue_family_member_residence_card',
+            'ue_family_member_permanent_residence_card',
+            'stateless_person_proof',
+            'refugee_a_b_card',
+            'refugees_stateless_annex_25_26',
+            'registration_certificate',
+            'a_b_card',
+            'subsidiary_protection_decision',
+            'a_card',
+            'temporary_protection_decision',
+            'professional_3_month_residence_permit',
+            'salary_slips',
+            'replacement_3_month_residence_permit',
+            'unemployment_benefit_pension_compensation_proof',
+            'cpas_certificate',
+            'household_composition_or_birth_certificate',
+            'tutorship_act',
+            'household_composition_or_marriage_certificate',
+            'legal_cohabitation_certificate',
+            'parent_identity_card',
+            'parent_long_term_residence_permit',
+            'parent_refugees_stateless_annex_25_26_or_protection_decision',
+            'parent_3_month_residence_permit',
+            'parent_salary_slips',
+            'parent_cpas_certificate',
+            'cfwb_scholarship_decision',
+            'scholarship_certificate',
+            'ue_long_term_stay_identity_document',
+            'belgium_residence_permit',
         ]
 
         cls.documents_tokens: Dict[str, List[uuid.UUID]] = {}
@@ -252,37 +294,161 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
 
     @freezegun.freeze_time('2023-01-01')
     def test_admission_doctorate_creation_based_on_pre_admission(self):
+        if not apps.is_installed('parcours_doctoral'):
+            return
+
+        from parcours_doctoral.ddd.domain.model.enums import ChoixStatutParcoursDoctoral
+        from parcours_doctoral.models import ParcoursDoctoral
+        from parcours_doctoral.tests.factories.parcours_doctoral import ParcoursDoctoralFactory
+        from parcours_doctoral.tests.factories.supervision import (
+            CaMemberFactory as DoctorateCaMemberFactory,
+        )
+        from parcours_doctoral.tests.factories.supervision import (
+            ExternalPromoterFactory as DoctorateExternalPromoterFactory,
+        )
+        from parcours_doctoral.tests.factories.supervision import (
+            PromoterFactory as DoctoratePromoterFactory,
+        )
+
         self.client.force_authenticate(user=self.candidate.user)
 
-        existing_promoter = PromoterFactory(
+        existing_promoter = DoctoratePromoterFactory(
             is_reference_promoter=True,
             internal_comment='Internal comment 1',
-            rejection_reason='Rejection reason 1',
             comment='Comment 1',
             pdf_from_candidate=[uuid.uuid4()],
         )
-        external_promoter = ExternalPromoterFactory(
+        external_promoter = DoctorateExternalPromoterFactory(
             process=existing_promoter.process,
             internal_comment='Internal comment 2',
-            rejection_reason='Rejection reason 2',
             comment='Comment 2',
             pdf_from_candidate=[uuid.uuid4()],
         )
-        existing_ca_member = CaMemberFactory(
+        existing_ca_member = DoctorateCaMemberFactory(
             process=existing_promoter.process,
             internal_comment='Internal comment 3',
-            rejection_reason='Rejection reason 3',
             comment='Comment 3',
             pdf_from_candidate=[uuid.uuid4()],
         )
 
         pre_admission = DoctorateAdmissionFactory(
-            supervision_group=existing_promoter.process,
             candidate=self.candidate,
             training=self.doctorate,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
-            comment='Comment',
+            curriculum=self.documents_tokens['curriculum'],
+        )
+
+        # Accounting
+        # Absence debts
+        pre_admission.accounting.institute_absence_debts_certificate = self.documents_tokens[
+            'institute_absence_debts_certificate'
+        ]
+
+        # Assimilation
+        pre_admission.accounting.assimilation_situation = (
+            TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2.name
+        )
+
+        pre_admission.accounting.assimilation_1_situation_type = ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER.name
+        pre_admission.accounting.long_term_resident_card = self.documents_tokens['long_term_resident_card']
+        pre_admission.accounting.cire_unlimited_stay_foreigner_card = self.documents_tokens[
+            'cire_unlimited_stay_foreigner_card'
+        ]
+        pre_admission.accounting.ue_family_member_residence_card = self.documents_tokens[
+            'ue_family_member_residence_card'
+        ]
+        pre_admission.accounting.ue_family_member_permanent_residence_card = self.documents_tokens[
+            'ue_family_member_permanent_residence_card'
+        ]
+
+        pre_admission.accounting.assimilation_2_situation_type = ChoixAssimilation2.DEMANDEUR_ASILE.name
+        pre_admission.accounting.stateless_person_proof = self.documents_tokens['stateless_person_proof']
+        pre_admission.accounting.refugee_a_b_card = self.documents_tokens['refugee_a_b_card']
+        pre_admission.accounting.refugees_stateless_annex_25_26 = self.documents_tokens[
+            'refugees_stateless_annex_25_26'
+        ]
+        pre_admission.accounting.registration_certificate = self.documents_tokens['registration_certificate']
+        pre_admission.accounting.a_b_card = self.documents_tokens['a_b_card']
+        pre_admission.accounting.subsidiary_protection_decision = self.documents_tokens[
+            'subsidiary_protection_decision'
+        ]
+        pre_admission.accounting.a_card = self.documents_tokens['a_card']
+        pre_admission.accounting.temporary_protection_decision = self.documents_tokens['temporary_protection_decision']
+
+        pre_admission.accounting.assimilation_3_situation_type = (
+            ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT.name
+        )
+        pre_admission.accounting.professional_3_month_residence_permit = self.documents_tokens[
+            'professional_3_month_residence_permit'
+        ]
+        pre_admission.accounting.salary_slips = self.documents_tokens['salary_slips']
+        pre_admission.accounting.replacement_3_month_residence_permit = self.documents_tokens[
+            'replacement_3_month_residence_permit'
+        ]
+        pre_admission.accounting.unemployment_benefit_pension_compensation_proof = self.documents_tokens[
+            'unemployment_benefit_pension_compensation_proof'
+        ]
+
+        pre_admission.accounting.cpas_certificate = self.documents_tokens['cpas_certificate']
+
+        pre_admission.accounting.relationship = LienParente.CONJOINT.name
+        pre_admission.accounting.assimilation_5_situation_type = ChoixAssimilation5.A_NATIONALITE_UE.name
+        pre_admission.accounting.household_composition_or_birth_certificate = self.documents_tokens[
+            'household_composition_or_birth_certificate'
+        ]
+        pre_admission.accounting.tutorship_act = self.documents_tokens['tutorship_act']
+        pre_admission.accounting.household_composition_or_marriage_certificate = self.documents_tokens[
+            'household_composition_or_marriage_certificate'
+        ]
+        pre_admission.accounting.legal_cohabitation_certificate = self.documents_tokens[
+            'legal_cohabitation_certificate'
+        ]
+        pre_admission.accounting.parent_identity_card = self.documents_tokens['parent_identity_card']
+        pre_admission.accounting.parent_long_term_residence_permit = self.documents_tokens[
+            'parent_long_term_residence_permit'
+        ]
+        pre_admission.accounting.parent_refugees_stateless_annex_25_26_or_protection_decision = self.documents_tokens[
+            'parent_refugees_stateless_annex_25_26_or_protection_decision'
+        ]
+        pre_admission.accounting.parent_3_month_residence_permit = self.documents_tokens[
+            'parent_3_month_residence_permit'
+        ]
+        pre_admission.accounting.parent_salary_slips = self.documents_tokens['parent_salary_slips']
+        pre_admission.accounting.parent_cpas_certificate = self.documents_tokens['parent_cpas_certificate']
+
+        pre_admission.accounting.assimilation_6_situation_type = (
+            ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT.name
+        )
+        pre_admission.accounting.cfwb_scholarship_decision = self.documents_tokens['cfwb_scholarship_decision']
+        pre_admission.accounting.scholarship_certificate = self.documents_tokens['scholarship_certificate']
+
+        pre_admission.accounting.ue_long_term_stay_identity_document = self.documents_tokens[
+            'ue_long_term_stay_identity_document'
+        ]
+        pre_admission.accounting.belgium_residence_permit = self.documents_tokens['belgium_residence_permit']
+
+        # Affiliations
+        pre_admission.accounting.solidarity_student = True
+
+        # Bank account number
+        pre_admission.accounting.account_number_type = ChoixTypeCompteBancaire.IBAN.name
+        pre_admission.accounting.iban_account_number = '43210'
+        pre_admission.accounting.valid_iban = True
+        pre_admission.accounting.other_format_account_number = '910'
+        pre_admission.accounting.bic_swift_code = '14S'
+        pre_admission.accounting.account_holder_first_name = 'John'
+        pre_admission.accounting.account_holder_last_name = 'Doe'
+
+        pre_admission.accounting.save()
+
+        doctorate: ParcoursDoctoral = ParcoursDoctoralFactory(
+            admission=pre_admission,
+            supervision_group=existing_promoter.process,
+            student=self.candidate,
+            training=self.doctorate,
+            status=ChoixStatutParcoursDoctoral.ADMIS.name,
+            justification='Comment',
             proximity_commission=ChoixCommissionProximiteCDSS.ECLI.name,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
@@ -314,7 +480,6 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             phd_already_done_thesis_domain='PhD already done thesis domain',
             phd_already_done_defense_date=datetime.date(2023, 1, 1),
             phd_already_done_no_defense_reason='No defense reason',
-            curriculum=self.documents_tokens['curriculum'],
         )
 
         response = self.client.post(
@@ -341,28 +506,30 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         self.assertEqual(new_admission.training, pre_admission.training)
         self.assertEqual(new_admission.type, ChoixTypeAdmission.ADMISSION.name)
         self.assertEqual(new_admission.status, ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
-        self.assertEqual(new_admission.comment, pre_admission.comment)
-        self.assertEqual(new_admission.proximity_commission, pre_admission.proximity_commission)
-        self.assertEqual(new_admission.financing_type, pre_admission.financing_type)
-        self.assertEqual(new_admission.financing_work_contract, pre_admission.financing_work_contract)
-        self.assertEqual(new_admission.financing_eft, pre_admission.financing_eft)
-        self.assertEqual(new_admission.international_scholarship_id, pre_admission.international_scholarship_id)
-        self.assertEqual(new_admission.other_international_scholarship, pre_admission.other_international_scholarship)
-        self.assertEqual(new_admission.scholarship_start_date, pre_admission.scholarship_start_date)
-        self.assertEqual(new_admission.scholarship_end_date, pre_admission.scholarship_end_date)
+        self.assertEqual(new_admission.related_pre_admission, pre_admission)
+
+        self.assertEqual(new_admission.comment, doctorate.justification)
+        self.assertEqual(new_admission.proximity_commission, doctorate.proximity_commission)
+        self.assertEqual(new_admission.financing_type, doctorate.financing_type)
+        self.assertEqual(new_admission.financing_work_contract, doctorate.financing_work_contract)
+        self.assertEqual(new_admission.financing_eft, doctorate.financing_eft)
+        self.assertEqual(new_admission.international_scholarship_id, doctorate.international_scholarship_id)
+        self.assertEqual(new_admission.other_international_scholarship, doctorate.other_international_scholarship)
+        self.assertEqual(new_admission.scholarship_start_date, doctorate.scholarship_start_date)
+        self.assertEqual(new_admission.scholarship_end_date, doctorate.scholarship_end_date)
         self.assertEqual(new_admission.scholarship_proof, self.duplicated_documents_tokens['scholarship_proof'])
-        self.assertEqual(new_admission.planned_duration, pre_admission.planned_duration)
-        self.assertEqual(new_admission.dedicated_time, pre_admission.dedicated_time)
-        self.assertEqual(new_admission.is_fnrs_fria_fresh_csc_linked, pre_admission.is_fnrs_fria_fresh_csc_linked)
-        self.assertEqual(new_admission.financing_comment, pre_admission.financing_comment)
-        self.assertEqual(new_admission.project_title, pre_admission.project_title)
-        self.assertEqual(new_admission.project_abstract, pre_admission.project_abstract)
-        self.assertEqual(new_admission.thesis_language, pre_admission.thesis_language)
-        self.assertEqual(new_admission.thesis_institute, pre_admission.thesis_institute)
-        self.assertEqual(new_admission.thesis_location, pre_admission.thesis_location)
-        self.assertEqual(new_admission.phd_alread_started, pre_admission.phd_alread_started)
-        self.assertEqual(new_admission.phd_alread_started_institute, pre_admission.phd_alread_started_institute)
-        self.assertEqual(new_admission.work_start_date, pre_admission.work_start_date)
+        self.assertEqual(new_admission.planned_duration, doctorate.planned_duration)
+        self.assertEqual(new_admission.dedicated_time, doctorate.dedicated_time)
+        self.assertEqual(new_admission.is_fnrs_fria_fresh_csc_linked, doctorate.is_fnrs_fria_fresh_csc_linked)
+        self.assertEqual(new_admission.financing_comment, doctorate.financing_comment)
+        self.assertEqual(new_admission.project_title, doctorate.project_title)
+        self.assertEqual(new_admission.project_abstract, doctorate.project_abstract)
+        self.assertEqual(new_admission.thesis_language, doctorate.thesis_language)
+        self.assertEqual(new_admission.thesis_institute, doctorate.thesis_institute)
+        self.assertEqual(new_admission.thesis_location, doctorate.thesis_location)
+        self.assertEqual(new_admission.phd_alread_started, doctorate.phd_alread_started)
+        self.assertEqual(new_admission.phd_alread_started_institute, doctorate.phd_alread_started_institute)
+        self.assertEqual(new_admission.work_start_date, doctorate.work_start_date)
         self.assertEqual(new_admission.project_document, self.duplicated_documents_tokens['project_document'])
         self.assertEqual(new_admission.gantt_graph, self.duplicated_documents_tokens['gantt_graph'])
         self.assertEqual(new_admission.program_proposition, self.duplicated_documents_tokens['program_proposition'])
@@ -374,15 +541,193 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             new_admission.recommendation_letters,
             self.duplicated_documents_tokens['recommendation_letters'],
         )
-        self.assertEqual(new_admission.phd_already_done, pre_admission.phd_already_done)
-        self.assertEqual(new_admission.phd_already_done_institution, pre_admission.phd_already_done_institution)
-        self.assertEqual(new_admission.phd_already_done_thesis_domain, pre_admission.phd_already_done_thesis_domain)
-        self.assertEqual(new_admission.phd_already_done_defense_date, pre_admission.phd_already_done_defense_date)
+        self.assertEqual(new_admission.phd_already_done, doctorate.phd_already_done)
+        self.assertEqual(new_admission.phd_already_done_institution, doctorate.phd_already_done_institution)
+        self.assertEqual(new_admission.phd_already_done_thesis_domain, doctorate.phd_already_done_thesis_domain)
+        self.assertEqual(new_admission.phd_already_done_defense_date, doctorate.phd_already_done_defense_date)
         self.assertEqual(
             new_admission.phd_already_done_no_defense_reason,
-            pre_admission.phd_already_done_no_defense_reason,
+            doctorate.phd_already_done_no_defense_reason,
         )
         self.assertEqual(new_admission.curriculum, self.duplicated_documents_tokens['curriculum'])
+
+        # Accounting
+        self.assertEqual(
+            new_admission.accounting.institute_absence_debts_certificate,
+            self.duplicated_documents_tokens['institute_absence_debts_certificate'],
+        )
+
+        self.assertEqual(
+            new_admission.accounting.assimilation_situation, pre_admission.accounting.assimilation_situation
+        )
+
+        self.assertEqual(
+            new_admission.accounting.assimilation_1_situation_type,
+            pre_admission.accounting.assimilation_1_situation_type,
+        )
+        self.assertEqual(
+            new_admission.accounting.long_term_resident_card,
+            self.duplicated_documents_tokens['long_term_resident_card'],
+        )
+        self.assertEqual(
+            new_admission.accounting.cire_unlimited_stay_foreigner_card,
+            self.duplicated_documents_tokens['cire_unlimited_stay_foreigner_card'],
+        )
+        self.assertEqual(
+            new_admission.accounting.ue_family_member_residence_card,
+            self.duplicated_documents_tokens['ue_family_member_residence_card'],
+        )
+        self.assertEqual(
+            new_admission.accounting.ue_family_member_permanent_residence_card,
+            self.duplicated_documents_tokens['ue_family_member_permanent_residence_card'],
+        )
+
+        self.assertEqual(
+            new_admission.accounting.assimilation_2_situation_type,
+            pre_admission.accounting.assimilation_2_situation_type,
+        )
+        self.assertEqual(
+            new_admission.accounting.stateless_person_proof,
+            self.duplicated_documents_tokens['stateless_person_proof'],
+        )
+        self.assertEqual(
+            new_admission.accounting.refugee_a_b_card,
+            self.duplicated_documents_tokens['refugee_a_b_card'],
+        )
+        self.assertEqual(
+            new_admission.accounting.refugees_stateless_annex_25_26,
+            self.duplicated_documents_tokens['refugees_stateless_annex_25_26'],
+        )
+        self.assertEqual(
+            new_admission.accounting.registration_certificate,
+            self.duplicated_documents_tokens['registration_certificate'],
+        )
+        self.assertEqual(
+            new_admission.accounting.a_b_card,
+            self.duplicated_documents_tokens['a_b_card'],
+        )
+        self.assertEqual(
+            new_admission.accounting.subsidiary_protection_decision,
+            self.duplicated_documents_tokens['subsidiary_protection_decision'],
+        )
+        self.assertEqual(
+            new_admission.accounting.a_card,
+            self.duplicated_documents_tokens['a_card'],
+        )
+
+        self.assertEqual(
+            new_admission.accounting.assimilation_3_situation_type,
+            pre_admission.accounting.assimilation_3_situation_type,
+        )
+        self.assertEqual(
+            new_admission.accounting.temporary_protection_decision,
+            self.duplicated_documents_tokens['temporary_protection_decision'],
+        )
+        self.assertEqual(
+            new_admission.accounting.professional_3_month_residence_permit,
+            self.duplicated_documents_tokens['professional_3_month_residence_permit'],
+        )
+        self.assertEqual(
+            new_admission.accounting.salary_slips,
+            self.duplicated_documents_tokens['salary_slips'],
+        )
+        self.assertEqual(
+            new_admission.accounting.replacement_3_month_residence_permit,
+            self.duplicated_documents_tokens['replacement_3_month_residence_permit'],
+        )
+        self.assertEqual(
+            new_admission.accounting.unemployment_benefit_pension_compensation_proof,
+            self.duplicated_documents_tokens['unemployment_benefit_pension_compensation_proof'],
+        )
+
+        self.assertEqual(
+            new_admission.accounting.cpas_certificate,
+            self.duplicated_documents_tokens['cpas_certificate'],
+        )
+
+        self.assertEqual(new_admission.accounting.relationship, pre_admission.accounting.relationship)
+        self.assertEqual(
+            new_admission.accounting.assimilation_5_situation_type,
+            pre_admission.accounting.assimilation_5_situation_type,
+        )
+        self.assertEqual(
+            new_admission.accounting.household_composition_or_birth_certificate,
+            self.duplicated_documents_tokens['household_composition_or_birth_certificate'],
+        )
+        self.assertEqual(
+            new_admission.accounting.tutorship_act,
+            self.duplicated_documents_tokens['tutorship_act'],
+        )
+        self.assertEqual(
+            new_admission.accounting.household_composition_or_marriage_certificate,
+            self.duplicated_documents_tokens['household_composition_or_marriage_certificate'],
+        )
+        self.assertEqual(
+            new_admission.accounting.legal_cohabitation_certificate,
+            self.duplicated_documents_tokens['legal_cohabitation_certificate'],
+        )
+        self.assertEqual(
+            new_admission.accounting.parent_identity_card,
+            self.duplicated_documents_tokens['parent_identity_card'],
+        )
+        self.assertEqual(
+            new_admission.accounting.parent_long_term_residence_permit,
+            self.duplicated_documents_tokens['parent_long_term_residence_permit'],
+        )
+        self.assertEqual(
+            new_admission.accounting.parent_refugees_stateless_annex_25_26_or_protection_decision,
+            self.duplicated_documents_tokens['parent_refugees_stateless_annex_25_26_or_protection_decision'],
+        )
+        self.assertEqual(
+            new_admission.accounting.parent_3_month_residence_permit,
+            self.duplicated_documents_tokens['parent_3_month_residence_permit'],
+        )
+        self.assertEqual(
+            new_admission.accounting.parent_salary_slips,
+            self.duplicated_documents_tokens['parent_salary_slips'],
+        )
+        self.assertEqual(
+            new_admission.accounting.parent_cpas_certificate,
+            self.duplicated_documents_tokens['parent_cpas_certificate'],
+        )
+
+        self.assertEqual(
+            new_admission.accounting.assimilation_6_situation_type,
+            pre_admission.accounting.assimilation_6_situation_type,
+        )
+        self.assertEqual(
+            new_admission.accounting.cfwb_scholarship_decision,
+            self.duplicated_documents_tokens['cfwb_scholarship_decision'],
+        )
+        self.assertEqual(
+            new_admission.accounting.scholarship_certificate,
+            self.duplicated_documents_tokens['scholarship_certificate'],
+        )
+
+        self.assertEqual(
+            new_admission.accounting.ue_long_term_stay_identity_document,
+            self.duplicated_documents_tokens['ue_long_term_stay_identity_document'],
+        )
+        self.assertEqual(
+            new_admission.accounting.belgium_residence_permit,
+            self.duplicated_documents_tokens['belgium_residence_permit'],
+        )
+
+        self.assertEqual(new_admission.accounting.solidarity_student, pre_admission.accounting.solidarity_student)
+
+        self.assertEqual(new_admission.accounting.account_number_type, pre_admission.accounting.account_number_type)
+        self.assertEqual(new_admission.accounting.iban_account_number, pre_admission.accounting.iban_account_number)
+        self.assertEqual(new_admission.accounting.valid_iban, pre_admission.accounting.valid_iban)
+        self.assertEqual(
+            new_admission.accounting.other_format_account_number, pre_admission.accounting.other_format_account_number
+        )
+        self.assertEqual(new_admission.accounting.bic_swift_code, pre_admission.accounting.bic_swift_code)
+        self.assertEqual(
+            new_admission.accounting.account_holder_first_name, pre_admission.accounting.account_holder_first_name
+        )
+        self.assertEqual(
+            new_admission.accounting.account_holder_last_name, pre_admission.accounting.account_holder_last_name
+        )
 
         # Check the duplication of the supervision group
         self.assertIsNotNone(new_admission.supervision_group)
