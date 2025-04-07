@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,32 +30,51 @@ import freezegun
 import mock
 from django.test import TestCase
 
-from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
+from admission.ddd.admission.formation_generale.commands import (
+    SoumettrePropositionCommand,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    PropositionFactory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.financabilite.dtos.catalogue import FormationDTO
 from ddd.logic.financabilite.dtos.parcours import (
-    ParcoursDTO,
-    ParcoursAcademiqueInterneDTO,
     ParcoursAcademiqueExterneDTO,
+    ParcoursAcademiqueInterneDTO,
+    ParcoursDTO,
 )
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
+from infrastructure.financabilite.domain.service.in_memory.financabilite import (
+    FinancabiliteInMemoryFetcher,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 
 
 class TestSoumettrePropositionGenerale(TestCase):
@@ -128,7 +147,7 @@ class TestSoumettrePropositionGenerale(TestCase):
         ):
             proposition = PropositionFactory(
                 est_bachelier_en_reorientation=True,
-                formation_id__sigle="ABCD2MC",
+                formation_id__sigle="ABCD1BA",
                 formation_id__annee=2024,
                 curriculum=['file1.pdf'],
                 matricule_candidat=self.candidat.matricule,
@@ -177,7 +196,7 @@ class TestSoumettrePropositionGenerale(TestCase):
         ):
             proposition = PropositionFactory(
                 est_bachelier_en_reorientation=True,
-                formation_id__sigle="ABCD2MC",
+                formation_id__sigle="ABCD1BA",
                 formation_id__annee=2024,
                 matricule_candidat=self.candidat.matricule,
                 curriculum=['file1.pdf'],

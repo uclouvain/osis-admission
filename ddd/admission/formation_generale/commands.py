@@ -49,8 +49,11 @@ class InitierPropositionCommand(interface.CommandRequest):
     annee_formation: int
     matricule_candidat: str
 
+    avec_bourse_double_diplome: Optional[bool] = None
     bourse_double_diplome: Optional[str] = ''
+    avec_bourse_internationale: Optional[bool] = None
     bourse_internationale: Optional[str] = ''
+    avec_bourse_erasmus_mundus: Optional[bool] = None
     bourse_erasmus_mundus: Optional[str] = ''
 
 
@@ -76,8 +79,11 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
     sigle_formation: str
     annee_formation: int
 
+    avec_bourse_double_diplome: Optional[bool] = None
     bourse_double_diplome: Optional[str] = ''
+    avec_bourse_internationale: Optional[bool] = None
     bourse_internationale: Optional[str] = ''
+    avec_bourse_erasmus_mundus: Optional[bool] = None
     bourse_erasmus_mundus: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
@@ -88,8 +94,11 @@ class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
 
+    avec_bourse_double_diplome: Optional[bool] = None
     bourse_double_diplome: Optional[str] = ''
+    avec_bourse_internationale: Optional[bool] = None
     bourse_internationale: Optional[str] = ''
+    avec_bourse_erasmus_mundus: Optional[bool] = None
     bourse_erasmus_mundus: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)

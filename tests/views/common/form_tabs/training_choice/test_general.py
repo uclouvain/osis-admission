@@ -55,11 +55,17 @@ from admission.tests.factories.roles import (
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.models.campus import Campus
+from base.models.enums.education_group_categories import Categories
+from base.models.enums.education_group_types import (
+    EducationGroupTypesEnum,
+    TrainingType,
+)
 from base.models.enums.organization_type import MAIN
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.education_group_year import (
     EducationGroupYearBachelorFactory,
+    EducationGroupYearFactory,
     Master120TrainingFactory,
 )
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -108,6 +114,9 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            has_double_degree_scholarship=True,
+            has_international_scholarship=True,
+            has_erasmus_mundus_scholarship=True,
             double_degree_scholarship=cls.scholarships[0],
             international_scholarship=cls.scholarships[3],
             erasmus_mundus_scholarship=cls.scholarships[4],
@@ -119,6 +128,30 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
             version_name='',
         )
 
+        cls.certificate_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=Master120TrainingFactory(
+                management_entity=first_doctoral_commission,
+                academic_year=academic_years[0],
+                education_group_type__category=Categories.TRAINING.name,
+                education_group_type__name=TrainingType.CERTIFICATE.name,
+            ),
+            candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__id_photo=[],
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            has_double_degree_scholarship=True,
+            has_international_scholarship=True,
+            has_erasmus_mundus_scholarship=True,
+            double_degree_scholarship=cls.scholarships[0],
+            international_scholarship=cls.scholarships[3],
+            erasmus_mundus_scholarship=cls.scholarships[4],
+        )
+
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.certificate_admission.training,
+            version_name='',
+        )
+
         cls.bachelor_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=EducationGroupYearBachelorFactory(
                 management_entity=first_doctoral_commission,
@@ -127,6 +160,9 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            has_double_degree_scholarship=None,
+            has_international_scholarship=None,
+            has_erasmus_mundus_scholarship=None,
             double_degree_scholarship=None,
             international_scholarship=None,
             erasmus_mundus_scholarship=None,
@@ -173,6 +209,14 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         cls.bachelor_detail_url = resolve_url(
             'admission:general-education:training-choice',
             uuid=cls.bachelor_admission.uuid,
+        )
+        cls.certificate_url = resolve_url(
+            'admission:general-education:update:training-choice',
+            uuid=cls.certificate_admission.uuid,
+        )
+        cls.certificate_detail_url = resolve_url(
+            'admission:general-education:training-choice',
+            uuid=cls.certificate_admission.uuid,
         )
 
     def test_general_training_choice_access(self):
@@ -380,6 +424,113 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('has_international_scholarship', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('has_erasmus_mundus_scholarship', []))
 
+    def test_form_submit_for_certificate_with_invalid_data(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # The user specifies that he has scholarships but not selects which ones
+        response = self.client.post(
+            self.certificate_url,
+            {
+                'has_double_degree_scholarship': 'True',
+                'double_degree_scholarship': '',
+                'has_international_scholarship': 'True',
+                'has_erasmus_mundus_scholarship': 'True',
+                'erasmus_mundus_scholarship': '',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('double_degree_scholarship', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('international_scholarship', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('erasmus_mundus_scholarship', []))
+
+        # The user doesn't specify if he has scholarships
+        response = self.client.post(
+            self.certificate_url,
+            {
+                'has_double_degree_scholarship': '',
+                'double_degree_scholarship': '',
+                'has_international_scholarship': '',
+                'international_scholarship': '',
+                'has_erasmus_mundus_scholarship': '',
+                'erasmus_mundus_scholarship': '',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('has_double_degree_scholarship', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('has_international_scholarship', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('has_erasmus_mundus_scholarship', []))
+
+    @freezegun.freeze_time('2021-12-01')
+    def test_form_submit_for_certificate_with_valid_data(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # The user specifies that he has scholarships and selects them
+        response = self.client.post(
+            self.certificate_url,
+            {
+                'has_double_degree_scholarship': 'True',
+                'double_degree_scholarship': self.scholarships[1].uuid,
+                'has_international_scholarship': 'True',
+                'international_scholarship': self.scholarships[2].uuid,
+                'has_erasmus_mundus_scholarship': 'True',
+                'erasmus_mundus_scholarship': self.scholarships[5].uuid,
+                'specific_question_answers_0': 'Answer',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, self.certificate_detail_url)
+
+        self.certificate_admission.refresh_from_db()
+
+        self.assertEqual(self.certificate_admission.double_degree_scholarship, self.scholarships[1])
+        self.assertEqual(self.certificate_admission.international_scholarship, self.scholarships[2])
+        self.assertEqual(self.certificate_admission.erasmus_mundus_scholarship, self.scholarships[5])
+        self.assertEqual(
+            self.certificate_admission.specific_question_answers,
+            {
+                str(self.specific_questions[0].form_item.uuid): 'Answer',
+            },
+        )
+        self.assertEqual(self.certificate_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.certificate_admission.last_update_author, self.sic_manager_user.person)
+        self.assertNotIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.certificate_admission.requested_documents,
+        )
+
+        # The user specifies that he has no scholarships but selects them
+        response = self.client.post(
+            self.certificate_url,
+            {
+                'has_double_degree_scholarship': 'False',
+                'double_degree_scholarship': self.scholarships[1].uuid,
+                'has_international_scholarship': 'False',
+                'international_scholarship': self.scholarships[2].uuid,
+                'has_erasmus_mundus_scholarship': 'False',
+                'erasmus_mundus_scholarship': self.scholarships[5].uuid,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, self.certificate_detail_url)
+
+        self.certificate_admission.refresh_from_db()
+
+        self.assertEqual(self.certificate_admission.double_degree_scholarship, None)
+        self.assertEqual(self.certificate_admission.international_scholarship, None)
+        self.assertEqual(self.certificate_admission.erasmus_mundus_scholarship, None)
+
     def test_training_choice_for_bachelor_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
         response = self.client.get(self.bachelor_url)
@@ -425,15 +576,15 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(form.fields['general_education_training'].disabled, True)
         self.assertEqual(form.fields['general_education_training'].required, False)
 
-        self.assertEqual(form.initial['has_double_degree_scholarship'], False)
+        self.assertEqual(form['has_double_degree_scholarship'].initial, None)
         self.assertEqual(form.initial['double_degree_scholarship'], None)
         self.assertEqual(form.fields['double_degree_scholarship'].choices, EMPTY_CHOICE_AS_LIST)
 
-        self.assertEqual(form.initial['has_international_scholarship'], False)
+        self.assertEqual(form['has_international_scholarship'].initial, None)
         self.assertEqual(form.initial['international_scholarship'], None)
         self.assertEqual(form.fields['international_scholarship'].choices, EMPTY_CHOICE_AS_LIST)
 
-        self.assertEqual(form.initial['has_erasmus_mundus_scholarship'], False)
+        self.assertEqual(form['has_erasmus_mundus_scholarship'].initial, None)
         self.assertEqual(form.initial['erasmus_mundus_scholarship'], None)
         self.assertEqual(form.fields['erasmus_mundus_scholarship'].choices, EMPTY_CHOICE_AS_LIST)
 

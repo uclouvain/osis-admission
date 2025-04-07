@@ -43,18 +43,18 @@ from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.models import GeneralEducationAdmission
-from admission.models.checklist import (
-    AdditionalApprovalCondition,
-    RefusalReasonCategory,
-    FreeAdditionalApprovalCondition,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
     PoursuiteDeCycle,
+)
+from admission.models import GeneralEducationAdmission
+from admission.models.checklist import (
+    AdditionalApprovalCondition,
+    RefusalReasonCategory,
+    FreeAdditionalApprovalCondition,
 )
 from admission.tests.factories.comment import CommentEntryFactory
 from admission.tests.factories.curriculum import (
@@ -212,7 +212,7 @@ class FacultyDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.checklist['current']['decision_facultaire']['extra'], {})
 
 
-@override_settings(ADMISSION_BACKEND_LINK_PREFIX='https//example.com')
+@override_settings(BACKEND_LINK_PREFIX='https//example.com')
 class FacultyDecisionSendToFacultyViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

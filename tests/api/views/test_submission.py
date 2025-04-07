@@ -824,7 +824,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the faculty")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
-                % {'to_service': _("the faculty")},
+                % {'to_service': _("to the faculty")},
                 'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }

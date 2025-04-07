@@ -819,6 +819,9 @@ msgctxt "admission decision"
 msgid "Approved"
 msgstr "Approuvée"
 
+msgid "Approved by CDD at"
+msgstr "Approuvée par la CDD à"
+
 msgid "Approximate date for completing the thesis:"
 msgstr "Date approximative d'achèvement de la thèse :"
 
@@ -946,8 +949,14 @@ msgstr "A présenté l'épreuve d'évaluation"
 msgid "Assessment test succeeded"
 msgstr "A réussi l'épreuve d'évaluation"
 
+msgid "Assim."
+msgstr "Assim."
+
 msgid "Assimilated,Non-assimilated"
 msgstr "Assimilé(e),Non assimilé(e)"
+
+msgid "Assimilation"
+msgstr "Assimilation"
 
 msgid "Assimilation 1"
 msgstr "Assimilation 1"
@@ -2396,7 +2405,7 @@ msgid "Dossier submission date"
 msgstr "Date de soumission du dossier"
 
 msgid "Double degree:"
-msgstr "Bourse double diplomation:"
+msgstr "Bourse double diplomation :"
 
 msgid "Download as PDF"
 msgstr "Télécharger en tant que PDF"
@@ -3329,6 +3338,15 @@ msgstr "Salutations en fonction du genre du candidat"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
+
+msgid "Has Erasmus Mundus scholarship"
+msgstr "A une bourse Erasmus Mundus"
+
+msgid "Has dual degree scholarship"
+msgstr "A une bourse double diplomation"
+
+msgid "Has international scholarship"
+msgstr "A une bourse internationale"
 
 msgid "Has the PhD project already started?"
 msgstr "Le projet doctoral a-t-il déjà commencé ?"
@@ -5590,8 +5608,11 @@ msgstr "Refus 95 générique - irrecevabilité"
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr "Refus article 95 Jury"
 
-msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
-msgstr "Refus 95 SIC - conditions publiées"
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER"
+msgstr "Refus 95 SIC - conditions publiées master"
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER_SPECIALISATION"
+msgstr "Refus 95 SIC - conditions publiées master de spécialisation"
 
 msgid "REFUS_ARTICLE_96_HUE_NON_PROGRESSION"
 msgstr "96 HUE – non progression (art. 3)"
@@ -6889,6 +6910,13 @@ msgid ""
 msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "envoyer le dossier en faculté : %(statuses)s."
+
+msgid ""
+"The information about the scholarships must be specified in the 'Course "
+"choice' tab."
+msgstr ""
+"Les informations concernant les bourses doivent être spécifiées dans "
+"l'onglet 'Choix de formation'."
 
 #, python-format
 msgid ""
@@ -8419,9 +8447,6 @@ msgstr "la <strong>non-poursuite</strong> du doctorat."
 
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
-
-msgid "the faculty"
-msgstr "la faculté"
 
 msgid "the person concerned"
 msgstr "la personne concernée"

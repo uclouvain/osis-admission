@@ -74,14 +74,6 @@ class ChecklistViewTestCase(TestCase):
             academic_year=cls.academic_years[0],
             education_group_type__name=TrainingType.MASTER_MA_120.name,
         )
-        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training=cls.training,
-            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-            specific_question_answers={str(AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL).uuid): 0},
-            submitted_at=factory.LazyAttribute(lambda obj: datetime.datetime(obj.determined_academic_year.year, 1, 1)),
-        )
-        cls.candidate = cls.general_admission.candidate
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
 
@@ -119,6 +111,15 @@ class ChecklistViewTestCase(TestCase):
         patched = patcher.start()
         patched.side_effect = lambda tokens: {token: self.file_metadata for token in tokens}
         self.addCleanup(patcher.stop)
+
+        self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            specific_question_answers={str(AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL).uuid): 0},
+            submitted_at=factory.LazyAttribute(lambda obj: datetime.datetime(obj.determined_academic_year.year, 1, 1)),
+        )
+        self.candidate = self.general_admission.candidate
 
     def test_get(self):
         self.client.force_login(user=self.sic_manager_user)
