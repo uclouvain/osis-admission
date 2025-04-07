@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,26 +34,28 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
 from admission.auth.scope import Scope
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutChecklist,
-    ChoixStatutPropositionContinue,
     ChoixMotifAttente,
     ChoixMotifRefus,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionContinue,
 )
 from admission.forms.admission.continuing_education.checklist import (
-    DecisionFacApprovalForm,
-    DecisionFacApprovalChoices,
-    DecisionHoldForm,
-    DecisionDenyForm,
-    DecisionCancelForm,
-    DecisionValidationForm,
     CloseForm,
+    DecisionCancelForm,
+    DecisionDenyForm,
+    DecisionFacApprovalChoices,
+    DecisionFacApprovalForm,
+    DecisionHoldForm,
+    DecisionValidationForm,
 )
 from admission.infrastructure.admission.formation_continue.domain.service.historique import (
     TAGS_APPROBATION_PROPOSITION,
@@ -64,7 +66,10 @@ from admission.tests.factories.continuing_education import (
     ContinuingEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import CentralManagerRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    CentralManagerRoleFactory,
+    ProgramManagerRoleFactory,
+)
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -444,8 +449,6 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        self.assertIsInstance(response.context['decision_validation_form'], DecisionValidationForm)
-
     def test_post_validation_iufc(self):
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
@@ -462,16 +465,11 @@ class ChecklistViewTestCase(TestCase):
         )
         response = self.client.post(
             url,
-            data={
-                'decision-validation-subject': 'subject',
-                'decision-validation-body': 'body',
-            },
+            data={},
             **self.default_headers,
         )
 
         self.assertEqual(response.status_code, 200)
-
-        self.assertTrue(response.context['decision_validation_form'].is_valid())
 
         self.continuing_admission.refresh_from_db()
 
@@ -482,19 +480,17 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
-        # Check that a notification has been created
+        # Check that no notification have been created
         notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
-        self.assertEqual(len(notifications), 1)
-        email_object = message_from_string(notifications[0].payload)
-        self.assertEqual(email_object['To'], self.continuing_admission.candidate.private_email)
+        self.assertEqual(len(notifications), 0)
 
-        # Check that two historic entries have been created
+        # Check that one historic entry have been created
         historic_entries = HistoryEntry.objects.filter(object_uuid=self.continuing_admission.uuid)
-        self.assertEqual(len(historic_entries), 2)
+        self.assertEqual(len(historic_entries), 1)
 
-        self.assertCountEqual(
-            [entry.tags for entry in historic_entries],
-            [TAGS_APPROBATION_PROPOSITION, ['proposition', 'decision', 'message']],
+        self.assertEqual(
+            historic_entries[0].tags,
+            TAGS_APPROBATION_PROPOSITION,
         )
 
     def test_get_close_iufc(self):
