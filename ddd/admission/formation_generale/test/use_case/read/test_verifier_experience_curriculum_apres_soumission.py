@@ -160,8 +160,10 @@ class TestVerifierExperienceCVApresSoumissionService(TestCase):
 
         with mock.patch.multiple(
             self.experience_academiques_complete,
-            a_obtenu_diplome=True,
-            diplome=[],
+            a_obtenu_diplome=False,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=None,
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
@@ -170,9 +172,10 @@ class TestVerifierExperienceCVApresSoumissionService(TestCase):
 
         with mock.patch.multiple(
             self.experience_academiques_complete,
-            a_obtenu_diplome=True,
-            diplome=['uuid-diplome'],
-            grade_obtenu=Grade.DISTINCTION.name,
+            a_obtenu_diplome=False,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=False,
         ):
             proposition_id = self.message_bus.invoke(self.cmd)
             self.assertEqual(proposition_id, self.proposition.entity_id)

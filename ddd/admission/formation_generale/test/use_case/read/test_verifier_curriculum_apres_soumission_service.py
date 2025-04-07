@@ -56,6 +56,7 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.community import CommunityEnum
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
     AcademicYearIdentity,
@@ -80,6 +81,7 @@ from osis_profile.tests.factories.curriculum import (
     AnneeExperienceParcoursInterneDTOFactory,
     ExperienceParcoursInterneDTOFactory,
 )
+from reference.models.enums.cycle import Cycle
 
 
 class TestVerifierCurriculumApresSoumissionService(TestCase):
@@ -400,7 +402,15 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
     def test_should_pas_retourner_erreur_periode_en_fonction_experiences_academiques_incompletes_candidat(self):
         self.experiences_academiques.append(self.experience_academiques_complete)
 
-        with mock.patch.multiple(self.experience_academiques_complete, releve_notes=[]):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            a_obtenu_diplome=False,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=True,
+            credits_inscrits_complements=None,
+            credits_acquis_complements=10,
+        ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
 

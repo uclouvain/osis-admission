@@ -85,6 +85,7 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldExperiencesAcademiquesEtreCompleteesApresSoumission,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -368,16 +369,13 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
-    experiences_academiques_incompletes: Dict[str, str]
+    verification_experiences_completees: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [
-            ShouldExperiencesAcademiquesEtreCompletees(
-                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
-            ),
+        invariants = [
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_soumission,
                 experiences_academiques=self.experiences_academiques,
@@ -390,18 +388,27 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
             ),
         ]
 
+        if self.verification_experiences_completees:
+            invariants.append(
+                ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
+                    experiences_academiques=self.experiences_academiques,
+                )
+            )
+
+        return invariants
+
 
 @attr.dataclass(frozen=True, slots=True)
 class ExperienceAcademiquePostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    experiences_academiques_incompletes: Dict[str, str]
+    experience_academique: ExperienceAcademiqueDTO
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldExperiencesAcademiquesEtreCompletees(
-                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+            ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
+                experiences_academiques=[self.experience_academique]
             ),
         ]
 

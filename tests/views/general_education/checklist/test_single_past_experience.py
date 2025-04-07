@@ -236,6 +236,8 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             obtained_diploma=False,
             country=self.experiences[0].country,
             evaluation_type='',
+            with_fwb_master_fields=True,
+            with_complement=None,
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
@@ -272,7 +274,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(len(experiences_checklists), 1)
 
-        experience.evaluation_type = EvaluationSystem.NO_CREDIT_SYSTEM.name
+        experience.with_complement = False
         experience.save()
 
         response = self.client.post(

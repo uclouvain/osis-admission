@@ -60,11 +60,15 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.organization import OrganizationFactory
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from osis_profile.models.enums.curriculum import EvaluationSystem, Result
+from reference.models.enums.cycle import Cycle
+from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -208,9 +212,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         # Add an incomplete experience
         experience = EducationalExperienceFactory(
             person=self.candidate,
-            obtained_diploma=False,
             country=self.experiences[0].country,
-            evaluation_type='',
+            with_fwb_bachelor_fields=True,
+            block_1_acquired_credit_number=None,
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
@@ -247,7 +251,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(len(experiences_checklists), 1)
 
-        experience.evaluation_type = EvaluationSystem.NO_CREDIT_SYSTEM.name
+        experience.block_1_acquired_credit_number = 10
         experience.save()
 
         response = self.client.post(

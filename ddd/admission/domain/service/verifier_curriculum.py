@@ -42,7 +42,6 @@ class VerifierCurriculum(interface.DomainService):
     def recuperer_experiences_academiques_incompletes(
         cls,
         experiences: List[ExperienceAcademiqueDTO],
-        verification_apres_soumission=False,
     ) -> Dict[str, str]:
 
         experiences_incompletes = {}
@@ -71,22 +70,6 @@ class VerifierCurriculum(interface.DomainService):
                     not all(getattr(experience, champ_requis) for champ_requis in cls.CHAMPS_REQUIS_SI_DIPLOME_OBTENU)
                     or traduction_necessaire
                     and not experience.traduction_diplome
-                )
-                or verification_apres_soumission
-                and (
-                    # Bachelier FWB
-                    experience.est_formation_bachelier_fwb
-                    and experience.credits_acquis_bloc_1 is None
-                    # Master FWB
-                    or experience.est_formation_master_fwb
-                    and (
-                        experience.avec_complements is None
-                        or experience.avec_complements
-                        and (
-                            experience.credits_acquis_complements is None
-                            or experience.credits_inscrits_complements is None
-                        )
-                    )
                 )
             ):
                 experiences_incompletes[experience.uuid] = str(experience)

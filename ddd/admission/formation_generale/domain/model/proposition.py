@@ -742,7 +742,7 @@ class Proposition(interface.RootEntity):
         profil_candidat_translator: IProfilCandidatTranslator,
     ):
         if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
-            # Une expérience académique ne peut passer à l'état suffisant que si elle est complète
+            # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
             ProfilCandidatService.verifier_experience_curriculum_formation_generale_apres_soumission(
                 proposition=self,
                 uuid_experience=uuid_experience,

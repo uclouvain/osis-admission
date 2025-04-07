@@ -62,4 +62,3 @@ from ._should_informations_complementaires_etre_completes import ShouldVisaEtreC
 from ._should_informations_onglet_choix_formation_etre_completees import (
     ShouldRenseignerBoursesEtudesSelonFormation,
 )
-from ._should_informations_complementaires_etre_completes import ShouldVisaEtreComplete
