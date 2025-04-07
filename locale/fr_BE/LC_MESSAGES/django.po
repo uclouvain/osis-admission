@@ -949,8 +949,14 @@ msgstr "A présenté l'épreuve d'évaluation"
 msgid "Assessment test succeeded"
 msgstr "A réussi l'épreuve d'évaluation"
 
+msgid "Assim."
+msgstr "Assim."
+
 msgid "Assimilated,Non-assimilated"
 msgstr "Assimilé(e),Non assimilé(e)"
+
+msgid "Assimilation"
+msgstr "Assimilation"
 
 msgid "Assimilation 1"
 msgstr "Assimilation 1"
