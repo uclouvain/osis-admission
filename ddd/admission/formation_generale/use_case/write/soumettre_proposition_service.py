@@ -118,10 +118,6 @@ def soumettre_proposition(
         sigle_formation=formation.entity_id.sigle,
         annee=formation.entity_id.annee,
     )
-    etat_financabilite_2023 = financabilite_fetcher.recuperer_etat_financabilite_2023(
-        matricule_fgs=proposition.matricule_candidat,
-        sigle_formation=formation.entity_id.sigle,
-    )
 
     # WHEN
     VerifierProposition.verifier(
@@ -162,7 +158,6 @@ def soumettre_proposition(
         parcours=parcours,
         formation=formation_dto,
         est_en_reorientation=proposition.est_reorientation_inscription_externe,
-        etat_financabilite_2023=etat_financabilite_2023,
     ).determiner()
 
     proposition.nettoyer_reponses_questions_specifiques(
