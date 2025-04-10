@@ -27,14 +27,13 @@ from io import BytesIO
 from typing import Dict, List, Optional
 
 import img2pdf
+from PIL.Image import DecompressionBombError
 from django.utils.translation import override
 from osis_document.api.utils import get_raw_content_remotely
-from PIL.Image import DecompressionBombError
 
 from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
-    ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
@@ -237,7 +236,6 @@ def get_secondary_studies_attachments(
                             label=DocumentsEtudesSecondaires['DAES_HORS_UE'],
                             uuids=context.etudes_secondaires.diplome_etranger.daes_hors_ue,
                             candidate_language=context.identification.langue_contact,
-                            readonly=readonly_document,
                         )
                     )
 
