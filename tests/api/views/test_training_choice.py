@@ -75,7 +75,10 @@ from admission.models import (
 from admission.models.base import REFERENCE_SEQ_NAME
 from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
+from admission.tests.factories.calendar import (
+    AdmissionAcademicCalendarFactory,
+    AdmissionMedDentEnrollmentAcademicCalendarFactory,
+)
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
@@ -96,6 +99,7 @@ from admission.tests.factories.supervision import (
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
+from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -218,6 +222,8 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         self.documents_remote_duplicate_patched.return_value = self.duplicated_documents_tokens_by_uuid
         self.addCleanup(self.documents_remote_duplicate_patcher.stop)
 
+        DoctorateAdmission.objects.all().delete()
+
     @freezegun.freeze_time('2023-01-01')
     def test_admission_doctorate_creation_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -310,10 +316,6 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             phd_already_done_no_defense_reason='No defense reason',
             curriculum=self.documents_tokens['curriculum'],
         )
-
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT last_value FROM %(sequence)s' % {'sequence': REFERENCE_SEQ_NAME})
-            seq_value = cursor.fetchone()[0]
 
         response = self.client.post(
             self.url,
@@ -475,6 +477,9 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'matricule_candidat': cls.candidate.global_id,
+            'avec_bourse_erasmus_mundus': True,
+            'avec_bourse_internationale': True,
+            'avec_bourse_double_diplome': True,
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'bourse_internationale': str(cls.international_scholarship.uuid),
             'bourse_double_diplome': str(cls.double_degree_scholarship.uuid),
@@ -497,6 +502,9 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
+        self.assertTrue(admission.has_international_scholarship)
+        self.assertTrue(admission.has_erasmus_mundus_scholarship)
+        self.assertTrue(admission.has_double_degree_scholarship)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
 
         history_entry: HistoryEntry = HistoryEntry.objects.filter(
@@ -630,6 +638,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'uuid_proposition': cls.admission.uuid,
+            'avec_bourse_erasmus_mundus': True,
+            'avec_bourse_internationale': True,
+            'avec_bourse_double_diplome': True,
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'bourse_internationale': str(cls.international_scholarship.uuid),
             'bourse_double_diplome': str(cls.double_degree_scholarship.uuid),
@@ -699,6 +710,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
+        self.assertTrue(admission.has_international_scholarship)
+        self.assertTrue(admission.has_erasmus_mundus_scholarship)
+        self.assertTrue(admission.has_double_degree_scholarship)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
@@ -1025,3 +1039,89 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
         self.client.force_authenticate(user=None)
         response = self.client.put(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class SpecificEnrolmentPeriodsApiViewTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.candidate = CandidateFactory().person.user
+        cls.academic_year_2023 = AcademicYearFactory(year=2023)
+        cls.academic_year_2024 = AcademicYearFactory(year=2024)
+
+        cls.url = resolve_url('admission_api_v1:specific_enrolment_periods')
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_none_if_there_is_no_period(self):
+        self.client.force_authenticate(user=self.candidate)
+
+        response = self.client.get(self.url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json().get('medicine_dentistry_bachelor'), None)
+
+    def test_get_current_period_if_the_today_date_is_inside_it(self):
+        self.client.force_authenticate(user=self.candidate)
+
+        academic_calendar = AdmissionMedDentEnrollmentAcademicCalendarFactory(data_year=self.academic_year_2023)
+
+        with freezegun.freeze_time('2023-09-06'):
+            response = self.client.get(self.url, format='json')
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            self.assertEqual(
+                response.json().get('medicine_dentistry_bachelor'),
+                {
+                    'date_debut': academic_calendar.start_date.isoformat(),
+                    'date_fin': academic_calendar.end_date.isoformat(),
+                },
+            )
+
+        with freezegun.freeze_time('2024-02-15'):
+            response = self.client.get(self.url, format='json')
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            self.assertEqual(
+                response.json().get('medicine_dentistry_bachelor'),
+                {
+                    'date_debut': academic_calendar.start_date.isoformat(),
+                    'date_fin': academic_calendar.end_date.isoformat(),
+                },
+            )
+
+    def test_get_next_period_if_the_today_date_is_not_inside_an_existing_one(self):
+        self.client.force_authenticate(user=self.candidate)
+
+        academic_calendar_2023 = AdmissionMedDentEnrollmentAcademicCalendarFactory(data_year=self.academic_year_2023)
+        academic_calendar_2024 = AdmissionMedDentEnrollmentAcademicCalendarFactory(data_year=self.academic_year_2024)
+
+        with freezegun.freeze_time('2023-09-05'):
+            response = self.client.get(self.url, format='json')
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            self.assertEqual(
+                response.json().get('medicine_dentistry_bachelor'),
+                {
+                    'date_debut': academic_calendar_2023.start_date.isoformat(),
+                    'date_fin': academic_calendar_2023.end_date.isoformat(),
+                },
+            )
+
+        with freezegun.freeze_time('2024-02-16'):
+            response = self.client.get(self.url, format='json')
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            self.assertEqual(
+                response.json().get('medicine_dentistry_bachelor'),
+                {
+                    'date_debut': academic_calendar_2024.start_date.isoformat(),
+                    'date_fin': academic_calendar_2024.end_date.isoformat(),
+                },
+            )

@@ -86,9 +86,6 @@ msgstr ""
 msgid ", on"
 msgstr ""
 
-msgid "102 change of course"
-msgstr ""
-
 msgid "12"
 msgstr ""
 
@@ -326,6 +323,12 @@ msgid "Accounting"
 msgstr ""
 
 msgid "Achieved additional training"
+msgstr ""
+
+msgid "Acquired bloc 1 credits total number"
+msgstr ""
+
+msgid "Acquired complements credits total number"
 msgstr ""
 
 msgid "Acquired credit number"
@@ -730,6 +733,9 @@ msgctxt "admission decision"
 msgid "Approved"
 msgstr ""
 
+msgid "Approved by CDD at"
+msgstr ""
+
 msgid "Approximate date for completing the thesis:"
 msgstr ""
 
@@ -844,7 +850,13 @@ msgstr ""
 msgid "Assessment test succeeded"
 msgstr ""
 
+msgid "Assim."
+msgstr ""
+
 msgid "Assimilated,Non-assimilated"
+msgstr ""
+
+msgid "Assimilation"
 msgstr ""
 
 msgid "Assimilation 1"
@@ -1009,9 +1021,6 @@ msgid "Billing address street number"
 msgstr ""
 
 msgid "Billing address type"
-msgstr ""
-
-msgid "Block 1"
 msgstr ""
 
 msgid "Box"
@@ -1297,6 +1306,9 @@ msgid ""
 "uclouvain.be/en/study/iufc</a>."
 msgstr ""
 
+msgid "Cessation for 102 change of course"
+msgstr ""
+
 msgid "Change of course"
 msgstr ""
 
@@ -1440,10 +1452,10 @@ msgstr ""
 msgid "Competent diplomatic post"
 msgstr ""
 
-msgid "Complement"
+msgid "Complementary training proposition"
 msgstr ""
 
-msgid "Complementary training proposition"
+msgid "Complements credits total number"
 msgstr ""
 
 msgctxt "equivalence_status"
@@ -2607,12 +2619,6 @@ msgstr ""
 msgid "FRIA"
 msgstr ""
 
-msgid "FWB - Credits earned"
-msgstr ""
-
-msgid "FWB - Registered credits"
-msgstr ""
-
 msgid "FWB Cotutelle"
 msgstr ""
 
@@ -3034,6 +3040,15 @@ msgid "Greetings depending on the gender of the candidate"
 msgstr ""
 
 msgid "Grounds for denied"
+msgstr ""
+
+msgid "Has Erasmus Mundus scholarship"
+msgstr ""
+
+msgid "Has dual degree scholarship"
+msgstr ""
+
+msgid "Has international scholarship"
 msgstr ""
 
 msgid "Has the PhD project already started?"
@@ -4638,6 +4653,12 @@ msgstr ""
 msgid "Pending application fee"
 msgstr ""
 
+#, python-format
+msgid ""
+"Pending the publication of the results of the medical and dental entrance "
+"examination, your application can only be submitted from %(start_date)s."
+msgstr ""
+
 msgid "Period"
 msgstr ""
 
@@ -5014,7 +5035,10 @@ msgstr ""
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr ""
 
-msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER_SPECIALISATION"
 msgstr ""
 
 msgid "REFUS_ARTICLE_96_HUE_NON_PROGRESSION"
@@ -6202,6 +6226,11 @@ msgid ""
 "to submit the dossier to the faculty: %(statuses)s."
 msgstr ""
 
+msgid ""
+"The information about the scholarships must be specified in the 'Course "
+"choice' tab."
+msgstr ""
+
 #, python-format
 msgid ""
 "The inscription type admission was authorised the %(date)s by %(author)s."
@@ -6532,8 +6561,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/fr/logement\">www."
-"uclouvain.be/fr/logement</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
+"uclouvain.be/en/logement</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -6910,6 +6939,9 @@ msgid ""
 msgstr ""
 
 msgid "Weight"
+msgstr ""
+
+msgid "Were there any prerequisite courses?"
 msgstr ""
 
 msgid "What diploma have you obtained (or will obtain)?"
@@ -7370,6 +7402,9 @@ msgid ""
 "closed."
 msgstr ""
 
+msgid "Your application cannot be submitted now."
+msgstr ""
+
 msgid "Your application is currently being reviewed by the course exam board"
 msgstr ""
 
@@ -7506,12 +7541,6 @@ msgstr ""
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr ""
 
-msgid "the UCLouvain Registration Service"
-msgstr ""
-
-msgid "the faculty"
-msgstr ""
-
 msgid "the person concerned"
 msgstr ""
 
@@ -7520,6 +7549,9 @@ msgid "to"
 msgstr ""
 
 msgid "to the UCLouvain Registration Service"
+msgstr ""
+
+msgid "to the faculty"
 msgstr ""
 
 msgid "ucl"

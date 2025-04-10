@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,12 +29,9 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.test import override_settings
-from osis_async.models import AsyncTask
-from osis_document.enums import PostProcessingType
 from rest_framework.test import APITestCase
 
 from admission.constants import PNG_MIME_TYPE
-from admission.models import AdmissionTask
 from admission.ddd.admission.enums import (
     CleConfigurationItemFormulaire,
     Onglets,
@@ -42,8 +39,8 @@ from admission.ddd.admission.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.exceptions import InvalidMimeTypeException, DocumentPostProcessingException, MergeDocumentsException
-from admission.tasks.merge_admission_documents import general_education_admission_document_merging_from_task
+from admission.exceptions import MergeDocumentsException
+from admission.tasks.merge_admission_documents import base_education_admission_document_merging
 from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
     EducationalExperienceFactory,
@@ -57,6 +54,7 @@ from admission.tests.factories.person import CompletePersonFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
+from osis_document.enums import PostProcessingType
 from osis_profile.models.enums.curriculum import TranscriptType
 
 
@@ -222,12 +220,6 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             pdf_recap=[self.uuid_documents_by_token['pdf_recap_file_token']],
         )
 
-        self.admission_task = AdmissionTask.objects.create(
-            admission=self.admission,
-            task=AsyncTask.objects.create(),
-            type=AdmissionTask.TaskType.GENERAL_MERGE,
-        )
-
         self.non_free_document = AdmissionFormItemInstantiationFactory(
             form_item=DocumentAdmissionFormItemFactory(
                 configuration={
@@ -248,9 +240,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         # the recap which is not processed as a system document
         self.metadata_by_token['pdf_recap_file_token']['mimetype'] = PNG_MIME_TYPE
 
-        general_education_admission_document_merging_from_task(
-            task_uuid=self.admission_task.task.uuid,
-        )
+        base_education_admission_document_merging(self.admission)
 
         self.launch_post_processing_patcher.assert_not_called()
 
@@ -258,9 +248,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         self.metadata_by_token['token-passport']['mimetype'] = PNG_MIME_TYPE
         self.metadata_by_token['token-passport']['name'] = 'file.1.png'
 
-        general_education_admission_document_merging_from_task(
-            task_uuid=self.admission_task.task.uuid,
-        )
+        base_education_admission_document_merging(self.admission)
 
         self.launch_post_processing_patcher.assert_called_once_with(
             uuid_list=[str(self.uuid_documents_by_token['token-passport'])],
@@ -286,9 +274,8 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             self.launch_post_processing_patcher.side_effect = lambda **kwargs: {
                 'error': 'An error occurred',
             }
-            general_education_admission_document_merging_from_task(
-                task_uuid=self.admission_task.task.uuid,
-            )
+
+            base_education_admission_document_merging(self.admission)
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[str(self.uuid_documents_by_token['token-passport'])],
@@ -318,9 +305,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         self.admission.candidate.passport = uuids
         self.admission.candidate.save(update_fields=['passport'])
 
-        general_education_admission_document_merging_from_task(
-            task_uuid=self.admission_task.task.uuid,
-        )
+        base_education_admission_document_merging(self.admission)
 
         self.launch_post_processing_patcher.assert_called_once_with(
             uuid_list=[str(doc_uuid) for doc_uuid in uuids],
@@ -347,9 +332,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
         self.metadata_by_token['token-passport']['mimetype'] = PNG_MIME_TYPE
 
-        general_education_admission_document_merging_from_task(
-            task_uuid=self.admission_task.task.uuid,
-        )
+        base_education_admission_document_merging(self.admission)
 
         self.launch_post_processing_patcher.assert_called_once_with(
             uuid_list=[str(doc_uuid) for doc_uuid in uuids],
@@ -376,9 +359,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         self.admission.save()
         self.metadata_by_token['non_free_specific_question_file_token']['mimetype'] = PNG_MIME_TYPE
 
-        general_education_admission_document_merging_from_task(
-            task_uuid=self.admission_task.task.uuid,
-        )
+        base_education_admission_document_merging(self.admission)
 
         self.launch_post_processing_patcher.assert_called_once_with(
             uuid_list=[str(doc_uuid) for doc_uuid in uuids],
@@ -418,9 +399,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         self.metadata_by_token['non_free_specific_question_file_token']['mimetype'] = PNG_MIME_TYPE
 
         with self.assertRaises(MergeDocumentsException) as context_manager:
-            general_education_admission_document_merging_from_task(
-                task_uuid=self.admission_task.task.uuid,
-            )
+            base_education_admission_document_merging(self.admission)
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[str(doc_uuid) for doc_uuid in uuids],
@@ -469,7 +448,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         )
 
         # No valuated experience -> no merge
-        general_education_admission_document_merging_from_task(task_uuid=self.admission_task.task.uuid)
+        base_education_admission_document_merging(self.admission)
 
         educational_experience_year.refresh_from_db()
         self.assertNotEqual(educational_experience_year.transcript, [self.PDF_MERGE_UUID])
@@ -488,7 +467,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             professionalexperience=non_educational_experience,
         )
 
-        general_education_admission_document_merging_from_task(task_uuid=self.admission_task.task.uuid)
+        base_education_admission_document_merging(self.admission)
 
         educational_experience_year.refresh_from_db()
         self.assertNotEqual(educational_experience_year.transcript, [self.PDF_MERGE_UUID])
@@ -506,7 +485,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         non_educational_valuation.baseadmission = self.admission
         non_educational_valuation.save()
 
-        general_education_admission_document_merging_from_task(task_uuid=self.admission_task.task.uuid)
+        base_education_admission_document_merging(self.admission)
 
         educational_experience_year.refresh_from_db()
         self.assertEqual(educational_experience_year.transcript, [self.PDF_MERGE_UUID])

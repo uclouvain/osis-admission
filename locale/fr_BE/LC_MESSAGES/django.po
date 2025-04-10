@@ -97,9 +97,6 @@ msgstr "Date (prévue) de délivrance du diplôme (document signé)"
 msgid ", on"
 msgstr ", le"
 
-msgid "102 change of course"
-msgstr "Réorientation 102"
-
 msgid "12"
 msgstr "12"
 
@@ -381,6 +378,12 @@ msgstr "Comptabilité"
 
 msgid "Achieved additional training"
 msgstr "Formation complémentaire réalisée"
+
+msgid "Acquired bloc 1 credits total number"
+msgstr "Nombre total de crédits de bloc 1 acquis"
+
+msgid "Acquired complements credits total number"
+msgstr "Nombre total de crédits de compléments acquis"
 
 msgid "Acquired credit number"
 msgstr "Crédits acquis"
@@ -816,6 +819,9 @@ msgctxt "admission decision"
 msgid "Approved"
 msgstr "Approuvée"
 
+msgid "Approved by CDD at"
+msgstr "Approuvée par la CDD à"
+
 msgid "Approximate date for completing the thesis:"
 msgstr "Date approximative d'achèvement de la thèse :"
 
@@ -943,8 +949,14 @@ msgstr "A présenté l'épreuve d'évaluation"
 msgid "Assessment test succeeded"
 msgstr "A réussi l'épreuve d'évaluation"
 
+msgid "Assim."
+msgstr "Assim."
+
 msgid "Assimilated,Non-assimilated"
 msgstr "Assimilé(e),Non assimilé(e)"
+
+msgid "Assimilation"
+msgstr "Assimilation"
 
 msgid "Assimilation 1"
 msgstr "Assimilation 1"
@@ -1111,9 +1123,6 @@ msgstr "Le numéro de rue de l'adresse de facturation"
 
 msgid "Billing address type"
 msgstr "Le type de l'adresse de facturation"
-
-msgid "Block 1"
-msgstr "Bloc 1"
 
 msgid "Box"
 msgstr "Boîte"
@@ -1423,6 +1432,9 @@ msgstr ""
 "iufc/participants-de-nationalite-hue.html\">https://uclouvain.be/fr/etudier/"
 "iufc/participants-de-nationalite-hue.html</a>."
 
+msgid "Cessation for 102 change of course"
+msgstr "Cessation pour réorientation 102"
+
 msgid "Change of course"
 msgstr "Réorientation"
 
@@ -1570,11 +1582,11 @@ msgstr "Communication avec votre école secondaire"
 msgid "Competent diplomatic post"
 msgstr "Poste diplomatique compétent"
 
-msgid "Complement"
-msgstr "Complément"
-
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
+
+msgid "Complements credits total number"
+msgstr "Nombre total de crédits de compléments"
 
 msgctxt "equivalence_status"
 msgid "Completed"
@@ -2393,7 +2405,7 @@ msgid "Dossier submission date"
 msgstr "Date de soumission du dossier"
 
 msgid "Double degree:"
-msgstr "Bourse double diplomation:"
+msgstr "Bourse double diplomation :"
 
 msgid "Download as PDF"
 msgstr "Télécharger en tant que PDF"
@@ -2867,12 +2879,6 @@ msgstr "FRESH"
 msgid "FRIA"
 msgstr "FRIA"
 
-msgid "FWB - Credits earned"
-msgstr "FWB - Crédits acquis"
-
-msgid "FWB - Registered credits"
-msgstr "FWB - Crédits inscrits"
-
 msgid "FWB Cotutelle"
 msgstr "Cotutelle FWB"
 
@@ -3332,6 +3338,15 @@ msgstr "Salutations en fonction du genre du candidat"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
+
+msgid "Has Erasmus Mundus scholarship"
+msgstr "A une bourse Erasmus Mundus"
+
+msgid "Has dual degree scholarship"
+msgstr "A une bourse double diplomation"
+
+msgid "Has international scholarship"
+msgstr "A une bourse internationale"
 
 msgid "Has the PhD project already started?"
 msgstr "Le projet doctoral a-t-il déjà commencé ?"
@@ -5159,6 +5174,15 @@ msgstr "Méthode de paiement"
 msgid "Pending application fee"
 msgstr "Frais de dossier en attente"
 
+#, python-format
+msgid ""
+"Pending the publication of the results of the medical and dental entrance "
+"examination, your application can only be submitted from %(start_date)s."
+msgstr ""
+"Dans l'attente de la publication des résultats du concours d'entrée en "
+"médecine et dentisterie, votre demande ne pourra être soumise qu'à partir du "
+"%(start_date)s."
+
 msgid "Period"
 msgstr "Période"
 
@@ -5584,8 +5608,11 @@ msgstr "Refus 95 générique - irrecevabilité"
 msgid "REFUS_ARTICLE_95_JURY"
 msgstr "Refus article 95 Jury"
 
-msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
-msgstr "Refus 95 SIC - conditions publiées"
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER"
+msgstr "Refus 95 SIC - conditions publiées master"
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIEES_MASTER_SPECIALISATION"
+msgstr "Refus 95 SIC - conditions publiées master de spécialisation"
 
 msgid "REFUS_ARTICLE_96_HUE_NON_PROGRESSION"
 msgstr "96 HUE – non progression (art. 3)"
@@ -6884,6 +6911,13 @@ msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "envoyer le dossier en faculté : %(statuses)s."
 
+msgid ""
+"The information about the scholarships must be specified in the 'Course "
+"choice' tab."
+msgstr ""
+"Les informations concernant les bourses doivent être spécifiées dans "
+"l'onglet 'Choix de formation'."
+
 #, python-format
 msgid ""
 "The inscription type admission was authorised the %(date)s by %(author)s."
@@ -7282,8 +7316,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/fr/logement\">www."
-"uclouvain.be/fr/logement</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
+"uclouvain.be/en/logement</a>."
 msgstr ""
 "Cette autorisation d'inscription vous permet d'introduire une demande de "
 "logement auprès du service LOGE : <a href=\"https://www.uclouvain.be/fr/"
@@ -7339,7 +7373,8 @@ msgstr "Cet état n’est pas accessible pour les demandes de type Inscription."
 msgid ""
 "This student has a pathway prior to 2015 which can only be consulted in EPC."
 msgstr ""
-"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable uniquement dans EPC."
+"Cet·te étudiant·e a un parcours antérieur à 2015 qui est consultable "
+"uniquement dans EPC."
 
 msgid "Tick boxes"
 msgstr "Cases à cocher"
@@ -7706,6 +7741,9 @@ msgstr ""
 
 msgid "Weight"
 msgstr "Poids"
+
+msgid "Were there any prerequisite courses?"
+msgstr "Y a-t-il eu des compléments de formation ?"
 
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr "Quel diplôme avez-vous obtenu (ou obtiendrez-vous) ?"
@@ -8263,6 +8301,10 @@ msgstr ""
 "Il n'est pas possible de soumettre votre dossier d'admission car la "
 "formation %(acronym)s est fermée."
 
+msgid "Your application cannot be submitted now."
+msgstr ""
+"Il n'est pas possible de soumettre votre dossier d'admission maintenant."
+
 msgid "Your application is currently being reviewed by the course exam board"
 msgstr "Votre dossier est en cours de vérification par le jury de la formation"
 
@@ -8406,12 +8448,6 @@ msgstr "la <strong>non-poursuite</strong> du doctorat."
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
 
-msgid "the UCLouvain Registration Service"
-msgstr "au Service des Inscriptions de l'UCLouvain"
-
-msgid "the faculty"
-msgstr "la faculté"
-
 msgid "the person concerned"
 msgstr "la personne concernée"
 
@@ -8421,6 +8457,9 @@ msgstr "à"
 
 msgid "to the UCLouvain Registration Service"
 msgstr "au Service des Inscriptions de l'UCLouvain"
+
+msgid "to the faculty"
+msgstr "à la faculté"
 
 msgid "ucl"
 msgstr "UCLouvain"

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,17 +26,26 @@
 
 import datetime
 
+import freezegun
 from django.test import TestCase
 
-import freezegun
-
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from base.models.enums.community import CommunityEnum
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO
-from osis_profile.models.enums.curriculum import TranscriptType, Result, Grade, EvaluationSystem
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
+)
+from osis_profile.models.enums.curriculum import (
+    EvaluationSystem,
+    Grade,
+    Result,
+    TranscriptType,
+)
 
 
 class ProfilCandidatTestCase(TestCase):
@@ -69,6 +78,10 @@ class ProfilCandidatTestCase(TestCase):
             'nom_formation_equivalente_communaute_fr': '',
             'cycle_formation': '',
             'est_autre_formation': None,
+            'credits_acquis_bloc_1': None,
+            'avec_complements': None,
+            'credits_inscrits_complements': None,
+            'credits_acquis_complements': None,
         }
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_sans_etablissement(self):
@@ -97,12 +110,8 @@ class ProfilCandidatTestCase(TestCase):
                                 credits_inscrits=10,
                                 traduction_releve_notes=[],
                                 releve_notes=['uuid-releve-notes-1'],
-                                avec_bloc_1=None,
-                                avec_complement=None,
                                 allegement='',
                                 est_reorientation_102=None,
-                                credits_inscrits_communaute_fr=None,
-                                credits_acquis_communaute_fr=None,
                             )
                         ],
                     )
@@ -129,12 +138,8 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-0'],
-                            avec_bloc_1=None,
-                            avec_complement=None,
                             allegement='',
                             est_reorientation_102=None,
-                            credits_inscrits_communaute_fr=None,
-                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -153,12 +158,8 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-1'],
-                            avec_bloc_1=None,
-                            avec_complement=None,
                             allegement='',
                             est_reorientation_102=None,
-                            credits_inscrits_communaute_fr=None,
-                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -177,12 +178,8 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-2'],
-                            avec_bloc_1=None,
-                            avec_complement=None,
                             allegement='',
                             est_reorientation_102=None,
-                            credits_inscrits_communaute_fr=None,
-                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -201,12 +198,8 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-3'],
-                            avec_bloc_1=None,
-                            avec_complement=None,
                             allegement='',
                             est_reorientation_102=None,
-                            credits_inscrits_communaute_fr=None,
-                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -225,12 +218,8 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-4'],
-                            avec_bloc_1=None,
-                            avec_complement=None,
                             allegement='',
                             est_reorientation_102=None,
-                            credits_inscrits_communaute_fr=None,
-                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -249,12 +238,8 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-5'],
-                            avec_bloc_1=None,
-                            avec_complement=None,
                             allegement='',
                             est_reorientation_102=None,
-                            credits_inscrits_communaute_fr=None,
-                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),

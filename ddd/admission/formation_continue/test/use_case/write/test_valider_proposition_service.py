@@ -25,6 +25,7 @@
 # ##############################################################################
 from unittest.mock import patch
 
+import mock
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
@@ -58,6 +59,11 @@ class ValiderPropositionTestCase(SimpleTestCase):
             objet_message="objet",
             corps_message="corps",
         )
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_should_valider(self):
         proposition_id = self.message_bus.invoke(self.cmd)

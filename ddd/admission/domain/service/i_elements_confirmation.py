@@ -311,9 +311,9 @@ class IElementsConfirmation(interface.DomainService):
             _("by the faculty") if isinstance(proposition, PropositionContinue) else _("by the Enrolment Office")
         )
         to_service = (
-            _("the faculty")
+            _("to the faculty")
             if isinstance(proposition, PropositionContinue)
-            else _("the UCLouvain Registration Service")
+            else _("to the UCLouvain Registration Service")
         )
         elements += [
             # Justificatifs

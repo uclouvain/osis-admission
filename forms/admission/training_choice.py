@@ -149,11 +149,16 @@ class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
             proposition.formation.type
         ]
 
+        self.training_with_scholarship = proposition.formation.est_formation_avec_bourse
+
         kwargs['initial'] = {
             'campus': proposition.formation.campus.uuid if proposition.formation.campus else '',
             'training_type': self.training_type,
+            'has_double_degree_scholarship': proposition.avec_bourse_double_diplome,
             'double_degree_scholarship': proposition.bourse_double_diplome and proposition.bourse_double_diplome.uuid,
+            'has_international_scholarship': proposition.avec_bourse_internationale,
             'international_scholarship': proposition.bourse_internationale and proposition.bourse_internationale.uuid,
+            'has_erasmus_mundus_scholarship': proposition.avec_bourse_erasmus_mundus,
             'erasmus_mundus_scholarship': proposition.bourse_erasmus_mundus and proposition.bourse_erasmus_mundus.uuid,
             'general_education_training': proposition.formation.sigle,
             'specific_question_answers': proposition.reponses_questions_specifiques,
@@ -169,7 +174,7 @@ class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
 
         scholarships = (
             Scholarship.objects.filter(disabled=False).order_by('long_name', 'short_name')
-            if self.training_type == TypeFormation.MASTER.name
+            if self.training_with_scholarship
             else []
         )
 
@@ -180,7 +185,6 @@ class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
         ]
 
         for scholarship_field, scholarship_type in self.scholarship_fields:
-            self.initial[f'has_{scholarship_field}'] = bool(self.initial.get(scholarship_field))
             self.fields[scholarship_field].choices = get_scholarship_choices(
                 scholarships=scholarships,
                 scholarship_type=scholarship_type,
@@ -189,11 +193,11 @@ class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        self.clean_master_scholarships(cleaned_data)
+        self.clean_scholarships(cleaned_data)
         return cleaned_data
 
-    def clean_master_scholarships(self, cleaned_data):
-        if self.training_type == TypeFormation.MASTER.name:
+    def clean_scholarships(self, cleaned_data):
+        if self.training_with_scholarship:
             for scholarship_field, _ in self.scholarship_fields:
                 if cleaned_data.get(f'has_{scholarship_field}'):
                     if not cleaned_data.get(scholarship_field):
@@ -207,7 +211,7 @@ class GeneralTrainingChoiceForm(BaseTrainingChoiceForm):
         else:
             for scholarship_field, _ in self.scholarship_fields:
                 cleaned_data[scholarship_field] = ''
-                cleaned_data[f'has_{scholarship_field}'] = ''
+                cleaned_data[f'has_{scholarship_field}'] = None
 
     class Media:
         js = ('js/dependsOn.min.js',)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,8 +35,18 @@ from admission.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
-from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result, Grade, ActivityType
+from osis_profile.models import (
+    EducationalExperience,
+    EducationalExperienceYear,
+    ProfessionalExperience,
+)
+from osis_profile.models.enums.curriculum import (
+    ActivityType,
+    EvaluationSystem,
+    Grade,
+    Result,
+    TranscriptType,
+)
 from reference.tests.factories.language import LanguageFactory
 
 
@@ -47,8 +57,6 @@ class EducationalExperienceYearFactory(factory.django.DjangoModelFactory):
     transcript = factory.LazyFunction(lambda: [uuid.uuid4()])
     transcript_translation = factory.LazyFunction(lambda: [uuid.uuid4()])
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
-    fwb_registered_credit_number = 20
-    fwb_acquired_credit_number = 15
 
     class Meta:
         model = EducationalExperienceYear

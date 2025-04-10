@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    TypeDeRefus,
 )
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.general_education import (
@@ -91,6 +92,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         self.general_admission.refusal_reasons.all().delete()
         self.general_admission.other_refusal_reasons = []
+        self.general_admission.refusal_type = ''
 
         self.general_admission.save()
 
@@ -101,12 +103,14 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         form = response.context['sic_decision_refusal_form']
 
         self.assertEqual(form.initial.get('reasons'), [])
+        self.assertEqual(form.initial.get('refusal_type'), '')
 
     def test_refusal_decision_form_initialization_one_reason(self):
         self.client.force_login(user=self.sic_manager_user)
         refusal_reason = RefusalReasonFactory()
 
         self.general_admission.refusal_reasons.add(refusal_reason)
+        self.general_admission.refusal_type = TypeDeRefus.REFUS_AGREGATION.name
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -116,6 +120,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         form = response.context['sic_decision_refusal_form']
 
         self.assertEqual(form.initial.get('reasons'), [refusal_reason.uuid])
+        self.assertEqual(form.initial.get('refusal_type'), TypeDeRefus.REFUS_AGREGATION.name)
 
     def test_refusal_decision_form_initialization_other_reason(self):
         self.client.force_login(user=self.sic_manager_user)

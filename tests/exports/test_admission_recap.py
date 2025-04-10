@@ -1113,12 +1113,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     traduction_releve_notes=['uuid-traduction-releve-notes'],
                     credits_inscrits=220,
                     credits_acquis=220,
-                    avec_bloc_1=None,
-                    avec_complement=None,
                     allegement='',
                     est_reorientation_102=None,
-                    credits_inscrits_communaute_fr=None,
-                    credits_acquis_communaute_fr=None,
                 )
             ],
             a_obtenu_diplome=True,
@@ -1138,6 +1134,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
             identifiant_externe='123456789',
+            credits_acquis_bloc_1=None,
+            avec_complements=None,
+            credits_inscrits_complements=None,
+            credits_acquis_complements=None,
         )
         cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -1161,12 +1161,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     traduction_releve_notes=['uuid-traduction-releve-notes'],
                     credits_inscrits=220,
                     credits_acquis=220,
-                    avec_bloc_1=None,
-                    avec_complement=None,
                     allegement='',
                     est_reorientation_102=None,
-                    credits_inscrits_communaute_fr=None,
-                    credits_acquis_communaute_fr=None,
                 )
             ],
             a_obtenu_diplome=True,
@@ -1186,6 +1182,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
             identifiant_externe='123456789',
+            credits_acquis_bloc_1=None,
+            avec_complements=None,
+            credits_inscrits_complements=None,
+            credits_acquis_complements=None,
         )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[
@@ -1486,6 +1486,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             bourse_double_diplome=None,
             bourse_erasmus_mundus=None,
             bourse_internationale=None,
+            avec_bourse_double_diplome=None,
+            avec_bourse_erasmus_mundus=None,
+            avec_bourse_internationale=None,
             est_bachelier_belge=None,
             est_modification_inscription_externe=None,
             est_non_resident_au_sens_decret=None,

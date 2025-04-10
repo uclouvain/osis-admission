@@ -55,6 +55,9 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
     MaximumPropositionsAutoriseesInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculumInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
@@ -98,6 +101,7 @@ _historique_global = HistoriqueGlobalInMemory()
 _notification = NotificationInMemory()
 _lister_demandes_service = ListerDemandesInMemory()
 _emplacement_document_repository = emplacement_document_in_memory_repository
+_raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -158,6 +162,7 @@ COMMAND_HANDLERS = {
         maximum_propositions_service=_maximum_propositions_autorisees,
         questions_specifiques_translator=_question_specific_translator,
         historique=_historique_global,
+        raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -245,6 +250,7 @@ COMMAND_HANDLERS = {
         notification=_notification,
     ),
     ValiderPropositionCommand: lambda msg_bus, cmd: valider_proposition(
+        msg_bus,
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,

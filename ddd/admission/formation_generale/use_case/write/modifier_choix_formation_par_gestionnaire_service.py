@@ -61,8 +61,11 @@ def modifier_choix_formation_par_gestionnaire(
     proposition.modifier_choix_formation_par_gestionnaire(
         auteur_modification=cmd.gestionnaire,
         bourses_ids=bourses_ids,
+        avec_bourse_double_diplome=cmd.avec_bourse_double_diplome,
         bourse_double_diplome=cmd.bourse_double_diplome,
+        avec_bourse_internationale=cmd.avec_bourse_internationale,
         bourse_internationale=cmd.bourse_internationale,
+        avec_bourse_erasmus_mundus=cmd.avec_bourse_erasmus_mundus,
         bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
     )

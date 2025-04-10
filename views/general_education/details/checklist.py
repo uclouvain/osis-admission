@@ -1043,6 +1043,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             form_kwargs['initial'] = {
                 'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
                 + self.admission.other_refusal_reasons,
+                'refusal_type': self.proposition.type_de_refus,
             }
 
         return SicDecisionRefusalForm(**form_kwargs)

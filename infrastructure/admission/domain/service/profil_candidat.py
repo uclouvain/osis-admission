@@ -385,12 +385,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             traduction_releve_notes=educational_experience_year.transcript_translation,
             credits_inscrits=educational_experience_year.registered_credit_number,
             credits_acquis=educational_experience_year.acquired_credit_number,
-            avec_bloc_1=educational_experience_year.with_block_1,
-            avec_complement=educational_experience_year.with_complement,
             allegement=educational_experience_year.reduction,
             est_reorientation_102=educational_experience_year.is_102_change_of_course,
-            credits_inscrits_communaute_fr=educational_experience_year.fwb_registered_credit_number,
-            credits_acquis_communaute_fr=educational_experience_year.fwb_acquired_credit_number,
         )
 
     @classmethod
@@ -540,6 +536,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     grade_obtenu=experience_year.educational_experience.obtained_grade,
                     systeme_evaluation=experience_year.educational_experience.evaluation_type,
                     type_enseignement=experience_year.educational_experience.study_system,
+                    credits_acquis_bloc_1=experience_year.educational_experience.block_1_acquired_credit_number,
+                    avec_complements=experience_year.educational_experience.with_complement,
+                    credits_inscrits_complements=(
+                        experience_year.educational_experience.complement_registered_credit_number
+                    ),
+                    credits_acquis_complements=experience_year.educational_experience.complement_acquired_credit_number,
                     valorisee_par_admissions=getattr(experience_year, 'valuated_from_admissions', None),
                     injectee=experience_year.injecte_par_admission or experience_year.injecte_par_cv,
                     identifiant_externe=experience_year.educational_experience.external_id,

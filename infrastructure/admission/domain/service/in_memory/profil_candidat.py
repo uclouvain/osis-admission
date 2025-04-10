@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,19 +30,35 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    CandidatNonTrouveException,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
     ConnaissanceLangueDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+)
+from admission.ddd.admission.dtos import (
+    AdressePersonnelleDTO,
+    CoordonneesDTO,
+    IdentificationDTO,
+)
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -55,18 +71,18 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
+    CurriculumAExperiencesDTO,
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-    CurriculumAExperiencesDTO,
 )
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
+    EvaluationSystem,
+    Grade,
     Result,
     TranscriptType,
-    Grade,
-    EvaluationSystem,
-    ActivityType,
-    ActivitySector,
 )
 from reference.models.enums.cycle import Cycle
 
@@ -149,10 +165,6 @@ class AnneeExperienceAcademique:
     traduction_releve_notes: List[str]
     credits_inscrits: Optional[float]
     credits_acquis: Optional[float]
-    avec_bloc_1: Optional[bool] = None
-    avec_complement: Optional[bool] = None
-    credits_inscrits_communaute_fr: Optional[float] = None
-    credits_acquis_communaute_fr: Optional[float] = None
     allegement: str = ''
     est_reorientation_102: Optional[bool] = None
 
@@ -190,6 +202,10 @@ class ExperienceAcademique:
     cycle_formation: str
     nom_formation_equivalente_communaute_fr: str
     identifiant_externe: Optional[str] = None
+    credits_acquis_bloc_1 = None
+    avec_complements = None
+    credits_inscrits_complements = None
+    credits_acquis_complements = None
 
 
 @dataclass
@@ -984,28 +1000,32 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         numero_contact_urgence = coordonnees.numero_contact_urgence
 
         return CoordonneesDTO(
-            domicile_legal=AdressePersonnelleDTO(
-                rue=domicile_legal.rue,
-                code_postal=domicile_legal.code_postal,
-                ville=domicile_legal.ville,
-                pays=domicile_legal.pays,
-                numero_rue=domicile_legal.numero_rue,
-                boite_postale=domicile_legal.boite_postale,
-                nom_pays=domicile_legal.nom_pays,
-            )
-            if domicile_legal
-            else None,
-            adresse_correspondance=AdressePersonnelleDTO(
-                rue=adresse_correspondance.rue,
-                code_postal=adresse_correspondance.code_postal,
-                ville=adresse_correspondance.ville,
-                pays=adresse_correspondance.pays,
-                numero_rue=adresse_correspondance.numero_rue,
-                boite_postale=adresse_correspondance.boite_postale,
-                nom_pays=adresse_correspondance.nom_pays,
-            )
-            if adresse_correspondance
-            else None,
+            domicile_legal=(
+                AdressePersonnelleDTO(
+                    rue=domicile_legal.rue,
+                    code_postal=domicile_legal.code_postal,
+                    ville=domicile_legal.ville,
+                    pays=domicile_legal.pays,
+                    numero_rue=domicile_legal.numero_rue,
+                    boite_postale=domicile_legal.boite_postale,
+                    nom_pays=domicile_legal.nom_pays,
+                )
+                if domicile_legal
+                else None
+            ),
+            adresse_correspondance=(
+                AdressePersonnelleDTO(
+                    rue=adresse_correspondance.rue,
+                    code_postal=adresse_correspondance.code_postal,
+                    ville=adresse_correspondance.ville,
+                    pays=adresse_correspondance.pays,
+                    numero_rue=adresse_correspondance.numero_rue,
+                    boite_postale=adresse_correspondance.boite_postale,
+                    nom_pays=adresse_correspondance.nom_pays,
+                )
+                if adresse_correspondance
+                else None
+            ),
             adresse_email_privee=adresse_email_privee,
             numero_mobile=numero_mobile,
             numero_contact_urgence=numero_contact_urgence,
@@ -1051,10 +1071,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                                     traduction_releve_notes=annee.traduction_releve_notes,
                                     credits_acquis=annee.credits_inscrits,
                                     credits_inscrits=annee.credits_acquis,
-                                    avec_bloc_1=annee.avec_bloc_1,
-                                    avec_complement=annee.avec_complement,
-                                    credits_acquis_communaute_fr=annee.credits_inscrits_communaute_fr,
-                                    credits_inscrits_communaute_fr=annee.credits_acquis_communaute_fr,
                                     allegement=annee.allegement,
                                     est_reorientation_102=annee.est_reorientation_102,
                                 )
@@ -1087,6 +1103,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             type_enseignement=experience.type_enseignement,
                             valorisee_par_admissions=[],
                             est_autre_formation=None,
+                            credits_acquis_bloc_1=experience.credits_acquis_bloc_1,
+                            avec_complements=experience.avec_complements,
+                            credits_inscrits_complements=experience.credits_inscrits_complements,
+                            credits_acquis_complements=experience.credits_acquis_complements,
                         ),
                     )
 
@@ -1142,9 +1162,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
             return ConditionsComptabiliteDTO(
-                pays_nationalite_ue=candidate.pays_nationalite in cls.pays_union_europeenne
-                if candidate.pays_nationalite
-                else None,
+                pays_nationalite_ue=(
+                    candidate.pays_nationalite in cls.pays_union_europeenne if candidate.pays_nationalite else None
+                ),
                 a_frequente_recemment_etablissement_communaute_fr=any(
                     experience.communaute_fr
                     for experience in cls.experiences_academiques

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,20 +24,23 @@
 #
 # ##############################################################################
 from datetime import date, timedelta
-from typing import List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
-from admission.ddd.admission.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
 from admission.ddd.admission.dtos import IdentificationDTO
+from admission.ddd.admission.dtos.periode import PeriodeDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from base.tests.factories.academic_year import get_current_year
 from osis_profile import PLUS_5_ISO_CODES
 
 
@@ -104,3 +107,7 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         return identification.pays_nationalite in (
             ProfilCandidatInMemoryTranslator.pays_union_europeenne | PLUS_5_ISO_CODES
         ) or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)
+
+    @classmethod
+    def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
+        return None

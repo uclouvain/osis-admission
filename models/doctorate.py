@@ -622,6 +622,11 @@ class DoctorateAdmission(BaseAdmission):
         null=True,
         verbose_name=_('Last signature request before submission at'),
     )
+    approved_by_cdd_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=_('Approved by CDD at'),
+    )
 
     def update_financability_computed_rule(self, author: 'Person'):
         from admission.ddd.admission.doctorat.preparation.commands import (

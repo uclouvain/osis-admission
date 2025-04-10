@@ -26,9 +26,7 @@
 
 import waffle
 
-from admission.ddd.admission.commands import (
-    RechercherParcoursAnterieurQuery,
-)
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
@@ -756,6 +754,12 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+        )
+    ),
+    RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery: (
+        lambda msg_bus, cmd: recuperer_periode_inscription_specifique_bachelier_medecine_dentisterie(
+            cmd,
+            calendrier_inscription=CalendrierInscription(),
         )
     ),
 }
