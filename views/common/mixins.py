@@ -258,9 +258,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         # Leave this test first so we are sure the other information are available.
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
-        annee_ouverte = AdmissionDigitTicketSubmissionCalendar().get_target_years_opened()
-        if annee_ouverte and self.admission.determined_academic_year.year != annee_ouverte[0]:
-            return False, f"Seules les inscriptions en {annee_ouverte} sont autorisées"
+        annees_ouvertes = AdmissionDigitTicketSubmissionCalendar().get_target_years_opened()
+        if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:
+            return False, f"Seules les inscriptions en {annees_ouvertes} sont autorisées"
         contexte = self.admission.get_admission_context()
         if contexte == CONTEXT_GENERAL:
             financabilite_checklist = self.admission.checklist.get('current', {}).get('financabilite', {})
