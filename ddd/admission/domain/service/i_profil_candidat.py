@@ -42,7 +42,6 @@ from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
@@ -54,6 +53,7 @@ from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     ValorisationEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     CurriculumAExperiencesDTO,
     ExperienceAcademiqueDTO,

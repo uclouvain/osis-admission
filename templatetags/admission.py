@@ -139,6 +139,7 @@ from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     MessageCurriculumDTO,
@@ -1260,6 +1261,7 @@ def checklist_experience_action_links_context(
         ExperienceNonAcademiqueDTO,
         EtudesSecondairesAdmissionDTO,
         ExperienceParcoursInterneDTO,
+        ExamenDTO,
     ],
     current_year,
     prefix,
@@ -1281,7 +1283,7 @@ def checklist_experience_action_links_context(
         return result_context
 
     elif (
-        experience.__class__ == EtudesSecondairesAdmissionDTO
+        experience.__class__ in [EtudesSecondairesAdmissionDTO, ExamenDTO]
         or experience.valorisee_par_admissions
         and proposition_uuid in experience.valorisee_par_admissions
         and experience.derniere_annee == current_year

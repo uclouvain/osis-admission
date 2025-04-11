@@ -75,7 +75,6 @@ from admission.ddd.admission.dtos import (
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
@@ -107,6 +106,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     CurriculumAExperiencesDTO,
@@ -139,10 +139,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def _get_identification_dto(
-        cls,
-        candidate: Person,
-        residential_country: str,
-        has_default_language: bool,
+            cls,
+            candidate: Person,
+            residential_country: str,
+            has_default_language: bool,
     ) -> IdentificationDTO:
         """Returns the DTO of the identification data of the given candidate."""
         country_of_citizenship = (
@@ -204,9 +204,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def _get_address_dto(
-        cls,
-        address: Optional[PersonAddress],
-        has_default_language: bool,
+            cls,
+            address: Optional[PersonAddress],
+            has_default_language: bool,
     ) -> Optional[AdressePersonnelleDTO]:
         """Returns the DTO of the given address."""
         return (
@@ -259,9 +259,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def _get_language_knowledge_dto(
-        cls,
-        candidate: Optional[Person] = None,
-        languages: Optional[List[LanguageKnowledge]] = None,
+            cls,
+            candidate: Optional[Person] = None,
+            languages: Optional[List[LanguageKnowledge]] = None,
     ) -> List[ConnaissanceLangueDTO]:
         """Returns the DTO of the language knowledge data of the given candidate."""
         return [
@@ -279,9 +279,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def _get_secondary_studies_dto(
-        cls,
-        candidate: Person,
-        has_default_language: bool,
+            cls,
+            candidate: Person,
+            has_default_language: bool,
     ):
         belgian_high_school_diploma = getattr(candidate, 'belgianhighschooldiploma', None)
         foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
@@ -374,8 +374,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def _get_non_academic_experiences_dtos(
-        cls,
-        experiences_non_academiques: QuerySet[ProfessionalExperience],
+            cls,
+            experiences_non_academiques: QuerySet[ProfessionalExperience],
     ) -> List[ExperienceNonAcademiqueDTO]:
         return [
             ExperienceNonAcademiqueDTO(
@@ -411,12 +411,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def _get_academic_experiences_dtos(
-        cls,
-        matricule: str,
-        has_default_language: bool,
-        uuid_proposition: str,
-        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
-        uuid_experience: str = '',
+            cls,
+            matricule: str,
+            has_default_language: bool,
+            uuid_proposition: str,
+            experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+            uuid_experience: str = '',
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
 
@@ -699,23 +699,34 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             education_group_year__academic_year__year=formation_annee,
         ).first()
         if education_group_year_exam is None:
-            return ExamenDTO(requis=False, attestation=[], annee=None)
+            return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
         exam = Exam.objects.filter(
             person__global_id=matricule,
             type=ExamTypes.FORMATION.name,
             education_group_year_exam=education_group_year_exam,
         ).first()
+        titre = (
+            education_group_year_exam.title_fr
+            if get_language() == settings.LANGUAGE_CODE_FR
+            else education_group_year_exam.title_en
+        )
         if exam is None:
-            return ExamenDTO(requis=True, attestation=[], annee=None)
-        return ExamenDTO(requis=True, attestation=exam.certificate, annee=exam.year.year if exam.year else None)
+            return ExamenDTO(uuid='', requis=True, titre=titre, attestation=[], annee=None)
+        return ExamenDTO(
+            uuid=str(exam.uuid),
+            requis=True,
+            titre=titre,
+            attestation=exam.certificate,
+            annee=exam.year.year if exam.year else None,
+        )
 
     @classmethod
     def get_experiences_non_academiques(
-        cls,
-        matricule: str,
-        uuid_proposition: str,
-        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
-        uuid_experience: str = '',
+            cls,
+            matricule: str,
+            uuid_proposition: str,
+            experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+            uuid_experience: str = '',
     ) -> List[ExperienceNonAcademiqueDTO]:
         non_academic_experiences: QuerySet[ProfessionalExperience] = (
             ProfessionalExperience.objects.filter(
@@ -759,11 +770,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_curriculum(
-        cls,
-        matricule: str,
-        annee_courante: int,
-        uuid_proposition: str,
-        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+            cls,
+            matricule: str,
+            annee_courante: int,
+            uuid_proposition: str,
+            experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> Optional['CurriculumAdmissionDTO']:
 
         try:
@@ -811,10 +822,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_experience_academique(
-        cls,
-        matricule: str,
-        uuid_proposition: str,
-        uuid_experience: str,
+            cls,
+            matricule: str,
+            uuid_proposition: str,
+            uuid_experience: str,
     ) -> 'ExperienceAcademiqueDTO':
         experiences = cls._get_academic_experiences_dtos(
             matricule,
@@ -830,10 +841,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_experience_non_academique(
-        cls,
-        matricule: str,
-        uuid_proposition: str,
-        uuid_experience: str,
+            cls,
+            matricule: str,
+            uuid_proposition: str,
+            uuid_experience: str,
     ) -> 'ExperienceNonAcademiqueDTO':
         experiences = cls.get_experiences_non_academiques(
             matricule,
@@ -902,9 +913,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_conditions_comptabilite(
-        cls,
-        matricule: str,
-        annee_courante: int,
+            cls,
+            matricule: str,
+            annee_courante: int,
     ) -> 'ConditionsComptabiliteDTO':
         minimal_years = cls.get_annees_minimum_curriculum(
             global_id=matricule,
@@ -1005,8 +1016,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ProfessionalExperience.objects.filter(person__global_id=matricule)
             .annotate(
                 nombre_mois=(ExtractYear('end_date') - ExtractYear('start_date')) * 12
-                + (ExtractMonth('end_date') - ExtractMonth('start_date'))
-                + 1
+                            + (ExtractMonth('end_date') - ExtractMonth('start_date'))
+                            + 1
                 # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
             )
             .aggregate(total=models.Sum('nombre_mois'))
@@ -1015,12 +1026,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def recuperer_toutes_informations_candidat(
-        cls,
-        matricule: str,
-        formation: Union['DoctoratFormationDTO', 'FormationDTO'],
-        annee_courante: int,
-        uuid_proposition: str,
-        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+            cls,
+            matricule: str,
+            formation: Union['DoctoratFormationDTO', 'FormationDTO'],
+            annee_courante: int,
+            uuid_proposition: str,
+            experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
 

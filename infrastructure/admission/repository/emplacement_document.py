@@ -31,7 +31,7 @@ from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import F, Case, When, Q, UUIDField
+from django.db.models import F, Case, When, Q, UUIDField, Subquery, OuterRef
 from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -86,8 +86,9 @@ from admission.services.injection_epc.injection_dossier import EPCInjection as D
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from osis_profile.models import (
-    OSIS_PROFILE_MODELS,
+    OSIS_PROFILE_MODELS, Exam,
 )
+from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
@@ -255,18 +256,24 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             common_filter,
             admission__training__education_group_type__name=TrainingType.BACHELOR.name,
         ).annotate(
+            exam_secondary=Subquery(
+                Exam.objects.filter(
+                    type=ExamTypes.PREMIER_CYCLE.name,
+                    person=OuterRef('admission__candidate'),
+                ).values('uuid')[:1]
+            ),
             experience_uuid=Case(
                 When(
                     admission__candidate__belgianhighschooldiploma__isnull=False,
                     then=F('admission__candidate__belgianhighschooldiploma__uuid'),
                 ),
                 When(
-                    admission__candidate__highschooldiplomaalternative__isnull=False,
-                    then=F('admission__candidate__highschooldiplomaalternative__uuid'),
-                ),
-                When(
                     admission__candidate__foreignhighschooldiploma__isnull=False,
                     then=F('admission__candidate__foreignhighschooldiploma__uuid'),
+                ),
+                When(
+                    exam_secondary__isnull=False,
+                    then=F('exam_secondary'),
                 ),
                 output_field=UUIDField(),
             )
