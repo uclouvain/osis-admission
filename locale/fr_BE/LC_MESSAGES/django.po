@@ -352,6 +352,9 @@ msgstr "Vue formations académiques"
 msgid "Acceptation condition"
 msgstr "Condition d'acceptation"
 
+msgid "Access condition"
+msgstr "Condition d'accès"
+
 msgid "Access condition:"
 msgstr "Condition d'accès :"
 
@@ -1163,6 +1166,9 @@ msgstr "Membres du comité d'accompagnement"
 
 msgid "CANDIDAT_NOTIFIE"
 msgstr "Candidat·e notifié·e"
+
+msgid "CC"
+msgstr "Réor."
 
 msgid "CDD comment about the collaborative program"
 msgstr "Commentaire de la CDD concernant le programme conjoint"
@@ -2827,14 +2833,14 @@ msgstr "Pré-admission existante"
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
+msgid "Experience"
+msgstr "Expérience"
+
 msgid "Experience knowledge valorisation"
 msgstr "Valorisation des acquis d'expérience"
 
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
-
-msgid "Experiences"
-msgstr "Expériences"
 
 msgid "Expert advice"
 msgstr "Avis expert"
@@ -3432,6 +3438,9 @@ msgstr "Texte d'aide"
 msgid "Hide the checklist menu"
 msgstr "Cacher le menu de la checklist"
 
+msgid "Hide the documents"
+msgstr "Cacher les documents"
+
 msgid "Hide the states of the checklist"
 msgstr "Cacher les états de la checklist"
 
@@ -3999,6 +4008,10 @@ msgid ""
 msgstr ""
 "Initialisation des questions spécifiques prédéfinies pour une année "
 "académique"
+
+msgctxt "admission"
+msgid "Inst."
+msgstr "Etab."
 
 msgctxt "admission"
 msgid "Institute"
@@ -5756,6 +5769,9 @@ msgctxt "X"
 msgid "Rector"
 msgstr "Recteur·trice"
 
+msgid "Red."
+msgstr "Allèg."
+
 msgid "Reduced rights"
 msgstr "Droits réduits"
 
@@ -6229,6 +6245,9 @@ msgstr "Voir le détail"
 
 msgid "Show the checklist menu"
 msgstr "Afficher le menu de la checklist"
+
+msgid "Show the documents"
+msgstr "Afficher les documents"
 
 msgid "Show the states of the checklist"
 msgstr "Afficher les états de la checklist"
@@ -7975,9 +7994,6 @@ msgstr "Année de naissance"
 
 msgid "Year of the training"
 msgstr "Année de la formation"
-
-msgid "Years"
-msgstr "Années"
 
 msgid "Yes"
 msgstr "Oui"

@@ -47,10 +47,14 @@ from admission.ddd.admission.doctorat.preparation.test.factory.person import Per
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import \
-    PersonneConnueUclInMemoryTranslator
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
 class TestIdentifierMembreCAService(TestCase):
@@ -62,6 +66,7 @@ class TestIdentifierMembreCAService(TestCase):
         )
 
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
+        self.proposition_repository = PropositionInMemoryRepository()
         self.proposition_id = PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition)
 
         self.message_bus = message_bus_in_memory_instance
@@ -79,6 +84,7 @@ class TestIdentifierMembreCAService(TestCase):
             langue="",
         )
         self.addCleanup(self.groupe_de_supervision_repository.reset)
+        self.addCleanup(self.proposition_repository.reset)
 
     def test_should_ajouter_membre_CA_dans_groupe_supervision(self):
         membre_CA_id = self.message_bus.invoke(self.cmd)

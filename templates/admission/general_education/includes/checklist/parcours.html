@@ -63,23 +63,23 @@
   {# Vue formations académiques #}
   {% concat prefix '-parcours-formations' as formations_prefix_id %}
   <div role="tabpanel" class="parcours table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ formations_prefix_id }}">
-    <table class="table">
+    <table class="table table-condensed parcours-table">
       <thead>
         <tr>
           {% if show_actions %}
             <th>{% trans "Actions" %}</th>
           {% endif %}
-          <th>{% trans "Years" %}</th>
+          <th>{% trans "Year" %}</th>
           <th>{# Diplomant #}</th>
-          <th>{% trans "Experiences" %}</th>
+          <th>{% trans "Experience" %}</th>
           <th>{% trans "Access title" %}</th>
           <th>{% trans "Registered credits" %}</th>
           <th>{% trans "Credits earned" %}</th>
-          <th>{% trans "Reduction" %}</th>
-          <th>{% trans "Course change" %}</th>
-          <th>{% trans "CA" %}</th>
+          <th title="{% trans "Reduction" %}">{% trans "Red." %}</th>
+          <th title="{% trans "Course change" %}">{% trans "CC" %}</th>
+          <th title="{% trans "Access condition" %}">{% trans "CA" %}</th>
           <th title="{% translate 'Assimilation' %}">{% trans "Assim." %}</th>
-          <th>{% trans "Institute" context "admission" %}</th>
+          <th title="{% trans "Institute" context "admission" %}">{% trans "Inst." context "admission" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -103,23 +103,23 @@
   {# Vue finançabilité #}
   {% concat prefix '-parcours-financabilite' as financabilite_prefix_id %}
   <div role="tabpanel" class="parcours table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ financabilite_prefix_id }}">
-    <table class="table">
+    <table class="table table-condensed parcours-table">
       <thead>
         <tr>
           {% if show_actions %}
             <th>{% trans "Actions" %}</th>
           {% endif %}
-          <th>{% trans "Years" %}</th>
+          <th>{% trans "Year" %}</th>
           <th>{# Diplomant #}</th>
-          <th>{% trans "Experiences" %}</th>
+          <th>{% trans "Experience" %}</th>
           <th>{% trans "Access title" %}</th>
           <th>{% trans "Registered credits" %}</th>
           <th>{% trans "Credits earned" %}</th>
-          <th>{% trans "Reduction" %}</th>
-          <th>{% trans "Course change" %}</th>
-          <th>{% trans "CA" %}</th>
+          <th title="{% trans "Reduction" %}">{% trans "Red." %}</th>
+          <th title="{% trans "Course change" %}">{% trans "CC" %}</th>
+          <th title="{% trans "Access condition" %}">{% trans "CA" %}</th>
           <th title="{% translate 'Assimilation' %}">{% trans "Assim." %}</th>
-          <th>{% trans "Institute" context "admission" %}</th>
+          <th title="{% trans "Institute" context "admission" %}">{% trans "Inst." context "admission" %}</th>
         </tr>
       </thead>
       <tbody>
