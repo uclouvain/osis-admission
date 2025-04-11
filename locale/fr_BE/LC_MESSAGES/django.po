@@ -1145,6 +1145,9 @@ msgid "By someone who has already taken this course in a previous edition"
 msgstr ""
 "Par quelqu’un ayant déjà suivi cette formation dans une édition précédente"
 
+msgid "CA"
+msgstr "CA"
+
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
 
