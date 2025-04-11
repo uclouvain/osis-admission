@@ -72,7 +72,6 @@ from admission.ddd.admission.domain.model.enums.condition_acces import (
 from admission.ddd.admission.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -249,6 +248,7 @@ from base.utils.htmx import HtmxPermissionRequiredMixin
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -542,32 +542,6 @@ class PastExperiencesMixin:
             f'{self.base_namespace}:past-experiences-access-title',
             uuid=self.kwargs['uuid'],
         )
-
-    @cached_property
-    def education_group_year_exam(self):
-        return EducationGroupYearExam.objects.filter(education_group_year=self.admission.training).first()
-
-    @cached_property
-    def examen(self):
-        try:
-            exam = Exam.objects.get(
-                person=self.admission.candidate,
-                type=ExamTypes.FORMATION.name,
-                education_group_year_exam__education_group_year=self.admission.training,
-            )
-            return ExamenDTO(
-                requis=self.education_group_year_exam is not None,
-                attestation=exam.certificate,
-                annee=exam.year.year if exam.year else None,
-            )
-        except Exam.DoesNotExist:
-            return None
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['education_group_year_exam'] = self.education_group_year_exam
-        context['examen'] = self.examen
-        return context
 
 
 # Fac decision
@@ -2087,6 +2061,7 @@ class PastExperiencesAccessTitleView(
                 access_titles=access_titles,
                 curriculum_dto=command_result.curriculum,
                 etudes_secondaires_dto=command_result.etudes_secondaires,
+                examens_dto=command_result.examens,
                 internal_experiences=internal_experiences,
             )
 
@@ -3148,6 +3123,7 @@ class ChecklistView(
                 access_titles=self.selectable_access_titles,
                 curriculum_dto=command_result.resume.curriculum,
                 etudes_secondaires_dto=command_result.resume.etudes_secondaires,
+                examens_dto=command_result.resume.examens,
                 internal_experiences=self.internal_experiences,
             )
 
@@ -3400,6 +3376,7 @@ class ChecklistView(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
+            examens=resume.examens,
             experiences_parcours_interne=self.internal_experiences,
             additional_messages=self.curriculum_additional_messages(),
         )

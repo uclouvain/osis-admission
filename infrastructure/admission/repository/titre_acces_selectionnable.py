@@ -192,6 +192,29 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 ),
             )
 
+        exam = (
+            Exam.objects.filter(
+                person=admission.candidate,
+                type=ExamTypes.FORMATION.name,
+                education_group_year_exam__education_group_year=admission.training,
+            )
+            .select_related('year')
+            .first()
+        )
+        if exam is not None and (not seulement_selectionnes or admission.is_exam_access_title):
+            access_titles.append(
+                TitreAccesSelectionnable(
+                    entity_id=TitreAccesSelectionnableIdentity(
+                        uuid_experience=str(exam.uuid),
+                        uuid_proposition=str(admission.uuid),
+                        type_titre=TypeTitreAccesSelectionnable.EXAMENS,
+                    ),
+                    selectionne=bool(admission.is_exam_access_title),
+                    annee=exam.year.year,
+                    pays_iso_code='',
+                ),
+            )
+
         for experience in educational_valuated_experiences:
             access_titles.append(
                 TitreAccesSelectionnable(
@@ -275,6 +298,12 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         if entity.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
             if not BaseAdmission.objects.filter(uuid=entity.entity_id.uuid_proposition).update(
                 are_secondary_studies_access_title=entity.selectionne,
+            ):
+                raise PropositionNonTrouveeException
+
+        elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXAMENS:
+            if not BaseAdmission.objects.filter(uuid=entity.entity_id.uuid_proposition).update(
+                is_exam_access_title=entity.selectionne,
             ):
                 raise PropositionNonTrouveeException
 

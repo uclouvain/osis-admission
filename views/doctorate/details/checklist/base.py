@@ -36,9 +36,7 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.commands import (
-    RechercherParcoursAnterieurQuery,
-)
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,
 )
@@ -298,6 +296,7 @@ class ChecklistView(
                 access_titles=self.selectable_access_titles,
                 curriculum_dto=command_result.resume.curriculum,
                 etudes_secondaires_dto=command_result.resume.etudes_secondaires,
+                examens_dto=command_result.resume.examens,
                 internal_experiences=self.internal_experiences,
             )
 

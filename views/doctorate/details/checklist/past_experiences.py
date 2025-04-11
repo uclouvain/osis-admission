@@ -300,6 +300,7 @@ class PastExperiencesAccessTitleView(
                 access_titles=access_titles,
                 curriculum_dto=command_result.curriculum,
                 etudes_secondaires_dto=command_result.etudes_secondaires,
+                examens_dto=command_result.examens,
                 internal_experiences=internal_experiences,
             )
 

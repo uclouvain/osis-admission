@@ -93,6 +93,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -387,6 +388,7 @@ def get_access_titles_names(
     access_titles: Dict[str, TitreAccesSelectionnableDTO],
     curriculum_dto: CurriculumAdmissionDTO,
     etudes_secondaires_dto: EtudesSecondairesAdmissionDTO,
+    examens_dto: ExamenDTO,
     internal_experiences: List[ExperienceParcoursInterneDTO],
 ) -> List[str]:
     """
@@ -397,7 +399,7 @@ def get_access_titles_names(
     # Sort the access titles by year and only keep the selected ones
     access_titles_list = sorted(
         (access_title for access_title in access_titles.values() if access_title.selectionne),
-        key=lambda title: title.annee,
+        key=lambda title: title.annee if title.annee else 0,
         reverse=True,
     )
 
@@ -446,6 +448,11 @@ def get_access_titles_names(
                     title=gettext('Secondary school'),
                     year=format_academic_year(access_title.annee),
                 )
+        elif access_title.type_titre == TypeTitreAccesSelectionnable.EXAMENS.name:
+            experience_name = '{title} ({year})'.format(
+                title=str(examens_dto.titre),
+                year=format_academic_year(access_title.annee),
+            )
         else:
             # Curriculum experiences
             if isinstance(experience, ExperienceAcademiqueDTO):
@@ -509,6 +516,10 @@ def get_experience_urls(
             ),
             'admission.change_admission_secondary_studies': user.has_perm(
                 perm='admission.change_admission_secondary_studies',
+                obj=admission,
+            ),
+            'admission.change_admission_exam': user.has_perm(
+                perm='admission.change_admission_exam',
                 obj=admission,
             ),
             'admission.delete_admission_curriculum': user.has_perm(
@@ -631,6 +642,20 @@ def get_experience_urls(
                 f'{base_namespace}:update:education',
                 uuid=admission.uuid,
             )
+
+    elif isinstance(experience, ExamenDTO):
+        res_context['details_url'] = resolve_url(
+            f'{base_namespace}:exam',
+            uuid=admission.uuid,
+        )
+
+        if not computed_permissions['admission.change_admission_exam']:
+            return res_context
+
+        res_context['edit_url'] = resolve_url(
+            f'{base_namespace}:update:exam',
+            uuid=admission.uuid,
+        )
 
     return res_context
 
