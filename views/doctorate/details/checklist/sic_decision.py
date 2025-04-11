@@ -194,7 +194,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic__derogation'
                     ),
                     prefix='decision_sic__derogation',
-                    label=_('Comment about dispensation'),
+                    label=_('Non-progression dispensation comment'),
                 ),
             }
         return context

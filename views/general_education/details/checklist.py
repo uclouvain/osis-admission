@@ -121,6 +121,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RefuserPropositionParFaculteCommand,
     SpecifierBesoinDeDerogationSicCommand,
     SpecifierConditionAccesPropositionCommand,
+    SpecifierDerogationDelegueVraeSicCommand,
     SpecifierDerogationFinancabiliteCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
     SpecifierExperienceEnTantQueTitreAccesCommand,
@@ -190,6 +191,7 @@ from admission.forms.admission.checklist import (
     PastExperiencesAdmissionRequirementForm,
     SicDecisionApprovalDocumentsForm,
     SicDecisionApprovalForm,
+    SicDecisionDelegateVraeDerogationForm,
     SicDecisionDerogationForm,
     SicDecisionFinalApprovalForm,
     SicDecisionFinalRefusalForm,
@@ -293,6 +295,7 @@ __all__ = [
     'SicApprovalEnrolmentDecisionView',
     'SicApprovalFinalDecisionView',
     'SicDecisionApprovalPanelView',
+    'SicDecisionDelegateVraeDispensationView',
     'SicRefusalDecisionView',
     'SicRefusalFinalDecisionView',
     'SicDecisionDispensationView',
@@ -1003,6 +1006,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 'dispensation_needed': self.admission.dispensation_needed,
             },
         )
+        context['sic_decision_delegate_vrae_dispensation_form'] = SicDecisionDelegateVraeDerogationForm(
+            initial={
+                'dispensation': self.admission.delegate_vrae_dispensation,
+                'comment': self.admission.delegate_vrae_dispensation_comment,
+                'certificate': self.admission.delegate_vrae_dispensation_certificate,
+            },
+        )
         context['requested_documents'] = {
             document.identifiant: {
                 'reason': self.proposition.documents_demandes.get(document.identifiant, {}).get('reason', ''),
@@ -1038,7 +1048,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic__derogation'
                     ),
                     prefix='decision_sic__derogation',
-                    label=_('Comment about dispensation'),
+                    label=_('Non-progression dispensation comment'),
                 ),
             }
         return context
@@ -1676,6 +1686,36 @@ class SicDecisionDispensationView(
             self.message_on_failure = exception.message
             return super().form_invalid(form)
 
+        return super().form_valid(form)
+
+
+class SicDecisionDelegateVraeDispensationView(
+    SicDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'sic-decision-delegate-vrae-dispensation'
+    urlpatterns = {'sic-decision-delegate-vrae-dispensation': 'sic-decision/delegate-vrae-dispensation'}
+    permission_required = 'admission.checklist_change_sic_decision'
+    form_class = SicDecisionDelegateVraeDerogationForm
+    template_name = 'admission/general_education/includes/checklist/sic_decision_delegate_vrae_dispensation_form.html'
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierDerogationDelegueVraeSicCommand(
+                    uuid_proposition=self.admission_uuid,
+                    derogation=form.cleaned_data['dispensation'],
+                    commentaire=form.cleaned_data['comment'],
+                    justificatif=form.cleaned_data['certificate'],
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            return super().form_invalid(form)
+        self.htmx_refresh = True
         return super().form_valid(form)
 
 
@@ -2871,6 +2911,7 @@ class ChecklistView(
             },
             f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': secondary_studies_attachments,
             'decision_sic': {
+                'JUSTIFICATIF_DEROGATION_DELEGUE_VRAE',
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
                 'ATTESTATION_REFUS_SIC',
@@ -2955,7 +2996,7 @@ class ChecklistView(
             tab_names.append('financabilite__derogation')
 
             comments_labels = {
-                'decision_sic__derogation': _('Comment about dispensation'),
+                'decision_sic__derogation': _('Non-progression dispensation comment'),
                 'financabilite__derogation': _('Faculty comment about financability dispensation'),
             }
             comments_permissions = {

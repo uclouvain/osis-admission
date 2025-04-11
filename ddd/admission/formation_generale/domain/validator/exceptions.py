@@ -284,7 +284,8 @@ class EtatChecklistDecisionSicNonValidePourApprouverUneInscription(BusinessExcep
     def __init__(self, **kwargs):
         message = _(
             'To approve an enrollment, the status of the checklist for the sic decision must be '
-            '"To be processed" or "Dispensation needed" (with management approval of the dispensation).'
+            '"To be processed" or "Non-progression dispensation needed" (with management approval '
+            'of the dispensation).'
         )
         super().__init__(message, **kwargs)
 
