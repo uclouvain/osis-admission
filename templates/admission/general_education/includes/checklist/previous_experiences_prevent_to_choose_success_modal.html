@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -28,17 +28,14 @@
 
 {% block modal_id %}previous-experiences-prevent-to-choose-success-modal{% endblock %}
 
+{% block modal_container_class %}vertical-modal{% endblock %}
+
 {% block modal_title %}
   {% translate "Impossible action" %}
 {% endblock %}
 
 {% block modal_body %}
-  <p>
-    {% blocktranslate trimmed %}
-      To move to this state, an admission requirement must have been selected and at least one access title line must
-      be selected in the past experience views.
-    {% endblocktranslate %}
-  </p>
+  <div class="error-message"></div>
 {% endblock %}
 
 {% block modal_footer %}
