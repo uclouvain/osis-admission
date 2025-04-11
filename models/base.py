@@ -563,6 +563,11 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         null=True,
         verbose_name=_('Are the secondary studies the access title for this admission?'),
     )
+    is_exam_access_title = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is the exam the access title for this admission?'),
+    )
     confirmation_elements = models.JSONField(
         blank=True,
         default=dict,
