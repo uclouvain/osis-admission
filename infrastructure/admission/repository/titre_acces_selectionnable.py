@@ -70,20 +70,24 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         seulement_selectionnes: Optional[bool] = None,
     ) -> List[TitreAccesSelectionnable]:
         # Retrieve the secondary studies
-        admission: BaseAdmission = BaseAdmission.objects.select_related(
-            'candidate__belgianhighschooldiploma__academic_graduation_year',
-            'candidate__belgianhighschooldiploma__institute',
-            'candidate__foreignhighschooldiploma__academic_graduation_year',
-            'candidate__foreignhighschooldiploma__country',
-            'candidate__graduated_from_high_school_year',
-            'training__academic_year',
-        ).prefetch_related(
-            Prefetch(
-                'candidate__exams',
-                queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name),
-                to_attr='exam_high_school_diploma_alternative',
-            ),
-        ).get(uuid=proposition_identity.uuid)
+        admission: BaseAdmission = (
+            BaseAdmission.objects.select_related(
+                'candidate__belgianhighschooldiploma__academic_graduation_year',
+                'candidate__belgianhighschooldiploma__institute',
+                'candidate__foreignhighschooldiploma__academic_graduation_year',
+                'candidate__foreignhighschooldiploma__country',
+                'candidate__graduated_from_high_school_year',
+                'training__academic_year',
+            )
+            .prefetch_related(
+                Prefetch(
+                    'candidate__exams',
+                    queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name),
+                    to_attr='exam_high_school_diploma_alternative',
+                ),
+            )
+            .get(uuid=proposition_identity.uuid)
+        )
 
         additional_filters = {'is_access_title': True} if seulement_selectionnes else {}
 
@@ -183,6 +187,8 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
             if getattr(high_school_diploma, 'academic_graduation_year', None):
                 high_school_diploma_experience_year = high_school_diploma.academic_graduation_year.year
+            elif isinstance(high_school_diploma, Exam):
+                high_school_diploma_experience_year = high_school_diploma.year.year
 
         elif getattr(admission.candidate, 'graduated_from_high_school_year', None):
             high_school_diploma_experience_uuid = OngletsDemande.ETUDES_SECONDAIRES.name
@@ -207,6 +213,41 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     annee=high_school_diploma_experience_year,
                     pays_iso_code=high_school_diploma_country,
                     nom=formatted_high_school_diploma_name.format(**formatted_high_school_diploma_name_variables),
+                ),
+            )
+
+        exam = (
+            Exam.objects.filter(
+                person=admission.candidate,
+                type=ExamTypes.FORMATION.name,
+                education_group_year_exam__education_group_year=admission.training,
+            )
+            .select_related('year')
+            .first()
+        )
+        if (
+            exam is not None
+            and exam.year is not None
+            and (not seulement_selectionnes or admission.is_exam_access_title)
+        ):
+            access_titles.append(
+                TitreAccesSelectionnable(
+                    entity_id=TitreAccesSelectionnableIdentity(
+                        uuid_experience=str(exam.uuid),
+                        uuid_proposition=str(admission.uuid),
+                        type_titre=TypeTitreAccesSelectionnable.EXAMENS,
+                    ),
+                    selectionne=bool(admission.is_exam_access_title),
+                    annee=exam.year.year,
+                    pays_iso_code='',
+                    nom='{title} ({year})'.format(
+                        title=(
+                            exam.education_group_year_exam.title_fr
+                            if has_default_language
+                            else exam.education_group_year_exam.title_en
+                        ),
+                        year=format_academic_year(exam.year.year),
+                    ),
                 ),
             )
 
@@ -322,6 +363,12 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         if entity.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
             if not BaseAdmission.objects.filter(uuid=entity.entity_id.uuid_proposition).update(
                 are_secondary_studies_access_title=entity.selectionne,
+            ):
+                raise PropositionNonTrouveeException
+
+        elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXAMENS:
+            if not BaseAdmission.objects.filter(uuid=entity.entity_id.uuid_proposition).update(
+                is_exam_access_title=entity.selectionne,
             ):
                 raise PropositionNonTrouveeException
 

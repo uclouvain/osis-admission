@@ -3753,6 +3753,9 @@ msgstr ""
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
+msgid "Is the exam the access title for this admission?"
+msgstr ""
+
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""

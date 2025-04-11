@@ -215,6 +215,7 @@ class PDFGeneration(IPDFGeneration):
 
         # Get the names of the access titles
         secondary_studies_dto = None
+        examen_dto = None
         internal_experiences_dtos = None
 
         context['access_titles_names'] = []
@@ -263,7 +264,6 @@ class PDFGeneration(IPDFGeneration):
                     uuid_experience=access_title.entity_id.uuid_experience,
                 )
                 context['access_titles_names'].append(experience.titre_pdf_decision_fac)
-
             # Curriculum non academic experience
             elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE:
                 experience = profil_candidat_translator.get_experience_non_academique(
@@ -272,6 +272,15 @@ class PDFGeneration(IPDFGeneration):
                     uuid_experience=access_title.entity_id.uuid_experience,
                 )
                 context['access_titles_names'].append(experience.titre_pdf_decision_fac)
+            # Exam
+            elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXAMENS:
+                if examen_dto is None:
+                    examen_dto = profil_candidat_translator.get_examen(
+                        matricule=proposition.matricule_candidat,
+                        formation_sigle=proposition.formation_id.sigle,
+                        formation_annee=proposition.formation_id.annee,
+                    )
+                context['access_titles_names'].append(examen_dto.titre)
 
         # Generate the pdf
         token = admission_generate_pdf(
