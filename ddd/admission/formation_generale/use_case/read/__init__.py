@@ -55,4 +55,7 @@ from .verifier_curriculum_apres_soumission_service import (
     verifier_curriculum_apres_soumission,
 )
 from .verifier_curriculum_service import verifier_curriculum
+from .verifier_experience_curriculum_apres_soumission_service import (
+    verifier_experience_curriculum_apres_soumission,
+)
 from .verifier_proposition_service import verifier_proposition

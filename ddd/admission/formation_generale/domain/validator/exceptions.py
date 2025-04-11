@@ -330,3 +330,14 @@ class BoursesEtudesNonRenseignees(BusinessException):
     def __init__(self, **kwargs):
         message = _("The information about the scholarships must be specified in the 'Course choice' tab.")
         super().__init__(message, **kwargs)
+
+
+class StatutsChecklistExperiencesEtreValidesException(BusinessException):
+    status_code = "FORMATION-GENERALE-37"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "All experiences must be in the 'Validated' status so that the previous experience "
+            "can be changed to the 'Sufficient' status."
+        )
+        super().__init__(message, **kwargs)

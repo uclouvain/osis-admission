@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,20 +34,28 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    CurriculumAdmissionDTO,
+)
 from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationEtudesSecondairesDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    CurriculumAExperiencesDTO,
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    ValorisationEtudesSecondairesDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    CurriculumAExperiencesDTO,
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from osis_common.ddd import interface
 
 
@@ -225,4 +233,9 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
         raise NotImplementedError
