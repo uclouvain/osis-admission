@@ -372,7 +372,7 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
         )
 
     def test_returns_an_exception_if_limit_date_reached(self):
-        self.calendar.end_date = datetime.date.today() - datetime.timedelta(days=14)
+        self.calendar.end_date = datetime.date.today() - datetime.timedelta(days=15)
         self.calendar.save()
 
         self.client.force_authenticate(user=self.user)
@@ -383,7 +383,9 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
 
         response_data = response.json()
 
-        triggered_exception = DateLimitePaiementDepasseeException(date_limite=datetime.date.today())
+        triggered_exception = DateLimitePaiementDepasseeException(
+            date_limite=datetime.date.today() - datetime.timedelta(days=1)
+        )
         self.assertEqual(
             response_data,
             {
