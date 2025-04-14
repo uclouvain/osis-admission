@@ -83,7 +83,7 @@ class IPaiementFraisDossier(interface.DomainService):
             raise PaiementDejaRealiseException
         aujourdhui = datetime.date.today()
         date_limite = periode_hue_plus_5_resident_etranger.date_fin + timedelta(days=14)
-        if aujourdhui >= date_limite:
+        if aujourdhui > date_limite:
             raise DateLimitePaiementDepasseeException(date_limite=date_limite)
 
     @classmethod
