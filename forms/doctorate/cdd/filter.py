@@ -67,7 +67,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import EntityProxy, SupervisionActor
-from admission.models.working_list import DoctorateWorkingList
 from base.forms.utils import autocomplete, EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
