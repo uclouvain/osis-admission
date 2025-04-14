@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementVaEtreOuvertParCandidatCommand,
 )
@@ -38,14 +39,21 @@ def specifier_paiement_va_etre_ouvert_par_candidat(
     cmd: 'SpecifierPaiementVaEtreOuvertParCandidatCommand',
     proposition_repository: 'IPropositionRepository',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
+    calendrier_translator: 'ICalendrierInscription',
 ) -> PaiementDTO:
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+    periode_hue_plus_5_resident_etranger = (
+        calendrier_translator.recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger(
+            annee_formation=proposition.formation_id.annee
+        )
+    )
 
     # WHEN
     paiement_frais_dossier_service.verifier_paiement_frais_dossier_necessaire(
         proposition=proposition,
+        periode_hue_plus_5_resident_etranger=periode_hue_plus_5_resident_etranger,
     )
 
     # THEN
