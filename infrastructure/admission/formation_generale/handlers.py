@@ -538,6 +538,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             paiement_frais_dossier_service=PaiementFraisDossier(),
+            calendrier_translator=CalendrierInscription(),
         )
     ),
     RecupererListePaiementsPropositionQuery: lambda msg_bus, cmd: recuperer_liste_paiements_proposition(

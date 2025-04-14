@@ -23,10 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from datetime import date, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.domain.model.periode import Periode
 from admission.ddd.admission.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
@@ -111,3 +113,15 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
     @classmethod
     def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
         return None
+
+    @classmethod
+    def recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger(
+        cls,
+        annee_formation: int,
+    ) -> Periode:
+        aujourdhui = datetime.date.today()
+        return Periode(
+            date_debut=aujourdhui - timedelta(days=14),
+            date_fin=aujourdhui,
+            type=AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY.name,
+        )
