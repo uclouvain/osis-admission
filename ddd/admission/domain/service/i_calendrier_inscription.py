@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     IdentificationNonCompleteeException,
 )
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.domain.model.periode import Periode
 from admission.ddd.admission.domain.service.i_formation_translator import (
     IFormationTranslator,
 )
@@ -235,6 +236,13 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
 
     @classmethod
     def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
+        raise NotImplementedError()
+
+    @classmethod
+    def recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger(
+        cls,
+        annee_formation: int,
+    ) -> Periode:
         raise NotImplementedError()
 
     @classmethod
