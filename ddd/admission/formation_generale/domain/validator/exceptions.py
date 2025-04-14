@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
 
 from django.utils.translation import gettext_lazy as _
 
@@ -329,4 +330,14 @@ class BoursesEtudesNonRenseignees(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("The information about the scholarships must be specified in the 'Course choice' tab.")
+        super().__init__(message, **kwargs)
+
+
+class DateLimitePaiementDepasseeException(BusinessException):
+    status_code = "FORMATION-GENERALE-37"
+
+    def __init__(self, date_limite: datetime.date, **kwargs):
+        message = _("The deadline was {date_limite}. It is no longer possible to regularize your situation.").format(
+            date_limite=date_limite.strftime("%d/%m/%Y")
+        )
         super().__init__(message, **kwargs)
