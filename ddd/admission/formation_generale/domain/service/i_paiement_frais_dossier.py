@@ -84,7 +84,10 @@ class IPaiementFraisDossier(interface.DomainService):
         aujourdhui = datetime.date.today()
         date_limite = periode_hue_plus_5_resident_etranger.date_fin + timedelta(days=14)
         if aujourdhui > date_limite:
-            raise DateLimitePaiementDepasseeException(date_limite=date_limite)
+            raise DateLimitePaiementDepasseeException(
+                date_limite=date_limite,
+                annee_formation=proposition.formation_id.annee,
+            )
 
     @classmethod
     def verifier_paiement_necessaire_par_gestionnaire(cls, proposition: PropositionGenerale) -> None:

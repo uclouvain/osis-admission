@@ -384,7 +384,8 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
         response_data = response.json()
 
         triggered_exception = DateLimitePaiementDepasseeException(
-            date_limite=datetime.date.today() - datetime.timedelta(days=1)
+            date_limite=datetime.date.today() - datetime.timedelta(days=1),
+            annee_formation=self.admission.training.academic_year.year,
         )
         self.assertEqual(
             response_data,
