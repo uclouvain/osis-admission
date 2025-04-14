@@ -51,22 +51,26 @@ class PersonTestCase(APITestCase):
     def setUpTestData(cls):
         cls.agnostic_url = resolve_url('person')
         cls.updated_data = {"first_name": "Jo"}
-        doctoral_commission = EntityFactory()
+        cls.doctoral_commission = EntityFactory()
+        cls.candidate_user_without_admission = CandidateFactory().person.user
+        cls.no_role_user = PersonFactory(first_name="Joe").user
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
+    def setUp(self):
+        super().setUp()
+
         promoter = PromoterFactory(actor_ptr__person__first_name="Jane")
-        cls.promoter_user = promoter.person.user
-        cls.committee_member_user = CaMemberFactory(
+        self.promoter_user = promoter.person.user
+        self.committee_member_user = CaMemberFactory(
             actor_ptr__person__first_name="James",
             process=promoter.process,
         ).person.user
         admission = DoctorateAdmissionFactory(
             candidate__first_name="John",
-            training__management_entity=doctoral_commission,
+            training__management_entity=self.doctoral_commission,
         )
-        cls.admission_url = resolve_url('person', uuid=admission.uuid)
-        cls.candidate_user = admission.candidate.user
-        cls.candidate_user_without_admission = CandidateFactory().person.user
-        cls.no_role_user = PersonFactory(first_name="Joe").user
-        AdmissionAcademicCalendarFactory.produce_all_required()
+        self.admission_url = resolve_url('person', uuid=admission.uuid)
+        self.candidate_user = admission.candidate.user
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

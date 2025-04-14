@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.117
+  version: 1.0.118
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -7948,6 +7948,9 @@ components:
                 type: string
               detail:
                 type: string
+        avec_bourse_double_diplome:
+          type: boolean
+          nullable: true
         bourse_double_diplome:
           type: object
           properties:
@@ -7965,6 +7968,9 @@ components:
           - nom_long
           - type
           nullable: true
+        avec_bourse_internationale:
+          type: boolean
+          nullable: true
         bourse_internationale:
           type: object
           properties:
@@ -7981,6 +7987,9 @@ components:
           - nom_court
           - nom_long
           - type
+          nullable: true
+        avec_bourse_erasmus_mundus:
+          type: boolean
           nullable: true
         bourse_erasmus_mundus:
           type: object
@@ -8958,10 +8967,19 @@ components:
           type: integer
         matricule_candidat:
           type: string
+        avec_bourse_double_diplome:
+          type: boolean
+          nullable: true
         bourse_double_diplome:
           type: string
+        avec_bourse_internationale:
+          type: boolean
+          nullable: true
         bourse_internationale:
           type: string
+        avec_bourse_erasmus_mundus:
+          type: boolean
+          nullable: true
         bourse_erasmus_mundus:
           type: string
       required:
@@ -9474,10 +9492,19 @@ components:
           type: string
         annee_formation:
           type: integer
+        avec_bourse_double_diplome:
+          type: boolean
+          nullable: true
         bourse_double_diplome:
           type: string
+        avec_bourse_internationale:
+          type: boolean
+          nullable: true
         bourse_internationale:
           type: string
+        avec_bourse_erasmus_mundus:
+          type: boolean
+          nullable: true
         bourse_erasmus_mundus:
           type: string
         reponses_questions_specifiques:
