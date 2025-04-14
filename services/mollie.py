@@ -126,7 +126,10 @@ class MollieService:
 
         logger.info(f"[MOLLIE] JSON reçu : {result}")
         if response.status_code != 201:
-            logger.error(f"[MOLLIE] La creation du paiement a echouee avec un status code = {response.status_code}")
+            logger.error(
+                f"[MOLLIE] La creation du paiement a echouee avec un status code = {response.status_code} "
+                f"- JSON reçu : {result}"
+            )
             raise CreateMolliePaymentException(reference=reference)
         return cls._convert_to_dto(result)
 
@@ -154,11 +157,19 @@ class MollieException(Exception):
 
 class FetchMolliePaymentException(MollieException):
     def __init__(self, mollie_id: str, **kwargs):
+        self.mollie_id = mollie_id
         self.message = f"[MOLLIE] Impossible de recuperer le paiement avec mollie_id: {mollie_id}"
         super().__init__(**kwargs)
+
+    def __reduce__(self):
+        return FetchMolliePaymentException, (self.mollie_id,)
 
 
 class CreateMolliePaymentException(MollieException):
     def __init__(self, reference: str, **kwargs):
+        self.reference = reference
         self.message = f"[MOLLIE] Impossible de creer le paiement pour l'admission avec reference: {reference}"
         super().__init__(**kwargs)
+
+    def __reduce__(self):
+        return CreateMolliePaymentException, (self.reference,)

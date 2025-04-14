@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
 
 from django.utils.translation import gettext_lazy as _
 
@@ -30,6 +31,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT,
     ChoixStatutPropositionGenerale,
 )
+from education_group.templatetags.academic_year_display import display_as_academic_year
 from osis_common.ddd.interface import BusinessException
 
 
@@ -329,4 +331,18 @@ class BoursesEtudesNonRenseignees(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("The information about the scholarships must be specified in the 'Course choice' tab.")
+        super().__init__(message, **kwargs)
+
+
+class DateLimitePaiementDepasseeException(BusinessException):
+    status_code = "FORMATION-GENERALE-37"
+
+    def __init__(self, date_limite: datetime.date, annee_formation: int, **kwargs):
+        message = _(
+            "The application fee payment period for {anac} admissions is now closed."
+            "The deadline was {date_limite}. It is no longer possible to regularize your situation."
+        ).format(
+            date_limite=date_limite.strftime("%d/%m/%Y"),
+            anac=display_as_academic_year(annee_formation)
+        )
         super().__init__(message, **kwargs)

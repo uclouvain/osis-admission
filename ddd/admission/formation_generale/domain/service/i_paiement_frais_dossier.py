@@ -23,9 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
+from datetime import timedelta
 from typing import Dict, List
 
+from admission.ddd.admission.domain.model.periode import Periode
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
@@ -37,7 +39,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     PropositionDoitEtreEnAttenteDePaiementException,
     StatutPropositionInvalidePourPaiementInscriptionException,
     PaiementNonRealiseException,
-    PaiementDejaRealiseException,
+    PaiementDejaRealiseException, DateLimitePaiementDepasseeException,
 )
 from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
 from osis_common.ddd import interface
@@ -69,12 +71,23 @@ class IPaiementFraisDossier(interface.DomainService):
             raise PaiementNonRealiseException
 
     @classmethod
-    def verifier_paiement_frais_dossier_necessaire(cls, proposition: PropositionGenerale) -> None:
+    def verifier_paiement_frais_dossier_necessaire(
+        cls,
+        proposition: PropositionGenerale,
+        periode_hue_plus_5_resident_etranger: Periode,
+    ) -> None:
         if not proposition.statut == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE:
             raise PropositionPourPaiementInvalideException
 
         if cls.paiement_realise(proposition_uuid=proposition.entity_id.uuid):
             raise PaiementDejaRealiseException
+        aujourdhui = datetime.date.today()
+        date_limite = periode_hue_plus_5_resident_etranger.date_fin + timedelta(days=14)
+        if aujourdhui > date_limite:
+            raise DateLimitePaiementDepasseeException(
+                date_limite=date_limite,
+                annee_formation=proposition.formation_id.annee,
+            )
 
     @classmethod
     def verifier_paiement_necessaire_par_gestionnaire(cls, proposition: PropositionGenerale) -> None:

@@ -27,9 +27,9 @@ import datetime
 from unittest import mock
 
 import freezegun
-from django.test import TestCase
+from django.test import SimpleTestCase
 
-from admission.models.online_payment import PaymentStatus
+from admission.ddd.admission.domain.model.periode import Periode
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementVaEtreOuvertParCandidatCommand,
 )
@@ -39,7 +39,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionPourPaiementInvalideException,
-    PaiementDejaRealiseException,
+    PaiementDejaRealiseException, DateLimitePaiementDepasseeException,
 )
 from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
 from admission.ddd.admission.formation_generale.test.factory.paiement import PaiementFactory
@@ -51,12 +51,14 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.models.online_payment import PaymentStatus
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 @freezegun.freeze_time('2020-11-01')
-class TestSpecifierPaiementVaEtreOuvertParCandidat(TestCase):
+class TestSpecifierPaiementVaEtreOuvertParCandidat(SimpleTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
@@ -138,4 +140,20 @@ class TestSpecifierPaiementVaEtreOuvertParCandidat(TestCase):
                 )
             )
             with self.assertRaises(PaiementDejaRealiseException):
+                self.message_bus.invoke(self.command)
+
+    @mock.patch('admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription.'
+                'CalendrierInscriptionInMemory.recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger')
+    def test_should_lever_exception_si_date_limite_depassee(self, mock_calendar):
+        date_debut = datetime.date.today() - datetime.timedelta(days=15)
+        mock_calendar.return_value = Periode(
+            date_debut=date_debut,
+            date_fin=date_debut,
+            type=AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY.name,
+        )
+        with mock.patch.multiple(
+            self.proposition,
+            statut=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
+        ):
+            with self.assertRaises(DateLimitePaiementDepasseeException):
                 self.message_bus.invoke(self.command)
