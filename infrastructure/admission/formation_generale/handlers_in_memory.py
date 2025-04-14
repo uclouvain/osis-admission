@@ -57,6 +57,9 @@ from admission.ddd.admission.formation_generale.use_case.write.retyper_document_
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_delegue_vrae_service import (
+    specifier_derogation_delegue_vrae,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
@@ -591,6 +594,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -607,6 +611,13 @@ COMMAND_HANDLERS = {
     SpecifierBesoinDeDerogationSicCommand: (
         lambda msg_bus, cmd: specifier_besoin_de_derogation(
             cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
+    SpecifierDerogationDelegueVraeSicCommand: (
+        lambda msg_bus, cmd: specifier_derogation_delegue_vrae(
+            cmd,
+            historique=_historique_formation_generale,
             proposition_repository=_proposition_repository,
         )
     ),
@@ -637,6 +648,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
             cmd,
             proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -780,6 +792,13 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_periode_inscription_specifique_bachelier_medecine_dentisterie(
             cmd,
             calendrier_inscription=CalendrierInscriptionInMemory(),
+        )
+    ),
+    VerifierExperienceCurriculumApresSoumissionQuery: (
+        lambda msg_bus, cmd: verifier_experience_curriculum_apres_soumission(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
         )
     ),
 }

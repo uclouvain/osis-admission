@@ -1,5 +1,5 @@
 {% extends "admission/modal/modal.html" %}
-{% load i18n %}
+{% load i18n bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,21 +26,12 @@
 {% endcomment %}
 
 
-{% block modal_id %}previous-experiences-prevent-to-choose-success-modal{% endblock %}
+{% block modal_id %}sic-decision-delegate-vrae-dispensation-modal{% endblock %}
 
-{% block modal_container_class %}vertical-modal{% endblock %}
+{% block modal_title %}{% translate "Delegate/VRAE dispensation" %}{% endblock %}
 
-{% block modal_title %}
-  {% translate "Impossible action" %}
-{% endblock %}
+{% block modal_class %}modal-lg{% endblock %}
 
-{% block modal_body %}
-  <div class="error-message"></div>
-{% endblock %}
-
-{% block modal_footer %}
-  <button type="button" class="btn btn-primary" data-dismiss="modal">
-    {% translate 'Ok' %}
-  </button>
-
+{% block modal_content %}
+  {% include 'admission/general_education/includes/checklist/sic_decision_delegate_vrae_dispensation_form.html' %}
 {% endblock %}

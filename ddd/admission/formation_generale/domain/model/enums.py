@@ -188,6 +188,12 @@ class BesoinDeDerogation(ChoiceEnum):
     ACCORD_DIRECTION = _("ACCORD_DIRECTION")
 
 
+class BesoinDeDerogationDelegueVrae(ChoiceEnum):
+    DEROGATION_DELEGUE = _("DEROGATION_DELEGUE")
+    DEROGATION_VRAE = _("DEROGATION_VRAE")
+    PAS_DE_DEROGATION = _("PAS_DE_DEROGATION")
+
+
 class DroitsInscriptionMontant(ChoiceEnum):
     INSCRIPTION_AU_ROLE = _("INSCRIPTION_AU_ROLE")
     INSCRIPTION_REGULIERE = _("INSCRIPTION_REGULIERE")

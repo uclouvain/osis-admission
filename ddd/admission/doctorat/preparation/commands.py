@@ -673,6 +673,7 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    type_experience: str
     gestionnaire: str
     statut: str
     statut_authentification: Optional[bool]
@@ -757,6 +758,13 @@ class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class VerifierExperienceCurriculumApresSoumissionQuery(interface.QueryRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    type_experience: str
 
 
 @attr.dataclass(frozen=True, slots=True)
