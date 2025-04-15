@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,23 +37,37 @@ from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
-from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_continue.domain.service.i_notification import (
+    INotification,
+)
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
 )
-from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING
+from admission.mail_templates.submission import (
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING,
+)
 from admission.models import AdmissionTask, ContinuingEducationAdmission
 from admission.models.base import BaseAdmission
-from admission.utils import get_salutation_prefix, get_portal_admission_url, get_backoffice_admission_url
+from admission.utils import (
+    get_backoffice_admission_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
+)
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 
@@ -104,12 +118,18 @@ class Notification(INotification):
         }
 
     @classmethod
-    def confirmer_soumission(cls, proposition: Proposition) -> None:
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+    def confirmer_soumission(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: 'IEmailDestinataireRepository',
+    ) -> None:
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission = (
             BaseAdmission.objects.with_training_management_and_reference()
-            .select_related('candidate', 'training')
+            .select_related('candidate', 'training__academic_year')
             .get(uuid=proposition.entity_id.uuid)
         )
 
@@ -135,20 +155,23 @@ class Notification(INotification):
         )
 
         # Notify the candidate via email and the program managers in cc
-        program_managers = ProgramManager.objects.filter(
-            education_group=admission.training.education_group,
-        ).select_related('person')
+        program_managers = email_destinataire_repository.search_informations_destinataires_dto(
+            sigle_programme=admission.training.acronym,
+            annee=admission.training.academic_year.year,
+            pour_premiere_annee=False,
+        )
 
         common_tokens = cls.get_common_tokens(admission)
         common_tokens['recap_link'] = get_file_url(token=read_token)
         common_tokens['program_managers_emails'] = (' ' + _('or') + ' ').join(
             [
-                f'<a href="mailto:{program_manager.person.email}">{program_manager.person.email}</a>'
+                f'<a href="mailto:{program_manager.email}">{program_manager.email}</a>'
                 for program_manager in program_managers
+                if program_manager.email
             ]
         )
         common_tokens['program_managers_names'] = ', '.join(
-            f'{manager.person.first_name} {manager.person.last_name}' for manager in program_managers
+            manager.en_tete for manager in program_managers if manager.en_tete
         )
 
         email_message = generate_email(
@@ -159,7 +182,9 @@ class Notification(INotification):
         )
 
         if program_managers:
-            email_message['Cc'] = ','.join([program_manager.person.email for program_manager in program_managers])
+            email_message['Cc'] = ','.join(
+                [program_manager.email for program_manager in program_managers if program_manager.email]
+            )
 
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 
@@ -266,9 +291,11 @@ class Notification(INotification):
             'candidate_first_name': proposition.prenom_candidat,
             'candidate_last_name': proposition.nom_candidat,
             'salutation': get_salutation_prefix(person=admission.candidate),
-            'training_title': admission.training.title
-            if admission.candidate.language == settings.LANGUAGE_CODE_FR
-            else admission.training.title_english,
+            'training_title': (
+                admission.training.title
+                if admission.candidate.language == settings.LANGUAGE_CODE_FR
+                else admission.training.title_english
+            ),
             'training_acronym': proposition.formation.sigle,
             'training_campus': proposition.formation.campus,
             'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
@@ -281,9 +308,11 @@ class Notification(INotification):
         }
 
         email_message = generate_email(
-            ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING
-            if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
-            else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
+            (
+                ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING
+                if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
+                else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING
+            ),
             admission.candidate.language,
             tokens,
             recipients=[admission.candidate.private_email],

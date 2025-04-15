@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,19 +25,23 @@
 ##############################################################################
 
 from admission.ddd.admission.formation_continue.commands import *
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.formation_continue.use_case.read import *
 from admission.ddd.admission.formation_continue.use_case.write import *
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.use_case.read import (
+    recuperer_questions_specifiques_proposition,
+)
 from admission.ddd.admission.use_case.write import (
-    initialiser_emplacement_document_libre_non_reclamable,
-    initialiser_emplacement_document_libre_a_reclamer,
-    initialiser_emplacement_document_a_reclamer,
     annuler_reclamation_emplacement_document,
+    initialiser_emplacement_document_a_reclamer,
+    initialiser_emplacement_document_libre_a_reclamer,
+    initialiser_emplacement_document_libre_non_reclamable,
     modifier_reclamation_emplacement_document,
-    supprimer_emplacement_document,
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
+    supprimer_emplacement_document,
 )
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
@@ -54,18 +58,24 @@ from admission.infrastructure.admission.domain.service.in_memory.historique impo
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.domain.service.in_memory.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculumInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.domain.service.in_memory.titres_acces import (
+    TitresAccesInMemory,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
-from admission.infrastructure.admission.formation_continue.domain.service.in_memory.historique import HistoriqueInMemory
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.historique import (
+    HistoriqueInMemory,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.lister_demandes import (
     ListerDemandesInMemory,
 )
@@ -81,7 +91,12 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory import (
+    EmailDestinataireInMemoryRepository,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -102,6 +117,7 @@ _notification = NotificationInMemory()
 _lister_demandes_service = ListerDemandesInMemory()
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
+_email_destinataire_repository = EmailDestinataireInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -163,6 +179,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=_question_specific_translator,
         historique=_historique_global,
         raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
+        email_destinataire_repository=_email_destinataire_repository,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

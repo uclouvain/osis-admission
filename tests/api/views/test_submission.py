@@ -98,6 +98,8 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -804,6 +806,19 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         cls.first_fac_manager = ProgramManagerRoleFactory(education_group=training.education_group).person
         cls.second_fac_manager = ProgramManagerRoleFactory(education_group=training.education_group).person
 
+        cls.first_fac_manager_email_info = EmailFonctionProgrammeFactory(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            email='first_fac_manager@info.be',
+            en_tete='First Fac Manager',
+            programme=training.education_group,
+        )
+        cls.second_fac_manager_email_info = EmailFonctionProgrammeFactory(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            email='second_fac_manager@info.be',
+            en_tete='Second Fac Manager',
+            programme=training.education_group,
+        )
+
         cls.second_candidate_ok = cls.second_admission_ok.candidate
 
         cls.second_ok_url = resolve_url(
@@ -1020,7 +1035,10 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
         cc_recipients = email_object['Cc'].split(',')
         self.assertEqual(len(cc_recipients), 2)
-        self.assertCountEqual(cc_recipients, [self.first_fac_manager.email, self.second_fac_manager.email])
+        self.assertCountEqual(
+            cc_recipients,
+            [self.first_fac_manager_email_info.email, self.second_fac_manager_email_info.email],
+        )
 
         content = email_object.as_string()
         self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)

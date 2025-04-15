@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,15 +24,21 @@
 #
 ##############################################################################
 from admission.ddd.admission.commands import *
-from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import (
+    RecupererInformationsDestinataireQuery,
+    RecupererInformationsDestinatairesQuery,
+)
 from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
 from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import specifier_experience_en_tant_que_titre_acces
+from admission.ddd.admission.use_case.write import (
+    specifier_experience_en_tant_que_titre_acces,
+)
 from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -58,6 +64,10 @@ COMMAND_HANDLERS = {
         lister_toutes_demandes_service=ListerToutesDemandesInMemory(),
     ),
     RecupererInformationsDestinataireQuery: lambda msg_bus, query: recuperer_informations_destinataire(
+        query,
+        email_destinataire_repository=EmailDestinataireInMemoryRepository(),
+    ),
+    RecupererInformationsDestinatairesQuery: lambda msg_bus, query: recuperer_informations_destinataires(
         query,
         email_destinataire_repository=EmailDestinataireInMemoryRepository(),
     ),

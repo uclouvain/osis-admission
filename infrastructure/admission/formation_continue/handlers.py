@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,48 +25,79 @@
 ##############################################################################
 
 from admission.ddd.admission.formation_continue.commands import *
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.formation_continue.use_case.read import *
 from admission.ddd.admission.formation_continue.use_case.write import *
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.use_case.read import (
+    recuperer_questions_specifiques_proposition,
+)
 from admission.ddd.admission.use_case.write import (
-    initialiser_emplacement_document_libre_non_reclamable,
-    initialiser_emplacement_document_libre_a_reclamer,
-    initialiser_emplacement_document_a_reclamer,
     annuler_reclamation_emplacement_document,
+    initialiser_emplacement_document_a_reclamer,
+    initialiser_emplacement_document_libre_a_reclamer,
+    initialiser_emplacement_document_libre_non_reclamable,
     modifier_reclamation_emplacement_document,
-    supprimer_emplacement_document,
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
+    supprimer_emplacement_document,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
-from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.domain.service.calendrier_inscription import (
+    CalendrierInscription,
+)
+from admission.infrastructure.admission.domain.service.elements_confirmation import (
+    ElementsConfirmation,
+)
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
-from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.domain.service.historique import (
+    Historique as HistoriqueGlobal,
+)
+from admission.infrastructure.admission.domain.service.maximum_propositions import (
+    MaximumPropositionsAutorisees,
+)
+from admission.infrastructure.admission.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
 from admission.infrastructure.admission.domain.service.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculum,
 )
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
-from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
-from admission.infrastructure.admission.formation_continue.domain.service.historique import Historique
-from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import ListerDemandesService
-from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
+from admission.infrastructure.admission.formation_continue.domain.service.formation import (
+    FormationContinueTranslator,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.historique import (
+    Historique,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import (
+    ListerDemandesService,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.notification import (
+    Notification,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
 from admission.infrastructure.admission.formation_continue.repository.emplacement_document import (
     EmplacementDocumentRepository,
 )
-from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
-from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from admission.infrastructure.admission.formation_continue.repository.proposition import (
+    PropositionRepository,
+)
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
+    EmailDestinataireRepository,
+)
+from infrastructure.shared_kernel.academic_year.repository.academic_year import (
+    AcademicYearRepository,
+)
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
+    PersonneConnueUclTranslator,
+)
 
 COMMAND_HANDLERS = {
     RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -127,6 +158,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         historique=HistoriqueGlobal(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
+        email_destinataire_repository=EmailDestinataireRepository(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

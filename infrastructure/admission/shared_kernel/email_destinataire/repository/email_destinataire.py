@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,20 +24,57 @@
 #
 # ##############################################################################
 
-from typing import Optional, List
+from typing import List, Optional
 
 from django.db.models import F
 
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
-    InformationsDestinatairePasTrouvee
-from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import InformationsDestinataireDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
-    IEmailDestinataireRepository
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
+    InformationsDestinatairePasTrouvee,
+)
+from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import (
+    InformationsDestinataireDTO,
+)
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 
 
 class EmailDestinataireRepository(IEmailDestinataireRepository):
+    @classmethod
+    def _get_base_qs(
+        cls,
+        sigle_programme: str,
+        annee: int,
+        pour_premiere_annee: bool,
+    ):
+        return (
+            EmailFonctionProgramme.objects.filter(
+                type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+                premiere_annee=pour_premiere_annee,
+            )
+            .annotate(
+                sigle_formation=F('programme__educationgroupyear__acronym'),
+                annee=F('programme__educationgroupyear__academic_year__year'),
+            )
+            .values('en_tete', 'email', 'sigle_formation', 'annee', 'premiere_annee')
+            .filter(
+                sigle_formation=sigle_programme.replace('-1', '') if pour_premiere_annee else sigle_programme,
+                annee=annee,
+            )
+        )
+
+    @classmethod
+    def _build_dto(cls, email_fonction: dict) -> InformationsDestinataireDTO:
+        return InformationsDestinataireDTO(
+            en_tete=email_fonction.get('en_tete'),
+            email=email_fonction.get('email'),
+            sigle_formation=email_fonction.get('sigle_formation'),
+            annee=email_fonction.get('annee'),
+            pour_premiere_annee=email_fonction.get('premiere_annee'),
+        )
+
     @classmethod
     def get_informations_destinataire_dto(
         cls,
@@ -46,30 +83,28 @@ class EmailDestinataireRepository(IEmailDestinataireRepository):
         pour_premiere_annee: bool,
     ) -> 'InformationsDestinataireDTO':
         try:
-            email_fonction = (
-                EmailFonctionProgramme.objects.filter(
-                    type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
-                    premiere_annee=pour_premiere_annee,
-                )
-                .annotate(
-                    sigle_formation=F('programme__educationgroupyear__acronym'),
-                    annee=F('programme__educationgroupyear__academic_year__year'),
-                )
-                .values('en_tete', 'email', 'sigle_formation', 'annee', 'premiere_annee')
-                .get(
-                    sigle_formation=sigle_programme.replace('-1', '') if pour_premiere_annee else sigle_programme,
-                    annee=annee,
-                )
-            )
+            email_fonction = cls._get_base_qs(
+                sigle_programme=sigle_programme,
+                annee=annee,
+                pour_premiere_annee=pour_premiere_annee,
+            ).get()
         except EmailFonctionProgramme.DoesNotExist as e:
             raise InformationsDestinatairePasTrouvee from e
-        return InformationsDestinataireDTO(
-            en_tete=email_fonction.get('en_tete'),
-            email=email_fonction.get('email'),
-            sigle_formation=email_fonction.get('sigle_formation'),
-            annee=email_fonction.get('annee'),
-            pour_premiere_annee=email_fonction.get('premiere_annee'),
+        return cls._build_dto(email_fonction=email_fonction)
+
+    @classmethod
+    def search_informations_destinataires_dto(
+        cls,
+        sigle_programme: str,
+        annee: int,
+        pour_premiere_annee: bool,
+    ) -> List['InformationsDestinataireDTO']:
+        emails_fonctions = cls._get_base_qs(
+            sigle_programme=sigle_programme,
+            annee=annee,
+            pour_premiere_annee=pour_premiere_annee,
         )
+        return [cls._build_dto(email_fonction=email_fonction) for email_fonction in emails_fonctions]
 
     @classmethod
     def get(cls, entity_id: 'EntityIdentity') -> 'RootEntity':
