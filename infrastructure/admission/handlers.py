@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,17 +26,30 @@
 from django.conf import settings
 
 from admission.ddd.admission.commands import *
-from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import (
+    RecupererInformationsDestinataireQuery,
+    RecupererInformationsDestinatairesQuery,
+)
 from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
 from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import specifier_experience_en_tant_que_titre_acces
-from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from admission.ddd.admission.use_case.write import (
+    specifier_experience_en_tant_que_titre_acces,
+)
+from admission.infrastructure.admission.domain.service.lister_toutes_demandes import (
+    ListerToutesDemandes,
+)
+from admission.infrastructure.admission.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
+from admission.infrastructure.admission.repository.titre_acces_selectionnable import (
+    TitreAccesSelectionnableRepository,
+)
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
-from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
+    ExperienceParcoursInterneTranslator,
+)
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -44,6 +57,10 @@ COMMAND_HANDLERS = {
         lister_toutes_demandes_service=ListerToutesDemandes(),
     ),
     RecupererInformationsDestinataireQuery: lambda msg_bus, query: recuperer_informations_destinataire(
+        query,
+        email_destinataire_repository=EmailDestinataireRepository(),
+    ),
+    RecupererInformationsDestinatairesQuery: lambda msg_bus, query: recuperer_informations_destinataires(
         query,
         email_destinataire_repository=EmailDestinataireRepository(),
     ),
@@ -79,13 +96,13 @@ COMMAND_HANDLERS = {
 EVENT_HANDLERS = {}
 
 if 'admission' in settings.INSTALLED_APPS:
-    from admission.ddd.admission.formation_generale.events import (
-        InscriptionApprouveeParSicEvent,
-        AdmissionApprouveeParSicEvent,
-    )
     from admission.ddd.admission.doctorat.events import (
-        InscriptionDoctoraleApprouveeParSicEvent,
         AdmissionDoctoraleApprouveeParSicEvent,
+        InscriptionDoctoraleApprouveeParSicEvent,
+    )
+    from admission.ddd.admission.formation_generale.events import (
+        AdmissionApprouveeParSicEvent,
+        InscriptionApprouveeParSicEvent,
     )
     from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import (
         reagir_a_approuver_proposition,

@@ -23,33 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-import abc
 from typing import List
 
 from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import (
     InformationsDestinataireDTO,
 )
-from osis_common.ddd import interface
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import (
+    RecupererInformationsDestinatairesQuery,
+)
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 
 
-class IEmailDestinataireRepository(interface.AbstractRepository):
-    @classmethod
-    @abc.abstractmethod
-    def get_informations_destinataire_dto(
-        cls,
-        sigle_programme: str,
-        annee: int,
-        pour_premiere_annee: bool,
-    ) -> 'InformationsDestinataireDTO':
-        pass
-
-    @classmethod
-    @abc.abstractmethod
-    def search_informations_destinataires_dto(
-        cls,
-        sigle_programme: str,
-        annee: int,
-        pour_premiere_annee: bool,
-    ) -> List['InformationsDestinataireDTO']:
-        pass
+def recuperer_informations_destinataires(
+    query: 'RecupererInformationsDestinatairesQuery',
+    email_destinataire_repository: 'IEmailDestinataireRepository',
+) -> List['InformationsDestinataireDTO']:
+    return email_destinataire_repository.search_informations_destinataires_dto(
+        sigle_programme=query.sigle_formation,
+        annee=query.annee,
+        pour_premiere_annee=query.est_premiere_annee,
+    )
