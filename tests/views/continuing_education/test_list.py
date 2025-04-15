@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,16 +32,20 @@ from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.models import ContinuingEducationAdmission
+from admission.auth.scope import Scope
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixEdition,
-    OngletsChecklist,
     ChoixStatutChecklist,
+    ChoixStatutPropositionContinue,
+    OngletsChecklist,
 )
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.models import ContinuingEducationAdmission, EPCInjection
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
     ProgramManagerRoleFactory,
@@ -54,11 +58,13 @@ from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
+from base.tests.factories.entity_version import (
+    EntityVersionFactory,
+    MainEntityVersionFactory,
+)
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
-from admission.auth.scope import Scope
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -385,7 +391,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(object_list[0].diplome_produit, current_admission.certificate_provided)
 
         self.assertEqual(object_list[0].etat_demande, current_admission.status)
-        self.assertEqual(object_list[0].etat_epc, '')
+        self.assertEqual(object_list[0].etat_injection_epc, '')
         self.assertEqual(object_list[0].date_confirmation, current_admission.submitted_at)
         self.assertEqual(object_list[0].derniere_modification_le, current_admission.modified_at)
         self.assertEqual(
@@ -529,6 +535,72 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0].uuid, self.admissions[1].uuid)
 
+    def test_list_with_filter_by_epc_injections(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        admission_injection = EPCInjection.objects.create(
+            admission=self.admissions[1],
+            type=EPCInjectionType.DEMANDE.name,
+            status=EPCInjectionStatus.ERROR.name,
+            last_attempt_date=datetime.datetime(2022, 1, 1),
+        )
+
+        for status in [
+            EPCInjectionStatus.OSIS_ERROR.name,
+            EPCInjectionStatus.ERROR.name,
+            EPCInjectionStatus.PENDING.name,
+            EPCInjectionStatus.NO_SENT.name,
+        ]:
+            admission_injection.status = status
+            admission_injection.save(update_fields=['status'])
+
+            response = self._do_request(injection_epc_en_erreur=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.context['object_list']), 1)
+            self.assertEqual(response.context['object_list'][0].uuid, self.admissions[1].uuid)
+
+            response = self._do_request(injection_epc_en_erreur=False)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.context['object_list']), 1)
+            self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+        for status in [
+            EPCInjectionStatus.OK.name,
+        ]:
+            admission_injection.status = status
+            admission_injection.save(update_fields=['status'])
+
+            response = self._do_request(injection_epc_en_erreur=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.context['object_list']), 0)
+
+            response = self._do_request(injection_epc_en_erreur=False)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.context['object_list']), 2)
+            self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+            self.assertEqual(response.context['object_list'][1].uuid, self.admissions[1].uuid)
+
+        admission_injection.status = EPCInjectionStatus.ERROR.name
+        admission_injection.type = EPCInjectionType.SIGNALETIQUE.name
+
+        admission_injection.save()
+
+        response = self._do_request(injection_epc_en_erreur=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        response = self._do_request(injection_epc_en_erreur=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 2)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+        self.assertEqual(response.context['object_list'][1].uuid, self.admissions[1].uuid)
+
+        response = self._do_request(injection_epc_en_erreur='')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 2)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+        self.assertEqual(response.context['object_list'][1].uuid, self.admissions[1].uuid)
+
     def test_list_with_filter_by_payement_order(self):
         self.client.force_login(user=self.sic_management_user)
 
@@ -639,6 +711,23 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.client.force_login(user=self.sic_management_user)
 
         response = self._do_request(o='etat_demande')
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, self.admissions[1].uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_epc_injection_status(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        admission_injection = EPCInjection.objects.create(
+            admission=self.admissions[0],
+            type=EPCInjectionType.DEMANDE.name,
+            status=EPCInjectionStatus.ERROR.name,
+            last_attempt_date=datetime.datetime(2022, 1, 1),
+        )
+
+        response = self._do_request(o='etat_injection_epc')
         self.assertEqual(response.status_code, 200)
         result = response.context['object_list']
         self.assertEqual(len(result), 2)

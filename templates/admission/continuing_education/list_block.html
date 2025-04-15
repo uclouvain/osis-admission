@@ -9,7 +9,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@
   {% sortable_header_div 'faculte' _('Faculty') %}
   {% sortable_header_div 'paye' _('Paid') %}
   {% sortable_header_div 'etat_demande' _('Status') %}
-  {% sortable_header_div 'etat_epc' _('EPC status') %}
+  {% sortable_header_div 'etat_injection_epc' _('EPC injection') %}
   {% sortable_header_div 'date_confirmation' _('Confirmation date') %}
   {% sortable_header_div 'derniere_modification_le' _('Last modif.') %}
   {% sortable_header_div 'derniere_modification_par' _('Modification author') %}
@@ -84,7 +84,7 @@
     {% endif %}
   </td>
   <td>{{ admission.etat_demande|enum_display:'ChoixStatutPropositionContinue' }}</td>
-  <td>{{ admission.etat_epc }} {% translate 'Waiting for development' %}</td>
+  <td>{% epc_injection_status_display admission.etat_injection_epc %}</td>
   <td>{{ admission.date_confirmation|date:'d/m/Y H:i' }}</td>
   <td>{{ admission.derniere_modification_le|date:'d/m/Y H:i' }}</td>
   <td>{{ admission.derniere_modification_par }}</td>

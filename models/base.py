@@ -90,7 +90,11 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.epc_injection import (
+    EPCInjection,
+    EPCInjectionStatus,
+    EPCInjectionType,
+)
 from admission.models.form_item import ConfigurableModelFormItemField
 from admission.models.functions import ToChar
 from base.models.academic_calendar import AcademicCalendar
@@ -394,6 +398,19 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 # Cas validation ticket Digit en erreur
                 ~Q(candidate__personmergeproposal__validation__valid=True)
             )
+        )
+
+    def annotate_admission_epc_injection_status(self):
+        return self.annotate(
+            last_epc_injection_status=Coalesce(
+                Subquery(
+                    EPCInjection.objects.filter(
+                        admission_id=OuterRef('pk'),
+                        type=EPCInjectionType.DEMANDE.name,
+                    ).values('status')[:1]
+                ),
+                Value(''),
+            ),
         )
 
     def annotate_submitted_profile_countries_names(self):

@@ -2293,7 +2293,10 @@ msgstr ""
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr ""
 
-msgid "EPC status"
+msgid "EPC injection"
+msgstr ""
+
+msgid "EPC injection in error"
 msgstr ""
 
 msgid "EU,NEU"
@@ -3574,6 +3577,9 @@ msgid ""
 "Initialization of the predefined specific questions for an academic year"
 msgstr ""
 
+msgid "Injection in error"
+msgstr ""
+
 msgctxt "admission"
 msgid "Inst."
 msgstr ""
@@ -4278,6 +4284,9 @@ msgstr ""
 
 msgid ""
 "No 'ValidationError' exception must be triggered with the the provided data."
+msgstr ""
+
+msgid "No EPC injection found"
 msgstr ""
 
 msgid "No English studies"
@@ -6844,6 +6853,9 @@ msgstr ""
 msgid "UCLouvain logo"
 msgstr ""
 
+msgid "UCLouvain registration:"
+msgstr ""
+
 msgid ""
 "UCLouvain to forward to the secondary school at which I obtained my Belgian "
 "secondary school, information relating to the successful completion of the "
@@ -6981,9 +6993,6 @@ msgstr "Work contract"
 
 msgctxt "equivalence_status"
 msgid "Waiting"
-msgstr ""
-
-msgid "Waiting for development"
 msgstr ""
 
 msgid "Waiting for signature"
