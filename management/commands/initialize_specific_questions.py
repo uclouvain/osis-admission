@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,29 +24,29 @@
 #
 # ##############################################################################
 import bisect
-
 import itertools
+
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.translation import ngettext
 
-from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import (
-    TypeItemFormulaire,
-    CritereItemFormulaireFormation,
-    Onglets,
-    CritereItemFormulaireLangueEtudes,
     CleConfigurationItemFormulaire,
-    TypeChampTexteFormulaire,
-    TypeChampSelectionFormulaire,
+    CritereItemFormulaireFormation,
+    CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireNationaliteCandidat,
-    CritereItemFormulaireVIP,
     CritereItemFormulaireNationaliteDiplome,
+    CritereItemFormulaireVIP,
+    Onglets,
+    TypeChampSelectionFormulaire,
+    TypeChampTexteFormulaire,
+    TypeItemFormulaire,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.education_group_year import EducationGroupYear
@@ -76,6 +76,31 @@ class SpecificQuestionToInit(ChoiceEnum):
     DENTISTRY_SPECIALIZATION_PROOF = "Attestation de sélection spécialisation dentisterie"
     ENGINEERING_ENTRANCE_EXAM_PROOF = "Attestation d'admission - partie mathématique"
     RESIDENT_STUDENT_FORM = "dossier résident - contingentement"
+
+
+class SpecificContinuingQuestionToInit(ChoiceEnum):
+    IUFC_ANNEXES = 'IUFC-Annexes'
+    IUFC_BIM1 = 'IUFC-BIM1'
+    IUFC_BIM2 = 'IUFC-BIM2'
+    IUFC_BIM3 = 'IUFC-BIM3'
+    IUFC_BURNOUT = 'IUFC-Burnout'
+    IUFC_CHEQUES_FORMATION1 = 'IUFC-Chèques formation1'
+    IUFC_CHEQUES_FORMATION2 = 'IUFC-Chèques formation2'
+    IUFC_CONGES_EDUCATION = 'IUFC-Congés éducation'
+    IUFC_CONGES_EDUCATION_DOC = 'IUFC-Congés éducation doc'
+    IUFC_ETALEMENT_PAIEMENT = 'IUFC-Etalement paiement'
+    IUFC_HOTEL = 'IUFC-Hôtel'
+    IUFC_INAMI = 'IUFC-INAMI'
+    IUFC_LANGAGE_PROGR = 'IUFC-Langage progr'
+    IUFC_LOGICIELS_STAT = 'IUFC-Logiciels stat'
+    IUFC_MEDIATION_ST_LOUIS = 'IUFC-Médiation St Louis'
+    IUFC_NIV_ANGLAIS = 'IUFC-Niv anglais'
+    IUFC_PC = 'IUFC-PC'
+    IUFC_PREREQUIS_STAT = 'IUFC-Prérequis stat'
+    IUFC_SECTEUR_ASSOCIATIF_QUESTION = 'IUFC-Secteur associatif question'
+    IUFC_SECTEUR_ASSOCIATIF_DOC = 'IUFC-Secteur associatif doc'
+    IUFC_TITRE_PEDAGOGIQUE_QUESTION = 'IUFC-Titre pédagogique question'
+    IUFC_TITRE_PEDAGOGIQUE_DOC = 'IUFC-Titre pédagogique doc'
 
 
 class EducationGroupNotFoundException(Exception):
