@@ -26,6 +26,8 @@
 
 from functools import partial
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
@@ -54,20 +56,11 @@ from reference.api.serializers.language import RelatedLanguageField
 from reference.models.diploma_title import DiplomaTitle
 
 
-class ValuatedFromTrainingsField(serializers.SerializerMethodField):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.field_schema = {
-            'type': 'array',
-            'items': {'type': 'string'},
-        }
-
-
 class ProfessionalExperienceSerializer(serializers.ModelSerializer):
     person = serializers.HiddenField(
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
-    valuated_from_trainings = ValuatedFromTrainingsField()
+    valuated_from_trainings = serializers.SerializerMethodField()
 
     class Meta:
         model = ProfessionalExperience
@@ -77,6 +70,7 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
         read_only_fields = ['external_id']
 
     @staticmethod
+    @extend_schema_field(serializers.ListSerializer(child=serializers.CharField()))
     def get_valuated_from_trainings(value):
         return [
             AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.get(training_type)
@@ -141,7 +135,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
     program = RelatedDiplomaField(required=False)
-    valuated_from_trainings = ValuatedFromTrainingsField()
+    valuated_from_trainings = serializers.SerializerMethodField()
     institute = RelatedInstitute(required=False)
 
     YEAR_FIELDS_TO_UPDATE = [
@@ -166,6 +160,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         read_only_fields = ['external_id']
 
     @staticmethod
+    @extend_schema_field(serializers.ListSerializer(child=serializers.CharField()))
     def get_valuated_from_trainings(value):
         return [
             AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.get(training_type)
@@ -244,7 +239,6 @@ class LiteEducationalExperienceYearSerializer(EducationalExperienceYearSerialize
 
 class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
     educationalexperienceyear_set = LiteEducationalExperienceYearSerializer(many=True)
-    valuated_from_trainings = ValuatedFromTrainingsField()
 
     class Meta:
         model = EducationalExperience
@@ -309,12 +303,7 @@ class CurriculumDetailsSerializer(serializers.Serializer):
     incomplete_periods = serializers.ListField(child=serializers.CharField())
     incomplete_experiences = serializers.DictField(child=serializers.ListField(child=serializers.CharField()))
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # Define a custom schema as the default schema type of a SerializerMethodField is string
-        self.fields['minimal_date'].field_schema = {'type': 'string', 'format': 'date'}
-        self.fields['maximal_date'].field_schema = {'type': 'string', 'format': 'date'}
-
+    @extend_schema_field(OpenApiTypes.DATE)
     def get_minimal_date(self, _):
         current_year = current_academic_year()
         return ProfilCandidatTranslator.get_annees_minimum_curriculum(
@@ -322,6 +311,7 @@ class CurriculumDetailsSerializer(serializers.Serializer):
             current_year=current_year.year,
         ).get('minimal_date')
 
+    @extend_schema_field(OpenApiTypes.DATE)
     def get_maximal_date(self, _):
         return ProfilCandidatTranslator.get_date_maximale_curriculum(
             mois_debut_annee_academique_courante_facultatif=self.context.get(
