@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,23 @@
 # ##############################################################################
 import datetime
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
-from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO as DoctorateAccountingDTO
-from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO as GeneralAccountingDTO
+from admission.ddd.admission.doctorat.preparation import (
+    commands as doctorate_education_commands,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    ComptabiliteDTO as DoctorateAccountingDTO,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
+from admission.ddd.admission.formation_generale.dtos import (
+    ComptabiliteDTO as GeneralAccountingDTO,
+)
 from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -85,26 +95,22 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
     )
     a_nationalite_ue = serializers.SerializerMethodField(allow_null=True)
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # Define custom schemas as the default schema type of a SerializerMethodField is string
-        self.fields['derniers_etablissements_superieurs_communaute_fr_frequentes'].field_schema = {
-            'type': 'object',
-            'properties': {
-                'academic_year': {'type': 'integer'},
-                'names': {'type': 'array', 'items': {'type': 'string'}},
+    @extend_schema_field(
+        inline_serializer(
+            'DerniersEtablissementsSuperieursFrequentes',
+            {
+                'academic_year': serializers.IntegerField(),
+                'names': serializers.ListSerializer(child=serializers.CharField()),
             },
-        }
-        self.fields['a_nationalite_ue'].field_schema = {
-            'type': 'boolean',
-        }
-
+        )
+    )
     def get_derniers_etablissements_superieurs_communaute_fr_frequentes(self, _):
         # Absence of debts conditions -> check, on the basis of the CV, the absence of debt to the last high
         # education establishment of the French community attended by the candidate, when it is not UCLouvain, and
         # only within the scope of the academic years that must be justified
         return get_last_french_community_high_education_institutes(self.context['candidate'], datetime.datetime.now())
 
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_a_nationalite_ue(self, _):
         country = getattr(self.context['candidate'], 'country_of_citizenship')
         return country.european_union if country else None
