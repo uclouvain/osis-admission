@@ -33,6 +33,7 @@ from admission.api.views.continuing_education import (
     RetrieveContinuingEducationSpecificInformationView,
 )
 from admission.api.views.coordonnees import (
+    CommonCoordonneesViewSet,
     ContinuingCoordonneesView,
     CoordonneesViewSet,
     GeneralCoordonneesView,
@@ -46,7 +47,10 @@ from admission.api.views.documents import (
     DoctorateRequestedDocumentListView,
     GeneralRequestedDocumentListView,
 )
-from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
+from admission.api.views.languages_knowledge import (
+    CommonLanguagesKnowledgeViewSet,
+    LanguagesKnowledgeViewSet,
+)
 from admission.api.views.payment import (
     ApplicationFeesListView,
     OpenApplicationFeesPaymentView,
@@ -58,6 +62,7 @@ from admission.api.views.pdf_recap import (
     GeneralPDFRecapView,
 )
 from admission.api.views.person import (
+    CommonPersonViewSet,
     ContinuingPersonView,
     GeneralPersonView,
     IdentificationDTOView,
@@ -76,6 +81,7 @@ from admission.api.views.references import (
     RetrieveDiplomaticPostView,
 )
 from admission.api.views.secondary_studies import (
+    CommonSecondaryStudiesViewSet,
     ContinuingSecondaryStudiesView,
     GeneralSecondaryStudiesView,
     SecondaryStudiesViewSet,
