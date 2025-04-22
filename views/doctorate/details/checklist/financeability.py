@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,8 +27,9 @@
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, pgettext, override
-from django.views.generic import TemplateView, FormView
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import override, pgettext
+from django.views.generic import FormView, TemplateView
 from django.views.generic.base import View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
@@ -36,10 +37,10 @@ from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    SpecifierFinancabiliteRegleCommand,
-    SpecifierDerogationFinancabiliteCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
+    SpecifierDerogationFinancabiliteCommand,
     SpecifierFinancabiliteNonConcerneeCommand,
+    SpecifierFinancabiliteRegleCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
@@ -51,13 +52,11 @@ from admission.forms.admission.checklist import (
     CommentForm,
     DoctorateFinancabiliteApprovalForm,
     DoctorateFinancabiliteNotFinanceableForm,
-)
-from admission.forms.admission.checklist import (
     FinancabiliteApprovalForm,
     FinancabiliteDispensationForm,
-    FinancabilityDispensationRefusalForm,
-    FinancabiliteNotificationForm,
     FinancabiliteNotFinanceableForm,
+    FinancabiliteNotificationForm,
+    FinancabilityDispensationRefusalForm,
 )
 from admission.mail_templates import (
     ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
@@ -70,7 +69,9 @@ from admission.utils import (
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
+from admission.views.doctorate.details.checklist.mixins import (
+    CheckListDefaultContextMixin,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -447,9 +448,9 @@ class FinancabiliteDerogationNotificationView(
 ):
     urlpatterns = {'financability-derogation-notification': 'financability-derogation-notification'}
     permission_required = 'admission.checklist_financability_dispensation'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    )
     htmx_template_name = (
         'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
     )
@@ -503,9 +504,9 @@ class FinancabiliteDerogationRefusView(
 ):
     urlpatterns = {'financability-derogation-refus': 'financability-derogation-refus'}
     permission_required = 'admission.checklist_financability_dispensation_fac'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    )
     htmx_template_name = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
 
     def get_form(self, form_class=None):

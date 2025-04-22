@@ -35,7 +35,7 @@ from admission.auth.roles.program_manager import (
     ProgramManager as ProgramManagerAdmission,
 )
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL, COMMENT_TAG_SIC
 from admission.ddd.admission.commands import (
     RechercherParcoursAnterieurQuery,
     RecupererEtudesSecondairesQuery,

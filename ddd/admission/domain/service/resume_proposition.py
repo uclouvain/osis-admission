@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,22 +24,28 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity as PropositionDoctoraleIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.groupe_de_supervision_dto import GroupeDeSupervisionDto
+from admission.ddd.admission.doctorat.preparation.domain.service.groupe_de_supervision_dto import (
+    GroupeDeSupervisionDto,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
     IComptabiliteTranslator as IComptabiliteDoctoraleTranslator,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
+    IMembreCATranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import GroupeDeSupervisionDTO
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    GroupeDeSupervisionDTO,
     PropositionDTO as PropositionDoctoraleDTO,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
@@ -48,19 +54,29 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository as IPropositionDoctoraleRepository,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
-    ResumePropositionDTO,
-    AdmissionPropositionDTO,
     AdmissionComptabiliteDTO,
+    AdmissionPropositionDTO,
     AdmissionPropositionGestionnaireDTO,
+    ResumePropositionDTO,
     ResumePropositionGestionnaireDTO,
 )
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
+    GetCurrentAcademicYear,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
 from osis_common.ddd import interface
 
 
@@ -87,9 +103,11 @@ class ResumeProposition(interface.DomainService):
 
         resume_candidat_dto = profil_candidat_translator.recuperer_toutes_informations_candidat(
             matricule=proposition_dto.matricule_candidat,
-            formation=proposition_dto.doctorat.type
-            if isinstance(proposition_dto, PropositionDoctoraleDTO)
-            else proposition_dto.formation.type,
+            formation=(
+                proposition_dto.doctorat.type
+                if isinstance(proposition_dto, PropositionDoctoraleDTO)
+                else proposition_dto.formation.type
+            ),
             annee_courante=annee_courante,
             uuid_proposition=proposition_dto.uuid,
             experiences_cv_recuperees=experiences_cv_recuperees,
@@ -129,9 +147,11 @@ class ResumeProposition(interface.DomainService):
 
         resume_candidat_dto = profil_candidat_translator.recuperer_toutes_informations_candidat(
             matricule=proposition_dto.matricule_candidat,
-            formation=proposition_dto.doctorat.type
-            if isinstance(proposition_dto, PropositionDoctoraleDTO)
-            else proposition_dto.formation.type,
+            formation=(
+                proposition_dto.doctorat.type
+                if isinstance(proposition_dto, PropositionDoctoraleDTO)
+                else proposition_dto.formation.type
+            ),
             annee_courante=annee_courante,
             uuid_proposition=proposition_dto.uuid,
             experiences_cv_recuperees=experiences_cv_recuperees,

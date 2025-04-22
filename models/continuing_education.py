@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,21 +29,24 @@ from contextlib import suppress
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-from admission.constants import CONTEXT_CONTINUING
 from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
-from admission.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
+from admission.constants import CONTEXT_CONTINUING
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixInscriptionATitre,
-    ChoixTypeAdresseFacturation,
-    ChoixMoyensDecouverteFormation,
     ChoixEdition,
+    ChoixInscriptionATitre,
     ChoixMotifAttente,
     ChoixMotifRefus,
+    ChoixMoyensDecouverteFormation,
+    ChoixStatutPropositionContinue,
+    ChoixTypeAdresseFacturation,
+)
+from admission.models.base import (
+    BaseAdmission,
+    BaseAdmissionQuerySet,
+    admission_directory_path,
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -322,8 +325,8 @@ class ContinuingEducationAdmission(BaseAdmission):
 
     def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.formation_continue.commands import (
-            VerifierPropositionQuery,
             DeterminerAnneeAcademiqueEtPotQuery,
+            VerifierPropositionQuery,
         )
         from admission.utils import gather_business_exceptions
         from infrastructure.messages_bus import message_bus_instance

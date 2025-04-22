@@ -34,7 +34,7 @@ from dal import forward
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import F, Q, Prefetch, prefetch_related_objects
+from django.db.models import F, Prefetch, Q, prefetch_related_objects
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
@@ -42,7 +42,13 @@ from django.utils.translation import ngettext_lazy, override, pgettext, pgettext
 from osis_document.contrib import FileUploadField
 from osis_document.utils import is_uuid
 
-from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL, COMMENT_TAG_SIC
+from admission.constants import (
+    COMMENT_TAG_FAC,
+    COMMENT_TAG_GLOBAL,
+    COMMENT_TAG_SIC,
+    CONTEXT_DOCTORATE,
+    CONTEXT_GENERAL,
+)
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.domain.model.enums.authentification import (
     EtatAuthentificationParcours,

@@ -48,7 +48,8 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     VerifierExperienceCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist, OngletsChecklist,
+    ChoixStatutChecklist,
+    OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ConditionAccesEtreSelectionneException,
@@ -74,8 +75,11 @@ from admission.forms.admission.checklist import (
     StatusForm,
     can_edit_experience_authentication,
 )
-from admission.utils import get_access_titles_names, get_missing_curriculum_periods, \
-    get_missing_curriculum_periods_for_doctorate
+from admission.utils import (
+    get_access_titles_names,
+    get_missing_curriculum_periods,
+    get_missing_curriculum_periods_for_doctorate,
+)
 from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
@@ -387,7 +391,9 @@ class SinglePastExperienceMixin(
             comment=CommentEntry.objects.filter(
                 object_uuid=self.admission_uuid,
                 tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
-            ).select_related('author').first(),
+            )
+            .select_related('author')
+            .first(),
             form_url=resolve_url(
                 f'{self.base_namespace}:save-comment',
                 uuid=self.admission_uuid,

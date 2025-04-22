@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,17 +25,29 @@
 # ##############################################################################
 import abc
 from abc import abstractmethod
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
+    Cotutelle,
+    pas_de_cotutelle,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+    DoctoratIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity, Proposition
-from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    CotutelleDTO,
+    MembreCADTO,
+    PromoteurDTO,
+)
 from admission.models.enums.actor_type import ActorType
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService

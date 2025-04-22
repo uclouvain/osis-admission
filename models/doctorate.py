@@ -39,6 +39,7 @@ from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
 from admission.admission_utils.copy_documents import copy_documents
+from admission.constants import CONTEXT_DOCTORATE
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -79,7 +80,6 @@ from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
-from admission.constants import CONTEXT_DOCTORATE
 
 __all__ = [
     "DoctorateAdmission",

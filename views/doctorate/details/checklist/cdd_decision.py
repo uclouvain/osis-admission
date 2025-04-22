@@ -56,7 +56,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
     ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
 )
-from admission.utils import get_salutation_prefix, get_access_titles_names
+from admission.utils import get_access_titles_names, get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import (

@@ -53,10 +53,7 @@ from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
-from admission.ddd.admission.enums import (
-    Onglets,
-    TypeItemFormulaire,
-)
+from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
@@ -81,16 +78,22 @@ from admission.templatetags.admission import (
     admission_training_type,
     admission_url,
     authentication_css_class,
+    candidate_language,
+    checklist_experience_action_links_context,
+    cotutelle_institute,
     current_subtabs,
     detail_tab_path_from_update,
     display,
     document_component,
     experience_details_template,
+    experience_valuation_url,
     field_data,
+    format_ways_to_find_out_about_the_course,
     formatted_language,
     formatted_reference,
     get_active_parent,
     get_country_name,
+    get_document_details_url,
     get_first_truthy_value,
     get_image_file_url,
     get_item,
@@ -105,12 +108,6 @@ from admission.templatetags.admission import (
     sortable_header_div,
     strip,
     update_tab_path_from_detail,
-    candidate_language,
-    experience_valuation_url,
-    checklist_experience_action_links_context,
-    format_ways_to_find_out_about_the_course,
-    get_document_details_url,
-    cotutelle_institute,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (

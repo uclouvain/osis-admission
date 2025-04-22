@@ -37,8 +37,6 @@ from django.utils.translation import ngettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
-
-from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -51,9 +49,10 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverInscriptionParSicCommand,
     RecupererDocumentsPropositionQuery,
     RecupererPdfTemporaireDecisionSicQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     SpecifierBesoinDeDerogationSicCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
-    SpecifierInformationsAcceptationPropositionParSicCommand, RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+    SpecifierInformationsAcceptationPropositionParSicCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
@@ -68,6 +67,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.dtos.resume import (
+    ResumeEtEmplacementsDocumentsPropositionDTO,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -100,7 +102,10 @@ from admission.utils import (
     get_salutation_prefix,
     get_training_url,
 )
-from admission.views.common.detail_tabs.checklist import change_admission_status, PropositionFromResumeMixin
+from admission.views.common.detail_tabs.checklist import (
+    PropositionFromResumeMixin,
+    change_admission_status,
+)
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
@@ -178,10 +183,16 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
         if self.request.htmx:
-            comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).select_related('author').first()
-            comment_derogation = CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid, tags=['decision_sic', 'derogation']
-            ).select_related('author').first()
+            comment = (
+                CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic'])
+                .select_related('author')
+                .first()
+            )
+            comment_derogation = (
+                CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic', 'derogation'])
+                .select_related('author')
+                .first()
+            )
             context['comment_forms'] = {
                 'decision_sic': CommentForm(
                     comment=comment,

@@ -30,11 +30,10 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-from admission.constants import CONTEXT_GENERAL
 from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
+from admission.constants import CONTEXT_GENERAL
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
